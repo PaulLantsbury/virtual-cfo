@@ -65,6 +65,13 @@ const UNIT_ECON_HISTORY = [
   { month: "Mar",  revenue: 68.40, contribution: 35.00 },
 ];
 
+const CHANNELS = [
+  { name: "Meta",             cm: 34.2, revenue: 41800 },
+  { name: "Google Shopping",  cm: 40.1, revenue: 28600 },
+  { name: "Email",            cm: 58.6, revenue: 22100 },
+  { name: "Organic",          cm: 52.3, revenue: 32000 },
+];
+
 const LEAKAGE = [
   { text: "Shipping costs increased £2.10 per order",       impact: "−£2.10 / order" },
   { text: "Discount depth increased 1.8 percentage points", impact: "−1.8pp"         },
@@ -270,6 +277,74 @@ export default function MarginAnalysis() {
           </div>
         </div>
       </div>
+
+      {/* Contribution Margin by Channel */}
+      {(() => {
+        const maxCm = Math.max(...CHANNELS.map(c => c.cm));
+        const minCm = Math.min(...CHANNELS.map(c => c.cm));
+        const sorted = [...CHANNELS].sort((a, b) => b.cm - a.cm);
+        return (
+          <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+            <div className="mb-5">
+              <h3 className="font-semibold text-lg text-foreground">Contribution Margin by Channel</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Contribution margin % per acquisition channel — March 2026
+              </p>
+            </div>
+            <ul className="space-y-4">
+              {sorted.map((ch) => {
+                const isMax = ch.cm === maxCm;
+                const isMin = ch.cm === minCm;
+                return (
+                  <li key={ch.name}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">{ch.name}</span>
+                        {isMax && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
+                            Highest
+                          </span>
+                        )}
+                        {isMin && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">
+                            Lowest
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          £{ch.revenue.toLocaleString()} revenue
+                        </span>
+                        <span className={cn(
+                          "text-sm font-bold tabular-nums w-14 text-right",
+                          isMax ? "text-emerald-600" : isMin ? "text-destructive" : "text-foreground"
+                        )}>
+                          {ch.cm}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all",
+                          isMax ? "bg-emerald-500" : isMin ? "bg-destructive" : "bg-primary"
+                        )}
+                        style={{ width: `${(ch.cm / 70) * 100}%` }}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="mt-5 flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
+              <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground leading-snug">
+                Meta margin is 24pp below Email. Consider reallocating budget toward higher-margin channels or improving Meta targeting efficiency.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Margin leakage */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">

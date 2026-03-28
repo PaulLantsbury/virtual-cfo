@@ -5,6 +5,7 @@ import { useDashboardKpis, useRevenueChart } from "@/hooks/use-dashboard";
 import { formatCurrency, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TopDrivers, type Driver } from "@/components/TopDrivers";
+import { ActionRecommendations, type Recommendation } from "@/components/ActionRecommendations";
 
 const TOP_DRIVERS: Driver[] = [
   { id: "1", text: "Margin down due to increased shipping and fulfilment costs", trend: "worsening" },
@@ -12,6 +13,14 @@ const TOP_DRIVERS: Driver[] = [
   { id: "3", text: "Ad spend efficiency declining — higher CAC with lower ROAS", trend: "worsening" },
   { id: "4", text: "Discount usage rising faster than revenue growth", trend: "worsening" },
   { id: "5", text: "Average order value holding steady", trend: "neutral" },
+];
+
+const RECOMMENDATIONS: Recommendation[] = [
+  { id: "1", text: "Review fulfilment partner pricing to improve contribution margin", impact: "high" },
+  { id: "2", text: "Reduce discount usage on returning customers", impact: "high" },
+  { id: "3", text: "Reallocate ad spend from Meta to Google Shopping", impact: "medium" },
+  { id: "4", text: "Investigate rising customer acquisition costs", impact: "medium" },
+  { id: "5", text: "Set up a post-purchase email sequence to lift repeat purchase rate", impact: "quick-win" },
 ];
 
 export default function Dashboard() {
@@ -97,6 +106,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* WHAT TO DO NEXT */}
+      <ActionRecommendations recommendations={RECOMMENDATIONS} />
 
       {/* CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

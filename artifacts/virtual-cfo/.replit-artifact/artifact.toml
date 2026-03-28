@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Virtual CFO"
+version = "1.0.0"
+id = "artifacts/virtual-cfo"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19234
+
+[services.development]
+run = "pnpm --filter @workspace/virtual-cfo run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/virtual-cfo", "run", "build" ]
+publicDir = "artifacts/virtual-cfo/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19234"
+BASE_PATH = "/"

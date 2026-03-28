@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Virtual CFO API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: dashboard
+    description: Dashboard KPI and financial data
 paths:
   /healthz:
     get:
@@ -24,6 +25,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard/kpis:
+    get:
+      operationId: getDashboardKpis
+      tags: [dashboard]
+      summary: Get dashboard KPIs
+      description: Returns key performance indicators for the dashboard
+      responses:
+        "200":
+          description: KPI data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardKpis"
+  /dashboard/revenue-chart:
+    get:
+      operationId: getRevenueChart
+      tags: [dashboard]
+      summary: Get revenue chart data
+      description: Returns monthly revenue and expense data for chart display
+      responses:
+        "200":
+          description: Revenue chart data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevenueChartData"
+  /dashboard/transactions:
+    get:
+      operationId: getRecentTransactions
+      tags: [dashboard]
+      summary: Get recent transactions
+      description: Returns a list of recent financial transactions
+      responses:
+        "200":
+          description: Recent transactions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionList"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +73,99 @@ components:
           type: string
       required:
         - status
-
+    KpiCard:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        value:
+          type: string
+        change:
+          type: number
+        changeLabel:
+          type: string
+        trend:
+          type: string
+          enum: [up, down, neutral]
+      required:
+        - id
+        - title
+        - value
+        - change
+        - changeLabel
+        - trend
+    DashboardKpis:
+      type: object
+      properties:
+        cards:
+          type: array
+          items:
+            $ref: "#/components/schemas/KpiCard"
+      required:
+        - cards
+    RevenueDataPoint:
+      type: object
+      properties:
+        month:
+          type: string
+        revenue:
+          type: number
+        expenses:
+          type: number
+        profit:
+          type: number
+      required:
+        - month
+        - revenue
+        - expenses
+        - profit
+    RevenueChartData:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/RevenueDataPoint"
+      required:
+        - data
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+        date:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        amount:
+          type: number
+        type:
+          type: string
+          enum: [income, expense]
+        status:
+          type: string
+          enum: [completed, pending, failed]
+      required:
+        - id
+        - date
+        - description
+        - category
+        - amount
+        - type
+        - status
+    TransactionList:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        total:
+          type: integer
+      required:
+        - transactions
+        - total

@@ -1,0 +1,22 @@
+packages:
+  "recharts": "Data visualization for dashboard charts"
+  "@supabase/supabase-js": "Supabase client scaffolding"
+  "framer-motion": "Animations and page transitions"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility function to efficiently merge Tailwind CSS classes"
+  "date-fns": "Date formatting for transactions"
+  "@radix-ui/react-avatar": "Accessible avatar component"
+  "@radix-ui/react-dropdown-menu": "Accessible dropdown menu component"
+  "@radix-ui/react-slot": "Slot component for Radix primitives"
+
+images:
+  - path: "artifacts/virtual-cfo/public/images/hero-bg.png"
+    description: "Abstract geometric gradient mesh background in deep navy blue, rich indigo, and subtle teal accents, soft light leaks, modern SaaS aesthetic, clean and professional"
+    aspect_ratio: "16:9"
+  - path: "artifacts/virtual-cfo/public/images/auth-side.png"
+    description: "Sleek data-driven abstract pattern with glowing nodes and connecting lines on a dark navy background, representing financial data and security, subtle and premium"
+    aspect_ratio: "9:16"
+
+notes:
+  - Assuming API might be unpopulated initially, implemented mock data fallbacks in the hooks layer to ensure the UI is always visible.
+  - Used Radix UI for accessible interactive components.

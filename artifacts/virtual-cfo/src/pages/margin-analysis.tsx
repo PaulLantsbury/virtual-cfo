@@ -1,4 +1,4 @@
-import { ArrowDownRight, TrendingDown, TrendingUp, Info } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, TrendingDown, TrendingUp, Info } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell,
@@ -63,6 +63,14 @@ const UNIT_ECON_HISTORY = [
   { month: "Jan",  revenue: 69.10, contribution: 37.00 },
   { month: "Feb",  revenue: 68.70, contribution: 36.10 },
   { month: "Mar",  revenue: 68.40, contribution: 35.00 },
+];
+
+const LEAKAGE = [
+  { text: "Shipping costs increased £2.10 per order",       impact: "−£2.10 / order" },
+  { text: "Discount depth increased 1.8 percentage points", impact: "−1.8pp"         },
+  { text: "Meta CAC increased £3.40 per order",             impact: "−£3.40 / order" },
+  { text: "Payment processing rate up 0.3%",                impact: "−£0.20 / order" },
+  { text: "Returns rate increased 2.1%",                    impact: "−£1.40 / order" },
 ];
 
 const DRIVERS = [
@@ -261,6 +269,31 @@ export default function MarginAnalysis() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Margin leakage */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+        <div className="mb-5">
+          <h3 className="font-semibold text-lg text-foreground">Margin leakage this month</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Largest negative contributors to margin change vs prior month
+          </p>
+        </div>
+        <ul className="space-y-1">
+          {LEAKAGE.map((item, i) => (
+            <li key={i} className="flex items-center justify-between py-2.5 border-b border-border/40 last:border-0">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0 bg-destructive/10">
+                  <ArrowUpRight className="w-4 h-4 text-destructive" />
+                </span>
+                <span className="text-sm text-foreground">{item.text}</span>
+              </div>
+              <span className="text-xs font-semibold tabular-nums text-destructive bg-destructive/10 px-2 py-0.5 rounded-full shrink-0 ml-4">
+                {item.impact}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Key margin drivers — above trend chart */}

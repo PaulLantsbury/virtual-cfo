@@ -157,21 +157,17 @@ const CHANNELS = [
   { name: "Organic",          cm: 52.3, revenue: 32000 },
 ];
 
-const LEAKAGE = [
-  { text: "Shipping costs increased £2.10 per order",       impact: "−£2.10 / order" },
-  { text: "Discount depth increased 1.8 percentage points", impact: "−1.8pp"         },
-  { text: "Meta CAC increased £3.40 per order",             impact: "−£3.40 / order" },
-  { text: "Payment processing rate up 0.3%",                impact: "−£0.20 / order" },
-  { text: "Returns rate increased 2.1%",                    impact: "−£1.40 / order" },
+/** @dynamic Replace rows and total with API/AI-generated values when ready */
+const CHANGE_DRIVERS = [
+  { driver: "Shipping costs",          change: "+8%",    impactPerOrder: -2.10, direction: "negative" as const },
+  { driver: "Discount depth",          change: "+1.8pp", impactPerOrder: -1.80, direction: "negative" as const },
+  { driver: "Meta CAC",                change: "+14%",   impactPerOrder: -3.40, direction: "negative" as const },
+  { driver: "Payment processing rate", change: "+0.3%",  impactPerOrder: -0.20, direction: "negative" as const },
+  { driver: "Returns rate",            change: "+2.1%",  impactPerOrder: -1.40, direction: "negative" as const },
 ];
-
-const DRIVERS = [
-  { text: "Shipping costs increased 8%",  trend: "worsening" },
-  { text: "Discount usage increased 11%", trend: "worsening" },
-  { text: "Meta CAC increased 14%",       trend: "worsening" },
-  { text: "Payment fee rate unchanged",   trend: "neutral"   },
-  { text: "Fulfilment costs stable",      trend: "neutral"   },
-];
+const CHANGE_DRIVERS_TOTAL = +CHANGE_DRIVERS
+  .reduce((s, d) => s + d.impactPerOrder, 0)
+  .toFixed(2);
 
 function fmt(n: number) {
   return `£${Math.abs(n).toLocaleString()}`;
@@ -431,58 +427,92 @@ export default function MarginAnalysis() {
         );
       })()}
 
-      {/* Margin leakage */}
+      {/* ── Margin Change Drivers This Month ── */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
         <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Margin leakage this month</h3>
+          <h3 className="font-semibold text-lg text-foreground">Margin Change Drivers This Month</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Largest negative contributors to margin change vs prior month
+            Largest factors affecting contribution margin vs last month
           </p>
         </div>
-        <ul className="space-y-1">
-          {LEAKAGE.map((item, i) => (
-            <li key={i} className="flex items-center justify-between py-2.5 border-b border-border/40 last:border-0">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0 bg-destructive/10">
-                  <ArrowUpRight className="w-4 h-4 text-destructive" />
-                </span>
-                <span className="text-sm text-foreground">{item.text}</span>
-              </div>
-              <span className="text-xs font-semibold tabular-nums text-destructive bg-destructive/10 px-2 py-0.5 rounded-full shrink-0 ml-4">
-                {item.impact}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
 
-      {/* Key margin drivers — above trend chart */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Key margin drivers this period</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Factors with the largest impact on contribution margin this month
-          </p>
-        </div>
-        <ul className="space-y-3">
-          {DRIVERS.map((d, i) => {
-            const isWorsening = d.trend === "worsening";
-            const isImproving = d.trend === "improving";
-            return (
-              <li key={i} className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">
-                <span className={cn(
-                  "inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0",
-                  isWorsening ? "bg-destructive/10" : isImproving ? "bg-success/10" : "bg-secondary"
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Driver
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Change
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Impact per order
+                </th>
+                <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Direction
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {CHANGE_DRIVERS.map((row) => {
+                const isNegative = row.direction === "negative";
+                const impactStr  = `${isNegative ? "−" : "+"}£${Math.abs(row.impactPerOrder).toFixed(2)} / order`;
+                return (
+                  <tr
+                    key={row.driver}
+                    className="border-b border-border/40 hover:bg-secondary/30 transition-colors"
+                  >
+                    <td className="py-3 pr-4 font-medium text-foreground">
+                      {row.driver}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <span className={cn(
+                        "inline-flex text-xs font-semibold px-2 py-0.5 rounded-full tabular-nums",
+                        isNegative
+                          ? "bg-destructive/10 text-destructive"
+                          : "bg-success/10 text-success"
+                      )}>
+                        {row.change}
+                      </span>
+                    </td>
+                    <td className={cn(
+                      "py-3 px-4 text-right tabular-nums font-semibold",
+                      isNegative ? "text-destructive" : "text-success"
+                    )}>
+                      {impactStr}
+                    </td>
+                    <td className="py-3 pl-4 text-right">
+                      {isNegative
+                        ? <ArrowDownRight className="w-4 h-4 text-destructive ml-auto" />
+                        : <ArrowUpRight   className="w-4 h-4 text-success ml-auto" />
+                      }
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-border bg-secondary/40">
+                <td className="py-3.5 pr-4 font-bold text-foreground" colSpan={2}>
+                  Total margin impact this month
+                </td>
+                <td className={cn(
+                  "py-3.5 px-4 text-right tabular-nums font-bold",
+                  CHANGE_DRIVERS_TOTAL < 0 ? "text-destructive" : "text-success"
                 )}>
-                  {isWorsening && <TrendingDown className="w-4 h-4 text-destructive" />}
-                  {isImproving && <TrendingUp className="w-4 h-4 text-success" />}
-                  {d.trend === "neutral" && <span className="text-muted-foreground text-xs font-bold">—</span>}
-                </span>
-                <span className="text-sm text-foreground">{d.text}</span>
-              </li>
-            );
-          })}
-        </ul>
+                  {CHANGE_DRIVERS_TOTAL < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_TOTAL).toFixed(2)} / order
+                </td>
+                <td className="py-3.5 pl-4 text-right">
+                  {CHANGE_DRIVERS_TOTAL < 0
+                    ? <ArrowDownRight className="w-4 h-4 text-destructive ml-auto" />
+                    : <ArrowUpRight   className="w-4 h-4 text-success ml-auto" />
+                  }
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
 
       {/* Margin Trend — full width */}

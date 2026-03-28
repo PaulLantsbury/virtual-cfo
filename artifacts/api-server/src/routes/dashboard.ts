@@ -59,7 +59,7 @@ router.get("/kpis", (_req, res) => {
         change: 0,
         changeLabel: "vs last period",
         trend: "down",
-        changeText: "Down from B last period",
+        changeText: "B → B−",
         explanation: "Revenue growth driven by discounting rather than repeat purchase behaviour",
       },
     ],

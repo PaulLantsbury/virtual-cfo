@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, PieChart, Settings, HelpCircle, Briefcase, TrendingDown } from "lucide-react";
+import { LayoutDashboard, PieChart, Settings, HelpCircle, Briefcase, TrendingDown, BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard",       href: "/dashboard" },
   { icon: TrendingDown,    label: "Margin Analysis", href: "/margin-analysis" },
+  { icon: BarChart2,       label: "Growth Quality",  href: "/growth-quality"  },
   { icon: PieChart,        label: "Reports",         href: "/dashboard/reports" },
   { icon: Settings,        label: "Settings",        href: "/settings" },
 ];

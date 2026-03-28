@@ -1,0 +1,137 @@
+Create a new page at /growth-quality called:
+
+Growth Quality Analysis
+
+This page should help founders understand whether their business is growing in a healthy, profitable way or relying too heavily on discounting and inefficient paid acquisition.
+
+Page structure:
+
+1. Page title and subtitle
+
+Title:
+Growth Quality Analysis
+
+Subtitle:
+Understand whether growth is being driven by retention, healthy channel mix, and profitable customer acquisition.
+
+2. Top summary KPI cards
+
+Add 4 KPI cards:
+
+- Growth Quality Score
+- Repeat Purchase Rate
+- Discount Dependency
+- CAC Payback Period
+
+Example values:
+Growth Quality Score: B-
+Repeat Purchase Rate: 27%
+Discount Dependency: 38%
+CAC Payback Period: 1.4 orders
+
+Each card should include:
+- current value
+- change vs prior period
+- short explanation text
+
+3. CFO Insight section near the top of the page
+
+Add a highlighted insight card titled:
+
+CFO Insight
+
+Example content:
+
+Growth quality has weakened this month. Revenue remains positive, but more of that growth is being driven by discounting and higher-cost paid channels rather than repeat customer behaviour.
+
+If discount dependency and CAC efficiency return to prior levels, growth quality could improve materially next month, with an estimated contribution uplift of £12,000–£28,000 at current sales volume.
+
+Include a short list of recommended focus actions:
+- Reduce blanket discounting
+- Improve retention conversion
+- Reallocate spend toward higher-margin channels
+
+Design requirements:
+- use the same visual style as the dashboard and margin analysis insight cards
+- highlight the estimated financial upside
+- structure content so it can later be dynamically generated
+
+4. Growth Quality score breakdown section
+
+Add a section called:
+
+What is driving the score?
+
+Display 4–5 components with weighted contributions such as:
+
+- Retention quality
+- Discount reliance
+- CAC efficiency
+- Contribution quality
+- Channel mix quality
+
+Show each as a row with:
+- component name
+- score or status
+- short explanation
+
+Example:
+Retention quality: Strong
+Discount reliance: Weak
+CAC efficiency: Watch
+Channel mix quality: Mixed
+
+5. Growth Quality trend chart
+
+Add a section called:
+
+Growth Quality Trend
+
+Show the score trend over the last 6–12 months.
+
+Example:
+B+ → B → B- → C+
+
+Add a short explanatory line below the chart.
+
+6. Key growth drivers this month
+
+Add a section called:
+
+Key Growth Drivers This Month
+
+Display 4–6 bullet-point insights such as:
+
+- Repeat purchase rate improved 2.4%
+- Discount depth increased 1.8pp
+- Meta CAC increased 14%
+- Organic mix declined
+- Email contribution margin remained strongest
+
+Style consistently with other insight sections.
+
+7. Recommended actions section
+
+Add a section called:
+
+What to do next
+
+Display 3–5 practical actions to improve growth quality.
+
+Example:
+- Reduce discount usage on returning customers
+- Shift budget away from lowest-margin paid channels
+- Strengthen post-purchase email retention flows
+- Focus acquisition on products with highest contribution margin
+
+Add small impact tags such as:
+High impact
+Medium impact
+Quick win
+
+Design requirements:
+
+- Keep the page visually consistent with the rest of the app
+- Make it feel like a Virtual CFO product rather than a generic marketing dashboard
+- Use founder-friendly, commercially oriented language
+- Structure all insight blocks so they can later be dynamically generated from real data

@@ -60,7 +60,13 @@ const VARIABLE_COST_PER_ORDER = +BRIDGE_ROWS
   .toFixed(2);
 const VARIABLE_COST_PER_ORDER_PREV_YEAR = 29.30;
 
-/** @ai-commentary Replace with AI-generated CFO insight when ready */
+/**
+ * @ai-commentary Replace with AI-generated CFO insight when ready.
+ * recovery.cashLow / cashHigh are forward projections:
+ *   @dynamic cashLow  = Math.round(nextMonthOrderVolume * (ppLow  / 100) * revenuePerOrder * 12)
+ *   @dynamic cashHigh = Math.round(nextMonthOrderVolume * (ppHigh / 100) * revenuePerOrder * 12)
+ * Using annualised run-rate at current volume (£124,500/month → ~£1.49m/year).
+ */
 const CFO_INSIGHT = {
   summary:
     "Contribution margin declined 3.5pp month-on-month and is now below the target range (45–55%).",
@@ -70,9 +76,16 @@ const CFO_INSIGHT = {
     "Discount depth increased 1.8 percentage points",
   ],
   closing:
-    "Marketing now represents the largest variable cost line at £12.20 per order, suggesting channel mix optimisation is the fastest route to recovery.",
+    "Marketing is now the largest variable cost line at £12.20 per order, indicating channel mix optimisation is the fastest route to recovery.",
   opportunity: "+2–4pp",
-};
+  /** @dynamic See annotation above for live formula */
+  recovery: {
+    ppLow: 2,
+    ppHigh: 4,
+    cashLow: 18_000,
+    cashHigh: 42_000,
+  },
+} as const;
 
 /** @ai-commentary Replace with dynamically generated AI insight when ready */
 const BRIDGE_INSIGHT =
@@ -279,9 +292,25 @@ export default function MarginAnalysis() {
           <p className="text-sm text-muted-foreground leading-relaxed mb-4">
             {CFO_INSIGHT.closing}
           </p>
-          <div className="inline-flex items-center gap-2 bg-success/10 text-success border border-success/20 px-3 py-1.5 rounded-lg text-sm font-semibold">
-            <TrendingUp className="w-4 h-4 shrink-0" />
-            Expected recoverable margin opportunity: {CFO_INSIGHT.opportunity}
+
+          {/* Recovery estimate callout */}
+          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 mt-0.5">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                If these three areas return to prior levels, contribution margin could improve by{" "}
+                <span className="font-semibold">
+                  +{CFO_INSIGHT.recovery.ppLow}–{CFO_INSIGHT.recovery.ppHigh}pp
+                </span>
+                , equivalent to approximately{" "}
+                <span className="font-bold text-emerald-700 dark:text-emerald-300 text-base">
+                  £{CFO_INSIGHT.recovery.cashLow.toLocaleString()}–£{CFO_INSIGHT.recovery.cashHigh.toLocaleString()}
+                </span>{" "}
+                additional contribution next month at current sales volume.
+              </p>
+            </div>
           </div>
         </div>
       </div>

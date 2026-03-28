@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, PieChart, Settings, HelpCircle, Briefcase, TrendingDown, BarChart2, Megaphone } from "lucide-react";
+import { LayoutDashboard, PieChart, Settings, HelpCircle, Briefcase, TrendingDown, BarChart2, Megaphone, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -7,6 +7,7 @@ const navItems = [
   { icon: TrendingDown,    label: "Margin Analysis", href: "/margin-analysis" },
   { icon: BarChart2,       label: "Growth Quality",      href: "/growth-quality"       },
   { icon: Megaphone,       label: "Marketing Efficiency", href: "/marketing-efficiency" },
+  { icon: Target,          label: "Opportunities",        href: "/opportunities"        },
   { icon: PieChart,        label: "Reports",         href: "/dashboard/reports" },
   { icon: Settings,        label: "Settings",        href: "/settings" },
 ];

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Briefcase, ArrowRight } from "lucide-react";
+import { Briefcase, ArrowRight, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 
 export default function Login() {
@@ -84,6 +84,22 @@ export default function Login() {
             New to Virtual CFO?{" "}
             <Link href="/signup" className="font-semibold text-primary hover:underline">Get started</Link>
           </p>
+
+          <div className="mt-8 pt-6 border-t border-dashed border-border">
+            <p className="text-xs text-center text-muted-foreground/60 mb-3 uppercase tracking-widest font-semibold">Development preview</p>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11 text-sm border-dashed text-muted-foreground hover:text-foreground gap-2"
+              onClick={() => {
+                sessionStorage.setItem("demoMode", "true");
+                window.location.href = "/dashboard";
+              }}
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              Enter demo dashboard
+            </Button>
+          </div>
         </div>
       </div>
       

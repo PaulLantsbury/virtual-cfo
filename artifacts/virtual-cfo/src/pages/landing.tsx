@@ -176,6 +176,36 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Built For Section */}
+      <section className="py-24 bg-card relative z-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight text-foreground mb-6 leading-tight">
+              Built for founders who already use Shopify and Xero
+            </h2>
+            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+              Virtual CFO connects your store and accounting data automatically to explain:
+            </p>
+            <ul className="flex flex-col gap-4 mb-10">
+              {[
+                "Whether your growth is profitable",
+                "How long your cash will last",
+                "What is driving margin changes",
+                "Where performance is improving or weakening",
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <span className="flex-none mt-1 w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
+                    <span className="w-2 h-2 rounded-full bg-primary"></span>
+                  </span>
+                  <span className="text-foreground text-lg">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-base font-semibold text-muted-foreground tracking-wide">No spreadsheets required.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Pain Point Section */}
       <section className="py-24 bg-background relative z-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

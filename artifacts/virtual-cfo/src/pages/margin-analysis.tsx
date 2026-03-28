@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowDownRight, ArrowUpRight, TrendingDown, TrendingUp, Info, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, TrendingDown, TrendingUp, Info, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell,
@@ -52,6 +52,20 @@ const BRIDGE_ROWS = [
   { label: "Fulfilment costs", total: -17430, perOrder: -6.40, type: "deduction", trend: "stable"    },
   { label: "Marketing spend",  total: -27390, perOrder:-12.20, type: "deduction", trend: "worsening" },
 ] as const;
+
+/** @ai-commentary Replace with AI-generated CFO insight when ready */
+const CFO_INSIGHT = {
+  summary:
+    "Contribution margin declined 3.5pp month-on-month and is now below the target range (45–55%).",
+  primaryDrivers: [
+    "Shipping costs increased £2.10 per order",
+    "Meta CAC increased £3.40 per order",
+    "Discount depth increased 1.8 percentage points",
+  ],
+  closing:
+    "Marketing now represents the largest variable cost line at £12.20 per order, suggesting channel mix optimisation is the fastest route to recovery.",
+  opportunity: "+2–4pp",
+};
 
 /** @ai-commentary Replace with dynamically generated AI insight when ready */
 const BRIDGE_INSIGHT =
@@ -192,6 +206,39 @@ export default function MarginAnalysis() {
           <span className="text-xs text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">
             March 2026
           </span>
+        </div>
+      </div>
+
+      {/* ── CFO Insight ── */}
+      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-8 overflow-hidden">
+        <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
+          <Sparkles className="w-4 h-4 text-primary shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+            CFO Insight
+          </span>
+        </div>
+        <div className="px-6 py-5">
+          <p className="text-sm font-medium text-foreground leading-relaxed mb-4">
+            {CFO_INSIGHT.summary}
+          </p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+            Primary drivers:
+          </p>
+          <ul className="space-y-1.5 mb-4">
+            {CFO_INSIGHT.primaryDrivers.map((driver, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+                <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0 mt-[5px]" />
+                {driver}
+              </li>
+            ))}
+          </ul>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+            {CFO_INSIGHT.closing}
+          </p>
+          <div className="inline-flex items-center gap-2 bg-success/10 text-success border border-success/20 px-3 py-1.5 rounded-lg text-sm font-semibold">
+            <TrendingUp className="w-4 h-4 shrink-0" />
+            Expected recoverable margin opportunity: {CFO_INSIGHT.opportunity}
+          </div>
         </div>
       </div>
 

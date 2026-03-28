@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowDownRight, ArrowUpRight, TrendingDown, TrendingUp, Info, ChevronDown, ChevronRight, Sparkles } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, TrendingDown, TrendingUp, Info, ChevronDown, ChevronRight, Sparkles, AlertTriangle } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell,
@@ -131,6 +131,47 @@ const RECOVERY_TOTAL_PP = +RECOVERY_SCENARIOS
   .reduce((s, r) => s + r.ppGain, 0)
   .toFixed(1);
 const RECOVERY_TARGET_CM = +(CM_PCT + RECOVERY_TOTAL_PP).toFixed(1);
+
+/**
+ * @dynamic Thresholds and trajectory can be computed from rolling CM data when live.
+ * monthlyDeclineRate: average pp drop per month (negative = worsening)
+ * monthsToThreshold: (currentCm - threshold) / monthlyDeclineRate
+ */
+const RISK_MONITOR = {
+  /** Current CM — derived from live constant for forward-linking */
+  currentCm: CM_PCT,
+  /** Thresholds ordered from nearest to most severe */
+  thresholds: [
+    {
+      pct: 40,
+      label: "Warning",
+      /** @dynamic Compute as Math.ceil((currentCm - pct) / monthlyDeclineRate) */
+      monthsAtCurrentRate: 2,
+      color: "amber" as const,
+      implications: [
+        "Paid acquisition becomes unprofitable on current channel mix",
+        "CAC payback period would exceed 2 orders",
+        "Growth efficiency declines — scaling costs outpace contribution",
+      ],
+    },
+    {
+      pct: 35,
+      label: "Critical",
+      /** @dynamic Compute as Math.ceil((currentCm - pct) / monthlyDeclineRate) */
+      monthsAtCurrentRate: 6,
+      color: "red" as const,
+      implications: [
+        "Business covers fixed costs but generates minimal surplus",
+        "New customer investment is no longer viable",
+        "Structural cost restructuring becomes necessary",
+      ],
+    },
+  ],
+  /** @dynamic Derived from rolling 3-month average CM decline in pp/month */
+  monthlyDeclineRate: 1.1,
+  trajectoryNote:
+    "At the current average decline rate of ~1.1pp/month, contribution margin could reach 40% within 2 months without corrective action.",
+} as const;
 
 function getBenchmark(pct: number) {
   if (pct >= BENCHMARK_TARGET.low) {
@@ -812,6 +853,104 @@ export default function MarginAnalysis() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* ── Margin Risk Monitor ── */}
+      <div className="mb-8">
+        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden shadow-sm">
+          {/* Header */}
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-amber-200 dark:border-amber-800/50">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                Margin Risk Monitor
+              </p>
+              <p className="text-sm text-amber-800 dark:text-amber-300 mt-0.5 leading-snug">
+                {RISK_MONITOR.trajectoryNote}
+              </p>
+            </div>
+          </div>
+
+          {/* Threshold cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-amber-200 dark:bg-amber-800/40">
+            {RISK_MONITOR.thresholds.map((t) => (
+              <div
+                key={t.pct}
+                className="bg-amber-50 dark:bg-amber-950/20 px-6 py-5"
+              >
+                {/* Threshold header row */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={
+                        t.color === "red"
+                          ? "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive/10 text-destructive"
+                          : "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-200"
+                      }
+                    >
+                      {t.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      if CM falls below
+                    </span>
+                    <span
+                      className={
+                        t.color === "red"
+                          ? "text-base font-bold text-destructive"
+                          : "text-base font-bold text-amber-700 dark:text-amber-300"
+                      }
+                    >
+                      {t.pct}%
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">at current rate</p>
+                    <p
+                      className={
+                        t.color === "red"
+                          ? "text-sm font-semibold text-destructive"
+                          : "text-sm font-semibold text-amber-700 dark:text-amber-300"
+                      }
+                    >
+                      ~{t.monthsAtCurrentRate} months
+                    </p>
+                  </div>
+                </div>
+
+                {/* Implications */}
+                <ul className="space-y-1.5">
+                  {t.implications.map((imp) => (
+                    <li key={imp} className="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
+                      <span
+                        className={
+                          t.color === "red"
+                            ? "mt-1.5 w-1.5 h-1.5 rounded-full bg-destructive flex-shrink-0"
+                            : "mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"
+                        }
+                      />
+                      {imp}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer note */}
+          <div className="px-6 py-3 bg-amber-100/60 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800/50">
+            <p className="text-xs text-amber-700 dark:text-amber-400">
+              Current contribution margin: <span className="font-semibold">{RISK_MONITOR.currentCm}%</span>
+              {" "}·{" "}
+              Warning threshold is{" "}
+              <span className="font-semibold">
+                {(RISK_MONITOR.currentCm - RISK_MONITOR.thresholds[0].pct).toFixed(1)}pp away
+              </span>
+              {" "}· Thresholds and time-to-breach will update automatically when live data is connected.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* ── Recommended margin improvements ── */}

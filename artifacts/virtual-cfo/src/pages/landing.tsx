@@ -52,7 +52,7 @@ export default function Landing() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-8"
           >
             <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-            Now integrating with Quickbooks & Xero
+            Built for Shopify + Xero users
           </motion.div>
           
           <motion.h1 
@@ -61,8 +61,8 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-5xl md:text-7xl font-display font-extrabold tracking-tight text-foreground max-w-4xl mx-auto leading-[1.1]"
           >
-            Financial clarity for <br className="hidden md:block"/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">ambitious founders</span>
+            Your AI CFO for <br className="hidden md:block"/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Shopify businesses using Xero</span>
           </motion.h1>
           
           <motion.p 
@@ -71,7 +71,7 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
-            Automate your KPIs, forecast runway, and make data-driven decisions without hiring a full-time finance team.
+            See true profitability, cash runway, and growth quality in minutes — without spreadsheets.
           </motion.p>
           
           <motion.div 

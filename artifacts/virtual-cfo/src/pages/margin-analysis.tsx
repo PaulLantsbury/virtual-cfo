@@ -1,7 +1,7 @@
 import { ArrowDownRight, TrendingDown, TrendingUp, Info } from "lucide-react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, ReferenceLine,
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ReferenceLine, Cell,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
@@ -39,6 +39,21 @@ const UNIT_ECONOMICS = [
 ];
 const CONTRIBUTION_PER_ORDER = 35.00;
 const CONTRIBUTION_PER_ORDER_PREV = 38.20;
+
+const UNIT_ECON_HISTORY = [
+  { month: "Apr",  revenue: 71.20, contribution: 39.10 },
+  { month: "May",  revenue: 70.80, contribution: 38.60 },
+  { month: "Jun",  revenue: 69.50, contribution: 38.00 },
+  { month: "Jul",  revenue: 72.10, contribution: 40.20 },
+  { month: "Aug",  revenue: 73.40, contribution: 41.50 },
+  { month: "Sep",  revenue: 71.90, contribution: 40.80 },
+  { month: "Oct",  revenue: 70.60, contribution: 39.40 },
+  { month: "Nov",  revenue: 69.80, contribution: 38.90 },
+  { month: "Dec",  revenue: 71.30, contribution: 38.20 },
+  { month: "Jan",  revenue: 69.10, contribution: 37.00 },
+  { month: "Feb",  revenue: 68.70, contribution: 36.10 },
+  { month: "Mar",  revenue: 68.40, contribution: 35.00 },
+];
 
 const DRIVERS = [
   { text: "Shipping costs increased 8%",  trend: "worsening" },
@@ -219,6 +234,35 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
+      {/* Key margin drivers — above trend chart */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+        <div className="mb-5">
+          <h3 className="font-semibold text-lg text-foreground">Key margin drivers this period</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Factors with the largest impact on contribution margin this month
+          </p>
+        </div>
+        <ul className="space-y-3">
+          {DRIVERS.map((d, i) => {
+            const isWorsening = d.trend === "worsening";
+            const isImproving = d.trend === "improving";
+            return (
+              <li key={i} className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">
+                <span className={cn(
+                  "inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0",
+                  isWorsening ? "bg-destructive/10" : isImproving ? "bg-success/10" : "bg-secondary"
+                )}>
+                  {isWorsening && <TrendingDown className="w-4 h-4 text-destructive" />}
+                  {isImproving && <TrendingUp className="w-4 h-4 text-success" />}
+                  {d.trend === "neutral" && <span className="text-muted-foreground text-xs font-bold">—</span>}
+                </span>
+                <span className="text-sm text-foreground">{d.text}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
       {/* Margin Trend — full width */}
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50 mb-8">
         <div className="mb-5">
@@ -264,34 +308,70 @@ export default function MarginAnalysis() {
         </p>
       </div>
 
-      {/* Key margin drivers */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Key margin drivers this period</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Factors with the largest impact on contribution margin this month
-          </p>
+      {/* Unit Economics 12-month bar chart */}
+      <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+          <div>
+            <h3 className="font-semibold text-lg text-foreground">Unit Economics — 12-Month View</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Revenue per order vs contribution per order (Apr 2025 – Mar 2026)
+            </p>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm bg-primary/30 inline-block" />
+              Revenue per order
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm bg-primary inline-block" />
+              Contribution per order
+            </span>
+          </div>
         </div>
-
-        <ul className="space-y-3">
-          {DRIVERS.map((d, i) => {
-            const isWorsening = d.trend === "worsening";
-            const isImproving = d.trend === "improving";
-            return (
-              <li key={i} className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">
-                <span className={cn(
-                  "inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0",
-                  isWorsening ? "bg-destructive/10" : isImproving ? "bg-success/10" : "bg-secondary"
-                )}>
-                  {isWorsening && <TrendingDown className="w-4 h-4 text-destructive" />}
-                  {isImproving && <TrendingUp className="w-4 h-4 text-success" />}
-                  {d.trend === "neutral" && <span className="text-muted-foreground text-xs font-bold">—</span>}
-                </span>
-                <span className="text-sm text-foreground">{d.text}</span>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="h-[260px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={UNIT_ECON_HISTORY} margin={{ top: 10, right: 10, left: -10, bottom: 0 }} barCategoryGap="30%">
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+              <XAxis
+                dataKey="month"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                dy={8}
+              />
+              <YAxis
+                domain={[0, 85]}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tickFormatter={(v) => `£${v}`}
+              />
+              <Tooltip
+                contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
+                formatter={(v: number, name: string) => [
+                  `£${v.toFixed(2)}`,
+                  name === "revenue" ? "Revenue per order" : "Contribution per order",
+                ]}
+              />
+              <Bar dataKey="revenue" fill="hsl(var(--primary))" fillOpacity={0.2} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="contribution" radius={[4, 4, 0, 0]}>
+                {UNIT_ECON_HISTORY.map((entry, index) => (
+                  <Cell
+                    key={index}
+                    fill={
+                      index === UNIT_ECON_HISTORY.length - 1
+                        ? "hsl(var(--destructive))"
+                        : "hsl(var(--primary))"
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
+          Contribution per order has declined from £41.50 (Aug) to £35.00 (Mar), a drop of £6.50 over 7 months. The gap between revenue and contribution is widening, indicating rising variable costs per order.
+        </p>
       </div>
     </AppLayout>
   );

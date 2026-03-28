@@ -11,6 +11,7 @@ import Signup from "@/pages/signup";
 import Dashboard from "@/pages/dashboard";
 import MarginAnalysis from "@/pages/margin-analysis";
 import GrowthQuality from "@/pages/growth-quality";
+import MarketingEfficiency from "@/pages/marketing-efficiency";
 import Settings from "@/pages/settings";
 
 const queryClient = new QueryClient({
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/dashboard/reports" component={Dashboard} /> {/* Map to dashboard for now */}
       <Route path="/margin-analysis" component={MarginAnalysis} />
       <Route path="/growth-quality" component={GrowthQuality} />
+      <Route path="/marketing-efficiency" component={MarketingEfficiency} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>

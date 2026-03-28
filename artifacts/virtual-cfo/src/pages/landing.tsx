@@ -22,7 +22,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-4">
             <Link href="/login" className="font-semibold text-sm hover:text-primary transition-colors">Log in</Link>
-            <Link href="/login">
+            <Link href="/signup">
               <Button className="rounded-full px-6">Get Started</Button>
             </Link>
           </div>
@@ -80,7 +80,7 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link href="/login">
+            <Link href="/signup">
               <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg rounded-full">
                 See your financial health in minutes <ChevronRight className="w-5 h-5 ml-2" />
               </Button>

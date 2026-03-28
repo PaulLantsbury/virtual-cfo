@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 // Pages
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
+import Signup from "@/pages/signup";
 import Dashboard from "@/pages/dashboard";
 import Settings from "@/pages/settings";
 
@@ -24,6 +25,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/transactions" component={Dashboard} /> {/* Map to dashboard for now */}
       <Route path="/dashboard/reports" component={Dashboard} /> {/* Map to dashboard for now */}

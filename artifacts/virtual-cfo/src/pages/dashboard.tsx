@@ -55,6 +55,11 @@ export default function Dashboard() {
                 </span>
                 <span className="text-muted-foreground text-xs">{kpi.changeLabel}</span>
               </div>
+              {kpi.explanation && (
+                <p className="mt-3 text-xs text-muted-foreground/80 leading-snug border-t border-border/50 pt-3">
+                  {kpi.explanation}
+                </p>
+              )}
             </div>
           ))
         )}

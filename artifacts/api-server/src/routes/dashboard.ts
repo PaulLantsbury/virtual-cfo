@@ -19,12 +19,13 @@ router.get("/kpis", (_req, res) => {
         trend: "up",
       },
       {
-        id: "monthly-expenses",
-        title: "Monthly Expenses",
-        value: "$68,200",
-        change: -3.1,
+        id: "contribution-margin",
+        title: "Contribution Margin",
+        value: "42.3%",
+        change: -2.8,
         changeLabel: "vs last month",
         trend: "down",
+        explanation: "Margin falling due to higher fulfilment costs",
       },
       {
         id: "net-profit",

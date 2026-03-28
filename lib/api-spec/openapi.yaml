@@ -89,6 +89,8 @@ components:
         trend:
           type: string
           enum: [up, down, neutral]
+        explanation:
+          type: string
       required:
         - id
         - title

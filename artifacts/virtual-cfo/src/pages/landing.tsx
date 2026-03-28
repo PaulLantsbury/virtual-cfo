@@ -82,7 +82,7 @@ export default function Landing() {
           >
             <Link href="/login">
               <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg rounded-full">
-                Start your free trial <ChevronRight className="w-5 h-5 ml-2" />
+                See your financial health in minutes <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
             <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-lg rounded-full bg-background/50 backdrop-blur">

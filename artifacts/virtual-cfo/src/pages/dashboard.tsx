@@ -74,6 +74,9 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* TOP DRIVERS */}
+      <TopDrivers drivers={TOP_DRIVERS} />
+
       {/* AI CFO INSIGHT */}
       <div className="relative mb-8 rounded-2xl overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-purple-500/10 rounded-2xl" />
@@ -93,9 +96,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-
-      {/* TOP DRIVERS */}
-      <TopDrivers drivers={TOP_DRIVERS} />
 
       {/* CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

@@ -44,6 +44,19 @@ const CAC_PAYBACK_PREV   = 1.1;
 
 const BENCHMARK_TARGET = { low: 45, high: 55 };
 
+const BRIDGE_ROWS = [
+  { label: "Revenue",          total: 124500, perOrder: 68.40, type: "revenue",   trend: "stable"    },
+  { label: "Discounts",        total:  -8715, perOrder: -8.10, type: "deduction", trend: "worsening" },
+  { label: "Payment fees",     total:  -2490, perOrder: -1.90, type: "deduction", trend: "stable"    },
+  { label: "Shipping costs",   total: -15562, perOrder: -4.80, type: "deduction", trend: "worsening" },
+  { label: "Fulfilment costs", total: -17430, perOrder: -6.40, type: "deduction", trend: "stable"    },
+  { label: "Marketing spend",  total: -27390, perOrder:-12.20, type: "deduction", trend: "worsening" },
+] as const;
+
+/** @ai-commentary Replace with dynamically generated AI insight when ready */
+const BRIDGE_INSIGHT =
+  "Contribution per order declined £3.20 month-on-month, driven primarily by higher shipping costs (+£2.10/order) and rising Meta CAC (+£3.40/order). Marketing (blended) now accounts for £12.20 per order — the single largest variable cost line.";
+
 const MARGIN_RECOMMENDATIONS: Recommendation[] = [
   {
     id: "m1",
@@ -248,123 +261,105 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
-      {/* Margin Breakdown + Unit Economics side by side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-
-        {/* Margin breakdown */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
-          <div className="mb-5">
-            <h3 className="font-semibold text-lg text-foreground">Margin Breakdown</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">This month</p>
-          </div>
-
-          <ul className="space-y-1">
-            {BREAKDOWN.map((row) => (
-              <li
-                key={row.label}
-                className="flex items-center justify-between py-2.5 border-b border-border/40 last:border-0 group"
-              >
-                <span className="text-sm text-foreground">{row.label}</span>
-                <div className="flex items-center gap-3 ml-4 shrink-0">
-                  <span className={cn(
-                    "text-xs font-semibold px-2 py-0.5 rounded-full",
-                    row.type === "revenue"
-                      ? "bg-success/10 text-success"
-                      : "bg-destructive/10 text-destructive"
-                  )}>
-                    {row.pct > 0 ? "+" : ""}{row.pct}%
-                  </span>
-                  <span className="text-sm font-semibold text-foreground tabular-nums w-20 text-right">
-                    {row.type === "revenue" ? fmt(row.value) : `−${fmt(row.value)}`}
-                  </span>
-                </div>
-              </li>
-            ))}
-
-            {/* CM result row */}
-            <li className="flex items-center justify-between pt-3 mt-1">
-              <span className="text-sm font-bold text-foreground">Contribution Margin</span>
-              <div className="flex items-center gap-3 ml-4 shrink-0">
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                  {CM_PCT}%
-                </span>
-                <span className="text-sm font-bold text-foreground tabular-nums w-20 text-right">
-                  {fmt(CM_VALUE)}
-                </span>
-              </div>
-            </li>
-          </ul>
-
-          <div className="mt-4 flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
-            <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-snug">
-              Contribution margin excludes fixed overheads. It reflects profit available to cover fixed costs and drive net profit.
-            </p>
-          </div>
+      {/* ── Contribution Margin Bridge ── */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+        <div className="mb-5">
+          <h3 className="font-semibold text-lg text-foreground">Contribution Margin Bridge</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            How revenue converts into contribution margin — total and per order, March 2026
+          </p>
         </div>
 
-        {/* Unit Economics */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
-          <div className="mb-6">
-            <h3 className="font-semibold text-lg text-foreground">Unit Economics (Per Order)</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Contribution margin calculated on a per-order basis
-            </p>
-          </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Metric
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Total (£)
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Per Order (£)
+                </th>
+                <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Trend
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {BRIDGE_ROWS.map((row) => {
+                const isRevenue = row.type === "revenue";
+                const totalStr  = isRevenue
+                  ? `£${row.total.toLocaleString()}`
+                  : `−£${Math.abs(row.total).toLocaleString()}`;
+                const perOrderStr = `£${Math.abs(row.perOrder).toFixed(2)}`;
 
-          <ul className="space-y-0">
-            {UNIT_ECONOMICS.map((row, i) => (
-              <li
-                key={row.label}
-                className={cn(
-                  "flex items-center justify-between py-3 border-b border-border/40",
-                  i === 0 && "border-t border-border/40"
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground w-4 shrink-0 font-medium">
-                    {row.type === "deduction" ? "−" : ""}
+                return (
+                  <tr
+                    key={row.label}
+                    className="border-b border-border/40 hover:bg-secondary/30 transition-colors"
+                  >
+                    <td className="py-3 pr-4 font-medium text-foreground">
+                      {row.label}
+                    </td>
+                    <td className={cn(
+                      "py-3 px-4 text-right tabular-nums font-semibold",
+                      isRevenue ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {totalStr}
+                    </td>
+                    <td className={cn(
+                      "py-3 px-4 text-right tabular-nums",
+                      isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
+                    )}>
+                      {isRevenue ? "" : "−"}{perOrderStr}
+                    </td>
+                    <td className="py-3 pl-4 text-right">
+                      {row.trend === "worsening" ? (
+                        <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                          ↑ cost
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-primary/30 bg-primary/5">
+                <td className="py-3.5 pr-4">
+                  <span className="font-bold text-foreground">Contribution Margin</span>
+                  <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                    {CM_PCT}%
                   </span>
-                  <span className="text-sm text-foreground">{row.label}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className={cn(
-                    "text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
-                    row.trend === "worsening"
-                      ? "bg-destructive/10 text-destructive"
-                      : "bg-secondary text-muted-foreground"
-                  )}>
-                    {row.trend === "worsening" ? "↑ cost" : "—"}
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
+                  £{CM_VALUE.toLocaleString()}
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
+                  £{CONTRIBUTION_PER_ORDER.toFixed(2)}
+                </td>
+                <td className="py-3.5 pl-4 text-right">
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                    <ArrowDownRight className="w-2.5 h-2.5" />
+                    ↓ margin
                   </span>
-                  <span className={cn(
-                    "text-sm font-semibold tabular-nums w-16 text-right",
-                    row.type === "revenue" ? "text-foreground" : "text-muted-foreground"
-                  )}>
-                    £{Math.abs(row.value).toFixed(2)}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
 
-          {/* Contribution per order result */}
-          <div className="mt-4 flex items-center justify-between rounded-xl bg-primary/10 border border-primary/20 px-4 py-4">
-            <div>
-              <p className="text-sm font-bold text-foreground">Contribution per order</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Down from £{CONTRIBUTION_PER_ORDER_PREV.toFixed(2)} last month
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-display font-bold text-foreground">
-                £{CONTRIBUTION_PER_ORDER.toFixed(2)}
-              </p>
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive">
-                <ArrowDownRight className="w-3 h-3" />
-                £{(CONTRIBUTION_PER_ORDER_PREV - CONTRIBUTION_PER_ORDER).toFixed(2)} vs last month
-              </span>
-            </div>
-          </div>
+        {/* Insight — structured for future AI commentary replacement */}
+        <div className="mt-5 flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100">
+          <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-900 leading-snug">
+            {BRIDGE_INSIGHT}
+          </p>
         </div>
       </div>
 

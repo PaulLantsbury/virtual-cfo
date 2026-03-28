@@ -71,7 +71,7 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
-            See true profitability, cash runway, and growth quality in minutes — without spreadsheets.
+            Understand whether your business is growing profitably — and what to do about it — in minutes instead of spreadsheets.
           </motion.p>
           
           <motion.div 

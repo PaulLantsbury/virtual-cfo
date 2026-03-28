@@ -124,7 +124,7 @@ export default function Landing() {
                   <ArrowDownRight className="w-3.5 h-3.5" />↓
                 </span>
               </div>
-              <p className="text-xs text-red-400/80 mt-1">Below target</p>
+              <p className="text-xs text-red-400/80 mt-1">Lower than expected</p>
             </div>
 
             {/* Cash Runway */}
@@ -146,7 +146,7 @@ export default function Landing() {
                   <ArrowUpRight className="w-3.5 h-3.5" />↑
                 </span>
               </div>
-              <p className="text-xs text-red-400/80 mt-1">Rising fast</p>
+              <p className="text-xs text-red-400/80 mt-1">Rising quickly</p>
             </div>
 
             {/* Repeat Purchase Rate */}

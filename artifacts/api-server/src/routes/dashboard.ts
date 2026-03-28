@@ -44,6 +44,15 @@ router.get("/kpis", (_req, res) => {
         trend: "neutral",
       },
       {
+        id: "discount-dependency",
+        title: "Discount Dependency",
+        value: "38%",
+        change: 11,
+        changeLabel: "vs last month",
+        trend: "down",
+        explanation: "High reliance on promotions to sustain growth",
+      },
+      {
         id: "growth-quality",
         title: "Growth Quality",
         value: "B−",

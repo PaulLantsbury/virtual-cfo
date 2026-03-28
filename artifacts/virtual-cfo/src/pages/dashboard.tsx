@@ -28,7 +28,7 @@ export default function Dashboard() {
       </div>
 
       {/* KPI GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
         {kpisLoading ? (
           Array(4).fill(0).map((_, i) => <div key={i} className="h-32 bg-secondary rounded-2xl animate-pulse"></div>)
         ) : (

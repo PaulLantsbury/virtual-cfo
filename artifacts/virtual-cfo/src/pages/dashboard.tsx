@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDownRight, Minus, Download, Sparkles, TrendingUp, AlertTriangle } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Minus, Download, Sparkles, TrendingUp } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useDashboardKpis, useRevenueChart } from "@/hooks/use-dashboard";
@@ -18,10 +18,6 @@ const CFO_INSIGHT = {
   upside: {
     ppLow: 2,
     ppHigh: 4,
-    cashLow: 18_000,
-    cashHigh: 42_000,
-  },
-  downside: {
     cashLow: 18_000,
     cashHigh: 42_000,
   },
@@ -105,22 +101,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Downside callout */}
-          <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/25 px-5 py-4">
-            <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-900/50 shrink-0 mt-0.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed">
-                If no action is taken and these trends continue, the business could lose approximately{" "}
-                <span className="font-bold text-amber-700 dark:text-amber-300 text-base">
-                  £{CFO_INSIGHT.downside.cashLow.toLocaleString()}–£{CFO_INSIGHT.downside.cashHigh.toLocaleString()}
-                </span>{" "}
-                of contribution profit next month.
-              </p>
-            </div>
-          </div>
-
           {/* Recommended focus */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
@@ -144,15 +124,6 @@ export default function Dashboard() {
                 Potential upside next month:{" "}
                 <span className="font-bold">
                   £{(CFO_INSIGHT.upside.cashLow / 1000).toFixed(0)}k–£{(CFO_INSIGHT.upside.cashHigh / 1000).toFixed(0)}k
-                </span>
-              </span>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 px-3 py-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-              <span className="text-xs text-amber-800 dark:text-amber-300">
-                At-risk profit next month:{" "}
-                <span className="font-bold">
-                  £{(CFO_INSIGHT.downside.cashLow / 1000).toFixed(0)}k–£{(CFO_INSIGHT.downside.cashHigh / 1000).toFixed(0)}k
                 </span>
               </span>
             </div>

@@ -29,6 +29,16 @@ const CM_PCT   = 42.3;
 const CM_PREV  = 45.8;
 const CM_CHANGE = +(CM_PCT - CM_PREV).toFixed(1);
 
+const BENCHMARK_TARGET = { low: 45, high: 55 };
+
+function getBenchmark(pct: number) {
+  if (pct >= BENCHMARK_TARGET.low) {
+    if (pct >= 50) return { label: "Healthy — within target range", color: "green" as const };
+    return { label: `Watch — lower end of target (${BENCHMARK_TARGET.low}–${BENCHMARK_TARGET.high}%)`, color: "amber" as const };
+  }
+  return { label: `Below target range (${BENCHMARK_TARGET.low}–${BENCHMARK_TARGET.high}%)`, color: "red" as const };
+}
+
 const UNIT_ECONOMICS = [
   { label: "Revenue per order",    value:  68.40, type: "revenue",   trend: "neutral" as const },
   { label: "Discounts",            value:  -8.10, type: "deduction", trend: "worsening" as const },
@@ -99,6 +109,25 @@ export default function MarginAnalysis() {
             </span>
             <span className="text-muted-foreground">vs prior month ({CM_PREV}%)</span>
           </div>
+          {(() => {
+            const bm = getBenchmark(CM_PCT);
+            return (
+              <div className={cn(
+                "mt-3 flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg w-fit",
+                bm.color === "green" && "bg-emerald-500/10 text-emerald-600",
+                bm.color === "amber" && "bg-amber-500/10 text-amber-600",
+                bm.color === "red"   && "bg-destructive/10 text-destructive",
+              )}>
+                <span className={cn(
+                  "w-2 h-2 rounded-full shrink-0",
+                  bm.color === "green" && "bg-emerald-500",
+                  bm.color === "amber" && "bg-amber-500",
+                  bm.color === "red"   && "bg-destructive",
+                )} />
+                {bm.label}
+              </div>
+            );
+          })()}
         </div>
 
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">

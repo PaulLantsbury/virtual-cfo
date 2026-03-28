@@ -97,10 +97,10 @@ export default function Login() {
         <div className="absolute inset-0 bg-gradient-to-t from-sidebar/90 via-sidebar/20 to-transparent"></div>
         <div className="absolute bottom-12 left-12 right-12 text-white">
           <blockquote className="text-2xl font-display font-medium leading-tight mb-4 text-white/90">
-            "Virtual CFO gave us the financial clarity we needed to confidently raise our Series A. It's like having a dedicated finance team on auto-pilot."
+            "Virtual CFO helped us see that sales were growing but margins were slipping. We finally had clarity on profitability and cash."
           </blockquote>
-          <p className="font-semibold text-lg text-primary-foreground">Sarah Jenkins</p>
-          <p className="text-primary-foreground/70">CEO, TechFlow</p>
+          <p className="font-semibold text-lg text-primary-foreground">Hannah Cole</p>
+          <p className="text-primary-foreground/70">Founder, DTC retail brand</p>
         </div>
       </div>
     </div>

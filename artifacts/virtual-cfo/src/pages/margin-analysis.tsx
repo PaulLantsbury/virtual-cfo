@@ -1,4 +1,5 @@
-import { ArrowDownRight, ArrowUpRight, TrendingDown, TrendingUp, Info } from "lucide-react";
+import { useState } from "react";
+import { ArrowDownRight, ArrowUpRight, TrendingDown, TrendingUp, Info, ChevronDown, ChevronRight } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell,
@@ -40,6 +41,36 @@ const CAC_PAYBACK        = 1.4;
 const CAC_PAYBACK_PREV   = 1.1;
 
 const BENCHMARK_TARGET = { low: 45, high: 55 };
+
+const SENSITIVITY = [
+  {
+    driver: "Shipping costs",
+    scenarios: [
+      { label: "Shipping costs increase 5%",  newCm: 41.7, delta: -0.6 },
+      { label: "Shipping costs increase 10%", newCm: 41.1, delta: -1.2 },
+      { label: "Shipping costs fall 5%",      newCm: 42.9, delta: +0.6 },
+      { label: "Shipping costs fall 10%",     newCm: 43.5, delta: +1.2 },
+    ],
+  },
+  {
+    driver: "Discount depth",
+    scenarios: [
+      { label: "Discount usage increases 10%", newCm: 42.0, delta: -0.3 },
+      { label: "Discount usage increases 20%", newCm: 41.7, delta: -0.6 },
+      { label: "Discount usage falls 10%",     newCm: 42.6, delta: +0.3 },
+      { label: "Discount usage falls 20%",     newCm: 43.0, delta: +0.7 },
+    ],
+  },
+  {
+    driver: "Marketing spend",
+    scenarios: [
+      { label: "Marketing spend increases 5%",  newCm: 41.2, delta: -1.1 },
+      { label: "Marketing spend increases 10%", newCm: 40.1, delta: -2.2 },
+      { label: "Marketing spend falls 5%",      newCm: 43.4, delta: +1.1 },
+      { label: "Marketing spend falls 10%",     newCm: 44.5, delta: +2.2 },
+    ],
+  },
+];
 
 function getBenchmark(pct: number) {
   if (pct >= BENCHMARK_TARGET.low) {
@@ -104,6 +135,8 @@ function fmt(n: number) {
 }
 
 export default function MarginAnalysis() {
+  const [sensitivityOpen, setSensitivityOpen] = useState(false);
+
   return (
     <AppLayout>
       {/* Header */}
@@ -579,6 +612,81 @@ export default function MarginAnalysis() {
         <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
           Contribution per order has fallen from £40.50 (Mar '25) to £35.00 (Mar '26), a year-on-year drop of £5.50. The widening gap between revenue and contribution signals rising variable costs per order.
         </p>
+      </div>
+
+      {/* ── Sensitivity Analysis ── */}
+      <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
+        <button
+          onClick={() => setSensitivityOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-muted/30 transition-colors"
+        >
+          <div>
+            <p className="font-semibold text-foreground">Contribution Margin Sensitivity</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Simulated impact on CM from changes in key cost drivers — based on current month
+            </p>
+          </div>
+          <div className="flex items-center gap-2 ml-4 shrink-0">
+            <span className="text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+              Current CM: 42.3%
+            </span>
+            {sensitivityOpen
+              ? <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              : <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            }
+          </div>
+        </button>
+
+        {sensitivityOpen && (
+          <div className="px-6 pb-6 border-t border-border/50">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5">
+              {SENSITIVITY.map((group) => (
+                <div key={group.driver}>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                    {group.driver}
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {group.scenarios.map((s) => {
+                      const isPositive = s.delta > 0;
+                      return (
+                        <div
+                          key={s.label}
+                          className={cn(
+                            "flex items-center justify-between rounded-lg px-3 py-2.5 text-sm",
+                            isPositive
+                              ? "bg-emerald-50 border border-emerald-100"
+                              : "bg-red-50 border border-red-100"
+                          )}
+                        >
+                          <span className="text-muted-foreground text-xs leading-snug pr-2">
+                            {s.label}
+                          </span>
+                          <div className="flex flex-col items-end shrink-0 ml-2">
+                            <span className="font-semibold text-foreground text-sm">
+                              {s.newCm.toFixed(1)}%
+                            </span>
+                            <span
+                              className={cn(
+                                "text-xs font-medium",
+                                isPositive ? "text-emerald-600" : "text-red-600"
+                              )}
+                            >
+                              {isPositive ? "+" : ""}{s.delta.toFixed(1)}pp
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-5 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
+              Scenarios assume revenue remains constant at £124,500. Marketing spend has the highest sensitivity — a 10% reduction adds 2.2pp to contribution margin. Discount depth has the lowest sensitivity given its smaller share of revenue.
+            </p>
+          </div>
+        )}
       </div>
     </AppLayout>
   );

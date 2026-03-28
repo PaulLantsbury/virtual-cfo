@@ -29,6 +29,9 @@ const CM_PCT   = 42.3;
 const CM_PREV  = 45.8;
 const CM_CHANGE = +(CM_PCT - CM_PREV).toFixed(1);
 
+const CAC_PAYBACK        = 1.4;
+const CAC_PAYBACK_PREV   = 1.1;
+
 const BENCHMARK_TARGET = { low: 45, high: 55 };
 
 function getBenchmark(pct: number) {
@@ -113,7 +116,7 @@ export default function MarginAnalysis() {
       </div>
 
       {/* Headline KPI strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Contribution Margin</p>
           <p className="text-4xl font-display font-bold text-foreground">{CM_PCT}%</p>
@@ -155,6 +158,22 @@ export default function MarginAnalysis() {
           <p className="text-sm font-medium text-muted-foreground mb-1">6-Month Trend</p>
           <p className="text-4xl font-display font-bold text-destructive">↓ 4.8pp</p>
           <p className="mt-3 text-xs text-muted-foreground">Down from 47.1% in October</p>
+        </div>
+
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+          <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
+          <p className="text-4xl font-display font-bold text-foreground">
+            {CAC_PAYBACK}<span className="text-2xl font-semibold text-muted-foreground ml-1">orders</span>
+          </p>
+          <div className="flex items-center gap-2 mt-3 text-xs">
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-semibold">
+              <ArrowUpRight className="w-3 h-3" />
+              from {CAC_PAYBACK_PREV} last month
+            </span>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground leading-snug">
+            Marketing investment now takes longer to recover
+          </p>
         </div>
       </div>
 

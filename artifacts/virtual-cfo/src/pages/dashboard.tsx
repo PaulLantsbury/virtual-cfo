@@ -1,15 +1,22 @@
-import { ArrowUpRight, ArrowDownRight, Minus, CreditCard, Download, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Minus, Download, Sparkles } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useDashboardKpis, useRevenueChart, useRecentTransactions } from "@/hooks/use-dashboard";
+import { useDashboardKpis, useRevenueChart } from "@/hooks/use-dashboard";
 import { formatCurrency, cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { TopDrivers, type Driver } from "@/components/TopDrivers";
+
+const TOP_DRIVERS: Driver[] = [
+  { id: "1", text: "Margin down due to increased shipping and fulfilment costs", trend: "worsening" },
+  { id: "2", text: "Repeat purchase rate improving month-on-month", trend: "improving" },
+  { id: "3", text: "Ad spend efficiency declining — higher CAC with lower ROAS", trend: "worsening" },
+  { id: "4", text: "Discount usage rising faster than revenue growth", trend: "worsening" },
+  { id: "5", text: "Average order value holding steady", trend: "neutral" },
+];
 
 export default function Dashboard() {
   const { data: kpis, isLoading: kpisLoading } = useDashboardKpis();
   const { data: chartData, isLoading: chartLoading } = useRevenueChart();
-  const { data: transactionsData, isLoading: txLoading } = useRecentTransactions();
 
   return (
     <AppLayout>
@@ -87,6 +94,9 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* TOP DRIVERS */}
+      <TopDrivers drivers={TOP_DRIVERS} />
+
       {/* CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2 bg-card rounded-2xl p-6 shadow-sm border border-border/50">
@@ -162,74 +172,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* RECENT TRANSACTIONS */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
-        <div className="p-6 border-b border-border/50 flex justify-between items-center">
-          <h3 className="font-semibold text-lg text-foreground">Recent Transactions</h3>
-          <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">View All</Button>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-secondary/30 text-muted-foreground font-medium uppercase tracking-wider text-xs">
-              <tr>
-                <th className="px-6 py-4">Transaction</th>
-                <th className="px-6 py-4">Category</th>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Amount</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {txLoading ? (
-                Array(5).fill(0).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td className="px-6 py-4"><div className="h-4 bg-secondary rounded w-32"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-secondary rounded w-20"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-secondary rounded w-24"></div></td>
-                    <td className="px-6 py-4"><div className="h-6 bg-secondary rounded-full w-16"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-secondary rounded w-20 ml-auto"></div></td>
-                  </tr>
-                ))
-              ) : (
-                transactionsData?.transactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-secondary/20 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                          <CreditCard className="w-4 h-4 text-muted-foreground" />
-                        </div>
-                        <span className="font-medium text-foreground">{tx.description}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-muted-foreground">{tx.category}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{format(new Date(tx.date), 'MMM dd, yyyy')}</td>
-                    <td className="px-6 py-4">
-                      <span className={cn(
-                        "px-2.5 py-1 rounded-full text-xs font-medium inline-flex items-center",
-                        tx.status === "completed" ? "bg-success/10 text-success" :
-                        tx.status === "pending" ? "bg-warning/10 text-warning" :
-                        "bg-destructive/10 text-destructive"
-                      )}>
-                        {tx.status}
-                      </span>
-                    </td>
-                    <td className={cn(
-                      "px-6 py-4 text-right font-semibold",
-                      tx.type === "income" ? "text-success" : "text-foreground"
-                    )}>
-                      {tx.type === "income" ? "+" : "-"}{formatCurrency(tx.amount)}
-                      <button className="ml-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ExternalLink className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </AppLayout>
   );
 }

@@ -93,6 +93,7 @@ export default function Dashboard() {
             <p className="text-sm sm:text-base text-foreground leading-relaxed font-medium">
               "Profitability declining despite revenue growth. Discount usage increased 11% month-on-month."
             </p>
+            <p className="mt-2 text-xs text-muted-foreground">Confidence: High</p>
           </div>
         </div>
       </div>

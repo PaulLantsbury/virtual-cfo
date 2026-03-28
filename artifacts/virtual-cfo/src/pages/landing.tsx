@@ -52,7 +52,7 @@ export default function Landing() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-8"
           >
             <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-            Built for Shopify + Xero users
+            Built for Shopify founders using Xero
           </motion.div>
           
           <motion.h1 

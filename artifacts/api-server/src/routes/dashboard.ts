@@ -53,6 +53,15 @@ router.get("/kpis", (_req, res) => {
         explanation: "High reliance on promotions to sustain growth",
       },
       {
+        id: "repeat-purchase-rate",
+        title: "Repeat Purchase Rate",
+        value: "28%",
+        change: 4.2,
+        changeLabel: "vs last month",
+        trend: "up",
+        explanation: "Retention improving as more customers place second orders",
+      },
+      {
         id: "growth-quality",
         title: "Growth Quality",
         value: "B−",

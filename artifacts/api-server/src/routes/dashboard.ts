@@ -43,6 +43,16 @@ router.get("/kpis", (_req, res) => {
         changeLabel: "stable",
         trend: "neutral",
       },
+      {
+        id: "growth-quality",
+        title: "Growth Quality",
+        value: "B−",
+        change: 0,
+        changeLabel: "vs last period",
+        trend: "down",
+        changeText: "Down from B last period",
+        explanation: "Revenue growth driven by discounting rather than repeat purchase behaviour",
+      },
     ],
   });
   res.json(data);

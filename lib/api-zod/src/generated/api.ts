@@ -29,6 +29,7 @@ export const GetDashboardKpisResponse = zod.object({
       changeLabel: zod.string(),
       trend: zod.enum(["up", "down", "neutral"]),
       explanation: zod.string().optional(),
+      changeText: zod.string().optional(),
     }),
   ),
 });

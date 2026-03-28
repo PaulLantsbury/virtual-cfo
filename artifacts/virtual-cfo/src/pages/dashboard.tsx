@@ -28,7 +28,7 @@ export default function Dashboard() {
       </div>
 
       {/* KPI GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-8">
         {kpisLoading ? (
           Array(4).fill(0).map((_, i) => <div key={i} className="h-32 bg-secondary rounded-2xl animate-pulse"></div>)
         ) : (
@@ -43,7 +43,7 @@ export default function Dashboard() {
               
               <div className="flex items-center gap-2 text-sm font-medium">
                 <span className={cn(
-                  "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs",
+                  "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs shrink-0",
                   kpi.trend === "up" ? "bg-success/10 text-success" : 
                   kpi.trend === "down" ? "bg-destructive/10 text-destructive" : 
                   "bg-secondary text-muted-foreground"
@@ -51,9 +51,11 @@ export default function Dashboard() {
                   {kpi.trend === "up" && <ArrowUpRight className="w-3 h-3" />}
                   {kpi.trend === "down" && <ArrowDownRight className="w-3 h-3" />}
                   {kpi.trend === "neutral" && <Minus className="w-3 h-3" />}
-                  {kpi.change}%
+                  {!kpi.changeText && `${kpi.change}%`}
                 </span>
-                <span className="text-muted-foreground text-xs">{kpi.changeLabel}</span>
+                <span className="text-muted-foreground text-xs leading-snug">
+                  {kpi.changeText ?? kpi.changeLabel}
+                </span>
               </div>
               {kpi.explanation && (
                 <p className="mt-3 text-xs text-muted-foreground/80 leading-snug border-t border-border/50 pt-3">

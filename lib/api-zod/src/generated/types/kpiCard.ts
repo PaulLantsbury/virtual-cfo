@@ -15,4 +15,5 @@ export interface KpiCard {
   changeLabel: string;
   trend: KpiCardTrend;
   explanation?: string;
+  changeText?: string;
 }

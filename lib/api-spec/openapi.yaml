@@ -91,6 +91,8 @@ components:
           enum: [up, down, neutral]
         explanation:
           type: string
+        changeText:
+          type: string
       required:
         - id
         - title

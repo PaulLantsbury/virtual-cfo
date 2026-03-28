@@ -1,12 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, ArrowLeftRight, PieChart, Settings, HelpCircle, Briefcase } from "lucide-react";
+import { LayoutDashboard, ArrowLeftRight, PieChart, Settings, HelpCircle, Briefcase, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: ArrowLeftRight, label: "Transactions", href: "/dashboard/transactions" },
-  { icon: PieChart, label: "Reports", href: "/dashboard/reports" },
-  { icon: Settings, label: "Settings", href: "/settings" },
+  { icon: LayoutDashboard, label: "Dashboard",       href: "/dashboard" },
+  { icon: ArrowLeftRight,  label: "Transactions",    href: "/dashboard/transactions" },
+  { icon: TrendingDown,    label: "Margin Analysis", href: "/margin-analysis" },
+  { icon: PieChart,        label: "Reports",         href: "/dashboard/reports" },
+  { icon: Settings,        label: "Settings",        href: "/settings" },
 ];
 
 export function Sidebar() {

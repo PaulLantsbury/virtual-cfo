@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDownRight, Minus, CreditCard, Download, ExternalLink } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Minus, CreditCard, Download, ExternalLink, Sparkles } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useDashboardKpis, useRevenueChart, useRecentTransactions } from "@/hooks/use-dashboard";
@@ -65,6 +65,26 @@ export default function Dashboard() {
             </div>
           ))
         )}
+      </div>
+
+      {/* AI CFO INSIGHT */}
+      <div className="relative mb-8 rounded-2xl overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-purple-500/10 rounded-2xl" />
+        <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-indigo-500/20" />
+        <div className="relative flex items-start gap-4 p-5 sm:p-6">
+          <div className="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-500/15 ring-1 ring-indigo-500/30 mt-0.5">
+            <Sparkles className="w-4 h-4 text-indigo-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-xs font-semibold uppercase tracking-widest text-indigo-500">AI CFO Insight</span>
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-[10px] font-bold tracking-wide">LIVE</span>
+            </div>
+            <p className="text-sm sm:text-base text-foreground leading-relaxed font-medium">
+              "Profitability declining despite revenue growth. Discount usage increased 11% month-on-month."
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* CHARTS */}

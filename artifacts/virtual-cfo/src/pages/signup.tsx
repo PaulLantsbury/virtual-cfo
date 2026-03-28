@@ -30,8 +30,8 @@ export default function Signup() {
             <span className="font-display font-bold text-2xl tracking-tight">Virtual CFO</span>
           </div>
 
-          <h1 className="text-3xl font-display font-bold mb-2">Create your account</h1>
-          <p className="text-muted-foreground mb-8">Get financial clarity for your Shopify business in minutes.</p>
+          <h1 className="text-3xl font-display font-bold mb-2">Get started with Virtual CFO</h1>
+          <p className="text-muted-foreground mb-8">Create your account to see profitability, cash runway, and growth quality in minutes.</p>
 
           <form onSubmit={handleSignup} className="space-y-5">
             <div className="space-y-2">

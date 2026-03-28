@@ -176,6 +176,33 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Pain Point Section */}
+      <section className="py-24 bg-background relative z-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground mb-10 leading-tight">
+            Most founders don't know whether<br className="hidden md:block" /> they are growing profitably
+          </h2>
+          <ul className="flex flex-col items-center gap-4 mb-10">
+            {[
+              "Revenue is rising but margins are falling",
+              "Discounting is driving growth more than retention",
+              "Cash is tightening faster than expected",
+            ].map((point) => (
+              <li key={point} className="flex items-center gap-3 text-lg text-muted-foreground">
+                <span className="flex-none w-5 h-5 rounded-full bg-red-500/15 flex items-center justify-center">
+                  <span className="w-2 h-2 rounded-full bg-red-400"></span>
+                </span>
+                {point}
+              </li>
+            ))}
+          </ul>
+          <p className="text-xl font-semibold text-foreground">
+            Virtual CFO explains what is really happening —{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">automatically.</span>
+          </p>
+        </div>
+      </section>
+
       {/* Features Grid */}
       <section id="features" className="py-24 bg-card relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

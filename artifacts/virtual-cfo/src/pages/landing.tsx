@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { BarChart3, TrendingUp, ShieldCheck, Zap, Briefcase, ChevronRight } from "lucide-react";
+import { BarChart3, TrendingUp, ShieldCheck, Zap, Briefcase, ChevronRight, ArrowDownRight, ArrowUpRight, Minus, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Landing() {
@@ -104,6 +104,75 @@ export default function Landing() {
               className="rounded-xl md:rounded-2xl border border-border shadow-sm object-cover w-full h-[400px] md:h-[600px]"
             />
           </motion.div>
+        </div>
+      </section>
+
+      {/* Insight Preview Strip */}
+      <section className="relative z-20 bg-sidebar border-y border-sidebar-border overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+            <span className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-widest">Live dashboard preview</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+            {/* Contribution Margin */}
+            <div className="flex-none min-w-[180px] bg-sidebar-accent/40 border border-sidebar-border rounded-xl p-4">
+              <p className="text-xs text-sidebar-foreground/50 mb-1 font-medium">Contribution Margin</p>
+              <div className="flex items-end gap-2">
+                <span className="text-2xl font-bold text-sidebar-foreground">21%</span>
+                <span className="flex items-center gap-0.5 text-red-400 text-sm font-semibold mb-0.5">
+                  <ArrowDownRight className="w-3.5 h-3.5" />↓
+                </span>
+              </div>
+              <p className="text-xs text-red-400/80 mt-1">Below target</p>
+            </div>
+
+            {/* Cash Runway */}
+            <div className="flex-none min-w-[180px] bg-sidebar-accent/40 border border-sidebar-border rounded-xl p-4">
+              <p className="text-xs text-sidebar-foreground/50 mb-1 font-medium">Cash Runway</p>
+              <div className="flex items-end gap-2">
+                <span className="text-2xl font-bold text-sidebar-foreground">4.2</span>
+                <span className="text-sidebar-foreground/60 text-sm mb-0.5 font-medium">months</span>
+              </div>
+              <p className="text-xs text-amber-400/80 mt-1">Monitor closely</p>
+            </div>
+
+            {/* Discount Dependency */}
+            <div className="flex-none min-w-[180px] bg-sidebar-accent/40 border border-sidebar-border rounded-xl p-4">
+              <p className="text-xs text-sidebar-foreground/50 mb-1 font-medium">Discount Dependency</p>
+              <div className="flex items-end gap-2">
+                <span className="text-2xl font-bold text-sidebar-foreground">38%</span>
+                <span className="flex items-center gap-0.5 text-red-400 text-sm font-semibold mb-0.5">
+                  <ArrowUpRight className="w-3.5 h-3.5" />↑
+                </span>
+              </div>
+              <p className="text-xs text-red-400/80 mt-1">Rising fast</p>
+            </div>
+
+            {/* Repeat Purchase Rate */}
+            <div className="flex-none min-w-[180px] bg-sidebar-accent/40 border border-sidebar-border rounded-xl p-4">
+              <p className="text-xs text-sidebar-foreground/50 mb-1 font-medium">Repeat Purchase Rate</p>
+              <div className="flex items-end gap-2">
+                <span className="text-2xl font-bold text-sidebar-foreground">27%</span>
+                <span className="flex items-center gap-0.5 text-red-400 text-sm font-semibold mb-0.5">
+                  <ArrowDownRight className="w-3.5 h-3.5" />↓
+                </span>
+              </div>
+              <p className="text-xs text-red-400/80 mt-1">Needs attention</p>
+            </div>
+
+            {/* AI Insight Card */}
+            <div className="flex-none min-w-[260px] bg-primary/20 border border-primary/30 rounded-xl p-4">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                <p className="text-xs text-primary font-semibold uppercase tracking-widest">AI Insight</p>
+              </div>
+              <p className="text-sm text-sidebar-foreground leading-snug font-medium">
+                Margin pressure increasing due to promotions
+              </p>
+              <p className="text-xs text-sidebar-foreground/40 mt-2">Updated just now</p>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDownRight, Minus, Download, Sparkles } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Minus, Download, Sparkles, TrendingUp, AlertTriangle } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useDashboardKpis, useRevenueChart } from "@/hooks/use-dashboard";
@@ -6,6 +6,32 @@ import { formatCurrency, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TopDrivers, type Driver } from "@/components/TopDrivers";
 import { ActionRecommendations, type Recommendation } from "@/components/ActionRecommendations";
+
+/**
+ * @ai-commentary Replace with dynamically generated insight when ready.
+ * upside/downside cashLow/cashHigh:
+ *   @dynamic cashLow  = Math.round(orderVolume * (ppLow  / 100) * revenuePerOrder)
+ *   @dynamic cashHigh = Math.round(orderVolume * (ppHigh / 100) * revenuePerOrder)
+ */
+const CFO_INSIGHT = {
+  body: "Contribution margin is declining despite revenue growth, driven primarily by higher shipping costs, rising Meta CAC, and increased discount usage.",
+  upside: {
+    ppLow: 2,
+    ppHigh: 4,
+    cashLow: 18_000,
+    cashHigh: 42_000,
+  },
+  downside: {
+    cashLow: 18_000,
+    cashHigh: 42_000,
+  },
+  /** @ai-commentary Recommended actions — replace with AI-ranked suggestions when ready */
+  recommendations: [
+    "Reduce discount depth on returning customers",
+    "Review shipping and fulfilment pricing",
+    "Reallocate spend toward higher-margin channels",
+  ],
+} as const;
 
 const TOP_DRIVERS: Driver[] = [
   { id: "1", text: "Margin down due to increased shipping and fulfilment costs", trend: "worsening" },
@@ -40,6 +66,97 @@ export default function Dashboard() {
             Export CSV
           </Button>
           <Button>Create Report</Button>
+        </div>
+      </div>
+
+      {/* ── CFO Insight ── */}
+      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-8 overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
+          <Sparkles className="w-4 h-4 text-primary shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+            CFO Insight
+          </span>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          {/* Body */}
+          <p className="text-sm font-medium text-foreground leading-relaxed">
+            {CFO_INSIGHT.body}
+          </p>
+
+          {/* Upside callout */}
+          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 mt-0.5">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                If these issues are addressed next month, contribution margin could improve by{" "}
+                <span className="font-semibold">
+                  +{CFO_INSIGHT.upside.ppLow}–{CFO_INSIGHT.upside.ppHigh}pp
+                </span>
+                , equivalent to approximately{" "}
+                <span className="font-bold text-emerald-700 dark:text-emerald-300 text-base">
+                  £{CFO_INSIGHT.upside.cashLow.toLocaleString()}–£{CFO_INSIGHT.upside.cashHigh.toLocaleString()}
+                </span>{" "}
+                additional contribution profit at current sales volume.
+              </p>
+            </div>
+          </div>
+
+          {/* Downside callout */}
+          <div className="rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/25 px-5 py-4">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-900/50 shrink-0 mt-0.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <p className="text-sm text-amber-900 dark:text-amber-200 leading-relaxed">
+                If no action is taken and these trends continue, the business could lose approximately{" "}
+                <span className="font-bold text-amber-700 dark:text-amber-300 text-base">
+                  £{CFO_INSIGHT.downside.cashLow.toLocaleString()}–£{CFO_INSIGHT.downside.cashHigh.toLocaleString()}
+                </span>{" "}
+                of contribution profit next month.
+              </p>
+            </div>
+          </div>
+
+          {/* Recommended focus */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+              Recommended focus:
+            </p>
+            <ul className="space-y-1.5">
+              {CFO_INSIGHT.recommendations.map((rec) => (
+                <li key={rec} className="flex items-start gap-2.5 text-sm text-foreground">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-[5px]" />
+                  {rec}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Summary tags */}
+          <div className="flex flex-wrap gap-3 pt-1 border-t border-primary/15">
+            <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="text-xs text-emerald-800 dark:text-emerald-300">
+                Potential upside next month:{" "}
+                <span className="font-bold">
+                  £{(CFO_INSIGHT.upside.cashLow / 1000).toFixed(0)}k–£{(CFO_INSIGHT.upside.cashHigh / 1000).toFixed(0)}k
+                </span>
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 px-3 py-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <span className="text-xs text-amber-800 dark:text-amber-300">
+                At-risk profit next month:{" "}
+                <span className="font-bold">
+                  £{(CFO_INSIGHT.downside.cashLow / 1000).toFixed(0)}k–£{(CFO_INSIGHT.downside.cashHigh / 1000).toFixed(0)}k
+                </span>
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -85,27 +202,6 @@ export default function Dashboard() {
 
       {/* TOP DRIVERS */}
       <TopDrivers drivers={TOP_DRIVERS} />
-
-      {/* AI CFO INSIGHT */}
-      <div className="relative mb-8 rounded-2xl overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-purple-500/10 rounded-2xl" />
-        <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-indigo-500/20" />
-        <div className="relative flex items-start gap-4 p-5 sm:p-6">
-          <div className="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-indigo-500/15 ring-1 ring-indigo-500/30 mt-0.5">
-            <Sparkles className="w-4 h-4 text-indigo-500" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-xs font-semibold uppercase tracking-widest text-indigo-500">AI CFO Insight</span>
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-500 text-[10px] font-bold tracking-wide">LIVE</span>
-            </div>
-            <p className="text-sm sm:text-base text-foreground leading-relaxed font-medium">
-              "Profitability declining despite revenue growth. Discount usage increased 11% month-on-month."
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">Confidence: High</p>
-          </div>
-        </div>
-      </div>
 
       {/* WHAT TO DO NEXT */}
       <ActionRecommendations recommendations={RECOMMENDATIONS} />

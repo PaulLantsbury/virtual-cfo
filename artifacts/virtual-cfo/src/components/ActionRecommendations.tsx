@@ -14,6 +14,8 @@ interface ActionRecommendationsProps {
   recommendations: Recommendation[];
   isLoading?: boolean;
   defaultExpanded?: boolean;
+  title?: string;
+  subtitle?: string;
 }
 
 const impactConfig: Record<ImpactLevel, { label: string; classes: string }> = {
@@ -35,6 +37,8 @@ export function ActionRecommendations({
   recommendations,
   isLoading,
   defaultExpanded = true,
+  title = "What to do next",
+  subtitle = "Recommended actions to improve profitability and cash performance",
 }: ActionRecommendationsProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
@@ -50,10 +54,10 @@ export function ActionRecommendations({
           </div>
           <div>
             <h3 className="font-semibold text-lg text-foreground leading-none mb-1">
-              What to do next
+              {title}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Recommended actions to improve profitability and cash performance
+              {subtitle}
             </p>
           </div>
         </div>

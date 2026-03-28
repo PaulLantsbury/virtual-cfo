@@ -5,6 +5,8 @@ import {
   ResponsiveContainer, ReferenceLine, Cell,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ActionRecommendations } from "@/components/ActionRecommendations";
+import type { Recommendation } from "@/components/ActionRecommendations";
 import { cn } from "@/lib/utils";
 
 const TREND_DATA = [
@@ -41,6 +43,34 @@ const CAC_PAYBACK        = 1.4;
 const CAC_PAYBACK_PREV   = 1.1;
 
 const BENCHMARK_TARGET = { low: 45, high: 55 };
+
+const MARGIN_RECOMMENDATIONS: Recommendation[] = [
+  {
+    id: "m1",
+    text: "Renegotiate shipping rates with your carrier — volumes qualify for a tier discount that could reduce shipping costs by 8–12%, adding ~1.0pp to contribution margin.",
+    impact: "high",
+  },
+  {
+    id: "m2",
+    text: "Pause blanket discount codes and replace with targeted post-purchase offers. Reducing average discount depth from 7% to 5% would recover ~0.6pp of margin.",
+    impact: "high",
+  },
+  {
+    id: "m3",
+    text: "Reallocate 15% of Meta spend toward Email — Email CM is 58.6% vs Meta at 34.2%. Shifting budget to your highest-margin channel improves blended margin immediately.",
+    impact: "high",
+  },
+  {
+    id: "m4",
+    text: "Review fulfilment partner SLA and pricing — fulfilment at 14% of revenue is above the typical 10–12% benchmark for your order volume. Request a pricing review.",
+    impact: "medium",
+  },
+  {
+    id: "m5",
+    text: "Set a contribution margin floor alert at 40%. You are currently at 42.3% — an early warning at 40% gives you time to act before margin falls below breakeven.",
+    impact: "quick-win",
+  },
+];
 
 const SENSITIVITY = [
   {
@@ -688,6 +718,14 @@ export default function MarginAnalysis() {
           </div>
         )}
       </div>
+
+      {/* ── Recommended margin improvements ── */}
+      <ActionRecommendations
+        recommendations={MARGIN_RECOMMENDATIONS}
+        title="Recommended margin improvements"
+        subtitle="Suggested operational actions based on your current margin trends and benchmarks"
+        defaultExpanded
+      />
     </AppLayout>
   );
 }

@@ -53,6 +53,13 @@ const BRIDGE_ROWS = [
   { label: "Marketing spend",  total: -27390, perOrder:-12.20, type: "deduction", trend: "worsening" },
 ] as const;
 
+/** @dynamic Derived from BRIDGE_ROWS deductions — stays in sync when data is live */
+const VARIABLE_COST_PER_ORDER = +BRIDGE_ROWS
+  .filter((r) => r.type === "deduction")
+  .reduce((s, r) => s + Math.abs(r.perOrder), 0)
+  .toFixed(2);
+const VARIABLE_COST_PER_ORDER_PREV_YEAR = 29.30;
+
 /** @ai-commentary Replace with AI-generated CFO insight when ready */
 const CFO_INSIGHT = {
   summary:
@@ -239,7 +246,7 @@ export default function MarginAnalysis() {
       </div>
 
       {/* Headline KPI strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Contribution Margin</p>
           <p className="text-4xl font-display font-bold text-foreground">{CM_PCT}%</p>
@@ -296,6 +303,23 @@ export default function MarginAnalysis() {
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
             Marketing investment now takes longer to recover
+          </p>
+        </div>
+
+        {/* Variable Cost per Order */}
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Variable Cost per Order</p>
+          <p className="text-4xl font-display font-bold text-foreground">
+            £{VARIABLE_COST_PER_ORDER.toFixed(2)}
+          </p>
+          <div className="flex items-center gap-2 mt-3 text-xs">
+            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
+              <ArrowUpRight className="w-3 h-3" />
+              Up £{(VARIABLE_COST_PER_ORDER - VARIABLE_COST_PER_ORDER_PREV_YEAR).toFixed(2)} vs last year
+            </span>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground leading-snug">
+            Sum of all variable costs per order
           </p>
         </div>
       </div>

@@ -7,12 +7,19 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 
 const TREND_DATA = [
-  { month: "Oct", margin: 47.1 },
-  { month: "Nov", margin: 46.3 },
-  { month: "Dec", margin: 45.8 },
-  { month: "Jan", margin: 44.9 },
-  { month: "Feb", margin: 43.7 },
-  { month: "Mar", margin: 42.3 },
+  { month: "Mar '25", margin: 48.2, highlighted: true  },
+  { month: "Apr",     margin: 47.8                     },
+  { month: "May",     margin: 48.0                     },
+  { month: "Jun",     margin: 47.5                     },
+  { month: "Jul",     margin: 48.1                     },
+  { month: "Aug",     margin: 47.9                     },
+  { month: "Sep",     margin: 47.4                     },
+  { month: "Oct",     margin: 47.1                     },
+  { month: "Nov",     margin: 46.3                     },
+  { month: "Dec",     margin: 45.8                     },
+  { month: "Jan",     margin: 44.9                     },
+  { month: "Feb",     margin: 43.7                     },
+  { month: "Mar '26", margin: 42.3, highlighted: true  },
 ];
 
 const BREAKDOWN = [
@@ -54,18 +61,19 @@ const CONTRIBUTION_PER_ORDER = 35.00;
 const CONTRIBUTION_PER_ORDER_PREV = 38.20;
 
 const UNIT_ECON_HISTORY = [
-  { month: "Apr",  revenue: 71.20, contribution: 39.10 },
-  { month: "May",  revenue: 70.80, contribution: 38.60 },
-  { month: "Jun",  revenue: 69.50, contribution: 38.00 },
-  { month: "Jul",  revenue: 72.10, contribution: 40.20 },
-  { month: "Aug",  revenue: 73.40, contribution: 41.50 },
-  { month: "Sep",  revenue: 71.90, contribution: 40.80 },
-  { month: "Oct",  revenue: 70.60, contribution: 39.40 },
-  { month: "Nov",  revenue: 69.80, contribution: 38.90 },
-  { month: "Dec",  revenue: 71.30, contribution: 38.20 },
-  { month: "Jan",  revenue: 69.10, contribution: 37.00 },
-  { month: "Feb",  revenue: 68.70, contribution: 36.10 },
-  { month: "Mar",  revenue: 68.40, contribution: 35.00 },
+  { month: "Mar '25", revenue: 71.80, contribution: 40.50, highlighted: true  },
+  { month: "Apr",     revenue: 71.20, contribution: 39.10                     },
+  { month: "May",     revenue: 70.80, contribution: 38.60                     },
+  { month: "Jun",     revenue: 69.50, contribution: 38.00                     },
+  { month: "Jul",     revenue: 72.10, contribution: 40.20                     },
+  { month: "Aug",     revenue: 73.40, contribution: 41.50                     },
+  { month: "Sep",     revenue: 71.90, contribution: 40.80                     },
+  { month: "Oct",     revenue: 70.60, contribution: 39.40                     },
+  { month: "Nov",     revenue: 69.80, contribution: 38.90                     },
+  { month: "Dec",     revenue: 71.30, contribution: 38.20                     },
+  { month: "Jan",     revenue: 69.10, contribution: 37.00                     },
+  { month: "Feb",     revenue: 68.70, contribution: 36.10                     },
+  { month: "Mar '26", revenue: 68.40, contribution: 35.00, highlighted: true  },
 ];
 
 const CHANNELS = [
@@ -421,26 +429,32 @@ export default function MarginAnalysis() {
 
       {/* Margin Trend — full width */}
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50 mb-8">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Margin Trend</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Contribution margin % — last 6 months</p>
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <h3 className="font-semibold text-lg text-foreground">Margin Trend</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">Contribution margin % — Mar 2025 to Mar 2026</p>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-secondary px-2.5 py-1.5 rounded-lg">
+            <span className="w-3 h-3 rounded-sm border-2 border-primary inline-block" />
+            Same month, 1 year apart
+          </div>
         </div>
         <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={TREND_DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <LineChart data={TREND_DATA} margin={{ top: 14, right: 14, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
               <XAxis
                 dataKey="month"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                 dy={8}
               />
               <YAxis
                 domain={[38, 52]}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip
@@ -452,28 +466,45 @@ export default function MarginAnalysis() {
                 type="monotone"
                 dataKey="margin"
                 stroke="hsl(var(--primary))"
-                strokeWidth={3}
-                dot={{ fill: "hsl(var(--primary))", r: 4 }}
+                strokeWidth={2.5}
+                dot={(props: any) => {
+                  const { cx, cy, index } = props;
+                  const isHighlighted = index === 0 || index === TREND_DATA.length - 1;
+                  if (isHighlighted) {
+                    return (
+                      <circle
+                        key={index}
+                        cx={cx}
+                        cy={cy}
+                        r={7}
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={2.5}
+                        fill="hsl(var(--card))"
+                      />
+                    );
+                  }
+                  return <circle key={index} cx={cx} cy={cy} r={3} fill="hsl(var(--primary))" />;
+                }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
         <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
-          Margin has declined 4.8 percentage points since October, driven primarily by higher shipping and fulfilment costs alongside increased discount usage.
+          Margin has declined 5.9pp vs the same month last year (48.2% → 42.3%), driven by higher shipping, fulfilment, and marketing costs.
         </p>
       </div>
 
-      {/* Unit Economics 12-month bar chart */}
+      {/* Unit Economics 13-month bar chart */}
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50 mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
           <div>
-            <h3 className="font-semibold text-lg text-foreground">Unit Economics — 12-Month View</h3>
+            <h3 className="font-semibold text-lg text-foreground">Unit Economics — 13-Month View</h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Revenue per order vs contribution per order (Apr 2025 – Mar 2026)
+              Revenue per order vs contribution per order (Mar 2025 – Mar 2026)
             </p>
           </div>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-sm bg-primary/30 inline-block" />
               Revenue per order
@@ -482,17 +513,21 @@ export default function MarginAnalysis() {
               <span className="w-3 h-3 rounded-sm bg-primary inline-block" />
               Contribution per order
             </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm border-2 border-primary inline-block" />
+              Same month, 1 year apart
+            </span>
           </div>
         </div>
         <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={UNIT_ECON_HISTORY} margin={{ top: 10, right: 10, left: -10, bottom: 0 }} barCategoryGap="30%">
+            <BarChart data={UNIT_ECON_HISTORY} margin={{ top: 10, right: 10, left: -10, bottom: 0 }} barCategoryGap="28%">
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
               <XAxis
                 dataKey="month"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
                 dy={8}
               />
               <YAxis
@@ -509,24 +544,40 @@ export default function MarginAnalysis() {
                   name === "revenue" ? "Revenue per order" : "Contribution per order",
                 ]}
               />
-              <Bar dataKey="revenue" fill="hsl(var(--primary))" fillOpacity={0.2} radius={[4, 4, 0, 0]} />
+              <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
+                {UNIT_ECON_HISTORY.map((entry, index) => {
+                  const isHighlighted = index === 0 || index === UNIT_ECON_HISTORY.length - 1;
+                  return (
+                    <Cell
+                      key={index}
+                      fill="hsl(var(--primary))"
+                      fillOpacity={0.2}
+                      stroke={isHighlighted ? "hsl(var(--primary))" : "none"}
+                      strokeWidth={isHighlighted ? 2 : 0}
+                    />
+                  );
+                })}
+              </Bar>
               <Bar dataKey="contribution" radius={[4, 4, 0, 0]}>
-                {UNIT_ECON_HISTORY.map((entry, index) => (
-                  <Cell
-                    key={index}
-                    fill={
-                      index === UNIT_ECON_HISTORY.length - 1
-                        ? "hsl(var(--destructive))"
-                        : "hsl(var(--primary))"
-                    }
-                  />
-                ))}
+                {UNIT_ECON_HISTORY.map((entry, index) => {
+                  const isHighlighted = index === 0 || index === UNIT_ECON_HISTORY.length - 1;
+                  const isLast = index === UNIT_ECON_HISTORY.length - 1;
+                  return (
+                    <Cell
+                      key={index}
+                      fill={isLast ? "hsl(var(--destructive))" : "hsl(var(--primary))"}
+                      stroke={isHighlighted ? (isLast ? "hsl(var(--destructive))" : "hsl(var(--primary))") : "none"}
+                      strokeWidth={isHighlighted ? 2 : 0}
+                      fillOpacity={isHighlighted ? 1 : 0.85}
+                    />
+                  );
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
         <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
-          Contribution per order has declined from £41.50 (Aug) to £35.00 (Mar), a drop of £6.50 over 7 months. The gap between revenue and contribution is widening, indicating rising variable costs per order.
+          Contribution per order has fallen from £40.50 (Mar '25) to £35.00 (Mar '26), a year-on-year drop of £5.50. The widening gap between revenue and contribution signals rising variable costs per order.
         </p>
       </div>
     </AppLayout>

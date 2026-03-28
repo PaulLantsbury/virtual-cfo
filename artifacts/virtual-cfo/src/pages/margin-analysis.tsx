@@ -176,7 +176,7 @@ export default function MarginAnalysis() {
             Contribution Margin Analysis
           </h1>
           <p className="text-muted-foreground mt-1">
-            Understanding what's driving your true profitability
+            Understanding where margin is being created — and lost
           </p>
         </div>
         <div className="flex items-center gap-3">

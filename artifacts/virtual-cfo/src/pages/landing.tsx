@@ -119,18 +119,18 @@ export default function Landing() {
             {[
               {
                 icon: BarChart3,
-                title: "Real-time Dashboards",
-                desc: "Connect your bank accounts and accounting software. We do the math instantly."
+                title: "True Contribution Margin",
+                desc: "See whether your growth is actually profitable after fulfilment, fees, and discounts."
               },
               {
                 icon: TrendingUp,
-                title: "Runway Forecasting",
-                desc: "Know exactly when you'll run out of cash based on your historical burn rate."
+                title: "Cash Runway Visibility",
+                desc: "Know how many months of cash you really have left based on real trading performance."
               },
               {
                 icon: ShieldCheck,
-                title: "Audit-Ready Reports",
-                desc: "Generate investor-ready P&L and Cash Flow statements with a single click."
+                title: "AI CFO Commentary",
+                desc: "Get a plain-English financial briefing explaining what changed in your business and why."
               }
             ].map((feat, i) => (
               <div key={i} className="bg-background p-8 rounded-3xl border border-border hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group">

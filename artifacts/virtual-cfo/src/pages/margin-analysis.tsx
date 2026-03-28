@@ -29,6 +29,17 @@ const CM_PCT   = 42.3;
 const CM_PREV  = 45.8;
 const CM_CHANGE = +(CM_PCT - CM_PREV).toFixed(1);
 
+const UNIT_ECONOMICS = [
+  { label: "Revenue per order",    value:  68.40, type: "revenue",   trend: "neutral" as const },
+  { label: "Discounts",            value:  -8.10, type: "deduction", trend: "worsening" as const },
+  { label: "Payment fees",         value:  -1.90, type: "deduction", trend: "neutral" as const },
+  { label: "Shipping",             value:  -4.80, type: "deduction", trend: "worsening" as const },
+  { label: "Fulfilment",           value:  -6.40, type: "deduction", trend: "neutral" as const },
+  { label: "Marketing (blended)",  value: -12.20, type: "deduction", trend: "worsening" as const },
+];
+const CONTRIBUTION_PER_ORDER = 35.00;
+const CONTRIBUTION_PER_ORDER_PREV = 38.20;
+
 const DRIVERS = [
   { text: "Shipping costs increased 8%",  trend: "worsening" },
   { text: "Discount usage increased 11%", trend: "worsening" },
@@ -85,6 +96,78 @@ export default function MarginAnalysis() {
           <p className="text-sm font-medium text-muted-foreground mb-1">6-Month Trend</p>
           <p className="text-4xl font-display font-bold text-destructive">↓ 4.8pp</p>
           <p className="mt-3 text-xs text-muted-foreground">Down from 47.1% in October</p>
+        </div>
+      </div>
+
+      {/* Unit Economics */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <div>
+            <h3 className="font-semibold text-lg text-foreground">Unit Economics (Per Order)</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Contribution margin calculated on a per-order basis
+            </p>
+          </div>
+          <span className="text-xs text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg self-start sm:self-auto">
+            March 2026
+          </span>
+        </div>
+
+        <div className="max-w-md">
+          <ul className="space-y-0">
+            {UNIT_ECONOMICS.map((row, i) => (
+              <li
+                key={row.label}
+                className={cn(
+                  "flex items-center justify-between py-3 border-b border-border/40",
+                  i === 0 && "border-t border-border/40"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground w-4 shrink-0 font-medium">
+                    {row.type === "deduction" ? "−" : ""}
+                  </span>
+                  <span className="text-sm text-foreground">{row.label}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  {/* Trend indicator placeholder — ready for live data */}
+                  <span className={cn(
+                    "text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
+                    row.trend === "worsening"
+                      ? "bg-destructive/10 text-destructive"
+                      : "bg-secondary text-muted-foreground"
+                  )}>
+                    {row.trend === "worsening" ? "↑ cost" : "—"}
+                  </span>
+                  <span className={cn(
+                    "text-sm font-semibold tabular-nums w-16 text-right",
+                    row.type === "revenue" ? "text-foreground" : "text-muted-foreground"
+                  )}>
+                    £{Math.abs(row.value).toFixed(2)}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* Contribution per order result */}
+          <div className="mt-4 flex items-center justify-between rounded-xl bg-primary/10 border border-primary/20 px-4 py-4">
+            <div>
+              <p className="text-sm font-bold text-foreground">Contribution per order</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Down from £{CONTRIBUTION_PER_ORDER_PREV.toFixed(2)} last month
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-display font-bold text-foreground">
+                £{CONTRIBUTION_PER_ORDER.toFixed(2)}
+              </p>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive">
+                <ArrowDownRight className="w-3 h-3" />
+                £{(CONTRIBUTION_PER_ORDER_PREV - CONTRIBUTION_PER_ORDER).toFixed(2)} vs last month
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

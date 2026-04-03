@@ -579,7 +579,7 @@ export default function MarginAnalysis() {
         subtitle="Key contribution margin metrics for March 2026."
       />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
 
         {/* 1 — Contribution Margin */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
@@ -621,18 +621,7 @@ export default function MarginAnalysis() {
           <p className="text-xs text-muted-foreground">Revenue minus variable costs</p>
         </div>
 
-        {/* 3 — 6-Month Trend */}
-        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">6-Month Trend</p>
-          <p className="text-3xl font-display font-bold text-destructive mb-2">↓ 4.8pp</p>
-          <div className="space-y-0.5 mb-2">
-            <VarLine label="vs prior 6-month period" value="↑ 1.6pp worse" favorable={false} />
-            <VarLine label="vs year-ago period" value="↑ 3.7pp worse" favorable={false} />
-          </div>
-          <p className="text-xs text-muted-foreground">Decline accelerating vs prior periods</p>
-        </div>
-
-        {/* 4 — CAC Payback */}
+        {/* 3 — CAC Payback */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
           <p className="text-3xl font-display font-bold text-foreground mb-2">
@@ -645,7 +634,7 @@ export default function MarginAnalysis() {
           <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover acquisition cost</p>
         </div>
 
-        {/* 5 — Contribution per Order */}
+        {/* 4 — Contribution per Order */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per Order</p>
           <p className="text-3xl font-display font-bold text-foreground mb-2">
@@ -656,28 +645,6 @@ export default function MarginAnalysis() {
             <VarLine label="vs last 12 months" value={`↓ £${(CONTRIBUTION_PER_ORDER_LY - CONTRIBUTION_PER_ORDER).toFixed(2)}`} favorable={false} />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Contribution available after variable costs per order</p>
-        </div>
-
-        {/* 6 — Average Discount % */}
-        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Average Discount %</p>
-          <p className="text-3xl font-display font-bold text-foreground mb-2">{AVG_DISCOUNT_PCT.toFixed(1)}%</p>
-          <div className="space-y-0.5 mb-2">
-            <VarLine label="vs last month" value={`↑ ${(AVG_DISCOUNT_PCT - AVG_DISCOUNT_PREV_M).toFixed(1)}pp`} favorable={false} />
-            <VarLine label="vs last 12 months" value={`↑ ${(AVG_DISCOUNT_PCT - AVG_DISCOUNT_LY).toFixed(1)}pp`} favorable={false} />
-          </div>
-          <p className="text-xs text-muted-foreground leading-snug">Higher discount depth reduces contribution margin directly</p>
-        </div>
-
-        {/* 7 — Returns % */}
-        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Returns %</p>
-          <p className="text-3xl font-display font-bold text-foreground mb-2">{RETURNS_PCT.toFixed(1)}%</p>
-          <div className="space-y-0.5 mb-2">
-            <VarLine label="vs last month" value={`↑ ${(RETURNS_PCT - RETURNS_PREV_M).toFixed(1)}pp`} favorable={false} />
-            <VarLine label="vs last 12 months" value={`↑ ${(RETURNS_PCT - RETURNS_LY).toFixed(1)}pp`} favorable={false} />
-          </div>
-          <p className="text-xs text-muted-foreground leading-snug">Returned orders reduce revenue and increase fulfilment cost</p>
         </div>
 
       </div>

@@ -499,24 +499,16 @@ export default function MarginAnalysis() {
             </div>
 
             {/* Fastest recovery lever */}
-            <div className="rounded-xl bg-emerald-100/80 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 px-4 py-4 flex flex-col justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
-                  Fastest recovery lever
-                </p>
-                <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed mb-4">
-                  {CFO_INSIGHT.fastestLever}
-                </p>
-              </div>
-              <div className="flex items-baseline gap-2 pt-3 border-t border-emerald-200 dark:border-emerald-800/50">
-                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mb-0.5" />
-                <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 leading-none">
-                  £{(CFO_INSIGHT.recovery.cashLow / 1_000).toFixed(0)}k–£{(CFO_INSIGHT.recovery.cashHigh / 1_000).toFixed(0)}k
-                </span>
-                <span className="text-xs text-emerald-700/80 dark:text-emerald-400/80 leading-tight">
-                  recoverable<br />next month
-                </span>
-              </div>
+            <div className="rounded-xl bg-emerald-100/80 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 px-4 py-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
+                Fastest recovery lever
+              </p>
+              <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                {CFO_INSIGHT.fastestLever}
+              </p>
+              <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 mt-3 leading-snug">
+                See quantified opportunities below ↓
+              </p>
             </div>
 
           </div>

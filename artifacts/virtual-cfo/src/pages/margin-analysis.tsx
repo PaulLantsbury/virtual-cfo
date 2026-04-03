@@ -476,17 +476,38 @@ export default function MarginAnalysis() {
               </ul>
             </div>
 
-            {/* Fastest recovery lever */}
+            {/* Fastest recovery lever — plan-aware */}
             <div className="rounded-xl bg-emerald-100/80 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 px-4 py-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
-                Fastest recovery lever
-              </p>
-              <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
-                {CFO_INSIGHT.fastestLever}
-              </p>
-              <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 mt-3 leading-snug">
-                See quantified opportunities below ↓
-              </p>
+              {isProUser() ? (
+                /* ── PRO: specific action + impact figure ── */
+                <>
+                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
+                    Fastest recovery lever
+                  </p>
+                  <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                    Shift 18–27% of Meta spend toward Email and Organic
+                  </p>
+                  <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 mt-2">
+                    Estimated impact: £9,500 next month
+                  </p>
+                  <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 mt-3 leading-snug">
+                    See quantified opportunities below ↓
+                  </p>
+                </>
+              ) : (
+                /* ── FREE: directional only + upgrade link ── */
+                <>
+                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
+                    Fastest recovery lever identified
+                  </p>
+                  <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                    Shift spend from Meta toward higher-margin channels
+                  </p>
+                  <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-3 leading-snug">
+                    Unlock estimated financial impact →
+                  </p>
+                </>
+              )}
             </div>
 
           </div>

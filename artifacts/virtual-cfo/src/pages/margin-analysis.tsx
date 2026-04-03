@@ -340,11 +340,31 @@ export default function MarginAnalysis() {
               <p className="text-4xl sm:text-5xl font-display font-bold text-foreground leading-none mb-2">
                 {CM_PCT}%
               </p>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 mb-3">
                 <span className="text-sm font-semibold text-destructive">
                   ↓ {Math.abs(CM_CHANGE)}pp
                 </span>
                 <span className="text-xs text-muted-foreground">vs last month</span>
+              </div>
+
+              {/* @dynamic gaps recompute from CM_PCT vs BENCHMARK_TARGET */}
+              <div className="pt-3 border-t border-primary/10 space-y-1.5">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs text-muted-foreground">
+                    Gap to lower bound ({BENCHMARK_TARGET.low}%)
+                  </span>
+                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 tabular-nums">
+                    +{(BENCHMARK_TARGET.low - CM_PCT).toFixed(1)}pp
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs text-muted-foreground">
+                    Gap to midpoint ({(BENCHMARK_TARGET.low + BENCHMARK_TARGET.high) / 2}%)
+                  </span>
+                  <span className="text-xs font-semibold text-muted-foreground tabular-nums">
+                    +{((BENCHMARK_TARGET.low + BENCHMARK_TARGET.high) / 2 - CM_PCT).toFixed(1)}pp
+                  </span>
+                </div>
               </div>
             </div>
 

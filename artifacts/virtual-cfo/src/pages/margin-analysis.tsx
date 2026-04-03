@@ -4,7 +4,6 @@ import {
   ResponsiveContainer, ReferenceLine, Cell,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { ActionRecommendations } from "@/components/ActionRecommendations";
 import type { Recommendation } from "@/components/ActionRecommendations";
 import { cn } from "@/lib/utils";
 
@@ -1089,13 +1088,6 @@ export default function MarginAnalysis() {
         </p>
       </div>
 
-      {/* Action Recommendations */}
-      <ActionRecommendations
-        recommendations={MARGIN_RECOMMENDATIONS}
-        title="Recommended margin improvements"
-        subtitle="Suggested operational actions based on your current margin trends and benchmarks"
-        defaultExpanded
-      />
     </AppLayout>
   );
 }

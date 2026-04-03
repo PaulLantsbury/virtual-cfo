@@ -1,4 +1,5 @@
-import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell,
@@ -285,9 +286,34 @@ function SectionHeading({ title, subtitle }: { title: string; subtitle?: string 
   );
 }
 
+// ─── Timeframe options ────────────────────────────────────────────────────────
+
+const TIMEFRAME_OPTIONS = [
+  { value: "7d",     label: "Last 7 days"    },
+  { value: "30d",    label: "Last 30 days"   },
+  { value: "90d",    label: "Last 90 days"   },
+  { value: "12m",    label: "Last 12 months" },
+  { value: "custom", label: "Custom"         },
+] as const;
+
+type TimeframeValue = typeof TIMEFRAME_OPTIONS[number]["value"];
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function MarginAnalysis() {
+  const [timeframe, setTimeframe] = useState<TimeframeValue>("30d");
+
+  const selectedLabel = TIMEFRAME_OPTIONS.find((o) => o.value === timeframe)!.label;
+
+  // Human-readable period phrase used inline in section subtitles and labels
+  const periodPhrase: Record<TimeframeValue, string> = {
+    "7d":     "the last 7 days",
+    "30d":    "the last 30 days",
+    "90d":    "the last 90 days",
+    "12m":    "the last 12 months",
+    "custom": "the selected period",
+  };
+
   return (
     <AppLayout>
       {/* ── Page header ── */}
@@ -300,10 +326,41 @@ export default function MarginAnalysis() {
             Understand current profit performance, the biggest upside opportunities, and what is driving change.
           </p>
         </div>
-        <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">
-          March 2026
-        </span>
+
+        {/* Controls: timeframe selector + period badge */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Timeframe selector */}
+          <div className="relative">
+            <select
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value as TimeframeValue)}
+              className="appearance-none bg-secondary text-sm font-medium text-foreground pl-3 pr-8 py-1.5 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30 border border-border/40"
+              aria-label="Select timeframe for performance views"
+            >
+              {TIMEFRAME_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg border border-border/40 whitespace-nowrap">
+            March 2026
+          </span>
+        </div>
       </div>
+
+      {/* Custom range informational note */}
+      {timeframe === "custom" && (
+        <div className="flex items-center gap-2.5 mb-8 px-4 py-3 rounded-xl bg-secondary border border-border/50">
+          <Info className="w-4 h-4 text-muted-foreground shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            Custom date range picker coming soon — performance views are currently showing Last 30 days data.
+          </p>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 1 — CFO INSIGHT
@@ -450,7 +507,7 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Opportunities"
-        subtitle="Ranked by margin impact — concrete actions based on current cost structure and order volume."
+        subtitle="Ranked by margin impact — based on rolling 30-day baseline, independent of the timeframe selector."
       />
 
       {/* ── Structured opportunities panel ── */}
@@ -639,7 +696,7 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Actual Performance"
-        subtitle="Key contribution margin metrics for March 2026."
+        subtitle={`Key contribution margin metrics · ${selectedLabel}`}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
@@ -717,12 +774,12 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Key Drivers"
-        subtitle="What changed this month and the financial impact per order on contribution margin."
+        subtitle={`What changed over ${periodPhrase[timeframe]} and the financial impact per order on contribution margin.`}
       />
 
       {/* Summary line */}
       <div className="flex items-start justify-between mb-4 px-5 py-3.5 rounded-xl bg-destructive/5 border border-destructive/15 gap-6">
-        <p className="text-sm font-semibold text-foreground mt-0.5">Total margin impact this month</p>
+        <p className="text-sm font-semibold text-foreground mt-0.5">Total margin impact — {selectedLabel}</p>
         <div className="text-right shrink-0">
           <p className={cn(
             "text-lg font-bold tabular-nums leading-none",
@@ -734,7 +791,7 @@ export default function MarginAnalysis() {
             "text-xs font-medium tabular-nums mt-1.5 leading-none",
             CHANGE_DRIVERS_TOTAL < 0 ? "text-destructive/70" : "text-emerald-600/70"
           )}>
-            ≈ {CHANGE_DRIVERS_MONTHLY_IMPACT < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_MONTHLY_IMPACT).toLocaleString()} estimated this month
+            ≈ {CHANGE_DRIVERS_MONTHLY_IMPACT < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_MONTHLY_IMPACT).toLocaleString()} estimated — {selectedLabel.toLowerCase()}
           </p>
         </div>
       </div>
@@ -824,7 +881,7 @@ export default function MarginAnalysis() {
         <div className="mb-5">
           <h3 className="font-semibold text-lg text-foreground">Contribution Margin Bridge</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            How revenue converts into contribution margin — total and per order, March 2026
+            How revenue converts into contribution margin — total and per order · {selectedLabel}
           </p>
         </div>
 
@@ -936,7 +993,7 @@ export default function MarginAnalysis() {
             <div className="mb-5">
               <h3 className="font-semibold text-lg text-foreground">Contribution Margin by Channel</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Contribution margin % per acquisition channel — March 2026
+                Contribution margin % per acquisition channel · {selectedLabel}
               </p>
             </div>
             <ul className="space-y-4">
@@ -999,7 +1056,7 @@ export default function MarginAnalysis() {
         <div className="flex items-start justify-between mb-5">
           <div>
             <h3 className="font-semibold text-lg text-foreground">Margin Trend</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Contribution margin % — Mar 2025 to Mar 2026</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Contribution margin % — {selectedLabel}</p>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-secondary px-2.5 py-1.5 rounded-lg">
             <span className="w-3 h-3 rounded-sm border-2 border-primary inline-block" />
@@ -1068,7 +1125,7 @@ export default function MarginAnalysis() {
           <div>
             <h3 className="font-semibold text-lg text-foreground">Unit Economics — 13-Month View</h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Revenue per order vs contribution per order (Mar 2025 – Mar 2026)
+              Revenue per order vs contribution per order · {selectedLabel}
             </p>
           </div>
           <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">

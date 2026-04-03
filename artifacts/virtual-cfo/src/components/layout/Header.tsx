@@ -2,6 +2,7 @@ import { Bell, Search, Menu } from "lucide-react";
 import * as Avatar from "@radix-ui/react-avatar";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Link } from "wouter";
+import { DevPlanToggle } from "@/components/DevPlanToggle";
 
 export function Header() {
   return (
@@ -21,6 +22,7 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-4">
+        <DevPlanToggle />
         <button className="relative p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
           <Bell className="w-5 h-5" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border-2 border-background"></span>

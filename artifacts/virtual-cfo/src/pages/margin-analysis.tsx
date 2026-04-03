@@ -694,93 +694,90 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Key Drivers"
-        subtitle="The specific factors that caused margin to change this month vs last month."
+        subtitle="The main factors affecting profit margin performance this period."
       />
 
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-10">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Margin Change Drivers This Month</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Largest factors affecting contribution margin vs last month
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
+        {/* Column headers */}
+        <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            What changed this period vs last month
+          </p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Margin impact
           </p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Driver
-                </th>
-                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Change
-                </th>
-                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Impact per order
-                </th>
-                <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Direction
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {CHANGE_DRIVERS.map((row) => {
-                const isNegative = row.direction === "negative";
-                const impactStr  = `${isNegative ? "−" : "+"}£${Math.abs(row.impactPerOrder).toFixed(2)} / order`;
-                return (
-                  <tr
-                    key={row.driver}
-                    className="border-b border-border/40 hover:bg-secondary/30 transition-colors"
-                  >
-                    <td className="py-3 pr-4 font-medium text-foreground">
-                      {row.driver}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <span className={cn(
-                        "inline-flex text-xs font-semibold px-2 py-0.5 rounded-full tabular-nums",
-                        isNegative
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-success/10 text-success"
-                      )}>
-                        {row.change}
-                      </span>
-                    </td>
-                    <td className={cn(
-                      "py-3 px-4 text-right tabular-nums font-semibold",
-                      isNegative ? "text-destructive" : "text-success"
-                    )}>
-                      {impactStr}
-                    </td>
-                    <td className="py-3 pl-4 text-right">
-                      {isNegative
-                        ? <ArrowDownRight className="w-4 h-4 text-destructive ml-auto" />
-                        : <ArrowUpRight   className="w-4 h-4 text-success ml-auto" />
-                      }
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-border bg-secondary/40">
-                <td className="py-3.5 pr-4 font-bold text-foreground" colSpan={2}>
-                  Total margin impact this month
-                </td>
-                <td className={cn(
-                  "py-3.5 px-4 text-right tabular-nums font-bold",
-                  CHANGE_DRIVERS_TOTAL < 0 ? "text-destructive" : "text-success"
-                )}>
-                  {CHANGE_DRIVERS_TOTAL < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_TOTAL).toFixed(2)} / order
-                </td>
-                <td className="py-3.5 pl-4 text-right">
-                  {CHANGE_DRIVERS_TOTAL < 0
-                    ? <ArrowDownRight className="w-4 h-4 text-destructive ml-auto" />
-                    : <ArrowUpRight   className="w-4 h-4 text-success ml-auto" />
-                  }
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+        {/* Driver rows — sorted by absolute impact descending */}
+        <div className="divide-y divide-border/40">
+          {[...CHANGE_DRIVERS]
+            .sort((a, b) => Math.abs(b.impactPerOrder) - Math.abs(a.impactPerOrder))
+            .map((row, i) => {
+              const isLargest  = i === 0;
+              const isNegative = row.direction === "negative";
+              const impactAbs  = Math.abs(row.impactPerOrder).toFixed(2);
+              return (
+                <div
+                  key={row.driver}
+                  className="flex items-center justify-between px-6 py-4 gap-6 hover:bg-secondary/20 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {/* Severity bar */}
+                    <div className={cn(
+                      "w-1 self-stretch rounded-full shrink-0 min-h-[2rem]",
+                      isLargest ? "bg-destructive" : "bg-destructive/25"
+                    )} />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-semibold text-foreground">{row.driver}</span>
+                        <span className={cn(
+                          "inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap",
+                          isNegative
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-emerald-500/10 text-emerald-600"
+                        )}>
+                          {isNegative ? "↑" : "↓"} {row.change}
+                        </span>
+                        {isLargest && (
+                          <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
+                            Largest driver
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <span className={cn(
+                    "text-sm font-bold whitespace-nowrap shrink-0 tabular-nums",
+                    isNegative ? "text-destructive" : "text-emerald-600"
+                  )}>
+                    {isNegative ? "−" : "+"}£{impactAbs}/order
+                  </span>
+                </div>
+              );
+            })}
+        </div>
+
+        {/* Total impact */}
+        <div className="flex items-center justify-between px-6 py-4 bg-secondary/30 border-t-2 border-border/60">
+          <p className="text-sm font-semibold text-foreground">Combined margin impact this month</p>
+          <span className={cn(
+            "text-sm font-bold whitespace-nowrap tabular-nums",
+            CHANGE_DRIVERS_TOTAL < 0 ? "text-destructive" : "text-emerald-600"
+          )}>
+            {CHANGE_DRIVERS_TOTAL < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_TOTAL).toFixed(2)}/order
+          </span>
+        </div>
+
+        {/* Channel mix insight */}
+        <div className="px-6 py-4 bg-amber-50/60 dark:bg-amber-950/10 border-t border-amber-100 dark:border-amber-900/30">
+          <div className="flex items-start gap-3">
+            <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-900 dark:text-amber-300 leading-relaxed">
+              <span className="font-semibold">Channel mix is the primary lever.</span>{" "}
+              Marketing is now the largest single variable cost at <span className="font-semibold">£12.20/order</span> — exceeding shipping, fulfilment, and discounts individually.
+              Reallocating budget toward Email (CM 58.6%) and Organic (CM 52.3%) would reduce blended CAC and recover margin without cutting revenue.
+            </p>
+          </div>
         </div>
       </div>
 

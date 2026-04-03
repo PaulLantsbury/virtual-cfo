@@ -80,7 +80,7 @@ const RETURNS_LY     = 1.4;
  */
 const CFO_INSIGHT = {
   /** @ai-commentary Replace with AI-generated headline based on live margin data */
-  headline: "Profit margin below target — £20,400 recoverable next month",
+  headline: "Profit margin below target — £20,400 in estimated additional contribution next month",
   /** @ai-commentary Replace with dynamically generated status: "warning" | "critical" | "healthy" */
   status: "warning" as "warning" | "critical" | "healthy",
   summary:
@@ -425,16 +425,16 @@ export default function MarginAnalysis() {
               </div>
             </div>
 
-            {/* 2 — Recoverable Next Month */}
+            {/* 2 — Estimated Additional Contribution */}
             <div className="pl-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Recoverable Next Month
+                Estimated Additional Contribution
               </p>
               <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-2">
                 £{RECOVERY_TOTAL_CASH.toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground leading-snug max-w-[26ch]">
-                Sum of quantified opportunities — see breakdown below
+                Based on the 30-day trading baseline — see breakdown below
               </p>
             </div>
 
@@ -521,7 +521,7 @@ export default function MarginAnalysis() {
       <SectionHeading
         title="Opportunities"
         subtitle="Top profit improvement opportunities ranked by expected contribution uplift next month."
-        support="Based on the current 30-day trading baseline and prioritised by financial impact."
+        support="Based on the current 30-day trading baseline — estimates are stable and independent of the timeframe selected above."
       />
 
       {/* ── Structured opportunities panel ── */}
@@ -642,7 +642,7 @@ export default function MarginAnalysis() {
             {/* Combined impact footer */}
             <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
               <p className="text-sm font-semibold text-foreground">
-                Combined impact — if all {RECOVERY_SCENARIOS.length} changes are implemented
+                Combined impact next month if implemented now
               </p>
               <div className="flex items-start gap-5 shrink-0 ml-4">
                 <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
@@ -1100,8 +1100,8 @@ export default function MarginAnalysis() {
 
       </div>
 
-      {/* Contribution Margin by Channel */}
-      {(() => {
+      {/* Contribution Margin by Channel — gated by plan */}
+      {canAccess("channel_margin_analysis") ? (() => {
         const maxCm = Math.max(...CHANNELS.map(c => c.cm));
         const minCm = Math.min(...CHANNELS.map(c => c.cm));
         const sorted = [...CHANNELS].sort((a, b) => b.cm - a.cm);
@@ -1161,12 +1161,29 @@ export default function MarginAnalysis() {
             <div className="mt-5 flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
               <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground leading-snug">
-                Meta has the widest revenue share (£41,800) but the lowest contribution margin at 34.2%. The 24pp spread between Meta and Email is the primary driver of channel mix underperformance — the data behind the opportunity quantified above.
+                Meta has the widest revenue share (£41,800) but the lowest contribution margin at 34.2%. The 24pp spread between Meta and Email is the primary driver of channel mix underperformance — reflected in the estimated additional contribution quantified above.
               </p>
             </div>
           </div>
         );
-      })()}
+      })() : (
+        /* ── FREE: upgrade card preserving section height ── */
+        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+          <div className="mb-5">
+            <h3 className="font-semibold text-lg text-foreground">Contribution Margin by Channel</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Contribution margin % per acquisition channel · {selectedLabel}
+            </p>
+          </div>
+          <div className="min-h-[160px] flex items-center">
+            <UpgradePreviewCard
+              title="Unlock channel margin breakdown"
+              description="See how contribution margin varies across Meta, Google Shopping, Email, and Organic — and which channels are reducing your blended margin."
+              className="w-full"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Margin Trend */}
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50 mb-8">
@@ -1232,7 +1249,7 @@ export default function MarginAnalysis() {
           </ResponsiveContainer>
         </div>
         <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
-          Margin has declined 5.9pp vs the same month last year (48.2% → 42.3%), driven by higher shipping, fulfilment, and marketing costs.
+          Contribution margin has declined 5.9pp year-on-year (48.2% → 42.3%). See Key Drivers above for a full breakdown of contributing factors.
         </p>
       </div>
 

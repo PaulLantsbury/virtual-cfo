@@ -1,0 +1,205 @@
+Perform a final product-quality cleanup pass on the Profit Margin Analysis page (/margin-analysis).
+
+The goal is to improve clarity, credibility, consistency, and upgrade conversion while preserving the current layout and structure.
+
+Do NOT redesign the page. Refine wording, logic, and behaviour only.
+
+
+SECTION 1 — headline opportunity framing
+
+Replace any wording that implies certainty of savings with appropriately confident but realistic phrasing.
+
+Use:
+
+Estimated additional contribution available next month
+
+instead of:
+
+Recoverable contribution next month
+
+Ensure the headline figure (example: £20,400) remains visible to both Free and Pro users.
+
+Add supporting text beneath the number:
+
+Based on the current 30-day trading baseline and prioritised by financial impact.
+
+
+SECTION 2 — timeframe consistency
+
+Ensure the timeframe selector controls:
+
+- Actual Performance cards
+- trend charts
+- Key Drivers section
+- Margin Trend chart
+- Unit Economics chart
+
+Ensure the Opportunities section continues using a rolling 30-day baseline regardless of timeframe selection.
+
+Add helper text under the Opportunities header:
+
+Opportunity estimates are based on the last 30 days of trading to provide stable next-month improvement forecasts.
+
+
+SECTION 3 — remove duplicate messaging across sections
+
+Audit the page and eliminate repeated insight statements appearing in multiple sections.
+
+Specifically reduce repetition of:
+
+- Meta reallocation messaging
+- channel mix optimisation commentary
+- contribution margin decline explanation
+
+Ensure each section has a distinct role:
+
+Summary = diagnosis  
+Opportunities = actions  
+Key Drivers = causes  
+Detailed Analysis = supporting evidence
+
+
+SECTION 4 — opportunity credibility framing
+
+Ensure opportunity rows consistently include:
+
+- opportunity name
+- short action description
+- contribution margin improvement (pp)
+- estimated £ impact next month
+- implementation effort label
+- confidence label
+
+Update the combined summary row text to:
+
+Combined impact next month if implemented now
+
+
+SECTION 5 — free vs pro gating behaviour
+
+Ensure the following sections remain visible for Free users:
+
+- contribution margin %
+- gap to target
+- primary causes
+- fastest recovery lever headline
+- margin risk monitor
+- headline opportunity value
+- total margin impact (last 30 days)
+
+Ensure the following remain gated:
+
+- per-opportunity £ values
+- per-opportunity margin uplift
+- contribution margin bridge
+- channel margin breakdown
+- driver-level attribution rows
+- CAC payback detail
+
+Ensure upgrade preview cards appear wherever gated content exists.
+
+
+SECTION 6 — upgrade preview messaging
+
+Standardise upgrade preview card wording across the page.
+
+Use consistent phrasing:
+
+Unlock estimated financial impact and implementation steps →
+
+Ensure preview cards appear in place of gated tables rather than leaving empty space.
+
+
+SECTION 7 — fastest recovery lever refinement
+
+Update the Fastest Recovery Lever section:
+
+Free users see:
+
+Fastest recovery lever identified  
+Shift spend from Meta toward higher-margin channels
+
+Pro users additionally see:
+
+Estimated impact: £X next month
+
+
+SECTION 8 — margin risk monitor clarity
+
+Ensure the Margin Risk Monitor includes:
+
+- warning threshold explanation
+- critical threshold explanation
+- time-to-threshold estimate
+- business implications at each threshold
+
+Update supporting text to:
+
+Updates automatically with live trading data.
+
+
+SECTION 9 — terminology consistency
+
+Standardise terminology across the page.
+
+Always use:
+
+contribution margin  
+contribution per order  
+additional contribution  
+margin improvement  
+next-month impact
+
+Avoid mixing with:
+
+profit margin uplift  
+recoverable margin  
+estimated savings
+
+
+SECTION 10 — visual hierarchy consistency
+
+Ensure:
+
+- headline opportunity value remains the most visually prominent number on the page
+- section subtitles use muted styling
+- upgrade preview cards match spacing of replaced content
+- locked sections do not collapse vertically
+- page reads clearly top-to-bottom as:
+
+Diagnosis → Opportunity → Actions → Drivers → Evidence
+
+
+SECTION 11 — opportunity section subtitle clarity
+
+Ensure the Opportunities section subtitle reads:
+
+Top profit improvement opportunities ranked by expected contribution uplift next month.
+
+Add secondary helper text:
+
+Based on the current 30-day trading baseline.
+
+
+SECTION 12 — final tone review
+
+Review the entire page for tone consistency.
+
+Ensure language is:
+
+- CFO-grade but founder-friendly
+- commercially direct
+- action-oriented
+- non-technical
+- precise but not over-certain
+
+Avoid speculative phrasing such as:
+
+could potentially improve
+
+Prefer:
+
+estimated impact if implemented
+
+
+After completing this pass, the page should feel consistent, credible, monetisable, and ready for early user testing.

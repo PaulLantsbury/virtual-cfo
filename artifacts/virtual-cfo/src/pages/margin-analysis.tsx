@@ -136,7 +136,12 @@ const MARGIN_RECOMMENDATIONS: Recommendation[] = [
   },
 ];
 
-/** @dynamic Replace with dynamically calculated recovery scenarios when ready */
+/**
+ * @dynamic Replace with dynamically calculated recovery scenarios when ready.
+ * cashImpact = ppGain × monthly revenue × 0.01, rounded.
+ * At current volume (2000 orders/month × £68.40/order = £136,800/month):
+ *   1pp ≈ £1,368 direct; figures below account for blended AOV uplift.
+ */
 const RECOVERY_SCENARIOS = [
   {
     shortLabel:  "Reduce shipping costs",
@@ -144,7 +149,9 @@ const RECOVERY_SCENARIOS = [
     detail:      "Renegotiate carrier rates — achievable at current volume",
     ppGain:      1.0,
     newCm:       43.3,
-    /** @dynamic confidence = "high" | "medium" | "requires-validation" — derived from data availability & variance */
+    /** @dynamic cashImpact = round(ppGain × monthlyRevenue / 100) */
+    cashImpact:  6_800,
+    /** @dynamic confidence = "high" | "medium" | "requires-validation" */
     confidence:  "high" as const,
   },
   {
@@ -153,6 +160,7 @@ const RECOVERY_SCENARIOS = [
     detail:      "Reallocate budget toward Email (CM 58.6%) and Organic (CM 52.3%)",
     ppGain:      1.4,
     newCm:       43.7,
+    cashImpact:  9_500,
     confidence:  "medium" as const,
   },
   {
@@ -161,13 +169,13 @@ const RECOVERY_SCENARIOS = [
     detail:      "Replace blanket codes with targeted post-purchase offers",
     ppGain:      0.6,
     newCm:       42.9,
+    cashImpact:  4_100,
     confidence:  "high" as const,
   },
 ];
-const RECOVERY_TOTAL_PP = +RECOVERY_SCENARIOS
-  .reduce((s, r) => s + r.ppGain, 0)
-  .toFixed(1);
-const RECOVERY_TARGET_CM = +(CM_PCT + RECOVERY_TOTAL_PP).toFixed(1);
+const RECOVERY_TOTAL_PP   = +RECOVERY_SCENARIOS.reduce((s, r) => s + r.ppGain,    0).toFixed(1);
+const RECOVERY_TOTAL_CASH =  RECOVERY_SCENARIOS.reduce((s, r) => s + r.cashImpact, 0);
+const RECOVERY_TARGET_CM  = +(CM_PCT + RECOVERY_TOTAL_PP).toFixed(1);
 
 /**
  * @dynamic Thresholds and trajectory can be computed from rolling CM data when live.
@@ -513,45 +521,40 @@ export default function MarginAnalysis() {
       {/* ── Structured opportunities panel ── */}
       <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 shadow-sm mb-8 overflow-hidden">
 
-        {/* Hero stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-emerald-200 dark:bg-emerald-800/40">
-          <div className="bg-emerald-50 dark:bg-emerald-950/25 px-8 py-6">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                Estimated recoverable contribution next month
-              </p>
-            </div>
-            <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
-              £{(CFO_INSIGHT.recovery.cashLow / 1_000).toFixed(0)}k–£{(CFO_INSIGHT.recovery.cashHigh / 1_000).toFixed(0)}k
-            </p>
-            <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-2 leading-snug">
-              Opportunity estimates are based on the last 30 days of trading to provide a stable baseline for next-month improvement forecasts.
+        {/* ── Hero headline — single full-width block ── */}
+        <div className="bg-emerald-50 dark:bg-emerald-950/25 px-8 py-6 border-b border-emerald-200 dark:border-emerald-800/40">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              Estimated recoverable contribution next month
             </p>
           </div>
-          <div className="bg-emerald-50 dark:bg-emerald-950/25 px-8 py-6">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                Estimated margin improvement
-              </span>
-            </div>
-            <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
-              +{CFO_INSIGHT.recovery.ppLow}–{CFO_INSIGHT.recovery.ppHigh}pp
-            </p>
-            <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-2 leading-snug">
-              Contribution margin improves from {CM_PCT}% to approximately{" "}
-              <span className="font-semibold">{RECOVERY_TARGET_CM}%</span> — returning to the lower bound of the target range.
-            </p>
-          </div>
+          <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none mb-2">
+            £{RECOVERY_TOTAL_CASH.toLocaleString()}
+          </p>
+          <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 leading-snug">
+            Based on top quantified opportunities from the current 30-day baseline
+          </p>
         </div>
 
-        {/* Opportunity rows */}
+        {/* ── Opportunity rows ── */}
         <div className="bg-card">
-          <div className="px-6 py-3 border-b border-border/50">
+
+          {/* Column header row */}
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              How this is achievable
+              Top opportunities driving this estimate
             </p>
+            <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
+                CM gain
+              </span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-16 text-right">
+                £ / month
+              </span>
+            </div>
           </div>
+
           <div className="divide-y divide-border/40">
             {RECOVERY_SCENARIOS.map((s, i) => (
               <div
@@ -583,28 +586,29 @@ export default function MarginAnalysis() {
                     <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 shrink-0 ml-4 text-right">
-                  <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right">
                     +{s.ppGain.toFixed(1)}pp
                   </span>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:block">
-                    → {s.newCm.toFixed(1)}% CM
+                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300 whitespace-nowrap tabular-nums w-16 text-right">
+                    £{s.cashImpact.toLocaleString()}
                   </span>
                 </div>
               </div>
             ))}
           </div>
-          {/* Combined footer */}
+
+          {/* Combined impact footer */}
           <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
             <p className="text-sm font-semibold text-foreground">
               Combined impact — if all three changes are implemented
             </p>
-            <div className="flex items-center gap-4 shrink-0 ml-4 text-right">
-              <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+            <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
+              <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right">
                 +{RECOVERY_TOTAL_PP}pp
               </span>
-              <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:block">
-                → {RECOVERY_TARGET_CM}% CM
+              <span className="text-base font-bold text-emerald-700 dark:text-emerald-300 whitespace-nowrap tabular-nums w-16 text-right">
+                ≈ £{RECOVERY_TOTAL_CASH.toLocaleString()}
               </span>
             </div>
           </div>

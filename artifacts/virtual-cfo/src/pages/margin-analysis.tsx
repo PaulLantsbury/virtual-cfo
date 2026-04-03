@@ -291,7 +291,7 @@ export default function MarginAnalysis() {
   return (
     <AppLayout>
       {/* ── Page header ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Profit Margin Analysis
@@ -450,7 +450,7 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Opportunities"
-        subtitle="Estimated profit improvement available from realistic operational changes."
+        subtitle="Ranked by margin impact — concrete actions based on current cost structure and order volume."
       />
 
       {/* ── Structured opportunities panel ── */}
@@ -622,13 +622,13 @@ export default function MarginAnalysis() {
 
           <div className="px-6 py-3 bg-amber-100/60 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800/50">
             <p className="text-xs text-amber-700 dark:text-amber-400">
-              Current contribution margin: <span className="font-semibold">{RISK_MONITOR.currentCm}%</span>
+              Current margin:{" "}
+              <span className="font-semibold">{RISK_MONITOR.currentCm}%</span>
               {" "}·{" "}
-              Warning threshold is{" "}
               <span className="font-semibold">
-                {(RISK_MONITOR.currentCm - RISK_MONITOR.thresholds[0].pct).toFixed(1)}pp away
+                {(RISK_MONITOR.currentCm - RISK_MONITOR.thresholds[0].pct).toFixed(1)}pp
               </span>
-              {" "}· Thresholds and time-to-breach will update automatically when live data is connected.
+              {" "}above the warning threshold · Updates automatically with live data.
             </p>
           </div>
         </div>
@@ -717,7 +717,7 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Key Drivers"
-        subtitle="The main factors affecting profit margin performance this period."
+        subtitle="What changed this month and the financial impact per order on contribution margin."
       />
 
       {/* Summary line */}
@@ -746,7 +746,7 @@ export default function MarginAnalysis() {
             What changed this period vs last month
           </p>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Margin impact
+            Margin impact / order
           </p>
         </div>
 
@@ -792,7 +792,7 @@ export default function MarginAnalysis() {
                     "text-sm font-bold whitespace-nowrap shrink-0 tabular-nums",
                     isNegative ? "text-destructive" : "text-emerald-600"
                   )}>
-                    {isNegative ? "−" : "+"}£{impactAbs}/order
+                    {isNegative ? "−" : "+"}£{impactAbs}
                   </span>
                 </div>
               );

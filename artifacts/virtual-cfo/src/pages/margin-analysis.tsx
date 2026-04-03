@@ -44,12 +44,33 @@ const BRIDGE_ROWS = [
   { label: "Marketing spend",  total: -27390, perOrder:-12.20, type: "deduction", trend: "worsening" },
 ] as const;
 
-/** @dynamic Derived from BRIDGE_ROWS deductions — stays in sync when data is live */
-const VARIABLE_COST_PER_ORDER = +BRIDGE_ROWS
-  .filter((r) => r.type === "deduction")
-  .reduce((s, r) => s + Math.abs(r.perOrder), 0)
-  .toFixed(2);
-const VARIABLE_COST_PER_ORDER_PREV_YEAR = 29.30;
+// ─── KPI metrics & variance data ─────────────────────────────────────────────
+// @dynamic All values replace with live-computed deltas (current − period_value)
+
+/** Contribution per order */
+const CONTRIBUTION_PER_ORDER         = 35.00;
+const CONTRIBUTION_PER_ORDER_PREV_M  = 38.20;  // last month
+const CONTRIBUTION_PER_ORDER_LY      = 40.50;  // same month last year (UNIT_ECON_HISTORY[0])
+
+/** Contribution Margin — YoY baseline from TREND_DATA[0] */
+const CM_LY = 48.2;
+
+/** Contribution Profit — prior periods (estimated from historical CM × revenue) */
+const CM_VALUE_PREV_M = 57_125;  // 45.8% of prior month revenue
+const CM_VALUE_LY     = 56_972;  // 48.2% of last-year revenue
+
+/** CAC Payback — year-ago baseline */
+const CAC_PAYBACK_LY = 0.9;
+
+/** Average Discount % — @dynamic computed from Shopify order discount data */
+const AVG_DISCOUNT_PCT    = 7.0;
+const AVG_DISCOUNT_PREV_M = 5.2;
+const AVG_DISCOUNT_LY     = 4.8;
+
+/** Returns % — @dynamic computed from Shopify returns data */
+const RETURNS_PCT    = 2.1;
+const RETURNS_PREV_M = 1.8;
+const RETURNS_LY     = 1.4;
 
 /**
  * @ai-commentary Replace with AI-generated CFO insight when ready.
@@ -212,10 +233,21 @@ const CHANGE_DRIVERS_TOTAL = +CHANGE_DRIVERS
   .reduce((s, d) => s + d.impactPerOrder, 0)
   .toFixed(2);
 
-const CONTRIBUTION_PER_ORDER      = 35.00;
-
 function fmt(n: number) {
   return `£${Math.abs(n).toLocaleString()}`;
+}
+
+/** Renders a small coloured variance line: green if favourable, red if not. */
+function VarLine({ label, value, favorable }: { label: string; value: string; favorable: boolean }) {
+  return (
+    <div className={cn(
+      "flex items-center gap-1 text-xs leading-none",
+      favorable ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+    )}>
+      <span className="font-semibold">{value}</span>
+      <span className="text-muted-foreground font-normal">{label}</span>
+    </div>
+  );
 }
 
 // ─── Section heading helper ───────────────────────────────────────────────────
@@ -320,29 +352,27 @@ export default function MarginAnalysis() {
         subtitle="Key contribution margin metrics for March 2026."
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-10">
-        {/* Contribution Margin % */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
+
+        {/* 1 — Contribution Margin */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Contribution Margin</p>
-          <p className="text-4xl font-display font-bold text-foreground">{CM_PCT}%</p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
-              <ArrowDownRight className="w-3 h-3" />
-              {Math.abs(CM_CHANGE)}%
-            </span>
-            <span className="text-muted-foreground">vs prior month ({CM_PREV}%)</span>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">{CM_PCT}%</p>
+          <div className="space-y-0.5 mb-3">
+            <VarLine label="vs last month" value={`↓ ${Math.abs(CM_CHANGE)}pp`} favorable={false} />
+            <VarLine label="vs last 12 months" value={`↓ ${Math.abs(CM_PCT - CM_LY).toFixed(1)}pp`} favorable={false} />
           </div>
           {(() => {
             const bm = getBenchmark(CM_PCT);
             return (
               <div className={cn(
-                "mt-3 flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg w-fit",
+                "flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-lg w-fit",
                 bm.color === "green" && "bg-emerald-500/10 text-emerald-600",
                 bm.color === "amber" && "bg-amber-500/10 text-amber-600",
                 bm.color === "red"   && "bg-destructive/10 text-destructive",
               )}>
                 <span className={cn(
-                  "w-2 h-2 rounded-full shrink-0",
+                  "w-1.5 h-1.5 rounded-full shrink-0",
                   bm.color === "green" && "bg-emerald-500",
                   bm.color === "amber" && "bg-amber-500",
                   bm.color === "red"   && "bg-destructive",
@@ -353,53 +383,76 @@ export default function MarginAnalysis() {
           })()}
         </div>
 
-        {/* Contribution Profit £ */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+        {/* 2 — Contribution Profit */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Contribution Profit</p>
-          <p className="text-4xl font-display font-bold text-foreground">{fmt(CM_VALUE)}</p>
-          <p className="mt-3 text-xs text-muted-foreground">Revenue minus variable costs</p>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">{fmt(CM_VALUE)}</p>
+          <div className="space-y-0.5 mb-2">
+            <VarLine label="vs last month" value={`↓ £${(CM_VALUE_PREV_M - CM_VALUE).toLocaleString()}`} favorable={false} />
+            <VarLine label="vs last 12 months" value={`↓ £${(CM_VALUE_LY - CM_VALUE).toLocaleString()}`} favorable={false} />
+          </div>
+          <p className="text-xs text-muted-foreground">Revenue minus variable costs</p>
         </div>
 
-        {/* 6-Month Trend */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+        {/* 3 — 6-Month Trend */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">6-Month Trend</p>
-          <p className="text-4xl font-display font-bold text-destructive">↓ 4.8pp</p>
-          <p className="mt-3 text-xs text-muted-foreground">Down from 47.1% in October</p>
+          <p className="text-3xl font-display font-bold text-destructive mb-2">↓ 4.8pp</p>
+          <div className="space-y-0.5 mb-2">
+            <VarLine label="vs prior 6-month period" value="↑ 1.6pp worse" favorable={false} />
+            <VarLine label="vs year-ago period" value="↑ 3.7pp worse" favorable={false} />
+          </div>
+          <p className="text-xs text-muted-foreground">Decline accelerating vs prior periods</p>
         </div>
 
-        {/* CAC Payback */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+        {/* 4 — CAC Payback */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
-          <p className="text-4xl font-display font-bold text-foreground">
-            {CAC_PAYBACK}<span className="text-2xl font-semibold text-muted-foreground ml-1">orders</span>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">
+            {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
           </p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-semibold">
-              <ArrowUpRight className="w-3 h-3" />
-              from {CAC_PAYBACK_PREV} last month
-            </span>
+          <div className="space-y-0.5 mb-2">
+            <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
+            <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Marketing investment now takes longer to recover
-          </p>
+          <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover acquisition cost</p>
         </div>
 
-        {/* Variable Cost per Order */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Variable Cost per Order</p>
-          <p className="text-4xl font-display font-bold text-foreground">
-            £{VARIABLE_COST_PER_ORDER.toFixed(2)}
+        {/* 5 — Contribution per Order */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per Order</p>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">
+            £{CONTRIBUTION_PER_ORDER.toFixed(2)}
           </p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
-              <ArrowUpRight className="w-3 h-3" />
-              Up £{(VARIABLE_COST_PER_ORDER - VARIABLE_COST_PER_ORDER_PREV_YEAR).toFixed(2)} vs last year
-            </span>
+          <div className="space-y-0.5 mb-2">
+            <VarLine label="vs last month" value={`↓ £${(CONTRIBUTION_PER_ORDER_PREV_M - CONTRIBUTION_PER_ORDER).toFixed(2)}`} favorable={false} />
+            <VarLine label="vs last 12 months" value={`↓ £${(CONTRIBUTION_PER_ORDER_LY - CONTRIBUTION_PER_ORDER).toFixed(2)}`} favorable={false} />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Sum of all variable costs per order
-          </p>
+          <p className="text-xs text-muted-foreground leading-snug">Contribution available after variable costs per order</p>
         </div>
+
+        {/* 6 — Average Discount % */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Average Discount %</p>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">{AVG_DISCOUNT_PCT.toFixed(1)}%</p>
+          <div className="space-y-0.5 mb-2">
+            <VarLine label="vs last month" value={`↑ ${(AVG_DISCOUNT_PCT - AVG_DISCOUNT_PREV_M).toFixed(1)}pp`} favorable={false} />
+            <VarLine label="vs last 12 months" value={`↑ ${(AVG_DISCOUNT_PCT - AVG_DISCOUNT_LY).toFixed(1)}pp`} favorable={false} />
+          </div>
+          <p className="text-xs text-muted-foreground leading-snug">Higher discount depth reduces contribution margin directly</p>
+        </div>
+
+        {/* 7 — Returns % */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Returns %</p>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">{RETURNS_PCT.toFixed(1)}%</p>
+          <div className="space-y-0.5 mb-2">
+            <VarLine label="vs last month" value={`↑ ${(RETURNS_PCT - RETURNS_PREV_M).toFixed(1)}pp`} favorable={false} />
+            <VarLine label="vs last 12 months" value={`↑ ${(RETURNS_PCT - RETURNS_LY).toFixed(1)}pp`} favorable={false} />
+          </div>
+          <p className="text-xs text-muted-foreground leading-snug">Returned orders reduce revenue and increase fulfilment cost</p>
+        </div>
+
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════

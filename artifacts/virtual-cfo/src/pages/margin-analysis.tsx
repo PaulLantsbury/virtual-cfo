@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { UpgradePreviewCard } from "@/components/UpgradePreviewCard";
-import { isProUser } from "@/lib/plan";
+import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 
 const TREND_DATA = [
@@ -478,7 +478,7 @@ export default function MarginAnalysis() {
 
             {/* Fastest recovery lever — plan-aware */}
             <div className="rounded-xl bg-emerald-100/80 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 px-4 py-4">
-              {isProUser() ? (
+              {canAccess("fastest_recovery_lever") ? (
                 /* ── PRO: specific action + impact figure ── */
                 <>
                   <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
@@ -544,7 +544,7 @@ export default function MarginAnalysis() {
         </div>
 
         {/* ── Opportunity rows — gated by plan ── */}
-        {isProUser() ? (
+        {canAccess("opportunity_breakdown") ? (
           /* ── PRO: full breakdown ── */
           <div className="bg-card">
 
@@ -818,7 +818,7 @@ export default function MarginAnalysis() {
 
         {/* 3 — CAC Payback */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          {isProUser() ? (
+          {canAccess("cac_payback") ? (
             /* ── PRO: full card ── */
             <>
               <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
@@ -885,7 +885,7 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
-      {isProUser() ? (
+      {canAccess("driver_breakdown") ? (
         /* ── PRO: full driver attribution table ── */
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
           {/* Column headers */}
@@ -990,7 +990,7 @@ export default function MarginAnalysis() {
           </p>
         </div>
 
-        {isProUser() ? (
+        {canAccess("margin_bridge") ? (
           /* ── PRO: full bridge table ── */
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

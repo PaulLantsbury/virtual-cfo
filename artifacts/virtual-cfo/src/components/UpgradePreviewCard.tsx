@@ -1,6 +1,8 @@
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const UPGRADE_HREF = "/upgrade";
+
 interface UpgradePreviewCardProps {
   title: string;
   description?: string;
@@ -15,7 +17,7 @@ interface UpgradePreviewCardProps {
 }
 
 /**
- * Reusable upgrade prompt for plan-gated sections.
+ * Reusable upgrade prompt for plan-gated sections. Entire card is a link to /upgrade.
  *
  * Standard (default) — horizontal card with border, lock icon, title, and right-aligned CTA:
  *   <UpgradePreviewCard title="Unlock driver-level breakdown" />
@@ -33,31 +35,39 @@ export function UpgradePreviewCard({
 }: UpgradePreviewCardProps) {
   if (compact) {
     return (
-      <div className={cn("flex flex-col gap-2.5", className)}>
+      <a
+        href={UPGRADE_HREF}
+        className={cn("flex flex-col gap-2.5 group", className)}
+      >
         <div className="flex items-start gap-2">
           {showLock && (
             <Lock className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" />
           )}
-          <p className="text-sm font-semibold text-foreground leading-snug">{title}</p>
+          <p className="text-sm font-semibold text-foreground leading-snug group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
+            {title}
+          </p>
         </div>
         {description && (
           <p className="text-xs text-muted-foreground leading-snug">{description}</p>
         )}
         {ctaText && (
-          <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 leading-none">
+          <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 leading-none group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
             {ctaText}
           </p>
         )}
-      </div>
+      </a>
     );
   }
 
   return (
-    <div
+    <a
+      href={UPGRADE_HREF}
       className={cn(
-        "rounded-xl border border-indigo-200 dark:border-indigo-700/50",
+        "block rounded-xl border border-indigo-200 dark:border-indigo-700/50",
         "bg-indigo-50/60 dark:bg-indigo-950/20",
         "px-6 py-5 flex items-center justify-between gap-4",
+        "hover:border-indigo-300 hover:bg-indigo-100/60 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/25",
+        "transition-colors cursor-pointer group",
         className
       )}
     >
@@ -79,10 +89,10 @@ export function UpgradePreviewCard({
         </div>
       </div>
       {ctaText && (
-        <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">
+        <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
           {ctaText}
         </span>
       )}
-    </div>
+    </a>
   );
 }

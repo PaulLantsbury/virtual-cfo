@@ -14,6 +14,7 @@ import GrowthQuality from "@/pages/growth-quality";
 import MarketingEfficiency from "@/pages/marketing-efficiency";
 import Opportunities from "@/pages/opportunities";
 import Settings from "@/pages/settings";
+import Upgrade from "@/pages/upgrade";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ function Router() {
       <Route path="/marketing-efficiency" component={MarketingEfficiency} />
       <Route path="/opportunities" component={Opportunities} />
       <Route path="/settings" component={Settings} />
+      <Route path="/upgrade" component={Upgrade} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -503,9 +503,12 @@ export default function MarginAnalysis() {
                   <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
                     Shift spend from Meta toward higher-margin channels
                   </p>
-                  <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-3 leading-snug">
+                  <a
+                    href="/upgrade"
+                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mt-3 leading-snug transition-colors"
+                  >
                     Unlock estimated financial impact →
-                  </p>
+                  </a>
                 </>
               )}
             </div>

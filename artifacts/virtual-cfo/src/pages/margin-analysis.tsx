@@ -507,7 +507,7 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Opportunities"
-        subtitle="Ranked by margin impact — based on rolling 30-day baseline, independent of the timeframe selector."
+        subtitle="Concrete, achievable actions ranked by margin impact."
       />
 
       {/* ── Structured opportunities panel ── */}
@@ -526,8 +526,7 @@ export default function MarginAnalysis() {
               £{(CFO_INSIGHT.recovery.cashLow / 1_000).toFixed(0)}k–£{(CFO_INSIGHT.recovery.cashHigh / 1_000).toFixed(0)}k
             </p>
             <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-2 leading-snug">
-              At current sales volume, if the changes below are implemented.
-              Estimates will update automatically when live data is connected.
+              Opportunity estimates are based on the last 30 days of trading to provide a stable baseline for next-month improvement forecasts.
             </p>
           </div>
           <div className="bg-emerald-50 dark:bg-emerald-950/25 px-8 py-6">

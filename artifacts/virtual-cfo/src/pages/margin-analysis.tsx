@@ -138,25 +138,29 @@ const MARGIN_RECOMMENDATIONS: Recommendation[] = [
 /** @dynamic Replace with dynamically calculated recovery scenarios when ready */
 const RECOVERY_SCENARIOS = [
   {
-    shortLabel: "Reduce shipping costs",
-    action:     "Reduce shipping costs by 8%",
-    detail:     "Renegotiate carrier rates — achievable at current volume",
-    ppGain:     1.0,
-    newCm:      43.3,
+    shortLabel:  "Reduce shipping costs",
+    action:      "Reduce shipping costs by 8%",
+    detail:      "Renegotiate carrier rates — achievable at current volume",
+    ppGain:      1.0,
+    newCm:       43.3,
+    /** @dynamic confidence = "high" | "medium" | "requires-validation" — derived from data availability & variance */
+    confidence:  "high" as const,
   },
   {
-    shortLabel: "Reallocate Meta spend",
-    action:     "Reduce Meta CAC by 10%",
-    detail:     "Reallocate budget toward Email (CM 58.6%) and Organic (CM 52.3%)",
-    ppGain:     1.4,
-    newCm:      43.7,
+    shortLabel:  "Reallocate Meta spend",
+    action:      "Reduce Meta CAC by 10%",
+    detail:      "Reallocate budget toward Email (CM 58.6%) and Organic (CM 52.3%)",
+    ppGain:      1.4,
+    newCm:       43.7,
+    confidence:  "medium" as const,
   },
   {
-    shortLabel: "Lower discount depth",
-    action:     "Reduce discount depth to 5%",
-    detail:     "Replace blanket codes with targeted post-purchase offers",
-    ppGain:     0.6,
-    newCm:      42.9,
+    shortLabel:  "Lower discount depth",
+    action:      "Reduce discount depth to 5%",
+    detail:      "Replace blanket codes with targeted post-purchase offers",
+    ppGain:      0.6,
+    newCm:       42.9,
+    confidence:  "high" as const,
   },
 ];
 const RECOVERY_TOTAL_PP = +RECOVERY_SCENARIOS
@@ -476,7 +480,23 @@ export default function MarginAnalysis() {
                     {i + 1}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground">{s.shortLabel}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-foreground">{s.shortLabel}</p>
+                      <span className={cn(
+                        "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
+                        s.confidence === "high"
+                          ? "bg-secondary text-muted-foreground border-border/60"
+                          : s.confidence === "medium"
+                          ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
+                          : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
+                      )}>
+                        {s.confidence === "high"
+                          ? "High confidence"
+                          : s.confidence === "medium"
+                          ? "Medium confidence"
+                          : "Requires validation"}
+                      </span>
+                    </div>
                     <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>
                   </div>
                 </div>

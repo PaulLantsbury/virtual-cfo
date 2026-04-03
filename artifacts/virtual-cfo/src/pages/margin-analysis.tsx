@@ -92,7 +92,7 @@ const CFO_INSIGHT = {
   ],
   /** @ai-commentary Single clearest action to move the margin needle fastest */
   fastestLever:
-    "Reallocate spend from Meta toward higher-margin channels such as Email and Organic.",
+    "Channel mix has the highest recovery potential this month. Shifting even a portion of Meta budget toward Email and Organic improves blended margin without adding to total spend.",
   /** @ai-commentary Generated from trajectory model: currentCm, declineRatePerMonth, warningThreshold */
   riskNote:
     "At the current decline rate, contribution margin could reach 40% in approximately 2 months.",
@@ -1057,7 +1057,7 @@ export default function MarginAnalysis() {
             <div className="mt-5 flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
               <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground leading-snug">
-                Meta margin is 24pp below Email. Consider reallocating budget toward higher-margin channels or improving Meta targeting efficiency.
+                Meta has the widest revenue share (£41,800) but the lowest contribution margin at 34.2%. The 24pp spread between Meta and Email is the primary driver of channel mix underperformance — the data behind the opportunity quantified above.
               </p>
             </div>
           </div>

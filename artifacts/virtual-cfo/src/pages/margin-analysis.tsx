@@ -25,15 +25,6 @@ const TREND_DATA = [
   { month: "Mar '26", margin: 42.3, highlighted: true  },
 ];
 
-const BREAKDOWN = [
-  { label: "Revenue",          value: 124500, pct: 100,   type: "revenue" },
-  { label: "Discounts",        value:  -8715, pct:  -7.0, type: "deduction" },
-  { label: "Payment fees",     value:  -2490, pct:  -2.0, type: "deduction" },
-  { label: "Shipping costs",   value: -15562, pct: -12.5, type: "deduction" },
-  { label: "Fulfilment costs", value: -17430, pct: -14.0, type: "deduction" },
-  { label: "Marketing spend",  value: -27390, pct: -22.0, type: "deduction" },
-];
-
 const CM_VALUE = 52913;
 const CM_PCT   = 42.3;
 const CM_PREV  = 45.8;
@@ -65,7 +56,6 @@ const VARIABLE_COST_PER_ORDER_PREV_YEAR = 29.30;
  * recovery.cashLow / cashHigh are forward projections:
  *   @dynamic cashLow  = Math.round(nextMonthOrderVolume * (ppLow  / 100) * revenuePerOrder * 12)
  *   @dynamic cashHigh = Math.round(nextMonthOrderVolume * (ppHigh / 100) * revenuePerOrder * 12)
- * Using annualised run-rate at current volume (£124,500/month → ~£1.49m/year).
  */
 const CFO_INSIGHT = {
   summary:
@@ -147,18 +137,13 @@ const RECOVERY_TARGET_CM = +(CM_PCT + RECOVERY_TOTAL_PP).toFixed(1);
 
 /**
  * @dynamic Thresholds and trajectory can be computed from rolling CM data when live.
- * monthlyDeclineRate: average pp drop per month (negative = worsening)
- * monthsToThreshold: (currentCm - threshold) / monthlyDeclineRate
  */
 const RISK_MONITOR = {
-  /** Current CM — derived from live constant for forward-linking */
   currentCm: CM_PCT,
-  /** Thresholds ordered from nearest to most severe */
   thresholds: [
     {
       pct: 40,
       label: "Warning",
-      /** @dynamic Compute as Math.ceil((currentCm - pct) / monthlyDeclineRate) */
       monthsAtCurrentRate: 2,
       color: "amber" as const,
       implications: [
@@ -170,7 +155,6 @@ const RISK_MONITOR = {
     {
       pct: 35,
       label: "Critical",
-      /** @dynamic Compute as Math.ceil((currentCm - pct) / monthlyDeclineRate) */
       monthsAtCurrentRate: 6,
       color: "red" as const,
       implications: [
@@ -180,7 +164,6 @@ const RISK_MONITOR = {
       ],
     },
   ],
-  /** @dynamic Derived from rolling 3-month average CM decline in pp/month */
   monthlyDeclineRate: 1.1,
   trajectoryNote:
     "At the current average decline rate of ~1.1pp/month, contribution margin could reach 40% within 2 months without corrective action.",
@@ -193,17 +176,6 @@ function getBenchmark(pct: number) {
   }
   return { label: `Below target range (${BENCHMARK_TARGET.low}–${BENCHMARK_TARGET.high}%)`, color: "red" as const };
 }
-
-const UNIT_ECONOMICS = [
-  { label: "Revenue per order",    value:  68.40, type: "revenue",   trend: "neutral" as const },
-  { label: "Discounts",            value:  -8.10, type: "deduction", trend: "worsening" as const },
-  { label: "Payment fees",         value:  -1.90, type: "deduction", trend: "neutral" as const },
-  { label: "Shipping",             value:  -4.80, type: "deduction", trend: "worsening" as const },
-  { label: "Fulfilment",           value:  -6.40, type: "deduction", trend: "neutral" as const },
-  { label: "Marketing (blended)",  value: -12.20, type: "deduction", trend: "worsening" as const },
-];
-const CONTRIBUTION_PER_ORDER = 35.00;
-const CONTRIBUTION_PER_ORDER_PREV = 38.20;
 
 const UNIT_ECON_HISTORY = [
   { month: "Mar '25", revenue: 71.80, contribution: 40.50, highlighted: true  },
@@ -240,34 +212,59 @@ const CHANGE_DRIVERS_TOTAL = +CHANGE_DRIVERS
   .reduce((s, d) => s + d.impactPerOrder, 0)
   .toFixed(2);
 
+const CONTRIBUTION_PER_ORDER      = 35.00;
+
 function fmt(n: number) {
   return `£${Math.abs(n).toLocaleString()}`;
 }
+
+// ─── Section heading helper ───────────────────────────────────────────────────
+
+function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="mb-5">
+      <div className="flex items-center gap-4">
+        <h2 className="text-lg font-bold text-foreground whitespace-nowrap">{title}</h2>
+        <div className="flex-1 h-px bg-border/60" />
+      </div>
+      {subtitle && (
+        <p className="text-sm text-muted-foreground mt-1.5">{subtitle}</p>
+      )}
+    </div>
+  );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function MarginAnalysis() {
   const [sensitivityOpen, setSensitivityOpen] = useState(false);
 
   return (
     <AppLayout>
-      {/* Header */}
+      {/* ── Page header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Contribution Margin Analysis
+            Profit Margin Analysis
           </h1>
           <p className="text-muted-foreground mt-1">
-            Understanding where margin is being created — and lost
+            Understand current profit performance, the biggest upside opportunities, and what is driving change.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">
-            March 2026
-          </span>
-        </div>
+        <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">
+          March 2026
+        </span>
       </div>
 
-      {/* ── CFO Insight ── */}
-      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-8 overflow-hidden">
+      {/* ══════════════════════════════════════════════════════════════════════
+          SECTION 1 — CFO INSIGHT
+      ══════════════════════════════════════════════════════════════════════ */}
+      <SectionHeading
+        title="CFO Insight"
+        subtitle="AI-generated summary of margin performance and recommended priorities."
+      />
+
+      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-10 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
           <Sparkles className="w-4 h-4 text-primary shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-primary">
@@ -315,8 +312,16 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
-      {/* Headline KPI strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+      {/* ══════════════════════════════════════════════════════════════════════
+          SECTION 2 — ACTUAL PERFORMANCE
+      ══════════════════════════════════════════════════════════════════════ */}
+      <SectionHeading
+        title="Actual Performance"
+        subtitle="Key contribution margin metrics for March 2026."
+      />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-10">
+        {/* Contribution Margin % */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Contribution Margin</p>
           <p className="text-4xl font-display font-bold text-foreground">{CM_PCT}%</p>
@@ -348,18 +353,21 @@ export default function MarginAnalysis() {
           })()}
         </div>
 
+        {/* Contribution Profit £ */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Contribution Profit</p>
           <p className="text-4xl font-display font-bold text-foreground">{fmt(CM_VALUE)}</p>
           <p className="mt-3 text-xs text-muted-foreground">Revenue minus variable costs</p>
         </div>
 
+        {/* 6-Month Trend */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">6-Month Trend</p>
           <p className="text-4xl font-display font-bold text-destructive">↓ 4.8pp</p>
           <p className="mt-3 text-xs text-muted-foreground">Down from 47.1% in October</p>
         </div>
 
+        {/* CAC Payback */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
           <p className="text-4xl font-display font-bold text-foreground">
@@ -394,178 +402,180 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
-      {/* ── Contribution Margin Bridge ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Contribution Margin Bridge</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            How revenue converts into contribution margin — total and per order, March 2026
-          </p>
-        </div>
+      {/* ══════════════════════════════════════════════════════════════════════
+          SECTION 3 — OPPORTUNITIES
+      ══════════════════════════════════════════════════════════════════════ */}
+      <SectionHeading
+        title="Opportunities"
+        subtitle="Quantified upside if key cost drivers return to prior levels."
+      />
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Metric
-                </th>
-                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Total (£)
-                </th>
-                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Per Order (£)
-                </th>
-                <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Trend
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {BRIDGE_ROWS.map((row) => {
-                const isRevenue = row.type === "revenue";
-                const totalStr  = isRevenue
-                  ? `£${row.total.toLocaleString()}`
-                  : `−£${Math.abs(row.total).toLocaleString()}`;
-                const perOrderStr = `£${Math.abs(row.perOrder).toFixed(2)}`;
+      {/* Margin Recovery Simulator */}
+      <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden mb-5">
+        <button
+          onClick={() => setSensitivityOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-muted/30 transition-colors"
+        >
+          <div>
+            <p className="font-semibold text-foreground">Margin Recovery Simulator</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Estimated contribution margin improvement from realistic operational changes
+            </p>
+          </div>
+          <div className="flex items-center gap-2 ml-4 shrink-0">
+            <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+              +{RECOVERY_TOTAL_PP}pp achievable
+            </span>
+            {sensitivityOpen
+              ? <ChevronDown className="w-5 h-5 text-muted-foreground" />
+              : <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            }
+          </div>
+        </button>
 
-                return (
-                  <tr
-                    key={row.label}
-                    className="border-b border-border/40 hover:bg-secondary/30 transition-colors"
-                  >
-                    <td className="py-3 pr-4 font-medium text-foreground">
-                      {row.label}
-                    </td>
-                    <td className={cn(
-                      "py-3 px-4 text-right tabular-nums font-semibold",
-                      isRevenue ? "text-foreground" : "text-muted-foreground"
-                    )}>
-                      {totalStr}
-                    </td>
-                    <td className={cn(
-                      "py-3 px-4 text-right tabular-nums",
-                      isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
-                    )}>
-                      {isRevenue ? "" : "−"}{perOrderStr}
-                    </td>
-                    <td className="py-3 pl-4 text-right">
-                      {row.trend === "worsening" ? (
-                        <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
-                          ↑ cost
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-primary/30 bg-primary/5">
-                <td className="py-3.5 pr-4">
-                  <span className="font-bold text-foreground">Contribution Margin</span>
-                  <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                    {CM_PCT}%
-                  </span>
-                </td>
-                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
-                  £{CM_VALUE.toLocaleString()}
-                </td>
-                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
-                  £{CONTRIBUTION_PER_ORDER.toFixed(2)}
-                </td>
-                <td className="py-3.5 pl-4 text-right">
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
-                    <ArrowDownRight className="w-2.5 h-2.5" />
-                    ↓ margin
-                  </span>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+        {sensitivityOpen && (
+          <div className="px-6 pb-6 border-t border-border/50">
+            <div className="flex flex-col gap-3 mt-5">
+              {RECOVERY_SCENARIOS.map((s) => (
+                <div
+                  key={s.action}
+                  className="flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3.5 gap-4"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground leading-snug">
+                      If {s.action}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
+                      {s.detail}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end shrink-0 ml-2 text-right">
+                    <span className="text-base font-bold text-emerald-700">
+                      {s.newCm.toFixed(1)}%
+                    </span>
+                    <span className="text-xs font-semibold text-emerald-600">
+                      +{s.ppGain.toFixed(1)}pp CM
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-        {/* Insight — structured for future AI commentary replacement */}
-        <div className="mt-5 flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100">
-          <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-900 leading-snug">
-            {BRIDGE_INSIGHT}
-          </p>
-        </div>
+            {/* Summary */}
+            <div className="mt-4 flex items-center justify-between rounded-xl bg-emerald-600 px-5 py-4">
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  Estimated achievable improvement
+                </p>
+                <p className="text-xs text-emerald-100 mt-0.5">
+                  Combined contribution margin if all three actions are implemented
+                </p>
+              </div>
+              <div className="text-right shrink-0 ml-4">
+                <p className="text-2xl font-bold text-white">
+                  {RECOVERY_TARGET_CM}%
+                </p>
+                <p className="text-xs font-semibold text-emerald-200">
+                  +{RECOVERY_TOTAL_PP}pp vs current
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
+              Scenarios assume revenue remains constant at £124,500. Improvements are estimated independently — combined gains may differ slightly due to cost interactions. At {RECOVERY_TARGET_CM}%, contribution margin would return to the lower bound of the target range (45–55%).
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Contribution Margin by Channel */}
-      {(() => {
-        const maxCm = Math.max(...CHANNELS.map(c => c.cm));
-        const minCm = Math.min(...CHANNELS.map(c => c.cm));
-        const sorted = [...CHANNELS].sort((a, b) => b.cm - a.cm);
-        return (
-          <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-            <div className="mb-5">
-              <h3 className="font-semibold text-lg text-foreground">Contribution Margin by Channel</h3>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Contribution margin % per acquisition channel — March 2026
-              </p>
+      {/* Margin Risk Monitor */}
+      <div className="mb-10">
+        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden shadow-sm">
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-amber-200 dark:border-amber-800/50">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             </div>
-            <ul className="space-y-4">
-              {sorted.map((ch) => {
-                const isMax = ch.cm === maxCm;
-                const isMin = ch.cm === minCm;
-                return (
-                  <li key={ch.name}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-foreground">{ch.name}</span>
-                        {isMax && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
-                            Highest
-                          </span>
-                        )}
-                        {isMin && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">
-                            Lowest
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-muted-foreground tabular-nums">
-                          £{ch.revenue.toLocaleString()} revenue
-                        </span>
-                        <span className={cn(
-                          "text-sm font-bold tabular-nums w-14 text-right",
-                          isMax ? "text-emerald-600" : isMin ? "text-destructive" : "text-foreground"
-                        )}>
-                          {ch.cm}%
-                        </span>
-                      </div>
-                    </div>
-                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all",
-                          isMax ? "bg-emerald-500" : isMin ? "bg-destructive" : "bg-primary"
-                        )}
-                        style={{ width: `${(ch.cm / 70) * 100}%` }}
-                      />
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="mt-5 flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
-              <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground leading-snug">
-                Meta margin is 24pp below Email. Consider reallocating budget toward higher-margin channels or improving Meta targeting efficiency.
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                Margin Risk Monitor
+              </p>
+              <p className="text-sm text-amber-800 dark:text-amber-300 mt-0.5 leading-snug">
+                {RISK_MONITOR.trajectoryNote}
               </p>
             </div>
           </div>
-        );
-      })()}
 
-      {/* ── Margin Change Drivers This Month ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-amber-200 dark:bg-amber-800/40">
+            {RISK_MONITOR.thresholds.map((t) => (
+              <div key={t.pct} className="bg-amber-50 dark:bg-amber-950/20 px-6 py-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className={
+                      t.color === "red"
+                        ? "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive/10 text-destructive"
+                        : "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-200"
+                    }>
+                      {t.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground">if CM falls below</span>
+                    <span className={
+                      t.color === "red"
+                        ? "text-base font-bold text-destructive"
+                        : "text-base font-bold text-amber-700 dark:text-amber-300"
+                    }>
+                      {t.pct}%
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">at current rate</p>
+                    <p className={
+                      t.color === "red"
+                        ? "text-sm font-semibold text-destructive"
+                        : "text-sm font-semibold text-amber-700 dark:text-amber-300"
+                    }>
+                      ~{t.monthsAtCurrentRate} months
+                    </p>
+                  </div>
+                </div>
+                <ul className="space-y-1.5">
+                  {t.implications.map((imp) => (
+                    <li key={imp} className="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
+                      <span className={
+                        t.color === "red"
+                          ? "mt-1.5 w-1.5 h-1.5 rounded-full bg-destructive flex-shrink-0"
+                          : "mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"
+                      } />
+                      {imp}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="px-6 py-3 bg-amber-100/60 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800/50">
+            <p className="text-xs text-amber-700 dark:text-amber-400">
+              Current contribution margin: <span className="font-semibold">{RISK_MONITOR.currentCm}%</span>
+              {" "}·{" "}
+              Warning threshold is{" "}
+              <span className="font-semibold">
+                {(RISK_MONITOR.currentCm - RISK_MONITOR.thresholds[0].pct).toFixed(1)}pp away
+              </span>
+              {" "}· Thresholds and time-to-breach will update automatically when live data is connected.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          SECTION 4 — KEY DRIVERS
+      ══════════════════════════════════════════════════════════════════════ */}
+      <SectionHeading
+        title="Key Drivers"
+        subtitle="The specific factors that caused margin to change this month vs last month."
+      />
+
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-10">
         <div className="mb-5">
           <h3 className="font-semibold text-lg text-foreground">Margin Change Drivers This Month</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -652,7 +662,180 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
-      {/* Margin Trend — full width */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          SECTION 5 — DETAILED ANALYSIS
+      ══════════════════════════════════════════════════════════════════════ */}
+      <SectionHeading
+        title="Detailed Analysis"
+        subtitle="Full breakdown of cost structure, channel performance, margin trend, and unit economics."
+      />
+
+      {/* Contribution Margin Bridge */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+        <div className="mb-5">
+          <h3 className="font-semibold text-lg text-foreground">Contribution Margin Bridge</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            How revenue converts into contribution margin — total and per order, March 2026
+          </p>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Metric
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Total (£)
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Per Order (£)
+                </th>
+                <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Trend
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {BRIDGE_ROWS.map((row) => {
+                const isRevenue = row.type === "revenue";
+                const totalStr  = isRevenue
+                  ? `£${row.total.toLocaleString()}`
+                  : `−£${Math.abs(row.total).toLocaleString()}`;
+                const perOrderStr = `£${Math.abs(row.perOrder).toFixed(2)}`;
+
+                return (
+                  <tr
+                    key={row.label}
+                    className="border-b border-border/40 hover:bg-secondary/30 transition-colors"
+                  >
+                    <td className="py-3 pr-4 font-medium text-foreground">{row.label}</td>
+                    <td className={cn(
+                      "py-3 px-4 text-right tabular-nums font-semibold",
+                      isRevenue ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {totalStr}
+                    </td>
+                    <td className={cn(
+                      "py-3 px-4 text-right tabular-nums",
+                      isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
+                    )}>
+                      {isRevenue ? "" : "−"}{perOrderStr}
+                    </td>
+                    <td className="py-3 pl-4 text-right">
+                      {row.trend === "worsening" ? (
+                        <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                          ↑ cost
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-primary/30 bg-primary/5">
+                <td className="py-3.5 pr-4">
+                  <span className="font-bold text-foreground">Contribution Margin</span>
+                  <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                    {CM_PCT}%
+                  </span>
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
+                  £{CM_VALUE.toLocaleString()}
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
+                  £{CONTRIBUTION_PER_ORDER.toFixed(2)}
+                </td>
+                <td className="py-3.5 pl-4 text-right">
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                    <ArrowDownRight className="w-2.5 h-2.5" />
+                    ↓ margin
+                  </span>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div className="mt-5 flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100">
+          <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-900 leading-snug">{BRIDGE_INSIGHT}</p>
+        </div>
+      </div>
+
+      {/* Contribution Margin by Channel */}
+      {(() => {
+        const maxCm = Math.max(...CHANNELS.map(c => c.cm));
+        const minCm = Math.min(...CHANNELS.map(c => c.cm));
+        const sorted = [...CHANNELS].sort((a, b) => b.cm - a.cm);
+        return (
+          <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+            <div className="mb-5">
+              <h3 className="font-semibold text-lg text-foreground">Contribution Margin by Channel</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Contribution margin % per acquisition channel — March 2026
+              </p>
+            </div>
+            <ul className="space-y-4">
+              {sorted.map((ch) => {
+                const isMax = ch.cm === maxCm;
+                const isMin = ch.cm === minCm;
+                return (
+                  <li key={ch.name}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-foreground">{ch.name}</span>
+                        {isMax && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">
+                            Highest
+                          </span>
+                        )}
+                        {isMin && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">
+                            Lowest
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          £{ch.revenue.toLocaleString()} revenue
+                        </span>
+                        <span className={cn(
+                          "text-sm font-bold tabular-nums w-14 text-right",
+                          isMax ? "text-emerald-600" : isMin ? "text-destructive" : "text-foreground"
+                        )}>
+                          {ch.cm}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all",
+                          isMax ? "bg-emerald-500" : isMin ? "bg-destructive" : "bg-primary"
+                        )}
+                        style={{ width: `${(ch.cm / 70) * 100}%` }}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="mt-5 flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
+              <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground leading-snug">
+                Meta margin is 24pp below Email. Consider reallocating budget toward higher-margin channels or improving Meta targeting efficiency.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Margin Trend */}
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50 mb-8">
         <div className="flex items-start justify-between mb-5">
           <div>
@@ -720,7 +903,7 @@ export default function MarginAnalysis() {
         </p>
       </div>
 
-      {/* Unit Economics 13-month bar chart */}
+      {/* Unit Economics — 13-Month */}
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50 mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
           <div>
@@ -770,7 +953,7 @@ export default function MarginAnalysis() {
                 ]}
               />
               <Bar dataKey="revenue" radius={[4, 4, 0, 0]}>
-                {UNIT_ECON_HISTORY.map((entry, index) => {
+                {UNIT_ECON_HISTORY.map((_, index) => {
                   const isHighlighted = index === 0 || index === UNIT_ECON_HISTORY.length - 1;
                   return (
                     <Cell
@@ -784,7 +967,7 @@ export default function MarginAnalysis() {
                 })}
               </Bar>
               <Bar dataKey="contribution" radius={[4, 4, 0, 0]}>
-                {UNIT_ECON_HISTORY.map((entry, index) => {
+                {UNIT_ECON_HISTORY.map((_, index) => {
                   const isHighlighted = index === 0 || index === UNIT_ECON_HISTORY.length - 1;
                   const isLast = index === UNIT_ECON_HISTORY.length - 1;
                   return (
@@ -806,183 +989,7 @@ export default function MarginAnalysis() {
         </p>
       </div>
 
-      {/* ── Margin Recovery Simulator ── */}
-      <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden">
-        <button
-          onClick={() => setSensitivityOpen((o) => !o)}
-          className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-muted/30 transition-colors"
-        >
-          <div>
-            <p className="font-semibold text-foreground">Margin Recovery Simulator</p>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Estimated contribution margin improvement from realistic operational changes
-            </p>
-          </div>
-          <div className="flex items-center gap-2 ml-4 shrink-0">
-            <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-              +{RECOVERY_TOTAL_PP}pp achievable
-            </span>
-            {sensitivityOpen
-              ? <ChevronDown className="w-5 h-5 text-muted-foreground" />
-              : <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            }
-          </div>
-        </button>
-
-        {sensitivityOpen && (
-          <div className="px-6 pb-6 border-t border-border/50">
-            <div className="flex flex-col gap-3 mt-5">
-              {RECOVERY_SCENARIOS.map((s) => (
-                <div
-                  key={s.action}
-                  className="flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3.5 gap-4"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground leading-snug">
-                      If {s.action}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-                      {s.detail}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end shrink-0 ml-2 text-right">
-                    <span className="text-base font-bold text-emerald-700">
-                      {s.newCm.toFixed(1)}%
-                    </span>
-                    <span className="text-xs font-semibold text-emerald-600">
-                      +{s.ppGain.toFixed(1)}pp CM
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Summary */}
-            <div className="mt-4 flex items-center justify-between rounded-xl bg-emerald-600 px-5 py-4">
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  Estimated achievable improvement
-                </p>
-                <p className="text-xs text-emerald-100 mt-0.5">
-                  Combined contribution margin if all three actions are implemented
-                </p>
-              </div>
-              <div className="text-right shrink-0 ml-4">
-                <p className="text-2xl font-bold text-white">
-                  {RECOVERY_TARGET_CM}%
-                </p>
-                <p className="text-xs font-semibold text-emerald-200">
-                  +{RECOVERY_TOTAL_PP}pp vs current
-                </p>
-              </div>
-            </div>
-
-            <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
-              Scenarios assume revenue remains constant at £124,500. Improvements are estimated independently — combined gains may differ slightly due to cost interactions. At {RECOVERY_TARGET_CM}%, contribution margin would return to the lower bound of the target range (45–55%).
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* ── Margin Risk Monitor ── */}
-      <div className="mb-8">
-        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden shadow-sm">
-          {/* Header */}
-          <div className="flex items-center gap-3 px-6 py-4 border-b border-amber-200 dark:border-amber-800/50">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40">
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-                Margin Risk Monitor
-              </p>
-              <p className="text-sm text-amber-800 dark:text-amber-300 mt-0.5 leading-snug">
-                {RISK_MONITOR.trajectoryNote}
-              </p>
-            </div>
-          </div>
-
-          {/* Threshold cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-amber-200 dark:bg-amber-800/40">
-            {RISK_MONITOR.thresholds.map((t) => (
-              <div
-                key={t.pct}
-                className="bg-amber-50 dark:bg-amber-950/20 px-6 py-5"
-              >
-                {/* Threshold header row */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={
-                        t.color === "red"
-                          ? "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive/10 text-destructive"
-                          : "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-200"
-                      }
-                    >
-                      {t.label}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      if CM falls below
-                    </span>
-                    <span
-                      className={
-                        t.color === "red"
-                          ? "text-base font-bold text-destructive"
-                          : "text-base font-bold text-amber-700 dark:text-amber-300"
-                      }
-                    >
-                      {t.pct}%
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">at current rate</p>
-                    <p
-                      className={
-                        t.color === "red"
-                          ? "text-sm font-semibold text-destructive"
-                          : "text-sm font-semibold text-amber-700 dark:text-amber-300"
-                      }
-                    >
-                      ~{t.monthsAtCurrentRate} months
-                    </p>
-                  </div>
-                </div>
-
-                {/* Implications */}
-                <ul className="space-y-1.5">
-                  {t.implications.map((imp) => (
-                    <li key={imp} className="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
-                      <span
-                        className={
-                          t.color === "red"
-                            ? "mt-1.5 w-1.5 h-1.5 rounded-full bg-destructive flex-shrink-0"
-                            : "mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"
-                        }
-                      />
-                      {imp}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Footer note */}
-          <div className="px-6 py-3 bg-amber-100/60 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800/50">
-            <p className="text-xs text-amber-700 dark:text-amber-400">
-              Current contribution margin: <span className="font-semibold">{RISK_MONITOR.currentCm}%</span>
-              {" "}·{" "}
-              Warning threshold is{" "}
-              <span className="font-semibold">
-                {(RISK_MONITOR.currentCm - RISK_MONITOR.thresholds[0].pct).toFixed(1)}pp away
-              </span>
-              {" "}· Thresholds and time-to-breach will update automatically when live data is connected.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Recommended margin improvements ── */}
+      {/* Action Recommendations */}
       <ActionRecommendations
         recommendations={MARGIN_RECOMMENDATIONS}
         title="Recommended margin improvements"

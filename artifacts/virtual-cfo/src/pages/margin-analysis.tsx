@@ -313,8 +313,42 @@ export default function MarginAnalysis() {
         {/* ── Body ── */}
         <div className="bg-primary/5 px-6 pt-5 pb-6">
 
+          {/* ── Hero metrics ── */}
+          <div className="grid grid-cols-2 mb-5 pb-5 border-b border-primary/15">
+
+            {/* 1 — Current Contribution Margin */}
+            <div className="pr-6 border-r border-primary/15">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Current Contribution Margin
+              </p>
+              <p className="text-4xl sm:text-5xl font-display font-bold text-foreground leading-none mb-2">
+                {CM_PCT}%
+              </p>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-semibold text-destructive">
+                  ↓ {Math.abs(CM_CHANGE)}pp
+                </span>
+                <span className="text-xs text-muted-foreground">vs last month</span>
+              </div>
+            </div>
+
+            {/* 2 — Recoverable Next Month */}
+            <div className="pl-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Recoverable Next Month
+              </p>
+              <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-2">
+                £{(CFO_INSIGHT.recovery.cashLow / 1_000).toFixed(0)}k–£{(CFO_INSIGHT.recovery.cashHigh / 1_000).toFixed(0)}k
+              </p>
+              <p className="text-xs text-muted-foreground leading-snug max-w-[22ch]">
+                Estimated additional contribution if key actions are implemented
+              </p>
+            </div>
+
+          </div>
+
           {/* Headline */}
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-snug mb-2">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground leading-snug mb-2">
             {CFO_INSIGHT.headline}
           </h2>
 

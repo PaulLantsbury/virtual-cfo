@@ -297,7 +297,10 @@ export default function MarginAnalysis() {
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 1 — CFO INSIGHT
       ══════════════════════════════════════════════════════════════════════ */}
-      <SectionHeading title="CFO Insight" />
+      <SectionHeading
+        title="Profit Margin Summary"
+        subtitle="Summary of current margin performance, key risks, and the fastest opportunities to improve profitability."
+      />
 
       <div className="rounded-2xl border border-primary/30 shadow-md mb-10 overflow-hidden">
 

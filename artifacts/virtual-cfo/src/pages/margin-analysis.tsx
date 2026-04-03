@@ -299,7 +299,7 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Profit Margin Summary"
-        subtitle="Summary of current margin performance, key risks, and the fastest opportunities to improve profitability."
+        subtitle="March 2026 · Contribution margin target: 45–55%"
       />
 
       <div className="rounded-2xl border border-primary/30 shadow-md mb-10 overflow-hidden">
@@ -353,14 +353,9 @@ export default function MarginAnalysis() {
           </div>
 
           {/* Headline */}
-          <h2 className="text-lg sm:text-xl font-bold text-foreground leading-snug mb-2">
+          <h2 className="text-lg sm:text-xl font-bold text-foreground leading-snug mb-5 pb-5 border-b border-primary/15">
             {CFO_INSIGHT.headline}
           </h2>
-
-          {/* Summary */}
-          <p className="text-sm text-muted-foreground leading-relaxed mb-5 pb-5 border-b border-primary/15">
-            {CFO_INSIGHT.summary}
-          </p>
 
           {/* Two-column detail */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -401,14 +396,6 @@ export default function MarginAnalysis() {
 
           </div>
 
-          {/* ── Risk note ── */}
-          <div className="flex items-start gap-2.5 mt-5 pt-4 border-t border-amber-200/60 dark:border-amber-700/30">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-[3px]" />
-            <p className="text-sm text-amber-800 dark:text-amber-300 leading-snug">
-              {CFO_INSIGHT.riskNote}
-            </p>
-          </div>
-
         </div>
       </div>
 
@@ -421,7 +408,7 @@ export default function MarginAnalysis() {
       />
 
       {/* ── Structured opportunities panel ── */}
-      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 shadow-sm mb-5 overflow-hidden">
+      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 shadow-sm mb-8 overflow-hidden">
 
         {/* Hero stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-emerald-200 dark:bg-emerald-800/40">
@@ -742,16 +729,6 @@ export default function MarginAnalysis() {
             })}
         </div>
 
-        {/* Total impact */}
-        <div className="flex items-center justify-between px-6 py-4 bg-secondary/30 border-t-2 border-border/60">
-          <p className="text-sm font-semibold text-foreground">Combined margin impact this month</p>
-          <span className={cn(
-            "text-sm font-bold whitespace-nowrap tabular-nums",
-            CHANGE_DRIVERS_TOTAL < 0 ? "text-destructive" : "text-emerald-600"
-          )}>
-            {CHANGE_DRIVERS_TOTAL < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_TOTAL).toFixed(2)}/order
-          </span>
-        </div>
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════

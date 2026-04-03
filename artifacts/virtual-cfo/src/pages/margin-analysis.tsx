@@ -811,11 +811,12 @@ export default function MarginAnalysis() {
               <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover acquisition cost</p>
             </>
           ) : (
-            /* ── FREE: teaser only ── */
+            /* ── FREE: teaser only — compact layout for narrow KPI card ── */
             <>
               <p className="text-sm font-medium text-muted-foreground mb-3">CAC Payback Period</p>
               <UpgradePreviewCard
-                title="Unlock detailed acquisition efficiency diagnostics"
+                title="Unlock acquisition efficiency diagnostics"
+                compact
               />
             </>
           )}
@@ -926,11 +927,19 @@ export default function MarginAnalysis() {
           </div>
         </div>
       ) : (
-        /* ── FREE: upgrade prompt ── */
-        <UpgradePreviewCard
-          title="Unlock driver-level breakdown showing exactly what changed"
-          className="mb-10"
-        />
+        /* ── FREE: upgrade prompt — card wrapper preserves section height ── */
+        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              What changed this period vs last month
+            </p>
+          </div>
+          <div className="px-6 py-12">
+            <UpgradePreviewCard
+              title="Unlock driver-level breakdown showing exactly what changed"
+            />
+          </div>
+        </div>
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
@@ -1058,11 +1067,14 @@ export default function MarginAnalysis() {
             </table>
           </div>
         ) : (
-          /* ── FREE: upgrade card ── */
-          <UpgradePreviewCard
-            title="Unlock contribution margin bridge analysis"
-            description="See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing →"
-          />
+          /* ── FREE: upgrade card — min-height preserves card weight ── */
+          <div className="min-h-[200px] flex items-center">
+            <UpgradePreviewCard
+              title="Unlock contribution margin bridge analysis"
+              description="See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing →"
+              className="w-full"
+            />
+          </div>
         )}
 
       </div>

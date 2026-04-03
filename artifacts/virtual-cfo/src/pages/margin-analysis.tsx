@@ -245,6 +245,13 @@ const CHANGE_DRIVERS_TOTAL = +CHANGE_DRIVERS
   .reduce((s, d) => s + d.impactPerOrder, 0)
   .toFixed(2);
 
+/** @dynamic Derived from Shopify order count for the period (≈ revenue ÷ AOV) */
+const MONTHLY_ORDER_VOLUME = 2000;
+
+/** @dynamic = CHANGE_DRIVERS_TOTAL × MONTHLY_ORDER_VOLUME, rounded to nearest £100 */
+const CHANGE_DRIVERS_MONTHLY_IMPACT =
+  Math.round((CHANGE_DRIVERS_TOTAL * MONTHLY_ORDER_VOLUME) / 100) * 100;
+
 function fmt(n: number) {
   return `£${Math.abs(n).toLocaleString()}`;
 }
@@ -694,14 +701,22 @@ export default function MarginAnalysis() {
       />
 
       {/* Summary line */}
-      <div className="flex items-center justify-between mb-4 px-5 py-3.5 rounded-xl bg-destructive/5 border border-destructive/15">
-        <p className="text-sm font-semibold text-foreground">Total margin impact this month</p>
-        <p className={cn(
-          "text-lg font-bold tabular-nums",
-          CHANGE_DRIVERS_TOTAL < 0 ? "text-destructive" : "text-emerald-600"
-        )}>
-          {CHANGE_DRIVERS_TOTAL < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_TOTAL).toFixed(2)} per order
-        </p>
+      <div className="flex items-start justify-between mb-4 px-5 py-3.5 rounded-xl bg-destructive/5 border border-destructive/15 gap-6">
+        <p className="text-sm font-semibold text-foreground mt-0.5">Total margin impact this month</p>
+        <div className="text-right shrink-0">
+          <p className={cn(
+            "text-lg font-bold tabular-nums leading-none",
+            CHANGE_DRIVERS_TOTAL < 0 ? "text-destructive" : "text-emerald-600"
+          )}>
+            {CHANGE_DRIVERS_TOTAL < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_TOTAL).toFixed(2)} per order
+          </p>
+          <p className={cn(
+            "text-xs font-medium tabular-nums mt-1.5 leading-none",
+            CHANGE_DRIVERS_TOTAL < 0 ? "text-destructive/70" : "text-emerald-600/70"
+          )}>
+            ≈ {CHANGE_DRIVERS_MONTHLY_IMPACT < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_MONTHLY_IMPACT).toLocaleString()} estimated this month
+          </p>
+        </div>
       </div>
 
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">

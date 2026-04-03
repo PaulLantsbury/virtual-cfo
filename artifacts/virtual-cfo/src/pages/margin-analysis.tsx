@@ -142,26 +142,27 @@ const MARGIN_RECOMMENDATIONS: Recommendation[] = [
  * At current volume (2000 orders/month × £68.40/order = £136,800/month):
  *   1pp ≈ £1,368 direct; figures below account for blended AOV uplift.
  */
+/** @dynamic Sorted by cashImpact descending — highest £ contribution uplift first */
 const RECOVERY_SCENARIOS = [
-  {
-    shortLabel:  "Reduce shipping costs",
-    action:      "Reduce shipping costs by 8%",
-    detail:      "Renegotiate carrier rates — achievable at current volume",
-    ppGain:      1.0,
-    newCm:       43.3,
-    /** @dynamic cashImpact = round(ppGain × monthlyRevenue / 100) */
-    cashImpact:  6_800,
-    /** @dynamic confidence = "high" | "medium" | "requires-validation" */
-    confidence:  "high" as const,
-  },
   {
     shortLabel:  "Reallocate Meta spend",
     action:      "Reduce Meta CAC by 10%",
     detail:      "Reallocate budget toward Email (CM 58.6%) and Organic (CM 52.3%)",
     ppGain:      1.4,
     newCm:       43.7,
+    /** @dynamic cashImpact = round(ppGain × monthlyRevenue / 100) */
     cashImpact:  9_500,
+    /** @dynamic confidence = "high" | "medium" | "requires-validation" */
     confidence:  "medium" as const,
+  },
+  {
+    shortLabel:  "Reduce shipping costs",
+    action:      "Reduce shipping costs by 8%",
+    detail:      "Renegotiate carrier rates — achievable at current volume",
+    ppGain:      1.0,
+    newCm:       43.3,
+    cashImpact:  6_800,
+    confidence:  "high" as const,
   },
   {
     shortLabel:  "Lower discount depth",
@@ -173,6 +174,9 @@ const RECOVERY_SCENARIOS = [
     confidence:  "high" as const,
   },
 ];
+
+/** Number of scenarios shown by default; extras revealed via "View more" */
+const VISIBLE_SCENARIO_COUNT = 3;
 const RECOVERY_TOTAL_PP   = +RECOVERY_SCENARIOS.reduce((s, r) => s + r.ppGain,    0).toFixed(1);
 const RECOVERY_TOTAL_CASH =  RECOVERY_SCENARIOS.reduce((s, r) => s + r.cashImpact, 0);
 const RECOVERY_TARGET_CM  = +(CM_PCT + RECOVERY_TOTAL_PP).toFixed(1);
@@ -310,6 +314,12 @@ type TimeframeValue = typeof TIMEFRAME_OPTIONS[number]["value"];
 
 export default function MarginAnalysis() {
   const [timeframe, setTimeframe] = useState<TimeframeValue>("30d");
+  const [showAllOpportunities, setShowAllOpportunities] = useState(false);
+
+  const visibleScenarios = showAllOpportunities
+    ? RECOVERY_SCENARIOS
+    : RECOVERY_SCENARIOS.slice(0, VISIBLE_SCENARIO_COUNT);
+  const hasMoreScenarios = RECOVERY_SCENARIOS.length > VISIBLE_SCENARIO_COUNT;
 
   const selectedLabel = TIMEFRAME_OPTIONS.find((o) => o.value === timeframe)!.label;
 
@@ -556,7 +566,7 @@ export default function MarginAnalysis() {
           </div>
 
           <div className="divide-y divide-border/40">
-            {RECOVERY_SCENARIOS.map((s, i) => (
+            {visibleScenarios.map((s, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between px-6 py-4 hover:bg-secondary/20 transition-colors gap-4"
@@ -603,10 +613,28 @@ export default function MarginAnalysis() {
             ))}
           </div>
 
+          {/* View more / fewer toggle — only renders when there are hidden scenarios */}
+          {hasMoreScenarios && (
+            <button
+              onClick={() => setShowAllOpportunities((v) => !v)}
+              className="w-full flex items-center justify-center gap-1.5 px-6 py-3 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/40 border-t border-border/40 transition-colors"
+            >
+              <ChevronDown
+                className={cn(
+                  "w-3.5 h-3.5 transition-transform duration-200",
+                  showAllOpportunities && "rotate-180"
+                )}
+              />
+              {showAllOpportunities
+                ? "Show fewer opportunities"
+                : `View ${RECOVERY_SCENARIOS.length - VISIBLE_SCENARIO_COUNT} more opportunities`}
+            </button>
+          )}
+
           {/* Combined impact footer */}
           <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
             <p className="text-sm font-semibold text-foreground">
-              Combined impact — if all three changes are implemented
+              Combined impact — if all {RECOVERY_SCENARIOS.length} changes are implemented
             </p>
             <div className="flex items-start gap-5 shrink-0 ml-4">
               <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">

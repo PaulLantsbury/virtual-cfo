@@ -669,6 +669,17 @@ export default function MarginAnalysis() {
         subtitle="The main factors affecting profit margin performance this period."
       />
 
+      {/* Summary line */}
+      <div className="flex items-center justify-between mb-4 px-5 py-3.5 rounded-xl bg-destructive/5 border border-destructive/15">
+        <p className="text-sm font-semibold text-foreground">Total margin impact this month</p>
+        <p className={cn(
+          "text-lg font-bold tabular-nums",
+          CHANGE_DRIVERS_TOTAL < 0 ? "text-destructive" : "text-emerald-600"
+        )}>
+          {CHANGE_DRIVERS_TOTAL < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_TOTAL).toFixed(2)} per order
+        </p>
+      </div>
+
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
         {/* Column headers */}
         <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">

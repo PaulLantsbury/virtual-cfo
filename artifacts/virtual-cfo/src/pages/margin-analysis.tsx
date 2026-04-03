@@ -93,6 +93,9 @@ const CFO_INSIGHT = {
   /** @ai-commentary Single clearest action to move the margin needle fastest */
   fastestLever:
     "Reallocate spend from Meta toward higher-margin channels such as Email and Organic.",
+  /** @ai-commentary Generated from trajectory model: currentCm, declineRatePerMonth, warningThreshold */
+  riskNote:
+    "At the current decline rate, contribution margin could reach 40% in approximately 2 months.",
   closing:
     "Marketing is now the largest variable cost line at £12.20 per order, indicating channel mix optimisation is the fastest route to recovery.",
   opportunity: "+2–4pp",
@@ -395,6 +398,15 @@ export default function MarginAnalysis() {
             </div>
 
           </div>
+
+          {/* ── Risk note ── */}
+          <div className="flex items-start gap-2.5 mt-5 pt-4 border-t border-amber-200/60 dark:border-amber-700/30">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-[3px]" />
+            <p className="text-sm text-amber-800 dark:text-amber-300 leading-snug">
+              {CFO_INSIGHT.riskNote}
+            </p>
+          </div>
+
         </div>
       </div>
 

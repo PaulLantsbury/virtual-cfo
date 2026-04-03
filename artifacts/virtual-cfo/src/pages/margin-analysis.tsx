@@ -262,9 +262,9 @@ function VarLine({ label, value, favorable }: { label: string; value: string; fa
 
 function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-5">
+    <div className="mt-4 mb-6">
       <div className="flex items-center gap-4">
-        <h2 className="text-lg font-bold text-foreground whitespace-nowrap">{title}</h2>
+        <h2 className="text-xl font-bold text-foreground whitespace-nowrap">{title}</h2>
         <div className="flex-1 h-px bg-border/60" />
       </div>
       {subtitle && (
@@ -743,7 +743,7 @@ export default function MarginAnalysis() {
           </span>
           <div className="flex-1 h-px bg-border/40" />
         </div>
-        <h2 className="text-base font-semibold text-muted-foreground">Detailed Analysis</h2>
+        <h2 className="text-xl font-bold text-muted-foreground">Detailed Analysis</h2>
         <p className="text-sm text-muted-foreground/60 mt-1 leading-relaxed">
           Full breakdown of cost structure, channel performance, margin trend, and unit economics.
         </p>

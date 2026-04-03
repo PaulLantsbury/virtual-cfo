@@ -154,6 +154,8 @@ const RECOVERY_SCENARIOS = [
     cashImpact:  9_500,
     /** @dynamic confidence = "high" | "medium" | "requires-validation" */
     confidence:  "medium" as const,
+    /** @dynamic effort = "low" | "medium" | "high" */
+    effort:      "low" as const,
   },
   {
     shortLabel:  "Reduce shipping costs",
@@ -163,6 +165,7 @@ const RECOVERY_SCENARIOS = [
     newCm:       43.3,
     cashImpact:  6_800,
     confidence:  "high" as const,
+    effort:      "medium" as const,
   },
   {
     shortLabel:  "Lower discount depth",
@@ -172,6 +175,7 @@ const RECOVERY_SCENARIOS = [
     newCm:       42.9,
     cashImpact:  4_100,
     confidence:  "high" as const,
+    effort:      "low" as const,
   },
 ];
 
@@ -591,6 +595,17 @@ export default function MarginAnalysis() {
                           : s.confidence === "medium"
                           ? "Medium confidence"
                           : "Requires validation"}
+                      </span>
+                      {/* @dynamic effort tag — assigned per scenario, styled flat and muted */}
+                      <span className={cn(
+                        "inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap",
+                        s.effort === "low"
+                          ? "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
+                          : s.effort === "medium"
+                          ? "bg-orange-50 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400"
+                          : "bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400"
+                      )}>
+                        {s.effort === "low" ? "Low effort" : s.effort === "medium" ? "Medium effort" : "High effort"}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>

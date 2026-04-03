@@ -357,6 +357,19 @@ export default function MarginAnalysis() {
             {CFO_INSIGHT.headline}
           </h2>
 
+          {/* Time-to-risk indicator */}
+          {/* @dynamic monthsToWarning = (currentCm − warningThreshold) / monthlyDeclineRate */}
+          <div className="flex items-center gap-2.5 mb-5 px-3.5 py-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-700/40">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <p className="text-sm text-amber-800 dark:text-amber-300 leading-snug">
+              At the current trend, contribution margin could reach{" "}
+              <span className="font-semibold">{RISK_MONITOR.thresholds[0].pct}%</span>
+              {" "}in approximately{" "}
+              <span className="font-semibold">~{RISK_MONITOR.thresholds[0].monthsAtCurrentRate} months</span>
+              {" "}without corrective action.
+            </p>
+          </div>
+
           {/* Two-column detail */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 

@@ -881,67 +881,84 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
-        {/* Column headers */}
-        <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            What changed this period vs last month
-          </p>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Margin impact / order
-          </p>
-        </div>
+      {isProUser() ? (
+        /* ── PRO: full driver attribution table ── */
+        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
+          {/* Column headers */}
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              What changed this period vs last month
+            </p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Margin impact / order
+            </p>
+          </div>
 
-        {/* Driver rows — sorted by absolute impact descending */}
-        <div className="divide-y divide-border/40">
-          {[...CHANGE_DRIVERS]
-            .sort((a, b) => Math.abs(b.impactPerOrder) - Math.abs(a.impactPerOrder))
-            .map((row, i) => {
-              const isLargest  = i === 0;
-              const isNegative = row.direction === "negative";
-              const impactAbs  = Math.abs(row.impactPerOrder).toFixed(2);
-              return (
-                <div
-                  key={row.driver}
-                  className="flex items-center justify-between px-6 py-4 gap-6 hover:bg-secondary/20 transition-colors"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    {/* Severity bar */}
-                    <div className={cn(
-                      "w-1 self-stretch rounded-full shrink-0 min-h-[2rem]",
-                      isLargest ? "bg-destructive" : "bg-destructive/25"
-                    )} />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-semibold text-foreground">{row.driver}</span>
-                        <span className={cn(
-                          "inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap",
-                          isNegative
-                            ? "bg-destructive/10 text-destructive"
-                            : "bg-emerald-500/10 text-emerald-600"
-                        )}>
-                          {isNegative ? "↑" : "↓"} {row.change}
-                        </span>
-                        {isLargest && (
-                          <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
-                            Largest driver
+          {/* Driver rows — sorted by absolute impact descending */}
+          <div className="divide-y divide-border/40">
+            {[...CHANGE_DRIVERS]
+              .sort((a, b) => Math.abs(b.impactPerOrder) - Math.abs(a.impactPerOrder))
+              .map((row, i) => {
+                const isLargest  = i === 0;
+                const isNegative = row.direction === "negative";
+                const impactAbs  = Math.abs(row.impactPerOrder).toFixed(2);
+                return (
+                  <div
+                    key={row.driver}
+                    className="flex items-center justify-between px-6 py-4 gap-6 hover:bg-secondary/20 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {/* Severity bar */}
+                      <div className={cn(
+                        "w-1 self-stretch rounded-full shrink-0 min-h-[2rem]",
+                        isLargest ? "bg-destructive" : "bg-destructive/25"
+                      )} />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-semibold text-foreground">{row.driver}</span>
+                          <span className={cn(
+                            "inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap",
+                            isNegative
+                              ? "bg-destructive/10 text-destructive"
+                              : "bg-emerald-500/10 text-emerald-600"
+                          )}>
+                            {isNegative ? "↑" : "↓"} {row.change}
                           </span>
-                        )}
+                          {isLargest && (
+                            <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
+                              Largest driver
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
+                    <span className={cn(
+                      "text-sm font-bold whitespace-nowrap shrink-0 tabular-nums",
+                      isNegative ? "text-destructive" : "text-emerald-600"
+                    )}>
+                      {isNegative ? "−" : "+"}£{impactAbs}
+                    </span>
                   </div>
-                  <span className={cn(
-                    "text-sm font-bold whitespace-nowrap shrink-0 tabular-nums",
-                    isNegative ? "text-destructive" : "text-emerald-600"
-                  )}>
-                    {isNegative ? "−" : "+"}£{impactAbs}
-                  </span>
-                </div>
-              );
-            })}
+                );
+              })}
+          </div>
         </div>
-
-      </div>
+      ) : (
+        /* ── FREE: upgrade prompt ── */
+        <div className="rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/60 dark:bg-indigo-950/20 px-6 py-5 mb-10 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+              <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
+              Unlock driver-level breakdown showing exactly what changed →
+            </p>
+          </div>
+          <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">
+            Upgrade →
+          </span>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 5 — DETAILED ANALYSIS

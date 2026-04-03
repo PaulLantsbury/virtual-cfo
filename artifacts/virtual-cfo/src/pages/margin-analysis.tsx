@@ -754,10 +754,20 @@ export default function MarginAnalysis() {
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 5 — DETAILED ANALYSIS
       ══════════════════════════════════════════════════════════════════════ */}
-      <SectionHeading
-        title="Detailed Analysis"
-        subtitle="Full breakdown of cost structure, channel performance, margin trend, and unit economics."
-      />
+
+      {/* De-emphasised heading — signals optional deeper-dive content */}
+      <div className="mt-14 pt-8 border-t border-border/40 mb-6">
+        <div className="flex items-center gap-3 mb-2.5">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 bg-secondary px-2.5 py-0.5 rounded-full whitespace-nowrap">
+            Deeper dive
+          </span>
+          <div className="flex-1 h-px bg-border/40" />
+        </div>
+        <h2 className="text-base font-semibold text-muted-foreground">Detailed Analysis</h2>
+        <p className="text-sm text-muted-foreground/60 mt-1 leading-relaxed">
+          Full breakdown of cost structure, channel performance, margin trend, and unit economics.
+        </p>
+      </div>
 
       {/* Contribution Margin Bridge */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">

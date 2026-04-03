@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown, Lock } from "lucide-react";
+import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { UpgradePreviewCard } from "@/components/UpgradePreviewCard";
 import { isProUser } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 
@@ -657,19 +658,10 @@ export default function MarginAnalysis() {
             </div>
 
             {/* Upgrade preview card */}
-            <div className="mx-6 my-5 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/60 dark:bg-indigo-950/20 px-6 py-5 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
-                  <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
-                  Unlock estimated financial impact and implementation steps
-                </p>
-              </div>
-              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">
-                Upgrade →
-              </span>
-            </div>
+            <UpgradePreviewCard
+              title="Unlock estimated financial impact and implementation steps"
+              className="mx-6 my-5"
+            />
           </div>
         )}
       </div>
@@ -820,22 +812,12 @@ export default function MarginAnalysis() {
             </>
           ) : (
             /* ── FREE: teaser only ── */
-            <div className="flex flex-col h-full justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-3">CAC Payback Period</p>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
-                    <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                  </div>
-                  <p className="text-sm font-semibold text-foreground leading-snug">
-                    CAC payback period identified
-                  </p>
-                </div>
-              </div>
-              <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 leading-snug mt-2">
-                Unlock detailed acquisition efficiency diagnostics →
-              </p>
-            </div>
+            <>
+              <p className="text-sm font-medium text-muted-foreground mb-3">CAC Payback Period</p>
+              <UpgradePreviewCard
+                title="Unlock detailed acquisition efficiency diagnostics"
+              />
+            </>
           )}
         </div>
 
@@ -945,19 +927,10 @@ export default function MarginAnalysis() {
         </div>
       ) : (
         /* ── FREE: upgrade prompt ── */
-        <div className="rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/60 dark:bg-indigo-950/20 px-6 py-5 mb-10 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
-              <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
-              Unlock driver-level breakdown showing exactly what changed →
-            </p>
-          </div>
-          <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">
-            Upgrade →
-          </span>
-        </div>
+        <UpgradePreviewCard
+          title="Unlock driver-level breakdown showing exactly what changed"
+          className="mb-10"
+        />
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
@@ -1086,26 +1059,10 @@ export default function MarginAnalysis() {
           </div>
         ) : (
           /* ── FREE: upgrade card ── */
-          <div className="rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/60 dark:bg-indigo-950/20 px-6 py-5">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0 mt-0.5">
-                <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
-                  Unlock contribution margin bridge analysis
-                </p>
-                <p className="text-xs text-indigo-700/70 dark:text-indigo-400/70 mt-1 leading-snug">
-                  See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing →
-                </p>
-              </div>
-            </div>
-            <div className="flex justify-end">
-              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-                Upgrade →
-              </span>
-            </div>
-          </div>
+          <UpgradePreviewCard
+            title="Unlock contribution margin bridge analysis"
+            description="See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing →"
+          />
         )}
 
       </div>

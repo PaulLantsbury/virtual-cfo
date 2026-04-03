@@ -288,7 +288,7 @@ function VarLine({ label, value, favorable }: { label: string; value: string; fa
 
 // ─── Section heading helper ───────────────────────────────────────────────────
 
-function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+function SectionHeading({ title, subtitle, support }: { title: string; subtitle?: string; support?: string }) {
   return (
     <div className="mt-4 mb-6">
       <div className="flex items-center gap-4">
@@ -297,6 +297,9 @@ function SectionHeading({ title, subtitle }: { title: string; subtitle?: string 
       </div>
       {subtitle && (
         <p className="text-sm text-muted-foreground mt-1.5">{subtitle}</p>
+      )}
+      {support && (
+        <p className="text-xs text-muted-foreground/70 mt-0.5">{support}</p>
       )}
     </div>
   );
@@ -521,7 +524,8 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Opportunities"
-        subtitle="Concrete, achievable actions ranked by margin impact."
+        subtitle="Top profit improvement opportunities ranked by expected contribution uplift next month."
+        support="Based on the current 30-day trading baseline and prioritised by financial impact."
       />
 
       {/* ── Structured opportunities panel ── */}

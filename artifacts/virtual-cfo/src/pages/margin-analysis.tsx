@@ -78,13 +78,21 @@ const RETURNS_LY     = 1.4;
  *   @dynamic cashHigh = Math.round(nextMonthOrderVolume * (ppHigh / 100) * revenuePerOrder * 12)
  */
 const CFO_INSIGHT = {
+  /** @ai-commentary Replace with AI-generated headline based on live margin data */
+  headline: "Profit margin below target — recoverable £18k–£42k next month",
+  /** @ai-commentary Replace with dynamically generated status: "warning" | "critical" | "healthy" */
+  status: "warning" as "warning" | "critical" | "healthy",
   summary:
-    "Contribution margin declined 3.5pp month-on-month and is now below the target range (45–55%).",
+    "Contribution margin is currently 42.3%, below the target range of 45–55%.",
+  /** @ai-commentary Sorted by magnitude descending from live driver analysis */
   primaryDrivers: [
-    "Shipping costs increased £2.10 per order",
     "Meta CAC increased £3.40 per order",
+    "Shipping costs increased £2.10 per order",
     "Discount depth increased 1.8 percentage points",
   ],
+  /** @ai-commentary Single clearest action to move the margin needle fastest */
+  fastestLever:
+    "Reallocate spend from Meta toward higher-margin channels such as Email and Organic.",
   closing:
     "Marketing is now the largest variable cost line at £12.20 per order, indicating channel mix optimisation is the fastest route to recovery.",
   opportunity: "+2–4pp",
@@ -287,36 +295,72 @@ export default function MarginAnalysis() {
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 1 — CFO INSIGHT
       ══════════════════════════════════════════════════════════════════════ */}
-      <SectionHeading
-        title="CFO Insight"
-        subtitle="AI-generated summary of margin performance and recommended priorities."
-      />
+      <SectionHeading title="CFO Insight" />
 
-      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-10 overflow-hidden">
-        <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
+      <div className="rounded-2xl border border-primary/30 shadow-md mb-10 overflow-hidden">
+
+        {/* ── Header bar ── */}
+        <div className="flex items-center gap-3 px-6 py-3 bg-primary/10 border-b border-primary/20">
           <Sparkles className="w-4 h-4 text-primary shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-primary">
             CFO Insight
           </span>
+          <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-destructive/15 text-destructive whitespace-nowrap">
+            Below target — action required
+          </span>
         </div>
-        <div className="px-6 py-5">
-          <p className="text-sm font-medium text-foreground leading-relaxed mb-4">
+
+        {/* ── Body ── */}
+        <div className="bg-primary/5 px-6 pt-5 pb-6">
+
+          {/* Headline */}
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-snug mb-2">
+            {CFO_INSIGHT.headline}
+          </h2>
+
+          {/* Summary */}
+          <p className="text-sm text-muted-foreground leading-relaxed mb-5 pb-5 border-b border-primary/15">
             {CFO_INSIGHT.summary}
           </p>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            Primary drivers:
-          </p>
-          <ul className="space-y-1.5 mb-4">
-            {CFO_INSIGHT.primaryDrivers.map((driver, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
-                <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0 mt-[5px]" />
-                {driver}
-              </li>
-            ))}
-          </ul>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {CFO_INSIGHT.closing}
-          </p>
+
+          {/* Two-column detail */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+            {/* Primary causes */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Primary causes
+              </p>
+              <ul className="space-y-2.5">
+                {CFO_INSIGHT.primaryDrivers.map((driver, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0 mt-[5px]" />
+                    {driver}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Fastest recovery lever */}
+            <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-4 py-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
+                Fastest recovery lever
+              </p>
+              <p className="text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed mb-3">
+                {CFO_INSIGHT.fastestLever}
+              </p>
+              <div className="flex items-baseline gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mb-0.5" />
+                <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
+                  £{(CFO_INSIGHT.recovery.cashLow / 1_000).toFixed(0)}k–£{(CFO_INSIGHT.recovery.cashHigh / 1_000).toFixed(0)}k
+                </span>
+                <span className="text-xs text-emerald-700/70 dark:text-emerald-400/70">
+                  recoverable next month
+                </span>
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
 

@@ -684,6 +684,7 @@ export default function MarginAnalysis() {
             {/* Upgrade preview card */}
             <UpgradePreviewCard
               title="Unlock estimated financial impact and implementation steps"
+              description="See the estimated £ contribution uplift and specific implementation steps for each opportunity, ranked by financial impact."
               className="mx-6 my-5"
             />
           </div>
@@ -839,7 +840,8 @@ export default function MarginAnalysis() {
             <>
               <p className="text-sm font-medium text-muted-foreground mb-3">CAC Payback Period</p>
               <UpgradePreviewCard
-                title="Unlock acquisition efficiency diagnostics"
+                title="Unlock channel-level margin insights"
+                description="Track CAC payback and acquisition efficiency across channels."
                 compact
               />
             </>
@@ -958,9 +960,11 @@ export default function MarginAnalysis() {
               What changed this period vs last month
             </p>
           </div>
-          <div className="px-6 py-12">
+          <div className="min-h-[200px] flex items-center px-6">
             <UpgradePreviewCard
               title="Unlock driver-level breakdown showing exactly what changed"
+              description="See which costs or revenue movements drove the most margin impact this period, with exact per-order attribution."
+              className="w-full"
             />
           </div>
         </div>
@@ -1095,7 +1099,7 @@ export default function MarginAnalysis() {
           <div className="min-h-[200px] flex items-center">
             <UpgradePreviewCard
               title="Unlock contribution margin bridge analysis"
-              description="See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing →"
+              description="See exactly how revenue converts to contribution margin across discounts, shipping, fulfilment, and marketing costs."
               className="w-full"
             />
           </div>
@@ -1178,10 +1182,10 @@ export default function MarginAnalysis() {
               Contribution margin % per acquisition channel · {selectedLabel}
             </p>
           </div>
-          <div className="min-h-[160px] flex items-center">
+          <div className="min-h-[200px] flex items-center">
             <UpgradePreviewCard
-              title="Unlock channel margin breakdown"
-              description="See how contribution margin varies across Meta, Google Shopping, Email, and Organic — and which channels are reducing your blended margin."
+              title="Unlock channel-level margin insights"
+              description="See contribution margin % and revenue split across Meta, Google Shopping, Email, and Organic — and which channels are reducing your blended performance."
               className="w-full"
             />
           </div>

@@ -809,6 +809,9 @@ export default function MarginAnalysis() {
                   Total (£)
                 </th>
                 <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  % of Revenue
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
                   Per Order (£)
                 </th>
                 <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -818,10 +821,15 @@ export default function MarginAnalysis() {
             </thead>
             <tbody>
               {BRIDGE_ROWS.map((row) => {
-                const isRevenue = row.type === "revenue";
-                const totalStr  = isRevenue
+                const revenueTotal = BRIDGE_ROWS[0].total;
+                const isRevenue   = row.type === "revenue";
+                const totalStr    = isRevenue
                   ? `£${row.total.toLocaleString()}`
                   : `−£${Math.abs(row.total).toLocaleString()}`;
+                const pctRaw      = (row.total / revenueTotal) * 100;
+                const pctStr      = isRevenue
+                  ? `${pctRaw.toFixed(1)}%`
+                  : `−${Math.abs(pctRaw).toFixed(1)}%`;
                 const perOrderStr = `£${Math.abs(row.perOrder).toFixed(2)}`;
 
                 return (
@@ -835,6 +843,12 @@ export default function MarginAnalysis() {
                       isRevenue ? "text-foreground" : "text-muted-foreground"
                     )}>
                       {totalStr}
+                    </td>
+                    <td className={cn(
+                      "py-3 px-4 text-right tabular-nums",
+                      isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
+                    )}>
+                      {pctStr}
                     </td>
                     <td className={cn(
                       "py-3 px-4 text-right tabular-nums",
@@ -859,12 +873,12 @@ export default function MarginAnalysis() {
               <tr className="border-t-2 border-primary/30 bg-primary/5">
                 <td className="py-3.5 pr-4">
                   <span className="font-bold text-foreground">Contribution Margin</span>
-                  <span className="ml-2 text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                    {CM_PCT}%
-                  </span>
                 </td>
                 <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
                   £{CM_VALUE.toLocaleString()}
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-primary">
+                  {CM_PCT}%
                 </td>
                 <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
                   £{CONTRIBUTION_PER_ORDER.toFixed(2)}

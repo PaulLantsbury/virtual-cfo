@@ -549,8 +549,8 @@ export default function MarginAnalysis() {
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
                 CM gain
               </span>
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-16 text-right">
-                £ / month
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-20 text-right">
+                £ next month
               </span>
             </div>
           </div>
@@ -586,13 +586,18 @@ export default function MarginAnalysis() {
                     <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
-                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right">
+                <div className="flex items-start gap-5 shrink-0 ml-4">
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
                     +{s.ppGain.toFixed(1)}pp
                   </span>
-                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300 whitespace-nowrap tabular-nums w-16 text-right">
-                    £{s.cashImpact.toLocaleString()}
-                  </span>
+                  <div className="text-right w-20">
+                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                      £{s.cashImpact.toLocaleString()}
+                    </p>
+                    <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
+                      next month
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -603,13 +608,18 @@ export default function MarginAnalysis() {
             <p className="text-sm font-semibold text-foreground">
               Combined impact — if all three changes are implemented
             </p>
-            <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
-              <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right">
+            <div className="flex items-start gap-5 shrink-0 ml-4">
+              <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
                 +{RECOVERY_TOTAL_PP}pp
               </span>
-              <span className="text-base font-bold text-emerald-700 dark:text-emerald-300 whitespace-nowrap tabular-nums w-16 text-right">
-                ≈ £{RECOVERY_TOTAL_CASH.toLocaleString()}
-              </span>
+              <div className="text-right w-20">
+                <p className="text-base font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                  ≈ £{RECOVERY_TOTAL_CASH.toLocaleString()}
+                </p>
+                <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
+                  next month
+                </p>
+              </div>
             </div>
           </div>
         </div>

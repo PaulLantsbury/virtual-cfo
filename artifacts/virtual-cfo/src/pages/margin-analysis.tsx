@@ -510,14 +510,14 @@ export default function MarginAnalysis() {
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-              Estimated recoverable contribution next month
+              Estimated additional contribution available next month
             </p>
           </div>
           <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none mb-2">
             £{RECOVERY_TOTAL_CASH.toLocaleString()}
           </p>
           <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 leading-snug">
-            Based on top quantified opportunities from the current 30-day baseline
+            Based on top quantified opportunities from the current 30-day trading baseline
           </p>
         </div>
 

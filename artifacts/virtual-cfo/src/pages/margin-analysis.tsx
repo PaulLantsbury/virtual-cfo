@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { ArrowDownRight, ArrowUpRight, TrendingDown, TrendingUp, Info, ChevronDown, ChevronRight, Sparkles, AlertTriangle } from "lucide-react";
+import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell,
@@ -97,10 +96,6 @@ const CFO_INSIGHT = {
     cashHigh: 42_000,
   },
 } as const;
-
-/** @ai-commentary Replace with dynamically generated AI insight when ready */
-const BRIDGE_INSIGHT =
-  "Contribution per order declined £3.20 month-on-month, driven primarily by higher shipping costs (+£2.10/order) and rising Meta CAC (+£3.40/order). Marketing (blended) now accounts for £12.20 per order — the single largest variable cost line.";
 
 const MARGIN_RECOMMENDATIONS: Recommendation[] = [
   {
@@ -272,8 +267,6 @@ function SectionHeading({ title, subtitle }: { title: string; subtitle?: string 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function MarginAnalysis() {
-  const [sensitivityOpen, setSensitivityOpen] = useState(false);
-
   return (
     <AppLayout>
       {/* ── Page header ── */}
@@ -532,84 +525,6 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
-      {/* Margin Recovery Simulator */}
-      <div className="bg-white rounded-xl border border-border shadow-sm overflow-hidden mb-5">
-        <button
-          onClick={() => setSensitivityOpen((o) => !o)}
-          className="w-full flex items-center justify-between px-6 py-5 text-left hover:bg-muted/30 transition-colors"
-        >
-          <div>
-            <p className="font-semibold text-foreground">Margin Recovery Simulator</p>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Estimated contribution margin improvement from realistic operational changes
-            </p>
-          </div>
-          <div className="flex items-center gap-2 ml-4 shrink-0">
-            <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-              +{RECOVERY_TOTAL_PP}pp achievable
-            </span>
-            {sensitivityOpen
-              ? <ChevronDown className="w-5 h-5 text-muted-foreground" />
-              : <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            }
-          </div>
-        </button>
-
-        {sensitivityOpen && (
-          <div className="px-6 pb-6 border-t border-border/50">
-            <div className="flex flex-col gap-3 mt-5">
-              {RECOVERY_SCENARIOS.map((s) => (
-                <div
-                  key={s.action}
-                  className="flex items-center justify-between rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3.5 gap-4"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground leading-snug">
-                      If {s.action}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-                      {s.detail}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end shrink-0 ml-2 text-right">
-                    <span className="text-base font-bold text-emerald-700">
-                      {s.newCm.toFixed(1)}%
-                    </span>
-                    <span className="text-xs font-semibold text-emerald-600">
-                      +{s.ppGain.toFixed(1)}pp CM
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Summary */}
-            <div className="mt-4 flex items-center justify-between rounded-xl bg-emerald-600 px-5 py-4">
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  Estimated achievable improvement
-                </p>
-                <p className="text-xs text-emerald-100 mt-0.5">
-                  Combined contribution margin if all three actions are implemented
-                </p>
-              </div>
-              <div className="text-right shrink-0 ml-4">
-                <p className="text-2xl font-bold text-white">
-                  {RECOVERY_TARGET_CM}%
-                </p>
-                <p className="text-xs font-semibold text-emerald-200">
-                  +{RECOVERY_TOTAL_PP}pp vs current
-                </p>
-              </div>
-            </div>
-
-            <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
-              Scenarios assume revenue remains constant at £124,500. Improvements are estimated independently — combined gains may differ slightly due to cost interactions. At {RECOVERY_TARGET_CM}%, contribution margin would return to the lower bound of the target range (45–55%).
-            </p>
-          </div>
-        )}
-      </div>
-
       {/* Margin Risk Monitor */}
       <div className="mb-10">
         <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden shadow-sm">
@@ -767,18 +682,6 @@ export default function MarginAnalysis() {
             {CHANGE_DRIVERS_TOTAL < 0 ? "−" : "+"}£{Math.abs(CHANGE_DRIVERS_TOTAL).toFixed(2)}/order
           </span>
         </div>
-
-        {/* Channel mix insight */}
-        <div className="px-6 py-4 bg-amber-50/60 dark:bg-amber-950/10 border-t border-amber-100 dark:border-amber-900/30">
-          <div className="flex items-start gap-3">
-            <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-            <p className="text-sm text-amber-900 dark:text-amber-300 leading-relaxed">
-              <span className="font-semibold">Channel mix is the primary lever.</span>{" "}
-              Marketing is now the largest single variable cost at <span className="font-semibold">£12.20/order</span> — exceeding shipping, fulfilment, and discounts individually.
-              Reallocating budget toward Email (CM 58.6%) and Organic (CM 52.3%) would reduce blended CAC and recover margin without cutting revenue.
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
@@ -894,10 +797,6 @@ export default function MarginAnalysis() {
           </table>
         </div>
 
-        <div className="mt-5 flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100">
-          <Info className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-sm text-amber-900 leading-snug">{BRIDGE_INSIGHT}</p>
-        </div>
       </div>
 
       {/* Contribution Margin by Channel */}

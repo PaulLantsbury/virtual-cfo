@@ -947,101 +947,126 @@ export default function MarginAnalysis() {
           </p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Metric
-                </th>
-                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Total (£)
-                </th>
-                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  % of Revenue
-                </th>
-                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                  Per Order (£)
-                </th>
-                <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Trend
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {BRIDGE_ROWS.map((row) => {
-                const revenueTotal = BRIDGE_ROWS[0].total;
-                const isRevenue   = row.type === "revenue";
-                const totalStr    = isRevenue
-                  ? `£${row.total.toLocaleString()}`
-                  : `−£${Math.abs(row.total).toLocaleString()}`;
-                const pctRaw      = (row.total / revenueTotal) * 100;
-                const pctStr      = isRevenue
-                  ? `${pctRaw.toFixed(1)}%`
-                  : `−${Math.abs(pctRaw).toFixed(1)}%`;
-                const perOrderStr = `£${Math.abs(row.perOrder).toFixed(2)}`;
+        {isProUser() ? (
+          /* ── PRO: full bridge table ── */
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Metric
+                  </th>
+                  <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    Total (£)
+                  </th>
+                  <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    % of Revenue
+                  </th>
+                  <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                    Per Order (£)
+                  </th>
+                  <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Trend
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {BRIDGE_ROWS.map((row) => {
+                  const revenueTotal = BRIDGE_ROWS[0].total;
+                  const isRevenue   = row.type === "revenue";
+                  const totalStr    = isRevenue
+                    ? `£${row.total.toLocaleString()}`
+                    : `−£${Math.abs(row.total).toLocaleString()}`;
+                  const pctRaw      = (row.total / revenueTotal) * 100;
+                  const pctStr      = isRevenue
+                    ? `${pctRaw.toFixed(1)}%`
+                    : `−${Math.abs(pctRaw).toFixed(1)}%`;
+                  const perOrderStr = `£${Math.abs(row.perOrder).toFixed(2)}`;
 
-                return (
-                  <tr
-                    key={row.label}
-                    className="border-b border-border/40 hover:bg-secondary/30 transition-colors"
-                  >
-                    <td className="py-3 pr-4 font-medium text-foreground">{row.label}</td>
-                    <td className={cn(
-                      "py-3 px-4 text-right tabular-nums font-semibold",
-                      isRevenue ? "text-foreground" : "text-muted-foreground"
-                    )}>
-                      {totalStr}
-                    </td>
-                    <td className={cn(
-                      "py-3 px-4 text-right tabular-nums",
-                      isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
-                    )}>
-                      {pctStr}
-                    </td>
-                    <td className={cn(
-                      "py-3 px-4 text-right tabular-nums",
-                      isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
-                    )}>
-                      {isRevenue ? "" : "−"}{perOrderStr}
-                    </td>
-                    <td className="py-3 pl-4 text-right">
-                      {row.trend === "worsening" ? (
-                        <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
-                          ↑ cost
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-primary/30 bg-primary/5">
-                <td className="py-3.5 pr-4">
-                  <span className="font-bold text-foreground">Contribution Margin</span>
-                </td>
-                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
-                  £{CM_VALUE.toLocaleString()}
-                </td>
-                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-primary">
-                  {CM_PCT}%
-                </td>
-                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
-                  £{CONTRIBUTION_PER_ORDER.toFixed(2)}
-                </td>
-                <td className="py-3.5 pl-4 text-right">
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
-                    <ArrowDownRight className="w-2.5 h-2.5" />
-                    ↓ margin
-                  </span>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+                  return (
+                    <tr
+                      key={row.label}
+                      className="border-b border-border/40 hover:bg-secondary/30 transition-colors"
+                    >
+                      <td className="py-3 pr-4 font-medium text-foreground">{row.label}</td>
+                      <td className={cn(
+                        "py-3 px-4 text-right tabular-nums font-semibold",
+                        isRevenue ? "text-foreground" : "text-muted-foreground"
+                      )}>
+                        {totalStr}
+                      </td>
+                      <td className={cn(
+                        "py-3 px-4 text-right tabular-nums",
+                        isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
+                      )}>
+                        {pctStr}
+                      </td>
+                      <td className={cn(
+                        "py-3 px-4 text-right tabular-nums",
+                        isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
+                      )}>
+                        {isRevenue ? "" : "−"}{perOrderStr}
+                      </td>
+                      <td className="py-3 pl-4 text-right">
+                        {row.trend === "worsening" ? (
+                          <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                            ↑ cost
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-primary/30 bg-primary/5">
+                  <td className="py-3.5 pr-4">
+                    <span className="font-bold text-foreground">Contribution Margin</span>
+                  </td>
+                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
+                    £{CM_VALUE.toLocaleString()}
+                  </td>
+                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-primary">
+                    {CM_PCT}%
+                  </td>
+                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
+                    £{CONTRIBUTION_PER_ORDER.toFixed(2)}
+                  </td>
+                  <td className="py-3.5 pl-4 text-right">
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                      <ArrowDownRight className="w-2.5 h-2.5" />
+                      ↓ margin
+                    </span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        ) : (
+          /* ── FREE: upgrade card ── */
+          <div className="rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/60 dark:bg-indigo-950/20 px-6 py-5">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0 mt-0.5">
+                <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
+                  Unlock contribution margin bridge analysis
+                </p>
+                <p className="text-xs text-indigo-700/70 dark:text-indigo-400/70 mt-1 leading-snug">
+                  See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing →
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+                Upgrade →
+              </span>
+            </div>
+          </div>
+        )}
 
       </div>
 

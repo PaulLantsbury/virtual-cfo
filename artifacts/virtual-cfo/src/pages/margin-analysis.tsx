@@ -805,15 +805,38 @@ export default function MarginAnalysis() {
 
         {/* 3 — CAC Payback */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
-          <p className="text-3xl font-display font-bold text-foreground mb-2">
-            {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
-          </p>
-          <div className="space-y-0.5 mb-2">
-            <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
-            <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
-          </div>
-          <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover acquisition cost</p>
+          {isProUser() ? (
+            /* ── PRO: full card ── */
+            <>
+              <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
+              <p className="text-3xl font-display font-bold text-foreground mb-2">
+                {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
+              </p>
+              <div className="space-y-0.5 mb-2">
+                <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
+                <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover acquisition cost</p>
+            </>
+          ) : (
+            /* ── FREE: teaser only ── */
+            <div className="flex flex-col h-full justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-3">CAC Payback Period</p>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+                    <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <p className="text-sm font-semibold text-foreground leading-snug">
+                    CAC payback period identified
+                  </p>
+                </div>
+              </div>
+              <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 leading-snug mt-2">
+                Unlock detailed acquisition efficiency diagnostics →
+              </p>
+            </div>
+          )}
         </div>
 
         {/* 4 — Contribution per Order */}

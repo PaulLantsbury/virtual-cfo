@@ -5,7 +5,6 @@ import {
   ResponsiveContainer, ReferenceLine, Cell,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import type { Recommendation } from "@/components/ActionRecommendations";
 import { cn } from "@/lib/utils";
 
 const TREND_DATA = [
@@ -79,7 +78,7 @@ const RETURNS_LY     = 1.4;
  */
 const CFO_INSIGHT = {
   /** @ai-commentary Replace with AI-generated headline based on live margin data */
-  headline: "Profit margin below target — recoverable £18k–£42k next month",
+  headline: "Profit margin below target — £20,400 recoverable next month",
   /** @ai-commentary Replace with dynamically generated status: "warning" | "critical" | "healthy" */
   status: "warning" as "warning" | "critical" | "healthy",
   summary:
@@ -99,42 +98,16 @@ const CFO_INSIGHT = {
   closing:
     "Marketing is now the largest variable cost line at £12.20 per order, indicating channel mix optimisation is the fastest route to recovery.",
   opportunity: "+2–4pp",
-  /** @dynamic See annotation above for live formula */
+  /**
+   * @dynamic Derived from RECOVERY_SCENARIOS totals — keep in sync with RECOVERY_TOTAL_CASH / RECOVERY_TOTAL_PP.
+   * ppGain = sum of scenario ppGain values; cashTotal = sum of scenario cashImpact values.
+   */
   recovery: {
-    ppLow: 2,
-    ppHigh: 4,
-    cashLow: 18_000,
-    cashHigh: 42_000,
+    ppGain: 3.0,
+    cashTotal: 20_400,
   },
 } as const;
 
-const MARGIN_RECOMMENDATIONS: Recommendation[] = [
-  {
-    id: "m1",
-    text: "Renegotiate shipping rates with your carrier — volumes qualify for a tier discount that could reduce shipping costs by 8–12%, adding ~1.0pp to contribution margin.",
-    impact: "high",
-  },
-  {
-    id: "m2",
-    text: "Pause blanket discount codes and replace with targeted post-purchase offers. Reducing average discount depth from 7% to 5% would recover ~0.6pp of margin.",
-    impact: "high",
-  },
-  {
-    id: "m3",
-    text: "Reallocate 15% of Meta spend toward Email — Email CM is 58.6% vs Meta at 34.2%. Shifting budget to your highest-margin channel improves blended margin immediately.",
-    impact: "high",
-  },
-  {
-    id: "m4",
-    text: "Review fulfilment partner SLA and pricing — fulfilment at 14% of revenue is above the typical 10–12% benchmark for your order volume. Request a pricing review.",
-    impact: "medium",
-  },
-  {
-    id: "m5",
-    text: "Set a contribution margin floor alert at 40%. You are currently at 42.3% — an early warning at 40% gives you time to act before margin falls below breakeven.",
-    impact: "quick-win",
-  },
-];
 
 /**
  * @dynamic Replace with dynamically calculated recovery scenarios when ready.
@@ -456,10 +429,10 @@ export default function MarginAnalysis() {
                 Recoverable Next Month
               </p>
               <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-2">
-                £{(CFO_INSIGHT.recovery.cashLow / 1_000).toFixed(0)}k–£{(CFO_INSIGHT.recovery.cashHigh / 1_000).toFixed(0)}k
+                £{RECOVERY_TOTAL_CASH.toLocaleString()}
               </p>
-              <p className="text-xs text-muted-foreground leading-snug max-w-[22ch]">
-                Estimated additional contribution if key actions are implemented
+              <p className="text-xs text-muted-foreground leading-snug max-w-[26ch]">
+                Sum of quantified opportunities — see breakdown below
               </p>
             </div>
 

@@ -34,6 +34,16 @@ const MKT_CM_CHANGE      = +(MKT_CM - MKT_CM_PREV).toFixed(1);
 const MKT_CM_TARGET      = { low: 42, high: 48 } as const;
 
 /**
+ * Total contribution profit after all marketing costs for the selected period.
+ * @dynamic revenueTotal × (MKT_CM / 100)
+ */
+const MKT_CP             = 38_400;
+const MKT_CP_PREV        = 41_200;  // last month
+const MKT_CP_LY          = 35_400;  // last 12-month average
+const MKT_CP_CHANGE_MOM  = MKT_CP - MKT_CP_PREV;   // -2_800 (unfavourable)
+const MKT_CP_CHANGE_LY   = MKT_CP - MKT_CP_LY;     // +3_000 (favourable)
+
+/**
  * Estimated additional contribution available if spend is reallocated.
  * @dynamic Math.round(orderVolume × (cmGainPp / 100) × revenuePerOrder)
  */
@@ -386,6 +396,9 @@ export default function MarketingEfficiency() {
           <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 leading-snug">
             Based on top quantified opportunities from the current 30-day trading baseline
           </p>
+          <p className="text-xs text-emerald-700/50 dark:text-emerald-400/50 leading-snug mt-1">
+            Current Marketing Contribution Profit: £{MKT_CP.toLocaleString()} · March 2026
+          </p>
         </div>
 
         {/* ── Opportunity rows — gated by plan ── */}
@@ -533,7 +546,33 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 mb-10">
+
+        {/* Marketing Contribution Profit — headline KPI */}
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Marketing Contribution Profit</p>
+          <p className="text-4xl font-display font-bold text-foreground">
+            £{MKT_CP.toLocaleString()}
+          </p>
+          <div className="space-y-1.5 mt-3">
+            <div className="flex items-center gap-1 text-xs">
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold whitespace-nowrap">
+                <ArrowDownRight className="w-3 h-3 shrink-0" />
+                £{Math.abs(MKT_CP_CHANGE_MOM).toLocaleString()} vs last month
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-xs">
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold whitespace-nowrap">
+                <ArrowUpRight className="w-3 h-3 shrink-0" />
+                £{MKT_CP_CHANGE_LY.toLocaleString()} vs 12-month avg
+              </span>
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground leading-snug">
+            Revenue remaining after all marketing costs
+          </p>
+        </div>
+
         {/* Blended CAC */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Blended CAC</p>

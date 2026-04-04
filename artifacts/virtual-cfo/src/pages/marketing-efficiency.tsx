@@ -1364,12 +1364,18 @@ export default function MarketingEfficiency() {
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Customer Acquisition Cost by Channel
           </p>
-          <p className="text-xs text-muted-foreground">vs last month</p>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground">
+              Blended avg:{" "}
+              <span className="font-semibold text-foreground tabular-nums">£{BLENDED_CAC.toFixed(2)}</span>
+            </span>
+            <span className="text-xs text-muted-foreground border-l border-border/50 pl-3">vs last month</span>
+          </div>
         </div>
 
         <div className="grid grid-cols-4 gap-4 px-6 py-2.5 border-b border-border/40">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Channel</span>
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">CAC</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">CAC · vs avg</span>
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Change</span>
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Efficiency</span>
         </div>
@@ -1377,13 +1383,28 @@ export default function MarketingEfficiency() {
         <div className="divide-y divide-border/40">
           {CAC_BY_CHANNEL.map((row) => {
             const cfg = EFFICIENCY_CONFIG[row.efficiency];
+            /** @dynamic diff = row.cac − BLENDED_CAC (live) */
+            const cacDiff = +(row.cac - BLENDED_CAC).toFixed(2);
+            const absCacDiff = Math.abs(cacDiff).toFixed(2);
             return (
               <div key={row.channel} className="grid grid-cols-4 gap-4 px-6 py-3.5 items-center hover:bg-secondary/30 transition-colors">
                 <div className="flex items-center gap-2">
                   <span className={cn("w-2 h-2 rounded-full shrink-0", cfg.dot)} />
                   <span className="text-sm font-medium text-foreground">{row.channel}</span>
                 </div>
-                <span className="text-sm font-bold text-foreground text-right">£{row.cac.toFixed(2)}</span>
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className="text-sm font-bold text-foreground tabular-nums">£{row.cac.toFixed(2)}</span>
+                  <span
+                    className={cn(
+                      "text-[11px] font-medium tabular-nums",
+                      cacDiff > 0
+                        ? "text-destructive/80"
+                        : "text-emerald-600/80 dark:text-emerald-400/80"
+                    )}
+                  >
+                    £{absCacDiff} {cacDiff > 0 ? "above" : "below"} avg
+                  </span>
+                </div>
                 <span
                   className={cn(
                     "text-sm font-medium text-right",
@@ -1414,16 +1435,32 @@ export default function MarketingEfficiency() {
       {/* CAC Payback by Channel */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
         <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">CAC Payback by Channel</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Number of orders required to recover the acquisition cost for each channel.
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-lg text-foreground">CAC Payback by Channel</h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Number of orders required to recover the acquisition cost for each channel.
+              </p>
+            </div>
+            {/* @dynamic CAC_PAYBACK = spend-weighted blended average across all channels */}
+            <div className="text-right shrink-0 pt-0.5">
+              <p className="text-xs text-muted-foreground">Blended avg</p>
+              <p className="text-sm font-bold text-foreground tabular-nums">{CAC_PAYBACK} orders</p>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-4">
           {[...PAYBACK_BY_CHANNEL].sort((a, b) => a.payback - b.payback).map((row) => {
             const overThreshold = row.payback > PAYBACK_THRESHOLD;
             const barPct = Math.min((row.payback / 3) * 100, 100);
+            /** @dynamic diff = row.payback − CAC_PAYBACK (live) */
+            const paybackDiff = +(row.payback - CAC_PAYBACK).toFixed(1);
+            const absPaybackDiff = Math.abs(paybackDiff);
+            const paybackDiffLabel =
+              paybackDiff === 0
+                ? "at avg"
+                : `${absPaybackDiff} ${paybackDiff > 0 ? "above" : "below"} avg`;
             return (
               <div key={row.channel}>
                 <div className="flex items-center justify-between mb-1.5">
@@ -1431,7 +1468,17 @@ export default function MarketingEfficiency() {
                   <div className="flex items-center gap-2">
                     <span
                       className={cn(
-                        "text-sm font-bold",
+                        "text-[11px] font-medium tabular-nums",
+                        paybackDiff > 0
+                          ? "text-destructive/70"
+                          : "text-emerald-600/70 dark:text-emerald-400/70"
+                      )}
+                    >
+                      {paybackDiffLabel}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-sm font-bold tabular-nums",
                         overThreshold ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
                       )}
                     >

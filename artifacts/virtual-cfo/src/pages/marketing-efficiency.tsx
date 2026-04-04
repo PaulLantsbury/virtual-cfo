@@ -275,29 +275,44 @@ const ME_DRIVERS = [
     cause:     "Blended CAC rose due to Meta audience saturation and higher auction competition",
     impact:    -6_400,
     direction: "negative" as const,
-  },
-  {
-    driver:    "Discount-led traffic mix",
-    cause:     "Higher discount depth shifted order mix toward low-margin SKUs",
-    impact:    -3_100,
-    direction: "negative" as const,
-  },
-  {
-    driver:    "Lower repeat-customer share",
-    cause:     "Repeat purchase rate declined, increasing reliance on expensive new customer acquisition",
-    impact:    -2_200,
-    direction: "negative" as const,
+    category:  "acquisition-cost" as const,
   },
   {
     driver:    "Higher CPC across paid channels",
     cause:     "Cost-per-click rose across Google Shopping and Meta, compressing margin on paid orders",
     impact:    -900,
     direction: "negative" as const,
+    category:  "acquisition-cost" as const,
   },
+  {
+    driver:    "Discount-led traffic mix",
+    cause:     "Higher discount depth shifted order mix toward low-margin SKUs",
+    impact:    -3_100,
+    direction: "negative" as const,
+    category:  "mix" as const,
+  },
+  {
+    driver:    "Lower repeat-customer share",
+    cause:     "Repeat purchase rate declined, increasing reliance on expensive new customer acquisition",
+    impact:    -2_200,
+    direction: "negative" as const,
+    category:  "structural" as const,
+  },
+];
+
+/** Ordered group definitions for the Key Drivers section */
+const ME_DRIVER_GROUPS = [
+  { key: "acquisition-cost" as const, label: "Acquisition Cost Drivers" },
+  { key: "mix"              as const, label: "Mix Drivers"              },
+  { key: "structural"       as const, label: "Structural Drivers"       },
 ];
 
 /** @dynamic Sum of ME_DRIVERS impact values */
 const ME_DRIVERS_TOTAL = ME_DRIVERS.reduce((s, d) => s + d.impact, 0); // −12_600
+/** Driver with the largest absolute impact */
+const ME_LARGEST_DRIVER = ME_DRIVERS.reduce((a, b) =>
+  Math.abs(a.impact) > Math.abs(b.impact) ? a : b
+).driver;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -1144,40 +1159,62 @@ export default function MarketingEfficiency() {
             </p>
           </div>
 
-          <div className="divide-y divide-border/40">
-            {ME_DRIVERS.map((row, i) => {
-              const isLargest  = i === 0;
-              const impactAbs  = Math.abs(row.impact);
-              return (
-                <div
-                  key={row.driver}
-                  className="flex items-center justify-between px-6 py-4 gap-6 hover:bg-secondary/20 transition-colors"
-                >
-                  <div className="flex items-start gap-3 min-w-0">
-                    {/* Severity bar */}
-                    <div className={cn(
-                      "w-1 self-stretch rounded-full shrink-0 min-h-[2rem] mt-0.5",
-                      isLargest ? "bg-destructive" : "bg-destructive/25"
-                    )} />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-sm font-semibold text-foreground">{row.driver}</span>
-                        {isLargest && (
-                          <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
-                            Largest driver
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-snug">{row.cause}</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-bold whitespace-nowrap shrink-0 tabular-nums text-destructive">
-                    −£{impactAbs.toLocaleString()}
-                  </span>
+            {/* Grouped driver rows */}
+          {ME_DRIVER_GROUPS.map((group) => {
+            const groupDrivers = ME_DRIVERS
+              .filter((d) => d.category === group.key)
+              .sort((a, b) => a.impact - b.impact); // most negative first
+            if (!groupDrivers.length) return null;
+            const groupTotal = groupDrivers.reduce((s, d) => s + d.impact, 0);
+            return (
+              <div key={group.key}>
+                {/* Group heading row */}
+                <div className="flex items-center justify-between px-6 py-2 border-y border-border/40 bg-secondary/30">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/70">
+                    {group.label}
+                  </p>
+                  <p className="text-[11px] font-bold tabular-nums text-destructive/60">
+                    −£{Math.abs(groupTotal).toLocaleString()}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
+                {/* Driver rows within group */}
+                <div className="divide-y divide-border/30">
+                  {groupDrivers.map((row) => {
+                    const isLargest = row.driver === ME_LARGEST_DRIVER;
+                    const impactAbs = Math.abs(row.impact);
+                    return (
+                      <div
+                        key={row.driver}
+                        className="flex items-center justify-between px-6 py-4 gap-6 hover:bg-secondary/20 transition-colors"
+                      >
+                        <div className="flex items-start gap-3 min-w-0">
+                          {/* Severity bar */}
+                          <div className={cn(
+                            "w-1 self-stretch rounded-full shrink-0 min-h-[2rem] mt-0.5",
+                            isLargest ? "bg-destructive" : "bg-destructive/25"
+                          )} />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <span className="text-sm font-semibold text-foreground">{row.driver}</span>
+                              {isLargest && (
+                                <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
+                                  Largest driver
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-snug">{row.cause}</p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-bold whitespace-nowrap shrink-0 tabular-nums text-destructive">
+                          −£{impactAbs.toLocaleString()}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
 
           {/* Total row */}
           <div className="flex items-center justify-between px-6 py-3.5 border-t border-border/50 bg-secondary/20">

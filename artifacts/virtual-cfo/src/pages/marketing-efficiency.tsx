@@ -356,30 +356,36 @@ const TIMELINE_FRAMING: Record<string, {
   baselineNote:  string;
   rowLabel:      string;
   combinedLabel: string;
+  /** Concise per-row sub-label shown beneath each £ impact figure */
+  impactBasis:   string;
 }> = {
   "7d":  {
     upliftPhrase:  "next month at current 7-day run rate",
     baselineNote:  "current 7-day trading baseline",
     rowLabel:      "next month",
     combinedLabel: "next month if implemented now",
+    impactBasis:   "next month · 7-day run rate",
   },
   "30d": {
     upliftPhrase:  "next month at current 30-day run rate",
     baselineNote:  "current 30-day trading baseline",
     rowLabel:      "next month",
     combinedLabel: "next month if implemented now",
+    impactBasis:   "next month · 30-day run rate",
   },
   "90d": {
     upliftPhrase:  "next month based on 90-day trading baseline",
     baselineNote:  "90-day trading baseline",
     rowLabel:      "next month",
     combinedLabel: "next month if implemented now",
+    impactBasis:   "next month · 90-day baseline",
   },
   "12m": {
     upliftPhrase:  "based on trailing 12-month performance",
     baselineNote:  "trailing 12-month performance",
     rowLabel:      "projected",
     combinedLabel: "projected, if implemented now",
+    impactBasis:   "projected · 12-month avg",
   },
 };
 
@@ -612,8 +618,8 @@ export default function MarketingEfficiency() {
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
                   CM gain
                 </span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-20 text-right">
-                  £ {framing.rowLabel}
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-28 text-right">
+                  £ impact
                 </span>
               </div>
             </div>
@@ -659,12 +665,12 @@ export default function MarketingEfficiency() {
                     <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
                       +{o.ppGain.toFixed(1)}pp
                     </span>
-                    <div className="text-right w-20">
+                    <div className="text-right w-28">
                       <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
                         £{o.cashImpact.toLocaleString()}
                       </p>
-                      <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
-                        {framing.rowLabel}
+                      <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-snug">
+                        {framing.impactBasis}
                       </p>
                     </div>
                   </div>
@@ -681,12 +687,12 @@ export default function MarketingEfficiency() {
                 <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
                   +{ME_TOTAL_PP}pp
                 </span>
-                <div className="text-right w-20">
+                <div className="text-right w-28">
                   <p className="text-base font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
                     ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
                   </p>
-                  <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
-                    {framing.rowLabel}
+                  <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-snug">
+                    {framing.impactBasis}
                   </p>
                 </div>
               </div>

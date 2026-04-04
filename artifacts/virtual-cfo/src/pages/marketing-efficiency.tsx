@@ -936,15 +936,22 @@ export default function MarketingEfficiency() {
           CAC by channel, payback, contribution margin, and trend evidence
       ══════════════════════════════════════════════════════════════════════ */}
 
-      <div className="mb-4">
+      {/* ── Section divider ── */}
+      <div className="border-t border-border/50 pt-10 mb-2">
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
+          Deep Dive
+        </p>
         <h2 className="text-xl font-bold text-foreground">Detailed Analysis</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Channel-level acquisition cost, payback period, contribution margin, and 12-month efficiency trend
+        <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+          Supporting evidence behind current channel performance and efficiency trends.
         </p>
       </div>
 
+      {/* ── Grouped sub-sections ── */}
+      <div className="space-y-4">
+
       {/* CAC by Channel */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-6">
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Customer Acquisition Cost by Channel
@@ -997,7 +1004,7 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* CAC Payback by Channel */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-6">
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
         <div className="mb-5">
           <h3 className="font-semibold text-lg text-foreground">CAC Payback by Channel</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -1050,7 +1057,7 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* Contribution Margin by Channel */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-6">
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
         <div className="mb-5">
           <h3 className="font-semibold text-lg text-foreground">Contribution Margin by Channel</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -1140,7 +1147,7 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* Marketing Efficiency Trend */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
         <div className="mb-5">
           <h3 className="font-semibold text-lg text-foreground">Marketing Efficiency Trend</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -1205,6 +1212,8 @@ export default function MarketingEfficiency() {
           CAC increased from £9.20 in September to £12.20 in March — a 33% increase in 6 months.
         </p>
       </div>
+
+      </div>{/* end Detailed Analysis group */}
 
       {/* Recommended actions */}
       <div className="mt-10">

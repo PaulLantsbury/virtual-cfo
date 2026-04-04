@@ -1186,6 +1186,30 @@ export default function MarketingEfficiency() {
         />
       </div>
 
+      {/*
+       * ══════════════════════════════════════════════════════════════════════
+       * FUTURE SECTION — Traffic Quality Diagnostics
+       * ══════════════════════════════════════════════════════════════════════
+       *
+       * Intentionally excluded from this page to keep the focus on:
+       *   — channel contribution profit and margin
+       *   — customer acquisition cost (blended and by channel)
+       *   — CAC payback period
+       *   — budget reallocation opportunities
+       *
+       * When added, Traffic Quality Diagnostics should appear as a separate
+       * sub-page or tab, NOT inline here. Suggested metrics when the time comes:
+       *   — Paid vs organic traffic split and quality score
+       *   — Landing page conversion rate by channel
+       *   — Session-to-order conversion rate by acquisition source
+       *   — Bounce rate by paid channel (signal of ad/landing page mismatch)
+       *
+       * Do NOT add GA4-style web analytics (top pages, bounce rate, session
+       * duration, funnel charts) to this page. This page is a financial
+       * decision surface, not a web analytics dashboard.
+       * ══════════════════════════════════════════════════════════════════════
+       */}
+
     </AppLayout>
   );
 }

@@ -381,24 +381,24 @@ const TIMELINE_FRAMING: Record<string, {
 }> = {
   "7d":  {
     upliftPhrase:  "next month at current 7-day run rate",
-    baselineNote:  "current 7-day trading baseline",
+    baselineNote:  "current 7-day run rate",
     rowLabel:      "next month",
     combinedLabel: "next month if implemented now",
     impactBasis:   "next month · 7-day run rate",
   },
   "30d": {
     upliftPhrase:  "next month at current 30-day run rate",
-    baselineNote:  "current 30-day trading baseline",
+    baselineNote:  "current 30-day run rate",
     rowLabel:      "next month",
     combinedLabel: "next month if implemented now",
     impactBasis:   "next month · 30-day run rate",
   },
   "90d": {
-    upliftPhrase:  "next month based on 90-day trading baseline",
-    baselineNote:  "90-day trading baseline",
+    upliftPhrase:  "next month based on 90-day run rate",
+    baselineNote:  "90-day run rate",
     rowLabel:      "next month",
     combinedLabel: "next month if implemented now",
-    impactBasis:   "next month · 90-day baseline",
+    impactBasis:   "next month · 90-day run rate",
   },
   "12m": {
     upliftPhrase:  "based on trailing 12-month performance",

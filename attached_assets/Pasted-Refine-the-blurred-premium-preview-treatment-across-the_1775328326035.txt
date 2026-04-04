@@ -1,0 +1,129 @@
+Refine the blurred premium-preview treatment across the app so the free version creates strong intrigue but gives away slightly less decision detail.
+
+Apply this globally to all PremiumBlurPreview / PRO-gated sections, especially:
+
+- Opportunities sections
+- driver breakdown sections
+- channel analysis sections
+- premium diagnostic tables/charts
+
+The goal is to preserve:
+- curiosity
+- trust
+- product quality
+
+while reducing how much actionable detail a free user can extract.
+
+
+PART 1 — Soften action labels in free previews
+
+Where gated opportunity rows currently show fully explicit action names such as:
+
+- Reallocate Meta spend
+- Reduce shipping costs
+- Lower discount depth
+
+Update the FREE preview version only to show slightly more general action labels such as:
+
+- Reallocate paid spend
+- Optimise fulfilment costs
+- Improve pricing strategy
+
+Use the more precise wording only for Pro users.
+
+Important:
+- do not change the headline opportunity amount visible in free
+- do not remove the fact that there are 3 opportunities
+- only make the row titles slightly less specific in free mode
+
+
+PART 2 — Reduce precision of confidence indicators in free previews
+
+Where premium-gated rows currently show:
+- High confidence
+- Medium confidence
+- Low effort
+- Medium effort
+
+Update FREE preview versions only to show less precise visual indicators, for example:
+
+Confidence: ●●●○○
+Effort: ●●○○○
+
+or a similar masked visual rating system.
+
+Do not show exact text labels like "High confidence" or "Medium effort" in free mode.
+
+For Pro users, keep the full exact labels unchanged.
+
+
+PART 3 — Increase masking on value columns only
+
+In blurred premium-preview sections, make the right-hand value columns harder to infer than the left-hand category labels.
+
+Apply stronger blur / opacity / masking specifically to:
+
+- £ impact columns
+- pp uplift columns
+- value labels at end of bars
+- summary value rows inside gated previews
+
+Keep left-hand row/category labels more readable than right-hand values.
+
+Goal:
+Users can understand what kind of action is hidden,
+but cannot clearly infer how valuable it is.
+
+
+PART 4 — Slightly soften ranking clarity in free previews
+
+Where opportunity rows show:
+1
+2
+3
+
+Reduce the prominence of these ranking numbers in FREE previews by slightly lowering contrast or opacity.
+
+Keep them visible enough to suggest ranking exists,
+but avoid making the priority order feel fully explicit.
+
+Do not remove them entirely.
+
+
+PART 5 — Preserve what should remain visible in free mode
+
+Do NOT change the following:
+- headline opportunity value (e.g. £20,400)
+- overall number of opportunities shown
+- upgrade CTA position
+- overall section structure
+- ghost value placeholders (e.g. £ —,— and +—.—pp)
+
+The free version should still clearly communicate:
+- there is a real quantified opportunity
+- there are multiple identified actions
+- more precise guidance is available in Pro
+
+
+PART 6 — Consistency across all pages
+
+Apply these rules consistently anywhere premium blur previews are used across:
+- Profit Margin Analysis
+- Marketing Efficiency
+- Growth Drivers / Growth Quality
+- any other PRO-gated analysis pages
+
+Ensure free previews now communicate:
+"valuable insight exists here"
+without allowing users to extract too much actionable precision.
+
+
+PART 7 — Final quality check
+
+After implementing:
+- free mode should still feel generous and premium
+- Pro mode should still feel meaningfully more useful
+- blurred sections should create intrigue, not frustration
+- no gated preview should look broken, empty, or disabled
+
+Do not redesign the pages — just tighten the premium-preview behaviour.

@@ -255,6 +255,16 @@ const ME_OPPORTUNITIES: {
   },
 ];
 
+/**
+ * Softer action labels shown in the FREE ghost preview only.
+ * Pro users see the precise shortLabel from ME_OPPORTUNITIES.
+ */
+const ME_GHOST_LABELS: Record<string, string> = {
+  "Reallocate Meta spend":                                           "Reallocate paid spend",
+  "Increase lifecycle email conversion":                             "Improve retention efficiency",
+  "Improve paid acquisition mix toward higher-contribution products": "Optimise paid acquisition mix",
+};
+
 /** @dynamic Sum of ppGain across ME_OPPORTUNITIES */
 const ME_TOTAL_PP = +ME_OPPORTUNITIES.reduce((s, o) => s + o.ppGain, 0).toFixed(1);
 
@@ -489,7 +499,7 @@ export default function MarketingEfficiency() {
                 <span className="text-sm font-semibold text-destructive">
                   ↓ {Math.abs(MKT_CM_CHANGE)}pp
                 </span>
-                <span className="text-xs text-muted-foreground">vs prior period</span>
+                <span className="text-xs text-muted-foreground">vs last month</span>
               </div>
 
               {/* @dynamic gaps recompute from MKT_CM vs MKT_CM_TARGET */}
@@ -759,38 +769,47 @@ export default function MarketingEfficiency() {
             /* ── FREE: full rows blurred + gradient + indigo upgrade card ── */
             <div className="relative">
 
-              {/* Ghost rows — labels readable, values masked as placeholders */}
+              {/* Ghost rows — softer labels, dot ratings, muted values */}
               <div className="pointer-events-none select-none" aria-hidden="true">
                 <div className="divide-y divide-border/40">
                   {ME_OPPORTUNITIES.map((o, i) => (
                     <div key={i} className="flex items-center justify-between px-6 py-4 gap-4">
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                        {/* Ranking bullet — muted in free mode so ordering feels less explicit */}
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-border/50 dark:bg-slate-700/30 shrink-0 text-[11px] font-medium text-foreground/30">
                           {i + 1}
                         </span>
                         <div className="min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
-                            <span className={cn(
-                              "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
-                              o.confidence === "high"
-                                ? "bg-secondary text-muted-foreground border-border/60"
-                                : o.confidence === "medium"
-                                ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
-                                : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
-                            )}>
-                              {o.confidence === "high" ? "High confidence" : o.confidence === "medium" ? "Medium confidence" : "Requires validation"}
+                          {/* Soft action label — generalised vs Pro-specific wording */}
+                          <p className="text-sm font-semibold text-foreground leading-snug">
+                            {ME_GHOST_LABELS[o.shortLabel] ?? o.shortLabel}
+                          </p>
+                          {/* Dot indicators — replace explicit confidence/effort text */}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="inline-flex items-center gap-[2px] text-[9px]">
+                              <span className="text-foreground/25 mr-0.5">conf</span>
+                              {[0,1,2].map(j => {
+                                const f = o.confidence === "high" ? 3 : o.confidence === "medium" ? 2 : 1;
+                                return <span key={j} className={j < f ? "text-foreground/40" : "text-foreground/15"}>{j < f ? "●" : "○"}</span>;
+                              })}
+                            </span>
+                            <span className="inline-flex items-center gap-[2px] text-[9px]">
+                              <span className="text-foreground/25 mr-0.5">effort</span>
+                              {[0,1,2].map(j => {
+                                const f = o.effort === "low" ? 1 : o.effort === "medium" ? 2 : 3;
+                                return <span key={j} className={j < f ? "text-foreground/40" : "text-foreground/15"}>{j < f ? "●" : "○"}</span>;
+                              })}
                             </span>
                           </div>
-                          <p className="text-xs text-foreground/20 dark:text-foreground/15 mt-0.5 leading-snug">—— —— —— ——</p>
                         </div>
                       </div>
+                      {/* Value columns — deeper masking than left-side labels */}
                       <div className="flex items-start gap-5 shrink-0 ml-4">
-                        <span className="text-sm font-bold whitespace-nowrap tabular-nums w-12 text-right pt-0.5 text-foreground/25 dark:text-foreground/20">
+                        <span className="text-sm font-bold whitespace-nowrap tabular-nums w-12 text-right pt-0.5 text-foreground/[0.13]">
                           +—.—pp
                         </span>
                         <div className="text-right w-28">
-                          <p className="text-sm font-bold tabular-nums leading-none text-foreground/25 dark:text-foreground/20">
+                          <p className="text-sm font-bold tabular-nums leading-none text-foreground/[0.13]">
                             £ —,—
                           </p>
                         </div>
@@ -798,10 +817,10 @@ export default function MarketingEfficiency() {
                     </div>
                   ))}
                 </div>
-                {/* Combined footer — masked value */}
+                {/* Combined footer — value more muted than label */}
                 <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
                   <p className="text-sm font-semibold text-foreground">Combined impact — {framing.combinedLabel}</p>
-                  <span className="text-base font-bold tabular-nums text-foreground/25 dark:text-foreground/20">
+                  <span className="text-base font-bold tabular-nums text-foreground/[0.13]">
                     £ —,—
                   </span>
                 </div>

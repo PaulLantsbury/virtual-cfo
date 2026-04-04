@@ -1,4 +1,4 @@
-import { Sparkles, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Sparkles, TrendingUp } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
@@ -14,21 +14,29 @@ import { cn } from "@/lib/utils";
 
 /** @dynamic */
 const BLENDED_CAC        = 12.20;
-const BLENDED_CAC_PREV   = 9.80;
+const BLENDED_CAC_PREV   = 9.80;   // last month
+const BLENDED_CAC_LY     = 10.20;  // 12-month average
 const BLENDED_CAC_CHANGE = +(BLENDED_CAC - BLENDED_CAC_PREV).toFixed(2);
+const BLENDED_CAC_CHANGE_LY = +(BLENDED_CAC - BLENDED_CAC_LY).toFixed(2);
 
 /** @dynamic */
 const BLENDED_ROAS       = 2.8;
-const BLENDED_ROAS_PREV  = 3.4;
+const BLENDED_ROAS_PREV  = 3.4;    // last month
+const BLENDED_ROAS_LY    = 3.2;    // 12-month average
+const BLENDED_ROAS_CHANGE_MOM = +(BLENDED_ROAS - BLENDED_ROAS_PREV).toFixed(1);
+const BLENDED_ROAS_CHANGE_LY  = +(BLENDED_ROAS - BLENDED_ROAS_LY).toFixed(1);
 
 /** @dynamic */
 const CAC_PAYBACK        = 1.4;
-const CAC_PAYBACK_PREV   = 1.1;
+const CAC_PAYBACK_PREV   = 1.1;    // last month
+const CAC_PAYBACK_LY     = 1.0;    // 12-month average
 
 /** @dynamic */
 const MKT_CM             = 38.6;
-const MKT_CM_PREV        = 41.8;
+const MKT_CM_PREV        = 41.8;   // last month
+const MKT_CM_LY          = 43.5;   // 12-month average
 const MKT_CM_CHANGE      = +(MKT_CM - MKT_CM_PREV).toFixed(1);
+const MKT_CM_CHANGE_LY   = +(MKT_CM - MKT_CM_LY).toFixed(1);
 
 /** @dynamic Marketing contribution margin target range */
 const MKT_CM_TARGET      = { low: 42, high: 48 } as const;
@@ -246,6 +254,18 @@ const ME_DRIVERS = [
 const ME_DRIVERS_TOTAL = ME_DRIVERS.reduce((s, d) => s + d.impact, 0); // −12_600
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function VarLine({ label, value, favorable }: { label: string; value: string; favorable: boolean }) {
+  return (
+    <div className={cn(
+      "flex items-center gap-1 text-xs leading-none",
+      favorable ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+    )}>
+      <span className="font-semibold">{value}</span>
+      <span className="text-muted-foreground font-normal">{label}</span>
+    </div>
+  );
+}
 
 const EFFICIENCY_CONFIG: Record<EfficiencyRating, { label: string; badge: string; dot: string }> = {
   strong: {
@@ -585,95 +605,107 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
 
-        {/* Marketing Contribution Profit — headline KPI */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+        {/* 1 — Marketing Contribution Profit */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Marketing Contribution Profit</p>
-          <p className="text-4xl font-display font-bold text-foreground">
+          <p className="text-3xl font-display font-bold text-foreground mb-2">
             £{MKT_CP.toLocaleString()}
           </p>
-          <div className="space-y-1.5 mt-3">
-            <div className="flex items-center gap-1 text-xs">
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold whitespace-nowrap">
-                <ArrowDownRight className="w-3 h-3 shrink-0" />
-                £{Math.abs(MKT_CP_CHANGE_MOM).toLocaleString()} vs last month
-              </span>
-            </div>
-            <div className="flex items-center gap-1 text-xs">
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold whitespace-nowrap">
-                <ArrowUpRight className="w-3 h-3 shrink-0" />
-                £{MKT_CP_CHANGE_LY.toLocaleString()} vs 12-month avg
-              </span>
-            </div>
+          <div className="space-y-0.5 mb-2">
+            <VarLine
+              label="vs last month"
+              value={`↓ £${Math.abs(MKT_CP_CHANGE_MOM).toLocaleString()}`}
+              favorable={MKT_CP_CHANGE_MOM > 0}
+            />
+            <VarLine
+              label="vs 12-month avg"
+              value={`↑ £${MKT_CP_CHANGE_LY.toLocaleString()}`}
+              favorable={MKT_CP_CHANGE_LY > 0}
+            />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Revenue remaining after all marketing costs
-          </p>
+          <p className="text-xs text-muted-foreground leading-snug">Revenue remaining after all marketing costs</p>
         </div>
 
-        {/* Blended CAC */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+        {/* 2 — Blended CAC */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Blended CAC</p>
-          <p className="text-4xl font-display font-bold text-foreground">£{BLENDED_CAC.toFixed(2)}</p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
-              <ArrowUpRight className="w-3 h-3" />
-              Up £{BLENDED_CAC_CHANGE.toFixed(2)} vs last month
-            </span>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">£{BLENDED_CAC.toFixed(2)}</p>
+          <div className="space-y-0.5 mb-2">
+            <VarLine
+              label="vs last month"
+              value={`↑ £${BLENDED_CAC_CHANGE.toFixed(2)}`}
+              favorable={BLENDED_CAC_CHANGE < 0}
+            />
+            <VarLine
+              label="vs 12-month avg"
+              value={`↑ £${BLENDED_CAC_CHANGE_LY.toFixed(2)}`}
+              favorable={BLENDED_CAC_CHANGE_LY < 0}
+            />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Average cost to acquire one customer across all channels
-          </p>
+          <p className="text-xs text-muted-foreground leading-snug">Average cost to acquire one customer across all channels</p>
         </div>
 
-        {/* Blended ROAS */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+        {/* 3 — Blended ROAS */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Blended ROAS</p>
-          <p className="text-4xl font-display font-bold text-foreground">{BLENDED_ROAS}x</p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
-              <ArrowDownRight className="w-3 h-3" />
-              Down from {BLENDED_ROAS_PREV}x last month
-            </span>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">{BLENDED_ROAS}×</p>
+          <div className="space-y-0.5 mb-2">
+            <VarLine
+              label="vs last month"
+              value={`↓ ${Math.abs(BLENDED_ROAS_CHANGE_MOM).toFixed(1)}×`}
+              favorable={BLENDED_ROAS_CHANGE_MOM > 0}
+            />
+            <VarLine
+              label="vs 12-month avg"
+              value={`↓ ${Math.abs(BLENDED_ROAS_CHANGE_LY).toFixed(1)}×`}
+              favorable={BLENDED_ROAS_CHANGE_LY > 0}
+            />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Revenue returned per £1 of blended marketing spend
-          </p>
+          <p className="text-xs text-muted-foreground leading-snug">Revenue returned per £1 of blended marketing spend</p>
         </div>
 
-        {/* CAC Payback */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+        {/* 4 — CAC Payback Period */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
-          <p className="text-4xl font-display font-bold text-foreground">
-            {CAC_PAYBACK}{" "}
-            <span className="text-lg font-medium text-muted-foreground">orders</span>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">
+            {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
           </p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
-              <ArrowUpRight className="w-3 h-3" />
-              Up from {CAC_PAYBACK_PREV} last month
-            </span>
+          <div className="space-y-0.5 mb-2">
+            <VarLine
+              label="vs last month"
+              value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`}
+              favorable={CAC_PAYBACK < CAC_PAYBACK_PREV}
+            />
+            <VarLine
+              label="vs 12-month avg"
+              value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`}
+              favorable={CAC_PAYBACK < CAC_PAYBACK_LY}
+            />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Orders needed to recover the cost of acquiring each new customer
-          </p>
+          <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover the cost of acquiring each new customer</p>
         </div>
 
-        {/* Marketing CM */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
+        {/* 5 — Marketing Contribution Margin */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Marketing Contribution Margin</p>
-          <p className="text-4xl font-display font-bold text-foreground">{MKT_CM}%</p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
-              <ArrowDownRight className="w-3 h-3" />
-              {Math.abs(MKT_CM_CHANGE)}pp vs prior period
-            </span>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">{MKT_CM}%</p>
+          <div className="space-y-0.5 mb-2">
+            <VarLine
+              label="vs last month"
+              value={`↓ ${Math.abs(MKT_CM_CHANGE).toFixed(1)}pp`}
+              favorable={MKT_CM_CHANGE > 0}
+            />
+            <VarLine
+              label="vs 12-month avg"
+              value={`↓ ${Math.abs(MKT_CM_CHANGE_LY).toFixed(1)}pp`}
+              favorable={MKT_CM_CHANGE_LY > 0}
+            />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Blended contribution margin after all marketing costs
-          </p>
+          <p className="text-xs text-muted-foreground leading-snug">Blended contribution margin after all marketing costs</p>
         </div>
+
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════

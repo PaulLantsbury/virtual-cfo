@@ -538,16 +538,6 @@ export default function MarketingEfficiency() {
 
       </div>
 
-      {/* Recommended actions */}
-      <div className="mb-10">
-        <ActionRecommendations
-          recommendations={RECOMMENDATIONS}
-          title="What to do next"
-          subtitle="Practical actions to improve marketing efficiency and contribution margin"
-          defaultExpanded
-        />
-      </div>
-
       {/* ══════════════════════════════════════════════════════════════════════
           §3  ACTUAL PERFORMANCE
           Blended headline metrics for the current period
@@ -769,18 +759,40 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §4  KEY DRIVERS
-          Which channels are causing efficiency to deteriorate
+          §5  KEY DRIVERS
+          Primary causes of current efficiency movement and recommended actions
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-4">
         <h2 className="text-xl font-bold text-foreground">Key Drivers</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Channel-level acquisition cost and efficiency movement vs last month
+          Primary causes of current efficiency movement and recommended actions
         </p>
       </div>
 
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
+      <div className="mb-10">
+        <ActionRecommendations
+          recommendations={RECOMMENDATIONS}
+          title="What to do next"
+          subtitle="Practical actions to improve marketing efficiency and contribution margin"
+          defaultExpanded
+        />
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          §6  DETAILED ANALYSIS
+          CAC by channel, payback, contribution margin, and trend evidence
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-4">
+        <h2 className="text-xl font-bold text-foreground">Detailed Analysis</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Channel-level acquisition cost, payback period, contribution margin, and 12-month efficiency trend
+        </p>
+      </div>
+
+      {/* CAC by Channel */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-6">
         <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Customer Acquisition Cost by Channel
@@ -788,7 +800,6 @@ export default function MarketingEfficiency() {
           <p className="text-xs text-muted-foreground">vs last month</p>
         </div>
 
-        {/* Table header */}
         <div className="grid grid-cols-4 gap-4 px-6 py-2.5 border-b border-border/40">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Channel</span>
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">CAC</span>
@@ -825,7 +836,6 @@ export default function MarketingEfficiency() {
           })}
         </div>
 
-        {/* Footer annotation */}
         <div className="px-6 py-3 border-t border-border/40 bg-secondary/10">
           <p className="text-xs text-muted-foreground leading-snug">
             Meta CAC has risen {CAC_BY_CHANNEL[0].changeLabel} month-on-month and now exceeds the blended average by £{(CAC_BY_CHANNEL[0].cac - BLENDED_CAC).toFixed(2)} per order.
@@ -834,16 +844,57 @@ export default function MarketingEfficiency() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          §5  DETAILED ANALYSIS
-          Channel margin, payback, and trend evidence
-      ══════════════════════════════════════════════════════════════════════ */}
+      {/* CAC Payback by Channel */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-6">
+        <div className="mb-5">
+          <h3 className="font-semibold text-lg text-foreground">CAC Payback by Channel</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Number of orders required to recover the acquisition cost for each channel.
+          </p>
+        </div>
 
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-foreground">Detailed Analysis</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Channel-level contribution margin, payback period, and 12-month efficiency trend
-        </p>
+        <div className="space-y-4">
+          {[...PAYBACK_BY_CHANNEL].sort((a, b) => a.payback - b.payback).map((row) => {
+            const overThreshold = row.payback > PAYBACK_THRESHOLD;
+            const barPct = Math.min((row.payback / 3) * 100, 100);
+            return (
+              <div key={row.channel}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm font-medium text-foreground">{row.channel}</span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "text-sm font-bold",
+                        overThreshold ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
+                      )}
+                    >
+                      {row.payback} orders
+                    </span>
+                    {overThreshold && (
+                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
+                        Above target
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="w-full h-2 bg-secondary rounded-full">
+                  <div
+                    className={cn("h-2 rounded-full transition-all", overThreshold ? "bg-destructive" : "bg-emerald-500")}
+                    style={{ width: `${barPct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
+          <span className="inline-block w-6 border-t border-dashed border-destructive/60 mt-2 shrink-0" />
+          <span>
+            Target threshold: <span className="font-semibold">{PAYBACK_THRESHOLD} orders</span>. Channels above this
+            reduce short-term cash efficiency and increase growth risk.
+          </span>
+        </div>
       </div>
 
       {/* Contribution Margin by Channel */}
@@ -909,59 +960,6 @@ export default function MarketingEfficiency() {
             margin by approximately{" "}
             <span className="font-semibold">1.2pp</span> next month.
           </p>
-        </div>
-      </div>
-
-      {/* CAC Payback by Channel */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-6">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">CAC Payback by Channel</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Number of orders required to recover the acquisition cost for each channel.
-          </p>
-        </div>
-
-        <div className="space-y-4">
-          {[...PAYBACK_BY_CHANNEL].sort((a, b) => a.payback - b.payback).map((row) => {
-            const overThreshold = row.payback > PAYBACK_THRESHOLD;
-            const barPct = Math.min((row.payback / 3) * 100, 100);
-            return (
-              <div key={row.channel}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm font-medium text-foreground">{row.channel}</span>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "text-sm font-bold",
-                        overThreshold ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
-                      )}
-                    >
-                      {row.payback} orders
-                    </span>
-                    {overThreshold && (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
-                        Above target
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="w-full h-2 bg-secondary rounded-full">
-                  <div
-                    className={cn("h-2 rounded-full transition-all", overThreshold ? "bg-destructive" : "bg-emerald-500")}
-                    style={{ width: `${barPct}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
-          <span className="inline-block w-6 border-t border-dashed border-destructive/60 mt-2 shrink-0" />
-          <span>
-            Target threshold: <span className="font-semibold">{PAYBACK_THRESHOLD} orders</span>. Channels above this
-            reduce short-term cash efficiency and increase growth risk.
-          </span>
         </div>
       </div>
 

@@ -61,6 +61,26 @@ const MKT_CP_PER_ORDER_CHANGE_MOM = +(MKT_CP_PER_ORDER - MKT_CP_PER_ORDER_PREV).
 const MKT_CP_PER_ORDER_CHANGE_LY  = +(MKT_CP_PER_ORDER - MKT_CP_PER_ORDER_LY).toFixed(2);  // -2.30 (unfavourable)
 
 /**
+ * Total marketing spend for the current period across all channels.
+ * @dynamic Sourced from advertising platform costs (Meta, Google Shopping) + email tool costs.
+ *          Validated against: MKT_CP / TOTAL_MKT_SPEND ≈ CP_PER_SPEND
+ */
+const TOTAL_MKT_SPEND      = 17_600; // current period
+const TOTAL_MKT_SPEND_PREV = 16_000; // last month — lower spend, better efficiency
+const TOTAL_MKT_SPEND_LY   = 12_500; // 12-month average — historically more efficient
+
+/**
+ * Contribution generated for every £1 of marketing spend.
+ * @dynamic MKT_CP / TOTAL_MKT_SPEND
+ * Unfavourable direction: higher is better (declining = spending more to earn less contribution).
+ */
+const CP_PER_SPEND      = +(MKT_CP      / TOTAL_MKT_SPEND).toFixed(2);            // £2.18
+const CP_PER_SPEND_PREV = +(MKT_CP_PREV / TOTAL_MKT_SPEND_PREV).toFixed(2);      // £2.58
+const CP_PER_SPEND_LY   = +(MKT_CP_LY   / TOTAL_MKT_SPEND_LY).toFixed(2);        // £2.83
+const CP_PER_SPEND_CHANGE_MOM = +(CP_PER_SPEND - CP_PER_SPEND_PREV).toFixed(2);   // -0.40 (unfavourable)
+const CP_PER_SPEND_CHANGE_LY  = +(CP_PER_SPEND - CP_PER_SPEND_LY).toFixed(2);     // -0.65 (unfavourable)
+
+/**
  * Recoverable contribution available if spend is reallocated toward higher-margin channels.
  * @dynamic Math.round(orderVolume × (cmGainPp / 100) × revenuePerOrder)
  */
@@ -739,7 +759,7 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-6">
 
         {/* 1 — Marketing Contribution Profit */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
@@ -859,6 +879,27 @@ export default function MarketingEfficiency() {
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Contribution profit generated per order after marketing cost</p>
+        </div>
+
+        {/* 7 — Contribution per £1 of Marketing Spend */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per £1 Spend</p>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">
+            £{CP_PER_SPEND.toFixed(2)}
+          </p>
+          <div className="space-y-0.5 mb-2">
+            <VarLine
+              label="vs last month"
+              value={`${CP_PER_SPEND_CHANGE_MOM < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_MOM).toFixed(2)}`}
+              favorable={CP_PER_SPEND_CHANGE_MOM > 0}
+            />
+            <VarLine
+              label="vs 12-month avg"
+              value={`${CP_PER_SPEND_CHANGE_LY < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_LY).toFixed(2)}`}
+              favorable={CP_PER_SPEND_CHANGE_LY > 0}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground leading-snug">Contribution generated for every £1 of marketing spend</p>
         </div>
 
       </div>

@@ -1315,7 +1315,7 @@ export default function MarketingEfficiency() {
       <PremiumBlurPreview
         title="Key Drivers"
         subtitle="What changed vs prior period and the contribution impact."
-        badgeText="PRO — Unlock detailed analysis"
+        badgeText="PRO — Unlock margin drivers"
         ctaTitle="Unlock attributed driver breakdown"
         ctaDescription="See exactly which cost or mix changes drove the most contribution impact, with per-driver £ attribution."
         isPro={canAccess("driver_breakdown")}
@@ -1522,7 +1522,7 @@ export default function MarketingEfficiency() {
             <p className="text-sm font-bold text-foreground tabular-nums">{CAC_PAYBACK} orders</p>
           </div>
         }
-        ctaTitle="Unlock CAC Payback Analysis"
+        ctaTitle="Unlock CAC payback by channel"
         ctaDescription="Identify which channels delay cash recovery and increase working capital pressure."
         isPro={canAccess("cac_payback")}
       >

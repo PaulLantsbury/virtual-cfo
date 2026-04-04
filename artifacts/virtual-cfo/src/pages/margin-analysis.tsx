@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown } from "lucide-react";
+import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown, Lock } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { UpgradePreviewCard } from "@/components/UpgradePreviewCard";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
@@ -494,16 +493,15 @@ export default function MarginAnalysis() {
           </p>
         </div>
 
-        {/* ── Opportunity rows — gated by plan ── */}
-        {canAccess("opportunity_breakdown") ? (
-          /* ── PRO: full breakdown ── */
-          <div className="bg-card">
+        {/* ── Opportunity rows — gated by plan via inline blur pattern ── */}
+        <div className="bg-card">
 
-            {/* Column header row */}
-            <div className="flex items-center justify-between px-6 py-3 border-b border-border/50">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Top opportunities driving this estimate
-              </p>
+          {/* Column header — always visible; badge shown when locked */}
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Top opportunities driving this estimate
+            </p>
+            {canAccess("opportunity_breakdown") ? (
               <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
                   CM gain
@@ -512,131 +510,199 @@ export default function MarginAnalysis() {
                   £ next month
                 </span>
               </div>
-            </div>
-
-            <div className="divide-y divide-border/40">
-              {visibleScenarios.map((s, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-secondary/20 transition-colors gap-4"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-foreground">{s.shortLabel}</p>
-                        <span className={cn(
-                          "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
-                          s.confidence === "high"
-                            ? "bg-secondary text-muted-foreground border-border/60"
-                            : s.confidence === "medium"
-                            ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
-                            : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
-                        )}>
-                          {s.confidence === "high"
-                            ? "High confidence"
-                            : s.confidence === "medium"
-                            ? "Medium confidence"
-                            : "Requires validation"}
-                        </span>
-                        <span className={cn(
-                          "inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap",
-                          s.effort === "low"
-                            ? "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
-                            : s.effort === "medium"
-                            ? "bg-orange-50 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400"
-                            : "bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400"
-                        )}>
-                          {s.effort === "low" ? "Low effort" : s.effort === "medium" ? "Medium effort" : "High effort"}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-5 shrink-0 ml-4">
-                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                      +{s.ppGain.toFixed(1)}pp
-                    </span>
-                    <div className="text-right w-20">
-                      <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                        £{s.cashImpact.toLocaleString()}
-                      </p>
-                      <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
-                        next month
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* View more / fewer toggle — only renders when there are hidden scenarios */}
-            {hasMoreScenarios && (
-              <button
-                onClick={() => setShowAllOpportunities((v) => !v)}
-                className="w-full flex items-center justify-center gap-1.5 px-6 py-3 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/40 border-t border-border/40 transition-colors"
-              >
-                <ChevronDown
-                  className={cn(
-                    "w-3.5 h-3.5 transition-transform duration-200",
-                    showAllOpportunities && "rotate-180"
-                  )}
-                />
-                {showAllOpportunities
-                  ? "Show fewer opportunities"
-                  : `View ${RECOVERY_SCENARIOS.length - VISIBLE_SCENARIO_COUNT} more opportunities`}
-              </button>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">
+                PRO — Unlock opportunity breakdown
+              </span>
             )}
+          </div>
 
-            {/* Combined impact footer */}
-            <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
-              <p className="text-sm font-semibold text-foreground">
-                Combined impact next month if implemented now
-              </p>
-              <div className="flex items-start gap-5 shrink-0 ml-4">
-                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                  +{RECOVERY_TOTAL_PP}pp
-                </span>
-                <div className="text-right w-20">
-                  <p className="text-base font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                    ≈ £{RECOVERY_TOTAL_CASH.toLocaleString()}
-                  </p>
-                  <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
-                    next month
-                  </p>
+          {canAccess("opportunity_breakdown") ? (
+            /* ── PRO: full rows + toggle + combined footer ── */
+            <>
+              <div className="divide-y divide-border/40">
+                {visibleScenarios.map((s, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between px-6 py-4 hover:bg-secondary/20 transition-colors gap-4"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-semibold text-foreground">{s.shortLabel}</p>
+                          <span className={cn(
+                            "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
+                            s.confidence === "high"
+                              ? "bg-secondary text-muted-foreground border-border/60"
+                              : s.confidence === "medium"
+                              ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
+                              : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
+                          )}>
+                            {s.confidence === "high"
+                              ? "High confidence"
+                              : s.confidence === "medium"
+                              ? "Medium confidence"
+                              : "Requires validation"}
+                          </span>
+                          <span className={cn(
+                            "inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap",
+                            s.effort === "low"
+                              ? "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
+                              : s.effort === "medium"
+                              ? "bg-orange-50 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400"
+                              : "bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400"
+                          )}>
+                            {s.effort === "low" ? "Low effort" : s.effort === "medium" ? "Medium effort" : "High effort"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-5 shrink-0 ml-4">
+                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
+                        +{s.ppGain.toFixed(1)}pp
+                      </span>
+                      <div className="text-right w-20">
+                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                          £{s.cashImpact.toLocaleString()}
+                        </p>
+                        <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
+                          next month
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* View more / fewer toggle */}
+              {hasMoreScenarios && (
+                <button
+                  onClick={() => setShowAllOpportunities((v) => !v)}
+                  className="w-full flex items-center justify-center gap-1.5 px-6 py-3 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/40 border-t border-border/40 transition-colors"
+                >
+                  <ChevronDown
+                    className={cn(
+                      "w-3.5 h-3.5 transition-transform duration-200",
+                      showAllOpportunities && "rotate-180"
+                    )}
+                  />
+                  {showAllOpportunities
+                    ? "Show fewer opportunities"
+                    : `View ${RECOVERY_SCENARIOS.length - VISIBLE_SCENARIO_COUNT} more opportunities`}
+                </button>
+              )}
+
+              {/* Combined impact footer */}
+              <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
+                <p className="text-sm font-semibold text-foreground">
+                  Combined impact next month if implemented now
+                </p>
+                <div className="flex items-start gap-5 shrink-0 ml-4">
+                  <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
+                    +{RECOVERY_TOTAL_PP}pp
+                  </span>
+                  <div className="text-right w-20">
+                    <p className="text-base font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                      ≈ £{RECOVERY_TOTAL_CASH.toLocaleString()}
+                    </p>
+                    <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
+                      next month
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        ) : (
-          /* ── FREE: names only + upgrade card ── */
-          <div className="bg-card">
-            <div className="px-6 py-3 border-b border-border/50">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Top opportunities identified
-              </p>
-            </div>
-            <div className="divide-y divide-border/40">
-              {RECOVERY_SCENARIOS.map((s, i) => (
-                <div key={i} className="flex items-center gap-3 px-6 py-4">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-                    {i + 1}
-                  </span>
-                  <p className="text-sm font-semibold text-foreground">{s.shortLabel}</p>
-                </div>
-              ))}
-            </div>
+            </>
+          ) : (
+            /* ── FREE: full PRO rows blurred + gradient + indigo upgrade card ── */
+            <div className="relative">
 
-            {/* Upgrade preview card */}
-            <UpgradePreviewCard
-              title="Unlock estimated financial impact and implementation steps"
-              description="See the estimated £ contribution uplift and specific implementation steps for each opportunity, ranked by financial impact."
-              className="mx-6 my-5"
-            />
-          </div>
-        )}
+              {/* Full PRO rows rendered beneath the blur */}
+              <div className="blur-[3px] opacity-40 pointer-events-none select-none" aria-hidden="true">
+                <div className="divide-y divide-border/40">
+                  {RECOVERY_SCENARIOS.map((s, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between px-6 py-4 gap-4"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                          {i + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-semibold text-foreground">{s.shortLabel}</p>
+                            <span className={cn(
+                              "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
+                              s.confidence === "high"
+                                ? "bg-secondary text-muted-foreground border-border/60"
+                                : s.confidence === "medium"
+                                ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
+                                : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
+                            )}>
+                              {s.confidence === "high" ? "High confidence" : s.confidence === "medium" ? "Medium confidence" : "Requires validation"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-5 shrink-0 ml-4">
+                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
+                          +{s.ppGain.toFixed(1)}pp
+                        </span>
+                        <div className="text-right w-20">
+                          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                            £{s.cashImpact.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Combined footer — blurred too */}
+                <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
+                  <p className="text-sm font-semibold text-foreground">Combined impact next month</p>
+                  <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                    ≈ £{RECOVERY_TOTAL_CASH.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Gradient fade */}
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/65 to-transparent rounded-b-xl pointer-events-none" />
+
+              {/* Indigo upgrade card */}
+              <div className="relative mx-6 mb-5 mt-4">
+                <a
+                  href="/upgrade"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/30 px-5 py-4 hover:border-indigo-300 hover:bg-indigo-100/80 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/35 transition-colors cursor-pointer group"
+                >
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0 mt-0.5">
+                      <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
+                        Unlock estimated financial impact
+                      </p>
+                      <p className="text-xs text-indigo-700/70 dark:text-indigo-400/70 mt-1 leading-snug">
+                        See the £ uplift, confidence level, and implementation steps for each opportunity.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
+                    Upgrade →
+                  </span>
+                </a>
+              </div>
+
+            </div>
+          )}
+
+        </div>
       </div>
 
       {/* Margin Risk Monitor */}
@@ -772,8 +838,9 @@ export default function MarginAnalysis() {
         <PremiumBlurPreview
           title="CAC Payback Period"
           subtitle="Orders needed to recover acquisition cost"
-          badgeText="PRO"
-          ctaTitle="Unlock CAC Payback"
+          badgeText="PRO — Unlock CAC payback"
+          ctaTitle="Unlock CAC payback period"
+          ctaDescription="See how many orders it takes to recover each new customer acquisition."
           isPro={canAccess("cac_payback")}
           className="p-5"
         >
@@ -831,9 +898,9 @@ export default function MarginAnalysis() {
       <PremiumBlurPreview
         title="Driver Attribution"
         subtitle="What changed vs last month and the per-order margin impact."
-        badgeText="PRO — Unlock detailed analysis"
-        ctaTitle="Unlock driver-level breakdown"
-        ctaDescription="See exactly what changed and how much each factor impacted margin."
+        badgeText="PRO — Unlock margin drivers"
+        ctaTitle="Unlock attributed margin driver breakdown"
+        ctaDescription="See exactly what changed this period and how much each factor impacted your margin per order."
         isPro={canAccess("driver_breakdown")}
         className="overflow-hidden mb-10"
       >
@@ -924,8 +991,8 @@ export default function MarginAnalysis() {
       <PremiumBlurPreview
         title="Contribution Margin Bridge"
         subtitle={`How revenue converts into contribution margin — total and per order · ${selectedLabel}`}
-        badgeText="PRO — Unlock detailed analysis"
-        ctaTitle="Unlock contribution margin bridge analysis"
+        badgeText="PRO — Unlock margin bridge"
+        ctaTitle="Unlock contribution margin bridge"
         ctaDescription="See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing."
         isPro={canAccess("margin_bridge")}
         className="mb-8"
@@ -1036,9 +1103,9 @@ export default function MarginAnalysis() {
           <PremiumBlurPreview
             title="Contribution Margin by Channel"
             subtitle={`Contribution margin % per acquisition channel · ${selectedLabel}`}
-            badgeText="PRO — Unlock detailed analysis"
-            ctaTitle="Unlock channel-level margin insights"
-            ctaDescription="See which channels create margin and which are dragging blended profitability."
+            badgeText="PRO — Unlock channel diagnostics"
+            ctaTitle="Unlock channel margin diagnostics"
+            ctaDescription="See which channels are creating margin and which are dragging blended profitability."
             isPro={canAccess("channel_margin_analysis")}
             className="mb-8"
           >

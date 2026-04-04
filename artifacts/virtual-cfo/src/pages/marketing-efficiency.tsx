@@ -6,6 +6,8 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ActionRecommendations } from "@/components/ActionRecommendations";
 import type { Recommendation } from "@/components/ActionRecommendations";
+import { UpgradePreviewCard } from "@/components/UpgradePreviewCard";
+import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
@@ -110,6 +112,51 @@ const REALLOCATION = {
   cashLow: 10_000,
   cashHigh: 25_000,
 } as const;
+
+type Confidence = "high" | "medium" | "low";
+type Effort     = "low" | "medium" | "high";
+
+/**
+ * Structured opportunity scenarios for the Marketing Efficiency page.
+ * Each entry supports Free (name only) and Pro (full breakdown) display.
+ * @dynamic Replace with live-computed values from ad platform + Shopify data.
+ */
+const ME_OPPORTUNITIES: {
+  shortLabel: string;
+  detail: string;
+  ppGain: number;
+  cashImpact: number;
+  confidence: Confidence;
+  effort: Effort;
+}[] = [
+  {
+    shortLabel: "Reallocate Meta spend",
+    detail: "Shift 15% of Meta budget toward Email and Organic to improve blended CAC and contribution margin.",
+    ppGain: 1.4,
+    cashImpact: 9_800,
+    confidence: "high",
+    effort: "low",
+  },
+  {
+    shortLabel: "Increase lifecycle email conversion",
+    detail: "Improve email automation coverage to convert more existing contacts into repeat buyers.",
+    ppGain: 0.9,
+    cashImpact: 5_600,
+    confidence: "medium",
+    effort: "medium",
+  },
+  {
+    shortLabel: "Improve paid acquisition mix toward higher-contribution products",
+    detail: "Focus Google Shopping campaigns on SKUs with above-average contribution margin to improve channel ROI.",
+    ppGain: 0.7,
+    cashImpact: 2_800,
+    confidence: "medium",
+    effort: "medium",
+  },
+];
+
+/** @dynamic Sum of ppGain across ME_OPPORTUNITIES */
+const ME_TOTAL_PP = +ME_OPPORTUNITIES.reduce((s, o) => s + o.ppGain, 0).toFixed(1);
 
 const RECOMMENDATIONS: Recommendation[] = [
   {
@@ -309,55 +356,159 @@ export default function MarketingEfficiency() {
 
       {/* ══════════════════════════════════════════════════════════════════════
           §2  OPPORTUNITIES
-          Where the budget should move and what actions to take
+          Ranked by expected contribution uplift next month
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-2">
         <h2 className="text-xl font-bold text-foreground">Opportunities</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Estimated contribution uplift from reallocating spend toward higher-margin channels
+          Top profit improvement opportunities ranked by expected contribution uplift next month.
+        </p>
+        <p className="text-xs text-muted-foreground/70 mt-1">
+          Based on the current 30-day trading baseline.
         </p>
       </div>
 
-      {/* Budget reallocation */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-6">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Budget Reallocation Opportunity</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Estimated impact of shifting spend toward higher-contribution channels.
+      {/* ── Structured opportunities panel ── */}
+      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 shadow-sm mb-8 overflow-hidden">
+
+        {/* ── Hero headline ── */}
+        <div className="bg-emerald-50 dark:bg-emerald-950/25 px-8 py-6 border-b border-emerald-200 dark:border-emerald-800/40">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              Estimated additional contribution available next month
+            </p>
+          </div>
+          <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none mb-2">
+            £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+          </p>
+          <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 leading-snug">
+            Based on top quantified opportunities from the current 30-day trading baseline
           </p>
         </div>
 
-        <p className="text-sm text-foreground leading-relaxed mb-6">
-          Shifting {REALLOCATION.metaShiftPct}% of Meta spend toward Email and Organic channels could increase
-          contribution margin by <span className="font-semibold">{REALLOCATION.cmGainLow}–{REALLOCATION.cmGainHigh}pp</span>{" "}
-          next month without reducing overall revenue.
-        </p>
+        {/* ── Opportunity rows — gated by plan ── */}
+        {canAccess("opportunity_breakdown") ? (
+          /* ── PRO: full breakdown with metrics ── */
+          <div className="bg-card">
 
-        <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0">
-                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">
-                  Estimated contribution uplift
-                </p>
-                <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                  +£{(REALLOCATION.cashLow / 1000).toFixed(0)}k–£{(REALLOCATION.cashHigh / 1000).toFixed(0)}k
-                </p>
-                <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">next month at current sales volume</p>
+            {/* Column header row */}
+            <div className="flex items-center justify-between px-6 py-3 border-b border-border/50">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Top opportunities driving this estimate
+              </p>
+              <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
+                  CM gain
+                </span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-20 text-right">
+                  £ next month
+                </span>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Margin improvement</p>
-              <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
-                +{REALLOCATION.cmGainLow}–{REALLOCATION.cmGainHigh}pp
+
+            <div className="divide-y divide-border/40">
+              {ME_OPPORTUNITIES.map((o, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between px-6 py-4 hover:bg-secondary/20 transition-colors gap-4"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
+                        <span className={cn(
+                          "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
+                          o.confidence === "high"
+                            ? "bg-secondary text-muted-foreground border-border/60"
+                            : o.confidence === "medium"
+                            ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
+                            : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
+                        )}>
+                          {o.confidence === "high" ? "High confidence" : o.confidence === "medium" ? "Medium confidence" : "Requires validation"}
+                        </span>
+                        <span className={cn(
+                          "inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap",
+                          o.effort === "low"
+                            ? "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
+                            : o.effort === "medium"
+                            ? "bg-orange-50 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400"
+                            : "bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400"
+                        )}>
+                          {o.effort === "low" ? "Low effort" : o.effort === "medium" ? "Medium effort" : "High effort"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{o.detail}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-5 shrink-0 ml-4">
+                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
+                      +{o.ppGain.toFixed(1)}pp
+                    </span>
+                    <div className="text-right w-20">
+                      <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                        £{o.cashImpact.toLocaleString()}
+                      </p>
+                      <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
+                        next month
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Combined impact footer */}
+            <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
+              <p className="text-sm font-semibold text-foreground">
+                Combined impact next month if implemented now
+              </p>
+              <div className="flex items-start gap-5 shrink-0 ml-4">
+                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
+                  +{ME_TOTAL_PP}pp
+                </span>
+                <div className="text-right w-20">
+                  <p className="text-base font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                    ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+                  </p>
+                  <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
+                    next month
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        ) : (
+          /* ── FREE: names only + upgrade card ── */
+          <div className="bg-card">
+            <div className="px-6 py-3 border-b border-border/50">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Top opportunities identified
               </p>
             </div>
+            <div className="divide-y divide-border/40">
+              {ME_OPPORTUNITIES.map((o, i) => (
+                <div key={i} className="flex items-center gap-3 px-6 py-4">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
+                </div>
+              ))}
+            </div>
+            <UpgradePreviewCard
+              title="Unlock estimated financial impact and implementation steps"
+              description="See the estimated £ contribution uplift, confidence level, and implementation effort for each opportunity, ranked by financial impact."
+              className="mx-6 my-5"
+            />
           </div>
-        </div>
+        )}
+
       </div>
 
       {/* Recommended actions */}

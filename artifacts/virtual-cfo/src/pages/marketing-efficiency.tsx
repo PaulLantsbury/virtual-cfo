@@ -62,11 +62,11 @@ const ESTIMATED_CONTRIBUTION = 18_200;
  */
 const CFO_INSIGHT = {
   primaryDrivers: [
-    "Meta CAC increased £3.40 per order vs prior period",
-    "Repeat-customer share declined, raising new customer acquisition spend",
-    "Lifecycle email remains underutilised relative to channel potential",
+    "Meta CAC increased materially — up £3.40 per order vs prior period",
+    "Repeat-customer share declined, increasing reliance on higher-cost new acquisition",
+    "Lifecycle email conversion remains underutilised relative to its contribution potential",
   ],
-  recoveryLever: "Shift spend from Meta toward higher-margin channels such as Email and Organic",
+  recoveryLever: "Reallocate 15–25% of paid acquisition spend toward Email and Organic — the two highest-contribution channels by profit margin",
 } as const;
 
 /** @dynamic Replace with live channel-level margin data from Shopify + ad platforms */
@@ -392,18 +392,24 @@ export default function MarketingEfficiency() {
           </div>
 
           {/* ── Headline ── */}
-          <h2 className="text-lg sm:text-xl font-bold text-foreground leading-snug mb-5 pb-5 border-b border-primary/15">
-            Marketing efficiency has weakened — estimated additional contribution of{" "}
-            £{ESTIMATED_CONTRIBUTION.toLocaleString()} available next month
-          </h2>
+          <div className="mb-5 pb-5 border-b border-primary/15 space-y-2.5">
+            <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">
+              Marketing efficiency has weakened due to rising Meta CAC and increased reliance on lower-contribution paid acquisition.
+            </p>
+            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+              If 15–25% of paid acquisition spend is reallocated toward higher-margin channels such as Email and Organic, estimated additional contribution next month is approximately{" "}
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{ESTIMATED_CONTRIBUTION.toLocaleString()}</span>{" "}
+              at current sales volume.
+            </p>
+          </div>
 
           {/* ── Two-column detail ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
-            {/* Primary causes */}
+            {/* Primary drivers */}
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                Primary causes
+                Primary drivers
               </p>
               <ul className="space-y-2.5">
                 {CFO_INSIGHT.primaryDrivers.map((driver, i) => (

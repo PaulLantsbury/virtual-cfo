@@ -51,6 +51,13 @@ const MKT_CP_LY          = 35_400;  // last 12-month average
 const MKT_CP_CHANGE_MOM  = MKT_CP - MKT_CP_PREV;   // -2_800 (unfavourable)
 const MKT_CP_CHANGE_LY   = MKT_CP - MKT_CP_LY;     // +3_000 (favourable)
 
+/** @dynamic MKT_CP / order_count — contribution profit generated per order after all marketing costs */
+const MKT_CP_PER_ORDER           =  9.40;
+const MKT_CP_PER_ORDER_PREV      = 10.50;  // last month
+const MKT_CP_PER_ORDER_LY        = 11.70;  // 12-month average
+const MKT_CP_PER_ORDER_CHANGE_MOM = +(MKT_CP_PER_ORDER - MKT_CP_PER_ORDER_PREV).toFixed(2); // -1.10 (unfavourable)
+const MKT_CP_PER_ORDER_CHANGE_LY  = +(MKT_CP_PER_ORDER - MKT_CP_PER_ORDER_LY).toFixed(2);  // -2.30 (unfavourable)
+
 /**
  * Estimated additional contribution available if spend is reallocated.
  * @dynamic Math.round(orderVolume × (cmGainPp / 100) × revenuePerOrder)
@@ -611,7 +618,7 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
 
         {/* 1 — Marketing Contribution Profit */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
@@ -710,6 +717,27 @@ export default function MarketingEfficiency() {
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Blended contribution margin after all marketing costs</p>
+        </div>
+
+        {/* 6 — Marketing Contribution per Order */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+          <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per Order</p>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">
+            £{MKT_CP_PER_ORDER.toFixed(2)}
+          </p>
+          <div className="space-y-0.5 mb-2">
+            <VarLine
+              label="vs last month"
+              value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_MOM).toFixed(2)}`}
+              favorable={MKT_CP_PER_ORDER_CHANGE_MOM > 0}
+            />
+            <VarLine
+              label="vs 12-month avg"
+              value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_LY).toFixed(2)}`}
+              favorable={MKT_CP_PER_ORDER_CHANGE_LY > 0}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground leading-snug">Contribution profit generated per order after marketing cost</p>
         </div>
 
       </div>

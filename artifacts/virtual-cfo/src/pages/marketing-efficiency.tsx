@@ -1,4 +1,4 @@
-import { Sparkles, TrendingUp } from "lucide-react";
+import { Sparkles, TrendingUp, AlertTriangle } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
@@ -121,6 +121,16 @@ const CHANNEL_CP = [
 const maxCp = Math.max(...CHANNEL_CP.map((c) => c.cp));
 const minCp = Math.min(...CHANNEL_CP.map((c) => c.cp));
 const totalAttributedCp = CHANNEL_CP.reduce((s, c) => s + c.cp, 0);
+
+/**
+ * Estimated contribution profit lost per period due to sub-optimal channel allocation.
+ * @dynamic Compute as: (blended CP rate − lowest-performing channel CP rate) × that
+ *          channel's revenue × practical reallocation headroom (e.g. 0.9). Where
+ *          blended CP rate = totalAttributedCp / totalChannelRevenue and channel CP
+ *          rate = channel_cp / channel_revenue. Replace with live values from
+ *          ad-platform + Shopify revenue attribution.
+ */
+const ALLOC_LOSS_CP = 6_700;
 
 /**
  * Contribution profit generated per order by acquisition channel after marketing cost.
@@ -947,6 +957,14 @@ export default function MarketingEfficiency() {
               Total: £{totalAttributedCp.toLocaleString()}
             </span>
           </div>
+        </div>
+
+        {/* Diagnostic insight line */}
+        <div className="flex items-start gap-2 px-3.5 py-2.5 mb-5 rounded-lg bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-700/30">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-700/90 dark:text-amber-400/80 leading-snug">
+            <span className="font-semibold">£{ALLOC_LOSS_CP.toLocaleString()}</span> of contribution profit is currently being lost due to sub-optimal channel allocation.
+          </p>
         </div>
 
         <div className="h-[260px]">

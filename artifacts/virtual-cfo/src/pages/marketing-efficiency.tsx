@@ -113,6 +113,18 @@ const CHANNEL_CPO = [
 const maxCpo = Math.max(...CHANNEL_CPO.map((c) => c.cpo));
 const minCpo = Math.min(...CHANNEL_CPO.map((c) => c.cpo));
 
+/**
+ * Revenue share vs contribution share per acquisition channel.
+ * @dynamic revShare: channel.revenue / totalRevenue; cpShare: channel_cp / totalAttributedCp
+ */
+const totalChannelRevenue = CHANNEL_CM.reduce((s, c) => s + c.revenue, 0);
+const CHANNEL_SHARE = CHANNEL_CM.map((c) => {
+  const cp = CHANNEL_CP.find((p) => p.channel === c.channel)!.cp;
+  const revShare = Math.round((c.revenue / totalChannelRevenue) * 100);
+  const cpShare  = Math.round((cp / totalAttributedCp) * 100);
+  return { channel: c.channel, revShare, cpShare, delta: cpShare - revShare };
+});
+
 type EfficiencyRating = "strong" | "watch" | "weak";
 
 /** @dynamic Replace with live CAC per channel from ad platform APIs */
@@ -956,6 +968,101 @@ export default function MarketingEfficiency() {
           <span className="font-semibold text-red-500">Meta</span> (£{minCpo.toFixed(2)}).
           Shifting volume toward higher-CPO channels directly improves blended contribution margin without
           increasing revenue.
+        </p>
+
+      </div>
+
+      {/* Revenue Share vs Contribution Share — sub-section of Actual Performance */}
+      <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 mb-10">
+
+        {/* Sub-heading */}
+        <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
+          <div>
+            <h3 className="font-semibold text-base text-foreground">Revenue Share vs Contribution Share</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Compare which channels generate revenue versus which channels generate contribution profit
+            </p>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground shrink-0">
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm bg-slate-400/60 inline-block" />Revenue
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" />Contribution ↑
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-sm bg-red-500 inline-block" />Contribution ↓
+            </span>
+          </div>
+        </div>
+
+        {/* Channel rows */}
+        <div className="space-y-1">
+          {CHANNEL_SHARE.map((row) => {
+            const positive = row.delta >= 0;
+            const cpColor = positive
+              ? "bg-emerald-500"
+              : "bg-red-500";
+            const cpTextColor = positive
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-red-500 dark:text-red-400";
+            const deltaBg = positive
+              ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+              : "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400";
+            return (
+              <div key={row.channel} className="py-4 border-b border-border/40 last:border-0">
+
+                {/* Channel name + delta badge */}
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-foreground">{row.channel}</span>
+                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${deltaBg}`}>
+                    {positive ? "▲" : "▼"} {positive ? "+" : ""}{row.delta}pp
+                  </span>
+                </div>
+
+                {/* Revenue bar */}
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-[11px] text-muted-foreground w-24 shrink-0">Revenue</span>
+                  <div className="flex-1 h-4 bg-secondary/60 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-slate-400/60 rounded-full transition-all"
+                      style={{ width: `${row.revShare}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-muted-foreground tabular-nums w-8 text-right">
+                    {row.revShare}%
+                  </span>
+                </div>
+
+                {/* Contribution bar */}
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-muted-foreground w-24 shrink-0">Contribution</span>
+                  <div className="flex-1 h-4 bg-secondary/60 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${cpColor}`}
+                      style={{ width: `${row.cpShare}%` }}
+                    />
+                  </div>
+                  <span className={`text-xs font-bold tabular-nums w-8 text-right ${cpTextColor}`}>
+                    {row.cpShare}%
+                  </span>
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Interpretation note */}
+        <p className="mt-5 pt-4 border-t border-border/40 text-sm text-muted-foreground leading-relaxed">
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Email</span> and{" "}
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Organic</span> both
+          return more contribution than their revenue share suggests — they punch above their weight and
+          should be protected and grown.{" "}
+          <span className="font-semibold text-red-500">Google Shopping</span> and{" "}
+          <span className="font-semibold text-red-500">Meta</span> consume a disproportionate share of
+          revenue while returning significantly less contribution — a clear signal of over-investment
+          relative to profitability.
         </p>
 
       </div>

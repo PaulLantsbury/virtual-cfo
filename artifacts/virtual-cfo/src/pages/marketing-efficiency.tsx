@@ -226,6 +226,16 @@ const ME_OPPORTUNITIES: {
 /** @dynamic Sum of ppGain across ME_OPPORTUNITIES */
 const ME_TOTAL_PP = +ME_OPPORTUNITIES.reduce((s, o) => s + o.ppGain, 0).toFixed(1);
 
+/**
+ * Confidence-weighted breakdown of the total estimated opportunity value.
+ * @dynamic Derived from ME_OPPORTUNITIES[].confidence and cashImpact
+ */
+const ME_CONFIDENCE_TOTALS = {
+  high:   ME_OPPORTUNITIES.filter((o) => o.confidence === "high").reduce((s, o) => s + o.cashImpact, 0),
+  medium: ME_OPPORTUNITIES.filter((o) => o.confidence === "medium").reduce((s, o) => s + o.cashImpact, 0),
+  low:    ME_OPPORTUNITIES.filter((o) => o.confidence === "low").reduce((s, o) => s + o.cashImpact, 0),
+};
+
 const RECOMMENDATIONS: Recommendation[] = [
   {
     id: "me1",
@@ -542,6 +552,29 @@ export default function MarketingEfficiency() {
           <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mb-3">
             +{OPPORTUNITY_UPLIFT_PCT}% uplift vs current marketing contribution profit
           </p>
+
+          {/* Confidence breakdown */}
+          <div className="flex flex-col gap-1 mb-3">
+            {ME_CONFIDENCE_TOTALS.high > 0 && (
+              <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 shrink-0" />
+                <span className="font-semibold">High confidence</span>&ensp;£{ME_CONFIDENCE_TOTALS.high.toLocaleString()}
+              </p>
+            )}
+            {ME_CONFIDENCE_TOTALS.medium > 0 && (
+              <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50 dark:bg-emerald-400/50 shrink-0" />
+                <span className="font-semibold">Medium confidence</span>&ensp;£{ME_CONFIDENCE_TOTALS.medium.toLocaleString()}
+              </p>
+            )}
+            {ME_CONFIDENCE_TOTALS.low > 0 && (
+              <p className="text-xs text-emerald-700/40 dark:text-emerald-400/40 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/30 dark:bg-emerald-400/30 shrink-0" />
+                <span className="font-semibold">Requires validation</span>&ensp;£{ME_CONFIDENCE_TOTALS.low.toLocaleString()}
+              </p>
+            )}
+          </div>
+
           <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 leading-snug">
             Based on top quantified opportunities from the {framing.baselineNote}
           </p>

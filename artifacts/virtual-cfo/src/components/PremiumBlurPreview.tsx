@@ -108,28 +108,29 @@ export function PremiumBlurPreview({
       ) : (
         /* ── Locked: blur + gradient + upgrade overlay ── */
         <div className="relative">
-          {/* Real children — blurred so layout/proportions are visible but values are not */}
+          {/* Real children — blurred so structure is visible but values are not */}
           <div
-            className="blur-[3px] opacity-40 pointer-events-none select-none"
+            className="blur-[2px] opacity-[0.55] pointer-events-none select-none"
             aria-hidden="true"
           >
             {children}
           </div>
 
-          {/* Gradient fade from transparent → card background */}
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/65 to-transparent rounded-b-xl pointer-events-none" />
+          {/* Layered gradient: top is clear (structure visible), bottom fades to card (hides values) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent rounded-b-xl pointer-events-none" />
 
-          {/* Upgrade card — sits at the bottom of the overlay */}
+          {/* Upgrade card — floats above blur, shadow gives depth */}
           <div className="relative mt-4">
             <a
               href={UPGRADE_HREF}
               className={cn(
                 "flex items-center justify-between gap-4",
                 "rounded-xl border border-indigo-200 dark:border-indigo-700/50",
-                "bg-indigo-50/80 dark:bg-indigo-950/30",
+                "bg-indigo-50/90 dark:bg-indigo-950/40",
                 "px-5 py-4",
-                "hover:border-indigo-300 hover:bg-indigo-100/80",
-                "dark:hover:border-indigo-600 dark:hover:bg-indigo-900/35",
+                "shadow-lg shadow-indigo-500/10 dark:shadow-indigo-900/30",
+                "hover:border-indigo-300 hover:bg-indigo-100/90",
+                "dark:hover:border-indigo-600 dark:hover:bg-indigo-900/45",
                 "transition-colors cursor-pointer group"
               )}
             >

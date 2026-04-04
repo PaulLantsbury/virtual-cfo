@@ -760,7 +760,7 @@ export default function MarketingEfficiency() {
             <div className="relative">
 
               {/* Full PRO rows rendered beneath the blur */}
-              <div className="blur-[3px] opacity-40 pointer-events-none select-none" aria-hidden="true">
+              <div className="blur-[2px] opacity-[0.55] pointer-events-none select-none" aria-hidden="true">
                 <div className="divide-y divide-border/40">
                   {ME_OPPORTUNITIES.map((o, i) => (
                     <div
@@ -811,13 +811,13 @@ export default function MarketingEfficiency() {
               </div>
 
               {/* Gradient fade */}
-              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/65 to-transparent rounded-b-xl pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/35 to-transparent rounded-b-xl pointer-events-none" />
 
               {/* Indigo upgrade card */}
               <div className="relative mx-6 mb-5 mt-4">
                 <a
                   href="/upgrade"
-                  className="flex items-center justify-between gap-4 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/30 px-5 py-4 hover:border-indigo-300 hover:bg-indigo-100/80 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/35 transition-colors cursor-pointer group"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-5 py-4 shadow-lg shadow-indigo-500/10 dark:shadow-indigo-900/30 hover:border-indigo-300 hover:bg-indigo-100/90 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/45 transition-colors cursor-pointer group"
                 >
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0 mt-0.5">

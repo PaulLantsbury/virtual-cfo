@@ -1448,122 +1448,167 @@ export default function MarketingEfficiency() {
         </div>
       </div>
 
-      {/* CAC Payback by Channel */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
-        <div className="mb-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="font-semibold text-lg text-foreground">CAC Payback by Channel</h3>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Number of orders required to recover the acquisition cost for each channel.
-              </p>
-            </div>
-            {/* @dynamic CAC_PAYBACK = spend-weighted blended average across all channels */}
-            <div className="text-right shrink-0 pt-0.5">
-              <p className="text-xs text-muted-foreground">Blended avg</p>
-              <p className="text-sm font-bold text-foreground tabular-nums">{CAC_PAYBACK} orders</p>
+      {/* CAC Payback by Channel — Pro gated */}
+      {canAccess("cac_payback") ? (
+
+        /* ── PRO: full chart with reference lines and insight ── */
+        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
+          <div className="mb-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="font-semibold text-lg text-foreground">CAC Payback by Channel</h3>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Number of orders required to recover the acquisition cost for each channel.
+                </p>
+              </div>
+              {/* @dynamic CAC_PAYBACK = spend-weighted blended average across all channels */}
+              <div className="text-right shrink-0 pt-0.5">
+                <p className="text-xs text-muted-foreground">Blended avg</p>
+                <p className="text-sm font-bold text-foreground tabular-nums">{CAC_PAYBACK} orders</p>
+              </div>
             </div>
           </div>
+
+          <div className="space-y-4">
+            {[...PAYBACK_BY_CHANNEL].sort((a, b) => a.payback - b.payback).map((row) => {
+              const overThreshold = row.payback > PAYBACK_THRESHOLD;
+              const barPct = Math.min((row.payback / 3) * 100, 100);
+              /** @dynamic diff = row.payback − CAC_PAYBACK (live) */
+              const paybackDiff = +(row.payback - CAC_PAYBACK).toFixed(1);
+              const absPaybackDiff = Math.abs(paybackDiff);
+              const paybackDiffLabel =
+                paybackDiff === 0
+                  ? "at avg"
+                  : `${absPaybackDiff} ${paybackDiff > 0 ? "above" : "below"} avg`;
+              /** @dynamic reference line positions within 0–3 order scale */
+              const blendedPct = (CAC_PAYBACK / 3) * 100;
+              const thresholdPct = (PAYBACK_THRESHOLD / 3) * 100;
+              return (
+                <div key={row.channel}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-sm font-medium text-foreground">{row.channel}</span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "text-[11px] font-medium tabular-nums",
+                          paybackDiff > 0
+                            ? "text-destructive/70"
+                            : "text-emerald-600/70 dark:text-emerald-400/70"
+                        )}
+                      >
+                        {paybackDiffLabel}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-sm font-bold tabular-nums",
+                          overThreshold ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
+                        )}
+                      >
+                        {row.payback} orders
+                      </span>
+                      {overThreshold && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
+                          Above target
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Bar track with reference line ticks */}
+                  <div className="relative w-full" style={{ height: "20px" }}>
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-slate-400/60 dark:bg-slate-500/60 rounded-sm z-10 pointer-events-none"
+                      style={{ left: `calc(${blendedPct}% - 1px)` }}
+                    />
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-destructive/40 rounded-sm z-10 pointer-events-none"
+                      style={{ left: `calc(${thresholdPct}% - 1px)` }}
+                    />
+                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className={cn("h-2 rounded-full transition-all", overThreshold ? "bg-destructive" : "bg-emerald-500")}
+                        style={{ width: `${barPct}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Legend */}
+          <div className="mt-5 space-y-1.5">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="inline-block w-6 border-t border-dashed border-slate-400/70 dark:border-slate-500/70 shrink-0" />
+              <span>Blended avg: <span className="font-semibold tabular-nums">{CAC_PAYBACK} orders</span></span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="inline-block w-6 border-t border-dashed border-destructive/60 shrink-0" />
+              <span>
+                Target threshold: <span className="font-semibold tabular-nums">{PAYBACK_THRESHOLD} orders</span>. Channels above this
+                reduce short-term cash efficiency and increase growth risk.
+              </span>
+            </div>
+          </div>
+
+          {/* @dynamic Insight: identifies the worst channel above blended avg */}
+          {(() => {
+            const worst = [...PAYBACK_BY_CHANNEL].reduce((a, b) => a.payback > b.payback ? a : b);
+            const worstDiff = +(worst.payback - CAC_PAYBACK).toFixed(1);
+            return worstDiff > 0 ? (
+              <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3">
+                <span className="font-semibold text-foreground">{worst.channel}</span> payback is{" "}
+                <span className="font-semibold tabular-nums">{worstDiff} orders</span> slower than the blended average, increasing short-term cash recovery risk.
+              </p>
+            ) : null;
+          })()}
         </div>
 
-        <div className="space-y-4">
-          {[...PAYBACK_BY_CHANNEL].sort((a, b) => a.payback - b.payback).map((row) => {
-            const overThreshold = row.payback > PAYBACK_THRESHOLD;
-            const barPct = Math.min((row.payback / 3) * 100, 100);
-            /** @dynamic diff = row.payback − CAC_PAYBACK (live) */
-            const paybackDiff = +(row.payback - CAC_PAYBACK).toFixed(1);
-            const absPaybackDiff = Math.abs(paybackDiff);
-            const paybackDiffLabel =
-              paybackDiff === 0
-                ? "at avg"
-                : `${absPaybackDiff} ${paybackDiff > 0 ? "above" : "below"} avg`;
-            /** @dynamic percentages for reference line positions within 0–3 scale */
-            const blendedPct = (CAC_PAYBACK / 3) * 100;
-            const thresholdPct = (PAYBACK_THRESHOLD / 3) * 100;
-            return (
+      ) : (
+
+        /* ── FREE: locked preview panel ── */
+        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
+          {/* Header — title always visible, Pro badge top-right */}
+          <div className="flex items-start justify-between gap-4 mb-1.5">
+            <h3 className="font-semibold text-lg text-foreground">CAC Payback by Channel</h3>
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0 mt-0.5">
+              PRO — Unlock cash recovery diagnostics
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground mb-5 leading-snug">
+            See how quickly each channel recovers acquisition cost and where cash efficiency risk is increasing.
+          </p>
+
+          {/* Blurred placeholder chart — shape visible, data hidden */}
+          <div className="space-y-4 blur-sm opacity-40 pointer-events-none select-none mb-5" aria-hidden="true">
+            {[
+              { channel: "Email",           pct: 20, green: true  },
+              { channel: "Organic",         pct: 27, green: true  },
+              { channel: "Google Shopping", pct: 43, green: true  },
+              { channel: "Meta",            pct: 70, green: false },
+            ].map((row) => (
               <div key={row.channel}>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-sm font-medium text-foreground">{row.channel}</span>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "text-[11px] font-medium tabular-nums",
-                        paybackDiff > 0
-                          ? "text-destructive/70"
-                          : "text-emerald-600/70 dark:text-emerald-400/70"
-                      )}
-                    >
-                      {paybackDiffLabel}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-sm font-bold tabular-nums",
-                        overThreshold ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
-                      )}
-                    >
-                      {row.payback} orders
-                    </span>
-                    {overThreshold && (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
-                        Above target
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-sm font-bold text-muted-foreground tabular-nums">•.• orders</span>
                 </div>
-                {/* Bar track with reference line indicators */}
-                <div className="relative w-full" style={{ height: "20px" }}>
-                  {/* Blended avg reference line — grey, centered vertically */}
+                <div className="w-full h-2 bg-secondary rounded-full">
                   <div
-                    className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-slate-400/60 dark:bg-slate-500/60 rounded-sm z-10 pointer-events-none"
-                    style={{ left: `calc(${blendedPct}% - 1px)` }}
+                    className={cn("h-2 rounded-full", row.green ? "bg-emerald-500" : "bg-destructive")}
+                    style={{ width: `${row.pct}%` }}
                   />
-                  {/* Target threshold reference line — red, centered vertically */}
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-destructive/40 rounded-sm z-10 pointer-events-none"
-                    style={{ left: `calc(${thresholdPct}% - 1px)` }}
-                  />
-                  {/* Bar track */}
-                  <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className={cn("h-2 rounded-full transition-all", overThreshold ? "bg-destructive" : "bg-emerald-500")}
-                      style={{ width: `${barPct}%` }}
-                    />
-                  </div>
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
+
+          <UpgradePreviewCard
+            title="Unlock CAC Payback Analysis"
+            description="Identify which channels delay cash recovery and increase working capital pressure."
+            ctaText="Upgrade →"
+          />
         </div>
 
-        {/* Legend — two reference lines */}
-        <div className="mt-5 space-y-1.5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="inline-block w-6 border-t border-dashed border-slate-400/70 dark:border-slate-500/70 shrink-0" />
-            <span>
-              Blended avg: <span className="font-semibold tabular-nums">{CAC_PAYBACK} orders</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="inline-block w-6 border-t border-dashed border-destructive/60 shrink-0" />
-            <span>
-              Target threshold: <span className="font-semibold tabular-nums">{PAYBACK_THRESHOLD} orders</span>. Channels above this
-              reduce short-term cash efficiency and increase growth risk.
-            </span>
-          </div>
-        </div>
-
-        {/* @dynamic Insight: identifies worst channel above blended avg */}
-        {(() => {
-          const worst = [...PAYBACK_BY_CHANNEL].reduce((a, b) => a.payback > b.payback ? a : b);
-          const worstDiff = +(worst.payback - CAC_PAYBACK).toFixed(1);
-          return worstDiff > 0 ? (
-            <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3">
-              <span className="font-semibold text-foreground">{worst.channel}</span> payback is{" "}
-              <span className="font-semibold tabular-nums">{worstDiff} orders</span> slower than the blended average, increasing short-term cash recovery risk.
-            </p>
-          ) : null;
-        })()}
-      </div>
+      )}
 
       {/*
        * ── FUTURE SECTION (Pro-only deep-dive) ──────────────────────────────

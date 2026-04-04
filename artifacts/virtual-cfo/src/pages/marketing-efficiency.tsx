@@ -777,7 +777,7 @@ export default function MarketingEfficiency() {
 
       {/* ══════════════════════════════════════════════════════════════════════
           §3  ACTUAL PERFORMANCE
-          KPI headline metrics + contribution profit by channel
+          KPI headline metrics for the selected period
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-4">
@@ -933,7 +933,7 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §3  ALLOCATION DIAGNOSTICS
+          §4  ALLOCATION DIAGNOSTICS
           Channel-level contribution breakdown and budget allocation analysis
       ══════════════════════════════════════════════════════════════════════ */}
 
@@ -1216,7 +1216,7 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §4  KEY DRIVERS
+          §5  KEY DRIVERS
           Attributed causes: what changed and the £ contribution impact
       ══════════════════════════════════════════════════════════════════════ */}
 
@@ -1338,7 +1338,7 @@ export default function MarketingEfficiency() {
       )}
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §5  DETAILED ANALYSIS
+          §6  DETAILED ANALYSIS
           CAC by channel, payback, contribution margin, and trend evidence
       ══════════════════════════════════════════════════════════════════════ */}
 

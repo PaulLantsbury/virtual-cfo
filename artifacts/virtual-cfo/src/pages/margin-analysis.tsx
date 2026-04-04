@@ -620,14 +620,11 @@ export default function MarginAnalysis() {
             /* ── FREE: full PRO rows blurred + gradient + indigo upgrade card ── */
             <div className="relative">
 
-              {/* Full PRO rows rendered beneath the blur */}
-              <div className="blur-[10px] opacity-[0.7] pointer-events-none select-none" aria-hidden="true">
+              {/* Ghost rows — labels readable, values masked as placeholders */}
+              <div className="pointer-events-none select-none" aria-hidden="true">
                 <div className="divide-y divide-border/40">
                   {RECOVERY_SCENARIOS.map((s, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between px-6 py-4 gap-4"
-                    >
+                    <div key={i} className="flex items-center justify-between px-6 py-4 gap-4">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
                           {i + 1}
@@ -646,33 +643,30 @@ export default function MarginAnalysis() {
                               {s.confidence === "high" ? "High confidence" : s.confidence === "medium" ? "Medium confidence" : "Requires validation"}
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>
+                          <p className="text-xs text-foreground/20 dark:text-foreground/15 mt-0.5 leading-snug">—— —— —— ——</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-5 shrink-0 ml-4">
-                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                          +{s.ppGain.toFixed(1)}pp
+                        <span className="text-sm font-bold whitespace-nowrap tabular-nums w-12 text-right pt-0.5 text-foreground/25 dark:text-foreground/20">
+                          +—.—pp
                         </span>
                         <div className="text-right w-20">
-                          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                            £{s.cashImpact.toLocaleString()}
+                          <p className="text-sm font-bold tabular-nums leading-none text-foreground/25 dark:text-foreground/20">
+                            £ —,—
                           </p>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                {/* Combined footer — blurred too */}
+                {/* Combined footer — masked value */}
                 <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
                   <p className="text-sm font-semibold text-foreground">Combined impact next month</p>
-                  <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                    ≈ £{RECOVERY_TOTAL_CASH.toLocaleString()}
+                  <span className="text-base font-bold tabular-nums text-foreground/25 dark:text-foreground/20">
+                    £ —,—
                   </span>
                 </div>
               </div>
-
-              {/* White/dark overlay — reduces contrast of blurred values */}
-              <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/25 pointer-events-none" />
 
               {/* Gradient fade */}
               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent rounded-b-xl pointer-events-none" />
@@ -931,6 +925,48 @@ export default function MarginAnalysis() {
         ctaDescription="See exactly what changed this period and how much each factor impacted your margin per order."
         isPro={canAccess("driver_breakdown")}
         className="overflow-hidden mb-10"
+        ghostContent={
+          <div className="-mx-6 -mb-6">
+            <div className="flex items-center justify-between px-6 py-3 border-t border-border/50 bg-secondary/20">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                What changed this period vs last month
+              </p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Margin impact / order
+              </p>
+            </div>
+            <div className="divide-y divide-border/40">
+              {[...CHANGE_DRIVERS]
+                .sort((a, b) => Math.abs(b.impactPerOrder) - Math.abs(a.impactPerOrder))
+                .map((row, i) => (
+                  <div key={row.driver} className="flex items-center justify-between px-6 py-4 gap-6">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={cn("w-1 self-stretch rounded-full shrink-0 min-h-[2rem]", i === 0 ? "bg-destructive" : "bg-destructive/25")} />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-semibold text-foreground">{row.driver}</span>
+                          <span className={cn(
+                            "inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap",
+                            row.direction === "negative" ? "bg-destructive/10 text-destructive" : "bg-emerald-500/10 text-emerald-600"
+                          )}>
+                            {row.direction === "negative" ? "↑" : "↓"}
+                          </span>
+                          {i === 0 && (
+                            <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
+                              Largest driver
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold whitespace-nowrap shrink-0 tabular-nums text-foreground/25 dark:text-foreground/20">
+                      {row.direction === "negative" ? "−" : "+"}£ —.——
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        }
       >
         {/* Negative-margin wrapper extends table flush to card edges */}
         <div className="-mx-6 -mb-6">
@@ -1024,6 +1060,58 @@ export default function MarginAnalysis() {
         ctaDescription="See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing."
         isPro={canAccess("margin_bridge")}
         className="mb-8"
+        ghostContent={
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Metric</th>
+                  <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">Total (£)</th>
+                  <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">% of Revenue</th>
+                  <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">Per Order (£)</th>
+                  <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                {BRIDGE_ROWS.map((row) => (
+                  <tr key={row.label} className="border-b border-border/40">
+                    <td className="py-3 pr-4 font-medium text-foreground">{row.label}</td>
+                    <td className="py-3 px-4 text-right tabular-nums font-semibold text-foreground/25 dark:text-foreground/20 whitespace-nowrap">
+                      {row.type === "revenue" ? "£ " : "−£ "}—,———
+                    </td>
+                    <td className="py-3 px-4 text-right tabular-nums text-foreground/25 dark:text-foreground/20 whitespace-nowrap">
+                      {row.type === "revenue" ? "" : "−"}—.—%
+                    </td>
+                    <td className="py-3 px-4 text-right tabular-nums text-foreground/25 dark:text-foreground/20 whitespace-nowrap">
+                      {row.type === "revenue" ? "" : "−"}£ —.——
+                    </td>
+                    <td className="py-3 pl-4 text-right">
+                      {row.trend === "worsening" ? (
+                        <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">↑ cost</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-primary/30 bg-primary/5">
+                  <td className="py-3.5 pr-4"><span className="font-bold text-foreground">Contribution Margin</span></td>
+                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground/25 dark:text-foreground/20 whitespace-nowrap">£ —,———</td>
+                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground/25 dark:text-foreground/20 whitespace-nowrap">—.—%</td>
+                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground/25 dark:text-foreground/20 whitespace-nowrap">£ —.——</td>
+                  <td className="py-3.5 pl-4 text-right">
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                      <ArrowDownRight className="w-2.5 h-2.5" />
+                      ↓ margin
+                    </span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        }
       >
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -1136,6 +1224,45 @@ export default function MarginAnalysis() {
             ctaDescription="See which channels are creating margin and which are dragging blended profitability."
             isPro={canAccess("channel_margin_analysis")}
             className="mb-8"
+            ghostContent={
+              <ul className="space-y-4">
+                {(() => {
+                  const ghostWidths = ["80%", "72%", "58%", "46%"];
+                  return sorted.map((ch, i) => {
+                    const isMax = ch.cm === maxCm;
+                    const isMin = ch.cm === minCm;
+                    return (
+                      <li key={ch.name}>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-foreground">{ch.name}</span>
+                            {isMax && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">Highest</span>
+                            )}
+                            {isMin && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive">Lowest</span>
+                            )}
+                          </div>
+                          <span className="text-sm font-bold tabular-nums text-foreground/25 dark:text-foreground/20">—%</span>
+                        </div>
+                        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className={cn("h-full rounded-full", isMax ? "bg-emerald-500/50" : isMin ? "bg-destructive/50" : "bg-primary/50")}
+                            style={{ width: ghostWidths[i] }}
+                          />
+                        </div>
+                      </li>
+                    );
+                  });
+                })()}
+                <li className="mt-1 flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
+                  <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <p className="text-xs text-foreground/25 dark:text-foreground/20 leading-snug">
+                    Unlock Pro to see contribution margin % per channel, and understand which channels are dragging blended profitability.
+                  </p>
+                </li>
+              </ul>
+            }
           >
             <ul className="space-y-4">
               {sorted.map((ch) => {

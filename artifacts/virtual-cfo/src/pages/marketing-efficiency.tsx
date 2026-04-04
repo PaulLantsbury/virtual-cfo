@@ -759,14 +759,11 @@ export default function MarketingEfficiency() {
             /* ── FREE: full rows blurred + gradient + indigo upgrade card ── */
             <div className="relative">
 
-              {/* Full PRO rows rendered beneath the blur */}
-              <div className="blur-[2px] opacity-[0.55] pointer-events-none select-none" aria-hidden="true">
+              {/* Ghost rows — labels readable, values masked as placeholders */}
+              <div className="pointer-events-none select-none" aria-hidden="true">
                 <div className="divide-y divide-border/40">
                   {ME_OPPORTUNITIES.map((o, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between px-6 py-4 gap-4"
-                    >
+                    <div key={i} className="flex items-center justify-between px-6 py-4 gap-4">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
                           {i + 1}
@@ -785,33 +782,30 @@ export default function MarketingEfficiency() {
                               {o.confidence === "high" ? "High confidence" : o.confidence === "medium" ? "Medium confidence" : "Requires validation"}
                             </span>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{o.detail}</p>
+                          <p className="text-xs text-foreground/20 dark:text-foreground/15 mt-0.5 leading-snug">—— —— —— ——</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-5 shrink-0 ml-4">
-                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                          +{o.ppGain.toFixed(1)}pp
+                        <span className="text-sm font-bold whitespace-nowrap tabular-nums w-12 text-right pt-0.5 text-foreground/25 dark:text-foreground/20">
+                          +—.—pp
                         </span>
                         <div className="text-right w-28">
-                          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                            £{o.cashImpact.toLocaleString()}
+                          <p className="text-sm font-bold tabular-nums leading-none text-foreground/25 dark:text-foreground/20">
+                            £ —,—
                           </p>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-                {/* Combined footer — blurred too */}
+                {/* Combined footer — masked value */}
                 <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
                   <p className="text-sm font-semibold text-foreground">Combined impact — {framing.combinedLabel}</p>
-                  <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                    ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+                  <span className="text-base font-bold tabular-nums text-foreground/25 dark:text-foreground/20">
+                    £ —,—
                   </span>
                 </div>
               </div>
-
-              {/* White/dark overlay — reduces contrast of blurred values */}
-              <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/25 pointer-events-none" />
 
               {/* Gradient fade */}
               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent rounded-b-xl pointer-events-none" />
@@ -1323,6 +1317,62 @@ export default function MarketingEfficiency() {
         ctaDescription="See exactly which cost or mix changes drove the most contribution impact, with per-driver £ attribution."
         isPro={canAccess("driver_breakdown")}
         className="overflow-hidden mb-10"
+        ghostContent={
+          <div className="-mx-6 -mb-6">
+            <div className="flex items-center justify-between px-6 py-3 border-t border-border/50 bg-secondary/20">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                What changed this period vs prior period
+              </p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Contribution impact
+              </p>
+            </div>
+            {ME_DRIVER_GROUPS.map((group) => {
+              const groupDrivers = ME_DRIVERS
+                .filter((d) => d.category === group.key)
+                .sort((a, b) => a.impact - b.impact);
+              if (!groupDrivers.length) return null;
+              return (
+                <div key={group.key}>
+                  <div className="flex items-center justify-between px-6 py-2 border-y border-border/40 bg-secondary/30">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/70">{group.label}</p>
+                    <p className="text-[11px] font-bold tabular-nums text-foreground/25 dark:text-foreground/20">−£ —,———</p>
+                  </div>
+                  <div className="divide-y divide-border/30">
+                    {groupDrivers.map((row) => (
+                      <div key={row.driver} className="flex items-center justify-between px-6 py-4 gap-6">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className={cn(
+                            "w-1 self-stretch rounded-full shrink-0 min-h-[2rem] mt-0.5",
+                            row.driver === ME_LARGEST_DRIVER ? "bg-destructive" : "bg-destructive/25"
+                          )} />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <span className="text-sm font-semibold text-foreground">{row.driver}</span>
+                              {row.driver === ME_LARGEST_DRIVER && (
+                                <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
+                                  Largest driver
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-foreground/20 dark:text-foreground/15 leading-snug">—— —— —— ——</p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-bold whitespace-nowrap shrink-0 tabular-nums text-foreground/25 dark:text-foreground/20">
+                          −£ —,———
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+            <div className="flex items-center justify-between px-6 py-3.5 border-t border-border/50 bg-secondary/20">
+              <p className="text-xs font-semibold text-foreground">Total attributed impact — {periodBadge}</p>
+              <p className="text-sm font-bold tabular-nums text-foreground/25 dark:text-foreground/20">−£ —,———</p>
+            </div>
+          </div>
+        }
       >
         {/* Negative-margin wrapper extends table flush to card edges */}
         <div className="-mx-6 -mb-6">
@@ -1519,7 +1569,6 @@ export default function MarketingEfficiency() {
         subtitle="Number of orders required to recover the acquisition cost for each channel."
         badgeText="PRO — Unlock cash recovery diagnostics"
         headerExtra={
-          /* @dynamic CAC_PAYBACK = spend-weighted blended average across all channels */
           <div className="text-right pt-0.5">
             <p className="text-xs text-muted-foreground">Blended avg</p>
             <p className="text-sm font-bold text-foreground tabular-nums">{CAC_PAYBACK} orders</p>
@@ -1528,6 +1577,54 @@ export default function MarketingEfficiency() {
         ctaTitle="Unlock CAC payback by channel"
         ctaDescription="Identify which channels delay cash recovery and increase working capital pressure."
         isPro={canAccess("cac_payback")}
+        ghostContent={
+          <div className="space-y-4">
+            {(() => {
+              const ghostWidths = ["20%", "28%", "45%", "72%"];
+              return [...PAYBACK_BY_CHANNEL]
+                .sort((a, b) => a.payback - b.payback)
+                .map((row, i) => {
+                  const overThreshold = row.payback > PAYBACK_THRESHOLD;
+                  return (
+                    <div key={row.channel}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-medium text-foreground">{row.channel}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-medium tabular-nums text-foreground/25 dark:text-foreground/20">—.— avg</span>
+                          <span className="text-sm font-bold tabular-nums text-foreground/25 dark:text-foreground/20">—.— orders</span>
+                          {overThreshold && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
+                              Above target
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="relative w-full" style={{ height: "20px" }}>
+                        <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-slate-400/60 dark:bg-slate-500/60 rounded-sm z-10" style={{ left: "38%" }} />
+                        <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-destructive/40 rounded-sm z-10" style={{ left: "55%" }} />
+                        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className={cn("h-2 rounded-full", overThreshold ? "bg-destructive/70" : "bg-emerald-500/70")}
+                            style={{ width: ghostWidths[i] }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                });
+            })()}
+            <div className="mt-5 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="inline-block w-6 border-t border-dashed border-slate-400/70 dark:border-slate-500/70 shrink-0" />
+                <span>Blended avg: <span className="font-semibold tabular-nums text-foreground/25 dark:text-foreground/20">—.— orders</span></span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="inline-block w-6 border-t border-dashed border-destructive/60 shrink-0" />
+                <span>Target threshold: <span className="font-semibold tabular-nums text-foreground/25 dark:text-foreground/20">—.— orders</span>. Channels above this reduce short-term cash efficiency.</span>
+              </div>
+            </div>
+          </div>
+        }
       >
         {/* ── Chart rows — real data, blurred for free users ── */}
         <div className="space-y-4">

@@ -34,6 +34,13 @@ interface PremiumBlurPreviewProps {
   isPro: boolean;
   /** The real section content (charts, tables, etc.) */
   children: React.ReactNode;
+  /**
+   * Optional ghost preview content rendered in locked state instead of
+   * blurred children. Show labels and category names clearly, but replace
+   * all numeric values with masked placeholders (£ —,—, —.—%, etc.).
+   * When omitted, falls back to full blur of children.
+   */
+  ghostContent?: React.ReactNode;
   /** Extra classes for the outer card wrapper */
   className?: string;
 }
@@ -44,22 +51,12 @@ interface PremiumBlurPreviewProps {
  * Wraps a Pro-gated section in a consistent premium card shell.
  *
  * — Unlocked (isPro = true): renders `children` normally inside the card.
- * — Locked (isPro = false): blurs `children` behind a gradient and overlays
- *   an indigo upgrade card so the section structure remains visible while
- *   precise values are unreadable.
- *
- * Usage:
- *   <PremiumBlurPreview
- *     title="CAC Payback by Channel"
- *     subtitle="Orders needed to recover acquisition cost per channel."
- *     headerExtra={<BlendedAvgSummary />}
- *     badgeText="PRO — Unlock cash recovery diagnostics"
- *     ctaTitle="Unlock CAC Payback Analysis"
- *     ctaDescription="Identify which channels delay cash recovery."
- *     isPro={canAccess("cac_payback")}
- *   >
- *     <PaybackChart />
- *   </PremiumBlurPreview>
+ * — Locked (isPro = false):
+ *     If `ghostContent` is supplied: renders it as a readable preview with
+ *     category labels visible and all numeric values replaced by masked
+ *     placeholders, then overlays the gradient + upgrade card on top.
+ *     If no `ghostContent`: blurs `children` behind a gradient and overlays
+ *     the upgrade card (original full-blur fallback).
  */
 export function PremiumBlurPreview({
   title,
@@ -71,6 +68,7 @@ export function PremiumBlurPreview({
   ctaText = "Upgrade →",
   isPro,
   children,
+  ghostContent,
   className,
 }: PremiumBlurPreviewProps) {
   return (
@@ -90,12 +88,10 @@ export function PremiumBlurPreview({
         </div>
 
         {isPro ? (
-          /* Unlocked — show caller-supplied header extra (e.g. a metric summary) */
           headerExtra ? (
             <div className="shrink-0">{headerExtra}</div>
           ) : null
         ) : (
-          /* Locked — show Pro badge instead of metric data */
           <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0 mt-0.5">
             {badgeText}
           </span>
@@ -106,23 +102,36 @@ export function PremiumBlurPreview({
         /* ── Unlocked: full content ── */
         <>{children}</>
       ) : (
-        /* ── Locked: blur + gradient + upgrade overlay ── */
+        /* ── Locked: ghost preview or full blur + gradient + upgrade card ── */
         <div className="relative">
-          {/* Real children — blurred: structure recognisable, values unreadable */}
-          <div
-            className="blur-[10px] opacity-[0.7] pointer-events-none select-none"
-            aria-hidden="true"
-          >
-            {children}
-          </div>
 
-          {/* White/dark overlay — reduces contrast of blurred values further */}
-          <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/25 pointer-events-none rounded-b-xl" />
+          {ghostContent ? (
+            /* Ghost preview: labels readable, values masked — no blur applied */
+            <div className="pointer-events-none select-none" aria-hidden="true">
+              {ghostContent}
+            </div>
+          ) : (
+            /* Full blur fallback for sections without custom ghost content */
+            <div
+              className="blur-[10px] opacity-[0.7] pointer-events-none select-none"
+              aria-hidden="true"
+            >
+              {children}
+            </div>
+          )}
 
-          {/* Gradient: top clear (structure visible), bottom fades to card bg */}
+          {/* Overlay — washes ghost content slightly or adds opacity over blur */}
+          <div className={cn(
+            "absolute inset-0 pointer-events-none rounded-b-xl",
+            ghostContent
+              ? "bg-white/8 dark:bg-slate-950/10"
+              : "bg-white/20 dark:bg-slate-950/25"
+          )} />
+
+          {/* Gradient: top clear, bottom fades firmly to card bg hiding bottom rows */}
           <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent rounded-b-xl pointer-events-none" />
 
-          {/* Upgrade card — floats above blur, shadow gives depth */}
+          {/* Upgrade card — floats above everything */}
           <div className="relative mt-4">
             <a
               href={UPGRADE_HREF}

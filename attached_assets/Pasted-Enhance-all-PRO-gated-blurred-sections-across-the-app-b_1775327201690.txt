@@ -1,0 +1,182 @@
+Enhance all PRO-gated blurred sections across the app by adding ghost labels and masked values so users can clearly understand what type of information is hidden, without being able to read the actual premium data.
+
+Apply this globally anywhere the PremiumBlurPreview component is used, including:
+
+- Profit Margin Analysis page
+- Marketing Efficiency page
+- Growth Drivers / Growth Quality page
+- any future page using the same blurred premium-preview pattern
+
+
+GOAL
+
+The blurred sections should feel more intentionally premium by showing the shape and type of hidden insight, while still preventing the user from extracting real values.
+
+Users should be able to recognise:
+
+- the type of chart or table
+- the names of rows or channels
+- the kind of metrics hidden
+
+But they should NOT be able to read:
+- actual £ values
+- percentages
+- pp changes
+- precise labels on chart axes
+- exact opportunity estimates
+
+
+PART 1 — Ghost labels for tables and lists
+
+Where blurred content includes a table or opportunity list, keep the left-hand row labels or category labels partially visible.
+
+Examples of allowed visible labels:
+
+- Meta
+- Email
+- Organic
+- Google Shopping
+- Shipping costs
+- Discount depth
+- Returns rate
+- Reallocate Meta spend
+- Reduce shipping costs
+
+These labels should remain readable enough to indicate what the hidden section contains.
+
+However, all value columns to the right should be masked.
+
+Examples of masked value display:
+
+£ —,—
+—.— orders
++—.—pp
+—% change
+£ —,— next month
+
+Style masked values in muted low-contrast placeholder text.
+
+
+PART 2 — Ghost labels for charts
+
+Where blurred content includes a chart:
+
+- keep category names or channel names faintly visible
+- keep general bar/line shapes visible
+- mask axis values and data labels
+- do not allow users to read exact plotted numbers
+
+For bar charts:
+- channel names can remain readable
+- data labels at the end of bars should be replaced with masked placeholders such as:
+  £ —,—
+  —.—
+  —%
+
+For line charts:
+- month labels may remain faintly visible
+- y-axis values should be masked or blurred further
+- tooltip values should never appear in free mode
+
+
+PART 3 — Mask numeric columns consistently
+
+Apply a numeric masking rule to all blurred premium sections:
+
+Any visible premium value should render as a placeholder instead of real data.
+
+Examples:
+
+£9,800  →  £ —,—
+2.1 orders  →  —.— orders
++1.4pp  →  +—.—pp
+41%  →  —%
+£18,200  →  £ —,— (only in blurred premium sections, not headline free metrics)
+
+Do NOT mask data in sections intended to remain visible to free users.
+
+
+PART 4 — Visual styling for ghost labels
+
+Ghost labels should feel premium and intentional.
+
+Requirements:
+
+- channel / row labels remain visible in muted but readable dark text
+- masked values use lighter, lower-contrast placeholder styling
+- preserve grid alignment so users understand structure
+- avoid making the content look broken or like missing data
+- the overall effect should feel like “preview of locked premium analytics”
+
+
+PART 5 — Overlay card remains primary CTA
+
+Keep the existing upgrade overlay card on top of the blurred content:
+
+- lock icon
+- premium title
+- one-line explanation
+- Upgrade CTA
+
+Ensure ghost labels sit visually behind the overlay and do not compete with it.
+
+
+PART 6 — Apply globally via PremiumBlurPreview
+
+Update the PremiumBlurPreview component so this masked ghost-label logic is inherited automatically by all blurred premium sections.
+
+This should apply across:
+
+- blurred tables
+- blurred charts
+- blurred opportunity breakdowns
+- blurred driver breakdowns
+- blurred channel analysis blocks
+
+
+PART 7 — Test examples
+
+After implementing, ensure these examples behave correctly:
+
+1. Opportunity table:
+Visible:
+- Reallocate Meta spend
+- Reduce shipping costs
+- Lower discount depth
+Masked:
+- £ impact
+- confidence detail if intended hidden
+- pp uplift values
+
+2. CAC Payback chart:
+Visible:
+- Email
+- Organic
+- Google Shopping
+- Meta
+Masked:
+- 0.6 orders
+- 2.1 orders
+- threshold values if intended hidden
+
+3. Margin bridge table:
+Visible:
+- Revenue
+- Discounts
+- Shipping costs
+- Marketing spend
+Masked:
+- £ totals
+- % of revenue
+- per-order values
+
+
+PART 8 — Final quality standard
+
+The final result should communicate:
+
+“This premium analysis exists and is specific to your business.”
+
+without allowing users to reverse-engineer or read the hidden data.
+
+The experience should feel polished, premium, and intentionally gated — not like a bug, loading state, or broken UI.

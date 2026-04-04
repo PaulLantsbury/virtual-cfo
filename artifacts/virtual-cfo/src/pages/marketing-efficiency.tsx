@@ -69,6 +69,20 @@ const CHANNEL_CM = [
   { channel: "Meta",            cm: 34.2, revenue: 38_900 },
 ];
 
+/**
+ * Contribution profit (£) per acquisition channel for the current period.
+ * @dynamic channel_revenue × (channel_cm / 100) — after channel-specific acquisition cost
+ */
+const CHANNEL_CP = [
+  { channel: "Email",           cp: 12_400 },
+  { channel: "Organic",        cp:  9_800 },
+  { channel: "Google Shopping", cp:  6_200 },
+  { channel: "Meta",            cp:  2_100 },
+];
+const maxCp = Math.max(...CHANNEL_CP.map((c) => c.cp));
+const minCp = Math.min(...CHANNEL_CP.map((c) => c.cp));
+const totalAttributedCp = CHANNEL_CP.reduce((s, c) => s + c.cp, 0);
+
 type EfficiencyRating = "strong" | "watch" | "weak";
 
 /** @dynamic Replace with live CAC per channel from ad platform APIs */
@@ -635,6 +649,123 @@ export default function MarketingEfficiency() {
             Blended contribution margin after all marketing costs
           </p>
         </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          §3b  CONTRIBUTION PROFIT BY CHANNEL
+          Primary decision-making view: which channels generate the most £ profit
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-4">
+        <h2 className="text-xl font-bold text-foreground">Contribution Profit by Channel</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Which channels generate the most contribution profit after acquisition cost.
+        </p>
+      </div>
+
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-10">
+
+        {/* Legend */}
+        <div className="flex items-center gap-5 mb-5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" />
+            Highest contributor
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-red-500 inline-block" />
+            Lowest contributor
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-primary/60 inline-block" />
+            Other channels
+          </span>
+        </div>
+
+        <div className="h-[240px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={[...CHANNEL_CP].sort((a, b) => b.cp - a.cp)}
+              layout="vertical"
+              margin={{ top: 0, right: 80, left: 10, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+              <XAxis
+                type="number"
+                tickFormatter={(v: number) => `£${(v / 1000).toFixed(0)}k`}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              />
+              <YAxis
+                type="category"
+                dataKey="channel"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                width={125}
+              />
+              <Tooltip
+                formatter={(v: number) => [`£${v.toLocaleString()}`, "Contribution Profit"]}
+                contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgb(0 0 0 / .1)" }}
+              />
+              <Bar
+                dataKey="cp"
+                radius={[0, 6, 6, 0]}
+                maxBarSize={36}
+                label={{
+                  position: "right",
+                  formatter: (v: number) => `£${v.toLocaleString()}`,
+                  fill: "hsl(var(--muted-foreground))",
+                  fontSize: 12,
+                  fontWeight: 600,
+                }}
+              >
+                {[...CHANNEL_CP].sort((a, b) => b.cp - a.cp).map((entry) => (
+                  <Cell
+                    key={entry.channel}
+                    fill={
+                      entry.cp === maxCp
+                        ? "#22c55e"
+                        : entry.cp === minCp
+                        ? "#ef4444"
+                        : "hsl(var(--primary))"
+                    }
+                    opacity={entry.cp === maxCp || entry.cp === minCp ? 1 : 0.65}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Summary row */}
+        <div className="mt-5 pt-4 border-t border-border/40 flex items-center justify-between flex-wrap gap-3">
+          <p className="text-xs text-muted-foreground">
+            Total attributed contribution profit:{" "}
+            <span className="font-semibold text-foreground">£{totalAttributedCp.toLocaleString()}</span>
+            {" "}·{" "}
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+              Email
+            </span>{" "}
+            generates{" "}
+            <span className="font-semibold text-foreground">
+              {Math.round((CHANNEL_CP.find((c) => c.channel === "Email")!.cp / totalAttributedCp) * 100)}%
+            </span>{" "}
+            of attributed profit on{" "}
+            <span className="font-semibold text-foreground">
+              {Math.round((CHANNEL_CM.find((c) => c.channel === "Email")!.revenue / CHANNEL_CM.reduce((s, c) => s + c.revenue, 0)) * 100)}%
+            </span>{" "}
+            of revenue — the highest-leverage channel.
+          </p>
+          <div className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-lg px-3 py-1.5 shrink-0">
+            <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+            <span>Meta generates only{" "}
+              {Math.round((CHANNEL_CP.find((c) => c.channel === "Meta")!.cp / totalAttributedCp) * 100)}%
+              {" "}of attributed profit
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════

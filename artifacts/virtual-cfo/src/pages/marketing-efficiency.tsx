@@ -297,10 +297,45 @@ const EFFICIENCY_CONFIG: Record<EfficiencyRating, { label: string; badge: string
 const maxCm = Math.max(...CHANNEL_CM.map((c) => c.cm));
 const minCm = Math.min(...CHANNEL_CM.map((c) => c.cm));
 
+// ─── Timeline framing ─────────────────────────────────────────────────────────
+
+const TIMELINE_FRAMING: Record<string, {
+  upliftPhrase:  string;
+  baselineNote:  string;
+  rowLabel:      string;
+  combinedLabel: string;
+}> = {
+  "7d":  {
+    upliftPhrase:  "next month at current 7-day run rate",
+    baselineNote:  "current 7-day trading baseline",
+    rowLabel:      "next month",
+    combinedLabel: "next month if implemented now",
+  },
+  "30d": {
+    upliftPhrase:  "next month at current 30-day run rate",
+    baselineNote:  "current 30-day trading baseline",
+    rowLabel:      "next month",
+    combinedLabel: "next month if implemented now",
+  },
+  "90d": {
+    upliftPhrase:  "next month based on 90-day trading baseline",
+    baselineNote:  "90-day trading baseline",
+    rowLabel:      "next month",
+    combinedLabel: "next month if implemented now",
+  },
+  "12m": {
+    upliftPhrase:  "based on trailing 12-month performance",
+    baselineNote:  "trailing 12-month performance",
+    rowLabel:      "projected",
+    combinedLabel: "projected, if implemented now",
+  },
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MarketingEfficiency() {
-  const { periodBadge, periodPhrase } = useTimeline();
+  const { periodBadge, periodPhrase, timeline } = useTimeline();
+  const framing = TIMELINE_FRAMING[timeline] ?? TIMELINE_FRAMING["30d"];
 
   return (
     <AppLayout>
@@ -394,7 +429,7 @@ export default function MarketingEfficiency() {
                 £{ESTIMATED_CONTRIBUTION.toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground leading-snug max-w-[26ch]">
-                Based on the current 30-day trading baseline
+                Based on {framing.baselineNote}
               </p>
             </div>
 
@@ -406,9 +441,9 @@ export default function MarketingEfficiency() {
               Marketing efficiency has weakened due to rising Meta CAC and increased reliance on lower-contribution paid acquisition.
             </p>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              If 15–25% of paid acquisition spend is reallocated toward higher-margin channels such as Email and Organic, estimated additional contribution next month is approximately{" "}
+              If 15–25% of paid acquisition spend is reallocated toward higher-margin channels such as Email and Organic, estimated additional contribution is approximately{" "}
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{ESTIMATED_CONTRIBUTION.toLocaleString()}</span>{" "}
-              at current sales volume.
+              {framing.upliftPhrase}.
             </p>
           </div>
 
@@ -456,10 +491,10 @@ export default function MarketingEfficiency() {
       <div className="mb-2">
         <h2 className="text-xl font-bold text-foreground">Opportunities</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Top profit improvement opportunities ranked by expected contribution uplift next month.
+          Top profit improvement opportunities ranked by expected contribution uplift {framing.rowLabel}.
         </p>
         <p className="text-xs text-muted-foreground/70 mt-1">
-          Based on the current 30-day trading baseline.
+          Based on the {framing.baselineNote}.
         </p>
       </div>
 
@@ -471,14 +506,14 @@ export default function MarketingEfficiency() {
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-              Estimated additional contribution available next month
+              Estimated additional contribution available — {framing.rowLabel}
             </p>
           </div>
           <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none mb-2">
             £{ESTIMATED_CONTRIBUTION.toLocaleString()}
           </p>
           <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 leading-snug">
-            Based on top quantified opportunities from the current 30-day trading baseline
+            Based on top quantified opportunities from the {framing.baselineNote}
           </p>
           <p className="text-xs text-emerald-700/50 dark:text-emerald-400/50 leading-snug mt-1">
             Current Marketing Contribution Profit: £{MKT_CP.toLocaleString()} · {periodBadge}
@@ -500,7 +535,7 @@ export default function MarketingEfficiency() {
                   CM gain
                 </span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-20 text-right">
-                  £ next month
+                  £ {framing.rowLabel}
                 </span>
               </div>
             </div>
@@ -551,7 +586,7 @@ export default function MarketingEfficiency() {
                         £{o.cashImpact.toLocaleString()}
                       </p>
                       <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
-                        next month
+                        {framing.rowLabel}
                       </p>
                     </div>
                   </div>
@@ -562,7 +597,7 @@ export default function MarketingEfficiency() {
             {/* Combined impact footer */}
             <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
               <p className="text-sm font-semibold text-foreground">
-                Combined impact next month if implemented now
+                Combined impact — {framing.combinedLabel}
               </p>
               <div className="flex items-start gap-5 shrink-0 ml-4">
                 <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
@@ -573,7 +608,7 @@ export default function MarketingEfficiency() {
                     ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
                   </p>
                   <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
-                    next month
+                    {framing.rowLabel}
                   </p>
                 </div>
               </div>

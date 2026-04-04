@@ -621,7 +621,7 @@ export default function MarginAnalysis() {
             <div className="relative">
 
               {/* Full PRO rows rendered beneath the blur */}
-              <div className="blur-[2px] opacity-[0.55] pointer-events-none select-none" aria-hidden="true">
+              <div className="blur-[10px] opacity-[0.7] pointer-events-none select-none" aria-hidden="true">
                 <div className="divide-y divide-border/40">
                   {RECOVERY_SCENARIOS.map((s, i) => (
                     <div
@@ -671,8 +671,11 @@ export default function MarginAnalysis() {
                 </div>
               </div>
 
+              {/* White/dark overlay — reduces contrast of blurred values */}
+              <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/25 pointer-events-none" />
+
               {/* Gradient fade */}
-              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent rounded-b-xl pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent rounded-b-xl pointer-events-none" />
 
               {/* Indigo upgrade card */}
               <div className="relative mx-6 mb-5 mt-4">
@@ -856,14 +859,17 @@ export default function MarginAnalysis() {
             </>
           ) : (
             <>
-              <div className="blur-[2px] opacity-[0.55] pointer-events-none select-none" aria-hidden="true">
-                <p className="text-3xl font-display font-bold text-foreground mb-2">
-                  {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
-                </p>
-                <div className="space-y-0.5">
-                  <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
-                  <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
+              <div className="relative">
+                <div className="blur-[10px] opacity-[0.7] pointer-events-none select-none" aria-hidden="true">
+                  <p className="text-3xl font-display font-bold text-foreground mb-2">
+                    {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
+                  </p>
+                  <div className="space-y-0.5">
+                    <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
+                    <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
+                  </div>
                 </div>
+                <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/25 pointer-events-none rounded-lg" />
               </div>
               <a
                 href="/upgrade"

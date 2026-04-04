@@ -108,16 +108,19 @@ export function PremiumBlurPreview({
       ) : (
         /* ── Locked: blur + gradient + upgrade overlay ── */
         <div className="relative">
-          {/* Real children — blurred so structure is visible but values are not */}
+          {/* Real children — blurred: structure recognisable, values unreadable */}
           <div
-            className="blur-[2px] opacity-[0.55] pointer-events-none select-none"
+            className="blur-[10px] opacity-[0.7] pointer-events-none select-none"
             aria-hidden="true"
           >
             {children}
           </div>
 
-          {/* Layered gradient: top is clear (structure visible), bottom fades to card (hides values) */}
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent rounded-b-xl pointer-events-none" />
+          {/* White/dark overlay — reduces contrast of blurred values further */}
+          <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/25 pointer-events-none rounded-b-xl" />
+
+          {/* Gradient: top clear (structure visible), bottom fades to card bg */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent rounded-b-xl pointer-events-none" />
 
           {/* Upgrade card — floats above blur, shadow gives depth */}
           <div className="relative mt-4">

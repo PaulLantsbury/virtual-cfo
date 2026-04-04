@@ -1,0 +1,119 @@
+Improve the blur treatment used in all PremiumBlurPreview (PRO-gated) sections across the app so underlying content is no longer readable while still remaining visually recognisable as structured analysis.
+
+Apply this update globally to every blurred premium section on:
+
+- Marketing Efficiency page
+- Profit Margin Analysis page
+- Growth Drivers page
+- any other page using PremiumBlurPreview
+
+
+PART 1 — Increase blur strength
+
+Increase blur intensity on gated content containers:
+
+Current blur:
+backdrop-blur-sm or equivalent
+
+Update to:
+backdrop-blur-lg (minimum)
+or stronger if still readable
+
+Ensure:
+
+text values
+numbers
+axis labels
+table values
+
+cannot be read clearly.
+
+
+PART 2 — Add opacity layer over blurred content
+
+Add a semi-transparent overlay above blurred content:
+
+Example:
+
+background: rgba(255,255,255,0.55)
+
+(or dark-mode equivalent if needed)
+
+This overlay should:
+
+reduce readability further
+preserve layout visibility
+maintain chart structure visibility
+
+
+PART 3 — Add gradient fade toward centre
+
+Apply a subtle centre-weighted gradient overlay so the middle of charts/tables becomes less readable than edges.
+
+Example behaviour:
+
+top: light blur
+centre: strongest blur + opacity
+bottom: light blur
+
+This keeps structure visible but hides detail.
+
+
+PART 4 — Prevent numeric readability specifically
+
+Apply an additional text masking layer to:
+
+table values
+currency values
+percentages
+axis labels
+
+Example approach:
+
+reduce contrast
+increase blur selectively on text elements
+or apply masked overlay strips aligned with numeric columns
+
+Goal:
+
+users should recognise charts exist
+but not extract usable insight
+
+
+PART 5 — Keep headings readable
+
+Do NOT blur:
+
+section titles
+section subtitles
+PRO badge
+overlay CTA
+upgrade cards
+
+Only blur the analytical content itself.
+
+
+PART 6 — Preserve premium feel
+
+Ensure blur treatment still:
+
+looks intentional
+looks polished
+looks product-grade
+does not resemble disabled UI
+does not resemble loading state
+
+Users should feel:
+
+“valuable analysis is here but locked”
+
+
+PART 7 — Apply consistently everywhere
+
+Update PremiumBlurPreview component so ALL gated sections automatically inherit:
+
+stronger blur
+opacity overlay
+gradient masking
+
+This should fix the issue globally without editing each section individually.

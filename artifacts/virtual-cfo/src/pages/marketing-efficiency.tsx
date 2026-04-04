@@ -810,8 +810,11 @@ export default function MarketingEfficiency() {
                 </div>
               </div>
 
+              {/* White/dark overlay — reduces contrast of blurred values */}
+              <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/25 pointer-events-none" />
+
               {/* Gradient fade */}
-              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent rounded-b-xl pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent rounded-b-xl pointer-events-none" />
 
               {/* Indigo upgrade card */}
               <div className="relative mx-6 mb-5 mt-4">

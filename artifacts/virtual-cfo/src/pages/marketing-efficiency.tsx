@@ -65,6 +65,8 @@ const MKT_CP_PER_ORDER_CHANGE_LY  = +(MKT_CP_PER_ORDER - MKT_CP_PER_ORDER_LY).to
  * @dynamic Math.round(orderVolume × (cmGainPp / 100) × revenuePerOrder)
  */
 const ESTIMATED_CONTRIBUTION = 18_200;
+/** @dynamic Math.round((ESTIMATED_CONTRIBUTION / MKT_CP) * 100) */
+const OPPORTUNITY_UPLIFT_PCT = Math.round((ESTIMATED_CONTRIBUTION / MKT_CP) * 100);
 
 /**
  * @ai-commentary Replace with live-generated insight.
@@ -536,6 +538,9 @@ export default function MarketingEfficiency() {
           </div>
           <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none mb-2">
             £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+          </p>
+          <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mb-3">
+            +{OPPORTUNITY_UPLIFT_PCT}% uplift vs current marketing contribution profit
           </p>
           <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 leading-snug">
             Based on top quantified opportunities from the {framing.baselineNote}

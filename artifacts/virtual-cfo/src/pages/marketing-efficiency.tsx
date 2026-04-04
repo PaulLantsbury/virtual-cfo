@@ -932,7 +932,19 @@ export default function MarketingEfficiency() {
 
       </div>
 
-      {/* Contribution Profit by Channel — sub-section of Actual Performance */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          §3  ALLOCATION DIAGNOSTICS
+          Channel-level contribution breakdown and budget allocation analysis
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-4">
+        <h2 className="text-xl font-bold text-foreground">Allocation Diagnostics</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Where budget is currently creating — or destroying — contribution value.
+        </p>
+      </div>
+
+      {/* Contribution Profit by Channel — sub-section of Allocation Diagnostics */}
       <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 mb-10">
 
         {/* Sub-heading row */}
@@ -1022,7 +1034,7 @@ export default function MarketingEfficiency() {
 
       </div>
 
-      {/* Contribution per Order by Channel — sub-section of Actual Performance */}
+      {/* Contribution per Order by Channel — sub-section of Allocation Diagnostics */}
       <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 mb-10">
 
         {/* Sub-heading row */}
@@ -1108,7 +1120,7 @@ export default function MarketingEfficiency() {
 
       </div>
 
-      {/* Revenue Share vs Contribution Share — sub-section of Actual Performance */}
+      {/* Revenue Share vs Contribution Share — sub-section of Allocation Diagnostics */}
       <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 mb-10">
 
         {/* Sub-heading */}

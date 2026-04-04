@@ -6,6 +6,7 @@ import {
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { UpgradePreviewCard } from "@/components/UpgradePreviewCard";
+import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 import { useTimeline } from "@/lib/timeline";
@@ -768,32 +769,22 @@ export default function MarginAnalysis() {
         </div>
 
         {/* 3 — CAC Payback */}
-        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          {canAccess("cac_payback") ? (
-            /* ── PRO: full card ── */
-            <>
-              <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
-              <p className="text-3xl font-display font-bold text-foreground mb-2">
-                {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
-              </p>
-              <div className="space-y-0.5 mb-2">
-                <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
-                <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
-              </div>
-              <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover acquisition cost</p>
-            </>
-          ) : (
-            /* ── FREE: teaser only — compact layout for narrow KPI card ── */
-            <>
-              <p className="text-sm font-medium text-muted-foreground mb-3">CAC Payback Period</p>
-              <UpgradePreviewCard
-                title="Unlock channel-level margin insights"
-                description="Track CAC payback and acquisition efficiency across channels."
-                compact
-              />
-            </>
-          )}
-        </div>
+        <PremiumBlurPreview
+          title="CAC Payback Period"
+          subtitle="Orders needed to recover acquisition cost"
+          badgeText="PRO"
+          ctaTitle="Unlock CAC Payback"
+          isPro={canAccess("cac_payback")}
+          className="p-5"
+        >
+          <p className="text-3xl font-display font-bold text-foreground mb-2">
+            {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
+          </p>
+          <div className="space-y-0.5">
+            <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
+            <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
+          </div>
+        </PremiumBlurPreview>
 
         {/* 4 — Contribution per Order */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
@@ -837,11 +828,20 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
-      {canAccess("driver_breakdown") ? (
-        /* ── PRO: full driver attribution table ── */
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
+      <PremiumBlurPreview
+        title="Driver Attribution"
+        subtitle="What changed vs last month and the per-order margin impact."
+        badgeText="PRO — Unlock detailed analysis"
+        ctaTitle="Unlock driver-level breakdown"
+        ctaDescription="See exactly what changed and how much each factor impacted margin."
+        isPro={canAccess("driver_breakdown")}
+        className="overflow-hidden mb-10"
+      >
+        {/* Negative-margin wrapper extends table flush to card edges */}
+        <div className="-mx-6 -mb-6">
+
           {/* Column headers */}
-          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
+          <div className="flex items-center justify-between px-6 py-3 border-t border-border/50 bg-secondary/20">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               What changed this period vs last month
             </p>
@@ -898,24 +898,9 @@ export default function MarginAnalysis() {
                 );
               })}
           </div>
+
         </div>
-      ) : (
-        /* ── FREE: upgrade prompt — card wrapper preserves section height ── */
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
-          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              What changed this period vs last month
-            </p>
-          </div>
-          <div className="min-h-[200px] flex items-center px-6">
-            <UpgradePreviewCard
-              title="Unlock driver-level breakdown showing exactly what changed"
-              description="See which costs or revenue movements drove the most margin impact this period, with exact per-order attribution."
-              className="w-full"
-            />
-          </div>
-        </div>
-      )}
+      </PremiumBlurPreview>
 
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 5 — DETAILED ANALYSIS
@@ -936,137 +921,127 @@ export default function MarginAnalysis() {
       </div>
 
       {/* Contribution Margin Bridge */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Contribution Margin Bridge</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            How revenue converts into contribution margin — total and per order · {selectedLabel}
-          </p>
+      <PremiumBlurPreview
+        title="Contribution Margin Bridge"
+        subtitle={`How revenue converts into contribution margin — total and per order · ${selectedLabel}`}
+        badgeText="PRO — Unlock detailed analysis"
+        ctaTitle="Unlock contribution margin bridge analysis"
+        ctaDescription="See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing."
+        isPro={canAccess("margin_bridge")}
+        className="mb-8"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Metric
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Total (£)
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  % of Revenue
+                </th>
+                <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
+                  Per Order (£)
+                </th>
+                <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Trend
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {BRIDGE_ROWS.map((row) => {
+                const revenueTotal = BRIDGE_ROWS[0].total;
+                const isRevenue   = row.type === "revenue";
+                const totalStr    = isRevenue
+                  ? `£${row.total.toLocaleString()}`
+                  : `−£${Math.abs(row.total).toLocaleString()}`;
+                const pctRaw      = (row.total / revenueTotal) * 100;
+                const pctStr      = isRevenue
+                  ? `${pctRaw.toFixed(1)}%`
+                  : `−${Math.abs(pctRaw).toFixed(1)}%`;
+                const perOrderStr = `£${Math.abs(row.perOrder).toFixed(2)}`;
+
+                return (
+                  <tr
+                    key={row.label}
+                    className="border-b border-border/40 hover:bg-secondary/30 transition-colors"
+                  >
+                    <td className="py-3 pr-4 font-medium text-foreground">{row.label}</td>
+                    <td className={cn(
+                      "py-3 px-4 text-right tabular-nums font-semibold",
+                      isRevenue ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {totalStr}
+                    </td>
+                    <td className={cn(
+                      "py-3 px-4 text-right tabular-nums",
+                      isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
+                    )}>
+                      {pctStr}
+                    </td>
+                    <td className={cn(
+                      "py-3 px-4 text-right tabular-nums",
+                      isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
+                    )}>
+                      {isRevenue ? "" : "−"}{perOrderStr}
+                    </td>
+                    <td className="py-3 pl-4 text-right">
+                      {row.trend === "worsening" ? (
+                        <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                          ↑ cost
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-primary/30 bg-primary/5">
+                <td className="py-3.5 pr-4">
+                  <span className="font-bold text-foreground">Contribution Margin</span>
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
+                  £{CM_VALUE.toLocaleString()}
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-primary">
+                  {CM_PCT}%
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
+                  £{CONTRIBUTION_PER_ORDER.toFixed(2)}
+                </td>
+                <td className="py-3.5 pl-4 text-right">
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                    <ArrowDownRight className="w-2.5 h-2.5" />
+                    ↓ margin
+                  </span>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
-
-        {canAccess("margin_bridge") ? (
-          /* ── PRO: full bridge table ── */
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2.5 pr-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Metric
-                  </th>
-                  <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                    Total (£)
-                  </th>
-                  <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                    % of Revenue
-                  </th>
-                  <th className="text-right py-2.5 px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                    Per Order (£)
-                  </th>
-                  <th className="text-right py-2.5 pl-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Trend
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {BRIDGE_ROWS.map((row) => {
-                  const revenueTotal = BRIDGE_ROWS[0].total;
-                  const isRevenue   = row.type === "revenue";
-                  const totalStr    = isRevenue
-                    ? `£${row.total.toLocaleString()}`
-                    : `−£${Math.abs(row.total).toLocaleString()}`;
-                  const pctRaw      = (row.total / revenueTotal) * 100;
-                  const pctStr      = isRevenue
-                    ? `${pctRaw.toFixed(1)}%`
-                    : `−${Math.abs(pctRaw).toFixed(1)}%`;
-                  const perOrderStr = `£${Math.abs(row.perOrder).toFixed(2)}`;
-
-                  return (
-                    <tr
-                      key={row.label}
-                      className="border-b border-border/40 hover:bg-secondary/30 transition-colors"
-                    >
-                      <td className="py-3 pr-4 font-medium text-foreground">{row.label}</td>
-                      <td className={cn(
-                        "py-3 px-4 text-right tabular-nums font-semibold",
-                        isRevenue ? "text-foreground" : "text-muted-foreground"
-                      )}>
-                        {totalStr}
-                      </td>
-                      <td className={cn(
-                        "py-3 px-4 text-right tabular-nums",
-                        isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
-                      )}>
-                        {pctStr}
-                      </td>
-                      <td className={cn(
-                        "py-3 px-4 text-right tabular-nums",
-                        isRevenue ? "text-foreground font-semibold" : "text-muted-foreground"
-                      )}>
-                        {isRevenue ? "" : "−"}{perOrderStr}
-                      </td>
-                      <td className="py-3 pl-4 text-right">
-                        {row.trend === "worsening" ? (
-                          <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
-                            ↑ cost
-                          </span>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-              <tfoot>
-                <tr className="border-t-2 border-primary/30 bg-primary/5">
-                  <td className="py-3.5 pr-4">
-                    <span className="font-bold text-foreground">Contribution Margin</span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
-                    £{CM_VALUE.toLocaleString()}
-                  </td>
-                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-primary">
-                    {CM_PCT}%
-                  </td>
-                  <td className="py-3.5 px-4 text-right tabular-nums font-bold text-foreground">
-                    £{CONTRIBUTION_PER_ORDER.toFixed(2)}
-                  </td>
-                  <td className="py-3.5 pl-4 text-right">
-                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
-                      <ArrowDownRight className="w-2.5 h-2.5" />
-                      ↓ margin
-                    </span>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        ) : (
-          /* ── FREE: upgrade card — min-height preserves card weight ── */
-          <div className="min-h-[200px] flex items-center">
-            <UpgradePreviewCard
-              title="Unlock contribution margin bridge analysis"
-              description="See exactly how revenue converts to contribution margin across discounts, shipping, fulfilment, and marketing costs."
-              className="w-full"
-            />
-          </div>
-        )}
-
-      </div>
+      </PremiumBlurPreview>
 
       {/* Contribution Margin by Channel — gated by plan */}
-      {canAccess("channel_margin_analysis") ? (() => {
-        const maxCm = Math.max(...CHANNELS.map(c => c.cm));
-        const minCm = Math.min(...CHANNELS.map(c => c.cm));
+      {(() => {
+        const maxCm  = Math.max(...CHANNELS.map(c => c.cm));
+        const minCm  = Math.min(...CHANNELS.map(c => c.cm));
         const sorted = [...CHANNELS].sort((a, b) => b.cm - a.cm);
         return (
-          <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-            <div className="mb-5">
-              <h3 className="font-semibold text-lg text-foreground">Contribution Margin by Channel</h3>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Contribution margin % per acquisition channel · {selectedLabel}
-              </p>
-            </div>
+          <PremiumBlurPreview
+            title="Contribution Margin by Channel"
+            subtitle={`Contribution margin % per acquisition channel · ${selectedLabel}`}
+            badgeText="PRO — Unlock detailed analysis"
+            ctaTitle="Unlock channel-level margin insights"
+            ctaDescription="See which channels create margin and which are dragging blended profitability."
+            isPro={canAccess("channel_margin_analysis")}
+            className="mb-8"
+          >
             <ul className="space-y-4">
               {sorted.map((ch) => {
                 const isMax = ch.cm === maxCm;
@@ -1118,26 +1093,9 @@ export default function MarginAnalysis() {
                 Meta has the widest revenue share (£41,800) but the lowest contribution margin at 34.2%. The 24pp spread between Meta and Email is the primary driver of channel mix underperformance — reflected in the estimated additional contribution quantified above.
               </p>
             </div>
-          </div>
+          </PremiumBlurPreview>
         );
-      })() : (
-        /* ── FREE: upgrade card preserving section height ── */
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-          <div className="mb-5">
-            <h3 className="font-semibold text-lg text-foreground">Contribution Margin by Channel</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Contribution margin % per acquisition channel · {selectedLabel}
-            </p>
-          </div>
-          <div className="min-h-[200px] flex items-center">
-            <UpgradePreviewCard
-              title="Unlock channel-level margin insights"
-              description="See contribution margin % and revenue split across Meta, Google Shopping, Email, and Organic — and which channels are reducing your blended performance."
-              className="w-full"
-            />
-          </div>
-        </div>
-      )}
+      })()}
 
       {/* Margin Trend */}
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50 mb-8">

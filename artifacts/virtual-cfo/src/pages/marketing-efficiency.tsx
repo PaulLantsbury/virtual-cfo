@@ -162,7 +162,8 @@ const minCm = Math.min(...CHANNEL_CM.map((c) => c.cm));
 export default function MarketingEfficiency() {
   return (
     <AppLayout>
-      {/* Page header */}
+
+      {/* ── Page header ─────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -177,11 +178,25 @@ export default function MarketingEfficiency() {
         </span>
       </div>
 
-      {/* ── CFO Insight ── */}
-      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-8 overflow-hidden">
+      {/* ══════════════════════════════════════════════════════════════════════
+          §1  MARKETING EFFICIENCY SUMMARY
+          Diagnosis: what is happening and why it matters
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-foreground">Marketing Efficiency Summary</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          March 2026 · Current efficiency diagnosis and financial exposure
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-10 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
           <Sparkles className="w-4 h-4 text-primary shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-primary">CFO Insight</span>
+          <span className="ml-auto text-xs text-destructive font-semibold px-2 py-0.5 rounded-full bg-destructive/10">
+            Efficiency declining — action required
+          </span>
         </div>
         <div className="px-6 py-5 space-y-4">
           <div>
@@ -236,8 +251,82 @@ export default function MarketingEfficiency() {
         </div>
       </div>
 
-      {/* ── KPI Strip ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* ══════════════════════════════════════════════════════════════════════
+          §2  OPPORTUNITIES
+          Where the budget should move and what actions to take
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-foreground">Opportunities</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Estimated contribution uplift from reallocating spend toward higher-margin channels
+        </p>
+      </div>
+
+      {/* Budget reallocation */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-6">
+        <div className="mb-5">
+          <h3 className="font-semibold text-lg text-foreground">Budget Reallocation Opportunity</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Estimated impact of shifting spend toward higher-contribution channels.
+          </p>
+        </div>
+
+        <p className="text-sm text-foreground leading-relaxed mb-6">
+          Shifting {REALLOCATION.metaShiftPct}% of Meta spend toward Email and Organic channels could increase
+          contribution margin by <span className="font-semibold">{REALLOCATION.cmGainLow}–{REALLOCATION.cmGainHigh}pp</span>{" "}
+          next month without reducing overall revenue.
+        </p>
+
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0">
+                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">
+                  Estimated contribution uplift
+                </p>
+                <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                  +£{(REALLOCATION.cashLow / 1000).toFixed(0)}k–£{(REALLOCATION.cashHigh / 1000).toFixed(0)}k
+                </p>
+                <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">next month at current sales volume</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Margin improvement</p>
+              <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
+                +{REALLOCATION.cmGainLow}–{REALLOCATION.cmGainHigh}pp
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recommended actions */}
+      <div className="mb-10">
+        <ActionRecommendations
+          recommendations={RECOMMENDATIONS}
+          title="What to do next"
+          subtitle="Practical actions to improve marketing efficiency and contribution margin"
+          defaultExpanded
+        />
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          §3  ACTUAL PERFORMANCE
+          Blended headline metrics for the current period
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-4">
+        <h2 className="text-xl font-bold text-foreground">Actual Performance</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Key marketing efficiency metrics · March 2026
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {/* Blended CAC */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Blended CAC</p>
@@ -302,8 +391,86 @@ export default function MarketingEfficiency() {
         </div>
       </div>
 
-      {/* ── Contribution Margin by Channel ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+      {/* ══════════════════════════════════════════════════════════════════════
+          §4  KEY DRIVERS
+          Which channels are causing efficiency to deteriorate
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-4">
+        <h2 className="text-xl font-bold text-foreground">Key Drivers</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Channel-level acquisition cost and efficiency movement vs last month
+        </p>
+      </div>
+
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Customer Acquisition Cost by Channel
+          </p>
+          <p className="text-xs text-muted-foreground">vs last month</p>
+        </div>
+
+        {/* Table header */}
+        <div className="grid grid-cols-4 gap-4 px-6 py-2.5 border-b border-border/40">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Channel</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">CAC</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Change</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Efficiency</span>
+        </div>
+
+        <div className="divide-y divide-border/40">
+          {CAC_BY_CHANNEL.map((row) => {
+            const cfg = EFFICIENCY_CONFIG[row.efficiency];
+            return (
+              <div key={row.channel} className="grid grid-cols-4 gap-4 px-6 py-3.5 items-center hover:bg-secondary/30 transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className={cn("w-2 h-2 rounded-full shrink-0", cfg.dot)} />
+                  <span className="text-sm font-medium text-foreground">{row.channel}</span>
+                </div>
+                <span className="text-sm font-bold text-foreground text-right">£{row.cac.toFixed(2)}</span>
+                <span
+                  className={cn(
+                    "text-sm font-medium text-right",
+                    row.change === null ? "text-muted-foreground" :
+                    row.change > 0 ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
+                  )}
+                >
+                  {row.changeLabel}
+                </span>
+                <div className="flex justify-end">
+                  <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold", cfg.badge)}>
+                    {cfg.label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer annotation */}
+        <div className="px-6 py-3 border-t border-border/40 bg-secondary/10">
+          <p className="text-xs text-muted-foreground leading-snug">
+            Meta CAC has risen {CAC_BY_CHANNEL[0].changeLabel} month-on-month and now exceeds the blended average by £{(CAC_BY_CHANNEL[0].cac - BLENDED_CAC).toFixed(2)} per order.
+            Email and Organic remain well below the blended average.
+          </p>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          §5  DETAILED ANALYSIS
+          Channel margin, payback, and trend evidence
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-4">
+        <h2 className="text-xl font-bold text-foreground">Detailed Analysis</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Channel-level contribution margin, payback period, and 12-month efficiency trend
+        </p>
+      </div>
+
+      {/* Contribution Margin by Channel */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-6">
         <div className="mb-5">
           <h3 className="font-semibold text-lg text-foreground">Contribution Margin by Channel</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -368,55 +535,8 @@ export default function MarketingEfficiency() {
         </div>
       </div>
 
-      {/* ── CAC by Channel ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Customer Acquisition Cost by Channel</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Cost per acquired customer and month-on-month efficiency movement.
-          </p>
-        </div>
-
-        {/* Table header */}
-        <div className="grid grid-cols-4 gap-4 px-3 pb-2 border-b border-border/50">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Channel</span>
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">CAC</span>
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">vs Last Month</span>
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Efficiency</span>
-        </div>
-
-        <div className="divide-y divide-border/40">
-          {CAC_BY_CHANNEL.map((row) => {
-            const cfg = EFFICIENCY_CONFIG[row.efficiency];
-            return (
-              <div key={row.channel} className="grid grid-cols-4 gap-4 px-3 py-3.5 items-center hover:bg-secondary/30 rounded-xl transition-colors">
-                <div className="flex items-center gap-2">
-                  <span className={cn("w-2 h-2 rounded-full shrink-0", cfg.dot)} />
-                  <span className="text-sm font-medium text-foreground">{row.channel}</span>
-                </div>
-                <span className="text-sm font-bold text-foreground text-right">£{row.cac.toFixed(2)}</span>
-                <span
-                  className={cn(
-                    "text-sm font-medium text-right",
-                    row.change === null ? "text-muted-foreground" :
-                    row.change > 0 ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
-                  )}
-                >
-                  {row.changeLabel}
-                </span>
-                <div className="flex justify-end">
-                  <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold", cfg.badge)}>
-                    {cfg.label}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Payback by Channel ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+      {/* CAC Payback by Channel */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-6">
         <div className="mb-5">
           <h3 className="font-semibold text-lg text-foreground">CAC Payback by Channel</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -459,7 +579,6 @@ export default function MarketingEfficiency() {
           })}
         </div>
 
-        {/* Reference line annotation */}
         <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
           <span className="inline-block w-6 border-t border-dashed border-destructive/60 mt-2 shrink-0" />
           <span>
@@ -469,7 +588,7 @@ export default function MarketingEfficiency() {
         </div>
       </div>
 
-      {/* ── Marketing Efficiency Trend ── */}
+      {/* Marketing Efficiency Trend */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
         <div className="mb-5">
           <h3 className="font-semibold text-lg text-foreground">Marketing Efficiency Trend</h3>
@@ -478,7 +597,6 @@ export default function MarketingEfficiency() {
           </p>
         </div>
 
-        {/* Legend */}
         <div className="flex items-center gap-6 mb-4">
           <div className="flex items-center gap-2">
             <span className="w-3 h-0.5 bg-destructive inline-block rounded" />
@@ -501,7 +619,6 @@ export default function MarketingEfficiency() {
                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                 dy={8}
               />
-              {/* Left Y-axis: CAC */}
               <YAxis
                 yAxisId="cac"
                 orientation="left"
@@ -511,7 +628,6 @@ export default function MarketingEfficiency() {
                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                 tickFormatter={(v: number) => `£${v}`}
               />
-              {/* Right Y-axis: ROAS */}
               <YAxis
                 yAxisId="roas"
                 orientation="right"
@@ -539,55 +655,6 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      {/* ── Budget Reallocation Opportunity ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Budget Reallocation Opportunity</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Estimated impact of shifting spend toward higher-contribution channels.
-          </p>
-        </div>
-
-        <p className="text-sm text-foreground leading-relaxed mb-6">
-          Shifting {REALLOCATION.metaShiftPct}% of Meta spend toward Email and Organic channels could increase
-          contribution margin by <span className="font-semibold">{REALLOCATION.cmGainLow}–{REALLOCATION.cmGainHigh}pp</span>{" "}
-          next month without reducing overall revenue.
-        </p>
-
-        {/* Uplift callout */}
-        <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0">
-                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">
-                  Estimated contribution uplift
-                </p>
-                <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
-                  +£{(REALLOCATION.cashLow / 1000).toFixed(0)}k–£{(REALLOCATION.cashHigh / 1000).toFixed(0)}k
-                </p>
-                <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5">next month at current sales volume</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">Margin improvement</p>
-              <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
-                +{REALLOCATION.cmGainLow}–{REALLOCATION.cmGainHigh}pp
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Recommended Actions ── */}
-      <ActionRecommendations
-        recommendations={RECOMMENDATIONS}
-        title="What to do next"
-        subtitle="Practical actions to improve marketing efficiency and contribution margin"
-        defaultExpanded
-      />
     </AppLayout>
   );
 }

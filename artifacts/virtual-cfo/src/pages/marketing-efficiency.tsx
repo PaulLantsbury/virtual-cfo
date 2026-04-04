@@ -587,12 +587,30 @@ export default function MarketingEfficiency() {
               Recoverable contribution — {framing.rowLabel}
             </p>
           </div>
-          <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none mb-2">
-            £{ESTIMATED_CONTRIBUTION.toLocaleString()}
-          </p>
-          <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mb-3">
-            +{OPPORTUNITY_UPLIFT_PCT}% contribution uplift vs current marketing contribution profit
-          </p>
+          {/* Dual metric row — £ value + pp equivalent */}
+          <div className="flex flex-wrap items-end gap-x-8 gap-y-3 mb-3">
+            {/* Primary: cash value */}
+            <div>
+              <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
+                £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+              </p>
+              <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-1.5">
+                +{OPPORTUNITY_UPLIFT_PCT}% contribution uplift vs current marketing contribution profit
+              </p>
+            </div>
+            {/* Secondary: margin pp equivalent */}
+            <div className="pl-7 border-l-2 border-emerald-300/60 dark:border-emerald-700/40 pb-0.5">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600/70 dark:text-emerald-400/60 mb-1">
+                Equivalent to
+              </p>
+              <p className="text-3xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none">
+                +{ME_TOTAL_PP.toFixed(1)}pp
+              </p>
+              <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 leading-snug mt-1">
+                marketing contribution margin
+              </p>
+            </div>
+          </div>
 
           {/* Confidence breakdown */}
           <div className="flex flex-col gap-1 mb-3">

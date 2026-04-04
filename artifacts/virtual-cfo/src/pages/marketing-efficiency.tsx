@@ -61,7 +61,7 @@ const MKT_CP_PER_ORDER_CHANGE_MOM = +(MKT_CP_PER_ORDER - MKT_CP_PER_ORDER_PREV).
 const MKT_CP_PER_ORDER_CHANGE_LY  = +(MKT_CP_PER_ORDER - MKT_CP_PER_ORDER_LY).toFixed(2);  // -2.30 (unfavourable)
 
 /**
- * Estimated additional contribution available if spend is reallocated.
+ * Recoverable contribution available if spend is reallocated toward higher-margin channels.
  * @dynamic Math.round(orderVolume × (cmGainPp / 100) × revenuePerOrder)
  */
 const ESTIMATED_CONTRIBUTION = 18_200;
@@ -472,10 +472,10 @@ export default function MarketingEfficiency() {
               </div>
             </div>
 
-            {/* 2 — Estimated Additional Contribution Available Next Month */}
+            {/* 2 — Recoverable Contribution Next Month */}
             <div className="pl-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Estimated Additional Contribution Available Next Month
+                Recoverable Contribution Next Month
               </p>
               <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-2">
                 £{ESTIMATED_CONTRIBUTION.toLocaleString()}
@@ -493,7 +493,7 @@ export default function MarketingEfficiency() {
               Marketing efficiency has weakened due to rising Meta CAC and increased reliance on lower-contribution paid acquisition.
             </p>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              If 15–25% of paid acquisition spend is reallocated toward higher-margin channels such as Email and Organic, estimated additional contribution is approximately{" "}
+              If 15–25% of paid acquisition spend is reallocated toward higher-margin channels such as Email and Organic, recoverable contribution is approximately{" "}
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{ESTIMATED_CONTRIBUTION.toLocaleString()}</span>{" "}
               {framing.upliftPhrase}.
             </p>
@@ -543,7 +543,7 @@ export default function MarketingEfficiency() {
       <div className="mb-2">
         <h2 className="text-xl font-bold text-foreground">Opportunities</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Top profit improvement opportunities ranked by expected contribution uplift {framing.rowLabel}.
+          Ranked by contribution uplift potential {framing.rowLabel}.
         </p>
         <p className="text-xs text-muted-foreground/70 mt-1">
           Based on the {framing.baselineNote}.
@@ -558,14 +558,14 @@ export default function MarketingEfficiency() {
           <div className="flex items-center gap-2 mb-3">
             <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-              Estimated additional contribution available — {framing.rowLabel}
+              Recoverable contribution — {framing.rowLabel}
             </p>
           </div>
           <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none mb-2">
             £{ESTIMATED_CONTRIBUTION.toLocaleString()}
           </p>
           <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mb-3">
-            +{OPPORTUNITY_UPLIFT_PCT}% uplift vs current marketing contribution profit
+            +{OPPORTUNITY_UPLIFT_PCT}% contribution uplift vs current marketing contribution profit
           </p>
 
           {/* Confidence breakdown */}
@@ -591,7 +591,7 @@ export default function MarketingEfficiency() {
           </div>
 
           <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 leading-snug">
-            Based on top quantified opportunities from the {framing.baselineNote}
+            Based on quantified budget reallocation impact from the {framing.baselineNote}
           </p>
           <p className="text-xs text-emerald-700/50 dark:text-emerald-400/50 leading-snug mt-1">
             Current Marketing Contribution Profit: £{MKT_CP.toLocaleString()} · {periodBadge}

@@ -100,6 +100,19 @@ const maxCp = Math.max(...CHANNEL_CP.map((c) => c.cp));
 const minCp = Math.min(...CHANNEL_CP.map((c) => c.cp));
 const totalAttributedCp = CHANNEL_CP.reduce((s, c) => s + c.cp, 0);
 
+/**
+ * Contribution profit generated per order by acquisition channel after marketing cost.
+ * @dynamic channel_total_contribution / channel_order_count — per channel
+ */
+const CHANNEL_CPO = [
+  { channel: "Email",           cpo: 14.20 },
+  { channel: "Organic",         cpo: 12.10 },
+  { channel: "Google Shopping", cpo:  6.80 },
+  { channel: "Meta",            cpo:  2.30 },
+];
+const maxCpo = Math.max(...CHANNEL_CPO.map((c) => c.cpo));
+const minCpo = Math.min(...CHANNEL_CPO.map((c) => c.cpo));
+
 type EfficiencyRating = "strong" | "watch" | "weak";
 
 /** @dynamic Replace with live CAC per channel from ad platform APIs */
@@ -857,6 +870,92 @@ export default function MarketingEfficiency() {
           of revenue — the most efficient channel in the mix.{" "}
           <span className="font-semibold text-red-500">Meta</span>'s £2,100 contribution on the largest
           paid spend signals misallocated budget and is the primary reallocation candidate.
+        </p>
+
+      </div>
+
+      {/* Contribution per Order by Channel — sub-section of Actual Performance */}
+      <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 mb-10">
+
+        {/* Sub-heading row */}
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+          <div>
+            <h3 className="font-semibold text-base text-foreground">Contribution per Order by Channel</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Contribution profit generated per order by acquisition channel after marketing cost
+            </p>
+          </div>
+          <div className="flex items-center gap-5 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block" />Highest
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block" />Lowest
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-primary/60 inline-block" />Other
+            </span>
+          </div>
+        </div>
+
+        {/* Channel rows — horizontal bar + value */}
+        <div className="space-y-4">
+          {[...CHANNEL_CPO].sort((a, b) => b.cpo - a.cpo).map((entry) => {
+            const isMax = entry.cpo === maxCpo;
+            const isMin = entry.cpo === minCpo;
+            const barColor = isMax ? "bg-emerald-500" : isMin ? "bg-red-500" : "bg-primary/60";
+            const valueColor = isMax
+              ? "text-emerald-600 dark:text-emerald-400"
+              : isMin
+              ? "text-red-500 dark:text-red-400"
+              : "text-foreground";
+            const pct = (entry.cpo / maxCpo) * 100;
+            return (
+              <div key={entry.channel} className="flex items-center gap-4">
+                {/* Channel name */}
+                <span className="w-[130px] shrink-0 text-sm font-medium text-foreground truncate">
+                  {entry.channel}
+                </span>
+
+                {/* Bar */}
+                <div className="flex-1 h-7 bg-secondary/60 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${barColor}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+
+                {/* Value */}
+                <span className={`w-[52px] text-right text-sm font-bold tabular-nums shrink-0 ${valueColor}`}>
+                  £{entry.cpo.toFixed(2)}
+                </span>
+
+                {/* Badge for extremes */}
+                {(isMax || isMin) && (
+                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${
+                    isMax
+                      ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                      : "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
+                  }`}>
+                    {isMax ? "Best" : "Weakest"}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Interpretation note */}
+        <p className="mt-5 pt-4 border-t border-border/40 text-sm text-muted-foreground leading-relaxed">
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Email</span>{" "}
+          generates <span className="font-semibold text-foreground">£{(maxCpo).toFixed(2)}</span> per
+          order — <span className="font-semibold text-foreground">
+            {((maxCpo / minCpo)).toFixed(1)}×
+          </span>{" "}
+          more contribution per order than{" "}
+          <span className="font-semibold text-red-500">Meta</span> (£{minCpo.toFixed(2)}).
+          Shifting volume toward higher-CPO channels directly improves blended contribution margin without
+          increasing revenue.
         </p>
 
       </div>

@@ -202,7 +202,9 @@ const TREND_DATA = [
 
 /**
  * @dynamic Compute from: orderVolume × (ppGain / 100) × revenuePerOrder
+ * Reserved for reallocation scenario modelling.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const REALLOCATION = {
   metaShiftPct: 15,
   cmGainLow: 1,
@@ -376,7 +378,10 @@ const EFFICIENCY_CONFIG: Record<EfficiencyRating, { label: string; badge: string
   },
 };
 
+/** Reserved for upcoming Contribution Margin by Channel chart */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const maxCm = Math.max(...CHANNEL_CM.map((c) => c.cm));
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const minCm = Math.min(...CHANNEL_CM.map((c) => c.cm));
 
 // ─── Timeline framing ─────────────────────────────────────────────────────────
@@ -579,10 +584,7 @@ export default function MarketingEfficiency() {
       <div className="mb-2">
         <h2 className="text-xl font-bold text-foreground">Opportunities</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Ranked by contribution uplift potential {framing.rowLabel}.
-        </p>
-        <p className="text-xs text-muted-foreground/70 mt-1">
-          Based on the {framing.baselineNote}.
+          Ranked by contribution uplift — {framing.rowLabel}, at {framing.baselineNote}.
         </p>
       </div>
 
@@ -783,7 +785,7 @@ export default function MarketingEfficiency() {
       <div className="mb-4">
         <h2 className="text-xl font-bold text-foreground">Actual Performance</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Key marketing efficiency metrics and channel contribution breakdown · {periodBadge}
+          Key marketing efficiency metrics · {periodBadge}
         </p>
       </div>
 
@@ -1025,7 +1027,7 @@ export default function MarketingEfficiency() {
           </span>{" "}
           of attributed contribution on{" "}
           <span className="font-semibold text-foreground">
-            {Math.round((CHANNEL_CM.find((c) => c.channel === "Email")!.revenue / CHANNEL_CM.reduce((s, c) => s + c.revenue, 0)) * 100)}%
+            {Math.round((CHANNEL_CM.find((c) => c.channel === "Email")!.revenue / totalChannelRevenue) * 100)}%
           </span>{" "}
           of revenue — the most efficient channel in the mix.{" "}
           <span className="font-semibold text-red-500">Meta</span>'s £2,100 contribution on the largest
@@ -1313,7 +1315,7 @@ export default function MarketingEfficiency() {
 
           {/* Total row */}
           <div className="flex items-center justify-between px-6 py-3.5 border-t border-border/50 bg-secondary/20">
-            <p className="text-xs font-semibold text-foreground">Total attributed impact — last 30 days</p>
+            <p className="text-xs font-semibold text-foreground">Total attributed impact — {periodBadge}</p>
             <p className="text-sm font-bold text-destructive tabular-nums">
               −£{Math.abs(ME_DRIVERS_TOTAL).toLocaleString()}
             </p>

@@ -600,6 +600,129 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
+          §3b  CONTRIBUTION PROFIT BY CHANNEL  (hero decision chart)
+          Primary budget-allocation visual — which channels generate the most £
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-3">
+        <h2 className="text-2xl font-bold text-foreground">Contribution Profit by Channel</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Which acquisition channels generate the most contribution profit after marketing cost.
+        </p>
+      </div>
+
+      <div className="bg-card rounded-2xl border border-border/70 shadow-md p-7 mb-10">
+
+        {/* Legend + total */}
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+          <div className="flex items-center gap-5 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block" />
+              Highest contributor
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block" />
+              Lowest contributor
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-sm bg-primary/60 inline-block" />
+              Other channels
+            </span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Total attributed:{" "}
+            <span className="font-bold text-foreground text-base">£{totalAttributedCp.toLocaleString()}</span>
+          </p>
+        </div>
+
+        {/* Hero chart — taller than secondary charts */}
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={[...CHANNEL_CP].sort((a, b) => b.cp - a.cp)}
+              layout="vertical"
+              margin={{ top: 0, right: 90, left: 10, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+              <XAxis
+                type="number"
+                tickFormatter={(v: number) => `£${(v / 1000).toFixed(0)}k`}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+              />
+              <YAxis
+                type="category"
+                dataKey="channel"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "hsl(var(--foreground))", fontSize: 13, fontWeight: 500 }}
+                width={130}
+              />
+              <Tooltip
+                formatter={(v: number) => [`£${v.toLocaleString()}`, "Contribution Profit"]}
+                contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 16px rgb(0 0 0 / .12)" }}
+              />
+              <Bar
+                dataKey="cp"
+                radius={[0, 7, 7, 0]}
+                maxBarSize={44}
+                label={{
+                  position: "right",
+                  formatter: (v: number) => `£${v.toLocaleString()}`,
+                  fill: "hsl(var(--foreground))",
+                  fontSize: 13,
+                  fontWeight: 700,
+                }}
+              >
+                {[...CHANNEL_CP].sort((a, b) => b.cp - a.cp).map((entry) => (
+                  <Cell
+                    key={entry.channel}
+                    fill={
+                      entry.cp === maxCp ? "#22c55e"
+                      : entry.cp === minCp ? "#ef4444"
+                      : "hsl(var(--primary))"
+                    }
+                    opacity={entry.cp === maxCp || entry.cp === minCp ? 1 : 0.6}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Insight paragraph */}
+        <div className="mt-6 pt-5 border-t border-border/40 space-y-4">
+          <p className="text-sm text-foreground leading-relaxed">
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">Email</span> and{" "}
+            <span className="font-semibold">Organic</span> generate the highest contribution profit, while{" "}
+            <span className="font-semibold text-red-500">Meta</span> produces the lowest contribution despite
+            the largest paid spend. Email alone generates{" "}
+            <span className="font-semibold">
+              {Math.round((CHANNEL_CP.find((c) => c.channel === "Email")!.cp / totalAttributedCp) * 100)}%
+            </span>{" "}
+            of attributed profit on just{" "}
+            <span className="font-semibold">
+              {Math.round((CHANNEL_CM.find((c) => c.channel === "Email")!.revenue / CHANNEL_CM.reduce((s, c) => s + c.revenue, 0)) * 100)}%
+            </span>{" "}
+            of revenue — the highest-leverage channel in the mix. This suggests budget can be
+            reallocated toward higher-return channels without reducing overall revenue.
+          </p>
+
+          {/* Action callout */}
+          <div className="flex items-start gap-3 rounded-xl bg-primary/5 border border-primary/15 px-4 py-3.5">
+            <TrendingUp className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <p className="text-sm text-foreground leading-relaxed">
+              <span className="font-semibold">Budget reallocation opportunity:</span>{" "}
+              Reallocating part of Meta spend toward Email and Organic could improve blended
+              contribution next month without increasing total marketing budget.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
           §3  ACTUAL PERFORMANCE
           Blended headline metrics for the current period
       ══════════════════════════════════════════════════════════════════════ */}
@@ -714,122 +837,6 @@ export default function MarketingEfficiency() {
 
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          §3b  CONTRIBUTION PROFIT BY CHANNEL
-          Primary decision-making view: which channels generate the most £ profit
-      ══════════════════════════════════════════════════════════════════════ */}
-
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-foreground">Contribution Profit by Channel</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Which channels generate the most contribution profit after acquisition cost.
-        </p>
-      </div>
-
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-10">
-
-        {/* Legend */}
-        <div className="flex items-center gap-5 mb-5 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" />
-            Highest contributor
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-red-500 inline-block" />
-            Lowest contributor
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-primary/60 inline-block" />
-            Other channels
-          </span>
-        </div>
-
-        <div className="h-[240px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={[...CHANNEL_CP].sort((a, b) => b.cp - a.cp)}
-              layout="vertical"
-              margin={{ top: 0, right: 80, left: 10, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
-              <XAxis
-                type="number"
-                tickFormatter={(v: number) => `£${(v / 1000).toFixed(0)}k`}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-              />
-              <YAxis
-                type="category"
-                dataKey="channel"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                width={125}
-              />
-              <Tooltip
-                formatter={(v: number) => [`£${v.toLocaleString()}`, "Contribution Profit"]}
-                contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgb(0 0 0 / .1)" }}
-              />
-              <Bar
-                dataKey="cp"
-                radius={[0, 6, 6, 0]}
-                maxBarSize={36}
-                label={{
-                  position: "right",
-                  formatter: (v: number) => `£${v.toLocaleString()}`,
-                  fill: "hsl(var(--muted-foreground))",
-                  fontSize: 12,
-                  fontWeight: 600,
-                }}
-              >
-                {[...CHANNEL_CP].sort((a, b) => b.cp - a.cp).map((entry) => (
-                  <Cell
-                    key={entry.channel}
-                    fill={
-                      entry.cp === maxCp
-                        ? "#22c55e"
-                        : entry.cp === minCp
-                        ? "#ef4444"
-                        : "hsl(var(--primary))"
-                    }
-                    opacity={entry.cp === maxCp || entry.cp === minCp ? 1 : 0.65}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Summary row */}
-        <div className="mt-5 pt-4 border-t border-border/40 flex items-center justify-between flex-wrap gap-3">
-          <p className="text-xs text-muted-foreground">
-            Total attributed contribution profit:{" "}
-            <span className="font-semibold text-foreground">£{totalAttributedCp.toLocaleString()}</span>
-            {" "}·{" "}
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-              Email
-            </span>{" "}
-            generates{" "}
-            <span className="font-semibold text-foreground">
-              {Math.round((CHANNEL_CP.find((c) => c.channel === "Email")!.cp / totalAttributedCp) * 100)}%
-            </span>{" "}
-            of attributed profit on{" "}
-            <span className="font-semibold text-foreground">
-              {Math.round((CHANNEL_CM.find((c) => c.channel === "Email")!.revenue / CHANNEL_CM.reduce((s, c) => s + c.revenue, 0)) * 100)}%
-            </span>{" "}
-            of revenue — the highest-leverage channel.
-          </p>
-          <div className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-lg px-3 py-1.5 shrink-0">
-            <TrendingUp className="w-3.5 h-3.5 shrink-0" />
-            <span>Meta generates only{" "}
-              {Math.round((CHANNEL_CP.find((c) => c.channel === "Meta")!.cp / totalAttributedCp) * 100)}%
-              {" "}of attributed profit
-            </span>
-          </div>
-        </div>
-
-      </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
           §5  KEY DRIVERS

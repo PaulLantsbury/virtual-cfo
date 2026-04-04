@@ -1,0 +1,127 @@
+Update the Profit Margin Analysis page (/margin-analysis) so that channel names inside PRO-gated tables are obscured in the free version when displayed inside PremiumBlurPreview sections.
+
+Specifically apply this to:
+
+- Contribution Margin by Channel
+- Channel Contribution Breakdown tables
+- Any channel-level bridge tables
+- Any gated diagnostics referencing named acquisition channels
+
+
+PART 1 — Replace visible channel names with masked ghost labels
+
+Where channel names currently appear such as:
+
+Meta
+Email
+Organic
+Google Shopping
+Paid Social
+Affiliate
+
+Replace FREE preview versions with masked placeholders such as:
+
+Channel A
+Channel B
+Channel C
+Channel D
+
+or:
+
+Primary paid channel
+Owned channel
+Organic channel
+Secondary paid channel
+
+Use consistent placeholder naming across the section.
+
+Important:
+Keep real channel names fully visible for Pro users only.
+
+
+PART 2 — Preserve structure but hide attribution insight
+
+Ensure the table still clearly communicates:
+
+- number of rows
+- relative layout
+- ranking structure
+- presence of channel-level diagnostics
+
+But prevent users from identifying:
+
+which specific channel is underperforming
+which channel drives the most contribution
+where margin leakage sits
+
+
+PART 3 — Keep numeric masking behaviour unchanged
+
+Continue masking:
+
+£ contribution values
+margin %
+pp movements
+uplift estimates
+
+using existing ghost value format:
+
+£ —,—
+—.—%
++—.—pp
+
+Do not reveal real values in free mode.
+
+
+PART 4 — Maintain readable column headers
+
+Do NOT obscure:
+
+Contribution Margin
+Revenue Share
+Contribution Share
+Variance vs blended average
+Margin movement
+
+These should remain visible to communicate what the analysis contains.
+
+
+PART 5 — Preserve upgrade motivation
+
+Ensure overlay upgrade card remains visible and unchanged:
+
+Lock icon
+Upgrade CTA
+Explanation text
+
+Example supporting copy:
+
+Unlock channel-level margin diagnostics
+See exactly which acquisition channels are improving — or diluting — profitability.
+
+
+PART 6 — Apply via PremiumBlurPreview component logic
+
+Implement this masking inside the PremiumBlurPreview wrapper so that:
+
+if user.isPro === false:
+    replace channel labels with placeholders
+else:
+    display real channel names
+
+This ensures behaviour applies consistently across all gated channel-level sections globally.
+
+
+PART 7 — Final quality goal
+
+After implementation:
+
+Free users should see:
+
+a structured margin-by-channel table exists
+
+but NOT be able to determine:
+
+which specific channels are responsible for margin movement
+
+The preview should feel informative yet incomplete — encouraging upgrade rather than enabling decision-making.

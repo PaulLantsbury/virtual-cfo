@@ -237,6 +237,21 @@ const CHANNELS = [
   { name: "Organic",          cm: 52.3, revenue: 32000 },
 ];
 
+/**
+ * Generic channel labels for the FREE ghost preview.
+ * Ordered to match the channel list sorted by CM descending:
+ *   Email → Organic → Google Shopping → Meta
+ */
+const CHANNEL_GHOST_NAMES = ["Channel A", "Channel B", "Channel C", "Channel D"] as const;
+
+/**
+ * Maps channel-specific driver names to generic equivalents for the FREE ghost preview.
+ * Non-channel drivers (Shipping costs, Discount depth, etc.) are shown as-is.
+ */
+const DRIVER_GHOST_LABELS: Record<string, string> = {
+  "Meta CAC": "Paid channel CAC",
+};
+
 /** @dynamic Replace rows and total with API/AI-generated values when ready */
 const CHANGE_DRIVERS = [
   { driver: "Shipping costs",          change: "+8%",    impactPerOrder: -2.10, direction: "negative" as const },
@@ -963,7 +978,7 @@ export default function MarginAnalysis() {
                       <div className={cn("w-1 self-stretch rounded-full shrink-0 min-h-[2rem]", i === 0 ? "bg-destructive" : "bg-destructive/25")} />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold text-foreground">{row.driver}</span>
+                          <span className="text-sm font-semibold text-foreground">{DRIVER_GHOST_LABELS[row.driver] ?? row.driver}</span>
                           <span className={cn(
                             "inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap",
                             row.direction === "negative" ? "bg-destructive/10 text-destructive" : "bg-emerald-500/10 text-emerald-600"
@@ -1254,7 +1269,7 @@ export default function MarginAnalysis() {
                       <li key={ch.name}>
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-foreground">{ch.name}</span>
+                            <span className="text-sm font-medium text-foreground">{CHANNEL_GHOST_NAMES[i] ?? `Channel ${i + 1}`}</span>
                             {isMax && (
                               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600">Highest</span>
                             )}

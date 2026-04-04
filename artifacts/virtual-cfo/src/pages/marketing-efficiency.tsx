@@ -174,6 +174,13 @@ const CAC_BY_CHANNEL: {
 ];
 
 /** @dynamic */
+/**
+ * Generic channel labels for the CAC Payback FREE ghost preview.
+ * Ordered to match PAYBACK_BY_CHANNEL sorted by payback ascending:
+ *   Email → Organic → Google Shopping → Meta
+ */
+const PAYBACK_CHANNEL_GHOST_NAMES = ["Channel A", "Channel B", "Channel C", "Channel D"] as const;
+
 const PAYBACK_THRESHOLD = 1.5;
 
 /** @dynamic Replace with live payback data */
@@ -341,6 +348,14 @@ const ME_DRIVERS = [
     category:  "structural" as const,
   },
 ];
+
+/**
+ * Maps channel-specific driver names to generic equivalents for the FREE ghost preview.
+ * Non-channel drivers (mix, structural) are shown as-is.
+ */
+const ME_DRIVER_GHOST_LABELS: Record<string, string> = {
+  "Meta CAC increase": "Paid channel CAC increase",
+};
 
 /** Ordered group definitions for the Key Drivers section */
 const ME_DRIVER_GROUPS = [
@@ -1367,7 +1382,7 @@ export default function MarketingEfficiency() {
                           )} />
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <span className="text-sm font-semibold text-foreground">{row.driver}</span>
+                              <span className="text-sm font-semibold text-foreground">{ME_DRIVER_GHOST_LABELS[row.driver] ?? row.driver}</span>
                               {row.driver === ME_LARGEST_DRIVER && (
                                 <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
                                   Largest driver
@@ -1607,7 +1622,7 @@ export default function MarketingEfficiency() {
                   return (
                     <div key={row.channel}>
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-medium text-foreground">{row.channel}</span>
+                        <span className="text-sm font-medium text-foreground">{PAYBACK_CHANNEL_GHOST_NAMES[i] ?? `Channel ${i + 1}`}</span>
                         <div className="flex items-center gap-2">
                           <span className="text-[11px] font-medium tabular-nums text-foreground/25 dark:text-foreground/20">—.— avg</span>
                           <span className="text-sm font-bold tabular-nums text-foreground/25 dark:text-foreground/20">—.— orders</span>

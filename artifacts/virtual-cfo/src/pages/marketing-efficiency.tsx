@@ -28,20 +28,25 @@ const MKT_CM             = 38.6;
 const MKT_CM_PREV        = 41.8;
 const MKT_CM_CHANGE      = +(MKT_CM - MKT_CM_PREV).toFixed(1);
 
+/** @dynamic Marketing contribution margin target range */
+const MKT_CM_TARGET      = { low: 42, high: 48 } as const;
+
+/**
+ * Estimated additional contribution available if spend is reallocated.
+ * @dynamic Math.round(orderVolume × (cmGainPp / 100) × revenuePerOrder)
+ */
+const ESTIMATED_CONTRIBUTION = 18_200;
+
 /**
  * @ai-commentary Replace with live-generated insight.
- * cashLow / cashHigh:
- *   @dynamic Math.round(orderVolume * (ppGain / 100) * revenuePerOrder)
  */
 const CFO_INSIGHT = {
-  body: "Marketing efficiency has weakened this month due to rising Meta CAC and increased reliance on discounted acquisition.",
-  detail: "Blended CAC increased by £3.40 per order, reducing contribution margin across paid channels.",
-  upside: { cashLow: 14_000, cashHigh: 32_000 },
-  recommendations: [
-    "Reduce spend on lowest-margin paid channels",
-    "Increase lifecycle email conversion",
-    "Prioritise acquisition of repeat-purchase customers",
+  primaryDrivers: [
+    "Meta CAC increased £3.40 per order vs prior period",
+    "Repeat-customer share declined, raising new customer acquisition spend",
+    "Lifecycle email remains underutilised relative to channel potential",
   ],
+  recoveryLever: "Shift spend from Meta toward higher-margin channels such as Email and Organic",
 } as const;
 
 /** @dynamic Replace with live channel-level margin data from Shopify + ad platforms */
@@ -190,64 +195,115 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-10 overflow-hidden">
-        <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
+      <div className="rounded-2xl border border-primary/30 shadow-md mb-10 overflow-hidden">
+
+        {/* ── Header bar ── */}
+        <div className="flex items-center gap-3 px-6 py-3 bg-primary/10 border-b border-primary/20">
           <Sparkles className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">CFO Insight</span>
-          <span className="ml-auto text-xs text-destructive font-semibold px-2 py-0.5 rounded-full bg-destructive/10">
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+            CFO Insight
+          </span>
+          <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-destructive/15 text-destructive whitespace-nowrap">
             Efficiency declining — action required
           </span>
         </div>
-        <div className="px-6 py-5 space-y-4">
-          <div>
-            <p className="text-sm font-medium text-foreground leading-relaxed mb-1">{CFO_INSIGHT.body}</p>
-            <p className="text-sm text-muted-foreground leading-relaxed">{CFO_INSIGHT.detail}</p>
-          </div>
 
-          {/* Upside callout */}
-          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">
-            <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 mt-0.5">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+        {/* ── Body ── */}
+        <div className="bg-primary/5 px-6 pt-5 pb-6">
+
+          {/* ── Hero metrics ── */}
+          <div className="grid grid-cols-2 mb-5 pb-5 border-b border-primary/15">
+
+            {/* 1 — Current Marketing Contribution Margin */}
+            <div className="pr-6 border-r border-primary/15">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Current Marketing Contribution Margin
+              </p>
+              <p className="text-4xl sm:text-5xl font-display font-bold text-foreground leading-none mb-2">
+                {MKT_CM}%
+              </p>
+              <div className="flex items-center gap-1.5 mb-3">
+                <span className="text-sm font-semibold text-destructive">
+                  ↓ {Math.abs(MKT_CM_CHANGE)}pp
+                </span>
+                <span className="text-xs text-muted-foreground">vs prior period</span>
               </div>
-              <p className="text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed">
-                If spend is partially reallocated toward higher-margin channels such as Email and Organic,
-                contribution profit could improve by approximately{" "}
-                <span className="font-bold text-emerald-700 dark:text-emerald-300 text-base">
-                  £{CFO_INSIGHT.upside.cashLow.toLocaleString()}–£{CFO_INSIGHT.upside.cashHigh.toLocaleString()}
-                </span>{" "}
-                next month at current sales volume.
+
+              {/* @dynamic gaps recompute from MKT_CM vs MKT_CM_TARGET */}
+              <div className="pt-3 border-t border-primary/10 space-y-1.5">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs text-muted-foreground">
+                    Gap to lower bound ({MKT_CM_TARGET.low}%)
+                  </span>
+                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 tabular-nums">
+                    +{(MKT_CM_TARGET.low - MKT_CM).toFixed(1)}pp
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs text-muted-foreground">
+                    Gap to midpoint ({(MKT_CM_TARGET.low + MKT_CM_TARGET.high) / 2}%)
+                  </span>
+                  <span className="text-xs font-semibold text-muted-foreground tabular-nums">
+                    +{((MKT_CM_TARGET.low + MKT_CM_TARGET.high) / 2 - MKT_CM).toFixed(1)}pp
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 2 — Estimated Additional Contribution Available Next Month */}
+            <div className="pl-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                Estimated Additional Contribution Available Next Month
+              </p>
+              <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-2">
+                £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+              </p>
+              <p className="text-xs text-muted-foreground leading-snug max-w-[26ch]">
+                Based on the current 30-day trading baseline
               </p>
             </div>
+
           </div>
 
-          {/* Recommended focus */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Recommended focus:
-            </p>
-            <ul className="space-y-1.5">
-              {CFO_INSIGHT.recommendations.map((rec) => (
-                <li key={rec} className="flex items-start gap-2.5 text-sm text-foreground">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-[5px]" />
-                  {rec}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* ── Headline ── */}
+          <h2 className="text-lg sm:text-xl font-bold text-foreground leading-snug mb-5 pb-5 border-b border-primary/15">
+            Marketing efficiency has weakened — estimated additional contribution of{" "}
+            £{ESTIMATED_CONTRIBUTION.toLocaleString()} available next month
+          </h2>
 
-          {/* Summary tag */}
-          <div className="flex flex-wrap gap-3 pt-1 border-t border-primary/15">
-            <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span className="text-xs text-emerald-800 dark:text-emerald-300">
-                Potential upside next month:{" "}
-                <span className="font-bold">
-                  £{(CFO_INSIGHT.upside.cashLow / 1000).toFixed(0)}k–£{(CFO_INSIGHT.upside.cashHigh / 1000).toFixed(0)}k
-                </span>
-              </span>
+          {/* ── Two-column detail ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+            {/* Primary causes */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Primary causes
+              </p>
+              <ul className="space-y-2.5">
+                {CFO_INSIGHT.primaryDrivers.map((driver, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0 mt-[5px]" />
+                    {driver}
+                  </li>
+                ))}
+              </ul>
             </div>
+
+            {/* Fastest recovery lever */}
+            <div className="rounded-xl bg-emerald-100/80 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 px-4 py-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
+                Fastest recovery lever identified
+              </p>
+              <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                {CFO_INSIGHT.recoveryLever}
+              </p>
+              <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 mt-3 leading-snug">
+                See budget reallocation opportunity below ↓
+              </p>
+            </div>
+
           </div>
+
         </div>
       </div>
 

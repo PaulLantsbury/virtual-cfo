@@ -504,10 +504,10 @@ export default function MarginAnalysis() {
             {canAccess("opportunity_breakdown") ? (
               <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
-                  CM gain
+                  CM uplift
                 </span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-20 text-right">
-                  £ next month
+                  £ uplift
                 </span>
               </div>
             ) : (
@@ -797,7 +797,7 @@ export default function MarginAnalysis() {
           <p className="text-3xl font-display font-bold text-foreground mb-2">{CM_PCT}%</p>
           <div className="space-y-0.5 mb-3">
             <VarLine label="vs last month" value={`↓ ${Math.abs(CM_CHANGE)}pp`} favorable={false} />
-            <VarLine label="vs last 12 months" value={`↓ ${Math.abs(CM_PCT - CM_LY).toFixed(1)}pp`} favorable={false} />
+            <VarLine label="vs 12-month avg" value={`↓ ${Math.abs(CM_PCT - CM_LY).toFixed(1)}pp`} favorable={false} />
           </div>
           {(() => {
             const bm = getBenchmark(CM_PCT);
@@ -826,7 +826,7 @@ export default function MarginAnalysis() {
           <p className="text-3xl font-display font-bold text-foreground mb-2">{fmt(CM_VALUE)}</p>
           <div className="space-y-0.5 mb-2">
             <VarLine label="vs last month" value={`↓ £${(CM_VALUE_PREV_M - CM_VALUE).toLocaleString()}`} favorable={false} />
-            <VarLine label="vs last 12 months" value={`↓ £${(CM_VALUE_LY - CM_VALUE).toLocaleString()}`} favorable={false} />
+            <VarLine label="vs 12-month avg" value={`↓ £${(CM_VALUE_LY - CM_VALUE).toLocaleString()}`} favorable={false} />
           </div>
           <p className="text-xs text-muted-foreground">Revenue minus variable costs</p>
         </div>
@@ -834,10 +834,10 @@ export default function MarginAnalysis() {
         {/* 3 — CAC Payback (compact inline gating — full upgrade card doesn't fit 4-col grid) */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <p className="text-sm font-medium text-muted-foreground">CAC Payback Period</p>
+            <p className="text-sm font-medium text-muted-foreground">CAC Payback</p>
             {!canAccess("cac_payback") && (
               <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0 mt-0.5">
-                PRO
+                PRO — Unlock CAC payback
               </span>
             )}
           </div>
@@ -848,7 +848,7 @@ export default function MarginAnalysis() {
               </p>
               <div className="space-y-0.5">
                 <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
-                <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
+                <VarLine label="vs 12-month avg" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
               </div>
             </>
           ) : (
@@ -860,7 +860,7 @@ export default function MarginAnalysis() {
                   </p>
                   <div className="space-y-0.5">
                     <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
-                    <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
+                    <VarLine label="vs 12-month avg" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
                   </div>
                 </div>
                 <div className="absolute inset-0 bg-white/20 dark:bg-slate-950/25 pointer-events-none rounded-lg" />
@@ -883,7 +883,7 @@ export default function MarginAnalysis() {
           </p>
           <div className="space-y-0.5 mb-2">
             <VarLine label="vs last month" value={`↓ £${(CONTRIBUTION_PER_ORDER_PREV_M - CONTRIBUTION_PER_ORDER).toFixed(2)}`} favorable={false} />
-            <VarLine label="vs last 12 months" value={`↓ £${(CONTRIBUTION_PER_ORDER_LY - CONTRIBUTION_PER_ORDER).toFixed(2)}`} favorable={false} />
+            <VarLine label="vs 12-month avg" value={`↓ £${(CONTRIBUTION_PER_ORDER_LY - CONTRIBUTION_PER_ORDER).toFixed(2)}`} favorable={false} />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Contribution available after variable costs per order</p>
         </div>

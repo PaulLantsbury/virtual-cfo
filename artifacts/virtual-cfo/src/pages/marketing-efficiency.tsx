@@ -665,10 +665,10 @@ export default function MarketingEfficiency() {
             {canAccess("opportunity_breakdown") ? (
               <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
-                  CM gain
+                  CM uplift
                 </span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-28 text-right">
-                  £ impact
+                  £ uplift
                 </span>
               </div>
             ) : (
@@ -915,9 +915,9 @@ export default function MarketingEfficiency() {
           <p className="text-xs text-muted-foreground leading-snug">Revenue returned per £1 of blended marketing spend</p>
         </div>
 
-        {/* 4 — CAC Payback Period */}
+        {/* 4 — CAC Payback */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
+          <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback</p>
           <p className="text-3xl font-display font-bold text-foreground mb-2">
             {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
           </p>
@@ -978,7 +978,7 @@ export default function MarketingEfficiency() {
 
         {/* 7 — Contribution per £1 of Marketing Spend */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per £1 Spend</p>
+          <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per £1 Marketing Spend</p>
           <p className="text-3xl font-display font-bold text-foreground mb-2">
             £{CP_PER_SPEND.toFixed(2)}
           </p>
@@ -1311,7 +1311,7 @@ export default function MarketingEfficiency() {
 
       <PremiumBlurPreview
         title="Key Drivers"
-        subtitle="What changed vs prior period and the contribution impact."
+        subtitle="What changed vs last month and the contribution impact."
         badgeText="PRO — Unlock margin drivers"
         ctaTitle="Unlock attributed driver breakdown"
         ctaDescription="See exactly which cost or mix changes drove the most contribution impact, with per-driver £ attribution."
@@ -1321,7 +1321,7 @@ export default function MarketingEfficiency() {
           <div className="-mx-6 -mb-6">
             <div className="flex items-center justify-between px-6 py-3 border-t border-border/50 bg-secondary/20">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                What changed this period vs prior period
+                What changed vs last month
               </p>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Contribution impact
@@ -1380,7 +1380,7 @@ export default function MarketingEfficiency() {
           {/* Column headers */}
           <div className="flex items-center justify-between px-6 py-3 border-t border-border/50 bg-secondary/20">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              What changed this period vs prior period
+              What changed vs last month
             </p>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Contribution impact

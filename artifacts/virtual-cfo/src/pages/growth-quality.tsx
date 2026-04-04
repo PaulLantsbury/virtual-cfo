@@ -298,7 +298,7 @@ export default function GrowthQuality() {
 
         {/* CAC Payback */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback Period</p>
+          <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback</p>
           <p className="text-4xl font-display font-bold text-foreground">
             {CAC_PAYBACK}{" "}
             <span className="text-lg font-medium text-muted-foreground">orders</span>
@@ -306,7 +306,7 @@ export default function GrowthQuality() {
           <div className="flex items-center gap-2 mt-3 text-xs">
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
               <ArrowUpRight className="w-3 h-3" />
-              from {CAC_PAYBACK_PREV} last month
+              ↑ {CAC_PAYBACK_CHANGE} orders vs last month
             </span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">

@@ -1134,14 +1134,14 @@ export default function MarketingEfficiency() {
       <div className="mb-4">
         <h2 className="text-xl font-bold text-foreground">Key Drivers</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          What changed over the last 30 days and the financial impact on marketing efficiency.
+          What changed over {periodPhrase} and the financial impact on marketing efficiency.
         </p>
       </div>
 
       {/* Summary block */}
       <div className="flex items-start justify-between mb-4 px-5 py-4 rounded-xl bg-destructive/5 border border-destructive/15 gap-6">
         <p className="text-sm font-semibold text-foreground mt-0.5">
-          Total marketing efficiency impact — last 30 days
+          Total marketing efficiency impact — {periodBadge}
         </p>
         <div className="text-right shrink-0">
           <p className="text-xl font-bold tabular-nums leading-none text-destructive">
@@ -1158,7 +1158,7 @@ export default function MarketingEfficiency() {
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
           <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              What changed this period vs last month
+              What changed this period vs prior period
             </p>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Contribution impact
@@ -1235,7 +1235,7 @@ export default function MarketingEfficiency() {
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
           <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              What changed this period vs last month
+              What changed this period vs prior period
             </p>
           </div>
           <div className="min-h-[200px] flex items-center px-6">
@@ -1434,7 +1434,7 @@ export default function MarketingEfficiency() {
           <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-snug">
             Reallocating {REALLOCATION.metaShiftPct}% of Meta spend toward Email could increase blended contribution
             margin by approximately{" "}
-            <span className="font-semibold">1.2pp</span> next month.
+            <span className="font-semibold">1.2pp</span> {framing.rowLabel}.
           </p>
         </div>
       </div>

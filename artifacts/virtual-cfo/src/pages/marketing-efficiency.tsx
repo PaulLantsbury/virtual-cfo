@@ -1,4 +1,4 @@
-import { Sparkles, TrendingUp, AlertTriangle } from "lucide-react";
+import { Sparkles, TrendingUp, AlertTriangle, Lock } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
@@ -6,7 +6,6 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ActionRecommendations } from "@/components/ActionRecommendations";
 import type { Recommendation } from "@/components/ActionRecommendations";
-import { UpgradePreviewCard } from "@/components/UpgradePreviewCard";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
@@ -655,16 +654,15 @@ export default function MarketingEfficiency() {
           </p>
         </div>
 
-        {/* ── Opportunity rows — gated by plan ── */}
-        {canAccess("opportunity_breakdown") ? (
-          /* ── PRO: full breakdown with metrics ── */
-          <div className="bg-card">
+        {/* ── Opportunity rows — gated by plan via inline blur pattern ── */}
+        <div className="bg-card">
 
-            {/* Column header row */}
-            <div className="flex items-center justify-between px-6 py-3 border-b border-border/50">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Top opportunities driving this estimate
-              </p>
+          {/* Column header — always visible; badge shown when locked */}
+          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Top opportunities driving this estimate
+            </p>
+            {canAccess("opportunity_breakdown") ? (
               <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
                   CM gain
@@ -673,108 +671,177 @@ export default function MarketingEfficiency() {
                   £ impact
                 </span>
               </div>
-            </div>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">
+                PRO — Unlock opportunity breakdown
+              </span>
+            )}
+          </div>
 
-            <div className="divide-y divide-border/40">
-              {ME_OPPORTUNITIES.map((o, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between px-6 py-4 hover:bg-secondary/20 transition-colors gap-4"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
-                        <span className={cn(
-                          "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
-                          o.confidence === "high"
-                            ? "bg-secondary text-muted-foreground border-border/60"
-                            : o.confidence === "medium"
-                            ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
-                            : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
-                        )}>
-                          {o.confidence === "high" ? "High confidence" : o.confidence === "medium" ? "Medium confidence" : "Requires validation"}
-                        </span>
-                        <span className={cn(
-                          "inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap",
-                          o.effort === "low"
-                            ? "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
-                            : o.effort === "medium"
-                            ? "bg-orange-50 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400"
-                            : "bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400"
-                        )}>
-                          {o.effort === "low" ? "Low effort" : o.effort === "medium" ? "Medium effort" : "High effort"}
-                        </span>
+          {canAccess("opportunity_breakdown") ? (
+            /* ── PRO: full rows + combined footer ── */
+            <>
+              <div className="divide-y divide-border/40">
+                {ME_OPPORTUNITIES.map((o, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between px-6 py-4 hover:bg-secondary/20 transition-colors gap-4"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
+                          <span className={cn(
+                            "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
+                            o.confidence === "high"
+                              ? "bg-secondary text-muted-foreground border-border/60"
+                              : o.confidence === "medium"
+                              ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
+                              : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
+                          )}>
+                            {o.confidence === "high" ? "High confidence" : o.confidence === "medium" ? "Medium confidence" : "Requires validation"}
+                          </span>
+                          <span className={cn(
+                            "inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap",
+                            o.effort === "low"
+                              ? "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
+                              : o.effort === "medium"
+                              ? "bg-orange-50 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400"
+                              : "bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400"
+                          )}>
+                            {o.effort === "low" ? "Low effort" : o.effort === "medium" ? "Medium effort" : "High effort"}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{o.detail}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{o.detail}</p>
+                    </div>
+                    <div className="flex items-start gap-5 shrink-0 ml-4">
+                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
+                        +{o.ppGain.toFixed(1)}pp
+                      </span>
+                      <div className="text-right w-28">
+                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                          £{o.cashImpact.toLocaleString()}
+                        </p>
+                        <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-snug">
+                          {framing.impactBasis}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-start gap-5 shrink-0 ml-4">
-                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                      +{o.ppGain.toFixed(1)}pp
-                    </span>
-                    <div className="text-right w-28">
-                      <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                        £{o.cashImpact.toLocaleString()}
-                      </p>
-                      <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-snug">
-                        {framing.impactBasis}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Combined impact footer */}
-            <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
-              <p className="text-sm font-semibold text-foreground">
-                Combined impact — {framing.combinedLabel}
-              </p>
-              <div className="flex items-start gap-5 shrink-0 ml-4">
-                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                  +{ME_TOTAL_PP}pp
-                </span>
-                <div className="text-right w-28">
-                  <p className="text-base font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                    ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
-                  </p>
-                  <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-snug">
-                    {framing.impactBasis}
-                  </p>
+              {/* Combined impact footer */}
+              <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
+                <p className="text-sm font-semibold text-foreground">
+                  Combined impact — {framing.combinedLabel}
+                </p>
+                <div className="flex items-start gap-5 shrink-0 ml-4">
+                  <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
+                    +{ME_TOTAL_PP}pp
+                  </span>
+                  <div className="text-right w-28">
+                    <p className="text-base font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                      ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+                    </p>
+                    <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-snug">
+                      {framing.impactBasis}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
+          ) : (
+            /* ── FREE: full rows blurred + gradient + indigo upgrade card ── */
+            <div className="relative">
 
-          </div>
-        ) : (
-          /* ── FREE: names only + upgrade card ── */
-          <div className="bg-card">
-            <div className="px-6 py-3 border-b border-border/50">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Top opportunities identified
-              </p>
-            </div>
-            <div className="divide-y divide-border/40">
-              {ME_OPPORTUNITIES.map((o, i) => (
-                <div key={i} className="flex items-center gap-3 px-6 py-4">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-                    {i + 1}
-                  </span>
-                  <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
+              {/* Full PRO rows rendered beneath the blur */}
+              <div className="blur-[3px] opacity-40 pointer-events-none select-none" aria-hidden="true">
+                <div className="divide-y divide-border/40">
+                  {ME_OPPORTUNITIES.map((o, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between px-6 py-4 gap-4"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
+                          {i + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
+                            <span className={cn(
+                              "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
+                              o.confidence === "high"
+                                ? "bg-secondary text-muted-foreground border-border/60"
+                                : o.confidence === "medium"
+                                ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
+                                : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
+                            )}>
+                              {o.confidence === "high" ? "High confidence" : o.confidence === "medium" ? "Medium confidence" : "Requires validation"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{o.detail}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-5 shrink-0 ml-4">
+                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
+                          +{o.ppGain.toFixed(1)}pp
+                        </span>
+                        <div className="text-right w-28">
+                          <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
+                            £{o.cashImpact.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+                {/* Combined footer — blurred too */}
+                <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
+                  <p className="text-sm font-semibold text-foreground">Combined impact — {framing.combinedLabel}</p>
+                  <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                    ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Gradient fade */}
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/65 to-transparent rounded-b-xl pointer-events-none" />
+
+              {/* Indigo upgrade card */}
+              <div className="relative mx-6 mb-5 mt-4">
+                <a
+                  href="/upgrade"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/30 px-5 py-4 hover:border-indigo-300 hover:bg-indigo-100/80 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/35 transition-colors cursor-pointer group"
+                >
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0 mt-0.5">
+                      <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
+                        Unlock detailed opportunity breakdown
+                      </p>
+                      <p className="text-xs text-indigo-700/70 dark:text-indigo-400/70 mt-1 leading-snug">
+                        See the estimated £ impact, confidence level, and implementation effort for each action.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
+                    Upgrade →
+                  </span>
+                </a>
+              </div>
+
             </div>
-            <UpgradePreviewCard
-              title="Unlock estimated financial impact and implementation steps"
-              description="See the estimated £ contribution uplift, confidence level, and implementation effort for each opportunity, ranked by financial impact."
-              className="mx-6 my-5"
-            />
-          </div>
-        )}
+          )}
+
+        </div>
 
       </div>
 
@@ -1245,10 +1312,20 @@ export default function MarketingEfficiency() {
         </div>
       </div>
 
-      {canAccess("driver_breakdown") ? (
-        /* ── PRO: full attributed driver table ── */
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
-          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
+      <PremiumBlurPreview
+        title="Key Drivers"
+        subtitle="What changed vs prior period and the contribution impact."
+        badgeText="PRO — Unlock detailed analysis"
+        ctaTitle="Unlock attributed driver breakdown"
+        ctaDescription="See exactly which cost or mix changes drove the most contribution impact, with per-driver £ attribution."
+        isPro={canAccess("driver_breakdown")}
+        className="overflow-hidden mb-10"
+      >
+        {/* Negative-margin wrapper extends table flush to card edges */}
+        <div className="-mx-6 -mb-6">
+
+          {/* Column headers */}
+          <div className="flex items-center justify-between px-6 py-3 border-t border-border/50 bg-secondary/20">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               What changed this period vs prior period
             </p>
@@ -1257,11 +1334,11 @@ export default function MarketingEfficiency() {
             </p>
           </div>
 
-            {/* Grouped driver rows */}
+          {/* Grouped driver rows */}
           {ME_DRIVER_GROUPS.map((group) => {
             const groupDrivers = ME_DRIVERS
               .filter((d) => d.category === group.key)
-              .sort((a, b) => a.impact - b.impact); // most negative first
+              .sort((a, b) => a.impact - b.impact);
             if (!groupDrivers.length) return null;
             const groupTotal = groupDrivers.reduce((s, d) => s + d.impact, 0);
             return (
@@ -1286,7 +1363,6 @@ export default function MarketingEfficiency() {
                         className="flex items-center justify-between px-6 py-4 gap-6 hover:bg-secondary/20 transition-colors"
                       >
                         <div className="flex items-start gap-3 min-w-0">
-                          {/* Severity bar */}
                           <div className={cn(
                             "w-1 self-stretch rounded-full shrink-0 min-h-[2rem] mt-0.5",
                             isLargest ? "bg-destructive" : "bg-destructive/25"
@@ -1321,24 +1397,9 @@ export default function MarketingEfficiency() {
               −£{Math.abs(ME_DRIVERS_TOTAL).toLocaleString()}
             </p>
           </div>
+
         </div>
-      ) : (
-        /* ── FREE: upgrade prompt ── */
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
-          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              What changed this period vs prior period
-            </p>
-          </div>
-          <div className="min-h-[200px] flex items-center px-6">
-            <UpgradePreviewCard
-              title="Unlock attributed driver breakdown"
-              description="See exactly which cost or mix changes drove the most contribution impact this period, with per-driver £ attribution."
-              className="w-full"
-            />
-          </div>
-        </div>
-      )}
+      </PremiumBlurPreview>
 
       {/* ══════════════════════════════════════════════════════════════════════
           §6  DETAILED ANALYSIS

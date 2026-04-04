@@ -811,7 +811,7 @@ export default function MarketingEfficiency() {
               </div>
 
               {/* Gradient fade */}
-              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/35 to-transparent rounded-b-xl pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent rounded-b-xl pointer-events-none" />
 
               {/* Indigo upgrade card */}
               <div className="relative mx-6 mb-5 mt-4">

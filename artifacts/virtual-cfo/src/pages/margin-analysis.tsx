@@ -452,7 +452,7 @@ export default function MarginAnalysis() {
                   </p>
                   <a
                     href="/upgrade"
-                    className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mt-3 leading-snug transition-colors"
+                    className="block text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mt-3 leading-snug transition-colors"
                   >
                     Unlock estimated financial impact →
                   </a>
@@ -834,24 +834,46 @@ export default function MarginAnalysis() {
           <p className="text-xs text-muted-foreground">Revenue minus variable costs</p>
         </div>
 
-        {/* 3 — CAC Payback */}
-        <PremiumBlurPreview
-          title="CAC Payback Period"
-          subtitle="Orders needed to recover acquisition cost"
-          badgeText="PRO — Unlock CAC payback"
-          ctaTitle="Unlock CAC payback period"
-          ctaDescription="See how many orders it takes to recover each new customer acquisition."
-          isPro={canAccess("cac_payback")}
-          className="p-5"
-        >
-          <p className="text-3xl font-display font-bold text-foreground mb-2">
-            {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
-          </p>
-          <div className="space-y-0.5">
-            <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
-            <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
+        {/* 3 — CAC Payback (compact inline gating — full upgrade card doesn't fit 4-col grid) */}
+        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <p className="text-sm font-medium text-muted-foreground">CAC Payback Period</p>
+            {!canAccess("cac_payback") && (
+              <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0 mt-0.5">
+                PRO
+              </span>
+            )}
           </div>
-        </PremiumBlurPreview>
+          {canAccess("cac_payback") ? (
+            <>
+              <p className="text-3xl font-display font-bold text-foreground mb-2">
+                {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
+              </p>
+              <div className="space-y-0.5">
+                <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
+                <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="blur-[2px] opacity-[0.55] pointer-events-none select-none" aria-hidden="true">
+                <p className="text-3xl font-display font-bold text-foreground mb-2">
+                  {CAC_PAYBACK}<span className="text-xl font-semibold text-muted-foreground ml-1">orders</span>
+                </p>
+                <div className="space-y-0.5">
+                  <VarLine label="vs last month" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`} favorable={false} />
+                  <VarLine label="vs last 12 months" value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`} favorable={false} />
+                </div>
+              </div>
+              <a
+                href="/upgrade"
+                className="block text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mt-3 transition-colors"
+              >
+                Unlock CAC payback →
+              </a>
+            </>
+          )}
+        </div>
 
         {/* 4 — Contribution per Order */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">

@@ -59,6 +59,15 @@ A modern SaaS financial dashboard for founders and operators.
 - Net Profit Margin bar chart (Recharts)
 - Recent transactions table
 
+### Plan Gating System
+- `src/lib/plan.ts` — `canAccess(featureName)` returns true for the current user's plan
+- Plan tiers: `"free"` | `"pro"` (default: free; override via `sessionStorage.setItem("userPlan", "pro")`)
+- Feature registry: `opportunity_breakdown`, `channel_margin_analysis`, `cac_payback`, `margin_bridge`, `driver_breakdown`, `fastest_recovery_lever`
+
+### Reusable Pro-Gating Components
+- **`UpgradePreviewCard`** — indigo inline card with lock icon + CTA link to `/upgrade`. Used for compact in-section upgrade prompts.
+- **`PremiumBlurPreview`** — full-section blur wrapper. Accepts `title`, `subtitle`, `headerExtra`, `badgeText`, `ctaTitle`, `ctaDescription`, `ctaText`, `isPro`, and `children`. When `isPro=false`: blurs children with `blur-[3px] opacity-40`, applies a gradient fade from bottom, and renders an indigo upgrade card. When `isPro=true`: renders children normally with optional `headerExtra` in the header. Used for chart/table sections — pass `canAccess("feature")` as `isPro`.
+
 ### Supabase Integration
 - Scaffolded in `artifacts/virtual-cfo/src/lib/supabase.ts`
 - Reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` env vars

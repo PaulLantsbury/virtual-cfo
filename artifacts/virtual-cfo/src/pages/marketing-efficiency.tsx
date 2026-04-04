@@ -1375,9 +1375,22 @@ export default function MarketingEfficiency() {
 
         <div className="grid grid-cols-4 gap-4 px-6 py-2.5 border-b border-border/40">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Channel</span>
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">CAC · vs avg</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">CAC · vs blended avg</span>
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Change</span>
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Efficiency</span>
+        </div>
+
+        {/* Blended Average reference row */}
+        <div className="grid grid-cols-4 gap-4 px-6 py-2.5 bg-secondary/30 border-b border-border/40 items-center">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full shrink-0 bg-slate-400 dark:bg-slate-500" />
+            <span className="text-xs font-semibold text-muted-foreground">Blended Average</span>
+          </div>
+          <span className="text-sm font-bold text-muted-foreground tabular-nums text-right">
+            £{BLENDED_CAC.toFixed(2)}
+          </span>
+          <span className="text-xs text-muted-foreground/50 text-right">—</span>
+          <span className="text-xs text-muted-foreground/50 text-right">—</span>
         </div>
 
         <div className="divide-y divide-border/40">
@@ -1386,6 +1399,9 @@ export default function MarketingEfficiency() {
             /** @dynamic diff = row.cac − BLENDED_CAC (live) */
             const cacDiff = +(row.cac - BLENDED_CAC).toFixed(2);
             const absCacDiff = Math.abs(cacDiff).toFixed(2);
+            const cacDiffLabel = cacDiff > 0
+              ? `+£${absCacDiff} vs blended avg`
+              : `−£${absCacDiff} vs blended avg`;
             return (
               <div key={row.channel} className="grid grid-cols-4 gap-4 px-6 py-3.5 items-center hover:bg-secondary/30 transition-colors">
                 <div className="flex items-center gap-2">
@@ -1402,7 +1418,7 @@ export default function MarketingEfficiency() {
                         : "text-emerald-600/80 dark:text-emerald-400/80"
                     )}
                   >
-                    £{absCacDiff} {cacDiff > 0 ? "above" : "below"} avg
+                    {cacDiffLabel}
                   </span>
                 </div>
                 <span
@@ -1461,6 +1477,9 @@ export default function MarketingEfficiency() {
               paybackDiff === 0
                 ? "at avg"
                 : `${absPaybackDiff} ${paybackDiff > 0 ? "above" : "below"} avg`;
+            /** @dynamic percentages for reference line positions within 0–3 scale */
+            const blendedPct = (CAC_PAYBACK / 3) * 100;
+            const thresholdPct = (PAYBACK_THRESHOLD / 3) * 100;
             return (
               <div key={row.channel}>
                 <div className="flex items-center justify-between mb-1.5">
@@ -1491,24 +1510,59 @@ export default function MarketingEfficiency() {
                     )}
                   </div>
                 </div>
-                <div className="w-full h-2 bg-secondary rounded-full">
+                {/* Bar track with reference line indicators */}
+                <div className="relative w-full" style={{ height: "20px" }}>
+                  {/* Blended avg reference line — grey, centered vertically */}
                   <div
-                    className={cn("h-2 rounded-full transition-all", overThreshold ? "bg-destructive" : "bg-emerald-500")}
-                    style={{ width: `${barPct}%` }}
+                    className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-slate-400/60 dark:bg-slate-500/60 rounded-sm z-10 pointer-events-none"
+                    style={{ left: `calc(${blendedPct}% - 1px)` }}
                   />
+                  {/* Target threshold reference line — red, centered vertically */}
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-destructive/40 rounded-sm z-10 pointer-events-none"
+                    style={{ left: `calc(${thresholdPct}% - 1px)` }}
+                  />
+                  {/* Bar track */}
+                  <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className={cn("h-2 rounded-full transition-all", overThreshold ? "bg-destructive" : "bg-emerald-500")}
+                      style={{ width: `${barPct}%` }}
+                    />
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
 
-        <div className="mt-4 flex items-start gap-2 text-xs text-muted-foreground">
-          <span className="inline-block w-6 border-t border-dashed border-destructive/60 mt-2 shrink-0" />
-          <span>
-            Target threshold: <span className="font-semibold">{PAYBACK_THRESHOLD} orders</span>. Channels above this
-            reduce short-term cash efficiency and increase growth risk.
-          </span>
+        {/* Legend — two reference lines */}
+        <div className="mt-5 space-y-1.5">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="inline-block w-6 border-t border-dashed border-slate-400/70 dark:border-slate-500/70 shrink-0" />
+            <span>
+              Blended avg: <span className="font-semibold tabular-nums">{CAC_PAYBACK} orders</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="inline-block w-6 border-t border-dashed border-destructive/60 shrink-0" />
+            <span>
+              Target threshold: <span className="font-semibold tabular-nums">{PAYBACK_THRESHOLD} orders</span>. Channels above this
+              reduce short-term cash efficiency and increase growth risk.
+            </span>
+          </div>
         </div>
+
+        {/* @dynamic Insight: identifies worst channel above blended avg */}
+        {(() => {
+          const worst = [...PAYBACK_BY_CHANNEL].reduce((a, b) => a.payback > b.payback ? a : b);
+          const worstDiff = +(worst.payback - CAC_PAYBACK).toFixed(1);
+          return worstDiff > 0 ? (
+            <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3">
+              <span className="font-semibold text-foreground">{worst.channel}</span> payback is{" "}
+              <span className="font-semibold tabular-nums">{worstDiff} orders</span> slower than the blended average, increasing short-term cash recovery risk.
+            </p>
+          ) : null;
+        })()}
       </div>
 
       {/*

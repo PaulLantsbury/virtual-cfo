@@ -1,0 +1,91 @@
+Enhance the Detailed Analysis section on the Marketing Efficiency page (/marketing-efficiency) by adding visual blended-average reference indicators to both:
+
+1. Customer Acquisition Cost by Channel table
+2. CAC Payback by Channel chart
+
+PART 1 — Customer Acquisition Cost by Channel (table)
+
+Add a "Blended Average CAC" reference row at the top of the table.
+
+Example:
+
+Blended Average: £12.20
+
+Then enhance each channel row so users can visually compare performance against the blended benchmark:
+
+Example:
+
+Meta
+£18.40
++£6.20 vs blended average
+
+Email
+£4.80
+−£7.40 vs blended average
+
+Display rules:
+
+- show variance vs blended average in muted grey text
+- use green if below blended average (better efficiency)
+- use red if above blended average (worse efficiency)
+- keep the existing MoM change column unchanged
+- do not clutter the layout
+
+Optional enhancement (preferred if simple to implement):
+
+Add a subtle vertical indicator bar beside CAC values showing relative position vs blended average.
+
+
+
+PART 2 — CAC Payback by Channel (chart)
+
+Add a second benchmark reference line to the existing chart:
+
+Currently shown:
+Target threshold = 1.5 orders
+
+Add:
+
+Blended CAC Payback = 1.4 orders
+
+Display rules:
+
+- render blended average as a dashed grey vertical reference line
+- keep the existing target threshold as red dashed line
+- label both clearly:
+
+Blended average: 1.4 orders
+Target threshold: 1.5 orders
+
+Ensure:
+
+- both lines remain visible but visually secondary to the bars
+- labels appear clean and aligned with chart styling
+- chart readability is preserved
+
+
+
+PART 3 — Add supporting insight text below chart
+
+Add a short interpretation sentence under the CAC Payback chart:
+
+Example:
+
+Meta payback is 0.7 orders slower than the blended average, increasing short-term cash recovery risk.
+
+Keep tone:
+
+commercial
+diagnostic
+CFO-style insight
+
+Structure the calculation so this updates dynamically later.
+
+
+
+PART 4 — General requirements
+
+Do not redesign the existing components
+Only enhance them with benchmark comparisons
+Keep styling consistent with the Marketing Efficiency page
+Ensure responsiveness still works on smaller screens

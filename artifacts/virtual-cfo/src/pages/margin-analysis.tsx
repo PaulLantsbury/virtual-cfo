@@ -8,6 +8,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { UpgradePreviewCard } from "@/components/UpgradePreviewCard";
 import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
+import { useTimeline } from "@/lib/timeline";
+import { TimelineSelector } from "@/components/TimelineSelector";
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true  },
@@ -280,39 +282,16 @@ function SectionHeading({ title, subtitle, support }: { title: string; subtitle?
   );
 }
 
-// ─── Timeframe options ────────────────────────────────────────────────────────
-
-const TIMEFRAME_OPTIONS = [
-  { value: "7d",     label: "Last 7 days"    },
-  { value: "30d",    label: "Last 30 days"   },
-  { value: "90d",    label: "Last 90 days"   },
-  { value: "12m",    label: "Last 12 months" },
-  { value: "custom", label: "Custom"         },
-] as const;
-
-type TimeframeValue = typeof TIMEFRAME_OPTIONS[number]["value"];
-
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function MarginAnalysis() {
-  const [timeframe, setTimeframe] = useState<TimeframeValue>("30d");
+  const { selectedLabel, periodPhrase } = useTimeline();
   const [showAllOpportunities, setShowAllOpportunities] = useState(false);
 
   const visibleScenarios = showAllOpportunities
     ? RECOVERY_SCENARIOS
     : RECOVERY_SCENARIOS.slice(0, VISIBLE_SCENARIO_COUNT);
   const hasMoreScenarios = RECOVERY_SCENARIOS.length > VISIBLE_SCENARIO_COUNT;
-
-  const selectedLabel = TIMEFRAME_OPTIONS.find((o) => o.value === timeframe)!.label;
-
-  // Human-readable period phrase used inline in section subtitles and labels
-  const periodPhrase: Record<TimeframeValue, string> = {
-    "7d":     "the last 7 days",
-    "30d":    "the last 30 days",
-    "90d":    "the last 90 days",
-    "12m":    "the last 12 months",
-    "custom": "the selected period",
-  };
 
   return (
     <AppLayout>
@@ -327,40 +306,8 @@ export default function MarginAnalysis() {
           </p>
         </div>
 
-        {/* Controls: timeframe selector + period badge */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Timeframe selector */}
-          <div className="relative">
-            <select
-              value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value as TimeframeValue)}
-              className="appearance-none bg-secondary text-sm font-medium text-foreground pl-3 pr-8 py-1.5 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30 border border-border/40"
-              aria-label="Select timeframe for performance views"
-            >
-              {TIMEFRAME_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          </div>
-
-          <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg border border-border/40 whitespace-nowrap">
-            March 2026
-          </span>
-        </div>
+        <TimelineSelector />
       </div>
-
-      {/* Custom range informational note */}
-      {timeframe === "custom" && (
-        <div className="flex items-center gap-2.5 mb-8 px-4 py-3 rounded-xl bg-secondary border border-border/50">
-          <Info className="w-4 h-4 text-muted-foreground shrink-0" />
-          <p className="text-sm text-muted-foreground">
-            Custom date range picker coming soon — performance views are currently showing Last 30 days data.
-          </p>
-        </div>
-      )}
 
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 1 — CFO INSIGHT
@@ -868,7 +815,7 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Key Drivers"
-        subtitle={`What changed over ${periodPhrase[timeframe]} and the financial impact per order on contribution margin.`}
+        subtitle={`What changed over ${periodPhrase} and the financial impact per order on contribution margin.`}
       />
 
       {/* Summary line */}

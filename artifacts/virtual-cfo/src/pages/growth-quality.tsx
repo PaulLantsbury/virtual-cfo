@@ -7,6 +7,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ActionRecommendations } from "@/components/ActionRecommendations";
 import type { Recommendation } from "@/components/ActionRecommendations";
 import { cn } from "@/lib/utils";
+import { useTimeline } from "@/lib/timeline";
+import { TimelineSelector } from "@/components/TimelineSelector";
 
 // ─── Data constants ──────────────────────────────────────────────────────────
 
@@ -170,6 +172,8 @@ function gradeColor(score: number) {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function GrowthQuality() {
+  const { periodBadge } = useTimeline();
+
   return (
     <AppLayout>
       {/* Page header */}
@@ -182,9 +186,7 @@ export default function GrowthQuality() {
             Understand whether growth is being driven by retention, healthy channel mix, and profitable customer acquisition.
           </p>
         </div>
-        <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">
-          March 2026
-        </span>
+        <TimelineSelector />
       </div>
 
       {/* ── CFO Insight ── */}
@@ -429,7 +431,7 @@ export default function GrowthQuality() {
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
         <h3 className="font-semibold text-lg text-foreground mb-1">Key Growth Drivers This Month</h3>
         <p className="text-sm text-muted-foreground mb-5">
-          Factors with the greatest influence on growth quality in March 2026.
+          Factors with the greatest influence on growth quality in {periodBadge}.
         </p>
         <ul className="space-y-3">
           {KEY_DRIVERS.map((d) => (

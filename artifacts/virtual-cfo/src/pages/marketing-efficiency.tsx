@@ -8,6 +8,8 @@ import { ActionRecommendations } from "@/components/ActionRecommendations";
 import type { Recommendation } from "@/components/ActionRecommendations";
 import { UpgradePreviewCard } from "@/components/UpgradePreviewCard";
 import { canAccess } from "@/lib/plan";
+import { useTimeline } from "@/lib/timeline";
+import { TimelineSelector } from "@/components/TimelineSelector";
 import { cn } from "@/lib/utils";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
@@ -298,6 +300,8 @@ const minCm = Math.min(...CHANNEL_CM.map((c) => c.cm));
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MarketingEfficiency() {
+  const { periodBadge, periodPhrase } = useTimeline();
+
   return (
     <AppLayout>
 
@@ -311,9 +315,7 @@ export default function MarketingEfficiency() {
             Understand which acquisition channels create profitable customers and where budget should be reallocated.
           </p>
         </div>
-        <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">
-          March 2026
-        </span>
+        <TimelineSelector />
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
@@ -324,7 +326,7 @@ export default function MarketingEfficiency() {
       <div className="mb-2">
         <h2 className="text-xl font-bold text-foreground">Marketing Efficiency Summary</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          March 2026 · Current efficiency diagnosis and financial exposure
+          {periodBadge} · Current efficiency diagnosis and financial exposure
         </p>
       </div>
 
@@ -479,7 +481,7 @@ export default function MarketingEfficiency() {
             Based on top quantified opportunities from the current 30-day trading baseline
           </p>
           <p className="text-xs text-emerald-700/50 dark:text-emerald-400/50 leading-snug mt-1">
-            Current Marketing Contribution Profit: £{MKT_CP.toLocaleString()} · March 2026
+            Current Marketing Contribution Profit: £{MKT_CP.toLocaleString()} · {periodBadge}
           </p>
         </div>
 
@@ -614,7 +616,7 @@ export default function MarketingEfficiency() {
       <div className="mb-4">
         <h2 className="text-xl font-bold text-foreground">Actual Performance</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Key marketing efficiency metrics and channel contribution breakdown · March 2026
+          Key marketing efficiency metrics and channel contribution breakdown · {periodBadge}
         </p>
       </div>
 

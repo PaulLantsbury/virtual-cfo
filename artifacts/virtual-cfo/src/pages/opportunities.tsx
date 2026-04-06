@@ -391,8 +391,8 @@ export default function Opportunities() {
             </span>
           </div>
           <div className="px-6 py-5">
-            <p className="text-sm font-medium text-foreground leading-relaxed mb-5">
-              {PRIORITY_NOTE}
+            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              Both can be actioned this week with no new budget. Start with whichever your team has most direct control over.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -125,34 +125,40 @@ const SCORE_COMPONENTS: {
  *   @dynamic channelMix = blendedCACDelta × newCustVolume (contribution-margin adjusted)
  */
 const KEY_DRIVERS: {
-  text:   string;
-  dir:    "positive" | "negative" | "neutral";
-  impact: string;
+  text:      string;
+  freeLabel: string;
+  dir:       "positive" | "negative" | "neutral";
+  impact:    string;
 }[] = [
   {
-    text:   "Repeat purchase rate improved +2.4pp month-on-month",
-    dir:    "positive",
-    impact: "Increased growth quality score by +0.3 grade points — retention is now the sole positive signal.",
+    text:      "Repeat purchase rate improved +2.4pp month-on-month",
+    freeLabel: "Retention signal improved",
+    dir:       "positive",
+    impact:    "Increased growth quality score by +0.3 grade points — retention is now the sole positive signal.",
   },
   {
-    text:   "Discount depth increased 1.8pp vs prior month",
-    dir:    "negative",
-    impact: "Reduced contribution by approximately £4.2k equivalent at current order volume.",
+    text:      "Discount depth increased 1.8pp vs prior month",
+    freeLabel: "Discount pressure increased",
+    dir:       "negative",
+    impact:    "Reduced contribution by approximately £4.2k equivalent at current order volume.",
   },
   {
-    text:   "Meta CAC increased 14% — paid channel efficiency declining",
-    dir:    "negative",
-    impact: "Weakened growth efficiency by approximately £3.1k in margin-adjusted acquisition cost.",
+    text:      "Meta CAC increased 14% — paid channel efficiency declining",
+    freeLabel: "Paid acquisition efficiency weakened",
+    dir:       "negative",
+    impact:    "Weakened growth efficiency by approximately £3.1k in margin-adjusted acquisition cost.",
   },
   {
-    text:   "Organic and email mix declined as a proportion of total revenue",
-    dir:    "negative",
-    impact: "Raised blended CAC and reduced channel mix quality — the second consecutive month of decline.",
+    text:      "Organic and email mix declined as a proportion of total revenue",
+    freeLabel: "Channel mix quality weakened",
+    dir:       "negative",
+    impact:    "Raised blended CAC and reduced channel mix quality — the second consecutive month of decline.",
   },
   {
-    text:   "Email-driven orders maintained the highest contribution margin",
-    dir:    "positive",
-    impact: "Supported contribution quality and partially offset the impact of rising discount dependency.",
+    text:      "Email-driven orders maintained the highest contribution margin",
+    freeLabel: "Owned-channel contribution remained strongest",
+    dir:       "positive",
+    impact:    "Supported contribution quality and partially offset the impact of rising discount dependency.",
   },
 ];
 
@@ -721,7 +727,7 @@ export default function GrowthQuality() {
                     className="text-sm font-medium text-foreground leading-snug select-none pointer-events-none"
                     style={{ filter: "blur(4px)", opacity: 0.55 }}
                   >
-                    {d.text}
+                    {d.freeLabel}
                   </p>
                   <p
                     className={cn(

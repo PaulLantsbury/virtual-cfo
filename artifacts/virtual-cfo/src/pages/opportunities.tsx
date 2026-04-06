@@ -241,6 +241,18 @@ export default function Opportunities() {
             return showRowDetail ? (
               /* ── Pro row: full detail ── */
               <div key={opp.id} className="px-6 py-5 hover:bg-secondary/20 transition-colors">
+                {idx === 0 && (
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">Do now</span>
+                    <div className="flex-1 h-px bg-border/60" />
+                  </div>
+                )}
+                {idx === 2 && (
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">Next wave</span>
+                    <div className="flex-1 h-px bg-border/60" />
+                  </div>
+                )}
                 <div className="flex items-start justify-between gap-4 mb-2">
 
                   <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -315,6 +327,18 @@ export default function Opportunities() {
             ) : (
               /* ── Free row: masked — rank + progress bar preserved, detail obscured ── */
               <div key={opp.id} className="px-6 py-4">
+                {idx === 0 && (
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">Do now</span>
+                    <div className="flex-1 h-px bg-border/60" />
+                  </div>
+                )}
+                {idx === 2 && (
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">Next wave</span>
+                    <div className="flex-1 h-px bg-border/60" />
+                  </div>
+                )}
                 <div className="flex items-start justify-between gap-4 mb-2">
 
                   {/* Left: rank visible, label + description blurred */}

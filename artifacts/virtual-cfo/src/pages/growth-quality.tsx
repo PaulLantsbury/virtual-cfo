@@ -1,8 +1,8 @@
 import { Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Minus, ArrowRight } from "lucide-react";
 import {
-  LineChart, Line, BarChart, Bar,
+  BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, ReferenceLine,
+  ResponsiveContainer,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ActionRecommendations } from "@/components/ActionRecommendations";
@@ -117,25 +117,6 @@ const SCORE_COMPONENTS: {
 ];
 
 /**
- * @dynamic Letter grade → numeric score for trend line.
- * Replace score values with live computed quality index when data is connected.
- */
-const TREND_DATA = [
-  { month: "Apr",  score: 87, grade: "B+"  },
-  { month: "May",  score: 83, grade: "B"   },
-  { month: "Jun",  score: 83, grade: "B"   },
-  { month: "Jul",  score: 80, grade: "B-"  },
-  { month: "Aug",  score: 80, grade: "B-"  },
-  { month: "Sep",  score: 83, grade: "B"   },
-  { month: "Oct",  score: 87, grade: "B+"  },
-  { month: "Nov",  score: 83, grade: "B"   },
-  { month: "Dec",  score: 80, grade: "B-"  },
-  { month: "Jan",  score: 76, grade: "C+"  },
-  { month: "Feb",  score: 79, grade: "B-"  },
-  { month: "Mar",  score: 76, grade: "B-"  },
-];
-
-/**
  * @ai-commentary Replace with dynamically generated driver list when ready.
  * impact values:
  *   @dynamic retention  = (repeatRateDelta / 100) × qualityScoreWeight × gradePointScale
@@ -188,22 +169,6 @@ const GROWTH_TYPE = {
   risk:      "medium" as "low" | "medium" | "high",
   riskLabel: "Medium risk",
   signal:    "At current levels, growth is becoming increasingly promotion-led rather than retention-led.",
-} as const;
-
-/**
- * 90-day trajectory risk projection — shown to Pro users only.
- * @dynamic cashLow  = round(orderVolume × (ppRiskLow  / 100) × avgOrderRevenue × 3)
- * @dynamic cashHigh = round(orderVolume × (ppRiskHigh / 100) × avgOrderRevenue × 3)
- * At current volume (~2,000 orders/month × £68.40 AOV = £136,800/month):
- *   3-month revenue ~£410,400 · ppRiskLow 4.4pp · ppRiskHigh 7.8pp → £18k–£32k
- */
-const TRAJECTORY_RISK = {
-  cashLow:  18_000,
-  cashHigh: 32_000,
-  days:     90,
-  /** @ai-commentary Replace with AI-generated projection narrative when live */
-  detail:
-    "Based on the current rate of discount dependency increase (+1.8pp) and paid channel CAC deterioration (+14%), blended contribution margin is projected to compress by a further 2–3pp over 90 days if these trends continue unchecked.",
 } as const;
 
 /**
@@ -300,16 +265,10 @@ const STATUS_CONFIG: Record<ScoreStatus, { label: string; bar: string; badge: st
   declining:{ label: "Declining",bar: "bg-amber-500",    badge: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300",        text: "text-amber-700 dark:text-amber-300"    },
 };
 
-function gradeColor(score: number) {
-  if (score >= 80) return "#22c55e";
-  if (score >= 65) return "#f59e0b";
-  return "#ef4444";
-}
-
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function GrowthQuality() {
-  const { periodBadge } = useTimeline();
+  useTimeline();
 
   return (
     <AppLayout>
@@ -320,7 +279,7 @@ export default function GrowthQuality() {
             Growth Quality Analysis
           </h1>
           <p className="text-muted-foreground mt-1">
-            Understand whether growth is being driven by retention, healthy channel mix, and profitable customer acquisition.
+            Identify whether revenue growth is healthy and self-sustaining — or fragile and dependent on discounting and paid spend.
           </p>
         </div>
         <TimelineSelector />
@@ -375,10 +334,10 @@ export default function GrowthQuality() {
             </div>
           )}
 
-          {/* Recommended focus */}
+          {/* Priority signals */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Recommended focus:
+              What to act on:
             </p>
             <ul className="space-y-1.5">
               {CFO_INSIGHT.recommendations.map((rec) => (
@@ -409,7 +368,7 @@ export default function GrowthQuality() {
 
       {/* ── Growth Classification & Risk Signal ── */}
       <div className={cn(
-        "rounded-2xl border px-6 py-5 mb-4",
+        "rounded-2xl border px-6 py-5 mb-8",
         GROWTH_TYPE.risk === "high"
           ? "bg-destructive/5 border-destructive/20 dark:bg-destructive/10 dark:border-destructive/30"
           : GROWTH_TYPE.risk === "medium"
@@ -461,54 +420,6 @@ export default function GrowthQuality() {
         </p>
       </div>
 
-      {/* ── 90-Day Trajectory Risk — Pro only ── */}
-      <PremiumBlurPreview
-        title="90-Day Trajectory Risk"
-        subtitle="Forward contribution impact if current growth quality trends continue unchecked"
-        badgeText="PRO — Unlock trajectory risk"
-        ctaTitle="Unlock 90-day trajectory risk"
-        ctaDescription="See the quantified contribution impact if current discount dependency and paid CAC trends continue — modelled forward over 90 days."
-        isPro={canAccess("growth_trajectory_risk")}
-        className="mb-4"
-        ghostContent={
-          <div className="flex items-start gap-4">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-100/60 dark:bg-amber-900/20 shrink-0 mt-0.5">
-              <TrendingDown className="w-4 h-4 text-amber-500/70 dark:text-amber-400/60" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground leading-snug">
-                Growth quality deterioration at current trajectory could reduce contribution by{" "}
-                <span className="tabular-nums text-foreground/[0.13]">£—,— – £—,—</span>
-                {" "}over the next{" "}
-                <span className="tabular-nums text-foreground/[0.13]">— days</span>.
-              </p>
-              <p className="mt-2 text-xs text-foreground/[0.13] leading-snug">
-                —— —— —— —— —— —— —— —— —— —— —— —— ——
-              </p>
-            </div>
-          </div>
-        }
-      >
-        <div className="rounded-xl bg-amber-50/60 dark:bg-amber-950/15 border border-amber-200/70 dark:border-amber-800/30 px-5 py-4 flex items-start gap-4">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 shrink-0 mt-0.5">
-            <TrendingDown className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground leading-snug">
-              Growth quality deterioration at current trajectory could reduce contribution by{" "}
-              <span className="font-bold text-destructive">
-                £{(TRAJECTORY_RISK.cashLow  / 1000).toFixed(0)}k–£{(TRAJECTORY_RISK.cashHigh / 1000).toFixed(0)}k
-              </span>
-              {" "}over the next{" "}
-              <span className="font-bold">{TRAJECTORY_RISK.days} days</span>.
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-              {TRAJECTORY_RISK.detail}
-            </p>
-          </div>
-        </div>
-      </PremiumBlurPreview>
-
       {/* ── KPI Strip ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Growth Quality Score */}
@@ -537,7 +448,7 @@ export default function GrowthQuality() {
             </span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Share of orders from returning customers
+            Target: above 30% for retention-led growth — currently improving
           </p>
         </div>
 
@@ -570,7 +481,7 @@ export default function GrowthQuality() {
             </span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Orders needed to recover the cost of acquiring each new customer
+            Below 1.2 orders is healthy — 1.4 signals acquisition cost pressure
           </p>
         </div>
       </div>
@@ -582,7 +493,7 @@ export default function GrowthQuality() {
             Where growth quality is strengthening vs weakening
           </h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Each factor shows whether it is contributing to healthier or weaker growth right now.
+            Each factor determines whether growth is healthy and self-sustaining — or fragile and costly to maintain.
           </p>
         </div>
 
@@ -661,124 +572,13 @@ export default function GrowthQuality() {
         })}
       </div>
 
-      {/* ── Growth Quality Trend — Pro only ── */}
-      <PremiumBlurPreview
-        title="Growth Quality Trend"
-        subtitle="12-month composite growth quality score — higher is healthier."
-        badgeText="PRO — Unlock quality trend"
-        ctaTitle="Unlock growth quality trend"
-        ctaDescription="See how your growth quality score has changed over the last 12 months and whether the trend is improving or declining."
-        isPro={canAccess("growth_quality_trend")}
-        className="mb-8"
-        ghostContent={
-          <div>
-            {/* Ghost chart area */}
-            <div className="flex gap-3" style={{ height: "200px" }}>
-              {/* Y-axis grade labels */}
-              <div className="flex flex-col justify-between pb-1 text-[11px] text-muted-foreground/40 shrink-0 select-none">
-                {["B+", "B", "B-", "C+", "C"].map((g) => <span key={g}>{g}</span>)}
-              </div>
-              {/* Chart body */}
-              <div className="flex-1 relative border-l border-b border-border/25">
-                {/* Healthy reference line */}
-                <div className="absolute left-0 right-0 h-px bg-success/10" style={{ top: "18%" }} />
-                {/* Ghost dots — flat/uniform height, non-informative */}
-                <div className="absolute inset-0 flex items-center px-1">
-                  {TREND_DATA.map((_, i) => (
-                    <div key={i} className="flex-1 flex justify-center">
-                      <div className="w-2 h-2 rounded-full bg-foreground/[0.08]" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            {/* X-axis month labels */}
-            <div className="flex gap-0 mt-2 pl-9">
-              {TREND_DATA.map((d) => (
-                <span key={d.month} className="flex-1 text-center text-[11px] text-muted-foreground/50">
-                  {d.month}
-                </span>
-              ))}
-            </div>
-            {/* Masked takeaway */}
-            <p className="text-xs text-foreground/[0.13] mt-3 leading-snug select-none">
-              —— —— —— —— —— —— —— —— —— —— —— —— ——
-            </p>
-          </div>
-        }
-      >
-        {/* Pro: real line chart */}
-        <div>
-          <div className="h-[220px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={TREND_DATA}
-                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                <XAxis
-                  dataKey="month"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                  dy={8}
-                />
-                <YAxis
-                  domain={[60, 100]}
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                  tickFormatter={(v: number) => {
-                    if (v >= 87) return "B+";
-                    if (v >= 83) return "B";
-                    if (v >= 79) return "B-";
-                    if (v >= 75) return "C+";
-                    if (v >= 70) return "C";
-                    return "C-";
-                  }}
-                />
-                <Tooltip
-                  contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgb(0 0 0 / .1)" }}
-                  formatter={(_: number, __: string, props: { payload?: { grade?: string } }) =>
-                    [props?.payload?.grade ?? "", "Grade"]
-                  }
-                />
-                <ReferenceLine y={83} stroke="hsl(var(--success))" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: "Healthy", position: "insideTopRight", fontSize: 11, fill: "hsl(var(--success))" }} />
-                <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2.5}
-                  dot={(props: { cx: number; cy: number; payload: { score: number } }) => (
-                    <circle
-                      key={`dot-${props.cx}`}
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={4}
-                      fill={gradeColor(props.payload.score)}
-                      stroke="white"
-                      strokeWidth={2}
-                    />
-                  )}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <p className="text-xs text-muted-foreground mt-3 leading-snug">
-            Score peaked at B+ in October before declining through Q1 2026. The current B- reflects
-            increasing discount dependency and rising paid acquisition costs offsetting improved retention.
-          </p>
-        </div>
-      </PremiumBlurPreview>
-
       {/* ── Growth Composition Trend — Pro only ── */}
       <PremiumBlurPreview
         title="Growth Composition Trend"
-        subtitle="How much growth is coming from repeat customers, paid acquisition, and discount-led orders."
+        subtitle="Whether growth is shifting toward healthy repeat channels or becoming increasingly dependent on paid spend and discounting."
         badgeText="PRO — Unlock composition"
         ctaTitle="Unlock growth composition breakdown"
-        ctaDescription="See exactly how the mix of repeat-customer, paid-acquisition, and discount-led growth has shifted over the last 6 months."
+        ctaDescription="See whether growth is becoming more or less healthy over time — and which channel types are driving the shift."
         isPro={canAccess("growth_composition_trend")}
         className="mb-8"
         ghostContent={
@@ -894,10 +694,10 @@ export default function GrowthQuality() {
       {/* ── Key Growth Drivers — Pro only (with impact lines) ── */}
       <PremiumBlurPreview
         title="Key Growth Drivers This Month"
-        subtitle={`What changed and how it affected growth quality in ${periodBadge}.`}
+        subtitle={`What shifted this month and whether it moved growth toward healthier or more fragile territory.`}
         badgeText="PRO — Unlock driver impact"
         ctaTitle="Unlock driver impact analysis"
-        ctaDescription="See the quantified contribution and efficiency impact of each growth driver — with commercial interpretation for each."
+        ctaDescription="See which specific changes this month improved or weakened growth quality — with quantified impact on contribution and acquisition efficiency."
         isPro={canAccess("driver_impact_detail")}
         className="mb-8"
         ghostContent={

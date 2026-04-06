@@ -36,13 +36,11 @@ export type FeatureName =
   | "margin_bridge"              // Contribution Margin Bridge waterfall table
   | "driver_breakdown"           // Key Drivers — per-driver attribution rows
   | "fastest_recovery_lever"       // CFO Insight — specific lever % and £ impact
-  | "growth_trajectory_risk"      // Growth Quality — 90-day forward contribution impact
   | "growth_composition_trend"    // Growth Quality — composition breakdown chart (repeat/paid/discount)
   | "score_component_detail"      // Growth Quality — grade + explanation text per score component
   | "driver_impact_detail"        // Growth Quality — quantified impact line per growth driver row
   | "growth_quality_actions"      // Growth Quality — "What to do next" action plan
-  | "recoverable_growth_quality"  // Growth Quality — recoverable contribution upside block
-  | "growth_quality_trend";       // Growth Quality — 12-month grade trend line chart
+  | "recoverable_growth_quality"; // Growth Quality — recoverable contribution upside block
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -59,13 +57,11 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   margin_bridge:           ["pro"],
   driver_breakdown:        ["pro"],
   fastest_recovery_lever:    ["pro"],
-  growth_trajectory_risk:    ["pro"],
   growth_composition_trend:  ["pro"],
   score_component_detail:    ["pro"],
   driver_impact_detail:      ["pro"],
-  growth_quality_actions:       ["pro"],
-  recoverable_growth_quality:   ["pro"],
-  growth_quality_trend:         ["pro"],
+  growth_quality_actions:    ["pro"],
+  recoverable_growth_quality:["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

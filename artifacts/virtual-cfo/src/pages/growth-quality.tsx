@@ -356,22 +356,24 @@ export default function GrowthQuality() {
             </p>
           </div>
 
-          {/* Upside callout */}
-          <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">
-            <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 mt-0.5">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          {/* Upside callout — Pro only (quantified recoverable figure) */}
+          {canAccess("recoverable_growth_quality") && (
+            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 mt-0.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <p className="text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed">
+                  If discount dependency and CAC efficiency return to prior levels, growth quality could
+                  improve materially next month, with an estimated contribution uplift of{" "}
+                  <span className="font-bold text-emerald-700 dark:text-emerald-300 text-base">
+                    £{CFO_INSIGHT.upside.cashLow.toLocaleString()}–£{CFO_INSIGHT.upside.cashHigh.toLocaleString()}
+                  </span>{" "}
+                  at current sales volume.
+                </p>
               </div>
-              <p className="text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed">
-                If discount dependency and CAC efficiency return to prior levels, growth quality could
-                improve materially next month, with an estimated contribution uplift of{" "}
-                <span className="font-bold text-emerald-700 dark:text-emerald-300 text-base">
-                  £{CFO_INSIGHT.upside.cashLow.toLocaleString()}–£{CFO_INSIGHT.upside.cashHigh.toLocaleString()}
-                </span>{" "}
-                at current sales volume.
-              </p>
             </div>
-          </div>
+          )}
 
           {/* Recommended focus */}
           <div>
@@ -388,18 +390,20 @@ export default function GrowthQuality() {
             </ul>
           </div>
 
-          {/* Summary tag */}
-          <div className="flex flex-wrap gap-3 pt-1 border-t border-primary/15">
-            <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span className="text-xs text-emerald-800 dark:text-emerald-300">
-                Potential upside next month:{" "}
-                <span className="font-bold">
-                  £{(CFO_INSIGHT.upside.cashLow / 1000).toFixed(0)}k–£{(CFO_INSIGHT.upside.cashHigh / 1000).toFixed(0)}k
+          {/* Summary tag — Pro only */}
+          {canAccess("recoverable_growth_quality") && (
+            <div className="flex flex-wrap gap-3 pt-1 border-t border-primary/15">
+              <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1.5">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="text-xs text-emerald-800 dark:text-emerald-300">
+                  Potential upside next month:{" "}
+                  <span className="font-bold">
+                    £{(CFO_INSIGHT.upside.cashLow / 1000).toFixed(0)}k–£{(CFO_INSIGHT.upside.cashHigh / 1000).toFixed(0)}k
+                  </span>
                 </span>
-              </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -657,76 +661,116 @@ export default function GrowthQuality() {
         })}
       </div>
 
-      {/* ── Growth Quality Trend ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Growth Quality Trend</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            12-month composite growth quality score — higher is healthier.
+      {/* ── Growth Quality Trend — Pro only ── */}
+      <PremiumBlurPreview
+        title="Growth Quality Trend"
+        subtitle="12-month composite growth quality score — higher is healthier."
+        badgeText="PRO — Unlock quality trend"
+        ctaTitle="Unlock growth quality trend"
+        ctaDescription="See how your growth quality score has changed over the last 12 months and whether the trend is improving or declining."
+        isPro={canAccess("growth_quality_trend")}
+        className="mb-8"
+        ghostContent={
+          <div>
+            {/* Ghost chart area */}
+            <div className="flex gap-3" style={{ height: "200px" }}>
+              {/* Y-axis grade labels */}
+              <div className="flex flex-col justify-between pb-1 text-[11px] text-muted-foreground/40 shrink-0 select-none">
+                {["B+", "B", "B-", "C+", "C"].map((g) => <span key={g}>{g}</span>)}
+              </div>
+              {/* Chart body */}
+              <div className="flex-1 relative border-l border-b border-border/25">
+                {/* Healthy reference line */}
+                <div className="absolute left-0 right-0 h-px bg-success/10" style={{ top: "18%" }} />
+                {/* Ghost dots — flat/uniform height, non-informative */}
+                <div className="absolute inset-0 flex items-center px-1">
+                  {TREND_DATA.map((_, i) => (
+                    <div key={i} className="flex-1 flex justify-center">
+                      <div className="w-2 h-2 rounded-full bg-foreground/[0.08]" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* X-axis month labels */}
+            <div className="flex gap-0 mt-2 pl-9">
+              {TREND_DATA.map((d) => (
+                <span key={d.month} className="flex-1 text-center text-[11px] text-muted-foreground/50">
+                  {d.month}
+                </span>
+              ))}
+            </div>
+            {/* Masked takeaway */}
+            <p className="text-xs text-foreground/[0.13] mt-3 leading-snug select-none">
+              —— —— —— —— —— —— —— —— —— —— —— —— ——
+            </p>
+          </div>
+        }
+      >
+        {/* Pro: real line chart */}
+        <div>
+          <div className="h-[220px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={TREND_DATA}
+                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                  dy={8}
+                />
+                <YAxis
+                  domain={[60, 100]}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                  tickFormatter={(v: number) => {
+                    if (v >= 87) return "B+";
+                    if (v >= 83) return "B";
+                    if (v >= 79) return "B-";
+                    if (v >= 75) return "C+";
+                    if (v >= 70) return "C";
+                    return "C-";
+                  }}
+                />
+                <Tooltip
+                  contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgb(0 0 0 / .1)" }}
+                  formatter={(_: number, __: string, props: { payload?: { grade?: string } }) =>
+                    [props?.payload?.grade ?? "", "Grade"]
+                  }
+                />
+                <ReferenceLine y={83} stroke="hsl(var(--success))" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: "Healthy", position: "insideTopRight", fontSize: 11, fill: "hsl(var(--success))" }} />
+                <Line
+                  type="monotone"
+                  dataKey="score"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2.5}
+                  dot={(props: { cx: number; cy: number; payload: { score: number } }) => (
+                    <circle
+                      key={`dot-${props.cx}`}
+                      cx={props.cx}
+                      cy={props.cy}
+                      r={4}
+                      fill={gradeColor(props.payload.score)}
+                      stroke="white"
+                      strokeWidth={2}
+                    />
+                  )}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3 leading-snug">
+            Score peaked at B+ in October before declining through Q1 2026. The current B- reflects
+            increasing discount dependency and rising paid acquisition costs offsetting improved retention.
           </p>
         </div>
-        <div className="h-[220px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={TREND_DATA}
-              margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-              <XAxis
-                dataKey="month"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                dy={8}
-              />
-              <YAxis
-                domain={[60, 100]}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                tickFormatter={(v: number) => {
-                  if (v >= 87) return "B+";
-                  if (v >= 83) return "B";
-                  if (v >= 79) return "B-";
-                  if (v >= 75) return "C+";
-                  if (v >= 70) return "C";
-                  return "C-";
-                }}
-              />
-              <Tooltip
-                contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgb(0 0 0 / .1)" }}
-                formatter={(_: number, __: string, props: { payload?: { grade?: string } }) =>
-                  [props?.payload?.grade ?? "", "Grade"]
-                }
-              />
-              {/* Healthy threshold */}
-              <ReferenceLine y={83} stroke="hsl(var(--success))" strokeDasharray="4 3" strokeWidth={1.5} label={{ value: "Healthy", position: "insideTopRight", fontSize: 11, fill: "hsl(var(--success))" }} />
-              <Line
-                type="monotone"
-                dataKey="score"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2.5}
-                dot={(props: { cx: number; cy: number; payload: { score: number } }) => (
-                  <circle
-                    key={`dot-${props.cx}`}
-                    cx={props.cx}
-                    cy={props.cy}
-                    r={4}
-                    fill={gradeColor(props.payload.score)}
-                    stroke="white"
-                    strokeWidth={2}
-                  />
-                )}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <p className="text-xs text-muted-foreground mt-3 leading-snug">
-          Score peaked at B+ in October before declining through Q1 2026. The current B- reflects
-          increasing discount dependency and rising paid acquisition costs offsetting improved retention.
-        </p>
-      </div>
+      </PremiumBlurPreview>
 
       {/* ── Growth Composition Trend — Pro only ── */}
       <PremiumBlurPreview

@@ -41,7 +41,8 @@ export type FeatureName =
   | "score_component_detail"      // Growth Quality — grade + explanation text per score component
   | "driver_impact_detail"        // Growth Quality — quantified impact line per growth driver row
   | "growth_quality_actions"      // Growth Quality — "What to do next" action plan
-  | "recoverable_growth_quality"; // Growth Quality — recoverable contribution upside block
+  | "recoverable_growth_quality"  // Growth Quality — recoverable contribution upside block
+  | "growth_quality_trend";       // Growth Quality — 12-month grade trend line chart
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -64,6 +65,7 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   driver_impact_detail:      ["pro"],
   growth_quality_actions:       ["pro"],
   recoverable_growth_quality:   ["pro"],
+  growth_quality_trend:         ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

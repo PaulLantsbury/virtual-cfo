@@ -35,7 +35,8 @@ export type FeatureName =
   | "cac_payback"                // CAC Payback Period KPI card
   | "margin_bridge"              // Contribution Margin Bridge waterfall table
   | "driver_breakdown"           // Key Drivers — per-driver attribution rows
-  | "fastest_recovery_lever";    // CFO Insight — specific lever % and £ impact
+  | "fastest_recovery_lever"     // CFO Insight — specific lever % and £ impact
+  | "growth_trajectory_risk";    // Growth Quality — 90-day forward contribution impact
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -52,6 +53,7 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   margin_bridge:           ["pro"],
   driver_breakdown:        ["pro"],
   fastest_recovery_lever:  ["pro"],
+  growth_trajectory_risk:  ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

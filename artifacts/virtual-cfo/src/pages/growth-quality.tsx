@@ -6,7 +6,9 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ActionRecommendations } from "@/components/ActionRecommendations";
 import type { Recommendation } from "@/components/ActionRecommendations";
+import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { cn } from "@/lib/utils";
+import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 
@@ -147,6 +149,22 @@ const GROWTH_TYPE = {
   risk:      "medium" as "low" | "medium" | "high",
   riskLabel: "Medium risk",
   signal:    "At current levels, growth is becoming increasingly promotion-led rather than retention-led.",
+} as const;
+
+/**
+ * 90-day trajectory risk projection — shown to Pro users only.
+ * @dynamic cashLow  = round(orderVolume × (ppRiskLow  / 100) × avgOrderRevenue × 3)
+ * @dynamic cashHigh = round(orderVolume × (ppRiskHigh / 100) × avgOrderRevenue × 3)
+ * At current volume (~2,000 orders/month × £68.40 AOV = £136,800/month):
+ *   3-month revenue ~£410,400 · ppRiskLow 4.4pp · ppRiskHigh 7.8pp → £18k–£32k
+ */
+const TRAJECTORY_RISK = {
+  cashLow:  18_000,
+  cashHigh: 32_000,
+  days:     90,
+  /** @ai-commentary Replace with AI-generated projection narrative when live */
+  detail:
+    "Based on the current rate of discount dependency increase (+1.8pp) and paid channel CAC deterioration (+14%), blended contribution margin is projected to compress by a further 2–3pp over 90 days if these trends continue unchecked.",
 } as const;
 
 const RECOMMENDATIONS: Recommendation[] = [
@@ -343,6 +361,54 @@ export default function GrowthQuality() {
           {GROWTH_TYPE.signal}
         </p>
       </div>
+
+      {/* ── 90-Day Trajectory Risk — Pro only ── */}
+      <PremiumBlurPreview
+        title="90-Day Trajectory Risk"
+        subtitle="Forward contribution impact if current growth quality trends continue unchecked"
+        badgeText="PRO — Unlock trajectory risk"
+        ctaTitle="Unlock 90-day trajectory risk"
+        ctaDescription="See the quantified contribution impact if current discount dependency and paid CAC trends continue — modelled forward over 90 days."
+        isPro={canAccess("growth_trajectory_risk")}
+        className="mb-4"
+        ghostContent={
+          <div className="flex items-start gap-4">
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-100/60 dark:bg-amber-900/20 shrink-0 mt-0.5">
+              <TrendingDown className="w-4 h-4 text-amber-500/70 dark:text-amber-400/60" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground leading-snug">
+                Growth quality deterioration at current trajectory could reduce contribution by{" "}
+                <span className="tabular-nums text-foreground/[0.13]">£—,— – £—,—</span>
+                {" "}over the next{" "}
+                <span className="tabular-nums text-foreground/[0.13]">— days</span>.
+              </p>
+              <p className="mt-2 text-xs text-foreground/[0.13] leading-snug">
+                —— —— —— —— —— —— —— —— —— —— —— —— ——
+              </p>
+            </div>
+          </div>
+        }
+      >
+        <div className="rounded-xl bg-amber-50/60 dark:bg-amber-950/15 border border-amber-200/70 dark:border-amber-800/30 px-5 py-4 flex items-start gap-4">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 shrink-0 mt-0.5">
+            <TrendingDown className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground leading-snug">
+              Growth quality deterioration at current trajectory could reduce contribution by{" "}
+              <span className="font-bold text-destructive">
+                £{(TRAJECTORY_RISK.cashLow  / 1000).toFixed(0)}k–£{(TRAJECTORY_RISK.cashHigh / 1000).toFixed(0)}k
+              </span>
+              {" "}over the next{" "}
+              <span className="font-bold">{TRAJECTORY_RISK.days} days</span>.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+              {TRAJECTORY_RISK.detail}
+            </p>
+          </div>
+        </div>
+      </PremiumBlurPreview>
 
       {/* ── KPI Strip ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

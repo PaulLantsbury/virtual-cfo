@@ -185,7 +185,7 @@ export default function Opportunities() {
                 <div className="flex items-center gap-2 mt-2">
                   <Lock className="w-3.5 h-3.5 text-emerald-600/60 dark:text-emerald-500/60 shrink-0" />
                   <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 leading-snug">
-                    {OPPORTUNITIES.length} improvement opportunities identified — upgrade to see the full estimate
+                    {OPPORTUNITIES.length} profit opportunities identified — upgrade to see quantified recovery estimates
                   </p>
                 </div>
               </>
@@ -415,10 +415,10 @@ export default function Opportunities() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">
-                    Unlock the full opportunity breakdown
+                    Unlock opportunity breakdown
                   </p>
                   <p className="text-xs text-indigo-700/60 dark:text-indigo-400/60 mt-0.5">
-                    See ranked £ uplift estimates, execution guidance, and where to focus first
+                    See the £ impact, confidence level, and time-to-impact for each action.
                   </p>
                 </div>
               </div>
@@ -433,15 +433,16 @@ export default function Opportunities() {
         )}
       </div>
 
-      {/* ── Where to start — Pro only ── */}
-      {showWhereToStart && (
-        <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm overflow-hidden">
-          <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
-            <Target className="w-4 h-4 text-primary shrink-0" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-              Where to start
-            </span>
-          </div>
+      {/* ── Where to start — always visible; content gated ── */}
+      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm overflow-hidden">
+        <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
+          <Target className="w-4 h-4 text-primary shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+            Where to start
+          </span>
+        </div>
+
+        {showWhereToStart ? (
           <div className="px-6 py-5">
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               Both can be actioned this week with no new budget. Start with whichever your team has most direct control over.
@@ -465,8 +466,32 @@ export default function Opportunities() {
               ))}
             </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="px-6 py-5 bg-indigo-50/50 dark:bg-indigo-950/20">
+            <div className="flex items-start sm:items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0 mt-0.5 sm:mt-0">
+                  <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">
+                    Unlock prioritised execution plan
+                  </p>
+                  <p className="text-xs text-indigo-700/60 dark:text-indigo-400/60 mt-0.5">
+                    See the top 1–2 changes to make first and how much they are worth.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="/upgrade"
+                className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors whitespace-nowrap shrink-0"
+              >
+                Upgrade to Pro →
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
 
     </AppLayout>
   );

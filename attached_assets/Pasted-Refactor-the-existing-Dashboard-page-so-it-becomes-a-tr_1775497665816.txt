@@ -1,0 +1,114 @@
+Refactor the existing Dashboard page so it becomes a true executive summary layer rather than a mini analysis page.
+
+Use the current dashboard as the starting point and keep what is already strong, but simplify and restructure it.
+
+GOALS
+
+- preserve the existing CFO Insight block at the top
+- keep the KPI card row concept
+- keep Top Drivers This Month
+- keep What to do next
+- remove detailed lower-page charts that belong on dedicated analysis pages
+- make the page feel like a weekly decision dashboard, not a reporting screen
+
+
+CHANGES TO MAKE
+
+1. Keep the existing top CFO Insight block, but ensure it remains the main hero section at the top of the page.
+
+2. Directly below the CFO Insight block, add a compact headline metric strip for:
+
+Recoverable contribution opportunity
+Example:
+Potential upside next month: £18k–£42k
+
+This can be visually lighter than the main CFO Insight, but should still stand out as the dashboard’s key “so what?” number.
+
+3. Keep the KPI grid, but tighten it so it includes only the most useful executive summary metrics:
+
+- Revenue
+- Contribution Margin
+- Net Profit
+- Cash Runway
+- Discount Dependency
+- Repeat Purchase Rate
+- Growth Quality
+
+If needed, reflow the cards neatly into a balanced grid.
+
+4. Keep the section:
+Top Drivers This Month
+
+But tighten it so it acts as a concise “What changed?” block:
+- maximum 5 driver lines
+- mix of positive and negative signals
+- each driver should be short and commercially clear
+- make each driver row clickable to the relevant analysis page if practical
+
+Example drivers:
+- Margin down due to increased shipping and fulfilment costs
+- Repeat purchase rate improving month-on-month
+- Ad spend efficiency declining — higher CAC with lower ROAS
+- Discount usage rising faster than revenue growth
+- Average order value holding steady
+
+5. Keep the section:
+What to do next
+
+But tighten it into a top-priority action block:
+- show only the top 3 actions on the dashboard
+- if there are more actions, add a link such as:
+  View full action plan →
+- keep impact tags such as High impact / Medium impact / Quick win
+- keep styling consistent with the rest of the app
+
+6. REMOVE the large charts currently shown lower down on the dashboard, including:
+- Cash Flow chart
+- Net Profit Margin chart
+- any other detailed chart sections that duplicate analysis pages
+
+These do not belong on the dashboard anymore.
+
+7. Replace the removed chart area with a new section called:
+
+Business Health Modules
+
+Add compact summary cards linking to the main analysis pages:
+
+- Profit Quality
+  Subtitle: Understand where margin is being created — and lost
+  CTA: Open Margin Analysis →
+
+- Growth Quality
+  Subtitle: See whether growth is healthy and self-sustaining
+  CTA: Open Growth Quality →
+
+- Acquisition Efficiency
+  Subtitle: Diagnose whether paid channels are creating profitable customers
+  CTA: Open Marketing Efficiency →
+
+- Opportunities
+  Subtitle: See the highest-value improvement actions across the business
+  CTA: Open Opportunities →
+
+- Cash Efficiency
+  Subtitle: Working capital and cash recovery insights
+  Badge: Coming soon
+
+Style these as compact navigation cards, not large dashboard widgets.
+
+8. Final layout order should be:
+
+- CFO Insight
+- Recoverable contribution strip
+- KPI summary grid
+- Top Drivers This Month
+- What to do next
+- Business Health Modules
+
+9. General design requirements:
+- keep the page clean and founder-friendly
+- reduce visual clutter
+- make this page feel more strategic and less analytical
+- preserve styling consistency with Margin Analysis, Growth Quality, and Marketing Efficiency
+- do not redesign the entire visual system — evolve the current dashboard into a better executive layer

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
+import { Lightbulb, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 export type ImpactLevel = "high" | "medium" | "quick-win";
@@ -16,6 +17,7 @@ interface ActionRecommendationsProps {
   defaultExpanded?: boolean;
   title?: string;
   subtitle?: string;
+  viewAllHref?: string;
 }
 
 const impactConfig: Record<ImpactLevel, { label: string; classes: string }> = {
@@ -39,6 +41,7 @@ export function ActionRecommendations({
   defaultExpanded = true,
   title = "What to do next",
   subtitle = "Recommended actions to improve profitability and cash performance",
+  viewAllHref,
 }: ActionRecommendationsProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
@@ -107,6 +110,17 @@ export function ActionRecommendations({
                 );
               })}
             </ul>
+          )}
+
+          {viewAllHref && (
+            <div className="mt-4 pt-4 border-t border-border/40">
+              <Link
+                href={viewAllHref}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+              >
+                View full action plan <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           )}
         </div>
       )}

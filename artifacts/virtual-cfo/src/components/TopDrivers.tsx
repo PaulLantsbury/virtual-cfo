@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, ChevronRight } from "lucide-react";
+import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 export type DriverTrend = "improving" | "worsening" | "neutral";
@@ -7,6 +8,7 @@ export interface Driver {
   id: string;
   text: string;
   trend: DriverTrend;
+  href?: string;
 }
 
 interface TopDriversProps {
@@ -14,22 +16,10 @@ interface TopDriversProps {
   isLoading?: boolean;
 }
 
-const trendConfig: Record<DriverTrend, { icon: React.ElementType; label: string; classes: string }> = {
-  improving: {
-    icon: TrendingUp,
-    label: "↑",
-    classes: "text-success bg-success/10",
-  },
-  worsening: {
-    icon: TrendingDown,
-    label: "↓",
-    classes: "text-destructive bg-destructive/10",
-  },
-  neutral: {
-    icon: Minus,
-    label: "–",
-    classes: "text-muted-foreground bg-secondary",
-  },
+const trendConfig: Record<DriverTrend, { label: string; classes: string }> = {
+  improving: { label: "↑", classes: "text-success bg-success/10" },
+  worsening: { label: "↓", classes: "text-destructive bg-destructive/10" },
+  neutral:   { label: "–", classes: "text-muted-foreground bg-secondary" },
 };
 
 export function TopDrivers({ drivers, isLoading }: TopDriversProps) {
@@ -38,7 +28,7 @@ export function TopDrivers({ drivers, isLoading }: TopDriversProps) {
       <div className="mb-5">
         <h3 className="font-semibold text-lg text-foreground">Top Drivers This Month</h3>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Key factors affecting your financial performance this period
+          What changed this month and how it affected financial performance
         </p>
       </div>
 
@@ -52,24 +42,38 @@ export function TopDrivers({ drivers, isLoading }: TopDriversProps) {
           ))}
         </ul>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-0.5">
           {drivers.map((driver) => {
-            const { icon: Icon, label, classes } = trendConfig[driver.trend];
-            return (
-              <li
-                key={driver.id}
-                className="flex items-center gap-3 group"
-              >
-                <span
-                  className={cn(
-                    "inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold shrink-0 transition-transform group-hover:scale-110",
-                    classes
-                  )}
-                  aria-label={driver.trend}
-                >
+            const { label, classes } = trendConfig[driver.trend];
+            const content = (
+              <>
+                <span className={cn(
+                  "inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold shrink-0",
+                  classes,
+                )}>
                   {label}
                 </span>
-                <span className="text-sm text-foreground leading-snug">{driver.text}</span>
+                <span className="flex-1 text-sm text-foreground leading-snug">
+                  {driver.text}
+                </span>
+                {driver.href && (
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0 group-hover:text-muted-foreground/60 transition-colors" />
+                )}
+              </>
+            );
+
+            return driver.href ? (
+              <li key={driver.id}>
+                <Link
+                  href={driver.href}
+                  className="flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-xl hover:bg-secondary/50 transition-colors group"
+                >
+                  {content}
+                </Link>
+              </li>
+            ) : (
+              <li key={driver.id} className="flex items-center gap-3 py-2.5">
+                {content}
               </li>
             );
           })}

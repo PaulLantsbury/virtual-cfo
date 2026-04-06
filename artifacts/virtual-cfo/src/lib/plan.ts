@@ -45,8 +45,10 @@ export type FeatureName =
   | "dashboard_full_action_plan"       // Dashboard — full 3-action prioritised plan (free sees 1)
   | "dashboard_driver_detail"          // Dashboard — Pro-enriched driver explanation lines
   | "dashboard_opportunities_module"   // Dashboard — Opportunities health module card
-  | "opportunities_uplift_values"      // Opportunities — per-opportunity £ uplift figures
+  | "opportunities_headline_value"      // Opportunities — £ value in the total recoverable block
+  | "opportunities_uplift_values"      // Opportunities — per-row £ uplift figures
   | "opportunities_execution_priority" // Opportunities — Execution priority this month strip
+  | "opportunities_row_detail"         // Opportunities — full label, description, meta, badges per row
   | "opportunities_where_to_start";    // Opportunities — Where to start section
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
@@ -73,11 +75,11 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   dashboard_full_action_plan:       ["pro"],
   dashboard_driver_detail:          ["pro"],
   dashboard_opportunities_module:   ["pro"],
-  // Prepared for Pro gating — currently visible to all plans.
-  // Flip to ["pro"] when gating pass is applied to the Opportunities page.
-  opportunities_uplift_values:      ["free", "pro"],
-  opportunities_execution_priority: ["free", "pro"],
-  opportunities_where_to_start:     ["free", "pro"],
+  opportunities_headline_value:     ["pro"],
+  opportunities_uplift_values:      ["pro"],
+  opportunities_execution_priority: ["pro"],
+  opportunities_row_detail:         ["pro"],
+  opportunities_where_to_start:     ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

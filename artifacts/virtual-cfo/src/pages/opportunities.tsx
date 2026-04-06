@@ -1,4 +1,4 @@
-import { TrendingUp, Target, ArrowRight, Zap } from "lucide-react";
+import { TrendingUp, Target, ArrowRight, Zap, Lock } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/plan";
@@ -22,7 +22,10 @@ const CAPITAL_FREE_HIGH = 26_000;
 
 type ImpactLevel  = "high" | "medium" | "quick-win";
 type Confidence   = "High" | "Medium";
-type TimeToImpact = "Immediate impact (0–30 days)" | "Short-term impact (1–2 months)" | "Structural impact (2–3 months)";
+type TimeToImpact =
+  | "Immediate impact (0–30 days)"
+  | "Short-term impact (1–2 months)"
+  | "Structural impact (2–3 months)";
 
 /**
  * @dynamic Each uplift estimate is computed from:
@@ -112,9 +115,11 @@ const maxUplift = Math.max(...OPPORTUNITIES.map((o) => o.uplift));
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Opportunities() {
-  const showUpliftValues    = canAccess("opportunities_uplift_values");
-  const showExecPriority    = canAccess("opportunities_execution_priority");
-  const showWhereToStart    = canAccess("opportunities_where_to_start");
+  const showHeadline     = canAccess("opportunities_headline_value");
+  const showUpliftValues = canAccess("opportunities_uplift_values");
+  const showExecPriority = canAccess("opportunities_execution_priority");
+  const showRowDetail    = canAccess("opportunities_row_detail");
+  const showWhereToStart = canAccess("opportunities_where_to_start");
 
   return (
     <AppLayout>
@@ -142,29 +147,54 @@ export default function Opportunities() {
             <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
               Estimated recoverable contribution next month
             </p>
-            <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
-              £{(TOTAL_LOW / 1000).toFixed(0)}k–£{(TOTAL_HIGH / 1000).toFixed(0)}k
-            </p>
-            <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 mt-2 leading-snug">
-              Based on {OPPORTUNITIES.length} identified improvement opportunities at current sales volume.
-              Estimates update automatically when live data is connected.
-            </p>
+
+            {showHeadline ? (
+              /* Pro: full £ value */
+              <>
+                <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
+                  £{(TOTAL_LOW / 1000).toFixed(0)}k–£{(TOTAL_HIGH / 1000).toFixed(0)}k
+                </p>
+                <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 mt-2 leading-snug">
+                  Based on {OPPORTUNITIES.length} identified improvement opportunities at current sales volume.
+                  Estimates update automatically when live data is connected.
+                </p>
+              </>
+            ) : (
+              /* Free: blurred value + upgrade prompt */
+              <>
+                <p
+                  className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none select-none pointer-events-none"
+                  style={{ filter: "blur(8px)" }}
+                  aria-hidden="true"
+                >
+                  £{(TOTAL_LOW / 1000).toFixed(0)}k–£{(TOTAL_HIGH / 1000).toFixed(0)}k
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Lock className="w-3.5 h-3.5 text-emerald-600/60 dark:text-emerald-500/60 shrink-0" />
+                  <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 leading-snug">
+                    {OPPORTUNITIES.length} improvement opportunities identified — upgrade to see the full estimate
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Capital-free uplift strip */}
-        <div className="px-8 py-3.5 border-t border-emerald-200 dark:border-emerald-800/40 bg-emerald-100/40 dark:bg-emerald-900/20 flex items-center gap-3">
-          <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500 shrink-0" />
-          <p className="text-xs text-emerald-800/70 dark:text-emerald-400/80 leading-snug">
-            <span className="font-semibold">
-              Estimated capital-free uplift: £{(CAPITAL_FREE_LOW / 1000).toFixed(0)}k–£{(CAPITAL_FREE_HIGH / 1000).toFixed(0)}k
-            </span>
-            {" "}— from opportunities requiring no new budget spend
-          </p>
-        </div>
+        {/* Capital-free uplift strip — Pro only (contains £ values) */}
+        {showHeadline && (
+          <div className="px-8 py-3.5 border-t border-emerald-200 dark:border-emerald-800/40 bg-emerald-100/40 dark:bg-emerald-900/20 flex items-center gap-3">
+            <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500 shrink-0" />
+            <p className="text-xs text-emerald-800/70 dark:text-emerald-400/80 leading-snug">
+              <span className="font-semibold">
+                Estimated capital-free uplift: £{(CAPITAL_FREE_LOW / 1000).toFixed(0)}k–£{(CAPITAL_FREE_HIGH / 1000).toFixed(0)}k
+              </span>
+              {" "}— from opportunities requiring no new budget spend
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* ── Execution priority strip ── */}
+      {/* ── Execution priority strip — Pro only ── */}
       {showExecPriority && (
         <div className="rounded-2xl border border-primary/20 bg-primary/5 px-6 py-5 mb-6 flex items-start gap-4">
           <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary/10 shrink-0 mt-0.5">
@@ -195,11 +225,11 @@ export default function Opportunities() {
             const { label: impactLabel, classes: impactClasses } = IMPACT_CONFIG[opp.impact];
             const barPct = Math.round((opp.uplift / maxUplift) * 100);
 
-            return (
+            return showRowDetail ? (
+              /* ── Pro row: full detail ── */
               <div key={opp.id} className="px-6 py-5 hover:bg-secondary/20 transition-colors">
                 <div className="flex items-start justify-between gap-4 mb-2">
 
-                  {/* ── Left: rank + label + description + meta ── */}
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0 mt-0.5">
                       {idx + 1}
@@ -207,8 +237,6 @@ export default function Opportunities() {
                     <div className="min-w-0">
                       <p className="font-semibold text-foreground text-sm leading-snug">{opp.label}</p>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{opp.description}</p>
-
-                      {/* Time-to-impact + confidence meta row */}
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
                         <span className="text-[11px] text-muted-foreground/70 font-medium">
                           {opp.timeToImpact}
@@ -226,7 +254,6 @@ export default function Opportunities() {
                     </div>
                   </div>
 
-                  {/* ── Right: uplift + impact badge + implementation type ── */}
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     {showUpliftValues && (
                       <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
@@ -239,14 +266,12 @@ export default function Opportunities() {
                     )}>
                       {impactLabel}
                     </span>
-                    {/* Implementation type badge */}
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap bg-secondary text-muted-foreground/70 border border-border/50">
                       {opp.implementationType}
                     </span>
                   </div>
                 </div>
 
-                {/* Contribution bar */}
                 <div className="ml-9 mt-3">
                   <div className="w-full h-1.5 bg-secondary rounded-full">
                     <div
@@ -259,22 +284,104 @@ export default function Opportunities() {
                   </p>
                 </div>
               </div>
+            ) : (
+              /* ── Free row: masked — rank + progress bar preserved, detail obscured ── */
+              <div key={opp.id} className="px-6 py-4">
+                <div className="flex items-start justify-between gap-4 mb-2">
+
+                  {/* Left: rank visible, label + description blurred */}
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0 mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      {/* Label: blurred — shape and word-count visible, text unreadable */}
+                      <p
+                        className="font-semibold text-foreground text-sm leading-snug select-none pointer-events-none"
+                        style={{ filter: "blur(5px)" }}
+                        aria-hidden="true"
+                      >
+                        {opp.label}
+                      </p>
+                      {/* Description: more heavily blurred — clearly blocked */}
+                      <p
+                        className="text-xs text-muted-foreground mt-1 leading-relaxed select-none pointer-events-none"
+                        style={{ filter: "blur(4px)", opacity: 0.45 }}
+                        aria-hidden="true"
+                      >
+                        {opp.description.slice(0, 80)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Right: stronger masking — colored badge visible, text blurred; no £ value */}
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    {/* Impact badge: color tier preserved (signals relative importance), text blurred */}
+                    <span className={cn(
+                      "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap",
+                      impactClasses,
+                    )}>
+                      <span
+                        className="select-none pointer-events-none"
+                        style={{ filter: "blur(6px)" }}
+                        aria-hidden="true"
+                      >
+                        {impactLabel}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Progress bar: fully visible — communicates relative scale without revealing £ */}
+                <div className="ml-9 mt-2">
+                  <div className="w-full h-1.5 bg-secondary rounded-full">
+                    <div
+                      className="h-1.5 rounded-full bg-emerald-400/50 transition-all"
+                      style={{ width: `${barPct}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
             );
           })}
         </div>
 
-        {/* Total row */}
-        <div className="px-6 py-4 bg-emerald-50/60 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 flex items-center justify-between">
-          <span className="text-sm font-semibold text-foreground">Total estimated uplift</span>
-          {showUpliftValues && (
+        {/* Bottom row: Pro shows total, Free shows upgrade CTA */}
+        {showUpliftValues ? (
+          <div className="px-6 py-4 bg-emerald-50/60 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 flex items-center justify-between">
+            <span className="text-sm font-semibold text-foreground">Total estimated uplift</span>
             <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
               £{(TOTAL_LOW / 1_000).toFixed(0)}k–£{(TOTAL_HIGH / 1_000).toFixed(0)}k
             </span>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="px-6 py-5 border-t border-border/40 bg-indigo-50/50 dark:bg-indigo-950/20">
+            <div className="flex items-start sm:items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-start gap-3">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0 mt-0.5 sm:mt-0">
+                  <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">
+                    Unlock the full opportunity breakdown
+                  </p>
+                  <p className="text-xs text-indigo-700/60 dark:text-indigo-400/60 mt-0.5">
+                    See ranked £ uplift estimates, execution guidance, and where to focus first
+                  </p>
+                </div>
+              </div>
+              <a
+                href="/upgrade"
+                className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors whitespace-nowrap shrink-0"
+              >
+                Upgrade to Pro →
+              </a>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ── Where to start ── */}
+      {/* ── Where to start — Pro only ── */}
       {showWhereToStart && (
         <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm overflow-hidden">
           <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
@@ -288,7 +395,6 @@ export default function Opportunities() {
               {PRIORITY_NOTE}
             </p>
 
-            {/* Top 2 callout */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {OPPORTUNITIES.slice(0, 2).map((opp) => (
                 <div
@@ -300,11 +406,9 @@ export default function Opportunities() {
                     <p className="text-sm font-semibold text-foreground leading-snug">{opp.label}</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">{opp.implementationType}</p>
                   </div>
-                  {showUpliftValues && (
-                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
-                      +£{opp.uplift.toLocaleString()}
-                    </span>
-                  )}
+                  <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0">
+                    +£{opp.uplift.toLocaleString()}
+                  </span>
                 </div>
               ))}
             </div>

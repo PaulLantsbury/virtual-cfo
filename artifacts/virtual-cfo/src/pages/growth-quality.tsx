@@ -240,7 +240,7 @@ const RECOVERABLE_UPSIDE = {
   cashHigh: 28_000,
   /** @ai-commentary Replace with AI-generated narrative when live */
   supporting:
-    "If discount dependency and CAC efficiency return to healthier levels, growth quality improves materially and more revenue converts into contribution profit.",
+    "If discount dependency and paid acquisition efficiency return closer to healthy levels, an estimated £12k–£28k of contribution could be recovered per month.",
   levers: [
     {
       id: "rv1",
@@ -773,7 +773,7 @@ export default function GrowthQuality() {
       {/* ── Recoverable Growth Quality — Pro only ── */}
       <PremiumBlurPreview
         title="Recoverable Growth Quality"
-        subtitle="Estimated contribution available from restoring healthier growth mix and acquisition efficiency."
+        subtitle="Estimated contribution available from restoring healthier growth structure and acquisition efficiency."
         badgeText="PRO — Unlock upside estimate"
         ctaTitle="Unlock recoverable growth quality"
         ctaDescription="See the estimated contribution available if discount dependency and CAC efficiency return to healthier levels."

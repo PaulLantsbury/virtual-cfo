@@ -687,11 +687,11 @@ export default function GrowthQuality() {
               <span className="font-semibold text-foreground">
                 Repeat-led growth fell from {COMPOSITION_DATA[0].repeat}% to {COMPOSITION_DATA[COMPOSITION_DATA.length - 1].repeat}%
               </span>{" "}
-              over the last 6 months. Discount-led growth now represents{" "}
+              over the last 6 months, while discount-led growth rose to{" "}
               <span className="font-semibold text-amber-600 dark:text-amber-400">
                 {COMPOSITION_DATA[COMPOSITION_DATA.length - 1].discount}%
-              </span>{" "}
-              of total growth — up from {COMPOSITION_DATA[0].discount}%.
+              </span>.{" "}
+              This suggests more growth is being bought rather than retained — weakening long-term quality.
             </p>
           </div>
         </div>

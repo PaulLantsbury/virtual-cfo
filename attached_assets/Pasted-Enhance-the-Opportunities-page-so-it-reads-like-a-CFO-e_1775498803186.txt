@@ -1,0 +1,98 @@
+Enhance the Opportunities page so it reads like a CFO execution plan rather than a ranked opportunity list.
+
+Do not redesign the layout. Improve structure, interpretability, and action clarity.
+
+
+1. Add implementation-type badges to each opportunity
+
+For each opportunity row, add a secondary badge beneath the impact label such as:
+
+No additional investment required
+Requires supplier negotiation
+Requires CRM setup
+Requires campaign reallocation
+
+Use muted styling consistent with existing UI tags.
+
+These should communicate effort level and implementation type.
+
+
+2. Add expected time-to-impact indicators
+
+Add a small line beneath each opportunity description:
+
+Examples:
+
+Immediate impact (0–30 days)
+Short-term impact (1–2 months)
+Structural impact (2–3 months)
+
+Ensure styling matches the tone of the app.
+
+
+3. Add confidence indicators
+
+Add a small confidence label to each opportunity:
+
+Confidence: High
+Confidence: Medium
+
+Place this beneath the time-to-impact indicator.
+
+Keep styling subtle.
+
+
+4. Add capital-free uplift summary near the top of the page
+
+Directly beneath the recoverable contribution headline, insert:
+
+Estimated capital-free uplift: £XXk–£XXk
+
+This should represent opportunities that require no new spend.
+
+Style this as a muted supporting metric strip.
+
+
+5. Add execution priority strip above the opportunity list
+
+Insert a new section:
+
+Execution priority this month
+
+Example content:
+
+Start with reallocating Meta spend and reducing discount depth.
+
+Together these represent over 60% of recoverable contribution improvement and require no additional investment.
+
+Style this similar to the existing "Where to start" section but place it above the ranked opportunity list.
+
+
+6. Improve opportunity descriptions slightly
+
+Ensure each opportunity description clearly explains:
+
+what changes
+why it improves contribution
+how impact is estimated
+
+Keep wording concise and CFO-style.
+
+
+7. Preserve ranking logic
+
+Keep opportunities sorted by estimated contribution uplift.
+
+Maintain progress bars and impact labels exactly as they are.
+
+
+8. Prepare page for Pro gating
+
+Ensure the following elements can be hidden for free users:
+
+recoverable contribution headline value
+opportunity-level £ impact values
+execution priority strip
+Where to start section
+
+Keep layout intact so blurred previews can be applied later.

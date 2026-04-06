@@ -41,10 +41,13 @@ export type FeatureName =
   | "driver_impact_detail"          // Growth Quality — quantified impact line per growth driver
   | "growth_quality_actions"        // Growth Quality — "What to do next" action plan
   | "recoverable_growth_quality"    // Growth Quality — recoverable contribution upside block
-  | "dashboard_recovery_upside"     // Dashboard — quantified £ value in recoverable strip
-  | "dashboard_full_action_plan"    // Dashboard — full 3-action prioritised plan (free sees 1)
-  | "dashboard_driver_detail"       // Dashboard — Pro-enriched driver explanation lines
-  | "dashboard_opportunities_module"; // Dashboard — Opportunities health module card
+  | "dashboard_recovery_upside"        // Dashboard — quantified £ value in recoverable strip
+  | "dashboard_full_action_plan"       // Dashboard — full 3-action prioritised plan (free sees 1)
+  | "dashboard_driver_detail"          // Dashboard — Pro-enriched driver explanation lines
+  | "dashboard_opportunities_module"   // Dashboard — Opportunities health module card
+  | "opportunities_uplift_values"      // Opportunities — per-opportunity £ uplift figures
+  | "opportunities_execution_priority" // Opportunities — Execution priority this month strip
+  | "opportunities_where_to_start";    // Opportunities — Where to start section
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -66,10 +69,15 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   driver_impact_detail:           ["pro"],
   growth_quality_actions:         ["pro"],
   recoverable_growth_quality:     ["pro"],
-  dashboard_recovery_upside:      ["pro"],
-  dashboard_full_action_plan:     ["pro"],
-  dashboard_driver_detail:        ["pro"],
-  dashboard_opportunities_module: ["pro"],
+  dashboard_recovery_upside:        ["pro"],
+  dashboard_full_action_plan:       ["pro"],
+  dashboard_driver_detail:          ["pro"],
+  dashboard_opportunities_module:   ["pro"],
+  // Prepared for Pro gating — currently visible to all plans.
+  // Flip to ["pro"] when gating pass is applied to the Opportunities page.
+  opportunities_uplift_values:      ["free", "pro"],
+  opportunities_execution_priority: ["free", "pro"],
+  opportunities_where_to_start:     ["free", "pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

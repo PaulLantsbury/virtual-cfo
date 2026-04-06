@@ -51,15 +51,6 @@ const CFO_INSIGHT = {
   ],
   /** @ai-commentary Strategic closing line derived from growth type classification */
   closing: "Growth is becoming more promotion-led and less retention-led.",
-  upside: {
-    cashLow: 12_000,
-    cashHigh: 28_000,
-  },
-  recommendations: [
-    "Reduce blanket discounting",
-    "Improve retention conversion",
-    "Reallocate spend toward higher-margin channels",
-  ],
 } as const;
 
 type ScoreStatus = "strong" | "watch" | "weak" | "mixed" | "declining";
@@ -299,7 +290,7 @@ export default function GrowthQuality() {
             CFO Insight
           </span>
         </div>
-        <div className="px-6 py-5 space-y-4">
+        <div className="px-6 py-5">
           {/* Diagnostic narrative — three-part structure */}
           <div className="space-y-3">
             <p className="text-sm font-medium text-foreground leading-relaxed">
@@ -321,54 +312,6 @@ export default function GrowthQuality() {
             </p>
           </div>
 
-          {/* Upside callout — Pro only (quantified recoverable figure) */}
-          {canAccess("recoverable_growth_quality") && (
-            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">
-              <div className="flex items-start gap-3">
-                <div className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 mt-0.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <p className="text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed">
-                  If discount dependency and CAC efficiency return to prior levels, growth quality could
-                  improve materially next month, with an estimated contribution uplift of{" "}
-                  <span className="font-bold text-emerald-700 dark:text-emerald-300 text-base">
-                    £{CFO_INSIGHT.upside.cashLow.toLocaleString()}–£{CFO_INSIGHT.upside.cashHigh.toLocaleString()}
-                  </span>{" "}
-                  at current sales volume.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Priority signals */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              What to act on:
-            </p>
-            <ul className="space-y-1.5">
-              {CFO_INSIGHT.recommendations.map((rec) => (
-                <li key={rec} className="flex items-start gap-2.5 text-sm text-foreground">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-[5px]" />
-                  {rec}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Summary tag — Pro only */}
-          {canAccess("recoverable_growth_quality") && (
-            <div className="flex flex-wrap gap-3 pt-1 border-t border-primary/15">
-              <div className="inline-flex items-center gap-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 px-3 py-1.5">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <span className="text-xs text-emerald-800 dark:text-emerald-300">
-                  Potential upside next month:{" "}
-                  <span className="font-bold">
-                    £{(CFO_INSIGHT.upside.cashLow / 1000).toFixed(0)}k–£{(CFO_INSIGHT.upside.cashHigh / 1000).toFixed(0)}k
-                  </span>
-                </span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -499,7 +442,7 @@ export default function GrowthQuality() {
             Where growth quality is strengthening vs weakening
           </h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Each factor determines whether growth is healthy and self-sustaining — or fragile and costly to maintain.
+            Five components scored by signal strength — from retention quality and channel mix to discount dependency and acquisition efficiency.
           </p>
         </div>
 

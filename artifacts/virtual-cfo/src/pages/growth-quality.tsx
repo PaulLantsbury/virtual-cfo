@@ -701,9 +701,10 @@ export default function GrowthQuality() {
         isPro={canAccess("driver_impact_detail")}
         className="mb-8"
         ghostContent={
-          <ul className="space-y-3">
-            {KEY_DRIVERS.map((d) => (
-              <li key={d.text} className="flex items-start gap-3 py-2 border-b border-border/40 last:border-0">
+          <ul className="space-y-0">
+            {KEY_DRIVERS.map((d, i) => (
+              <li key={i} className="flex items-start gap-3 py-3 border-b border-border/30 last:border-0">
+                {/* Direction icon — fully visible so pos/neg signal is clear */}
                 <span className={cn(
                   "mt-0.5 flex items-center justify-center w-5 h-5 rounded-full shrink-0",
                   d.dir === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40"
@@ -714,10 +715,26 @@ export default function GrowthQuality() {
                   {d.dir === "negative" && <TrendingDown className="w-3 h-3 text-destructive" />}
                   {d.dir === "neutral"  && <Minus        className="w-3 h-3 text-muted-foreground" />}
                 </span>
-                <div className="min-w-0">
-                  <p className="text-sm text-foreground leading-snug">{d.text}</p>
-                  <p className="mt-1 text-xs text-foreground/[0.13] leading-snug select-none">
-                    → —— —— —— —— —— —— ——
+                {/* Text content — blurred so structure is preserved but text is unreadable */}
+                <div className="min-w-0 flex-1">
+                  <p
+                    className="text-sm font-medium text-foreground leading-snug select-none pointer-events-none"
+                    style={{ filter: "blur(4px)", opacity: 0.55 }}
+                  >
+                    {d.text}
+                  </p>
+                  <p
+                    className={cn(
+                      "mt-1 text-xs leading-snug select-none pointer-events-none",
+                      d.dir === "positive"
+                        ? "text-emerald-700 dark:text-emerald-400"
+                        : d.dir === "negative"
+                        ? "text-destructive/80 dark:text-destructive/70"
+                        : "text-muted-foreground",
+                    )}
+                    style={{ filter: "blur(4px)", opacity: 0.5 }}
+                  >
+                    → {d.impact}
                   </p>
                 </div>
               </li>

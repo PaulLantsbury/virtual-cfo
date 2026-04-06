@@ -30,17 +30,21 @@ export type UserPlan = "free" | "pro";
  * Add new features here as new pages/sections are built.
  */
 export type FeatureName =
-  | "opportunity_breakdown"      // Section 2 — detailed opportunity rows with £ impact + steps
-  | "channel_margin_analysis"    // General channel-level margin / acquisition analysis
-  | "cac_payback"                // CAC Payback Period KPI card
-  | "margin_bridge"              // Contribution Margin Bridge waterfall table
-  | "driver_breakdown"           // Key Drivers — per-driver attribution rows
-  | "fastest_recovery_lever"       // CFO Insight — specific lever % and £ impact
-  | "growth_composition_trend"    // Growth Quality — composition breakdown chart (repeat/paid/discount)
-  | "score_component_detail"      // Growth Quality — grade + explanation text per score component
-  | "driver_impact_detail"        // Growth Quality — quantified impact line per growth driver row
-  | "growth_quality_actions"      // Growth Quality — "What to do next" action plan
-  | "recoverable_growth_quality"; // Growth Quality — recoverable contribution upside block
+  | "opportunity_breakdown"         // Opportunities — detailed rows with £ impact + steps
+  | "channel_margin_analysis"       // General channel-level margin / acquisition analysis
+  | "cac_payback"                   // CAC Payback Period KPI card
+  | "margin_bridge"                 // Contribution Margin Bridge waterfall table
+  | "driver_breakdown"              // Key Drivers — per-driver attribution rows
+  | "fastest_recovery_lever"        // CFO Insight — specific lever % and £ impact
+  | "growth_composition_trend"      // Growth Quality — composition breakdown chart
+  | "score_component_detail"        // Growth Quality — grade + explanation per score component
+  | "driver_impact_detail"          // Growth Quality — quantified impact line per growth driver
+  | "growth_quality_actions"        // Growth Quality — "What to do next" action plan
+  | "recoverable_growth_quality"    // Growth Quality — recoverable contribution upside block
+  | "dashboard_recovery_upside"     // Dashboard — quantified £ value in recoverable strip
+  | "dashboard_full_action_plan"    // Dashboard — full 3-action prioritised plan (free sees 1)
+  | "dashboard_driver_detail"       // Dashboard — Pro-enriched driver explanation lines
+  | "dashboard_opportunities_module"; // Dashboard — Opportunities health module card
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -51,17 +55,21 @@ export type FeatureName =
  * Example: `opportunity_breakdown: ["pro", "growth"]`
  */
 const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
-  opportunity_breakdown:   ["pro"],
-  channel_margin_analysis: ["pro"],
-  cac_payback:             ["pro"],
-  margin_bridge:           ["pro"],
-  driver_breakdown:        ["pro"],
-  fastest_recovery_lever:    ["pro"],
-  growth_composition_trend:  ["pro"],
-  score_component_detail:    ["pro"],
-  driver_impact_detail:      ["pro"],
-  growth_quality_actions:    ["pro"],
-  recoverable_growth_quality:["pro"],
+  opportunity_breakdown:          ["pro"],
+  channel_margin_analysis:        ["pro"],
+  cac_payback:                    ["pro"],
+  margin_bridge:                  ["pro"],
+  driver_breakdown:               ["pro"],
+  fastest_recovery_lever:         ["pro"],
+  growth_composition_trend:       ["pro"],
+  score_component_detail:         ["pro"],
+  driver_impact_detail:           ["pro"],
+  growth_quality_actions:         ["pro"],
+  recoverable_growth_quality:     ["pro"],
+  dashboard_recovery_upside:      ["pro"],
+  dashboard_full_action_plan:     ["pro"],
+  dashboard_driver_detail:        ["pro"],
+  dashboard_opportunities_module: ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

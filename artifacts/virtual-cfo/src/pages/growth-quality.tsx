@@ -45,12 +45,12 @@ const CFO_INSIGHT = {
   headline: "Growth remains positive, but quality has weakened for the third consecutive period.",
   /** @ai-commentary Replace with dynamically identified primary drivers when live */
   drivers: [
-    "rising discount dependency",
-    "worsening paid acquisition efficiency",
-    "declining organic and email contribution mix",
+    "higher discount reliance",
+    "weaker paid acquisition efficiency",
+    "declining organic and email mix",
   ],
   /** @ai-commentary Strategic closing line derived from growth type classification */
-  closing: "At current levels, growth is becoming increasingly promotion-led rather than retention-led.",
+  closing: "Growth is becoming more promotion-led and less retention-led.",
   upside: {
     cashLow: 12_000,
     cashHigh: 28_000,
@@ -306,7 +306,7 @@ export default function GrowthQuality() {
               {CFO_INSIGHT.headline}
             </p>
             <div>
-              <p className="text-sm font-medium text-foreground mb-1.5">The primary drivers are:</p>
+              <p className="text-sm font-medium text-foreground mb-1.5">The main pressures are:</p>
               <ul className="space-y-1">
                 {CFO_INSIGHT.drivers.map((d) => (
                   <li key={d} className="flex items-start gap-2 text-sm text-muted-foreground">

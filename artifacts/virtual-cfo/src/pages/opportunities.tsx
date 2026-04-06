@@ -52,7 +52,7 @@ const OPPORTUNITIES: {
     id:    "o1",
     label: "Reallocate Meta spend",
     description:
-      "Shift 15% of Meta budget to email and organic channels. Meta's blended CAC (£28) is 5.8× higher than email CAC (£4.80), meaning the same budget generates far more profitable customers through email. Every £1 reallocated recovers approximately £1.20 in contribution margin.",
+      "Shift 15% of Meta budget to email and organic. Meta CAC (£28) runs 5.8× higher than email CAC (£4.80) — the same spend generates significantly more profitable customers through email. Every £1 reallocated recovers approximately £1.20 in contribution.",
     uplift:             14_600,
     impact:             "high",
     implementationType: "No additional investment required",
@@ -65,7 +65,7 @@ const OPPORTUNITIES: {
     id:    "o2",
     label: "Reduce discount depth",
     description:
-      "Lower average discount depth from 7% to 5% on returning customer segments. Returning customers have demonstrated intent — discount depth is pure margin loss rather than acquisition cost. Recovering 2pp across 3,680 monthly repeat orders adds approximately £9.2k contribution at current volume.",
+      "Lower discount depth from 7% to 5% on returning segments. Returning customers have already demonstrated purchase intent — discounting them is pure margin loss, not acquisition spend. Recovering 2pp across 3,680 monthly repeat orders adds approximately £9.2k contribution.",
     uplift:             9_200,
     impact:             "high",
     implementationType: "No additional investment required",
@@ -81,7 +81,7 @@ const OPPORTUNITIES: {
     id:    "o3",
     label: "Renegotiate shipping rates",
     description:
-      "Renegotiate carrier contract rates or introduce free-shipping thresholds to reduce per-order fulfilment cost. At current order volume, a 10% reduction in shipping cost adds ~£3.70 per order to contribution margin. AOV thresholds above £60 typically reduce subsidy rate by 18–22%.",
+      "Reduce per-order fulfilment cost through carrier renegotiation or free-shipping thresholds. At current volume, a 10% reduction in shipping cost adds £3.70 per order to contribution. AOV thresholds above £60 typically cut the subsidy rate by 18–22%.",
     uplift:             6_800,
     impact:             "medium",
     implementationType: "Requires supplier negotiation",
@@ -94,7 +94,7 @@ const OPPORTUNITIES: {
     id:    "o4",
     label: "Activate email conversion flows",
     description:
-      "Build post-purchase and winback email sequences targeting lapsed customers. Email generates the highest contribution margin of any channel (58.6%) at the lowest CAC (£4.80). A 0.4pp improvement in email-attributed conversion adds approximately £4.3k monthly contribution from existing list volume.",
+      "Build post-purchase and winback sequences targeting lapsed customers. Email delivers the highest contribution margin of any channel (58.6%) at the lowest CAC (£4.80). A 0.4pp lift in email-attributed conversion adds approximately £4.3k monthly contribution from existing list volume.",
     uplift:             4_300,
     impact:             "quick-win",
     implementationType: "Requires CRM setup",

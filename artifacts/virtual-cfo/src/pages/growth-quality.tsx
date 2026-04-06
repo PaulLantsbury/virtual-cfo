@@ -798,18 +798,23 @@ export default function GrowthQuality() {
                 </p>
               </div>
             </div>
-            {/* Ghost lever rows */}
+            {/* Ghost lever rows — structure preserved, label text blurred */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {RECOVERABLE_UPSIDE.levers.map((lv) => (
                 <div key={lv.id} className="flex items-start gap-3 rounded-xl bg-card border border-border/40 px-4 py-3.5">
                   <ArrowRight className="w-4 h-4 text-foreground/10 shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground leading-snug">{lv.label}</p>
-                    <p className="text-xs text-foreground/[0.13] mt-1 leading-relaxed select-none">
+                    <p
+                      className="text-sm font-semibold text-foreground leading-snug select-none pointer-events-none"
+                      style={{ filter: "blur(4px)", opacity: 0.55 }}
+                    >
+                      {lv.label}
+                    </p>
+                    <p className="text-xs text-foreground/[0.13] mt-1 leading-relaxed select-none pointer-events-none">
                       —— —— —— —— —— ——
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-foreground/[0.10] shrink-0 whitespace-nowrap select-none">
+                  <span className="text-sm font-bold text-foreground/[0.10] shrink-0 whitespace-nowrap select-none pointer-events-none">
                     +£——k
                   </span>
                 </div>

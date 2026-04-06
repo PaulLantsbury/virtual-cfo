@@ -38,7 +38,16 @@ const CAC_PAYBACK_CHANGE = +(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1);
  *   @dynamic Math.round(orderVolume * (ppLow / 100) * revenuePerOrder)
  */
 const CFO_INSIGHT = {
-  body: "Growth quality has weakened this month. Revenue remains positive, but more of that growth is being driven by discounting and higher-cost paid channels rather than repeat customer behaviour.",
+  /** @ai-commentary Opening diagnostic sentence — replace with AI-generated headline when live */
+  headline: "Growth remains positive, but quality has weakened for the third consecutive period.",
+  /** @ai-commentary Replace with dynamically identified primary drivers when live */
+  drivers: [
+    "rising discount dependency",
+    "worsening paid acquisition efficiency",
+    "declining organic and email contribution mix",
+  ],
+  /** @ai-commentary Strategic closing line derived from growth type classification */
+  closing: "At current levels, growth is becoming increasingly promotion-led rather than retention-led.",
   upside: {
     cashLow: 12_000,
     cashHigh: 28_000,
@@ -213,9 +222,26 @@ export default function GrowthQuality() {
           </span>
         </div>
         <div className="px-6 py-5 space-y-4">
-          <p className="text-sm font-medium text-foreground leading-relaxed">
-            {CFO_INSIGHT.body}
-          </p>
+          {/* Diagnostic narrative — three-part structure */}
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-foreground leading-relaxed">
+              {CFO_INSIGHT.headline}
+            </p>
+            <div>
+              <p className="text-sm font-medium text-foreground mb-1.5">The primary drivers are:</p>
+              <ul className="space-y-1">
+                {CFO_INSIGHT.drivers.map((d) => (
+                  <li key={d} className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span className="mt-[5px] w-1 h-1 rounded-full bg-muted-foreground/50 shrink-0" />
+                    {d}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <p className="text-sm font-medium text-foreground leading-relaxed">
+              {CFO_INSIGHT.closing}
+            </p>
+          </div>
 
           {/* Upside callout */}
           <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-950/25 px-5 py-4">

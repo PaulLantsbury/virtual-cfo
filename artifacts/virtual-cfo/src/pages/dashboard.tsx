@@ -49,38 +49,38 @@ const HEALTH_MODULES = [
   {
     id:       "profit",
     title:    "Profit Quality",
-    subtitle: "Understand where margin is being created — and lost",
-    cta:      "Open Margin Analysis",
+    subtitle: "Where your contribution margin is being made — and where it's being eroded.",
+    cta:      "Analyse margin",
     href:     "/margin-analysis",
   },
   {
     id:       "growth",
     title:    "Growth Quality",
-    subtitle: "See whether growth is healthy and self-sustaining",
-    cta:      "Open Growth Quality",
+    subtitle: "Whether growth is healthy and self-sustaining — or dependent on discounting and paid spend.",
+    cta:      "Analyse growth",
     href:     "/growth-quality",
   },
   {
     id:       "acquisition",
     title:    "Acquisition Efficiency",
-    subtitle: "Diagnose whether paid channels are creating profitable customers",
-    cta:      "Open Marketing Efficiency",
+    subtitle: "Whether paid channels are generating profitable customers — or just revenue.",
+    cta:      "Diagnose acquisition",
     href:     "/marketing-efficiency",
   },
   {
     id:       "opportunities",
     title:    "Opportunities",
-    subtitle: "See the highest-value improvement actions across the business",
-    cta:      "Open Opportunities",
+    subtitle: "Your highest-impact improvement actions, ranked and quantified.",
+    cta:      "See all opportunities",
     href:     "/opportunities",
   },
   {
-    id:     "cash",
-    title:  "Cash Efficiency",
-    subtitle: "Working capital and cash recovery insights",
-    cta:    "",
-    href:   "#",
-    badge:  "Coming soon",
+    id:       "cash",
+    title:    "Cash Efficiency",
+    subtitle: "Working capital efficiency and cash recovery analysis.",
+    cta:      "",
+    href:     "#",
+    badge:    "Coming soon",
   },
 ] as const;
 
@@ -96,7 +96,7 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Financial Health Overview</h1>
-          <p className="text-muted-foreground mt-1">Here's what's driving your financial performance right now.</p>
+          <p className="text-muted-foreground mt-1">What changed this month, where performance is at risk, and what to act on.</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="bg-white">
@@ -135,7 +135,7 @@ export default function Dashboard() {
               <span className="font-bold text-emerald-700 dark:text-emerald-300 text-base">
                 £{(CFO_INSIGHT.upside.cashLow  / 1_000).toFixed(0)}k–£{(CFO_INSIGHT.upside.cashHigh / 1_000).toFixed(0)}k
               </span>
-              {" "}if identified issues are addressed
+              {" "}if the issues above are addressed
             </p>
           </div>
         </div>
@@ -191,7 +191,7 @@ export default function Dashboard() {
       {/* ── What to do next (top 3 only) ── */}
       <ActionRecommendations
         recommendations={RECOMMENDATIONS.slice(0, 3)}
-        subtitle="Top priority actions for this period"
+        subtitle="Three actions ranked by commercial impact"
         viewAllHref="/opportunities"
         defaultExpanded
       />
@@ -201,7 +201,7 @@ export default function Dashboard() {
         <div className="mb-5">
           <h3 className="font-semibold text-lg text-foreground">Business Health Modules</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Deep-dive analysis for each area of your business
+            Go deeper on any area to understand what's driving it and what to do about it.
           </p>
         </div>
 

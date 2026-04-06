@@ -1,4 +1,5 @@
 import { TrendingUp, Target, ArrowRight, Zap, Lock } from "lucide-react";
+import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/plan";
@@ -44,6 +45,8 @@ const OPPORTUNITIES: {
   confidence:         Confidence;
   /** True = no new budget required; eligible for capital-free uplift total */
   capitalFree:        boolean;
+  /** Analysis pages this recommendation is derived from */
+  sources:            { label: string; href: string }[];
 }[] = [
   {
     id:    "o1",
@@ -56,6 +59,7 @@ const OPPORTUNITIES: {
     timeToImpact:       "Immediate impact (0–30 days)",
     confidence:         "High",
     capitalFree:        true,
+    sources:            [{ label: "Marketing Efficiency", href: "/marketing-efficiency" }],
   },
   {
     id:    "o2",
@@ -68,6 +72,10 @@ const OPPORTUNITIES: {
     timeToImpact:       "Immediate impact (0–30 days)",
     confidence:         "High",
     capitalFree:        true,
+    sources:            [
+      { label: "Growth Quality",  href: "/growth-quality"  },
+      { label: "Margin Analysis", href: "/margin-analysis" },
+    ],
   },
   {
     id:    "o3",
@@ -80,6 +88,7 @@ const OPPORTUNITIES: {
     timeToImpact:       "Short-term impact (1–2 months)",
     confidence:         "Medium",
     capitalFree:        false,
+    sources:            [{ label: "Margin Analysis", href: "/margin-analysis" }],
   },
   {
     id:    "o4",
@@ -92,6 +101,10 @@ const OPPORTUNITIES: {
     timeToImpact:       "Short-term impact (1–2 months)",
     confidence:         "Medium",
     capitalFree:        false,
+    sources:            [
+      { label: "Growth Quality",       href: "/growth-quality"       },
+      { label: "Marketing Efficiency", href: "/marketing-efficiency" },
+    ],
   },
 ];
 
@@ -249,6 +262,21 @@ export default function Opportunities() {
                             : "text-amber-600/70 dark:text-amber-500/70",
                         )}>
                           Confidence: {opp.confidence}
+                        </span>
+                        <span className="text-muted-foreground/30 text-[11px]">·</span>
+                        <span className="text-[11px] text-muted-foreground/50">
+                          Source:{" "}
+                          {opp.sources.map((src, i) => (
+                            <span key={src.href}>
+                              {i > 0 && <span className="text-muted-foreground/30">, </span>}
+                              <Link
+                                href={src.href}
+                                className="underline-offset-2 hover:underline hover:text-muted-foreground transition-colors"
+                              >
+                                {src.label}
+                              </Link>
+                            </span>
+                          ))}
                         </span>
                       </div>
                     </div>

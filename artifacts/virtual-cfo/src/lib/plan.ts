@@ -39,7 +39,8 @@ export type FeatureName =
   | "growth_trajectory_risk"      // Growth Quality — 90-day forward contribution impact
   | "growth_composition_trend"    // Growth Quality — composition breakdown chart (repeat/paid/discount)
   | "score_component_detail"      // Growth Quality — grade + explanation text per score component
-  | "driver_impact_detail";       // Growth Quality — quantified impact line per growth driver row
+  | "driver_impact_detail"        // Growth Quality — quantified impact line per growth driver row
+  | "growth_quality_actions";     // Growth Quality — "What to do next" action plan
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -60,6 +61,7 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   growth_composition_trend:  ["pro"],
   score_component_detail:    ["pro"],
   driver_impact_detail:      ["pro"],
+  growth_quality_actions:    ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

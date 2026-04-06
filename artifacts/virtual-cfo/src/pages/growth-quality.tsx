@@ -729,18 +729,8 @@ export default function GrowthQuality() {
                   >
                     {d.freeLabel}
                   </p>
-                  <p
-                    className={cn(
-                      "mt-1 text-xs leading-snug select-none pointer-events-none",
-                      d.dir === "positive"
-                        ? "text-emerald-700 dark:text-emerald-400"
-                        : d.dir === "negative"
-                        ? "text-destructive/80 dark:text-destructive/70"
-                        : "text-muted-foreground",
-                    )}
-                    style={{ filter: "blur(4px)", opacity: 0.5 }}
-                  >
-                    → {d.impact}
+                  <p className="mt-1 text-xs text-muted-foreground/50 leading-snug select-none pointer-events-none">
+                    → detailed impact available in Pro
                   </p>
                 </div>
               </li>

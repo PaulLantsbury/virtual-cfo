@@ -37,7 +37,8 @@ export type FeatureName =
   | "driver_breakdown"           // Key Drivers — per-driver attribution rows
   | "fastest_recovery_lever"       // CFO Insight — specific lever % and £ impact
   | "growth_trajectory_risk"      // Growth Quality — 90-day forward contribution impact
-  | "growth_composition_trend";   // Growth Quality — composition breakdown chart (repeat/paid/discount)
+  | "growth_composition_trend"    // Growth Quality — composition breakdown chart (repeat/paid/discount)
+  | "score_component_detail";     // Growth Quality — grade + explanation text per score component
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -56,6 +57,7 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   fastest_recovery_lever:    ["pro"],
   growth_trajectory_risk:    ["pro"],
   growth_composition_trend:  ["pro"],
+  score_component_detail:    ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

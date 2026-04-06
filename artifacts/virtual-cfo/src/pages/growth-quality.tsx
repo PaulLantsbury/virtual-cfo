@@ -71,6 +71,8 @@ const SCORE_COMPONENTS: {
   grade: string;
   explanation: string;
   score: number;
+  /** Determines which group the component appears in */
+  direction: "strengthening" | "weakening";
 }[] = [
   {
     label: "Retention quality",
@@ -78,6 +80,7 @@ const SCORE_COMPONENTS: {
     grade: "B+",
     explanation: "Repeat purchase rate improved 2.4pp — more customers returning without paid re-acquisition.",
     score: 82,
+    direction: "strengthening",
   },
   {
     label: "Discount reliance",
@@ -85,6 +88,7 @@ const SCORE_COMPONENTS: {
     grade: "D+",
     explanation: "38% of orders include a discount code — well above the healthy benchmark of <25%.",
     score: 32,
+    direction: "weakening",
   },
   {
     label: "CAC efficiency",
@@ -92,6 +96,7 @@ const SCORE_COMPONENTS: {
     grade: "C+",
     explanation: "CAC payback rose to 1.4 orders. Meta CPM increases are reducing paid channel efficiency.",
     score: 55,
+    direction: "weakening",
   },
   {
     label: "Contribution quality",
@@ -99,6 +104,7 @@ const SCORE_COMPONENTS: {
     grade: "C+",
     explanation: "Contribution margin at 42.3% is below the 45–55% target range and declining month-on-month.",
     score: 52,
+    direction: "weakening",
   },
   {
     label: "Channel mix quality",
@@ -106,6 +112,7 @@ const SCORE_COMPONENTS: {
     grade: "C",
     explanation: "Paid mix is increasing while organic and email proportions decline — raising blended CAC.",
     score: 48,
+    direction: "weakening",
   },
 ];
 
@@ -499,45 +506,90 @@ export default function GrowthQuality() {
         </div>
       </div>
 
-      {/* ── Score Breakdown ── */}
+      {/* ── Score Breakdown — strengthening vs weakening ── */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">What is driving the score?</h3>
+        <div className="mb-6">
+          <h3 className="font-semibold text-lg text-foreground">
+            Where growth quality is strengthening vs weakening
+          </h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Five components weighted to produce the overall growth quality grade.
+            Each factor shows whether it is contributing to healthier or weaker growth right now.
           </p>
         </div>
-        <div className="space-y-5">
-          {SCORE_COMPONENTS.map((c) => {
-            const cfg = STATUS_CONFIG[c.status];
-            return (
-              <div key={c.label}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-foreground">{c.label}</span>
-                    <span
-                      className={cn(
-                        "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold",
-                        cfg.badge
-                      )}
-                    >
-                      {cfg.label}
-                    </span>
-                  </div>
-                  <span className={cn("text-sm font-bold", cfg.text)}>{c.grade}</span>
-                </div>
-                {/* Progress bar */}
-                <div className="w-full h-1.5 bg-secondary rounded-full mb-1.5">
-                  <div
-                    className={cn("h-1.5 rounded-full transition-all", cfg.bar)}
-                    style={{ width: `${c.score}%` }}
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground leading-snug">{c.explanation}</p>
+
+        {(
+          [
+            {
+              dir:      "strengthening" as const,
+              icon:     <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />,
+              labelCls: "text-emerald-700 dark:text-emerald-400",
+              heading:  "Strengthening",
+            },
+            {
+              dir:      "weakening" as const,
+              icon:     <TrendingDown className="w-3.5 h-3.5 text-destructive shrink-0" />,
+              labelCls: "text-destructive",
+              heading:  "Under pressure",
+            },
+          ] as const
+        ).map(({ dir, icon, labelCls, heading }, gi) => {
+          const items = SCORE_COMPONENTS.filter((c) => c.direction === dir);
+          if (!items.length) return null;
+          return (
+            <div key={dir} className={gi > 0 ? "mt-6 pt-6 border-t border-border/50" : ""}>
+              {/* Group header */}
+              <div className="flex items-center gap-1.5 mb-4">
+                {icon}
+                <span className={cn("text-xs font-semibold uppercase tracking-wider", labelCls)}>
+                  {heading} ({items.length})
+                </span>
               </div>
-            );
-          })}
-        </div>
+
+              <div className="space-y-4">
+                {items.map((c) => {
+                  const cfg = STATUS_CONFIG[c.status];
+                  return (
+                    <div key={c.label}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-foreground">{c.label}</span>
+                          <span className={cn(
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold",
+                            cfg.badge,
+                          )}>
+                            {cfg.label}
+                          </span>
+                        </div>
+                        {canAccess("score_component_detail") ? (
+                          <span className={cn("text-sm font-bold tabular-nums", cfg.text)}>{c.grade}</span>
+                        ) : (
+                          <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap">
+                            PRO
+                          </span>
+                        )}
+                      </div>
+                      {/* Bar */}
+                      <div className="w-full h-1.5 bg-secondary rounded-full mb-1.5">
+                        <div
+                          className={cn("h-1.5 rounded-full transition-all", cfg.bar)}
+                          style={{ width: `${c.score}%` }}
+                        />
+                      </div>
+                      {/* Explanation — gated */}
+                      {canAccess("score_component_detail") ? (
+                        <p className="text-xs text-muted-foreground leading-snug">{c.explanation}</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground/35 leading-snug blur-sm select-none pointer-events-none">
+                          {c.explanation}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* ── Growth Quality Trend ── */}

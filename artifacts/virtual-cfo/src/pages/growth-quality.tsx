@@ -1,6 +1,7 @@
 import { Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  LineChart, Line, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -166,6 +167,28 @@ const TRAJECTORY_RISK = {
   detail:
     "Based on the current rate of discount dependency increase (+1.8pp) and paid channel CAC deterioration (+14%), blended contribution margin is projected to compress by a further 2–3pp over 90 days if these trends continue unchecked.",
 } as const;
+
+/**
+ * Growth composition — share of growth attributable to each acquisition/order type.
+ * @dynamic repeat   = repeatOrders / totalOrders (previous period vs current)
+ * @dynamic paid     = newPaidAcqOrders / totalOrders
+ * @dynamic discount = discountedOrders (excl. already-counted repeat/paid) / totalOrders
+ * All three sum to 100 for each month.
+ */
+const COMPOSITION_DATA = [
+  { month: "Oct", repeat: 52, paid: 31, discount: 17 },
+  { month: "Nov", repeat: 50, paid: 32, discount: 18 },
+  { month: "Dec", repeat: 47, paid: 33, discount: 20 },
+  { month: "Jan", repeat: 44, paid: 34, discount: 22 },
+  { month: "Feb", repeat: 41, paid: 36, discount: 23 },
+  { month: "Mar", repeat: 38, paid: 38, discount: 24 },
+];
+
+const COMPOSITION_LEGEND = [
+  { key: "repeat",   color: "#22c55e", label: "Repeat-customer growth" },
+  { key: "paid",     color: "#6366f1", label: "Paid-acquisition growth" },
+  { key: "discount", color: "#f59e0b", label: "Discount-led growth"    },
+] as const;
 
 const RECOMMENDATIONS: Recommendation[] = [
   {
@@ -587,6 +610,125 @@ export default function GrowthQuality() {
           increasing discount dependency and rising paid acquisition costs offsetting improved retention.
         </p>
       </div>
+
+      {/* ── Growth Composition Trend — Pro only ── */}
+      <PremiumBlurPreview
+        title="Growth Composition Trend"
+        subtitle="How much growth is coming from repeat customers, paid acquisition, and discount-led orders."
+        badgeText="PRO — Unlock composition"
+        ctaTitle="Unlock growth composition breakdown"
+        ctaDescription="See exactly how the mix of repeat-customer, paid-acquisition, and discount-led growth has shifted over the last 6 months."
+        isPro={canAccess("growth_composition_trend")}
+        className="mb-8"
+        ghostContent={
+          <div>
+            {/* Ghost legend */}
+            <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4">
+              {COMPOSITION_LEGEND.map((item) => (
+                <div key={item.key} className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-foreground/[0.08] shrink-0" />
+                  <span className="text-xs text-muted-foreground/60">{item.label}</span>
+                </div>
+              ))}
+            </div>
+            {/* Ghost stacked bars — CSS only, no real data */}
+            <div className="h-[200px] flex items-end gap-2">
+              {[62, 57, 52, 48, 44, 40].map((rh, i) => {
+                const ph = Math.round((100 - rh) * 0.57);
+                const dh = 100 - rh - ph;
+                return (
+                  <div key={i} className="flex-1 flex flex-col justify-end gap-px" style={{ height: "100%" }}>
+                    <div className="w-full rounded-t-sm bg-foreground/[0.06]" style={{ height: `${dh}%` }} />
+                    <div className="w-full bg-foreground/[0.07]" style={{ height: `${ph}%` }} />
+                    <div className="w-full rounded-b-sm bg-foreground/[0.09]" style={{ height: `${rh}%` }} />
+                  </div>
+                );
+              })}
+            </div>
+            {/* Ghost X labels */}
+            <div className="flex gap-2 mt-2.5">
+              {COMPOSITION_DATA.map((d) => (
+                <span key={d.month} className="flex-1 text-center text-[11px] text-muted-foreground/50">{d.month}</span>
+              ))}
+            </div>
+            {/* Ghost takeaway */}
+            <div className="mt-3 pt-3 border-t border-border/40">
+              <p className="text-xs text-foreground/[0.13] leading-snug">
+                —— —— fell from —% to —% over the last — months. —— —— growth now represents —% of total growth.
+              </p>
+            </div>
+          </div>
+        }
+      >
+        {/* Pro: real stacked bar chart */}
+        <div>
+          {/* Legend */}
+          <div className="flex flex-wrap gap-x-5 gap-y-2 mb-5">
+            {COMPOSITION_LEGEND.map((item) => (
+              <div key={item.key} className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: item.color }} />
+                <span className="text-xs text-muted-foreground">{item.label}</span>
+              </div>
+            ))}
+          </div>
+          {/* Chart */}
+          <div className="h-[220px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={COMPOSITION_DATA}
+                margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
+                barCategoryGap="28%"
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                  dy={8}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tickFormatter={(v: number) => `${v}%`}
+                  ticks={[0, 25, 50, 75, 100]}
+                />
+                <Tooltip
+                  cursor={{ fill: "hsl(var(--muted)/0.15)" }}
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "1px solid hsl(var(--border))",
+                    boxShadow: "0 4px 12px rgb(0 0 0 / .08)",
+                    fontSize: 12,
+                  }}
+                  formatter={(value: number, name: string) => [
+                    `${value}%`,
+                    name === "repeat" ? "Repeat-customer" : name === "paid" ? "Paid acquisition" : "Discount-led",
+                  ]}
+                />
+                <Bar dataKey="repeat"   stackId="a" fill="#22c55e" radius={[0, 0, 4, 4]} maxBarSize={52} />
+                <Bar dataKey="paid"     stackId="a" fill="#6366f1" maxBarSize={52} />
+                <Bar dataKey="discount" stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={52} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          {/* Takeaway */}
+          <div className="mt-3 pt-3 border-t border-border/40">
+            <p className="text-xs text-muted-foreground leading-snug">
+              <span className="font-semibold text-foreground">
+                Repeat-led growth fell from {COMPOSITION_DATA[0].repeat}% to {COMPOSITION_DATA[COMPOSITION_DATA.length - 1].repeat}%
+              </span>{" "}
+              over the last 6 months. Discount-led growth now represents{" "}
+              <span className="font-semibold text-amber-600 dark:text-amber-400">
+                {COMPOSITION_DATA[COMPOSITION_DATA.length - 1].discount}%
+              </span>{" "}
+              of total growth — up from {COMPOSITION_DATA[0].discount}%.
+            </p>
+          </div>
+        </div>
+      </PremiumBlurPreview>
 
       {/* ── Key Growth Drivers ── */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">

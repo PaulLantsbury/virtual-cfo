@@ -135,13 +135,44 @@ const TREND_DATA = [
   { month: "Mar",  score: 76, grade: "B-"  },
 ];
 
-/** @ai-commentary Replace with dynamically generated driver list when ready */
-const KEY_DRIVERS: { text: string; dir: "positive" | "negative" | "neutral" }[] = [
-  { text: "Repeat purchase rate improved +2.4pp month-on-month", dir: "positive" },
-  { text: "Discount depth increased 1.8pp vs prior month", dir: "negative" },
-  { text: "Meta CAC increased 14% — paid channel efficiency declining", dir: "negative" },
-  { text: "Organic and email mix declined as a proportion of total revenue", dir: "negative" },
-  { text: "Email-driven orders maintained the highest contribution margin", dir: "positive" },
+/**
+ * @ai-commentary Replace with dynamically generated driver list when ready.
+ * impact values:
+ *   @dynamic retention  = (repeatRateDelta / 100) × qualityScoreWeight × gradePointScale
+ *   @dynamic discount   = orderVolume × (discountDepthDelta / 100) × avgOrderRevenue
+ *   @dynamic cac        = newCustVolume × (cacDelta / 100) × avgMarginRate
+ *   @dynamic channelMix = blendedCACDelta × newCustVolume (contribution-margin adjusted)
+ */
+const KEY_DRIVERS: {
+  text:   string;
+  dir:    "positive" | "negative" | "neutral";
+  impact: string;
+}[] = [
+  {
+    text:   "Repeat purchase rate improved +2.4pp month-on-month",
+    dir:    "positive",
+    impact: "Increased growth quality score by +0.3 grade points — retention is now the sole positive signal.",
+  },
+  {
+    text:   "Discount depth increased 1.8pp vs prior month",
+    dir:    "negative",
+    impact: "Reduced contribution by approximately £4.2k equivalent at current order volume.",
+  },
+  {
+    text:   "Meta CAC increased 14% — paid channel efficiency declining",
+    dir:    "negative",
+    impact: "Weakened growth efficiency by approximately £3.1k in margin-adjusted acquisition cost.",
+  },
+  {
+    text:   "Organic and email mix declined as a proportion of total revenue",
+    dir:    "negative",
+    impact: "Raised blended CAC and reduced channel mix quality — the second consecutive month of decline.",
+  },
+  {
+    text:   "Email-driven orders maintained the highest contribution margin",
+    dir:    "positive",
+    impact: "Supported contribution quality and partially offset the impact of rising discount dependency.",
+  },
 ];
 
 /**
@@ -782,34 +813,71 @@ export default function GrowthQuality() {
         </div>
       </PremiumBlurPreview>
 
-      {/* ── Key Growth Drivers ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <h3 className="font-semibold text-lg text-foreground mb-1">Key Growth Drivers This Month</h3>
-        <p className="text-sm text-muted-foreground mb-5">
-          Factors with the greatest influence on growth quality in {periodBadge}.
-        </p>
+      {/* ── Key Growth Drivers — Pro only (with impact lines) ── */}
+      <PremiumBlurPreview
+        title="Key Growth Drivers This Month"
+        subtitle={`What changed and how it affected growth quality in ${periodBadge}.`}
+        badgeText="PRO — Unlock driver impact"
+        ctaTitle="Unlock driver impact analysis"
+        ctaDescription="See the quantified contribution and efficiency impact of each growth driver — with commercial interpretation for each."
+        isPro={canAccess("driver_impact_detail")}
+        className="mb-8"
+        ghostContent={
+          <ul className="space-y-3">
+            {KEY_DRIVERS.map((d) => (
+              <li key={d.text} className="flex items-start gap-3 py-2 border-b border-border/40 last:border-0">
+                <span className={cn(
+                  "mt-0.5 flex items-center justify-center w-5 h-5 rounded-full shrink-0",
+                  d.dir === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40"
+                    : d.dir === "negative" ? "bg-destructive/10"
+                    : "bg-secondary",
+                )}>
+                  {d.dir === "positive" && <TrendingUp  className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />}
+                  {d.dir === "negative" && <TrendingDown className="w-3 h-3 text-destructive" />}
+                  {d.dir === "neutral"  && <Minus        className="w-3 h-3 text-muted-foreground" />}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm text-foreground leading-snug">{d.text}</p>
+                  <p className="mt-1 text-xs text-foreground/[0.13] leading-snug select-none">
+                    → —— —— —— —— —— —— ——
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        }
+      >
+        {/* Pro: full rows with impact interpretation */}
         <ul className="space-y-3">
           {KEY_DRIVERS.map((d) => (
             <li key={d.text} className="flex items-start gap-3 py-2 border-b border-border/40 last:border-0">
-              <span
-                className={cn(
-                  "mt-0.5 flex items-center justify-center w-5 h-5 rounded-full shrink-0",
-                  d.dir === "positive"
-                    ? "bg-emerald-100 dark:bg-emerald-900/40"
-                    : d.dir === "negative"
-                    ? "bg-destructive/10"
-                    : "bg-secondary"
-                )}
-              >
-                {d.dir === "positive" && <TrendingUp className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />}
+              <span className={cn(
+                "mt-0.5 flex items-center justify-center w-5 h-5 rounded-full shrink-0",
+                d.dir === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40"
+                  : d.dir === "negative" ? "bg-destructive/10"
+                  : "bg-secondary",
+              )}>
+                {d.dir === "positive" && <TrendingUp  className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />}
                 {d.dir === "negative" && <TrendingDown className="w-3 h-3 text-destructive" />}
-                {d.dir === "neutral" && <Minus className="w-3 h-3 text-muted-foreground" />}
+                {d.dir === "neutral"  && <Minus        className="w-3 h-3 text-muted-foreground" />}
               </span>
-              <span className="text-sm text-foreground leading-snug">{d.text}</span>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground leading-snug">{d.text}</p>
+                <p className={cn(
+                  "mt-1 text-xs leading-snug",
+                  d.dir === "positive"
+                    ? "text-emerald-700 dark:text-emerald-400"
+                    : d.dir === "negative"
+                    ? "text-destructive/80 dark:text-destructive/70"
+                    : "text-muted-foreground",
+                )}>
+                  → {d.impact}
+                </p>
+              </div>
             </li>
           ))}
         </ul>
-      </div>
+      </PremiumBlurPreview>
 
       {/* ── Recommended Actions ── */}
       <ActionRecommendations

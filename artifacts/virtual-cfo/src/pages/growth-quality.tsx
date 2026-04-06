@@ -174,7 +174,7 @@ const GROWTH_TYPE = {
   label:     "Promotion-led growth",
   risk:      "medium" as "low" | "medium" | "high",
   riskLabel: "Medium risk",
-  signal:    "At current levels, growth is becoming increasingly promotion-led rather than retention-led.",
+  signal:    "Growth is increasingly dependent on discounting and paid acquisition rather than repeat-led demand.",
 } as const;
 
 /**

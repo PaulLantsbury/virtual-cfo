@@ -1,0 +1,75 @@
+Make a final polish pass on the Growth Quality Analysis page (/growth-quality) with a few small copy and interpretation refinements only. Do not redesign the layout or move sections.
+
+Apply these changes:
+
+1. Tighten the top CFO Insight wording
+
+Update the main opening sentence to:
+
+Growth remains positive, but quality has weakened for the third consecutive period and is becoming increasingly promotion-led rather than retention-led.
+
+Keep the rest of the card structure the same.
+Maintain the concise, commercial, founder-friendly tone.
+
+
+2. Add a target anchor beneath the Growth Quality Score card
+
+On the KPI tile:
+Growth Quality Score
+
+Keep the main score as:
+B–
+
+Add a small muted supporting line beneath the score explanation:
+
+Healthy range: A– to B+
+
+This should help users interpret the score more quickly.
+
+
+3. Add a direction-of-travel micro-line to the Growth Classification block
+
+In the Growth Classification section:
+
+Keep:
+Promotion-led growth
+Medium risk
+
+Add one short muted supporting line beneath the main classification description:
+
+Shifted from more balanced growth in the prior period
+
+Keep this subtle and secondary so it improves interpretation without adding clutter.
+
+
+4. Tighten the Recoverable Growth Quality subtitle
+
+In the section:
+Recoverable Growth Quality
+
+Update the subtitle from the current wording to:
+
+Estimated contribution recoverable by restoring healthier retention mix and acquisition efficiency.
+
+Keep the rest of the section unchanged.
+
+
+5. Optional future-ready placeholder for confidence
+
+In the Recoverable Growth Quality section, add a very subtle muted placeholder line that can later support model confidence, but do not make it visually prominent.
+
+Example:
+Confidence: Medium
+
+Only add this if it fits cleanly without cluttering the section. If it makes the section feel too busy, omit it.
+
+
+6. Final consistency check
+
+As part of this pass, confirm:
+- wording remains consistent with the rest of the app
+- “promotion-led” language matches the classification block
+- the page still feels concise and decision-oriented
+- no spacing or layout regressions are introduced
+
+This is a final polish pass only — no structural changes.

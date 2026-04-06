@@ -42,15 +42,13 @@ const CAC_PAYBACK_CHANGE = +(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1);
  */
 const CFO_INSIGHT = {
   /** @ai-commentary Opening diagnostic sentence — replace with AI-generated headline when live */
-  headline: "Growth remains positive, but quality has weakened for the third consecutive period.",
+  headline: "Growth remains positive, but quality has weakened for the third consecutive period and is becoming increasingly promotion-led rather than retention-led.",
   /** @ai-commentary Replace with dynamically identified primary drivers when live */
   drivers: [
     "higher discount reliance",
     "weaker paid acquisition efficiency",
     "declining organic and email mix",
   ],
-  /** @ai-commentary Strategic closing line derived from growth type classification */
-  closing: "Growth is becoming more promotion-led and less retention-led.",
 } as const;
 
 type ScoreStatus = "strong" | "watch" | "weak" | "mixed" | "declining";
@@ -166,6 +164,8 @@ const GROWTH_TYPE = {
   risk:      "medium" as "low" | "medium" | "high",
   riskLabel: "Medium risk",
   signal:    "Growth is increasingly dependent on discounting and paid acquisition rather than repeat-led demand.",
+  /** @dynamic Derived from comparing current classification to prior period classification */
+  priorPeriod: "Shifted from more balanced growth in the prior period",
 } as const;
 
 /**
@@ -307,9 +307,6 @@ export default function GrowthQuality() {
                 ))}
               </ul>
             </div>
-            <p className="text-sm font-medium text-foreground leading-relaxed">
-              {CFO_INSIGHT.closing}
-            </p>
           </div>
 
         </div>
@@ -367,6 +364,9 @@ export default function GrowthQuality() {
         )}>
           {GROWTH_TYPE.signal}
         </p>
+        <p className="mt-2 text-xs text-muted-foreground/50 leading-snug">
+          {GROWTH_TYPE.priorPeriod}
+        </p>
       </div>
 
       {/* ── KPI Strip ── */}
@@ -383,6 +383,9 @@ export default function GrowthQuality() {
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
             Composite score across retention, discount reliance, and channel efficiency
+          </p>
+          <p className="mt-1.5 text-xs text-muted-foreground/50 leading-snug">
+            Healthy range: A– to B+
           </p>
         </div>
 
@@ -716,7 +719,7 @@ export default function GrowthQuality() {
       {/* ── Recoverable Growth Quality — Pro only ── */}
       <PremiumBlurPreview
         title="Recoverable Growth Quality"
-        subtitle="Estimated contribution available from restoring healthier growth structure and acquisition efficiency."
+        subtitle="Estimated contribution recoverable by restoring healthier retention mix and acquisition efficiency."
         badgeText="PRO — Unlock upside estimate"
         ctaTitle="Unlock recoverable growth quality"
         ctaDescription="See the estimated contribution available if discount dependency and CAC efficiency return to healthier levels."
@@ -783,6 +786,9 @@ export default function GrowthQuality() {
               </p>
               <p className="text-xs text-emerald-700/70 dark:text-emerald-400/80 mt-2 leading-snug max-w-xl">
                 {RECOVERABLE_UPSIDE.supporting}
+              </p>
+              <p className="text-[11px] text-muted-foreground/40 mt-2">
+                Confidence: Medium
               </p>
             </div>
           </div>

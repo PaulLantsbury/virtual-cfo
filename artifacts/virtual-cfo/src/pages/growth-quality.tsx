@@ -873,28 +873,11 @@ export default function GrowthQuality() {
           ctaDescription="See the specific actions that improve retention, reduce discount dependency, and strengthen profitable growth."
           isPro={false}
           className="mb-8"
-          ghostContent={
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/50 mb-4">
-                Recommended actions
-              </p>
-              <ul className="space-y-3">
-                {RECOMMENDATIONS.map((rec) => (
-                  <li key={rec.id} className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-foreground/10 shrink-0 mt-0.5" />
-                    <span className="flex-1 text-sm text-foreground/[0.13] leading-snug select-none">
-                      {rec.text}
-                    </span>
-                    <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-foreground/[0.06] text-foreground/[0.13] whitespace-nowrap">
-                      ——
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          }
         >
-          <></>
+          <ActionRecommendations
+            recommendations={RECOMMENDATIONS}
+            defaultExpanded
+          />
         </PremiumBlurPreview>
       )}
     </AppLayout>

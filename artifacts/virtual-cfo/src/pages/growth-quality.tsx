@@ -1,4 +1,4 @@
-import { Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
+import { Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Minus, ArrowRight } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip,
@@ -255,6 +255,40 @@ const RECOMMENDATIONS: Recommendation[] = [
     impact: "quick-win",
   },
 ];
+
+/**
+ * Recoverable contribution upside — what could be recaptured if growth mix
+ * and acquisition efficiency return to healthier levels.
+ * @dynamic cashLow / cashHigh:
+ *   Math.round(orderVolume × ppRecoveryLow × avgOrderRevenue)
+ *   where ppRecoveryLow = target discount dep (25%) − current (38%) → ~3pp contribution gain
+ *   and   ppRecoveryHigh includes CAC improvement contribution as well
+ */
+const RECOVERABLE_UPSIDE = {
+  cashLow:  12_000,
+  cashHigh: 28_000,
+  /** @ai-commentary Replace with AI-generated narrative when live */
+  supporting:
+    "If discount dependency and CAC efficiency return to healthier levels, growth quality improves materially and more revenue converts into contribution profit.",
+  levers: [
+    {
+      id: "rv1",
+      label: "Reduce discount dependency",
+      description:
+        "Returning discount depth from 38% toward the 25% target restores contribution margin on existing order volume without requiring more customers.",
+      upliftLow:  6_000,
+      upliftHigh: 14_000,
+    },
+    {
+      id: "rv2",
+      label: "Restore paid acquisition efficiency",
+      description:
+        "Bringing Meta CAC back toward prior-period levels reduces the acquisition cost drag and improves the contribution earned from each new customer.",
+      upliftLow:  6_000,
+      upliftHigh: 14_000,
+    },
+  ],
+} as const;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -877,6 +911,92 @@ export default function GrowthQuality() {
             </li>
           ))}
         </ul>
+      </PremiumBlurPreview>
+
+      {/* ── Recoverable Growth Quality — Pro only ── */}
+      <PremiumBlurPreview
+        title="Recoverable Growth Quality"
+        subtitle="Estimated contribution available from restoring healthier growth mix and acquisition efficiency."
+        badgeText="PRO — Unlock upside estimate"
+        ctaTitle="Unlock recoverable growth quality"
+        ctaDescription="See the estimated contribution available if discount dependency and CAC efficiency return to healthier levels."
+        isPro={canAccess("recoverable_growth_quality")}
+        className="mb-8"
+        ghostContent={
+          <div>
+            {/* Ghost headline block */}
+            <div className="rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-800/30 px-6 py-5 mb-5 flex items-center gap-5">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100/50 dark:bg-emerald-900/30 shrink-0">
+                <TrendingUp className="w-6 h-6 text-emerald-400/50 dark:text-emerald-600/40" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600/40 dark:text-emerald-500/30 mb-1">
+                  Estimated recoverable contribution
+                </p>
+                <p className="text-4xl font-display font-bold text-foreground/[0.10] leading-none select-none">
+                  £——k–£——k
+                </p>
+                <p className="text-xs text-foreground/[0.10] mt-2 select-none">
+                  —— —— —— —— —— —— —— —— ——
+                </p>
+              </div>
+            </div>
+            {/* Ghost lever rows */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {RECOVERABLE_UPSIDE.levers.map((lv) => (
+                <div key={lv.id} className="flex items-start gap-3 rounded-xl bg-card border border-border/40 px-4 py-3.5">
+                  <ArrowRight className="w-4 h-4 text-foreground/10 shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground leading-snug">{lv.label}</p>
+                    <p className="text-xs text-foreground/[0.13] mt-1 leading-relaxed select-none">
+                      —— —— —— —— —— ——
+                    </p>
+                  </div>
+                  <span className="text-sm font-bold text-foreground/[0.10] shrink-0 whitespace-nowrap select-none">
+                    +£——k
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        }
+      >
+        {/* Pro: full upside block */}
+        <div>
+          {/* Headline */}
+          <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-800/50 px-6 py-5 mb-5 flex items-center gap-5">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 shrink-0">
+              <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
+                Estimated recoverable contribution
+              </p>
+              <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
+                £{(RECOVERABLE_UPSIDE.cashLow / 1_000).toFixed(0)}k–£{(RECOVERABLE_UPSIDE.cashHigh / 1_000).toFixed(0)}k
+                <span className="text-base font-medium text-emerald-600/70 dark:text-emerald-400/70 ml-2">per month</span>
+              </p>
+              <p className="text-xs text-emerald-700/70 dark:text-emerald-400/80 mt-2 leading-snug max-w-xl">
+                {RECOVERABLE_UPSIDE.supporting}
+              </p>
+            </div>
+          </div>
+          {/* Lever breakdown */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {RECOVERABLE_UPSIDE.levers.map((lv) => (
+              <div key={lv.id} className="flex items-start gap-3 rounded-xl bg-card border border-border/50 px-4 py-3.5 shadow-sm">
+                <ArrowRight className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground leading-snug">{lv.label}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{lv.description}</p>
+                </div>
+                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
+                  +£{lv.upliftLow / 1_000}k–£{lv.upliftHigh / 1_000}k
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </PremiumBlurPreview>
 
       {/* ── Recommended Actions — Pro only ── */}

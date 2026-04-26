@@ -1,0 +1,100 @@
+Remove the Reports page and Reports navigation tab from the app.
+
+Objective:
+The Reports page duplicates the Dashboard page and is no longer needed. Delete it completely while keeping Dashboard unchanged and ensuring navigation still works cleanly.
+
+Tasks:
+
+1. Remove Reports from sidebar navigation
+
+Find the sidebar / main navigation config (likely in:
+- Sidebar.tsx
+- Navigation.tsx
+- Layout.tsx
+- routes.ts
+- menuConfig.ts
+or similar)
+
+Delete the Reports menu item entirely.
+
+Example removal target:
+{
+  name: "Reports",
+  href: "/reports",
+  icon: ...
+}
+
+Do not leave commented code.
+
+2. Delete the Reports route
+
+Locate the router configuration (likely App.tsx, router.tsx, routes.tsx or similar).
+
+Remove the route:
+
+<Route path="/reports" element={<Reports />} />
+
+or equivalent.
+
+Ensure routing still compiles with no unused imports.
+
+3. Delete Reports page component
+
+Delete the Reports page file completely.
+
+Typical locations:
+
+/pages/Reports.tsx
+/pages/reports.tsx
+/app/reports/page.tsx
+/components/reports/*
+/views/Reports.tsx
+
+Search the codebase for:
+
+Reports
+/reports
+
+Remove any unused imports referencing the Reports component.
+
+4. Remove Reports references from redirects or guards
+
+Check for logic like:
+
+defaultRoute = "/reports"
+redirect("/reports")
+navigate("/reports")
+
+Replace with:
+
+"/dashboard"
+
+5. Remove Reports from mobile nav (if present)
+
+If there is a mobile navigation menu component, remove Reports from there as well.
+
+6. Ensure Dashboard becomes the primary analytics destination
+
+Confirm:
+
+/dashboard still loads correctly
+Dashboard remains the default landing page after login
+No empty navigation slots remain
+
+7. Clean unused icons
+
+If Reports used a unique icon (e.g. BarChart3, FileText, ClipboardList, etc.), remove unused imports from:
+
+lucide-react
+heroicons
+mui icons
+
+8. Final verification
+
+After changes:
+
+App builds successfully
+No console warnings about missing routes
+No broken navigation links
+Sidebar spacing still looks correct
+Dashboard remains unchanged

@@ -38,7 +38,6 @@ function Router() {
       <Route path="/signup" component={Signup} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/transactions" component={Dashboard} /> {/* Map to dashboard for now */}
-      <Route path="/dashboard/reports" component={Dashboard} /> {/* Map to dashboard for now */}
       <Route path="/margin-analysis" component={MarginAnalysis} />
       <Route path="/growth-quality" component={GrowthQuality} />
       <Route path="/marketing-efficiency" component={MarketingEfficiency} />

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, PieChart, Settings, HelpCircle, Briefcase, TrendingDown, BarChart2, Megaphone, Target, Cpu, Wallet, Tag, FlaskConical } from "lucide-react";
+import { LayoutDashboard, Settings, HelpCircle, Briefcase, TrendingDown, BarChart2, Megaphone, Target, Cpu, Wallet, Tag, FlaskConical } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -12,7 +12,6 @@ const navItems = [
   { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
   { icon: Tag,             label: "Pricing Optimisation",   href: "/pricing-optimisation"   },
   { icon: FlaskConical,    label: "Scenario Lab",           href: "/scenario-lab"           },
-  { icon: PieChart,        label: "Reports",                href: "/dashboard/reports"      },
   { icon: Settings,        label: "Settings",               href: "/settings"               },
 ];
 

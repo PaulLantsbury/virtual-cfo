@@ -70,6 +70,22 @@ A modern SaaS financial dashboard for founders and operators.
 - Plan tiers: `"free"` | `"pro"` (default: free; override via `sessionStorage.setItem("userPlan", "pro")`)
 - Feature registry: `opportunity_breakdown`, `channel_margin_analysis`, `cac_payback`, `margin_bridge`, `driver_breakdown`, `fastest_recovery_lever`, `ai_cfo_action_plans` (Pro only)
 
+### CFO Alerts Page (`/cfo-alerts`)
+Pro-controlled page visible to all users as a rich preview. Free users see all content but all interactive controls are disabled with lock icons and "Pro only" labels.
+
+Sections:
+1. **Hero metric cards** — 24 available alert types, 4 recommended, 3 report templates, highest risk area
+2. **Free upgrade banner** — indigo card with 4 value bullets and CTA (Free mode only)
+3. **AiCfoAskCard** — page-level AI CFO question (`pageId="alerts"`)
+4. **Recommended alerts** — 4 cards (Meta CAC, Margin, Cash Runway, Discount Dependency) with Enable/Pro-only CTAs
+5. **All alert categories** — 5 collapsible sections (Sales, Margin, Marketing, Cash, Opportunity) each with 4 toggle cards; severity, category badge, threshold, frequency, method per card
+6. **Recurring CFO Reports** — 3 cards (Daily Pulse, Weekly Digest, Monthly Summary) with frequency selector, delivery method, preview modal
+7. **Recent Alerts Feed** — table of 4 mock rows; "Explain" button opens AI CFO drawer (`pageId="alerts"`); labelled "Example recent alerts" in Free mode
+8. **Notification Settings** — in-app, email, weekly summary toggles; Slack/WhatsApp "Coming later"; locked in Free mode
+9. **DataBenchmarkAssumptions** — collapsible at bottom
+
+Gating: `canAccess("cfo_alerts_controls")` — Pro only. Page itself is accessible to all. No real notifications or integrations.
+
 ### AI CFO Interaction Layer
 Present on all 9 main pages. Consists of three components + one data file:
 

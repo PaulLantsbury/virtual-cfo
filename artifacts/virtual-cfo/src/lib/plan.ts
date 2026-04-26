@@ -72,7 +72,8 @@ export type FeatureName =
   | "scenario_lab_builder"           // Scenario Lab — Full Scenario Builder (all sliders + live outputs)
   | "scenario_lab_bridge"            // Scenario Lab — Contribution Bridge, Cash Consequence, Quality Score
   | "scenario_lab_implementation"    // Scenario Lab — Implementation Plan + AI CFO Recommendation
-  | "ai_cfo_action_plans";           // AI CFO — recommended action + expected impact across all pages
+  | "ai_cfo_action_plans"            // AI CFO — recommended action + expected impact across all pages
+  | "cfo_alerts_controls";           // CFO Alerts — enable/edit/configure alerts and reports
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -126,6 +127,7 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   scenario_lab_bridge:              ["pro"],
   scenario_lab_implementation:      ["pro"],
   ai_cfo_action_plans:              ["pro"],
+  cfo_alerts_controls:              ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

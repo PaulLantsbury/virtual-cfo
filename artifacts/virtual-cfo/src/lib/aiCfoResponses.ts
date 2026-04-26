@@ -14,7 +14,8 @@ export type PageId =
   | "profit"
   | "cash"
   | "opportunities"
-  | "scenario";
+  | "scenario"
+  | "alerts";
 
 export type Confidence = "high" | "medium" | "low";
 
@@ -189,5 +190,23 @@ export const AI_CFO_RESPONSES: Record<PageId, AiCfoResponse> = {
     expectedImpact:
       "90-day stacked scenario recovers £18k–£27k/month contribution, increases contribution margin by 2.8–4.1pp, and improves the growth quality score from 54 to an estimated 68–74. Cash runway extends by 1.7 months.",
     confidence: "medium",
+  },
+
+  alerts: {
+    pageId: "alerts",
+    question: "Which areas of my business need proactive monitoring right now?",
+    verdict:
+      "Marketing efficiency and cash position are the two areas most likely to deteriorate without early warning. Your Meta CAC has been volatile, and cash headroom is narrowing — both warrant active monitoring to prevent surprises.",
+    evidence: [
+      "Meta CAC increased 18% last week — without an alert this would typically go unnoticed until month-end review.",
+      "Cash runway is 3.4 months, below the 4-month comfortable threshold, and tightening by approximately £4k per month.",
+      "Discount dependency rose from 26% to 34% over the past 8 weeks — a trend that accelerates margin erosion if unchecked.",
+      "Contribution margin fell below 40% twice in the last 6 weeks — both instances required CFO-level decisions.",
+    ],
+    recommendedAction:
+      "Enable the Meta CAC alert, contribution margin threshold alert and cash runway alert immediately. Set the Meta CAC threshold at 15% week-on-week increase and the margin alert at 40%. Review the weekly CFO digest to catch slow-moving risks before they compound.",
+    expectedImpact:
+      "Early-warning alerts on these three metrics could prevent £8k–£18k per month of undetected margin and cash erosion. Proactive monitoring typically reduces the time-to-decision by 3–4 weeks per issue identified.",
+    confidence: "high",
   },
 };

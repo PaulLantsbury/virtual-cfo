@@ -22,6 +22,7 @@ import PricingOptimisation from "@/pages/pricing-optimisation";
 import Settings from "@/pages/settings";
 import Upgrade from "@/pages/upgrade";
 import ScenarioLab from "@/pages/scenario-lab";
+import CfoAlerts from "@/pages/cfo-alerts";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/cash-control" component={CashControl} />
       <Route path="/pricing-optimisation" component={PricingOptimisation} />
       <Route path="/scenario-lab" component={ScenarioLab} />
+      <Route path="/cfo-alerts" component={CfoAlerts} />
       <Route path="/settings" component={Settings} />
       <Route path="/upgrade" component={Upgrade} />
       <Route component={NotFound} />

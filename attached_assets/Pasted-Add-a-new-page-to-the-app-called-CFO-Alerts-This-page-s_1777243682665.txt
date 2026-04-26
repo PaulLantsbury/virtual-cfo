@@ -1,0 +1,352 @@
+Add a new page to the app called “CFO Alerts”.
+
+This page should let users see what their virtual CFO can monitor, including alerts and recurring CFO reports.
+
+Important gating rule:
+CFO Alerts is a Pro-only feature.
+
+Free users should be able to view a rich preview of the full page, including example alerts, example reports and example monitoring rules, but they should not be able to enable, edit, configure or receive alerts.
+
+Use mock data and local UI state only.
+Do not build real email sending, background jobs or external integrations.
+
+Add this page to the sidebar navigation after Scenario Lab.
+
+Page title:
+CFO Alerts
+
+Subtitle:
+Choose what your virtual CFO should monitor and how often you want to be notified.
+
+Use the same styling, layout, cards, badges, Free/Pro gating and responsive behaviour as the rest of the app.
+
+1. Top CFO Insight
+
+Add a top insight card:
+
+“Your virtual CFO can monitor margin pressure, cash runway, marketing efficiency and sales performance — then alert you when something needs attention.”
+
+Hero metric cards:
+- Available alert types: 24
+- Recommended alerts: 4
+- Report templates: 3
+- Highest risk area: Marketing efficiency
+
+For Pro users:
+Show active state:
+“4 alerts currently active.”
+
+For Free users:
+Show preview state:
+“Available on Pro.”
+
+2. Free mode preview banner
+
+In Free mode only, add a large upgrade banner near the top:
+
+Title:
+Unlock proactive CFO monitoring
+
+Text:
+“CFO Alerts watches your sales, margin, cash and marketing performance so you know when something needs attention — before it becomes a bigger problem.”
+
+Bullets:
+- Monitor sales, margin, cash and marketing movements
+- Receive warning alerts when key metrics move
+- Schedule daily, weekly and monthly CFO summaries
+- Get AI CFO explanations and suggested actions
+
+CTA:
+Unlock CFO Alerts
+
+Important:
+Free users can view all example sections below, but every toggle, frequency selector, edit control and enable button should be disabled or locked.
+
+3. Recommended Alerts
+
+Add a section:
+Recommended alerts
+
+Subtitle:
+Suggested alerts based on your current business risks.
+
+Create 4 recommended alert cards:
+
+A. Meta CAC increase
+Category: Marketing
+Rule: Alert if Meta CAC rises by more than 15% week-on-week.
+Severity: Red
+Status: Recommended
+CTA:
+Enable alert
+
+B. Contribution margin below target
+Category: Margin
+Rule: Alert if contribution margin falls below 40%.
+Severity: Amber
+Status: Recommended
+CTA:
+Enable alert
+
+C. Cash runway tightening
+Category: Cash
+Rule: Alert if cash runway falls below 3 months.
+Severity: Amber
+Status: Recommended
+CTA:
+Enable alert
+
+D. Discount dependency rising
+Category: Pricing
+Rule: Alert if discount dependency rises above 35%.
+Severity: Amber
+Status: Recommended
+CTA:
+Enable alert
+
+Pro mode:
+- enable buttons work visually with local state
+- enabled cards show Active
+
+Free mode:
+- show all cards clearly
+- disable Enable buttons
+- show small lock label:
+“Pro only”
+- clicking CTA shows upgrade prompt or no-op
+
+4. Alert Categories
+
+Add alert category sections with toggle cards.
+
+Categories:
+
+Sales alerts:
+- Daily sales below target
+- Revenue down vs prior 7-day average
+- AOV drops by more than 10%
+- Orders fall by more than 15%
+
+Margin alerts:
+- Contribution margin below 40%
+- Margin drops by more than 3pp
+- Shipping cost per order rises by 10%
+- Discount dependency exceeds 35%
+
+Marketing alerts:
+- Meta CAC rises by more than 15%
+- Google ROAS falls below target
+- Blended CAC exceeds target
+- CAC payback exceeds 1.6 orders
+
+Cash alerts:
+- Cash runway below 3 months
+- Working capital drag increases by £25k
+- Inventory days exceed 90 days
+- Supplier payments accelerate materially
+
+Opportunity alerts:
+- New opportunity worth more than £5k/month detected
+- Recoverable contribution exceeds £25k/month
+- Discount leakage increases by £10k
+- Scenario opportunity exceeds £40k/month
+
+Each alert card should show:
+- toggle on/off
+- category badge
+- rule text
+- threshold
+- frequency
+- notification method
+- severity
+- last triggered if applicable
+
+Pro mode:
+- toggles can be switched on/off using local UI state
+- threshold/frequency controls can be changed if present
+
+Free mode:
+- show the cards and rules
+- disable all toggles and controls
+- add lock icon or “Pro only” label
+- do not allow enabling any alert
+
+5. Recurring CFO Reports
+
+Add a section:
+Recurring CFO Reports
+
+Subtitle:
+Choose the regular summaries your virtual CFO should prepare.
+
+Create 3 report cards:
+
+A. Daily Trading Pulse
+Frequency: Every morning
+Includes:
+- yesterday’s sales
+- orders
+- AOV
+- margin
+- CAC warning if relevant
+
+B. Weekly CFO Digest
+Frequency: Every Monday
+Includes:
+- sales vs last week
+- contribution margin
+- cash runway
+- biggest risk
+- biggest opportunity
+- top recommended action
+
+C. Monthly CFO Summary
+Frequency: Month-end
+Includes:
+- revenue
+- contribution
+- profit
+- cash
+- opportunities
+- recommended plan
+
+Each card should have:
+- toggle
+- frequency selector
+- delivery method
+- preview button
+
+Pro mode:
+- toggles and selectors work visually
+- preview button opens a mock preview
+
+Free mode:
+- show all report cards clearly
+- disable toggles and selectors
+- allow “Preview example” if easy to implement
+- otherwise show locked CTA:
+“Unlock reports on Pro”
+
+6. Recent Alerts Feed
+
+Add a section:
+Example recent alerts
+
+Use this title in Free mode:
+Example recent alerts
+
+Use this title in Pro mode:
+Recent alerts
+
+Show mock alert history:
+
+Today | Meta CAC increased 18% | Red | Review Meta campaigns
+Yesterday | Discount dependency reached 38% | Amber | Reduce blanket offers
+Monday | Cash runway fell to 3.4 months | Amber | Reduce stock build
+Last week | Contribution margin fell to 42.3% | Amber | Review margin recovery plan
+
+Columns:
+- Date
+- Alert
+- Severity
+- Suggested action
+- Status
+
+Pro mode:
+- show active alert history
+
+Free mode:
+- show as example/demo data
+- add subtle label:
+“Example preview — upgrade to activate monitoring.”
+
+7. Notification Settings
+
+Add a compact section:
+Notification settings
+
+Options:
+- In-app alerts
+- Email alerts
+- Weekly summary email
+- Slack / WhatsApp coming later
+
+Pro mode:
+- in-app and email settings can be toggled visually
+- Slack / WhatsApp remain “Coming later”
+
+Free mode:
+- show settings locked
+- all toggles disabled
+- display:
+“Notification delivery is available on Pro.”
+
+8. AI CFO explanation per alert
+
+For Pro mode:
+Add a small button on each recent alert:
+Explain
+
+Clicking opens the existing AI CFO drawer if available, or a mock side panel.
+
+Mock response format:
+- What happened
+- Why it matters
+- Recommended action
+- Expected impact
+
+Free mode:
+Show the Explain buttons but disabled with lock label:
+“Pro”
+
+9. Pro-only status treatment
+
+In Free mode, the page should feel like a clear preview, not like broken functionality.
+
+Use:
+- visible examples
+- disabled controls
+- lock icons
+- upgrade CTAs
+- “Available on Pro” badges
+
+Do not blur the entire page.
+Do not hide the content.
+Do not let users enable alerts.
+
+10. Data & benchmark assumptions
+
+Add a collapsible section near the bottom:
+
+Title:
+Data & benchmark assumptions
+
+Text:
+“Alerts are based on the quality and timing of connected sales, marketing, margin and cash data. Thresholds should be reviewed as your business changes.”
+
+11. Navigation
+
+Add sidebar item:
+CFO Alerts
+
+Position:
+After Scenario Lab
+
+Suggested route:
+/cfo-alerts
+
+12. Final output
+
+Build the CFO Alerts page using mock data and local state only.
+
+Do not add real email, Slack, WhatsApp, background jobs or external APIs.
+
+Ensure:
+- route works
+- sidebar link works
+- Free mode is preview-only
+- Pro mode allows visual enabling/disabling
+- all Free controls are disabled
+- no actual notifications are sent
+- styling matches the rest of the app
+- no build errors

@@ -1,0 +1,143 @@
+Update the existing Profit Engine page with three improvements:
+
+1. Add staff cost efficiency analysis
+2. Add a reusable timeframe selector
+3. Add clear Free vs Pro content gating
+
+Do not rebuild the page from scratch. Keep the current layout, styling, mock data, charts and working simulator.
+
+1. Add timeframe selector
+
+Replace the static “March 2026” pill at the top right with a reusable Time Period selector.
+
+Options:
+- Last 30 days
+- Last 90 days
+- This month
+- Last month
+- Last 12 months
+- Custom range
+
+Default:
+This month
+
+Also add a smaller comparison selector:
+Compare to: Previous period
+
+For now, changing the selector should update the visible label only and not need to recalculate real data.
+
+Make this component reusable so it can be added to every dashboard page.
+
+2. Add Staff Cost Efficiency section
+
+Add a new section after the KPI strip and before “What Changed Profit This Month?”
+
+Section title:
+Staff Cost Efficiency
+
+Subtitle:
+“Shows how effectively team costs are converting into profit before overheads.”
+
+Add a CFO Insight card:
+
+“Staff cost efficiency is improving. Each £1 spent on staff now generates £2.80 of profit before overheads, up from £2.45 last period.”
+
+Create three cards:
+
+A. Staff Cost Efficiency
+Value:
+£2.80
+
+Label:
+profit before overheads per £1 staff cost
+
+Delta:
++£0.35 vs prior period
+
+B. Staff Cost Ratio
+Value:
+18.5%
+
+Label:
+staff costs as a % of revenue
+
+Delta:
+-1.2pp vs prior period
+
+C. Staff Cost Trend
+Value:
+Improving
+
+Label:
+efficiency has improved for 4 consecutive periods
+
+Add a simple 6-period line chart titled:
+Staff Cost Efficiency Trend
+
+Mock data:
+Jan: £2.10
+Feb: £2.25
+Mar: £2.45
+Apr: £2.55
+May: £2.70
+Jun: £2.80
+
+Add helper text:
+“The higher this number, the more contribution the business generates for every £1 spent on people.”
+
+Use “staff costs” rather than “labour costs” because ecommerce founders will understand it more easily.
+
+3. Add Free vs Pro gating
+
+The app already has Free / Pro indicators in the header. Add conditional rendering logic or simple placeholder gating based on plan state.
+
+For Free users:
+
+Show fully:
+- Profit Engine Summary
+- Profit Risk Level
+- KPI strip
+- basic Staff Cost Efficiency headline card
+- basic Revenue to Profit bridge chart
+
+Limit or lock:
+- detailed Staff Cost Efficiency trend chart
+- What Changed Profit This Month driver table
+- Profit Sensitivity Simulator
+- full CFO Recommendations
+- What would move risk lower helper card
+
+For locked sections, show blurred preview content with an overlay:
+
+“Upgrade to Pro to unlock detailed profit drivers, staff cost trends, scenario modelling and CFO recommendations.”
+
+Add a clear CTA button:
+Upgrade to Pro
+
+For Pro users:
+
+Show everything:
+- full staff cost efficiency section
+- driver table and chart
+- simulator
+- all CFO recommendations
+- risk-lowering recommendations
+- full bridge table
+
+Important:
+Free version should still feel valuable, but Pro should clearly unlock the actionable “what to do next” layer.
+
+4. Positioning rule
+
+Use this principle throughout:
+
+Free = diagnosis
+Pro = action and deeper explanation
+
+5. Final output
+
+Update the existing Profit Engine page only.
+
+Do not add live integrations yet.
+Keep calculations client-side.
+Keep design consistent with the current page.

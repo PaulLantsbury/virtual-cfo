@@ -1,15 +1,19 @@
 import { useState } from "react";
 import {
   Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
-  AlertTriangle, CheckCircle, Info, Zap, Activity, Shield,
+  AlertTriangle, CheckCircle, Info, Zap, Activity, Shield, Users, Lock,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, ReferenceLine,
+  LineChart, Line, Dot,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import { TimelineSelector } from "@/components/TimelineSelector";
+import { canAccess } from "@/lib/plan";
+import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 
 // ─── Base data constants ─────────────────────────────────────────────────────
 // @dynamic Replace with Xero-derived figures when live data is connected.
@@ -68,6 +72,16 @@ const DRIVER_DATA = [
   { driver: "Better margin",    impact: 18_000,  explanation: "Pricing, discounting and product mix improved" },
   { driver: "Lower returns",    impact:  4_000,  explanation: "Fewer returns protected net revenue" },
   { driver: "Higher overheads", impact: -13_000, explanation: "Payroll and software costs increased" },
+];
+
+// ─── Staff cost efficiency trend data ────────────────────────────────────────
+const STAFF_COST_TREND = [
+  { month: "Jan", efficiency: 2.10 },
+  { month: "Feb", efficiency: 2.25 },
+  { month: "Mar", efficiency: 2.45 },
+  { month: "Apr", efficiency: 2.55 },
+  { month: "May", efficiency: 2.70 },
+  { month: "Jun", efficiency: 2.80 },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -214,9 +228,7 @@ export default function ProfitEngine() {
             See how your business generates and protects profit — and where it gets lost along the way.
           </p>
         </div>
-        <span className="shrink-0 text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full font-medium">
-          March 2026
-        </span>
+        <TimelineSelector />
       </div>
 
       {/* ── A. Profit Engine Summary ── */}
@@ -241,16 +253,18 @@ export default function ProfitEngine() {
           </div>
         </div>
 
-        {/* What would move risk lower? */}
-        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/15">
-          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 mb-1">What would move risk lower?</p>
-            <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 leading-relaxed">
-              Reduce overhead load below 55%, increase monthly revenue by approximately £80k, or improve margin without increasing discounting.
-            </p>
+        {/* What would move risk lower? — Pro only */}
+        {canAccess("profit_risk_actions") && (
+          <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/15">
+            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 mb-1">What would move risk lower?</p>
+              <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 leading-relaxed">
+                Reduce overhead load below 55%, increase monthly revenue by approximately £80k, or improve margin without increasing discounting.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* ── Profit Trend micro-summary ── */}
@@ -302,7 +316,129 @@ export default function ProfitEngine() {
         />
       </div>
 
-      {/* ── C. What Changed Profit This Month? ── */}
+      {/* ── C. Staff Cost Efficiency ── */}
+      <div className="mb-8">
+        <div className="mb-4">
+          <h3 className="font-semibold text-lg text-foreground">Staff Cost Efficiency</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Shows how effectively team costs are converting into profit before overheads.
+          </p>
+        </div>
+
+        <div className="mb-4">
+          <InlineCfoInsight text="Staff cost efficiency is improving. Each £1 spent on staff now generates £2.80 of profit before overheads, up from £2.45 last period." />
+        </div>
+
+        {/* 3 summary cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          {/* Card A */}
+          <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                <Users className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Staff Cost Efficiency</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground mb-1">£2.80</p>
+            <p className="text-xs text-muted-foreground mb-3">profit before overheads per £1 staff cost</p>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                <ArrowUpRight className="w-3 h-3" />+£0.35
+              </span>
+              <span className="text-[11px] text-muted-foreground">vs prior period</span>
+            </div>
+          </div>
+
+          {/* Card B */}
+          <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Staff Cost Ratio</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground mb-1">18.5%</p>
+            <p className="text-xs text-muted-foreground mb-3">staff costs as a % of revenue</p>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                <ArrowUpRight className="w-3 h-3" />-1.2pp
+              </span>
+              <span className="text-[11px] text-muted-foreground">vs prior period</span>
+            </div>
+          </div>
+
+          {/* Card C */}
+          <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Staff Cost Trend</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-emerald-600 dark:text-emerald-400 mb-1">Improving</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Efficiency has improved for 4 consecutive periods
+            </p>
+          </div>
+        </div>
+
+        {/* 6-period trend chart — Pro gated */}
+        <PremiumBlurPreview
+          title="6-Month Efficiency Trend"
+          subtitle="Staff cost efficiency over the last 6 months (£ profit before overheads per £1 staff cost)."
+          isPro={canAccess("profit_staff_cost_trend")}
+          ctaTitle="Upgrade to Pro to unlock staff cost trend analysis"
+          ctaDescription="See how efficiently your team costs are converting into profit over time."
+          ctaText="Upgrade →"
+          className="mb-3"
+        >
+          <div className="h-44">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={STAFF_COST_TREND} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  domain={[1.8, 3.0]}
+                  tickFormatter={(v) => `£${v.toFixed(2)}`}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={48}
+                />
+                <Tooltip
+                  formatter={(v: number) => [`£${v.toFixed(2)}`, "Efficiency"]}
+                  contentStyle={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "12px",
+                    fontSize: "12px",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="efficiency"
+                  stroke="#22c55e"
+                  strokeWidth={2.5}
+                  dot={{ r: 4, fill: "#22c55e", strokeWidth: 0 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </PremiumBlurPreview>
+
+        {/* Helper text */}
+        <p className="text-xs text-muted-foreground/70 italic">
+          The higher this number, the more contribution the business generates for every £1 spent on people.
+        </p>
+      </div>
+
+      {/* ── D. What Changed Profit This Month? ── */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50">
           <h3 className="font-semibold text-lg text-foreground">What Changed Profit This Month?</h3>
@@ -315,83 +451,118 @@ export default function ProfitEngine() {
           <InlineCfoInsight text="Profit improved by £18k this month, mainly due to stronger margin and better revenue quality, partly offset by higher overheads." />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-6">
-          {/* Driver table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/40 bg-secondary/40">
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Driver</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Profit Impact</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">What happened</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/40">
-                {DRIVER_DATA.map((row) => (
-                  <tr key={row.driver} className="hover:bg-secondary/20 transition-colors">
-                    <td className="px-6 py-3 font-medium text-foreground text-sm">{row.driver}</td>
-                    <td className={cn(
-                      "px-4 py-3 text-right font-semibold text-sm tabular-nums",
-                      row.impact >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
-                    )}>
-                      {row.impact >= 0 ? `+£${row.impact.toLocaleString()}` : `(£${Math.abs(row.impact).toLocaleString()})`}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">{row.explanation}</td>
+        {canAccess("profit_driver_table") ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-6">
+            {/* Driver table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/40 bg-secondary/40">
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Driver</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Profit Impact</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">What happened</th>
                   </tr>
-                ))}
-                {/* Net row */}
-                <tr className="bg-emerald-50/50 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40">
-                  <td className="px-6 py-3 font-semibold text-foreground text-sm">Net profit movement</td>
-                  <td className="px-4 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400 text-sm tabular-nums">+£18,000</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">Overall profit improvement vs prior period</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-border/40">
+                  {DRIVER_DATA.map((row) => (
+                    <tr key={row.driver} className="hover:bg-secondary/20 transition-colors">
+                      <td className="px-6 py-3 font-medium text-foreground text-sm">{row.driver}</td>
+                      <td className={cn(
+                        "px-4 py-3 text-right font-semibold text-sm tabular-nums",
+                        row.impact >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+                      )}>
+                        {row.impact >= 0 ? `+£${row.impact.toLocaleString()}` : `(£${Math.abs(row.impact).toLocaleString()})`}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">{row.explanation}</td>
+                    </tr>
+                  ))}
+                  {/* Net row */}
+                  <tr className="bg-emerald-50/50 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40">
+                    <td className="px-6 py-3 font-semibold text-foreground text-sm">Net profit movement</td>
+                    <td className="px-4 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400 text-sm tabular-nums">+£18,000</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">Overall profit improvement vs prior period</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-          {/* Driver bar chart */}
-          <div className="px-6 pb-6 pt-4 lg:pt-4">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Profit Impact by Driver</h4>
-            <div className="h-52">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={DRIVER_DATA}
-                  layout="vertical"
-                  margin={{ top: 0, right: 48, left: 0, bottom: 0 }}
-                  barSize={22}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                  <XAxis
-                    type="number"
-                    tickFormatter={(v) => `£${(Math.abs(v) / 1_000).toFixed(0)}k`}
-                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="driver"
-                    width={115}
-                    tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <ReferenceLine x={0} stroke="hsl(var(--border))" strokeWidth={1.5} />
-                  <Tooltip content={<DriverTooltip />} />
-                  <Bar dataKey="impact" radius={[0, 4, 4, 0]}>
-                    {DRIVER_DATA.map((entry) => (
-                      <Cell
-                        key={entry.driver}
-                        fill={entry.impact >= 0 ? "#22c55e" : "#ef4444"}
-                        fillOpacity={0.8}
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            {/* Driver bar chart */}
+            <div className="px-6 pb-6 pt-4 lg:pt-4">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Profit Impact by Driver</h4>
+              <div className="h-52">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={DRIVER_DATA}
+                    layout="vertical"
+                    margin={{ top: 0, right: 48, left: 0, bottom: 0 }}
+                    barSize={22}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      tickFormatter={(v) => `£${(Math.abs(v) / 1_000).toFixed(0)}k`}
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="driver"
+                      width={115}
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <ReferenceLine x={0} stroke="hsl(var(--border))" strokeWidth={1.5} />
+                    <Tooltip content={<DriverTooltip />} />
+                    <Bar dataKey="impact" radius={[0, 4, 4, 0]}>
+                      {DRIVER_DATA.map((entry) => (
+                        <Cell
+                          key={entry.driver}
+                          fill={entry.impact >= 0 ? "#22c55e" : "#ef4444"}
+                          fillOpacity={0.8}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="px-6 pb-6">
+            {/* Ghost table — blurred */}
+            <div className="blur-sm opacity-40 pointer-events-none select-none" aria-hidden>
+              <table className="w-full text-sm mb-4">
+                <thead>
+                  <tr className="border-b border-border/40 bg-secondary/40">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Driver</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Profit Impact</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/40">
+                  {DRIVER_DATA.map((row) => (
+                    <tr key={row.driver}>
+                      <td className="px-4 py-3 text-sm text-foreground">{row.driver}</td>
+                      <td className="px-4 py-3 text-right font-semibold text-sm">████████</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Upgrade prompt */}
+            <a href="/upgrade" className="mt-2 flex items-center gap-4 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-5 py-4 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors cursor-pointer">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+                <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">Upgrade to Pro to unlock the profit driver breakdown</p>
+                <p className="text-xs text-indigo-700/70 dark:text-indigo-400/70 mt-0.5">See exactly what moved profit this month — by driver, amount and explanation.</p>
+              </div>
+              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade →</span>
+            </a>
+          </div>
+        )}
       </div>
 
       {/* ── D. Where Your Revenue Turns Into Profit ── */}
@@ -598,22 +769,21 @@ export default function ProfitEngine() {
         </div>
       </div>
 
-      {/* ── F. Profit Sensitivity Simulator ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
-        <div className="px-6 py-5 border-b border-border/50">
-          <h3 className="font-semibold text-lg text-foreground">Profit Sensitivity Simulator</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Test how changes in sales, discounting, returns and overheads affect profit.
-          </p>
+      {/* ── F. Profit Sensitivity Simulator ── Pro gated ── */}
+      <PremiumBlurPreview
+        title="Profit Sensitivity Simulator"
+        subtitle="Test how changes in sales, discounting, returns and overheads affect profit."
+        isPro={canAccess("profit_simulator")}
+        ctaTitle="Upgrade to Pro to unlock the Profit Sensitivity Simulator"
+        ctaDescription="Model how pricing, discounting, returns or overhead changes affect your monthly profit — before you commit."
+        ctaText="Upgrade →"
+        className="mb-8"
+      >
+        <div className="mb-5">
+          <InlineCfoInsight text="Profit is currently most sensitive to discounting and overhead changes. Use this tool before making pricing, marketing or hiring decisions." />
         </div>
 
-        <div className="px-6 pt-5">
-          <div className="mb-6">
-            <InlineCfoInsight text="Profit is currently most sensitive to discounting and overhead changes. Use this tool before making pricing, marketing or hiring decisions." />
-          </div>
-        </div>
-
-        <div className="px-6 pb-6">
+        <div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Sliders */}
             <div className="space-y-6">
@@ -725,11 +895,18 @@ export default function ProfitEngine() {
             </div>
           </div>
         </div>
-      </div>
+      </PremiumBlurPreview>
 
-      {/* ── G. CFO Recommendations ── */}
-      <div className="mb-8">
-        <h3 className="font-semibold text-lg text-foreground mb-4">CFO Recommendations</h3>
+      {/* ── G. CFO Recommendations ── Pro gated ── */}
+      <PremiumBlurPreview
+        title="CFO Recommendations"
+        subtitle="Three priority actions your CFO would give you based on this month's profit data."
+        isPro={canAccess("profit_recommendations")}
+        ctaTitle="Upgrade to Pro to unlock CFO Recommendations"
+        ctaDescription="Get three high-priority actions based on your profit data — what improved, what to watch, and what to do next."
+        ctaText="Upgrade →"
+        className="mb-8"
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* What Improved */}
           <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/20 p-5">
@@ -764,7 +941,7 @@ export default function ProfitEngine() {
             </p>
           </div>
         </div>
-      </div>
+      </PremiumBlurPreview>
     </AppLayout>
   );
 }

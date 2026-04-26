@@ -49,7 +49,12 @@ export type FeatureName =
   | "opportunities_uplift_values"      // Opportunities — per-row £ uplift figures
   | "opportunities_execution_priority" // Opportunities — Execution priority this month strip
   | "opportunities_row_detail"         // Opportunities — full label, description, meta, badges per row
-  | "opportunities_where_to_start";    // Opportunities — Where to start section
+  | "opportunities_where_to_start"     // Opportunities — Where to start section
+  | "profit_risk_actions"              // Profit Engine — "What would move risk lower?" advisory card
+  | "profit_staff_cost_trend"         // Profit Engine — Staff cost efficiency 6-period trend chart
+  | "profit_driver_table"             // Profit Engine — What Changed driver table + bar chart
+  | "profit_simulator"                // Profit Engine — Profit Sensitivity Simulator
+  | "profit_recommendations";         // Profit Engine — CFO Recommendations section
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -80,6 +85,11 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   opportunities_execution_priority: ["pro"],
   opportunities_row_detail:         ["pro"],
   opportunities_where_to_start:     ["pro"],
+  profit_risk_actions:              ["pro"],
+  profit_staff_cost_trend:          ["pro"],
+  profit_driver_table:              ["pro"],
+  profit_simulator:                 ["pro"],
+  profit_recommendations:           ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

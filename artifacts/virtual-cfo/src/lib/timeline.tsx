@@ -2,29 +2,37 @@ import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
 export const TIMELINE_OPTIONS = [
-  { value: "7d",  label: "Last 7 days"    },
-  { value: "30d", label: "Last 30 days"   },
-  { value: "90d", label: "Last 90 days"   },
-  { value: "12m", label: "Last 12 months" },
+  { value: "this_month",  label: "This month"    },
+  { value: "last_month",  label: "Last month"    },
+  { value: "last_30",     label: "Last 30 days"  },
+  { value: "last_90",     label: "Last 90 days"  },
+  { value: "last_12m",    label: "Last 12 months"},
+  { value: "custom",      label: "Custom range"  },
 ] as const;
 
 export type TimelineValue = typeof TIMELINE_OPTIONS[number]["value"];
 
 /** Human-readable inline phrase for use inside section subtitles. */
 export const PERIOD_PHRASE: Record<TimelineValue, string> = {
-  "7d":  "the last 7 days",
-  "30d": "the last 30 days",
-  "90d": "the last 90 days",
-  "12m": "the last 12 months",
+  this_month: "this month",
+  last_month: "last month",
+  last_30:    "the last 30 days",
+  last_90:    "the last 90 days",
+  last_12m:   "the last 12 months",
+  custom:     "the selected period",
 };
 
 /** Short date-range badge label shown next to the selector. */
 export const PERIOD_BADGE: Record<TimelineValue, string> = {
-  "7d":  "28 Mar – 4 Apr 2026",
-  "30d": "March 2026",
-  "90d": "Jan – Mar 2026",
-  "12m": "Apr 2025 – Mar 2026",
+  this_month: "March 2026",
+  last_month: "February 2026",
+  last_30:    "1 Mar – 31 Mar 2026",
+  last_90:    "Jan – Mar 2026",
+  last_12m:   "Apr 2025 – Mar 2026",
+  custom:     "Custom range",
 };
+
+export const COMPARE_LABEL = "Compare to: Previous period";
 
 type TimelineContextType = {
   timeline: TimelineValue;
@@ -37,7 +45,7 @@ type TimelineContextType = {
 const TimelineContext = createContext<TimelineContextType | null>(null);
 
 export function TimelineProvider({ children }: { children: ReactNode }) {
-  const [timeline, setTimeline] = useState<TimelineValue>("30d");
+  const [timeline, setTimeline] = useState<TimelineValue>("this_month");
 
   const opt = TIMELINE_OPTIONS.find((o) => o.value === timeline)!;
 

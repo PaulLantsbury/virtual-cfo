@@ -19,6 +19,7 @@ import CashControl from "@/pages/cash-control";
 import PricingOptimisation from "@/pages/pricing-optimisation";
 import Settings from "@/pages/settings";
 import Upgrade from "@/pages/upgrade";
+import ScenarioLab from "@/pages/scenario-lab";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/profit-engine" component={ProfitEngine} />
       <Route path="/cash-control" component={CashControl} />
       <Route path="/pricing-optimisation" component={PricingOptimisation} />
+      <Route path="/scenario-lab" component={ScenarioLab} />
       <Route path="/settings" component={Settings} />
       <Route path="/upgrade" component={Upgrade} />
       <Route component={NotFound} />

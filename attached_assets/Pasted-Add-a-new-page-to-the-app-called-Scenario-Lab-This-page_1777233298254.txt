@@ -1,0 +1,545 @@
+Add a new page to the app called “Scenario Lab”.
+
+This page should act as the central planning and modelling hub for the CFO dashboard.
+
+It should pull together the logic from:
+- Profit Engine
+- Cash Control
+- Pricing Optimisation
+- Marketing Efficiency
+- Profit Margin Analysis
+
+The page should feel like an AI CFO suggesting a plan, then allowing the user to adjust the plan and see the combined impact.
+
+Add this page to the main navigation as:
+Scenario Lab
+
+Use mock ecommerce data for now.
+Do not add live integrations.
+
+Use the same styling, layout wrapper, sidebar, header, timeframe selector, card design, typography, colour system, Free/Pro gating and responsive behaviour as the existing pages.
+
+Default timeframe:
+This month
+
+Comparison:
+Previous period
+
+1. Page Header
+
+Title:
+Scenario Lab
+
+Subtitle:
+Build a joined-up forecast across profit, cash, pricing and marketing before making decisions.
+
+Top CFO Insight card:
+
+“Your current performance suggests the best near-term opportunity is a balanced recovery plan: reduce discounting, improve marketing efficiency and protect cash by controlling stock and overhead growth.”
+
+2. Scenario Quality Summary
+
+Add a top summary block with:
+
+Title:
+Recommended Scenario: Balanced Growth Plan
+
+Badge:
+Recommended
+
+Text:
+“This plan offers the best balance of profit uplift, cash protection and implementation risk.”
+
+Hero output cards:
+- Profit impact: +£42,000/month
+- Cash impact: +£64,000
+- Runway impact: +0.8 months
+- Margin impact: +4.2pp
+- Scenario quality: Strong
+
+Add risk badge:
+Risk level: Lower
+
+Add confidence badge:
+Confidence: Medium-High
+
+3. CFO Suggested Plans
+
+Create a section titled:
+CFO Suggested Plans
+
+Subtitle:
+Choose a recommended plan, then adjust the assumptions below.
+
+Create three plan cards:
+
+A. Margin Recovery Plan
+
+Badge:
+Profit Focus
+
+Best for:
+Immediate contribution improvement
+
+Expected impact:
++£42k contribution / month
+
+Actions:
+- Reduce average discount by 3pp
+- Reallocate 15% of Meta spend to Email and Organic
+- Reduce shipping cost per order by £1.50
+- Pause low-margin acquisition campaigns
+
+Button:
+Apply this plan
+
+B. Cash Protection Plan
+
+Badge:
+Cash Focus
+
+Best for:
+Protecting runway and reducing cash pressure
+
+Expected impact:
++£64k cash headroom
+
+Actions:
+- Reduce inventory days by 12
+- Delay non-essential supplier payments by 6 days
+- Hold fixed costs flat
+- Pause discretionary marketing spend
+
+Button:
+Apply this plan
+
+C. Balanced Growth Plan
+
+Badge:
+Recommended
+
+Best for:
+Improving profit without choking growth
+
+Expected impact:
++£28k contribution / +0.5 months runway
+
+Actions:
+- Reduce blanket discounts by 2pp
+- Shift 10% of Meta spend to Email
+- Improve full-price order mix
+- Keep Google Shopping spend stable
+
+Button:
+Apply this plan
+
+Make Balanced Growth Plan visually highlighted as the default recommended plan.
+
+4. Why this plan?
+
+Add a section immediately below the suggested plans.
+
+Title:
+Why this plan?
+
+CFO Insight:
+“This plan is recommended because Meta CAC is the largest margin drag, discounting has increased, and cash runway is tightening. It improves contribution without requiring additional stock investment.”
+
+Add three evidence cards:
+
+A. Margin pressure
+“Contribution margin is 42.3%, below the healthy 45–60% benchmark range.”
+
+B. Marketing inefficiency
+“Meta is generating materially lower contribution per order than Email and Organic.”
+
+C. Cash tightening
+“Inventory build and supplier timing are reducing cash headroom over the next 60 days.”
+
+5. Scenario Builder
+
+Create a large interactive section titled:
+Scenario Builder
+
+Subtitle:
+Adjust the assumptions to see the combined impact across profit, cash, pricing and marketing.
+
+Organise sliders into grouped tabs or grouped panels:
+
+Group A: Growth
+- Revenue Change
+  Range: -20% to +30%
+  Default: +5%
+- Order Volume Change
+  Range: -20% to +30%
+  Default: +3%
+- Average Order Value Change
+  Range: -10% to +15%
+  Default: +2%
+
+Group B: Margin
+- Discount Rate Change
+  Range: -8pp to +8pp
+  Default: -2pp
+- Returns Rate Change
+  Range: -5pp to +5pp
+  Default: -1pp
+- Shipping Cost per Order Change
+  Range: -£3 to +£3
+  Default: -£1.50
+- Payment Fee Rate Change
+  Range: -2pp to +2pp
+  Default: 0pp
+
+Group C: Marketing
+- Meta Spend Change
+  Range: -30% to +30%
+  Default: -10%
+- Google Spend Change
+  Range: -30% to +30%
+  Default: 0%
+- Email / Organic Mix Uplift
+  Range: 0% to +30%
+  Default: +10%
+- Blended CAC Change
+  Range: -25% to +25%
+  Default: -8%
+
+Group D: Cash
+- Inventory Days Change
+  Range: -20 days to +30 days
+  Default: -8 days
+- Supplier Payment Days Change
+  Range: -20 days to +20 days
+  Default: +4 days
+- Fixed Cost Change
+  Range: -20% to +20%
+  Default: 0%
+- Marketing Spend Change
+  Range: -30% to +30%
+  Default: -5%
+
+Group E: Overheads
+- Staff Cost Change
+  Range: -15% to +20%
+  Default: 0%
+- Software / Overhead Change
+  Range: -20% to +20%
+  Default: 0%
+- Fulfilment Cost Change
+  Range: -20% to +20%
+  Default: -5%
+
+6. Apply Plan Behaviour
+
+When the user clicks “Apply this plan”, update the Scenario Builder defaults to match that plan.
+
+Margin Recovery Plan should set:
+- Discount Rate Change: -3pp
+- Meta Spend Change: -15%
+- Email / Organic Mix Uplift: +15%
+- Shipping Cost per Order Change: -£1.50
+- Marketing Spend Change: -5%
+
+Cash Protection Plan should set:
+- Inventory Days Change: -12 days
+- Supplier Payment Days Change: +6 days
+- Fixed Cost Change: 0%
+- Marketing Spend Change: -10%
+- Revenue Change: 0%
+
+Balanced Growth Plan should set:
+- Discount Rate Change: -2pp
+- Meta Spend Change: -10%
+- Email / Organic Mix Uplift: +10%
+- Average Order Value Change: +2%
+- Inventory Days Change: -8 days
+- Fixed Cost Change: 0%
+- Revenue Change: +5%
+
+Add buttons:
+- Reset scenario
+- Save scenario
+- Compare scenario
+
+For now, Save and Compare can be mock buttons with no backend persistence.
+
+7. Imported Assumptions Panel
+
+Add a panel titled:
+Imported from page sliders
+
+Subtitle:
+Assumptions pulled from your current page-level scenarios.
+
+Show assumption chips:
+- Pricing Optimisation: discount reduced by 3pp
+- Marketing Efficiency: 15% Meta spend reallocated
+- Cash Control: inventory days reduced by 12
+- Profit Margin: shipping cost reduced by £1.50/order
+- Profit Engine: fixed costs held flat
+
+Add small buttons:
+- Apply current page assumptions
+- Clear imported assumptions
+
+For now, these can use mock state.
+
+8. Scenario Outputs Panel
+
+Create a sticky or prominent outputs panel beside or below the sliders.
+
+Title:
+Scenario Impact
+
+Show before vs after cards:
+
+A. Revenue
+Base: £420,000
+Scenario: £441,000
+Change: +£21,000
+
+B. Contribution
+Base: £198,000
+Scenario: £240,000
+Change: +£42,000
+
+C. EBITDA
+Base: £78,000
+Scenario: £118,000
+Change: +£40,000
+
+D. Cash Balance
+Base: £186,000
+Scenario: £250,000
+Change: +£64,000
+
+E. Cash Runway
+Base: 3.4 months
+Scenario: 4.2 months
+Change: +0.8 months
+
+F. Working Capital Drag
+Base: £74,000
+Scenario: £42,000
+Change: -£32,000
+
+G. CAC Payback
+Base: 1.6 orders
+Scenario: 1.2 orders
+Change: improved
+
+H. Contribution per Order
+Base: £12.40
+Scenario: £15.10
+Change: +£2.70
+
+Outputs should update dynamically based on slider changes using simple client-side calculations.
+
+Use mock calculation logic:
+- revenue changes with revenue/order/AOV sliders
+- contribution improves with discount reduction, returns reduction, shipping reduction and CAC reduction
+- EBITDA improves with contribution less fixed cost changes
+- cash improves with EBITDA, inventory days reduction and supplier days increase
+- runway = projected cash / projected fixed cash costs
+- CAC payback improves when CAC falls or contribution per order rises
+
+9. Scenario Bridge
+
+Create a section titled:
+Scenario Contribution Bridge
+
+Subtitle:
+Shows how the plan moves contribution from today’s position to the scenario result.
+
+Waterfall-style chart:
+Base contribution: £198,000
+Pricing improvement: +£18,000
+Marketing reallocation: +£9,500
+Shipping cost reduction: +£6,800
+Returns reduction: +£2,700
+Fixed cost / overhead change: +£5,000
+Scenario contribution: £240,000
+
+CFO Insight:
+“Most of the contribution uplift comes from reducing discounting and reallocating inefficient paid spend rather than relying on new customer growth.”
+
+10. Cash and Profit Consequence
+
+Create a section titled:
+Cash and Profit Consequence
+
+Subtitle:
+Shows whether the scenario improves both profitability and cash resilience.
+
+Add CFO Insight:
+“Profit improves by £42k, while cash improves by £64k because inventory reduction releases cash as well as improving operating performance.”
+
+Create four cards:
+
+A. Profit uplift
++£42,000/month
+“Contribution improves through better margin and marketing efficiency.”
+
+B. Cash uplift
++£64,000
+“Cash improves because working capital drag reduces.”
+
+C. Runway extension
++0.8 months
+“Cash cover improves from 3.4 to 4.2 months.”
+
+D. Risk movement
+Lower
+“Scenario reduces both margin risk and cash risk.”
+
+11. Scenario Quality Score
+
+Create a section titled:
+Scenario Quality Score
+
+Score:
+Strong
+
+Supporting text:
+“This scenario improves profit, cash and implementation risk without relying heavily on new customer acquisition.”
+
+Score factors:
+- Profit uplift: Strong
+- Cash impact: Strong
+- Implementation risk: Moderate
+- Confidence level: Medium-High
+- Payback period: Fast
+
+Add a small explanation:
+“Scenario quality is based on profit impact, cash impact, implementation complexity and confidence level.”
+
+12. Implementation Plan
+
+Create a section titled:
+Implementation Plan
+
+Subtitle:
+The practical actions required to deliver this scenario.
+
+Table columns:
+Action
+Impact
+Confidence
+Effort
+Timing
+
+Rows:
+Reduce discounting by 3pp | +£38k contribution | High | Low | Immediate
+Reallocate Meta spend | +£9.5k contribution | Medium | Low | 1–2 weeks
+Reduce inventory days | +£46k cash | Medium | Medium | 4–8 weeks
+Renegotiate shipping | +£6.8k contribution | High | Medium | 2–4 weeks
+Hold fixed costs flat | +£12k cash protection | High | Low | Immediate
+
+13. AI CFO Recommendation
+
+Create a final recommendation section.
+
+Title:
+AI CFO Recommendation
+
+Text:
+“Start with the Balanced Growth Plan. It delivers a meaningful contribution uplift while protecting cash runway and avoiding over-reliance on new paid acquisition. Prioritise discount discipline, Meta budget reallocation and inventory control before increasing growth spend.”
+
+Add three action bullets:
+- Apply the Balanced Growth Plan this month
+- Review Meta and Google performance weekly
+- Reassess inventory and cash runway after 30 days
+
+14. Free vs Pro Gating
+
+Use the same gating pattern as the other pages.
+
+Free version should show:
+- Scenario Lab Summary
+- Recommended Scenario headline
+- CFO Suggested Plans summary
+- Why this plan?
+- limited Scenario Builder preview
+- headline Scenario Impact
+- locked detailed bridge
+- locked Save / Compare buttons
+- locked Implementation Plan
+- locked AI CFO Recommendation
+
+Add Free upgrade card near the top:
+
+Title:
+Unlock your CFO scenario plan
+
+Text:
+“Upgrade to Pro to build joined-up profit, cash, pricing and marketing scenarios.”
+
+Bullets:
+- Apply CFO-suggested plans
+- Model combined profit and cash impact
+- Compare scenarios side by side
+- Build an implementation plan
+
+CTA:
+Unlock Pro
+
+Pro version should show:
+- all suggested plans
+- working Apply Plan buttons
+- full Scenario Builder
+- full dynamic outputs
+- full contribution bridge
+- full cash/profit consequence
+- full quality score
+- full implementation plan
+- full AI CFO recommendation
+- no blur overlays
+- no upgrade CTAs
+
+15. Data Quality Note
+
+Add a small neutral note near the bottom:
+
+Title:
+Data quality note
+
+Text:
+“Scenario outputs are based on the quality of connected sales, marketing, cost and cash data. Forecasts should be treated as directional estimates rather than guaranteed outcomes.”
+
+Supporting sentence:
+“Accuracy improves when Shopify, Xero, Google Ads, Meta and cost mappings are kept up to date.”
+
+Use subtle neutral styling, not warning styling.
+
+16. Language Rules
+
+Use plain-English founder-friendly language:
+- scenario
+- plan
+- cash runway
+- contribution
+- margin
+- profit impact
+- cash impact
+- risk level
+- what to do next
+
+Avoid overly technical forecasting terminology.
+
+17. Navigation and Routing
+
+Add the page to the sidebar/menu as:
+Scenario Lab
+
+Ensure route works correctly.
+
+Use the same app layout wrapper, sidebar, header, timeframe selector and plan toggle logic as the existing pages.
+
+18. Final Output
+
+Build the full Scenario Lab page using mock data.
+
+Do not add live integrations.
+Keep calculations client-side.
+Make the page responsive, but optimise for desktop dashboard viewing.

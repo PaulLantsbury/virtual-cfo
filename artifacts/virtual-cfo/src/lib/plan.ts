@@ -67,7 +67,11 @@ export type FeatureName =
   | "pricing_recommendations"         // Pricing — This Month's Pricing Priorities section
   | "marketing_budget_simulator"      // Marketing Efficiency — Budget Reallocation Simulator + Recoverable Contribution card
   | "margin_simulator"               // Margin Analysis — Margin Recovery Simulator (5 sliders)
-  | "margin_sensitivity_ranking";    // Margin Analysis — Sensitivity Ranking with £ impact per lever
+  | "margin_sensitivity_ranking"     // Margin Analysis — Sensitivity Ranking with £ impact per lever
+  | "scenario_lab_plans"             // Scenario Lab — CFO Suggested Plans with Apply buttons
+  | "scenario_lab_builder"           // Scenario Lab — Full Scenario Builder (all sliders + live outputs)
+  | "scenario_lab_bridge"            // Scenario Lab — Contribution Bridge, Cash Consequence, Quality Score
+  | "scenario_lab_implementation";   // Scenario Lab — Implementation Plan + AI CFO Recommendation
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -116,6 +120,10 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   marketing_budget_simulator:       ["pro"],
   margin_simulator:                 ["pro"],
   margin_sensitivity_ranking:       ["pro"],
+  scenario_lab_plans:               ["pro"],
+  scenario_lab_builder:             ["pro"],
+  scenario_lab_bridge:              ["pro"],
+  scenario_lab_implementation:      ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

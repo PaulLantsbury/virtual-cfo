@@ -1,0 +1,96 @@
+Update the new Business Health Verdict hero panel on the Dashboard to use a clearer traffic-light layout.
+
+Do not rebuild the dashboard. Only update the Business Health Verdict panel and keep all other sections in their current order.
+
+Objective:
+Make the business health verdict instantly understandable at a glance using a traffic-light approach.
+
+1. Overall verdict
+
+At the top of the panel, show:
+
+Overall Business Health
+
+AMBER — Moderate Risk
+
+Supporting sentence:
+“You are profitable, but margin quality and acquisition efficiency are weakening. Fix pricing, fulfilment costs and Meta spend before growth becomes expensive.”
+
+Use a large amber circular indicator or amber status badge next to the verdict.
+
+2. Add traffic-light scorecard
+
+Inside the same panel, add five compact traffic-light cards:
+
+A. Profitability
+Status: Green
+Label: Healthy
+Text: Profit remains positive.
+
+B. Margin Quality
+Status: Amber
+Label: Weakening
+Text: Contribution margin is below target and falling.
+
+C. Cash Runway
+Status: Amber
+Label: Watch
+Text: Cash is stable, but runway is tightening.
+
+D. Acquisition Efficiency
+Status: Red
+Label: At risk
+Text: Meta CAC is rising and ROAS is weakening.
+
+E. Retention
+Status: Green
+Label: Improving
+Text: Repeat purchase rate is improving.
+
+3. Add health position bar
+
+Below the traffic-light cards, add a simple horizontal health scale:
+
+Strong
+Stable
+Moderate Risk
+High Risk
+Critical
+
+Place the current marker on:
+Moderate Risk
+
+Use amber styling for the marker.
+
+4. Keep visual hierarchy
+
+The panel should be visually clear but not cluttered.
+
+Use:
+- green for healthy/improving
+- amber for watch/weakening/moderate risk
+- red for at risk
+- neutral grey for labels
+
+Make it easy for a non-financial founder to understand in under 5 seconds.
+
+5. Remove duplicate wording
+
+Remove or replace any duplicated status pills from the previous Business Health Verdict panel:
+- Margin quality: Weakening
+- Cash runway: Stable but tightening
+- Customer economics: Deteriorating
+- Retention: Improving
+
+The new traffic-light cards replace those.
+
+6. Keep everything else unchanged
+
+Do not change:
+- Recoverable Contribution block
+- CFO Insight block
+- Recommended Improvement Plan
+- KPI grid
+- Priority actions
+- Detailed engine cards
+- Navigation links

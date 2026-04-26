@@ -218,41 +218,76 @@ export default function Dashboard() {
 
       {/* ══ BUSINESS HEALTH VERDICT HERO ════════════════════════════════════ */}
       <div className="bg-card rounded-2xl shadow-sm border border-amber-200/70 dark:border-amber-800/30 mb-5 overflow-hidden">
-        <div className="px-6 py-5">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-5">
-            <div className="flex-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Business health</p>
-              <p className="text-2xl font-bold text-amber-700 dark:text-amber-400 mb-2">Moderate risk</p>
-              <p className="text-sm text-foreground leading-relaxed mb-1.5">
-                Growth is positive, but contribution margin quality is weakening due to rising CAC, increased discount reliance and fulfilment cost inflation.
-              </p>
-              <p className="text-xs text-muted-foreground leading-snug">
-                Profit remains recoverable, but the business should act before margin pressure becomes structural.
-              </p>
+        {/* Overall verdict row */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 pt-5 pb-4 border-b border-amber-100 dark:border-amber-900/30">
+          <div className="flex items-center gap-3 flex-1">
+            <div className="flex items-center justify-center w-11 h-11 rounded-full bg-amber-400 dark:bg-amber-500 shadow-md shadow-amber-400/30 shrink-0">
+              <span className="text-white font-black text-sm">!</span>
             </div>
-            <div className="grid grid-cols-2 gap-2 shrink-0 sm:w-64">
-              {[
-                { label: "Margin quality",          verdict: "Weakening",               style: "amber"  },
-                { label: "Cash runway",              verdict: "Stable but tightening",   style: "amber"  },
-                { label: "Customer economics",       verdict: "Deteriorating",           style: "red"    },
-                { label: "Retention",                verdict: "Improving",               style: "green"  },
-              ].map(({ label, verdict, style }) => (
-                <div key={label} className={cn(
-                  "rounded-xl px-3 py-2.5 border",
-                  style === "amber" ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200/60 dark:border-amber-700/30"
-                  : style === "red" ? "bg-rose-50 dark:bg-rose-950/15 border-rose-200/60 dark:border-rose-700/30"
-                  : "bg-emerald-50 dark:bg-emerald-950/15 border-emerald-200/60 dark:border-emerald-700/30"
-                )}>
-                  <p className="text-[10px] font-semibold text-muted-foreground mb-0.5">{label}</p>
-                  <p className={cn(
-                    "text-xs font-bold leading-tight",
-                    style === "amber" ? "text-amber-700 dark:text-amber-400"
-                    : style === "red"   ? "text-rose-700 dark:text-rose-400"
-                    : "text-emerald-700 dark:text-emerald-400"
-                  )}>{verdict}</p>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Overall Business Health</p>
+              <p className="text-xl font-black text-amber-700 dark:text-amber-400 tracking-tight">AMBER — Moderate Risk</p>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed sm:max-w-sm">
+            You are profitable, but margin quality and acquisition efficiency are weakening. Fix pricing, fulfilment costs and Meta spend before growth becomes expensive.
+          </p>
+        </div>
+
+        {/* Traffic-light scorecard */}
+        <div className="px-6 py-4">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5">
+            {[
+              { area: "Profitability",            label: "Healthy",   text: "Profit remains positive.",                            style: "green"  },
+              { area: "Margin Quality",           label: "Weakening", text: "Contribution margin is below target and falling.",     style: "amber"  },
+              { area: "Cash Runway",              label: "Watch",     text: "Cash is stable, but runway is tightening.",            style: "amber"  },
+              { area: "Acquisition Efficiency",   label: "At risk",   text: "Meta CAC is rising and ROAS is weakening.",            style: "red"    },
+              { area: "Retention",                label: "Improving", text: "Repeat purchase rate is improving.",                   style: "green"  },
+            ].map(({ area, label, text, style }) => (
+              <div key={area} className={cn(
+                "rounded-xl p-3 border flex flex-col gap-1.5",
+                style === "green" ? "bg-emerald-50 dark:bg-emerald-950/15 border-emerald-200/60 dark:border-emerald-800/30"
+                : style === "amber" ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200/60 dark:border-amber-700/30"
+                : "bg-rose-50 dark:bg-rose-950/15 border-rose-200/60 dark:border-rose-700/30"
+              )}>
+                <div className="flex items-center gap-1.5">
+                  <span className={cn(
+                    "w-2 h-2 rounded-full shrink-0",
+                    style === "green" ? "bg-emerald-500"
+                    : style === "amber" ? "bg-amber-400"
+                    : "bg-rose-500"
+                  )} />
+                  <span className={cn(
+                    "text-[11px] font-bold",
+                    style === "green" ? "text-emerald-700 dark:text-emerald-400"
+                    : style === "amber" ? "text-amber-700 dark:text-amber-400"
+                    : "text-rose-700 dark:text-rose-400"
+                  )}>{label}</span>
                 </div>
-              ))}
-            </div>
+                <p className="text-[10px] font-semibold text-muted-foreground">{area}</p>
+                <p className="text-[10px] text-muted-foreground/70 leading-tight">{text}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Health position bar */}
+          <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-border/40">
+            {[
+              { pos: "Strong",        active: false, done: true  },
+              { pos: "Stable",        active: false, done: true  },
+              { pos: "Moderate Risk", active: true,  done: false },
+              { pos: "High Risk",     active: false, done: false },
+              { pos: "Critical",      active: false, done: false },
+            ].map(({ pos, active, done }, i) => (
+              <div key={pos} className={cn(
+                "flex-1 text-center py-2 text-[10px] font-bold border-r border-border/30 last:border-0 transition-colors",
+                active  ? "bg-amber-400 dark:bg-amber-500 text-white"
+                : done  ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500"
+                : "bg-secondary/40 text-muted-foreground/50"
+              )}>
+                {pos}
+              </div>
+            ))}
           </div>
         </div>
       </div>

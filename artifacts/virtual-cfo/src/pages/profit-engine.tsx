@@ -104,18 +104,22 @@ function InlineCfoInsight({ text }: { text: string }) {
 interface KpiCardProps {
   label: string;
   value: string;
+  subValue?: string;
   delta: string;
   positive: boolean;
   neutral?: boolean;
   deltaLabel?: string;
   insight: string;
 }
-function KpiCard({ label, value, delta, positive, neutral, deltaLabel = "vs prior period", insight }: KpiCardProps) {
+function KpiCard({ label, value, subValue, delta, positive, neutral, deltaLabel = "vs prior period", insight }: KpiCardProps) {
   const DeltaIcon = neutral ? Zap : positive ? ArrowUpRight : ArrowDownRight;
   return (
     <div className="bg-card rounded-2xl border border-border/50 shadow-sm px-5 py-4 flex flex-col gap-1.5">
       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
       <p className="text-2xl font-display font-bold text-foreground leading-none">{value}</p>
+      {subValue && (
+        <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 -mt-0.5">{subValue}</p>
+      )}
       <div className="flex items-center gap-1.5">
         <span className={cn(
           "inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-full",
@@ -217,7 +221,7 @@ export default function ProfitEngine() {
 
       {/* ── A. Profit Engine Summary ── */}
       <div className="mb-8 space-y-4">
-        <CfoInsightCard text="Your business is trading profitably and is currently operating 39% above break-even. Profit quality has improved because contribution margin is stronger, but fixed costs are rising and need to be controlled before adding more overhead." />
+        <CfoInsightCard text="Your business is trading profitably and is operating 39% above break-even. Profit quality is improving, but rising overheads are increasing sensitivity to cost growth. Focus on scaling revenue before adding new fixed costs." />
 
         {/* Risk level pill */}
         <div className="flex items-start gap-4 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20">
@@ -232,9 +236,29 @@ export default function ProfitEngine() {
               </span>
             </div>
             <p className="text-sm text-amber-800 dark:text-amber-300/80 leading-relaxed">
-              Profitability is stable, but the business is becoming more sensitive to fixed cost increases.
+              Profitability is stable, but rising overheads mean profit will fall faster if revenue slows.
             </p>
           </div>
+        </div>
+
+        {/* What would move risk lower? */}
+        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/15">
+          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 mb-1">What would move risk lower?</p>
+            <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 leading-relaxed">
+              Reduce overhead load below 55%, increase monthly revenue by approximately £80k, or improve margin without increasing discounting.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Profit Trend micro-summary ── */}
+      <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/15 mb-4">
+        <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Profit Trend: Improving</span>
+          <span className="text-xs text-emerald-700/70 dark:text-emerald-400/70">Profit increased by £18k this month and profit margin expanded by 2.4pp.</span>
         </div>
       </div>
 
@@ -243,9 +267,10 @@ export default function ProfitEngine() {
         <KpiCard
           label="Monthly Profit"
           value="£78,000"
+          subValue="15% of revenue"
           delta="+£18,000"
           positive={true}
-          insight={`Profit margin is ${fmtPct(EBITDA_MARGIN_PCT)}`}
+          insight="Profit margin improved from 12.6% last month"
         />
         <KpiCard
           label="Profit Threshold"
@@ -379,7 +404,7 @@ export default function ProfitEngine() {
         </div>
 
         <div className="px-6 pt-5">
-          <InlineCfoInsight text="The business is generating healthy profit, but margins remain sensitive to overhead growth. Protecting margin is currently more valuable than chasing low-quality revenue." />
+          <InlineCfoInsight text="Increasing revenue through discounting would weaken profit. Margin improvements currently deliver more value than low-quality volume growth." />
         </div>
 
         {/* Waterfall chart */}
@@ -491,9 +516,9 @@ export default function ProfitEngine() {
       {/* ── E. Profit Scaling Indicators ── */}
       <div className="mb-8">
         <div className="mb-4">
-          <h3 className="font-semibold text-lg text-foreground">Profit Scaling Indicators</h3>
+          <h3 className="font-semibold text-lg text-foreground">How Easily Profit Scales</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            How efficiently the business converts revenue growth into profit growth.
+            Shows whether growth is likely to create more profit or be absorbed by overheads.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -584,7 +609,7 @@ export default function ProfitEngine() {
 
         <div className="px-6 pt-5">
           <div className="mb-6">
-            <InlineCfoInsight text="Small changes in discounting, returns and overheads can have a big impact on profit. Use this to see which levers matter most before making decisions." />
+            <InlineCfoInsight text="Profit is currently most sensitive to discounting and overhead changes. Use this tool before making pricing, marketing or hiring decisions." />
           </div>
         </div>
 

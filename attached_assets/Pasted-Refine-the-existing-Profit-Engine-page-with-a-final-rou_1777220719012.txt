@@ -1,0 +1,115 @@
+Refine the existing Profit Engine page with a final round of copy and clarity improvements.
+
+Do not rebuild the page from scratch. Keep the current layout, styling, components, charts, mock data, working sliders and navigation.
+
+Make the following targeted changes:
+
+1. Shorten and sharpen the top CFO Insight
+
+Replace the current top insight text with:
+
+“Your business is trading profitably and is operating 39% above break-even. Profit quality is improving, but rising overheads are increasing sensitivity to cost growth. Focus on scaling revenue before adding new fixed costs.”
+
+2. Improve Profit Risk Level wording
+
+Keep:
+Profit Risk Level: Moderate
+
+Replace supporting text with:
+
+“Profitability is stable, but rising overheads mean profit will fall faster if revenue slows.”
+
+3. Add a Profit Trend micro-summary above the KPI strip
+
+Add a small horizontal summary bar immediately above the KPI cards.
+
+Title:
+Profit Trend: Improving
+
+Supporting text:
+“Profit increased by £18k this month and profit margin expanded by 2.4pp.”
+
+Style:
+- subtle green/positive treatment
+- compact height
+- should not dominate the page
+- should visually connect the top insight to the KPI cards
+
+4. Improve Monthly Profit KPI card
+
+Current card:
+Monthly Profit
+£78,000
++£18,000 vs prior period
+Profit margin is 15.0%
+
+Update to show:
+
+Monthly Profit
+£78,000
+15% of revenue
++£18,000 vs prior period
+
+Make “15% of revenue” clearly visible as a secondary line under the main value.
+
+5. Improve the bridge section CFO Insight
+
+In the section “Where Your Revenue Turns Into Profit”, replace the CFO Insight text with:
+
+“Increasing revenue through discounting would weaken profit. Margin improvements currently deliver more value than low-quality volume growth.”
+
+Keep the bridge chart and table unchanged.
+
+6. Rename “Profit Scaling Indicators”
+
+Rename this section to:
+
+How Easily Profit Scales
+
+Subtitle:
+“Shows whether growth is likely to create more profit or be absorbed by overheads.”
+
+Keep the three cards:
+- Overhead Load
+- Profit Threshold
+- Profit Scaling Power
+
+7. Improve Simulator CFO Insight
+
+In the Profit Sensitivity Simulator, replace the CFO Insight text with:
+
+“Profit is currently most sensitive to discounting and overhead changes. Use this tool before making pricing, marketing or hiring decisions.”
+
+Keep the sliders, outputs and calculations unchanged.
+
+8. Add “What Would Move Risk Lower?” helper card
+
+Add a small helper card directly below the Profit Risk Level card and before the KPI strip.
+
+Title:
+What would move risk lower?
+
+Text:
+“Reduce overhead load below 55%, increase monthly revenue by approximately £80k, or improve margin without increasing discounting.”
+
+Style:
+- compact
+- advisory
+- light green or neutral positive styling
+- should feel like an AI CFO recommendation, not another KPI
+
+9. Keep language simple
+
+Across these changes:
+- use “profit” in main labels
+- avoid technical accounting jargon
+- keep EBITDA only where already needed in helper text
+- make the page feel like a CFO giving practical advice
+
+10. Final output
+
+Update the existing Profit Engine page only.
+
+Do not add live integrations.
+Do not change the route or navigation label.
+Do not remove existing working charts or sliders.

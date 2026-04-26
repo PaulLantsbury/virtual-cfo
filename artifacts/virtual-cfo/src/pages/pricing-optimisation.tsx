@@ -310,6 +310,30 @@ export default function PricingOptimisation() {
         </div>
       </div>
 
+      {/* ── 3b. Recovery Confidence Band ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/70 dark:bg-emerald-950/20">
+          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">High confidence</p>
+              <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">£38,000</span>
+            </div>
+            <p className="text-xs text-emerald-700/80 dark:text-emerald-400/75 leading-relaxed">Recoverable by reducing average discount by 3pp with limited conversion risk.</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/70 dark:bg-amber-950/15">
+          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">Test carefully</p>
+              <span className="text-sm font-bold text-amber-700 dark:text-amber-400">£14,000</span>
+            </div>
+            <p className="text-xs text-amber-700/80 dark:text-amber-400/75 leading-relaxed">Additional opportunity from targeted offers, shipping subsidy and returns improvements.</p>
+          </div>
+        </div>
+      </div>
+
       {/* ── 4. Pricing Trend bar ── */}
       <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-950/15 mb-4">
         <TrendingDown className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
@@ -322,13 +346,25 @@ export default function PricingOptimisation() {
       {/* ── 5. KPI Strip (8 cards, 4-column) ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <KpiCard label="Average Selling Price"     value="£42.60"     delta="-£1.20"    positive={false} insight="Average realised price per order after discounts." />
-        <KpiCard label="Average Discount"          value="18%"         delta="+3pp"     positive={false} insight="Average discount applied across orders." />
+        <KpiCard label="Average Discount"          value="18%"         delta="+3pp"     positive={false} insight="Average discount given across orders." />
         <KpiCard label="Full-Price Order Ratio"    value="46%"         delta="-6pp"     positive={false} insight="Orders completed without discount." />
         <KpiCard label="Contribution per Order"    value="£12.40"      delta="-£2.10"   positive={false} insight="Profit before overheads generated per order." />
         <KpiCard label="Discount Cost"             value="£64,000"     delta="+£14,000" positive={false} insight="Revenue given away through promotions and discount codes." />
         <KpiCard label="Returns Impact"            value="£18,000"     delta="+£5,000"  positive={false} insight="Contribution lost through returned orders." />
         <KpiCard label="Pricing Power Index"       value="Moderate"    delta="Stable"   positive={false} neutral={true} insight="Based on discount reliance, full-price mix and contribution stability." />
         <KpiCard label="Recoverable Contribution"  value="£52,000"     delta="+£11,000" positive={false} insight="Estimated monthly contribution recoverable through pricing improvements." />
+      </div>
+
+      {/* ── 5b. Discount Increase Impact micro-card — always visible ── */}
+      <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-red-200 dark:border-red-800/40 bg-red-50/60 dark:bg-red-950/15 mb-6">
+        <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <div className="flex items-center gap-3 flex-wrap mb-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-red-800 dark:text-red-300">Margin lost to discount increase</p>
+            <span className="text-lg font-display font-bold text-red-700 dark:text-red-400">£14,000</span>
+          </div>
+          <p className="text-xs text-red-700/80 dark:text-red-400/75 leading-relaxed">The increase in discounting vs the prior period reduced contribution by approximately £14k this month.</p>
+        </div>
       </div>
 
       {/* ── Free only: upgrade narrative ── */}
@@ -556,7 +592,7 @@ export default function PricingOptimisation() {
           ))}
         </div>
         <div className="px-6 pb-5">
-          <InlineCfoInsight text="Discount reliance is increasing. If this continues, customers may be trained to wait for promotions before buying." />
+          <InlineCfoInsight text="Discount reliance is increasing. If this continues, customers may be trained to wait for promotions, making future full-price conversion harder." />
         </div>
       </div>
 
@@ -676,6 +712,15 @@ export default function PricingOptimisation() {
                   </div>
                 </div>
 
+                {/* Safest lever */}
+                <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/15 px-4 py-3 flex items-start gap-2.5">
+                  <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Safest lever to improve contribution</p>
+                    <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">Reducing shipping subsidy by 10% improves contribution with lower conversion risk than changing headline discounts.</p>
+                  </div>
+                </div>
+
                 {/* Dynamic interpretation */}
                 <div className={cn("rounded-xl border px-4 py-3 flex items-start gap-2.5", simColor)}>
                   <SimIcon className="w-4 h-4 shrink-0 mt-0.5" />
@@ -695,14 +740,30 @@ export default function PricingOptimisation() {
           </div>
         ) : (
           <div className="px-6 py-6">
-            <div className="blur-sm opacity-30 pointer-events-none select-none grid grid-cols-2 gap-3 mb-4" aria-hidden>
-              {["Average Discount", "Full-Price Orders", "Conversion Rate", "Returns Rate"].map((s) => (
-                <div key={s} className="h-10 bg-secondary rounded-xl" />
-              ))}
+            <div className="blur-sm opacity-30 pointer-events-none select-none space-y-3 mb-4" aria-hidden>
+              <div className="grid grid-cols-2 gap-3">
+                {["Average Discount", "Full-Price Orders", "Conversion Rate", "Returns Rate"].map((s) => (
+                  <div key={s} className="h-10 bg-secondary rounded-xl" />
+                ))}
+              </div>
+              <div className="rounded-xl border border-indigo-200 px-4 py-3 flex items-center gap-2.5 bg-indigo-50/60">
+                <div className="w-4 h-4 rounded bg-indigo-200 shrink-0" />
+                <div className="space-y-1 flex-1">
+                  <div className="h-2.5 bg-indigo-200 rounded w-40" />
+                  <div className="h-2 bg-indigo-100 rounded w-56" />
+                </div>
+              </div>
+              <div className="rounded-xl border border-emerald-200 px-4 py-3 flex items-center gap-2.5 bg-emerald-50/60">
+                <div className="w-4 h-4 rounded bg-emerald-200 shrink-0" />
+                <div className="space-y-1 flex-1">
+                  <div className="h-2.5 bg-emerald-200 rounded w-36" />
+                  <div className="h-2 bg-emerald-100 rounded w-52" />
+                </div>
+              </div>
             </div>
             <UpgradeCta
-              title="Test how reducing inventory days would extend your runway"
-              description="Model how stock, supplier timing, marketing spend and fixed costs affect cash before you commit."
+              title="Model pricing and discount scenarios to find your fastest margin lever"
+              description="Test how changes to discounts, full-price mix, conversion and shipping subsidy affect contribution before you commit."
             />
           </div>
         )}
@@ -891,8 +952,17 @@ export default function PricingOptimisation() {
                   <Line yAxisId="pct" type="monotone" dataKey="discount"  stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} name="discount" />
                   <Line yAxisId="pct" type="monotone" dataKey="fullPrice" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} name="fullPrice" />
                   <Line yAxisId="gbp" type="monotone" dataKey="contrib"   stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} name="contrib" />
+                  <ReferenceLine yAxisId="pct" x="Mar" stroke="#f97316" strokeDasharray="4 2" strokeWidth={1.5}
+                    label={{ value: "Promo ↑", position: "insideTopLeft", fill: "#f97316", fontSize: 9, fontWeight: 700 }} />
                 </ComposedChart>
               </ResponsiveContainer>
+            </div>
+            <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-orange-200 dark:border-orange-800/40 bg-orange-50/60 dark:bg-orange-950/15 px-4 py-3">
+              <AlertTriangle className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-bold text-orange-800 dark:text-orange-300 mb-0.5">Promotion frequency increased (Mar–Apr)</p>
+                <p className="text-xs text-orange-700/80 dark:text-orange-400/75 leading-relaxed">Discounting began rising faster after promotional activity increased.</p>
+              </div>
             </div>
           </div>
         ) : (

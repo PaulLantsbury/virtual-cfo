@@ -1,0 +1,132 @@
+Refine the existing Pricing & Discount Optimisation page.
+
+Do not rebuild the page from scratch. Keep the current layout, styling, route, timeframe selector, mock data, charts, simulator, Free/Pro gating and responsive behaviour.
+
+Make the page slightly more decision-led by improving hierarchy and adding a few high-value CFO insight elements.
+
+1. Move Pricing Power Trend lower down
+
+Move the “Pricing Power Trend” section so it appears after:
+
+“What Changed Contribution This Month?”
+
+and before:
+
+“This Month’s Pricing Priorities”
+
+The trend chart should feel like supporting context, not one of the main decision sections.
+
+2. Add annotation to Pricing Power Trend chart
+
+Add a small annotation or callout on the trend chart around March/April:
+
+“Promotion frequency increased”
+
+Supporting text:
+“Discounting began rising faster after promotional activity increased.”
+
+This should make the chart more diagnostic and less passive.
+
+3. Add Discount Increase Impact micro-card
+
+Add a compact insight card near the top, after the KPI grid and before “What Would Improve Margin Fastest?”
+
+Title:
+Margin lost to discount increase
+
+Value:
+£14,000
+
+Text:
+“The increase in discounting vs the prior period reduced contribution by approximately £14k this month.”
+
+Use amber/red warning styling.
+
+This should be visible in both Free and Pro.
+
+4. Add Recovery Confidence Band
+
+Add a compact section near the Recoverable Contribution Opportunity area, ideally immediately below it.
+
+Title:
+Recovery Confidence
+
+Create two small cards:
+
+A. High confidence
+Value:
+£38,000
+
+Text:
+Recoverable by reducing average discount by 3pp with limited conversion risk.
+
+B. Test carefully
+Value:
+£14,000
+
+Text:
+Additional opportunity from targeted offers, shipping subsidy and returns improvements.
+
+Use green for high confidence and amber for test carefully.
+
+This should help users understand that not all recoverable contribution has the same certainty.
+
+5. Add “Safest lever to improve contribution” to simulator
+
+In the Pricing Sensitivity Simulator output panel, add a compact insight below:
+
+Fastest lever to improve contribution:
+“Reducing average discount by 3pp would increase contribution by approximately £38k.”
+
+Add a second compact insight:
+
+Safest lever to improve contribution:
+“Reducing shipping subsidy by 10% improves contribution with lower conversion risk than changing headline discounts.”
+
+Keep this visible in Pro mode.
+
+For Free mode, if the simulator is locked, show this as blurred/locked preview content only.
+
+6. Improve Discount Dependence Risk insight
+
+Replace the current CFO Insight in Discount Dependence Risk with:
+
+“Discount reliance is increasing. If this continues, customers may be trained to wait for promotions, making future full-price conversion harder.”
+
+7. Improve top KPI wording slightly
+
+Update these supporting texts:
+
+Average Discount:
+“Average discount given across orders.”
+
+Discount Cost:
+“Revenue given away through promotions and discount codes.”
+
+Recoverable Contribution:
+“Estimated monthly contribution recoverable through pricing improvements.”
+
+Keep the values unchanged.
+
+8. Free vs Pro behaviour
+
+In Free mode:
+- keep Pricing Power Trend headline visible but lock the detailed chart
+- keep Recovery Confidence headline visible, but blur detailed values if needed
+- show Discount Increase Impact micro-card
+- keep simulator locked
+- keep trade-off and detailed movement sections locked
+
+In Pro mode:
+- all sections should be fully visible
+- no blur overlays
+- no Upgrade CTAs
+- trend chart, simulator, contribution bridge and pricing priorities should all be unlocked
+
+9. Final output
+
+Update the existing Pricing & Discount Optimisation page only.
+
+Do not add live integrations.
+Keep all calculations client-side.
+Keep visual style consistent with Profit Engine and Cash Control.

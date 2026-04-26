@@ -133,14 +133,17 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
  * Swap this function body when auth/billing is integrated.
  */
 function resolvePlan(): UserPlan {
-  // Demo override: sessionStorage.setItem("userPlan", "pro") then refresh
-  const stored =
-    typeof window !== "undefined"
-      ? window.sessionStorage.getItem("userPlan")
-      : null;
-  if (stored === "pro" || stored === "free") return stored;
+  if (typeof window === "undefined") return "free";
 
-  // Default — all visitors start on free
+  // 1. Review Mode override — localStorage, persists across browser sessions
+  const reviewPlan = window.localStorage.getItem("reviewPlan");
+  if (reviewPlan === "pro" || reviewPlan === "free") return reviewPlan;
+
+  // 2. Dev toggle override — sessionStorage, same tab only
+  const devPlan = window.sessionStorage.getItem("userPlan");
+  if (devPlan === "pro" || devPlan === "free") return devPlan;
+
+  // 3. Default — all visitors start on free
   return "free";
 }
 

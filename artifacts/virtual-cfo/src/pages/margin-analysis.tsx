@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
+import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true  },
@@ -568,6 +569,8 @@ export default function MarginAnalysis() {
 
         </div>
       </div>
+
+      <AiCfoAskCard pageId="margin" />
 
       {/* ── Margin benchmark strip ── */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 mb-8 rounded-2xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40">

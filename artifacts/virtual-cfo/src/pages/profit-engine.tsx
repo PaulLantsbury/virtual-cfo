@@ -13,6 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
+import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 
@@ -278,6 +279,8 @@ export default function ProfitEngine() {
           </div>
         )}
       </div>
+
+      <AiCfoAskCard pageId="profit" />
 
       {/* ── Profit Trend micro-summary ── */}
       <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/15 mb-4">

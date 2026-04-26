@@ -12,6 +12,7 @@ import { canAccess } from "@/lib/plan";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
+import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
@@ -284,6 +285,8 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <AiCfoAskCard pageId="dashboard" />
 
       {/* ══ RECOVERABLE CONTRIBUTION OPPORTUNITY ════════════════════════════ */}
       <div className="bg-card rounded-2xl shadow-sm border border-emerald-200/70 dark:border-emerald-800/40 mb-5 overflow-hidden">

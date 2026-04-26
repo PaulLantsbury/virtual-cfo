@@ -7,6 +7,7 @@ import { SHARED_OPPORTUNITIES } from "@/lib/mock-data";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
+import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
@@ -175,6 +176,8 @@ export default function Opportunities() {
           </div>
         )}
       </div>
+
+      <AiCfoAskCard pageId="opportunities" />
 
       {/* ── Execution priority strip — Pro only ── */}
       {showExecPriority && (

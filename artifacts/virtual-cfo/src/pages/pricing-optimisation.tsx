@@ -14,6 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
+import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 
@@ -282,6 +283,8 @@ export default function PricingOptimisation() {
       <div className="mb-6">
         <CfoInsightCard text="Discounting is currently the largest drag on margin. Reducing the average discount by 3pp would increase contribution by approximately £38k per month without requiring additional traffic." />
       </div>
+
+      <AiCfoAskCard pageId="pricing" />
 
       {/* ── 2. Pricing Power Risk Level ── */}
       <div className="flex items-start gap-4 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 mb-4">

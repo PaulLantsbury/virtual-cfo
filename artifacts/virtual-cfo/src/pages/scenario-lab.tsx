@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
+import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 
 // ─── Base financial constants ─────────────────────────────────────────────────
 const BASE_REVENUE          = 420_000;
@@ -375,6 +376,8 @@ export default function ScenarioLab() {
             This scenario increases contribution by approximately 21% without requiring additional customer acquisition.
           </p>
         </div>
+
+        <AiCfoAskCard pageId="scenario" />
 
         {/* ── Free upgrade card ────────────────────────────────────────────── */}
         {!isPro && (

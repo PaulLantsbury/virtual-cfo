@@ -1,0 +1,240 @@
+Add an AI CFO interaction layer across the app.
+
+Do not connect to a real AI API yet. Build the front-end UX and mock contextual responses first.
+
+Objective:
+Make each page feel like the user has a virtual CFO sitting alongside the dashboard, explaining insights and recommending actions.
+
+Apply to these pages:
+- Dashboard / Business Control Centre
+- Profit Margin Analysis
+- Growth Quality
+- Marketing Efficiency
+- Pricing Optimisation
+- Profit Engine
+- Cash Control
+- Profit Opportunities
+- Scenario Lab
+
+1. Add page-level “Ask your AI CFO” module
+
+Place this near the top of each page, directly below the main CFO insight / verdict / opportunity hero section.
+
+Title:
+Ask your AI CFO
+
+Subtitle:
+Ask a question about this page or choose a suggested prompt.
+
+Include:
+- text input field
+- Ask button
+- 3–5 suggested prompt chips
+
+Suggested prompts should be page-specific.
+
+Dashboard prompts:
+- Is my business healthy?
+- What should I fix first?
+- Where is the biggest profit opportunity?
+- Explain the amber risk rating
+- Create a 30-day action plan
+
+Profit Margin Analysis prompts:
+- Why is margin falling?
+- Which cost driver matters most?
+- How much margin can I recover?
+- What should I do this month?
+
+Growth Quality prompts:
+- Is my growth healthy?
+- Am I relying too much on discounts?
+- How can I improve repeat purchase?
+- What should I focus on next?
+
+Marketing Efficiency prompts:
+- Which channels should I scale?
+- Why is Meta underperforming?
+- Where should I move budget?
+- How do I reduce CAC payback?
+
+Pricing Optimisation prompts:
+- Am I discounting too much?
+- What happens if I reduce discounts?
+- Which pricing lever has the biggest impact?
+- How do I improve full-price sales?
+
+Profit Engine prompts:
+- Is the business structurally profitable?
+- What is my break-even point?
+- How do I improve profit scaling?
+- What should I watch this month?
+
+Cash Control prompts:
+- Why is cash tightening?
+- How can I extend runway?
+- Where is cash trapped?
+- What should I do before increasing spend?
+
+Profit Opportunities prompts:
+- Which opportunity should I prioritise?
+- Which actions are highest confidence?
+- What can I do this month?
+- Which opportunity pays back fastest?
+
+Scenario Lab prompts:
+- Which plan should I choose?
+- Why is Balanced Growth recommended?
+- What are the risks in this scenario?
+- Turn this scenario into a weekly action plan
+
+2. Add right-hand AI CFO drawer
+
+When a user clicks a prompt chip or presses Ask, open a right-hand drawer / side panel.
+
+Panel title:
+AI CFO
+
+Panel subtitle:
+Contextual answer based on this page.
+
+Response format should always include:
+
+- Verdict
+- Why it matters
+- Evidence
+- Recommended action
+- Expected impact
+- Confidence / caveat
+
+Use clean formatting, short paragraphs and bullets.
+
+3. Add mock contextual responses
+
+Do not call a real AI API yet.
+
+Create a mock response map keyed by:
+- page
+- prompt
+
+If the user enters free text, return a generic page-aware response.
+
+Example Dashboard response for “What should I fix first?”:
+
+Verdict:
+Prioritise margin recovery before increasing growth spend.
+
+Why it matters:
+The business is profitable, but contribution quality is weakening because CAC, fulfilment costs and discount reliance are rising.
+
+Evidence:
+Contribution margin is 42.3%, discount dependency is 38%, and Meta CAC has increased by 14%.
+
+Recommended action:
+Start with fulfilment cost leakage, discount exposure on returning customers, and inefficient Meta spend.
+
+Expected impact:
+The current opportunity range is £18k–£42k per month.
+
+Confidence:
+Medium-high, based on current mock sales, marketing and margin data.
+
+4. Add contextual section buttons
+
+Inside major insight/action sections, add small secondary buttons where appropriate:
+
+- Explain this
+- What should I do?
+- Model impact
+- Show assumptions
+
+Clicking any of these should open the same AI CFO drawer with a relevant mock response.
+
+Do this for:
+- Dashboard Business Health panel
+- Recoverable Contribution block
+- Profit Margin bridge
+- Marketing Efficiency simulator
+- Pricing Discount Impact Analysis
+- Cash Control working capital section
+- Profit Opportunities opportunity cards
+- Scenario Lab Recommended Plan
+
+5. Do not make AI feel generic
+
+Avoid generic chatbot language.
+
+Every mock response should sound like a CFO:
+- specific
+- quantified
+- action-led
+- plain English
+- commercially useful
+
+Use metrics already present in the app:
+- £18k–£42k recoverable contribution
+- 42.3% contribution margin
+- 38% discount dependency
+- 3.4 months runway
+- £64k cash opportunity
+- £52k pricing opportunity
+- £18.2k marketing opportunity
+- £20.4k margin recovery
+- +£42k/month Balanced Growth Plan impact
+
+6. Keep UI clean
+
+The Ask your AI CFO module should be compact.
+
+It should not overpower the page hero section.
+
+Suggested layout:
+- small card
+- input row
+- prompt chips
+- subtle blue/purple AI styling
+
+The drawer should:
+- slide from the right
+- be dismissible
+- work on desktop and mobile
+- not break layout
+- keep page visible behind it
+
+7. Free vs Pro behaviour
+
+Free mode:
+- show Ask your AI CFO module
+- allow one or two suggested responses
+- for detailed action/impact prompts, show partial response and upgrade CTA:
+  “Upgrade to Pro to unlock the full CFO action plan.”
+
+Pro mode:
+- show full AI CFO responses
+- no upgrade CTA
+
+Do not block the entire AI feature in Free mode. Use it as an upgrade driver.
+
+8. Future-ready structure
+
+Create the mock AI CFO logic in a reusable structure so it can later be replaced by a real AI API call.
+
+Suggested structure:
+- aiCfoPrompts.ts
+- aiCfoResponses.ts
+- AiCfoAskCard component
+- AiCfoDrawer component
+
+Do not hardcode everything inside each page if avoidable.
+
+9. Final checks
+
+Ensure:
+- all pages still build
+- no existing page layout breaks
+- Free/Pro gating still works
+- no duplicate AI cards appear
+- drawer opens and closes correctly
+- prompt chips work
+- typed questions return a page-aware mock response
+- no real API keys or external AI calls are added

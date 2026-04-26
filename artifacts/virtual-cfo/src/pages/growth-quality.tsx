@@ -13,6 +13,7 @@ import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
+import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 
 // ─── Data constants ──────────────────────────────────────────────────────────
 
@@ -312,6 +313,8 @@ export default function GrowthQuality() {
 
         </div>
       </div>
+
+      <AiCfoAskCard pageId="growth" />
 
       {/* ── Growth Classification & Risk Signal ── */}
       <div className={cn(

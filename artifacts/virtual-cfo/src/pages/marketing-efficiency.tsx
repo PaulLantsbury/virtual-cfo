@@ -15,6 +15,7 @@ import { TimelineSelector } from "@/components/TimelineSelector";
 import { cn } from "@/lib/utils";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
@@ -649,6 +650,8 @@ export default function MarketingEfficiency() {
 
         </div>
       </div>
+
+      <AiCfoAskCard pageId="marketing" />
 
       {/* ══════════════════════════════════════════════════════════════════════
           §1b  BUDGET REALLOCATION SIMULATOR

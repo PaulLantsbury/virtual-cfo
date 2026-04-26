@@ -13,6 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
+import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 
 // ─── Base data constants ──────────────────────────────────────────────────────
@@ -318,6 +319,8 @@ export default function CashControl() {
           </div>
         </div>
       </div>
+
+      <AiCfoAskCard pageId="cash" />
 
       {/* ── Cash Trend bar ── */}
       <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-950/15 mb-4">

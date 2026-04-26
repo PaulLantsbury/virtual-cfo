@@ -68,7 +68,17 @@ A modern SaaS financial dashboard for founders and operators.
 ### Plan Gating System
 - `src/lib/plan.ts` — `canAccess(featureName)` returns true for the current user's plan
 - Plan tiers: `"free"` | `"pro"` (default: free; override via `sessionStorage.setItem("userPlan", "pro")`)
-- Feature registry: `opportunity_breakdown`, `channel_margin_analysis`, `cac_payback`, `margin_bridge`, `driver_breakdown`, `fastest_recovery_lever`
+- Feature registry: `opportunity_breakdown`, `channel_margin_analysis`, `cac_payback`, `margin_bridge`, `driver_breakdown`, `fastest_recovery_lever`, `ai_cfo_action_plans` (Pro only)
+
+### AI CFO Interaction Layer
+Present on all 9 main pages. Consists of three components + one data file:
+
+- **`src/lib/aiCfoResponses.ts`** — Mock AI responses keyed by page ID (`dashboard`, `margin`, `growth`, `marketing`, `pricing`, `profit`, `cash`, `opportunities`, `scenario`). Each entry has: `question`, `verdict`, `evidence[]`, `recommendedAction`, `expectedImpact`, `confidence`.
+- **`src/components/AiCfoProvider.tsx`** — React context (`useAiCfo()`) exposing `openDrawer(pageId)`. Wraps the app at root level.
+- **`src/components/AiCfoDrawer.tsx`** — Slide-in right panel. Free users see verdict + first 2 evidence bullets + upgrade CTA. Pro users see full evidence + `recommendedAction` + `expectedImpact`.
+- **`src/components/AiCfoAskCard.tsx`** — Inline trigger card showing the page question and "Get Analysis" button with 1.5s loading state. Inserted into every page just before the first major data section.
+
+The `AiCfoProvider` and `AiCfoDrawer` are mounted at app root in `App.tsx` (inside `TimelineProvider`). Each page imports and renders `<AiCfoAskCard pageId="..." />` at the appropriate location.
 
 ### Reusable Pro-Gating Components
 - **`UpgradePreviewCard`** — indigo inline card with lock icon + CTA link to `/upgrade`. Used for compact in-section upgrade prompts.

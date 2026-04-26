@@ -45,8 +45,14 @@ A modern SaaS financial dashboard for founders and operators.
 ### Routes
 - `/` — Landing page (marketing, hero, features, CTA)
 - `/login` — Login page with Supabase scaffolding
-- `/dashboard` — Main dashboard with KPI cards, Recharts charts, recent transactions
+- `/dashboard` — Main dashboard with KPI cards, CFO insight, top drivers, action recommendations
+- `/margin-analysis` — Contribution margin breakdown by channel, discount impact, returns analysis
+- `/growth-quality` — Repeat rate, CAC payback, discount dependency, growth quality score
+- `/marketing-efficiency` — Channel CAC, blended efficiency, acquisition diagnostics
+- `/opportunities` — Ranked profit opportunities with phased execution plan (Do now / Next wave)
+- `/profit-engine` — EBITDA bridge, break-even analysis, profit sensitivity simulator, driver attribution
 - `/settings` — Settings page
+- `/upgrade` — Plan upgrade page
 
 ### Layout
 - Reusable `AppLayout` component: dark sidebar + top header

@@ -1,0 +1,260 @@
+Add a new page to the app called “Profit Engine”.
+
+The objective of this page is to help ecommerce founders understand whether their business is structurally profitable, what revenue level they need to break even, how fixed costs absorb contribution, and how sensitive profit is to changes in revenue, margin, discounting, returns and fixed costs.
+
+This page should feel like an AI CFO explaining the profit mechanics of the business, not like an accounting report.
+
+Add this page to the main navigation as:
+Profit Engine
+
+Use mock ecommerce data for now, consistent with the existing app data structure and visual style.
+
+Design style:
+- modern SaaS dashboard
+- clean white cards
+- rounded corners
+- subtle shadows
+- clear section hierarchy
+- CFO Insight panels throughout
+- plain-English insight language
+- highly visual and intuitive
+- decision-led, not spreadsheet-led
+- consistent with the existing dashboard pages
+
+Page structure:
+
+1. Page Header
+
+Title:
+Profit Engine
+
+Subtitle:
+Understand your true profit base, break-even point and how changes in trading performance flow through to EBITDA.
+
+Top CFO Insight card:
+“Your profit engine is improving because contribution margin has strengthened, but fixed costs are still consuming a high proportion of contribution. The key opportunity is to grow revenue without allowing overheads to rise at the same rate.”
+
+2. Top KPI Strip
+
+Create 5 KPI cards:
+
+A. EBITDA
+Value: £78,000
+Delta: +£18,000 vs prior period
+Insight: EBITDA margin is 15.0%
+
+B. Break-even Revenue
+Value: £316,000
+Delta: -£24,000 vs prior period
+Insight: Lower break-even improves resilience
+
+C. Contribution Margin
+Value: 38.0%
+Delta: +2.4pp vs prior period
+Insight: Every £10k revenue creates £3.8k contribution
+
+D. Fixed Cost Absorption
+Value: 61%
+Delta: -7pp vs prior period
+Insight: 61% of contribution is used by fixed costs
+
+E. Margin of Safety
+Value: 39%
+Delta: +6pp vs prior period
+Insight: Revenue could fall 39% before EBITDA turns negative
+
+Use positive/negative styling for movements, while keeping the colour palette consistent with the rest of the app.
+
+3. Contribution to EBITDA Bridge
+
+Create a large central card titled:
+Revenue to EBITDA Bridge
+
+Add CFO Insight:
+“The business is generating healthy contribution, but EBITDA remains sensitive to fixed cost growth. Protecting contribution margin is currently more valuable than chasing low-quality revenue.”
+
+Include a waterfall-style visual or simple horizontal bridge chart showing:
+
+Revenue: £520,000
+Less Discounts: (£82,000)
+Less Returns: (£41,000)
+Net Revenue: £397,000
+Less Variable Costs: (£199,000)
+Contribution: £198,000
+Less Fixed Costs: (£120,000)
+EBITDA: £78,000
+
+Also include a supporting table with columns:
+Step
+Amount
+% of Revenue
+Commentary
+
+Rows:
+Revenue | £520,000 | 100.0% | Gross sales before discounts and returns
+Discounts | (£82,000) | (15.8%) | Discounting remains a significant margin drag
+Returns | (£41,000) | (7.9%) | Returns reduce net revenue and fulfilment efficiency
+Net Revenue | £397,000 | 76.3% | Revenue retained after discounts and returns
+Variable Costs | (£199,000) | (38.3%) | Product, fulfilment and payment costs
+Contribution | £198,000 | 38.0% | Profit available to cover fixed costs
+Fixed Costs | (£120,000) | (23.1%) | Payroll, software, rent and overheads
+EBITDA | £78,000 | 15.0% | Operating profit before depreciation and financing
+
+4. Profit Engine Health Section
+
+Create a section with three cards:
+
+A. Fixed Cost Absorption
+Title: Fixed Cost Absorption
+Metric: 61%
+Text:
+“61% of contribution is currently being consumed by fixed costs. This means the business has profit upside if revenue grows without overheads increasing at the same pace.”
+
+B. Break-even Point
+Title: Monthly Break-even Revenue
+Metric: £316,000
+Text:
+“At the current contribution margin, the business needs £316k of monthly revenue to cover fixed costs.”
+
+C. Operating Leverage
+Title: Operating Leverage
+Metric: 2.4x
+Text:
+“EBITDA is currently growing faster than revenue, which indicates positive operating leverage.”
+
+Add a small explanatory note:
+“Operating leverage improves when contribution grows faster than fixed costs.”
+
+5. Profit Sensitivity Simulator
+
+Create an interactive card titled:
+Profit Sensitivity Simulator
+
+Add CFO Insight:
+“Small changes in discounting, returns and fixed costs can have a disproportionate impact on EBITDA. Use the sliders below to understand which levers matter most.”
+
+Create 5 sliders:
+
+Revenue Change
+Range: -20% to +30%
+Default: 0%
+
+Discount Rate Change
+Range: -5pp to +8pp
+Default: 0pp
+
+Returns Rate Change
+Range: -5pp to +5pp
+Default: 0pp
+
+Variable Cost Change
+Range: -5pp to +5pp
+Default: 0pp
+
+Fixed Cost Change
+Range: -20% to +20%
+Default: 0%
+
+As the sliders move, dynamically calculate and display:
+
+Projected Revenue
+Projected Contribution
+Projected Fixed Costs
+Projected EBITDA
+EBITDA Movement vs Base
+Projected EBITDA Margin
+
+Base assumptions:
+Revenue = 520000
+Contribution margin = 38%
+Fixed costs = 120000
+Base EBITDA = 78000
+
+Simplified calculation:
+Adjusted revenue = revenue * (1 + revenue change)
+Adjusted contribution margin = base contribution margin - discount rate change - returns rate change - variable cost change
+Projected contribution = adjusted revenue * adjusted contribution margin
+Projected fixed costs = fixed costs * (1 + fixed cost change)
+Projected EBITDA = projected contribution - projected fixed costs
+Projected EBITDA margin = projected EBITDA / adjusted revenue
+
+Show a clear AI-generated interpretation below the results:
+- If EBITDA increases: “This scenario strengthens the profit engine because contribution growth more than offsets fixed cost movement.”
+- If EBITDA decreases: “This scenario weakens the profit engine because margin pressure or fixed cost growth absorbs too much contribution.”
+- If EBITDA becomes negative: “This scenario pushes the business below break-even. Management should prioritise margin recovery or fixed cost control.”
+
+6. What Changed Profit This Month?
+
+Create a card titled:
+What Changed Profit This Month?
+
+Add CFO Insight:
+“EBITDA improved by £18k this month, mainly due to stronger contribution margin and better revenue quality, partly offset by higher fixed costs.”
+
+Add a driver impact table:
+
+Driver | EBITDA Impact | Explanation
+Revenue growth | +£9,000 | Higher sales generated additional contribution
+Contribution margin improvement | +£18,000 | Better pricing and lower discounting improved profit flow-through
+Returns reduction | +£4,000 | Lower returns protected net revenue
+Fixed cost increase | (£11,000) | Payroll and software costs increased
+Net EBITDA movement | +£18,000 | Overall EBITDA improvement vs prior period
+
+Also add a simple bar chart showing positive and negative EBITDA drivers.
+
+7. AI CFO Commentary
+
+Create a final section titled:
+AI CFO Commentary
+
+Add 5 insight cards:
+
+A. Positive Signal
+“Contribution margin improved by 2.4pp this period. At current revenue levels, this adds approximately £12k of monthly EBITDA capacity.”
+
+B. Early Warning
+“Fixed costs increased by 9% versus the prior period. If this continues without matching contribution growth, EBITDA margin will compress.”
+
+C. Break-even Insight
+“The business is currently operating 39% above break-even revenue, giving a reasonable margin of safety.”
+
+D. Scaling Insight
+“If revenue grows by 10% while fixed costs remain flat, EBITDA would increase by approximately £20k.”
+
+E. CFO Recommendation
+“Prioritise revenue growth from profitable channels, limit blanket discounting, and monitor fixed cost creep before adding new overhead.”
+
+8. Design Requirements
+
+Use the same visual styling and component approach as the rest of the app.
+
+The page should feel like an AI CFO explaining how the business turns revenue into profit.
+
+Use:
+- summary cards
+- charts
+- plain-English insight panels
+- tooltips where helpful
+- responsive layout
+- strong visual hierarchy
+- clear labels
+- minimal accounting jargon
+
+Make sure the page is mobile responsive, but optimised for desktop dashboard viewing.
+
+9. Navigation and Routing
+
+Add the new page to the sidebar/menu as:
+Profit Engine
+
+Make sure the route works correctly.
+
+Use the same layout wrapper, header and sidebar as the existing pages.
+
+10. Final Output
+
+Build the full Profit Engine page with mock data, working sliders, charts and insight cards.
+
+Do not require live API integrations yet.
+
+Keep all calculations client-side for now.

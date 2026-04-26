@@ -19,12 +19,10 @@ export interface Driver {
 
 interface TopDriversProps {
   drivers: Driver[];
-  /**
-   * When true, renders `proDetail` lines beneath each driver text.
-   * Pass `canAccess("dashboard_driver_detail")` from the parent.
-   */
   isPro?: boolean;
   isLoading?: boolean;
+  title?: string;
+  subtitle?: string;
 }
 
 const trendConfig: Record<DriverTrend, { label: string; classes: string }> = {
@@ -33,14 +31,16 @@ const trendConfig: Record<DriverTrend, { label: string; classes: string }> = {
   neutral:   { label: "–", classes: "text-muted-foreground bg-secondary" },
 };
 
-export function TopDrivers({ drivers, isPro = false, isLoading }: TopDriversProps) {
+export function TopDrivers({
+  drivers, isPro = false, isLoading,
+  title = "Top Drivers This Month",
+  subtitle = "What changed this month and how it affected financial performance",
+}: TopDriversProps) {
   return (
     <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
       <div className="mb-5">
-        <h3 className="font-semibold text-lg text-foreground">Top Drivers This Month</h3>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          What changed this month and how it affected financial performance
-        </p>
+        <h3 className="font-semibold text-lg text-foreground">{title}</h3>
+        <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
       </div>
 
       {isLoading ? (

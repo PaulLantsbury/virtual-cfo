@@ -1,0 +1,388 @@
+Rewrite the existing Dashboard page into a stronger executive “Business Control Centre”.
+
+Do not change the sidebar, app shell, plan toggle, header structure, detailed pages or routes.
+
+Objective:
+The Dashboard should be the first-page summary of the whole Virtual CFO product. It should instantly show:
+1. Current state of the business
+2. Profit/cash opportunity identified
+3. Biggest risks
+4. Priority actions
+5. Clear routes into each detailed page
+
+Use the same visual style as the newer pages:
+- CFO Insight cards
+- status badges
+- rounded cards
+- green/amber/red risk styling
+- clean executive layout
+- founder-friendly language
+
+1. Rename page header
+
+Change page title from:
+Financial Health Overview
+
+To:
+Business Control Centre
+
+Subtitle:
+See what is happening, how much profit and cash is at risk, and where to act first.
+
+2. Add top executive alert strip
+
+Add a compact strip directly under the page header:
+
+“This month’s performance is reducing contribution by approximately £9.4k vs last month. The largest drivers are fulfilment cost inflation, Meta CAC deterioration and increased discounting.”
+
+Use amber/red subtle styling.
+
+3. Move Recoverable Contribution Opportunity to top
+
+Move the Recoverable Contribution Opportunity block directly under the alert strip.
+
+Make it more prominent.
+
+Title:
+Recoverable Contribution Opportunity
+
+Main value:
+£18k–£42k
+
+Supporting text:
+Potential contribution upside next month if the issues above are addressed.
+
+Add driver text:
+Driven primarily by shipping costs, Meta CAC inefficiency and increased discounting.
+
+CTA:
+See action plan →
+
+Link to the existing Opportunities / Scenario Lab page if available. If no Opportunities page route exists, link to Scenario Lab.
+
+4. Upgrade CFO Insight
+
+Replace the existing CFO Insight copy with:
+
+“Contribution margin is declining despite revenue growth. The fastest improvement comes from renegotiating fulfilment costs, reducing discount exposure on returning customers and reallocating inefficient Meta spend toward higher-contribution channels.”
+
+Place CFO Insight immediately below Recoverable Contribution Opportunity.
+
+5. Add Business Health Score
+
+Add a compact score card below CFO Insight.
+
+Title:
+Business health
+
+Score:
+Moderate risk
+
+Supporting text:
+Margin pressure, discount reliance and rising CAC are reducing the quality of growth.
+
+Driver badges:
+- Margin pressure
+- Discount reliance
+- Rising CAC
+
+Use amber styling.
+
+6. Add Recommended Improvement Plan preview
+
+Add a section after Business Health Score.
+
+Title:
+Recommended improvement plan
+
+Plan name:
+Balanced Growth Plan
+
+Text:
+“This plan improves profit without choking growth. It combines pricing discipline, marketing reallocation, stock control and overhead restraint.”
+
+Impact cards:
+- +£42k contribution/month
+- +£64k cash
+- +0.8 months runway
+- +4.2pp margin
+
+CTA:
+Model this plan →
+
+Link CTA to Scenario Lab.
+
+7. Reorder KPI tiles
+
+Replace or reorder KPI cards into this order:
+
+A. Contribution Margin
+Value: 42.3%
+Change: ↓ 2.8% vs last month
+Status: Below target
+Text: Margin falling due to higher fulfilment and acquisition costs.
+
+B. Recoverable Contribution
+Value: £18k–£42k
+Change: Opportunity identified
+Status: High value
+Text: Potential monthly contribution upside from current issues.
+
+C. Cash Runway
+Value: 3.4 months
+Change: Moderate
+Status: Monitor
+Text: Cash runway is tightening as working capital absorbs cash.
+
+D. Discount Dependency
+Value: 38%
+Change: ↑ 11% vs last month
+Status: High
+Text: High reliance on promotions to sustain growth.
+
+E. Acquisition Efficiency
+Value: Meta CAC +14%
+Change: ↓ efficiency
+Status: Weakening
+Text: Paid acquisition is becoming less contribution-efficient.
+
+F. Repeat Purchase Rate
+Value: 28%
+Change: ↑ 4.2% vs last month
+Status: Improving
+Text: Retention is improving as more customers place second orders.
+
+G. Monthly Revenue
+Value: £124,500
+Change: ↑ 12.4% vs last month
+Status: Growing
+Text: Revenue is growing, but margin quality is weakening.
+
+H. Net Profit
+Value: £56,300
+Change: ↑ 18.7% vs last month
+Status: Positive
+Text: Profit remains positive, but quality of growth needs attention.
+
+Use green/amber/red status styling.
+
+8. Add Priority Actions section above Top Drivers
+
+Insert a section after KPI tiles.
+
+Title:
+Priority actions this month
+
+Subtitle:
+The highest-impact actions your CFO would focus on first.
+
+Create three action cards:
+
+A. Renegotiate fulfilment partner pricing
+Impact:
++£6.8k contribution
+Reason:
+Shipping and fulfilment costs are the largest margin drag this month.
+Badge:
+High impact
+
+B. Reduce discount exposure on returning customers
+Impact:
++£4.2k contribution
+Reason:
+Discount usage is rising faster than revenue growth.
+Badge:
+High impact
+
+C. Reallocate inefficient Meta spend
+Impact:
++£3.1k contribution
+Reason:
+Meta CAC has increased while ROAS has weakened.
+Badge:
+Medium impact
+
+CTA:
+View full action plan →
+
+Link to Scenario Lab or Opportunities page.
+
+9. Rename Top Drivers section
+
+Rename:
+Top Drivers This Month
+
+To:
+What changed and why it matters
+
+Subtitle:
+The biggest movements behind this month’s financial performance.
+
+Keep the existing driver list, but update wording where needed:
+
+- Margin down due to increased shipping and fulfilment costs
+- Repeat purchase rate improving month-on-month
+- Ad spend efficiency declining — higher CAC with lower ROAS
+- Discount usage rising faster than revenue growth
+- Average order value holding steady
+
+Keep arrows/status icons.
+
+10. Improve What to do next section
+
+Rename:
+What to do next
+
+To:
+CFO action plan
+
+Subtitle:
+Three actions ranked by commercial impact.
+
+Keep existing actions, but update wording:
+
+- Review fulfilment partner pricing to improve contribution margin
+- Reduce discount usage on returning customers
+- Reallocate ad spend from Meta toward higher-contribution channels
+
+Keep impact badges:
+- High impact
+- High impact
+- Medium impact
+
+CTA:
+Open Scenario Lab →
+
+Link to Scenario Lab.
+
+11. Strengthen Business Health Modules section
+
+Rename:
+Business Health Modules
+
+To:
+Explore the detailed engines
+
+Subtitle:
+Go deeper on the areas driving profit, cash and growth quality.
+
+Update cards to include metrics and links:
+
+A. Profit Quality
+Headline:
+£20.4k margin recovery identified
+Text:
+See where contribution margin is being eroded and how to recover it.
+CTA:
+Analyse margin →
+Link to Profit Margin Analysis page.
+
+B. Growth Quality
+Headline:
+38% discount dependency
+Text:
+Understand whether growth is healthy or reliant on promotions and paid spend.
+CTA:
+Analyse growth →
+Link to Growth Quality page.
+
+C. Acquisition Efficiency
+Headline:
+Meta CAC +14%
+Text:
+Diagnose which channels are creating profitable customers.
+CTA:
+Diagnose acquisition →
+Link to Marketing Efficiency page.
+
+D. Opportunities / Scenario Lab
+Headline:
+£18k–£42k contribution upside
+Text:
+See the highest-impact improvement actions and model the combined impact.
+CTA:
+Model opportunity →
+Link to Scenario Lab.
+
+E. Cash Efficiency
+Headline:
+£64k cash headroom opportunity
+Text:
+See where cash is trapped and how to protect runway.
+CTA:
+Analyse cash →
+Link to Cash Control page.
+
+F. Pricing Optimisation
+Headline:
+£52k recoverable contribution
+Text:
+Identify discount leakage and pricing opportunities.
+CTA:
+Improve pricing →
+Link to Pricing Optimisation page.
+
+Use six cards in a clean grid.
+
+Do not show Cash Efficiency as “Coming soon” because Cash Control now exists.
+
+12. Remove report-style emphasis
+
+The dashboard should not feel like a reporting page.
+
+Avoid:
+- Create Report language
+- report builder references
+- overly passive “overview” wording
+
+Use:
+- action
+- opportunity
+- recoverable contribution
+- risk
+- recommended plan
+- scenario
+- CFO action
+
+13. Free vs Pro gating
+
+Free version:
+- show headline Business Control Centre
+- show CFO Insight
+- show Recoverable Contribution Opportunity headline
+- show KPI tiles
+- show module cards
+- lock detailed action values if required
+- show upgrade prompt:
+“Upgrade to Pro to unlock the full CFO action plan, scenario modelling and detailed opportunity breakdown.”
+
+Pro version:
+- show all values
+- show all links
+- no blur overlays
+- no upgrade CTAs
+
+14. Navigation links
+
+Ensure CTAs point to existing routes. Use current project route names.
+
+Suggested mappings:
+- Scenario Lab → /scenario-lab
+- Profit Margin Analysis → /margin-analysis or existing margin route
+- Growth Quality → /growth-quality
+- Marketing Efficiency → /marketing-efficiency
+- Cash Control → /cash-control
+- Pricing Optimisation → /pricing-optimisation
+- Profit Engine → /profit-engine
+
+If route names differ, use the app’s existing route constants or current sidebar links.
+
+15. Final output
+
+Update Dashboard page only.
+
+Do not change detailed pages.
+Do not add live integrations.
+Use mock data only.
+Keep all calculations client-side.
+Ensure the page is responsive and optimised for desktop dashboard viewing.

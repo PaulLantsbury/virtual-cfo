@@ -9,8 +9,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TopDrivers, type Driver } from "@/components/TopDrivers";
 import { canAccess } from "@/lib/plan";
-import { BenchmarkStrip } from "@/components/BenchmarkStrip";
-import { DataQualityNote } from "@/components/DataQualityNote";
+import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 
@@ -192,16 +191,6 @@ export default function Dashboard() {
           </Button>
         </div>
       </div>
-
-      <BenchmarkStrip
-        message="Contribution margin is 42.3%, below the typical healthy range of 45–60%."
-        status="below"
-      />
-
-      <DataQualityNote
-        note="Dashboard insights combine data from sales, marketing, pricing, margin and cash pages. Accuracy improves as source data mappings improve."
-        className="mb-5"
-      />
 
       {/* ══ BUSINESS HEALTH VERDICT HERO ════════════════════════════════════ */}
       <div className="bg-card rounded-2xl shadow-sm border border-amber-200/70 dark:border-amber-800/30 mb-5 overflow-hidden">
@@ -640,6 +629,12 @@ export default function Dashboard() {
           ))}
         </div>
       </div>
+
+      <DataBenchmarkAssumptions
+        benchmarkNote="Dashboard insights combine sales, marketing, pricing, margin and cash data."
+        dataQualityNote="Accuracy improves as source data mappings improve."
+        className="mb-2"
+      />
 
     </AppLayout>
   );

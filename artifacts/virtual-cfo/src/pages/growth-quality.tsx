@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
-import { BenchmarkStrip } from "@/components/BenchmarkStrip";
+import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 
 // ─── Data constants ──────────────────────────────────────────────────────────
 
@@ -282,11 +282,6 @@ export default function GrowthQuality() {
         </div>
         <TimelineSelector />
       </div>
-
-      <BenchmarkStrip
-        message="Repeat purchase rate is 28%, within the typical healthy range for this stage."
-        status="in"
-      />
 
       {/* ── CFO Insight ── */}
       <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-8 overflow-hidden">
@@ -840,6 +835,13 @@ export default function GrowthQuality() {
           />
         </PremiumBlurPreview>
       )}
+
+      <DataBenchmarkAssumptions
+        benchmarkNote="Repeat purchase rate is 28%, within the typical healthy range for this stage."
+        dataQualityNote="Growth quality depends on accurate customer, order and discount tagging."
+        className="mb-2"
+      />
+
     </AppLayout>
   );
 }

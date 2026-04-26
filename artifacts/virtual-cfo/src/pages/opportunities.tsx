@@ -6,7 +6,7 @@ import { canAccess } from "@/lib/plan";
 import { SHARED_OPPORTUNITIES } from "@/lib/mock-data";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
-import { BenchmarkStrip } from "@/components/BenchmarkStrip";
+import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
@@ -488,6 +488,13 @@ export default function Opportunities() {
           </div>
         )}
       </div>
+
+      <DataBenchmarkAssumptions
+        benchmarkNote="Opportunities are ranked by estimated value, confidence, timing and effort."
+        dataQualityNote="Opportunity values are directional estimates based on current connected data quality."
+        confidenceNote="High-confidence opportunities use direct Shopify and cost data. Medium and low confidence use industry benchmarks and trend extrapolation."
+        className="mb-2"
+      />
 
     </AppLayout>
   );

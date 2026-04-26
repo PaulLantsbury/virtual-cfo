@@ -13,8 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
-import { BenchmarkStrip } from "@/components/BenchmarkStrip";
-import { DataQualityNote } from "@/components/DataQualityNote";
+import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 
 // ─── Base data constants ──────────────────────────────────────────────────────
 const CASH_BALANCE        = 186_000;
@@ -276,13 +275,6 @@ export default function CashControl() {
         </div>
         <TimelineSelector />
       </div>
-
-      <BenchmarkStrip
-        message="Cash runway is 3.4 months, within monitor range but below strong cover."
-        status="watch"
-      />
-
-      <DataQualityNote note="Cash and working capital insights depend on accurate stock, supplier payment and bank transaction data." />
 
       {/* ── A. Cash Control Summary ── */}
       <div className="mb-8 space-y-4">
@@ -1019,6 +1011,13 @@ export default function CashControl() {
           </div>
         )}
       </div>
+
+      <DataBenchmarkAssumptions
+        benchmarkNote="Cash runway is 3.4 months, within monitor range but below strong cover."
+        dataQualityNote="Cash insights depend on accurate stock, supplier payment and bank transaction data."
+        className="mb-2"
+      />
+
     </AppLayout>
   );
 }

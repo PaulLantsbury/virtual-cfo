@@ -1,0 +1,157 @@
+Fix the placement of benchmark and data quality notes across the app.
+
+Problem:
+Benchmark strips and data quality notes are currently appearing at the top of multiple pages, before the main CFO insight and opportunity sections. This weakens the page hierarchy.
+
+Objective:
+Benchmarks and data quality notes should support trust, not lead the page. Move them lower down and make them lower visual priority.
+
+Apply this across all pages:
+- Dashboard / Business Control Centre
+- Profit Margin Analysis
+- Growth Quality
+- Marketing Efficiency
+- Pricing Optimisation
+- Profit Engine
+- Cash Control
+- Profit Opportunities
+- Scenario Lab
+
+1. Remove benchmark/data-quality notes from the top of each page
+
+On every page, ensure the first visible content after the page title is the main CFO verdict, CFO insight, risk summary, opportunity block or page-specific hero section.
+
+Do not show benchmark strips or data quality notes above these sections.
+
+2. Create a reusable collapsible section
+
+Create a reusable component called:
+
+Data & benchmark assumptions
+
+This should contain:
+- benchmark note for that page
+- data quality note for that page
+- confidence explanation where relevant
+
+Default state:
+Collapsed
+
+Visual style:
+- small
+- neutral grey
+- subtle border
+- low visual weight
+- no warning colours unless genuinely critical
+- positioned near the bottom of each page
+
+3. Page-specific content
+
+Dashboard:
+Benchmark note:
+“Dashboard insights combine sales, marketing, pricing, margin and cash data.”
+
+Data quality note:
+“Accuracy improves as source data mappings improve.”
+
+Profit Margin Analysis:
+Benchmark note:
+“Typical healthy DTC contribution margin range: 45–60%. Current: 42.3%.”
+
+Data quality note:
+“Margin analysis depends on product costs, shipping, discounts and marketing spend being mapped correctly.”
+
+Growth Quality:
+Benchmark note:
+“Repeat purchase rate is 28%, within the typical healthy range for this stage.”
+
+Data quality note:
+“Growth quality depends on accurate customer, order and discount tagging.”
+
+Marketing Efficiency:
+Benchmark note:
+“Meta CAC payback is 2.1 orders, above the safe range of <1.2 orders.”
+
+Data quality note:
+“Channel contribution estimates rely on revenue attribution from Google and Meta. Cross-channel attribution differences may affect comparisons.”
+
+Pricing Optimisation:
+Benchmark note:
+“Discount dependency is 38%, above the preferred range of 15–25%.”
+
+Data quality note:
+“Discount analysis assumes discounts are recorded using Shopify discount codes or compare-at pricing. Manual price changes may understate discount impact.”
+
+Profit Engine:
+Benchmark note:
+“Profit health is assessed using contribution margin, overhead load and break-even distance.”
+
+Data quality note:
+“Profit analysis depends on accurate fixed cost, contribution and overhead mapping.”
+
+Cash Control:
+Benchmark note:
+“Cash runway is 3.4 months, within monitor range but below strong cover.”
+
+Data quality note:
+“Cash insights depend on accurate stock, supplier payment and bank transaction data.”
+
+Profit Opportunities:
+Benchmark note:
+“Opportunities are ranked by estimated value, confidence, timing and effort.”
+
+Data quality note:
+“Opportunity values are directional estimates based on current connected data quality.”
+
+Scenario Lab:
+Benchmark note:
+“Scenario quality is assessed against margin, cash runway and CAC payback benchmarks.”
+
+Data quality note:
+“Scenario outputs are directional estimates, not guaranteed outcomes.”
+
+4. Keep confidence badges near the relevant insight
+
+Do not move confidence badges away from opportunity cards where they help decision-making.
+
+But any long confidence explanations should move into the collapsible Data & benchmark assumptions section.
+
+5. Preserve page hierarchy
+
+The top of each page should now start with:
+
+Dashboard:
+Business Health verdict
+
+Profit Margin Analysis:
+Profit Margin Summary / CFO insight
+
+Growth Quality:
+Growth Quality verdict
+
+Marketing Efficiency:
+Marketing Efficiency Summary / CFO insight
+
+Pricing Optimisation:
+Pricing Power summary
+
+Profit Engine:
+Profit Engine Summary
+
+Cash Control:
+Cash Control Summary / Cash Risk
+
+Profit Opportunities:
+Recoverable Opportunity summary
+
+Scenario Lab:
+Recommended Scenario / CFO insight
+
+6. Final checks
+
+Ensure:
+- no benchmark strip appears as the first card on any page
+- no data quality note appears above the main CFO insight
+- all notes remain available, just lower priority
+- Free/Pro gating remains unchanged
+- layout stays clean and responsive

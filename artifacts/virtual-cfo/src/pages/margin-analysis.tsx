@@ -11,8 +11,7 @@ import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
-import { BenchmarkStrip } from "@/components/BenchmarkStrip";
-import { DataQualityNote } from "@/components/DataQualityNote";
+import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true  },
@@ -410,13 +409,6 @@ export default function MarginAnalysis() {
 
         <TimelineSelector />
       </div>
-
-      <BenchmarkStrip
-        message="Typical healthy DTC contribution margin range: 45–60%. Current: 42.3%."
-        status="below"
-      />
-
-      <DataQualityNote note="Margin analysis depends on product costs, shipping, discounts and marketing spend being mapped correctly." />
 
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 1 — CFO INSIGHT
@@ -1969,6 +1961,12 @@ export default function MarginAnalysis() {
           Contribution per order has fallen from £40.50 (Mar '25) to £35.00 (Mar '26), a year-on-year drop of £5.50. The widening gap between revenue and contribution signals rising variable costs per order.
         </p>
       </div>
+
+      <DataBenchmarkAssumptions
+        benchmarkNote="Typical healthy DTC contribution margin range: 45–60%. Current: 42.3%."
+        dataQualityNote="Margin analysis depends on product costs, shipping, discounts and marketing spend being mapped correctly."
+        className="mb-2"
+      />
 
     </AppLayout>
   );

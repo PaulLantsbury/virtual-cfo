@@ -15,8 +15,7 @@ import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
-import { BenchmarkStrip } from "@/components/BenchmarkStrip";
-import { DataQualityNote } from "@/components/DataQualityNote";
+import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 
 // ─── Base financial constants ─────────────────────────────────────────────────
 const BASE_REVENUE          = 420_000;
@@ -358,13 +357,6 @@ export default function ScenarioLab() {
             <span className="text-xs text-muted-foreground">Compare to: {timelineCompare}</span>
           </div>
         </div>
-
-        <BenchmarkStrip
-          message="Scenario quality is assessed against margin, cash runway and CAC payback benchmarks."
-          status="in"
-        />
-
-        <DataQualityNote note="Scenario outputs are directional estimates based on connected sales, marketing, cost and cash data." />
 
         {/* ══ 2. CFO INSIGHT CARD ═════════════════════════════════════════════ */}
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
@@ -1164,19 +1156,15 @@ export default function ScenarioLab() {
           </div>
         </PremiumBlurPreview>
 
-        {/* ══ 14. DATA QUALITY NOTE ════════════════════════════════════════════ */}
-        <div className="bg-secondary/40 rounded-2xl border border-border/40 px-5 py-4">
-          <p className="text-xs font-semibold text-muted-foreground mb-1">Data quality note</p>
-          <p className="text-xs text-muted-foreground/80 leading-relaxed">
-            Scenario outputs are based on the quality of connected sales, marketing, cost and cash data. Forecasts should be treated
-            as directional estimates rather than guaranteed outcomes.
-          </p>
-          <p className="text-xs text-muted-foreground/60 mt-1.5 leading-relaxed">
-            Accuracy improves when Shopify, Xero, Google Ads, Meta and cost mappings are kept up to date.
-          </p>
-        </div>
-
       </div>
+
+      <DataBenchmarkAssumptions
+        benchmarkNote="Scenario quality is assessed against margin, cash runway and CAC payback benchmarks."
+        dataQualityNote="Scenario outputs are directional estimates, not guaranteed outcomes."
+        confidenceNote="Accuracy improves when Shopify, Xero, Google Ads, Meta and cost mappings are kept up to date."
+        className="mb-2"
+      />
+
     </AppLayout>
   );
 }

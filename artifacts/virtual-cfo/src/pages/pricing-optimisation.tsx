@@ -14,8 +14,7 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
-import { BenchmarkStrip } from "@/components/BenchmarkStrip";
-import { DataQualityNote } from "@/components/DataQualityNote";
+import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -278,13 +277,6 @@ export default function PricingOptimisation() {
         </div>
         <TimelineSelector />
       </div>
-
-      <BenchmarkStrip
-        message="Discount dependency is 38%, above the preferred range of 15–25%."
-        status="above"
-      />
-
-      <DataQualityNote note="Discount analysis assumes discounts are recorded using Shopify discount codes or compare-at pricing. If product list prices are manually reduced instead, discount impact may be understated." />
 
       {/* ── 1. Top CFO Insight ── */}
       <div className="mb-6">
@@ -1073,6 +1065,13 @@ export default function PricingOptimisation() {
           </div>
         )}
       </div>
+
+      <DataBenchmarkAssumptions
+        benchmarkNote="Discount dependency is 38%, above the preferred range of 15–25%."
+        dataQualityNote="Discount analysis assumes discounts are recorded using Shopify discount codes or compare-at pricing. Manual price changes may understate discount impact."
+        className="mb-2"
+      />
+
     </AppLayout>
   );
 }

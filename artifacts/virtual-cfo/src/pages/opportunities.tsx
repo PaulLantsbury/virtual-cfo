@@ -142,7 +142,7 @@ export default function Opportunities() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Profit Opportunities</h1>
           <p className="text-muted-foreground mt-1">
-            Ranked by estimated contribution uplift — each figure represents additional profit next month.
+            Rank the highest-impact profit and cash opportunities identified across your business.
           </p>
         </div>
         <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">

@@ -310,7 +310,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="shrink-0 sm:pt-2">
-                <Link href="/scenario-lab" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
+                <Link href="/profit-opportunities" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
                   See action plan <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -493,7 +493,7 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-            <Link href="/scenario-lab" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+            <Link href="/profit-opportunities" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
               View full action plan <ArrowRight className="w-4 h-4" />
             </Link>
           </>

@@ -42,6 +42,7 @@ function Router() {
       <Route path="/growth-quality" component={GrowthQuality} />
       <Route path="/marketing-efficiency" component={MarketingEfficiency} />
       <Route path="/opportunities" component={Opportunities} />
+      <Route path="/profit-opportunities" component={Opportunities} />
       <Route path="/profit-engine" component={ProfitEngine} />
       <Route path="/cash-control" component={CashControl} />
       <Route path="/pricing-optimisation" component={PricingOptimisation} />

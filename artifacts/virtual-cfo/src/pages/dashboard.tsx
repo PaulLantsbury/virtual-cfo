@@ -160,7 +160,6 @@ export default function Dashboard() {
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button>Create Report</Button>
         </div>
       </div>
 

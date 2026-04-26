@@ -1,0 +1,109 @@
+Improve the Free version of the Dashboard to better surface opportunity and increase upgrade conversion motivation.
+
+Do not change layout structure. Only adjust wording, visibility rules and locked-content behaviour.
+
+Objective:
+Free users should clearly see that £18k–£42k improvement exists, but must upgrade to unlock how to achieve it.
+
+1. Update Recoverable Contribution panel (Free version only)
+
+Replace the masked range:
+
+£–k – £–k / month
+
+with:
+
+£18k–£42k potential improvement identified
+
+Keep subtitle:
+
+Potential monthly contribution upside if the issues above are addressed.
+
+Keep timing text:
+
+Most recoverable within 30–60 days.
+
+Blur the timing chips visually:
+
+£12k within 30 days 🔒
+£30k within 90 days 🔒
+
+Add lock styling.
+
+2. Change panel heading (Free version only)
+
+Replace:
+
+RECOVERABLE CONTRIBUTION AVAILABLE IMMEDIATELY
+
+with:
+
+RECOVERABLE CONTRIBUTION IDENTIFIED
+
+3. Replace CTA button
+
+Replace:
+
+Unlock opportunity value
+
+with:
+
+Unlock your £18k–£42k recovery plan
+
+Keep lock icon.
+
+4. Add opportunity source preview list
+
+Below the subtitle insert:
+
+Opportunity sources identified:
+
+Fulfilment cost optimisation 🔒
+Discount discipline improvements 🔒
+Channel reallocation potential 🔒
+Pricing leakage recovery 🔒
+
+Style as muted locked bullets.
+
+5. Modify Fastest Route to Profit Improvement panel (Free version only)
+
+Replace the recommendation paragraph with:
+
+We’ve identified three priority actions with the highest contribution impact.
+
+Unlock prioritised action plan →
+
+Keep styling unchanged.
+
+6. Modify Priority Actions gating message
+
+Replace:
+
+2 more priority actions available on Pro
+
+with:
+
+Unlock 5 prioritised actions ranked by contribution impact
+
+7. Add upgrade trigger inside Business Health verdict panel
+
+Below the amber performance explanation row insert:
+
+We’ve identified £18k–£42k monthly improvement potential. Unlock the full recovery roadmap below.
+
+Style as muted secondary amber helper text.
+
+8. Do not change Pro version behaviour
+
+All quantified action logic remains visible only in Pro.
+
+9. Verify layout integrity
+
+Ensure:
+
+traffic-light panel unchanged
+health scale unchanged
+KPI grid unchanged
+engine navigation unchanged
+responsive layout preserved
+no duplicate CTAs introduced

@@ -242,6 +242,15 @@ export default function Dashboard() {
           </p>
         </div>
 
+        {/* Free-only upgrade hint */}
+        {!isPro && (
+          <div className="px-6 py-2.5 bg-amber-50/40 dark:bg-amber-950/10 border-b border-amber-100/60 dark:border-amber-900/15">
+            <p className="text-xs text-amber-700/70 dark:text-amber-400/60 leading-relaxed">
+              We've identified £18k–£42k monthly improvement potential. Unlock the full recovery roadmap below.
+            </p>
+          </div>
+        )}
+
         {/* Traffic-light scorecard */}
         <div className="px-6 py-4">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5">
@@ -304,42 +313,83 @@ export default function Dashboard() {
       <div className="bg-card rounded-2xl shadow-sm border border-emerald-200/70 dark:border-emerald-800/40 mb-5 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-200/60 dark:border-emerald-800/30">
           <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Recoverable contribution available immediately</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+            {isPro ? "Recoverable contribution available immediately" : "Recoverable contribution identified"}
+          </span>
         </div>
         <div className="px-6 py-5">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-            <div className="flex-1">
-              <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
-                {isPro ? "£18k–£42k" : "£—k–£—k"}
-                <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
-              </p>
-              <p className="text-sm text-foreground font-medium mb-1">
-                Potential monthly contribution upside if the issues above are addressed.
-              </p>
-              <p className="text-xs text-muted-foreground mb-3 leading-snug">
-                Most recoverable within 30–60 days.
-              </p>
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/30">
-                  £12k within 30 days
-                </span>
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border border-emerald-200/40 dark:border-emerald-800/30">
-                  £30k within 90 days
-                </span>
+          {isPro ? (
+            /* ── Pro layout ─────────────────────────────────────────────────── */
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+              <div className="flex-1">
+                <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
+                  £18k–£42k
+                  <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
+                </p>
+                <p className="text-sm text-foreground font-medium mb-1">
+                  Potential monthly contribution upside if the issues above are addressed.
+                </p>
+                <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/30">
+                    £12k within 30 days
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border border-emerald-200/40 dark:border-emerald-800/30">
+                    £30k within 90 days
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="shrink-0 sm:pt-2">
-              {isPro ? (
+              <div className="shrink-0 sm:pt-2">
                 <Link href="/scenario-lab" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
                   See action plan <ChevronRight className="w-4 h-4" />
                 </Link>
-              ) : (
-                <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-                  <Lock className="w-3.5 h-3.5" /> Unlock opportunity value
-                </a>
-              )}
+              </div>
             </div>
-          </div>
+          ) : (
+            /* ── Free layout ────────────────────────────────────────────────── */
+            <div>
+              <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
+                <div className="flex-1">
+                  <p className="text-3xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
+                    £18k–£42k potential improvement identified
+                  </p>
+                  <p className="text-sm text-foreground font-medium mb-1">
+                    Potential monthly contribution upside if the issues above are addressed.
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
+                  <div className="flex items-center gap-3 flex-wrap mb-4">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary text-muted-foreground/40 border border-border/40 blur-[2px] select-none pointer-events-none">
+                      <Lock className="w-3 h-3" /> £12k within 30 days
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary text-muted-foreground/40 border border-border/40 blur-[2px] select-none pointer-events-none">
+                      <Lock className="w-3 h-3" /> £30k within 90 days
+                    </span>
+                  </div>
+                  <div className="mb-1">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Opportunity sources identified</p>
+                    <ul className="space-y-1.5">
+                      {[
+                        "Fulfilment cost optimisation",
+                        "Discount discipline improvements",
+                        "Channel reallocation potential",
+                        "Pricing leakage recovery",
+                      ].map(src => (
+                        <li key={src} className="flex items-center gap-2 text-xs text-muted-foreground/50 select-none">
+                          <Lock className="w-3 h-3 shrink-0 text-muted-foreground/30" />
+                          <span className="blur-[2px]">{src}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <div className="shrink-0 sm:pt-2">
+                  <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+                    <Lock className="w-3.5 h-3.5" /> Unlock your £18k–£42k recovery plan
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -350,7 +400,18 @@ export default function Dashboard() {
           <span className="text-xs font-semibold uppercase tracking-wider text-primary">Fastest Route to Profit Improvement</span>
         </div>
         <div className="px-6 py-5">
-          <p className="text-sm font-medium text-foreground leading-relaxed">{CFO_INSIGHT.body}</p>
+          {isPro ? (
+            <p className="text-sm font-medium text-foreground leading-relaxed">{CFO_INSIGHT.body}</p>
+          ) : (
+            <div>
+              <p className="text-sm font-medium text-foreground leading-relaxed mb-3">
+                We've identified three priority actions with the highest contribution impact.
+              </p>
+              <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+                <Lock className="w-3.5 h-3.5" /> Unlock prioritised action plan <ChevronRight className="w-4 h-4" />
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
@@ -513,7 +574,7 @@ export default function Dashboard() {
               ))}
             </ul>
             <div className="mt-5 pt-4 border-t border-border/40 flex items-center justify-between gap-4">
-              <p className="text-xs text-muted-foreground">2 more priority actions available on Pro</p>
+              <p className="text-xs text-muted-foreground">Unlock 5 prioritised actions ranked by contribution impact</p>
               <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors whitespace-nowrap">
                 <Lock className="w-3.5 h-3.5" /> Unlock full prioritised action plan
               </a>

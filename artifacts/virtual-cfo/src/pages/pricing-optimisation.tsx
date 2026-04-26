@@ -440,6 +440,22 @@ export default function PricingOptimisation() {
           <InlineCfoInsight text="Discounts reduced realised revenue by 15% this month. This is the largest single pricing-related margin leakage." />
         </div>
 
+        {/* Data quality note */}
+        <div className="px-6 pb-2">
+          <div className="flex items-start gap-2.5 rounded-xl border border-border/40 bg-secondary/30 px-4 py-3">
+            <Info className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Data quality note</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                This analysis assumes discounts are recorded using Shopify discount codes or compare-at pricing. If product list prices are manually reduced instead, discount impact may be understated.
+              </p>
+              <p className="text-xs text-muted-foreground/70 leading-relaxed mt-1">
+                If your store frequently adjusts list prices instead of applying discounts, some pricing insights may be conservative.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Bridge waterfall chart — always visible */}
         <div className="px-6 pt-4 pb-2">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Revenue Bridge: Gross to Net Retained</h4>

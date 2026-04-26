@@ -1,0 +1,259 @@
+Paste this into Replit:
+
+```text
+Refine the existing “Profit Engine” page to make it simpler, more insight-led and easier for non-finance ecommerce founders to understand.
+
+The page is currently good visually, but it feels too much like a finance dashboard. Rework the hierarchy so the key CFO headlines appear first and the page feels like an AI CFO explaining what matters.
+
+Do not rebuild the page from scratch. Keep the existing visual style, components and mock data, but reorganise, rename and simplify the page.
+
+Main objective:
+Make the page answer these questions in this order:
+1. Am I profitably trading?
+2. How safe is that profit?
+3. Why did profit change this month?
+4. Where is revenue being lost before profit?
+5. What should I do next?
+
+1. Reorder the page structure
+
+Change the page order to:
+
+A. Profit Engine Summary
+B. Decision KPI Strip
+C. What Changed Profit This Month?
+D. Where Your Revenue Turns Into Profit
+E. Profit Scaling Indicators
+F. Profit Sensitivity Simulator
+G. CFO Recommendations
+
+2. Replace the top CFO Insight block
+
+At the very top, immediately under the title/subtitle, create a stronger headline section called:
+
+Profit Engine Summary
+
+Use a prominent AI CFO insight card with this wording:
+
+“Your business is trading profitably and is currently operating 39% above break-even. Profit quality has improved because contribution margin is stronger, but fixed costs are rising and need to be controlled before adding more overhead.”
+
+Below that, add a simple Profit Risk Level pill/card:
+
+Profit Risk Level: Moderate
+
+Supporting text:
+“Profitability is stable, but the business is becoming more sensitive to fixed cost increases.”
+
+Use a clear visual treatment:
+- green for strong/positive
+- amber for moderate/watch
+- red only for high risk
+Keep the style consistent with the rest of the app.
+
+3. Replace the current KPI strip with a more intuitive decision strip
+
+Keep 5 cards, but rename and simplify them:
+
+A. Monthly Profit
+Value: £78,000
+Delta: +£18,000 vs prior period
+Insight: EBITDA margin is 15.0%
+
+B. Profit Threshold
+Value: £316,000
+Delta: £24,000 lower than prior period
+Insight: Revenue must stay above this level to remain profitable
+
+C. Safety Margin
+Value: 39%
+Delta: +6pp vs prior period
+Insight: Revenue could fall 39% before profit turns negative
+
+D. Profit Per £10k Revenue
+Value: £3,800
+Delta: +£240 vs prior period
+Insight: Each £10k of revenue creates £3.8k before overheads
+
+E. Overhead Load
+Value: 61%
+Delta: -7pp vs prior period
+Insight: 61% of contribution is used by fixed costs
+
+Avoid overly technical labels such as:
+- fixed cost absorption
+- contribution margin
+- operating leverage
+
+You can still use those terms in tooltips or smaller helper text, but not as the main user-facing card titles.
+
+4. Move “What Changed Profit This Month?” above the revenue bridge
+
+This section should appear immediately below the KPI strip.
+
+Rename section subtitle to:
+“Your monthly profit improved by £18k. Here are the main reasons.”
+
+Keep the existing table and bar chart, but simplify the language:
+
+Driver rows:
+Revenue growth | +£9,000 | Sales growth added more contribution
+Better margin | +£18,000 | Pricing, discounting and product mix improved
+Lower returns | +£4,000 | Fewer returns protected net revenue
+Higher overheads | (£11,000) | Payroll and software costs increased
+Net profit movement | +£20,000 | Overall EBITDA improvement vs prior period
+
+Important: check the arithmetic shown. The drivers currently add to +£20k, while the commentary says +£18k. Either:
+- update the fixed cost drag to (£13,000), so the net movement equals +£18,000, or
+- update all commentary to say +£20,000.
+Use +£18,000 as the correct figure and make the table consistent.
+
+5. Rename and simplify the bridge section
+
+Rename:
+Revenue to EBITDA Bridge
+
+To:
+Where Your Revenue Turns Into Profit
+
+Subtitle:
+“See how gross sales reduce through discounts, returns, variable costs and overheads before becoming profit.”
+
+Keep the existing bridge chart and table, but make the table headings slightly more founder-friendly:
+
+Step
+Amount
+% of Sales
+What it means
+
+Keep the same values:
+Revenue: £520,000
+Discounts: (£82,000)
+Returns: (£41,000)
+Net Revenue: £397,000
+Variable Costs: (£199,000)
+Contribution: £198,000
+Fixed Costs: (£120,000)
+EBITDA: £78,000
+
+Add a short helper note under the chart:
+“The goal is not just to grow revenue — it is to increase the amount of revenue that survives through to profit.”
+
+6. Rename “Profit Engine Health” to “Profit Scaling Indicators”
+
+Move this below the revenue bridge.
+
+Rename the three cards:
+
+A. Overhead Load
+Metric: 61%
+Text:
+“61% of contribution is currently being used by fixed costs. Lower is better, because more profit drops through as revenue grows.”
+
+B. Profit Threshold
+Metric: £316,000
+Text:
+“At the current margin, the business needs £316k of monthly revenue to cover overheads and break even.”
+
+C. Profit Scaling Power
+Metric: Strong
+Sub-metric: 2.4x
+Text:
+“Profit is currently growing faster than revenue, which means the business is starting to scale efficiently.”
+
+Add a small note:
+“Profit scaling improves when revenue and margin grow faster than overheads.”
+
+7. Move the Profit Sensitivity Simulator lower down
+
+The simulator should appear after Profit Scaling Indicators.
+
+Keep the sliders and calculations, but make the intro less technical.
+
+Rename title:
+Profit Sensitivity Simulator
+
+Subtitle:
+“Test how changes in sales, discounting, returns and overheads affect profit.”
+
+Update the CFO insight text:
+“Small changes in discounting, returns and overheads can have a big impact on profit. Use this to see which levers matter most before making decisions.”
+
+Rename outputs:
+Projected Revenue
+Projected Gross Profit Before Overheads
+Projected Overheads
+Projected Profit
+Profit Movement vs Base
+Projected Profit Margin
+
+Keep EBITDA as the underlying calculation, but use “profit” in the user-facing labels where possible.
+
+8. Replace AI CFO Commentary with CFO Recommendations
+
+At the bottom, replace the current five-card AI CFO Commentary section with three clearer recommendation cards only.
+
+Section title:
+CFO Recommendations
+
+Cards:
+
+A. What Improved
+“Margin improved this period, adding approximately £12k of monthly profit capacity. This suggests pricing, discounting or product mix has moved in the right direction.”
+
+B. What To Watch
+“Fixed costs increased by 9%. If overheads continue rising without matching contribution growth, profit margin will start to compress.”
+
+C. Recommended Action
+“Prioritise profitable channel growth, limit blanket discounting and avoid adding overhead until revenue is comfortably above the profit threshold.”
+
+Remove or hide the previous five commentary cards:
+- Positive Signal
+- Early Warning
+- Break-even Insight
+- Scaling Insight
+- CFO Recommendation
+
+9. Language rules
+
+Across the whole page:
+- use “profit” rather than “EBITDA” in main labels where possible
+- keep EBITDA in smaller helper text where useful
+- avoid technical accounting language in headlines
+- use plain-English explanations
+- make every section answer “so what?”
+- keep copy shorter and more action-oriented
+
+Examples:
+Instead of:
+“Contribution margin improved by 2.4pp”
+Use:
+“More of each sale is now turning into profit.”
+
+Instead of:
+“Fixed cost absorption is 61%”
+Use:
+“Overheads are using 61% of profit before overheads.”
+
+10. Visual simplification
+
+Reduce visual overwhelm:
+- keep no more than one large insight card per section
+- avoid too many coloured cards in one area
+- make the top summary visually dominant
+- make charts secondary to the headline insight
+- ensure there is enough white space between sections
+- optimise for desktop but keep responsive behaviour
+
+11. Final output
+
+Update the existing Profit Engine page with this new structure and wording.
+
+Keep:
+- mock data
+- working sliders
+- existing chart components
+- current app styling
+- existing route and navigation label: Profit Engine
+
+Do not add live integrations yet.
+```

@@ -1,0 +1,250 @@
+Refine the existing Dashboard / Business Control Centre page.
+
+Do not rebuild from scratch. Keep the sidebar, header, Export CSV button, routes, existing mock data, plan toggle, responsive layout and detailed page links.
+
+Objective:
+Make the dashboard show the health of the business instantly. The page should open with a clear verdict, then quantify the opportunity, then show the recommended plan.
+
+Final top-of-page logic:
+1. Business health verdict
+2. Recoverable contribution opportunity
+3. Recommended improvement plan
+4. Supporting CFO insight / evidence
+5. KPI grid and remaining sections
+
+1. Add new Business Health Verdict hero panel
+
+Insert directly under the page title/subtitle and above the existing amber alert strip.
+
+Title:
+Business health
+
+Main verdict:
+Moderate risk
+
+Primary message:
+“Growth is positive, but contribution margin quality is weakening due to rising CAC, increased discount reliance and fulfilment cost inflation.”
+
+Secondary message:
+“Profit remains recoverable, but the business should act before margin pressure becomes structural.”
+
+Add four compact status pills/cards inside the panel:
+
+- Margin quality: Weakening
+- Cash runway: Stable but tightening
+- Customer economics: Deteriorating
+- Retention: Improving
+
+Use:
+- amber styling for Moderate risk / weakening / stable but tightening
+- red styling for deteriorating
+- green styling for improving
+
+This panel should be visually prominent, but not more visually dominant than the green opportunity block below.
+
+2. Reposition existing amber alert strip
+
+Keep the existing amber alert strip, but move it directly under the new Business Health Verdict panel.
+
+Keep text:
+“This month’s performance is reducing contribution by approximately £9.4k vs last month. The largest drivers are fulfilment cost inflation, Meta CAC deterioration and increased discounting.”
+
+3. Update Recoverable Contribution Opportunity block
+
+Keep this block directly below the amber alert strip.
+
+Change heading to:
+Recoverable contribution available immediately
+
+Main value:
+£18k–£42k
+
+Supporting copy:
+“Potential monthly contribution upside if the issues above are addressed.”
+
+Add timing line:
+“Most recoverable within 30–60 days.”
+
+Add recovery split underneath as two small inline items:
+- £12k within 30 days
+- £30k within 90 days
+
+Keep CTA:
+See action plan →
+
+4. Update CFO Insight copy
+
+Move the CFO Insight block below the Recoverable Contribution Opportunity block.
+
+Replace existing copy with:
+“The fastest route to improvement is reducing fulfilment costs, tightening discount exposure on returning customers and reallocating inefficient Meta spend toward higher-contribution channels.”
+
+Keep the CFO Insight visual style consistent with other pages.
+
+5. Improve Business Health Score panel
+
+If the existing separate “Business health / Moderate risk” card remains, either remove it to avoid duplication OR convert it into a slimmer supporting strip below CFO Insight.
+
+Preferred:
+Remove the duplicate existing Business Health card because the new verdict hero now performs this role.
+
+Do not show “Moderate risk” twice near the top.
+
+6. Upgrade Recommended Improvement Plan panel
+
+Keep the Recommended Improvement Plan panel near the top, directly below CFO Insight.
+
+Add timeframe and confidence:
+
+Add small badges:
+- Expected within 60–90 days
+- Confidence: Medium-High
+
+Keep plan name:
+Balanced Growth Plan
+
+Keep text:
+“This plan improves profit without choking growth. It combines pricing discipline, marketing reallocation, stock control and overhead restraint.”
+
+Keep impact cards:
+- Contribution / month: +£42k
+- Cash improvement: +£64k
+- Runway extension: +0.8 months
+- Margin improvement: +4.2pp
+
+Keep CTA:
+Model this plan →
+
+7. Reorder top page sections
+
+The top section order must be:
+
+A. Page title / subtitle / Export CSV
+B. Business Health Verdict hero panel
+C. Amber alert strip
+D. Recoverable contribution available immediately
+E. CFO Insight
+F. Recommended Improvement Plan
+G. KPI grid
+H. Priority actions this month
+I. What changed and why it matters
+J. CFO action plan
+K. Explore the detailed engines
+
+8. KPI grid remains but update wording slightly
+
+Keep current KPI order:
+- Contribution Margin
+- Recoverable Contribution
+- Cash Runway
+- Discount Dependency
+- Acquisition Efficiency
+- Repeat Purchase Rate
+- Monthly Revenue
+- Net Profit
+
+Update any text to reinforce verdict:
+
+Contribution Margin text:
+“Margin is below target and weakening.”
+
+Recoverable Contribution text:
+“Opportunity available from pricing, marketing and fulfilment improvements.”
+
+Cash Runway text:
+“Cash remains positive, but runway is tightening.”
+
+Acquisition Efficiency text:
+“Meta CAC is rising faster than contribution per order.”
+
+Net Profit text:
+“Profit remains positive, but quality of growth needs attention.”
+
+9. Priority actions section
+
+Keep section but ensure it appears below KPI grid.
+
+Use these cards:
+
+A. Reduce fulfilment cost leakage
+Impact:
++£6.8k contribution
+Text:
+“Fulfilment and shipping costs are the largest margin drag this month.”
+Badge:
+High impact
+
+B. Tighten discount exposure
+Impact:
++£4.2k contribution
+Text:
+“Discount usage is rising faster than revenue growth.”
+Badge:
+High impact
+
+C. Reallocate inefficient Meta spend
+Impact:
++£3.1k contribution
+Text:
+“Meta CAC has increased while ROAS has weakened.”
+Badge:
+Medium impact
+
+CTA:
+View full action plan →
+
+10. Clean duplicated arrows in detailed engine cards
+
+In the Explore the detailed engines cards, make sure each CTA has only one arrow.
+
+For example:
+Analyse margin →
+not:
+Analyse margin → →
+
+Apply to all six cards.
+
+11. Remove duplicated / competing health messaging
+
+Search the Dashboard page for duplicate health/risk blocks.
+
+Only one major health verdict should appear near the top:
+The new Business Health Verdict panel.
+
+Other risk labels can remain inside KPI cards and detailed sections.
+
+12. Keep visual hierarchy
+
+Use this emphasis:
+- Business Health Verdict: clear amber verdict
+- Recoverable Contribution block: strongest green opportunity block
+- Recommended Improvement Plan: executive plan block with green metrics
+- KPI grid: supporting evidence
+
+Do not make every block equally large or equally coloured.
+
+13. Free vs Pro
+
+Free version:
+- show the Business Health Verdict
+- show the headline recoverable contribution range
+- show Recommended Improvement Plan headline
+- show KPI grid
+- show Explore the detailed engines
+- lock detailed action values if required
+
+Pro version:
+- show all values
+- no blur overlays
+- no upgrade CTAs
+
+14. Final verification
+
+Ensure:
+- Dashboard still builds
+- Export CSV remains
+- Create Report does not return
+- All CTAs still navigate to existing routes
+- No unused imports remain
+- Page remains responsive
+- No section appears twice

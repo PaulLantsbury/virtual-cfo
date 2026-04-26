@@ -1,7 +1,7 @@
 import {
   ArrowUpRight, ArrowDownRight, Minus, Download,
   Sparkles, TrendingUp, AlertTriangle, ArrowRight,
-  ChevronRight, Lock, Lightbulb, Shield,
+  ChevronRight, Lock, Lightbulb,
 } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -14,41 +14,41 @@ import { canAccess } from "@/lib/plan";
 // ─── Data constants ───────────────────────────────────────────────────────────
 
 const CFO_INSIGHT = {
-  body: "Contribution margin is declining despite revenue growth. The fastest improvement comes from renegotiating fulfilment costs, reducing discount exposure on returning customers and reallocating inefficient Meta spend toward higher-contribution channels.",
+  body: "The fastest route to improvement is reducing fulfilment costs, tightening discount exposure on returning customers and reallocating inefficient Meta spend toward higher-contribution channels.",
   upside: { cashLow: 18_000, cashHigh: 42_000 },
 } as const;
 
 const KPI_CARDS = [
   {
-    id: "cm",   title: "Contribution Margin",      value: "42.3%",       change: "↓ 2.8% vs last month",   status: "warning",
-    text: "Margin falling due to higher fulfilment and acquisition costs.",
+    id: "cm",   title: "Contribution Margin",      value: "42.3%",         change: "↓ 2.8% vs last month",   status: "warning",
+    text: "Margin is below target and weakening.",
   },
   {
-    id: "rc",   title: "Recoverable Contribution", value: "£18k–£42k",   change: "Opportunity identified",  status: "positive",
-    text: "Potential monthly contribution upside from current issues.",
+    id: "rc",   title: "Recoverable Contribution", value: "£18k–£42k",     change: "Opportunity identified",  status: "positive",
+    text: "Opportunity available from pricing, marketing and fulfilment improvements.",
   },
   {
-    id: "cr",   title: "Cash Runway",              value: "3.4 months",  change: "Moderate",                status: "warning",
-    text: "Cash runway is tightening as working capital absorbs cash.",
+    id: "cr",   title: "Cash Runway",              value: "3.4 months",    change: "Moderate",                status: "warning",
+    text: "Cash remains positive, but runway is tightening.",
   },
   {
-    id: "dd",   title: "Discount Dependency",      value: "38%",         change: "↑ 11% vs last month",    status: "danger",
+    id: "dd",   title: "Discount Dependency",      value: "38%",           change: "↑ 11% vs last month",    status: "danger",
     text: "High reliance on promotions to sustain growth.",
   },
   {
-    id: "ae",   title: "Acquisition Efficiency",   value: "Meta CAC +14%", change: "↓ efficiency",         status: "danger",
-    text: "Paid acquisition is becoming less contribution-efficient.",
+    id: "ae",   title: "Acquisition Efficiency",   value: "Meta CAC +14%", change: "↓ efficiency",           status: "danger",
+    text: "Meta CAC is rising faster than contribution per order.",
   },
   {
-    id: "rpr",  title: "Repeat Purchase Rate",     value: "28%",         change: "↑ 4.2% vs last month",   status: "positive",
+    id: "rpr",  title: "Repeat Purchase Rate",     value: "28%",           change: "↑ 4.2% vs last month",   status: "positive",
     text: "Retention is improving as more customers place second orders.",
   },
   {
-    id: "mr",   title: "Monthly Revenue",          value: "£124,500",    change: "↑ 12.4% vs last month",  status: "positive",
+    id: "mr",   title: "Monthly Revenue",          value: "£124,500",      change: "↑ 12.4% vs last month",  status: "positive",
     text: "Revenue is growing, but margin quality is weakening.",
   },
   {
-    id: "np",   title: "Net Profit",               value: "£56,300",     change: "↑ 18.7% vs last month",  status: "positive",
+    id: "np",   title: "Net Profit",               value: "£56,300",       change: "↑ 18.7% vs last month",  status: "positive",
     text: "Profit remains positive, but quality of growth needs attention.",
   },
 ] as const;
@@ -96,14 +96,14 @@ const RECOMMENDATIONS: Recommendation[] = [
 
 const PRIORITY_ACTIONS = [
   {
-    title:  "Renegotiate fulfilment partner pricing",
+    title:  "Reduce fulfilment cost leakage",
     impact: "+£6.8k contribution",
-    reason: "Shipping and fulfilment costs are the largest margin drag this month.",
+    reason: "Fulfilment and shipping costs are the largest margin drag this month.",
     badge:  "High impact",
     color:  "red",
   },
   {
-    title:  "Reduce discount exposure on returning customers",
+    title:  "Tighten discount exposure",
     impact: "+£4.2k contribution",
     reason: "Discount usage is rising faster than revenue growth.",
     badge:  "High impact",
@@ -124,7 +124,7 @@ const HEALTH_MODULES = [
     title:     "Profit Quality",
     headline:  "£20.4k margin recovery identified",
     subtitle:  "See where contribution margin is being eroded and how to recover it.",
-    cta:       "Analyse margin →",
+    cta:       "Analyse margin",
     href:      "/margin-analysis",
   },
   {
@@ -132,7 +132,7 @@ const HEALTH_MODULES = [
     title:     "Growth Quality",
     headline:  "38% discount dependency",
     subtitle:  "Understand whether growth is healthy or reliant on promotions and paid spend.",
-    cta:       "Analyse growth →",
+    cta:       "Analyse growth",
     href:      "/growth-quality",
   },
   {
@@ -140,7 +140,7 @@ const HEALTH_MODULES = [
     title:     "Acquisition Efficiency",
     headline:  "Meta CAC +14%",
     subtitle:  "Diagnose which channels are creating profitable customers.",
-    cta:       "Diagnose acquisition →",
+    cta:       "Diagnose acquisition",
     href:      "/marketing-efficiency",
   },
   {
@@ -148,7 +148,7 @@ const HEALTH_MODULES = [
     title:     "Opportunities / Scenario Lab",
     headline:  "£18k–£42k contribution upside",
     subtitle:  "See the highest-impact improvement actions and model the combined impact.",
-    cta:       "Model opportunity →",
+    cta:       "Model opportunity",
     href:      "/scenario-lab",
   },
   {
@@ -156,7 +156,7 @@ const HEALTH_MODULES = [
     title:     "Cash Efficiency",
     headline:  "£64k cash headroom opportunity",
     subtitle:  "See where cash is trapped and how to protect runway.",
-    cta:       "Analyse cash →",
+    cta:       "Analyse cash",
     href:      "/cash-control",
   },
   {
@@ -164,7 +164,7 @@ const HEALTH_MODULES = [
     title:     "Pricing Optimisation",
     headline:  "£52k recoverable contribution",
     subtitle:  "Identify discount leakage and pricing opportunities.",
-    cta:       "Improve pricing →",
+    cta:       "Improve pricing",
     href:      "/pricing-optimisation",
   },
 ] as const;
@@ -216,6 +216,47 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ══ BUSINESS HEALTH VERDICT HERO ════════════════════════════════════ */}
+      <div className="bg-card rounded-2xl shadow-sm border border-amber-200/70 dark:border-amber-800/30 mb-5 overflow-hidden">
+        <div className="px-6 py-5">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-5">
+            <div className="flex-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Business health</p>
+              <p className="text-2xl font-bold text-amber-700 dark:text-amber-400 mb-2">Moderate risk</p>
+              <p className="text-sm text-foreground leading-relaxed mb-1.5">
+                Growth is positive, but contribution margin quality is weakening due to rising CAC, increased discount reliance and fulfilment cost inflation.
+              </p>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Profit remains recoverable, but the business should act before margin pressure becomes structural.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 shrink-0 sm:w-64">
+              {[
+                { label: "Margin quality",          verdict: "Weakening",               style: "amber"  },
+                { label: "Cash runway",              verdict: "Stable but tightening",   style: "amber"  },
+                { label: "Customer economics",       verdict: "Deteriorating",           style: "red"    },
+                { label: "Retention",                verdict: "Improving",               style: "green"  },
+              ].map(({ label, verdict, style }) => (
+                <div key={label} className={cn(
+                  "rounded-xl px-3 py-2.5 border",
+                  style === "amber" ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200/60 dark:border-amber-700/30"
+                  : style === "red" ? "bg-rose-50 dark:bg-rose-950/15 border-rose-200/60 dark:border-rose-700/30"
+                  : "bg-emerald-50 dark:bg-emerald-950/15 border-emerald-200/60 dark:border-emerald-700/30"
+                )}>
+                  <p className="text-[10px] font-semibold text-muted-foreground mb-0.5">{label}</p>
+                  <p className={cn(
+                    "text-xs font-bold leading-tight",
+                    style === "amber" ? "text-amber-700 dark:text-amber-400"
+                    : style === "red"   ? "text-rose-700 dark:text-rose-400"
+                    : "text-emerald-700 dark:text-emerald-400"
+                  )}>{verdict}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ══ EXECUTIVE ALERT STRIP ════════════════════════════════════════════ */}
       <div className="flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200/70 dark:border-amber-800/30 mb-5">
         <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
@@ -229,22 +270,30 @@ export default function Dashboard() {
       <div className="bg-card rounded-2xl shadow-sm border border-emerald-200/70 dark:border-emerald-800/40 mb-5 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-200/60 dark:border-emerald-800/30">
           <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Recoverable Contribution Opportunity</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Recoverable contribution available immediately</span>
         </div>
         <div className="px-6 py-5">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             <div className="flex-1">
               <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
                 {isPro ? "£18k–£42k" : "£—k–£—k"}
               </p>
-              <p className="text-sm text-foreground font-medium">
-                Potential contribution upside next month if the issues above are addressed.
+              <p className="text-sm text-foreground font-medium mb-1">
+                Potential monthly contribution upside if the issues above are addressed.
               </p>
-              <p className="text-xs text-muted-foreground mt-1.5 leading-snug">
-                Driven primarily by shipping costs, Meta CAC inefficiency and increased discounting.
+              <p className="text-xs text-muted-foreground mb-3 leading-snug">
+                Most recoverable within 30–60 days.
               </p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/30">
+                  £12k within 30 days
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border border-emerald-200/40 dark:border-emerald-800/30">
+                  £30k within 90 days
+                </span>
+              </div>
             </div>
-            <div className="shrink-0">
+            <div className="shrink-0 sm:pt-2">
               {isPro ? (
                 <Link href="/scenario-lab" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
                   See action plan <ChevronRight className="w-4 h-4" />
@@ -270,39 +319,22 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ══ BUSINESS HEALTH SCORE ═══════════════════════════════════════════ */}
-      <div className="bg-card rounded-2xl shadow-sm border border-amber-200/60 dark:border-amber-800/30 mb-5 p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-100 dark:bg-amber-900/30 border border-amber-200/70 dark:border-amber-700/40 shrink-0">
-              <Shield className="w-7 h-7 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Business health</p>
-              <p className="text-xl font-bold text-amber-700 dark:text-amber-400">Moderate risk</p>
-              <p className="text-xs text-muted-foreground mt-0.5 leading-snug max-w-sm">
-                Margin pressure, discount reliance and rising CAC are reducing the quality of growth.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            {["Margin pressure", "Discount reliance", "Rising CAC"].map(badge => (
-              <span key={badge} className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 border border-amber-200/60 dark:border-amber-700/30">
-                {badge}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* ══ RECOMMENDED IMPROVEMENT PLAN PREVIEW ════════════════════════════ */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3.5 bg-secondary/60 border-b border-border/40">
           <Sparkles className="w-4 h-4 text-primary shrink-0" />
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Recommended improvement plan</span>
-          <span className="ml-auto inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
-            Balanced Growth Plan
-          </span>
+          <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
+            <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border/50">
+              Expected within 60–90 days
+            </span>
+            <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border/50">
+              Confidence: Medium-High
+            </span>
+            <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
+              Balanced Growth Plan
+            </span>
+          </div>
         </div>
         <div className="px-6 py-5">
           <p className="text-sm text-foreground leading-relaxed mb-5">

@@ -1,0 +1,262 @@
+Refine the existing Cash Control page across both Pro and Free modes.
+
+Do not rebuild the page from scratch. Keep the current layout, styling, route, timeframe selector, charts, simulator, mock data and responsive behaviour.
+
+There are two objectives:
+1. Improve the Pro version so it feels more predictive and CFO-led.
+2. Improve the Free version gating so upgrade prompts sell outcomes, not just locked features.
+
+Part A — Pro version improvements
+
+1. Add Cash Stability Outlook
+
+In Pro mode, add a new section directly below the KPI grid and before “What Would Improve Cash Fastest?”
+
+Section title:
+Cash Stability Outlook
+
+CFO Insight:
+“At current working capital trends, cash runway is expected to fall below 3 months within 2 reporting periods unless inventory levels stabilise.”
+
+Add three compact cards:
+
+A. Projected Runway
+Value:
+2.8 months
+
+Text:
+Expected runway within 2 reporting periods if current trends continue.
+
+B. Main Risk Driver
+Value:
+Inventory build
+
+Text:
+Stock build is the largest pressure on cash recovery.
+
+C. Action Window
+Value:
+60 days
+
+Text:
+Management has around 60 days to protect cash headroom before risk increases.
+
+Use amber/moderate styling.
+
+2. Tighten Cash Risk wording
+
+Replace the Cash Risk Level supporting text with:
+
+“If inventory and supplier timing remain unchanged, available headroom is likely to tighten within the next 60 days.”
+
+3. Tighten Cash Cost Pressure insight
+
+Replace the Cash Cost Pressure CFO Insight with:
+
+“Fixed cash costs are increasing faster than operating cash generation, reducing resilience if revenue slows.”
+
+4. Add Fastest Lever to Improve Runway in simulator
+
+In the Cash Sensitivity Simulator, add a compact insight card or line near the output panel.
+
+Title:
+Fastest lever to improve runway
+
+Text:
+“Reducing inventory days by 10 would extend runway by approximately 0.6 months.”
+
+This should be visible in Pro mode.
+
+5. Improve simulator interpretation
+
+Keep the current dynamic interpretation, but ensure it includes a second predictive sentence based on projected runway:
+
+If projected runway is above 3 months:
+“At this level, the business retains reasonable cash headroom.”
+
+If projected runway is between 2 and 3 months:
+“At this level, cash runway is becoming tight and should be monitored weekly.”
+
+If projected runway is below 2 months:
+“At this level, cash runway would fall below 2 months and require immediate action.”
+
+6. Improve Cash Break-Even Revenue KPI helper display
+
+In the Cash Break-Even Revenue KPI card, add a small comparison line:
+
+Current revenue: £382k
+Cash break-even: £405k
+Gap: £23k
+
+Keep the existing value:
+£405,000
+
+This should help users understand immediately whether they are above or below cash break-even.
+
+7. Ensure all Pro sections are fully visible
+
+In Pro mode:
+- no blur overlays
+- no Upgrade to Pro CTAs
+- full Cash Cost Pressure
+- full Cash Sensitivity Ranking with £ impacts
+- full Cash Sensitivity Simulator
+- full This Month’s Cash Priorities
+- full What Changed Cash This Month
+- full bridge table
+
+Part B — Free version gating improvements
+
+8. Add consolidated upgrade narrative near the top
+
+In Free mode only, add a compact upgrade card after the KPI grid and before “What Would Improve Cash Fastest?”
+
+Title:
+Unlock your CFO action plan
+
+Text:
+“Upgrade to Pro to move from understanding your cash position to actively improving it.”
+
+Bullet list:
+- Model cash runway scenarios
+- Identify your highest-impact cash lever
+- See what moved cash this month
+- Get priority actions for next month
+
+CTA button:
+Unlock Pro
+
+This should sell the outcome, not just locked features.
+
+9. Improve locked Cash Bridge CTA
+
+In Free mode, keep the bridge chart visible but table/details locked.
+
+Replace CTA text with:
+
+Title:
+See exactly where £64k of cash was absorbed this month
+
+Text:
+“Unlock the detailed cash bridge to understand which movements reduced cash and why.”
+
+Button:
+Upgrade
+
+10. Improve locked Simulator CTA
+
+In Free mode, replace simulator locked CTA copy with:
+
+Title:
+Test how reducing inventory days would extend your runway
+
+Text:
+“Model how stock, supplier timing, marketing spend and fixed costs affect cash before you commit.”
+
+Button:
+Upgrade
+
+11. Improve priority action teaser
+
+In Free mode, replace:
+
+“One priority cash action has been identified for this month.”
+
+With:
+
+“One priority action could extend your runway this month.”
+
+Keep the detailed priorities locked behind Pro.
+
+12. Partially reveal Cash Cost Pressure in Free mode
+
+In Free mode, do not fully lock the whole Cash Cost Pressure section.
+
+Show one visible card:
+
+Title:
+Fixed Cost Trend
+
+Value:
+Rising
+
+Text:
+“Fixed cash costs increased 9% vs prior period.”
+
+Lock the detailed impact analysis and any further cards behind Pro.
+
+CTA:
+“Upgrade to see how rising overheads affect your cash runway.”
+
+13. Add locked Runway Forecast card in Free mode
+
+Add a small locked forecast card in Free mode, preferably after Cash Trend or near the KPI grid.
+
+Title:
+Runway Forecast
+
+Visible text:
+“Projected runway in 60 days: __ months”
+
+CTA:
+“Upgrade to see projected runway if current trends continue.”
+
+This should create urgency without giving away the full forecast.
+
+14. Improve Cash Sensitivity Ranking Free teaser
+
+In Free mode, keep the ranking visible but keep values masked.
+
+Show:
+1. Inventory days | £—,—
+2. Supplier payment timing | £—,—
+3. Fixed costs | £—,—
+4. Marketing spend | £—,—
+
+CTA:
+“Upgrade to see the £ impact of each cash lever.”
+
+15. Keep Free = diagnosis, Pro = action
+
+Free should show:
+- Cash Control Summary
+- Cash Safety Buffer
+- Cash Headroom
+- Cash Risk Level
+- Cash Trend
+- KPI grid
+- basic cash bridge chart
+- headline working capital cards
+- visible fixed cost trend
+- locked upgrade teasers for forecast, drivers, simulator and priorities
+
+Pro should show:
+- all Free content
+- full cash driver breakdown
+- full bridge table
+- full Cash Stability Outlook
+- full Cash Cost Pressure
+- full Cash Sensitivity Ranking with £ values
+- full Cash Sensitivity Simulator
+- full This Month’s Cash Priorities
+
+16. Language rules
+
+Use plain-English founder-friendly language:
+- cash headroom
+- cash runway
+- cash tied up
+- stock days
+- supplier timing
+- cash impact
+- what to do next
+
+Avoid making CTAs sound like generic feature unlocks. They should feel like practical outcomes.
+
+17. Final output
+
+Update the existing Cash Control page only.
+
+Do not add live integrations.
+Keep all calculations client-side.
+Keep current styling consistent with Profit Engine.

@@ -3,37 +3,32 @@ import { FlaskConical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserPlan } from "@/lib/plan";
 
+const STORAGE_KEY = "reviewPlan";
+
 /**
- * Developer-only plan toggle.
+ * Plan toggle — always visible.
  *
- * Visible only when Vite builds in development mode (import.meta.env.DEV).
- * Tree-shaken out of production bundles — never ships to end users.
+ * Persists the selected plan in localStorage so it survives page refreshes
+ * and can be used by external reviewers to switch between Free and Pro views.
  *
- * Usage:
- *   1. Click "Free" or "Pro" to switch plan
- *   2. Page reloads automatically so all canAccess() gates re-evaluate
- *   3. State persists in sessionStorage across reloads within the same tab
- *
- * Reset: close the tab or sessionStorage.removeItem("userPlan")
+ * plan.ts reads localStorage["reviewPlan"] first, so switching here
+ * immediately affects all canAccess() gates on every page after reload.
  */
 export function DevPlanToggle() {
   const [plan, setPlan] = useState<UserPlan>(
-    () => (sessionStorage.getItem("userPlan") as UserPlan | null) ?? "free"
+    () => (localStorage.getItem(STORAGE_KEY) as UserPlan | null) ?? "free"
   );
-
-  // Only render in Vite dev mode — constant at compile time, tree-shaken in prod
-  if (!import.meta.env.DEV) return null;
 
   const switchPlan = (next: UserPlan) => {
     if (next === plan) return;
-    sessionStorage.setItem("userPlan", next);
+    localStorage.setItem(STORAGE_KEY, next);
     setPlan(next);
     window.location.reload();
   };
 
   return (
     <div
-      title="Developer plan toggle — not visible to users"
+      title="Switch between Free and Pro view"
       className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-50 border border-amber-300 dark:bg-amber-950/25 dark:border-amber-700/60 select-none"
     >
       <FlaskConical className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />

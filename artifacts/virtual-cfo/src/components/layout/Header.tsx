@@ -1,6 +1,5 @@
 import { Bell, Search, Menu } from "lucide-react";
 import { DevPlanToggle } from "@/components/DevPlanToggle";
-import { ReviewModeToggle } from "@/components/ReviewModeToggle";
 
 export function Header() {
   return (
@@ -20,7 +19,6 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-3">
-        <ReviewModeToggle />
         <DevPlanToggle />
         <button className="relative p-2 text-muted-foreground hover:bg-secondary rounded-full transition-colors">
           <Bell className="w-5 h-5" />

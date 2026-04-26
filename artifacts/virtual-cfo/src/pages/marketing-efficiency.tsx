@@ -1,4 +1,6 @@
-import { Sparkles, TrendingUp, AlertTriangle, Lock } from "lucide-react";
+import { useState } from "react";
+import { Sparkles, TrendingUp, AlertTriangle, Lock, SlidersHorizontal, Info, Zap, Shield } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
@@ -455,6 +457,25 @@ export default function MarketingEfficiency() {
   const { periodBadge, periodPhrase, timeline } = useTimeline();
   const framing = TIMELINE_FRAMING[timeline] ?? TIMELINE_FRAMING["30d"];
 
+  // ── Budget Reallocation Simulator state ──────────────────────────────────
+  const [metaToEmail,    setMetaToEmail]    = useState(0);
+  const [metaToOrganic,  setMetaToOrganic]  = useState(0);
+  const [googleToEmail,  setGoogleToEmail]  = useState(0);
+  const [googleToOrganic,setGoogleToOrganic]= useState(0);
+
+  const totalShift    = metaToEmail + metaToOrganic + googleToEmail + googleToOrganic;
+  const effectiveShift = Math.min(totalShift, 30);
+  const shiftRatio     = effectiveShift / 30;
+
+  const simContribution = Math.round(shiftRatio * 18_200 / 100) * 100;
+  const simCacChange    = +(shiftRatio * 1.10).toFixed(2);
+  const simMarginGain   = +(shiftRatio * 3.0).toFixed(1);
+  const simRisk         = effectiveShift > 15 ? "Medium" : "Low";
+  const simHighConf     = Math.round(shiftRatio * 9_800 / 100) * 100;
+  const simMedConf      = Math.round(shiftRatio * 8_400 / 100) * 100;
+
+  const isPro = canAccess("marketing_budget_simulator");
+
   return (
     <AppLayout>
 
@@ -596,6 +617,257 @@ export default function MarketingEfficiency() {
               </p>
             </div>
 
+          </div>
+
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          §1b  BUDGET REALLOCATION SIMULATOR
+          Interactive channel shift modelling with Pro-gated outputs
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-foreground">Budget Reallocation Simulator</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Estimate how shifting paid spend toward higher-contribution channels affects contribution profit and CAC.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-border/60 shadow-sm mb-10 overflow-hidden bg-card">
+
+        {/* ── Header bar ── */}
+        <div className="flex items-center gap-3 px-6 py-3 bg-secondary/30 border-b border-border/50">
+          <SlidersHorizontal className="w-4 h-4 text-primary shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Channel Shift Modeller
+          </span>
+          {totalShift > 30 && (
+            <span className="ml-auto text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/40 px-2 py-0.5 rounded-full">
+              Combined shift capped at 30%
+            </span>
+          )}
+        </div>
+
+        <div className="px-6 pt-6 pb-5">
+
+          {/* ── Sliders ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+
+            {/* Meta → Email */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-foreground">Shift Meta budget → Email</p>
+                <span className="text-sm font-bold text-primary tabular-nums">{metaToEmail}%</span>
+              </div>
+              <Slider
+                min={0} max={25} step={1}
+                value={[metaToEmail]}
+                onValueChange={([v]) => setMetaToEmail(v)}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">0–25% of Meta spend</p>
+            </div>
+
+            {/* Meta → Organic */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-foreground">Shift Meta budget → Organic</p>
+                <span className="text-sm font-bold text-primary tabular-nums">{metaToOrganic}%</span>
+              </div>
+              <Slider
+                min={0} max={25} step={1}
+                value={[metaToOrganic]}
+                onValueChange={([v]) => setMetaToOrganic(v)}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">0–25% of Meta spend</p>
+            </div>
+
+            {/* Google → Email */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-foreground">Shift Google budget → Email</p>
+                <span className="text-sm font-bold text-primary tabular-nums">{googleToEmail}%</span>
+              </div>
+              <Slider
+                min={0} max={25} step={1}
+                value={[googleToEmail]}
+                onValueChange={([v]) => setGoogleToEmail(v)}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">0–25% of Google spend</p>
+            </div>
+
+            {/* Google → Organic */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-foreground">Shift Google budget → Organic</p>
+                <span className="text-sm font-bold text-primary tabular-nums">{googleToOrganic}%</span>
+              </div>
+              <Slider
+                min={0} max={25} step={1}
+                value={[googleToOrganic]}
+                onValueChange={([v]) => setGoogleToOrganic(v)}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">0–25% of Google spend</p>
+            </div>
+
+          </div>
+
+          {/* ── Recoverable Contribution Opportunity Card (Pro gated) ── */}
+          {isPro ? (
+            <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/20 px-5 py-4 mb-5">
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3">
+                Recoverable contribution next month
+              </p>
+              <div className="flex flex-wrap items-end gap-x-8 gap-y-2 mb-3">
+                <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none tabular-nums">
+                  £{simContribution.toLocaleString()}
+                </p>
+                <div className="pb-0.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600/70 dark:text-emerald-400/60 mb-0.5">
+                    Equivalent to
+                  </p>
+                  <p className="text-2xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none tabular-nums">
+                    +{simMarginGain}pp
+                  </p>
+                  <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 leading-snug">
+                    contribution margin
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 shrink-0" />
+                  <span className="font-semibold">High confidence</span>&ensp;£{simHighConf.toLocaleString()}
+                </p>
+                <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50 dark:bg-emerald-400/50 shrink-0" />
+                  <span className="font-semibold">Medium confidence</span>&ensp;£{simMedConf.toLocaleString()}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="relative rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/30 px-5 py-4 mb-5 overflow-hidden">
+              <div className="blur-sm select-none pointer-events-none" aria-hidden="true">
+                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3">
+                  Recoverable contribution next month
+                </p>
+                <p className="text-4xl font-display font-bold text-emerald-700 leading-none tabular-nums mb-2">
+                  £18,200
+                </p>
+                <p className="text-xs text-emerald-700/60">High confidence £9,800 · Medium confidence £8,400</p>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center px-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0 mt-0.5">
+                    <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
+                      Upgrade to Pro to unlock channel reallocation impact modelling
+                    </p>
+                    <a href="/upgrade" className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline mt-0.5 inline-block">
+                      Upgrade to Pro →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Simulator outputs ── */}
+          {isPro ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  Contribution uplift
+                </p>
+                <p className={cn(
+                  "text-2xl font-display font-bold leading-none tabular-nums",
+                  simContribution > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"
+                )}>
+                  {simContribution > 0 ? `+£${simContribution.toLocaleString()}` : "—"}
+                </p>
+              </div>
+              <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  Blended CAC change
+                </p>
+                <p className={cn(
+                  "text-2xl font-display font-bold leading-none tabular-nums",
+                  simCacChange > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"
+                )}>
+                  {simCacChange > 0 ? `−£${simCacChange.toFixed(2)}` : "—"}
+                </p>
+              </div>
+              <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  Margin improvement
+                </p>
+                <p className={cn(
+                  "text-2xl font-display font-bold leading-none tabular-nums",
+                  simMarginGain > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"
+                )}>
+                  {simMarginGain > 0 ? `+${simMarginGain}pp` : "—"}
+                </p>
+              </div>
+              <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  Risk level
+                </p>
+                <p className={cn(
+                  "text-2xl font-display font-bold leading-none",
+                  simRisk === "Low"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-amber-600 dark:text-amber-400"
+                )}>
+                  {effectiveShift > 0 ? simRisk : "—"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="relative rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/50 dark:bg-indigo-950/20 mb-6 overflow-hidden">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 blur-sm select-none pointer-events-none" aria-hidden="true">
+                {["Contribution uplift", "Blended CAC change", "Margin improvement", "Risk level"].map((label) => (
+                  <div key={label} className="rounded-xl bg-white/70 dark:bg-slate-800/40 border border-border/50 px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{label}</p>
+                    <p className="text-2xl font-display font-bold leading-none text-emerald-600">+£18,200</p>
+                  </div>
+                ))}
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <a href="/upgrade" className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full shadow-lg transition-colors">
+                  <Lock className="w-3.5 h-3.5" />
+                  Upgrade to Pro to unlock budget reallocation modelling
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* ── Fastest Recovery Lever ── */}
+          <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/25 border border-emerald-300 dark:border-emerald-700/50 px-5 py-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                Fastest recovery lever identified
+              </p>
+            </div>
+            <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
+              Reallocate 15–25% of Meta spend toward Email and Organic — the two highest-contribution channels by profit margin.
+            </p>
+            <div className="flex items-center gap-3 mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-700/30">
+              <div className="flex items-center gap-1.5">
+                <Shield className="w-3 h-3 text-emerald-600/70 dark:text-emerald-400/60" />
+                <span className="text-xs text-emerald-700/70 dark:text-emerald-400/60">Low implementation risk</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Zap className="w-3 h-3 text-emerald-600/70 dark:text-emerald-400/60" />
+                <span className="text-xs text-emerald-700/70 dark:text-emerald-400/60">Low effort · High impact</span>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -1597,10 +1869,19 @@ export default function MarketingEfficiency() {
         </div>
       </div>
 
+      {/* ── Attribution Confidence Note — visible Free + Pro ── */}
+      <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-secondary/40 border border-border/50">
+        <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Channel-level contribution estimates assume revenue attribution from platform reporting (Meta / Google).
+          Cross-channel attribution differences may slightly affect efficiency comparisons.
+        </p>
+      </div>
+
       {/* CAC Payback by Channel — Pro gated via PremiumBlurPreview */}
       <PremiumBlurPreview
         title="CAC Payback by Channel"
-        subtitle="Number of orders required to recover the acquisition cost for each channel."
+        subtitle="Orders required to recover acquisition cost using contribution profit per order."
         badgeText="PRO — Unlock cash recovery diagnostics"
         headerExtra={
           <div className="text-right pt-0.5">

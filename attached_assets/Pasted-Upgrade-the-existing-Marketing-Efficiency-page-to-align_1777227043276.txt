@@ -1,0 +1,158 @@
+Upgrade the existing Marketing Efficiency page to align with the structure used in Profit Engine and Pricing Optimisation.
+
+Do not rebuild the page. Extend the existing layout.
+
+Maintain styling, typography, spacing, and component system.
+
+--------------------------------------------------
+
+1. Add Budget Reallocation Simulator (NEW SECTION)
+
+Insert directly below the CFO Insight panel.
+
+Title:
+
+Budget Reallocation Simulator
+
+Subtitle:
+
+Estimate how shifting paid spend toward higher-contribution channels affects contribution profit and CAC.
+
+Add 4 sliders:
+
+Shift Meta budget → Email (0–25%)
+Shift Meta budget → Organic (0–25%)
+Shift Google budget → Email (0–25%)
+Shift Google budget → Organic (0–25%)
+
+Limit combined shift to max 30%.
+
+Display live outputs:
+
+Estimated contribution uplift (£)
+Blended CAC change (£)
+Contribution margin improvement (pp)
+Risk level indicator (Low / Medium)
+
+Mock outputs:
+
++£18,200 contribution
+-£1.10 blended CAC
++3.0pp contribution margin
+Risk: Low
+
+Show results dynamically when sliders move.
+
+--------------------------------------------------
+
+2. Add Recoverable Contribution Opportunity Card (PRO FEATURE)
+
+Place directly above the simulator outputs.
+
+Card content:
+
+Recoverable contribution next month
+
+£18,200
+
+Equivalent to:
+
++3.0pp contribution margin
+
+Confidence split:
+
+High confidence £9,800
+Medium confidence £8,400
+
+FREE MODE:
+
+Blur numbers
+Show:
+
+Upgrade to Pro to unlock channel reallocation impact modelling
+
+PRO MODE:
+
+Show full values
+
+--------------------------------------------------
+
+3. Add Fastest Recovery Lever Insight
+
+Below simulator results add:
+
+Fastest recovery lever identified
+
+Reallocate 15–25% of Meta spend toward Email and Organic — the two highest-contribution channels by profit margin.
+
+Style as green opportunity insight card.
+
+--------------------------------------------------
+
+4. Improve CAC Payback section wording
+
+Replace subtitle text:
+
+Number of orders required to recover the acquisition cost for each channel
+
+with:
+
+Orders required to recover acquisition cost using contribution profit per order
+
+--------------------------------------------------
+
+5. Add Attribution Confidence Note
+
+Insert below the CAC by Channel table:
+
+Text:
+
+Channel-level contribution estimates assume revenue attribution from platform reporting (Meta / Google). Cross-channel attribution differences may slightly affect efficiency comparisons.
+
+Style:
+
+small neutral info card
+not warning styling
+
+Visible in FREE and PRO
+
+--------------------------------------------------
+
+6. Add PRO gating behaviour near top of page
+
+Ensure this appears immediately after CFO Insight:
+
+If user is FREE:
+
+Show locked Recoverable Contribution card
+Blur simulator outputs
+Display:
+
+Upgrade to Pro to unlock budget reallocation modelling
+
+If user is PRO:
+
+Show full simulator outputs
+Show confidence split
+Hide upgrade messaging
+
+--------------------------------------------------
+
+7. Preserve existing sections below unchanged
+
+Keep:
+
+Contribution per channel bars
+Revenue vs contribution share comparison
+CAC vs blended comparison
+Key drivers breakdown
+Trend chart
+Recommended actions list
+
+Only adjust spacing so simulator integrates cleanly above them.
+
+--------------------------------------------------
+
+Final result:
+
+Marketing Efficiency page should now include an interactive budget reallocation simulator, early Pro upgrade trigger, contribution recovery estimate, and attribution confidence note consistent with the newer analytics pages.

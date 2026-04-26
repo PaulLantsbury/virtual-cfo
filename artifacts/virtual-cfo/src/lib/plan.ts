@@ -64,7 +64,8 @@ export type FeatureName =
   | "pricing_driver_table"            // Pricing — What Changed Contribution driver table + chart
   | "pricing_trade_off"               // Pricing — Price vs Volume Trade-off Analysis
   | "pricing_trend_chart"             // Pricing — Pricing Power Trend 6-period chart
-  | "pricing_recommendations";        // Pricing — This Month's Pricing Priorities section
+  | "pricing_recommendations"         // Pricing — This Month's Pricing Priorities section
+  | "marketing_budget_simulator";     // Marketing Efficiency — Budget Reallocation Simulator + Recoverable Contribution card
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -110,6 +111,7 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   pricing_trade_off:                ["pro"],
   pricing_trend_chart:              ["pro"],
   pricing_recommendations:          ["pro"],
+  marketing_budget_simulator:       ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

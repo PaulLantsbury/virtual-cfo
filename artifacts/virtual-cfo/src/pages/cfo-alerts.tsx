@@ -2,8 +2,9 @@ import { useState } from "react";
 import {
   Bell, AlertTriangle, CheckCircle2, Lock, Sparkles,
   ChevronDown, ChevronRight, Mail, Smartphone, TrendingDown,
-  BarChart2, Wallet, Megaphone, Target, Clock, Calendar,
-  Eye, ArrowRight, Info, ShoppingCart, Package, Zap,
+  BarChart2, Wallet, Megaphone, Target, Calendar,
+  Eye, ArrowRight, Info, ShoppingCart, Zap, Activity,
+  HelpCircle,
 } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -12,6 +13,7 @@ import { canAccess, isProUser } from "@/lib/plan";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { useAiCfo } from "@/components/AiCfoProvider";
 
@@ -44,6 +46,7 @@ interface ReportConfig {
 interface RecentAlertItem {
   date: string;
   alert: string;
+  impact: string;
   severity: Severity;
   action: string;
   status: "new" | "reviewed";
@@ -197,10 +200,10 @@ const CFO_REPORTS: ReportConfig[] = [
 ];
 
 const RECENT_ALERTS_FEED: RecentAlertItem[] = [
-  { date: "Today",      alert: "Meta CAC increased 18% week-on-week",          severity: "red",   action: "Review Meta campaigns",            status: "new"      },
-  { date: "Yesterday",  alert: "Discount dependency reached 38%",              severity: "amber", action: "Reduce blanket offers",            status: "new"      },
-  { date: "Monday",     alert: "Cash runway fell to 3.4 months",               severity: "amber", action: "Reduce stock build",               status: "reviewed" },
-  { date: "Last week",  alert: "Contribution margin fell to 42.3%",            severity: "amber", action: "Review margin recovery plan",      status: "reviewed" },
+  { date: "Today",     alert: "Meta CAC increased 18% week-on-week",  impact: "Potential impact: −£6.4k/month contribution",                    severity: "red",   action: "Review Meta campaigns",       status: "new"      },
+  { date: "Yesterday", alert: "Discount dependency reached 38%",       impact: "Potential impact: −£9.2k/month contribution",                    severity: "amber", action: "Reduce blanket offers",       status: "new"      },
+  { date: "Monday",    alert: "Cash runway fell to 3.4 months",        impact: "Potential impact: increased liquidity risk within 60 days",      severity: "amber", action: "Reduce stock build",          status: "reviewed" },
+  { date: "Last week", alert: "Contribution margin fell to 42.3%",     impact: "Potential impact: −£12k/month contribution",                     severity: "amber", action: "Review margin recovery plan", status: "reviewed" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -555,8 +558,6 @@ export default function CfoAlerts() {
     setNotifSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  const activeAlertCount = enabledAlerts.size;
-
   return (
     <AppLayout>
       {/* ── Page header ────────────────────────────────────────────────────── */}
@@ -578,29 +579,90 @@ export default function CfoAlerts() {
         )}
       </div>
 
-      {/* ── Hero metric cards ───────────────────────────────────────────────── */}
+      {/* ── CFO monitoring status panel ─────────────────────────────────────── */}
+      <div className="rounded-2xl border border-primary/25 bg-primary/5 px-5 py-4 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 shrink-0">
+            <Activity className="w-3.5 h-3.5 text-primary" />
+          </div>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Your CFO is currently monitoring</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {[
+            "Revenue trends — daily sales vs 30-day average",
+            "Contribution margin — tracking vs 40% target",
+            "Meta CAC efficiency — week-on-week movement",
+            "Cash runway — inventory and payables cycle",
+            "Discount dependency — % revenue from offers",
+            "AOV stability — order value changes by channel",
+          ].map((item) => (
+            <div key={item} className="flex items-start gap-2 text-sm text-foreground/80">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
+              <span className="leading-snug">{item}</span>
+            </div>
+          ))}
+        </div>
+        {!isPro && (
+          <p className="mt-3 text-xs text-muted-foreground/70 border-t border-primary/15 pt-3">
+            Monitoring is active in preview mode.{" "}
+            <Link href="/upgrade" className="text-primary underline underline-offset-2 font-semibold">Upgrade to Pro</Link>{" "}
+            to receive live alerts and notifications.
+          </p>
+        )}
+      </div>
+
+      {/* ── Traffic-light monitoring status ──────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Available alert types",  value: "24",                      icon: Bell,          color: "text-primary" },
-          { label: "Recommended alerts",     value: "4",                       icon: AlertTriangle, color: "text-amber-600 dark:text-amber-400" },
-          { label: "Report templates",       value: "3",                       icon: Calendar,      color: "text-emerald-600 dark:text-emerald-400" },
-          { label: "Highest risk area",      value: "Marketing efficiency",    icon: Megaphone,     color: "text-violet-600 dark:text-violet-400" },
-        ].map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 leading-tight">{label}</p>
-              <Icon className={cn("w-4 h-4 shrink-0", color)} />
+          {
+            label: "Sales trend",
+            value: "On track",
+            sub: "Daily revenue above 30d avg",
+            icon: ShoppingCart,
+            status: "green" as const,
+          },
+          {
+            label: "Contribution margin",
+            value: "42.3%  ↓",
+            sub: "Flagged — approaching 40% threshold",
+            icon: BarChart2,
+            status: "amber" as const,
+          },
+          {
+            label: "Marketing efficiency",
+            value: "CAC +18%",
+            sub: "Action required — Meta spend inefficient",
+            icon: Megaphone,
+            status: "red" as const,
+          },
+          {
+            label: "Highest risk area",
+            value: "Marketing efficiency",
+            sub: "Based on last 7 days of data",
+            icon: AlertTriangle,
+            status: "amber" as const,
+          },
+        ].map(({ label, value, sub, icon: Icon, status }) => {
+          const statusStyles = {
+            green: { dot: "bg-emerald-500", border: "border-emerald-200 dark:border-emerald-800/50", valueColor: "text-emerald-700 dark:text-emerald-400", badge: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400", badgeLabel: "On track" },
+            amber: { dot: "bg-amber-500", border: "border-amber-200 dark:border-amber-800/50", valueColor: "text-amber-700 dark:text-amber-400", badge: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400", badgeLabel: "Flagged" },
+            red:   { dot: "bg-red-500",   border: "border-red-200 dark:border-red-800/50",     valueColor: "text-red-700 dark:text-red-400",     badge: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",     badgeLabel: "Action needed" },
+          }[status];
+          return (
+            <div key={label} className={cn("rounded-2xl border bg-card p-4 shadow-sm", statusStyles.border)}>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 leading-tight">{label}</p>
+                <Icon className={cn("w-4 h-4 shrink-0", statusStyles.valueColor)} />
+              </div>
+              <p className={cn("text-lg font-bold leading-tight", statusStyles.valueColor)}>{value}</p>
+              <p className="text-[10px] text-muted-foreground/60 mt-1 leading-snug">{sub}</p>
+              <span className={cn("inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full mt-2", statusStyles.badge)}>
+                <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", statusStyles.dot)} />
+                {statusStyles.badgeLabel}
+              </span>
             </div>
-            <p className={cn("text-xl font-bold", color)}>{value}</p>
-            <p className="text-[10px] text-muted-foreground/60 mt-1">
-              {isPro
-                ? activeAlertCount > 0 && label === "Available alert types"
-                  ? `${activeAlertCount} alert${activeAlertCount !== 1 ? "s" : ""} currently active.`
-                  : ""
-                : label === "Available alert types" ? "Available on Pro." : ""}
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ── Free upgrade banner ─────────────────────────────────────────────── */}
@@ -802,61 +864,77 @@ export default function CfoAlerts() {
         )}
       </div>
 
-      {/* ══ RECENT ALERTS FEED ═══════════════════════════════════════════════ */}
+      {/* ══ WHAT YOUR CFO WOULD HAVE FLAGGED ════════════════════════════════ */}
       <div className="mb-8">
         <div className="flex items-center justify-between gap-3 mb-5">
           <div>
             <h2 className="text-xl font-bold text-foreground">
-              {isPro ? "Recent alerts" : "Example recent alerts"}
+              What your CFO would have flagged this week
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {isPro
-                ? "Your latest triggered alerts and CFO-suggested actions."
-                : "Example preview — upgrade to activate monitoring."}
+                ? "Issues your virtual CFO detected — with estimated financial impact."
+                : "Preview of what live monitoring would catch — upgrade to activate."}
             </p>
           </div>
         </div>
 
         <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-          {/* Table header */}
-          <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] gap-3 items-center px-5 py-3 bg-secondary/30 border-b border-border/40 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
-            <span>Date</span>
-            <span>Alert</span>
-            <span className="text-center">Severity</span>
-            <span>Suggested action</span>
-            <span className="text-center">Explain</span>
-          </div>
-
-          {/* Rows */}
           {RECENT_ALERTS_FEED.map((item, i) => {
             const sev = SEVERITY_STYLES[item.severity];
             return (
               <div
                 key={i}
-                className="grid grid-cols-[auto_1fr_auto_1fr_auto] gap-3 items-center px-5 py-3.5 border-b border-border/30 last:border-0 hover:bg-secondary/20 transition-colors"
+                className="flex flex-col gap-2 px-5 py-4 border-b border-border/30 last:border-0 hover:bg-secondary/20 transition-colors"
               >
-                <span className="text-xs text-muted-foreground/70 whitespace-nowrap">{item.date}</span>
-                <span className="text-xs font-medium text-foreground leading-snug">{item.alert}</span>
-                <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap", sev.badge)}>
-                  <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", sev.dot)} />
-                  {SEVERITY_LABEL[item.severity]}
-                </span>
-                <span className="text-xs text-muted-foreground leading-snug">{item.action}</span>
-                <div className="flex justify-center">
-                  {isPro ? (
-                    <button
-                      onClick={() => openDrawer("alerts")}
-                      className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors whitespace-nowrap"
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      Explain
-                    </button>
-                  ) : (
-                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg bg-secondary text-muted-foreground/40 border border-border/50 whitespace-nowrap cursor-not-allowed">
-                      <Lock className="w-2.5 h-2.5" />
-                      Pro
-                    </span>
-                  )}
+                {/* Row 1: date + alert + severity */}
+                <div className="flex flex-wrap items-start gap-3">
+                  <span className="text-xs text-muted-foreground/60 whitespace-nowrap mt-0.5 w-20 shrink-0">{item.date}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-semibold text-foreground leading-snug">{item.alert}</span>
+                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5 font-medium">{item.impact}</p>
+                  </div>
+                  <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap shrink-0", sev.badge)}>
+                    <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", sev.dot)} />
+                    {SEVERITY_LABEL[item.severity]}
+                  </span>
+                </div>
+
+                {/* Row 2: action text + inline buttons */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pl-23">
+                  <span className="text-xs text-muted-foreground leading-snug">{item.action}</span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {isPro ? (
+                      <>
+                        <button
+                          onClick={() => openDrawer("alerts")}
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg bg-primary/8 text-primary border border-primary/20 hover:bg-primary/15 transition-colors"
+                        >
+                          <Sparkles className="w-3 h-3" />
+                          Explain
+                        </button>
+                        <button
+                          onClick={() => openDrawer("alerts", "What should I do about this?")}
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg bg-primary/8 text-primary border border-primary/20 hover:bg-primary/15 transition-colors"
+                        >
+                          <HelpCircle className="w-3 h-3" />
+                          What should I do?
+                        </button>
+                        <button
+                          onClick={() => openDrawer("alerts", "Model the financial impact of fixing this.")}
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg bg-primary/8 text-primary border border-primary/20 hover:bg-primary/15 transition-colors"
+                        >
+                          <BarChart2 className="w-3 h-3" />
+                          Model impact
+                        </button>
+                      </>
+                    ) : (
+                      <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg bg-secondary text-muted-foreground/40 border border-border/50 cursor-not-allowed">
+                        <Lock className="w-2.5 h-2.5" />
+                        Explain — Pro only
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             );

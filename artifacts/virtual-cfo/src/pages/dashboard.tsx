@@ -13,6 +13,7 @@ import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions"
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
@@ -283,6 +284,12 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+
+          {/* AI CFO inline actions */}
+          <div className="mt-4 pt-3 border-t border-border/30 flex items-center gap-2 flex-wrap">
+            <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide">Ask your AI CFO:</span>
+            <AiCfoInlineButtons pageId="dashboard" />
+          </div>
         </div>
       </div>
 
@@ -321,6 +328,9 @@ export default function Dashboard() {
                   level="Medium-High"
                   helper="Based on 90-day trading data, discount history and channel performance trends."
                 />
+                <div className="mt-3 flex items-center gap-2 flex-wrap">
+                  <AiCfoInlineButtons pageId="dashboard" />
+                </div>
               </div>
               <div className="shrink-0 sm:pt-2">
                 <Link href="/profit-opportunities" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">

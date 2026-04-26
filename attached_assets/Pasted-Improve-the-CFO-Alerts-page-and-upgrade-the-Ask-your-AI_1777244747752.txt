@@ -1,0 +1,212 @@
+Improve the CFO Alerts page and upgrade the Ask your AI CFO interaction across the app.
+
+Objective:
+Make alerts feel proactive rather than configurable, and make the AI CFO module genuinely interactive instead of static prompt-response.
+
+Do not connect to real AI APIs yet. Keep mock logic.
+
+PART 1 — Improve CFO Alerts page
+
+1. Add “What your CFO is currently watching” panel at the top
+
+Insert a new section under the page title:
+
+Title:
+Your CFO is currently monitoring
+
+Content bullets:
+- Contribution margin trend
+- Meta CAC volatility
+- Cash runway stability
+- Discount dependency drift
+
+Add helper text:
+
+“You’ll be alerted if any of these move outside safe ranges.”
+
+Show this for both Free and Pro users.
+
+2. Replace hero metric cards
+
+Replace:
+
+Available alert types
+Recommended alerts
+Report templates
+
+With:
+
+Alert readiness status
+
+Show traffic-light monitoring status:
+
+Sales monitoring active (green)
+Margin monitoring recommended (amber)
+Marketing monitoring required (red)
+Cash monitoring recommended (amber)
+
+Use badge styling consistent with dashboard traffic lights.
+
+3. Upgrade “Example recent alerts” section
+
+Rename section:
+
+Example recent alerts
+
+To:
+
+What your CFO would have flagged this week
+
+Update rows to include impact estimates:
+
+Meta CAC increased 18%
+Potential impact: −£6.4k/month contribution
+
+Discount dependency reached 38%
+Potential impact: −£9.2k/month contribution
+
+Cash runway fell to 3.4 months
+Potential impact: increased liquidity risk within 60 days
+
+Contribution margin fell to 42.3%
+Potential impact: −£12k/month contribution
+
+Add buttons to each row:
+
+Explain
+What should I do?
+Model impact
+
+Buttons open AI CFO drawer.
+
+4. Add preview label for Free mode
+
+At top of alert history section in Free mode:
+
+“Example preview — upgrade to activate monitoring.”
+
+PART 2 — Upgrade Ask your AI CFO module
+
+Apply across all pages:
+
+Dashboard
+Profit Margin Analysis
+Growth Quality
+Marketing Efficiency
+Pricing Optimisation
+Profit Engine
+Cash Control
+Profit Opportunities
+Scenario Lab
+CFO Alerts
+
+1. Add question input field
+
+Update Ask your AI CFO card:
+
+Add text input:
+
+Placeholder:
+“Ask a question about this page…”
+
+Add button:
+
+Ask
+
+Keep existing suggested prompt chips below input.
+
+2. Add contextual label to responses
+
+At top of AI CFO drawer responses:
+
+Context: [current page name]
+
+Examples:
+
+Context: Pricing Optimisation
+Context: Marketing Efficiency
+Context: Cash Control
+
+3. Add response confidence indicator
+
+At bottom of each AI response:
+
+Confidence: Medium-high
+
+Helper text example:
+
+“Based on recent contribution margin, discount behaviour and marketing efficiency trends.”
+
+4. Add follow-up suggestion chips after responses
+
+After each AI answer display:
+
+Ask next:
+
+Show assumptions
+Model impact
+Create action plan
+Explain risk level
+
+Clicking these opens another contextual response.
+
+5. Add Scenario Lab integration button
+
+At bottom of AI responses add:
+
+Apply to Scenario Lab
+
+Clicking navigates to Scenario Lab page.
+
+6. Add explanation buttons to key insight cards
+
+Add small buttons where appropriate:
+
+Explain this
+What should I do?
+Model impact
+
+Apply to:
+
+Dashboard Business Health card
+Recoverable Contribution card
+Profit Margin bridge
+Marketing Efficiency simulator
+Pricing impact analysis
+Cash Control working capital section
+Profit Opportunities cards
+Scenario Lab recommended plan
+Alerts page alert rows
+
+Buttons open AI CFO drawer.
+
+7. Maintain Free vs Pro behaviour
+
+Free mode:
+
+Allow question input
+Allow prompt chips
+Show shorter AI responses
+Lock advanced modelling suggestions
+
+Display message:
+
+“Upgrade to Pro to unlock full CFO action plans.”
+
+Pro mode:
+
+Show full responses
+Enable Scenario Lab integration
+Remove upgrade prompts
+
+8. Keep layout clean
+
+Ensure:
+
+Ask your AI CFO card appears below hero insight
+Input field is visible immediately
+Prompt chips remain clickable
+Drawer opens correctly
+No duplicate AI cards exist
+Mobile layout remains intact
+No build errors occur

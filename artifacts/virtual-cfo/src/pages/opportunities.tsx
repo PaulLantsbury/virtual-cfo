@@ -8,6 +8,7 @@ import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
@@ -321,6 +322,9 @@ export default function Opportunities() {
                   <p className="text-[10px] text-muted-foreground mt-1">
                     {barPct}% of largest single opportunity
                   </p>
+                  <div className="mt-3">
+                    <AiCfoInlineButtons pageId="opportunities" />
+                  </div>
                 </div>
               </div>
             ) : (

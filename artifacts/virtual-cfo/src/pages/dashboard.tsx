@@ -24,8 +24,8 @@ const KPI_CARDS = [
     text: "Margin is below target and weakening.",
   },
   {
-    id: "rc",   title: "Recoverable Contribution", value: "£18k–£42k",     change: "Opportunity identified",  status: "positive",
-    text: "Opportunity available from pricing, marketing and fulfilment improvements.",
+    id: "rc",   title: "Recoverable Contribution", value: "£18k–£42k",     change: "Immediate margin recovery available",  status: "positive",
+    text: "Immediate margin recovery available from pricing, marketing and fulfilment improvements.",
   },
   {
     id: "cr",   title: "Cash Runway",              value: "3.4 months",    change: "Moderate",                status: "warning",
@@ -41,7 +41,7 @@ const KPI_CARDS = [
   },
   {
     id: "rpr",  title: "Repeat Purchase Rate",     value: "28%",           change: "↑ 4.2% vs last month",   status: "positive",
-    text: "Retention is improving as more customers place second orders.",
+    text: "Retention is strengthening as more customers place second orders.",
   },
   {
     id: "mr",   title: "Monthly Revenue",          value: "£124,500",      change: "↑ 12.4% vs last month",  status: "positive",
@@ -234,15 +234,23 @@ export default function Dashboard() {
           </p>
         </div>
 
+        {/* Inline £9.4k context strip */}
+        <div className="flex items-start gap-2.5 px-6 py-3 bg-amber-50/70 dark:bg-amber-950/15 border-b border-amber-100 dark:border-amber-900/20">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <p className="text-xs font-medium text-amber-800 dark:text-amber-300 leading-relaxed">
+            This month's performance reduced contribution by approximately £9.4k vs last month, driven by fulfilment cost inflation, Meta CAC deterioration and increased discounting.
+          </p>
+        </div>
+
         {/* Traffic-light scorecard */}
         <div className="px-6 py-4">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5">
             {[
               { area: "Profitability",            label: "Healthy",   text: "Profit remains positive.",                            style: "green"  },
               { area: "Margin Quality",           label: "Weakening", text: "Contribution margin is below target and falling.",     style: "amber"  },
-              { area: "Cash Runway",              label: "Watch",     text: "Cash is stable, but runway is tightening.",            style: "amber"  },
-              { area: "Acquisition Efficiency",   label: "At risk",   text: "Meta CAC is rising and ROAS is weakening.",            style: "red"    },
-              { area: "Retention",                label: "Improving", text: "Repeat purchase rate is improving.",                   style: "green"  },
+              { area: "Cash Runway",              label: "Runway tightening",       text: "Cash is stable, but runway is tightening.",    style: "amber"  },
+              { area: "Acquisition Efficiency",   label: "At risk",                 text: "Meta CAC is rising and ROAS is weakening.",    style: "red"    },
+              { area: "Retention",                label: "Retention strengthening", text: "Repeat purchase rate is improving.",           style: "green"  },
             ].map(({ area, label, text, style }) => (
               <div key={area} className={cn(
                 "rounded-xl p-3 border flex flex-col gap-1.5",
@@ -292,15 +300,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ══ EXECUTIVE ALERT STRIP ════════════════════════════════════════════ */}
-      <div className="flex items-start gap-3 px-5 py-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200/70 dark:border-amber-800/30 mb-5">
-        <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-        <p className="text-sm font-medium text-amber-900 dark:text-amber-200 leading-relaxed">
-          This month's performance is reducing contribution by approximately £9.4k vs last month. The largest drivers are
-          fulfilment cost inflation, Meta CAC deterioration and increased discounting.
-        </p>
-      </div>
-
       {/* ══ RECOVERABLE CONTRIBUTION OPPORTUNITY ════════════════════════════ */}
       <div className="bg-card rounded-2xl shadow-sm border border-emerald-200/70 dark:border-emerald-800/40 mb-5 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-200/60 dark:border-emerald-800/30">
@@ -312,6 +311,7 @@ export default function Dashboard() {
             <div className="flex-1">
               <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
                 {isPro ? "£18k–£42k" : "£—k–£—k"}
+                <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
               </p>
               <p className="text-sm text-foreground font-medium mb-1">
                 Potential monthly contribution upside if the issues above are addressed.
@@ -347,7 +347,7 @@ export default function Dashboard() {
       <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-5 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
           <Sparkles className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">CFO Insight</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">Fastest Route to Profit Improvement</span>
         </div>
         <div className="px-6 py-5">
           <p className="text-sm font-medium text-foreground leading-relaxed">{CFO_INSIGHT.body}</p>
@@ -447,7 +447,15 @@ export default function Dashboard() {
               </div>
               <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
               <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">{action.impact}</p>
-              <p className="text-xs text-muted-foreground leading-snug">{action.reason}</p>
+              <p className="text-xs text-muted-foreground leading-snug mb-4">{action.reason}</p>
+              <div className="flex items-center gap-3 pt-3 border-t border-border/40">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary/60 cursor-default select-none">
+                  Model impact <ArrowRight className="w-3 h-3" />
+                </span>
+                <span className="inline-flex items-center text-xs font-medium text-muted-foreground/50 cursor-default select-none border border-border/40 rounded-md px-2 py-0.5">
+                  Mark as done
+                </span>
+              </div>
             </div>
           ))}
         </div>

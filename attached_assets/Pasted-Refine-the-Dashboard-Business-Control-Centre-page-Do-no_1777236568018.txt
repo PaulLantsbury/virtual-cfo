@@ -1,0 +1,204 @@
+Refine the Dashboard / Business Control Centre page.
+
+Do not rebuild from scratch. Keep the current layout, data, routes, sidebar, header, Export CSV button, responsive styling and existing components. Only make the specific changes below.
+
+Objective:
+Make the dashboard verdict even clearer by explaining why the business is Amber inside the Business Health panel, making the recoverable contribution feel more commercial, and renaming CFO Insight into a more action-led recommendation.
+
+1. Move the monthly performance explanation into the Business Health panel
+
+Find the amber alert strip currently below the Business Health panel:
+
+“This month's performance is reducing contribution by approximately £9.4k vs last month. The largest drivers are fulfilment cost inflation, Meta CAC deterioration and increased discounting.”
+
+Remove this as a separate standalone strip.
+
+Instead, place this message inside the existing Business Health traffic-light panel, directly under the main verdict copy.
+
+New Business Health panel copy should read:
+
+Header:
+Overall Business Health
+
+Verdict:
+AMBER — Moderate Risk
+
+Main explanation:
+“You are profitable, but margin quality and acquisition efficiency are weakening. Fix pricing, fulfilment costs and Meta spend before growth becomes expensive.”
+
+Add a secondary amber explanation row inside the same panel:
+“This month’s performance reduced contribution by approximately £9.4k vs last month, driven by fulfilment cost inflation, Meta CAC deterioration and increased discounting.”
+
+Style this secondary row as a softer amber warning strip within the card, not as a separate page-level block.
+
+2. Keep the traffic-light scorecards
+
+Keep the five traffic-light scorecards inside the Business Health panel:
+
+- Profitability — Healthy — Profit remains positive.
+- Margin Quality — Weakening — Contribution margin is below target and falling.
+- Cash Runway — Watch — Cash is stable, but runway is tightening.
+- Acquisition Efficiency — At risk — Meta CAC is rising and ROAS is weakening.
+- Retention — Improving — Repeat purchase rate is improving.
+
+Keep the health scale:
+Strong / Stable / Moderate Risk / High Risk / Critical
+
+Keep the marker on Moderate Risk.
+
+3. Update wording in the traffic-light cards
+
+Change:
+Cash Runway label “Watch”
+to:
+Runway tightening
+
+Change:
+Retention label “Improving”
+to:
+Retention strengthening
+
+Keep colour styling the same:
+- Runway tightening = amber
+- Retention strengthening = green
+
+4. Upgrade Recoverable Contribution block
+
+Find the green block currently headed:
+“RECOVERABLE CONTRIBUTION AVAILABLE IMMEDIATELY”
+
+Keep the heading, but update the main value line to make the monthly nature explicit:
+
+Main value:
+£18k–£42k / month
+
+Supporting text:
+“Potential monthly contribution upside if the issues above are addressed.”
+
+Timing text:
+“Most recoverable within 30–60 days.”
+
+Keep the timing chips:
+- £12k within 30 days
+- £30k within 90 days
+
+Change the small status text/pill if present from:
+“Opportunity identified”
+to:
+“Immediate margin recovery available”
+
+Keep CTA:
+See action plan →
+
+5. Rename the CFO Insight block
+
+Find the blue “CFO INSIGHT” block immediately below the Recoverable Contribution block.
+
+Rename the header from:
+CFO INSIGHT
+
+to:
+FASTEST ROUTE TO PROFIT IMPROVEMENT
+
+Replace the copy with:
+“The fastest route to improvement is reducing fulfilment costs, tightening discount exposure on returning customers and reallocating inefficient Meta spend toward higher-contribution channels.”
+
+Keep the same blue insight visual styling and icon.
+
+6. Review Recommended Improvement Plan copy
+
+Keep this section where it is.
+
+Ensure it still has:
+- Expected within 60–90 days
+- Confidence: Medium-High
+- Balanced Growth Plan
+
+Keep the text:
+“This plan improves profit without choking growth. It combines pricing discipline, marketing reallocation, stock control and overhead restraint.”
+
+Keep the four metric cards:
+- Contribution / month: +£42k
+- Cash improvement: +£64k
+- Runway extension: +0.8 months
+- Margin improvement: +4.2pp
+
+Keep CTA:
+Model this plan →
+
+7. Update KPI wording
+
+In the KPI grid, make these exact wording changes:
+
+Contribution Margin helper text:
+“Margin is below target and weakening.”
+
+Recoverable Contribution helper text:
+“Immediate margin recovery available from pricing, marketing and fulfilment improvements.”
+
+Cash Runway helper text:
+“Cash remains positive, but runway is tightening.”
+
+Acquisition Efficiency helper text:
+“Meta CAC is rising faster than contribution per order.”
+
+Repeat Purchase Rate helper text:
+“Retention is strengthening as more customers place second orders.”
+
+Net Profit helper text:
+“Profit remains positive, but quality of growth needs attention.”
+
+8. Priority action card interaction placeholders
+
+Do not build full functionality yet, but add lightweight future-ready visual treatment to each Priority Action card:
+
+For each of the three action cards, add a subtle footer row with:
+- “Model impact →”
+- “Mark as done” as a disabled / non-functional ghost button or muted text button
+
+These should not perform actions yet.
+
+Do not break existing navigation.
+
+9. Keep detailed engine cards unchanged except duplicate arrows
+
+Ensure all detailed engine CTA links have only one arrow.
+
+Examples:
+Analyse margin →
+Analyse growth →
+Diagnose acquisition →
+Model opportunity →
+Analyse cash →
+Improve pricing →
+
+No duplicated arrows.
+
+10. Final order check
+
+Top-of-page order should now be:
+
+A. Page title and subtitle
+B. Business Health traffic-light verdict panel, including the £9.4k explanation inside it
+C. Recoverable Contribution Available Immediately
+D. Fastest Route to Profit Improvement
+E. Recommended Improvement Plan
+F. KPI grid
+G. Priority actions this month
+H. What changed and why it matters
+I. CFO action plan
+J. Explore the detailed engines
+
+11. Free vs Pro
+
+Do not change gating logic in this pass.
+
+12. Final verification
+
+Ensure:
+- No duplicate amber explanation strip remains outside the Business Health panel
+- No duplicate “CFO Insight” label remains in this top section
+- £18k–£42k clearly says “/ month”
+- Dashboard compiles
+- No unused imports remain
+- Page remains responsive on desktop and mobile

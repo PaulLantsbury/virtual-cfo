@@ -15,6 +15,8 @@ import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
+import { BenchmarkStrip } from "@/components/BenchmarkStrip";
+import { DataQualityNote } from "@/components/DataQualityNote";
 
 // ─── Base financial constants ─────────────────────────────────────────────────
 const BASE_REVENUE          = 420_000;
@@ -356,6 +358,13 @@ export default function ScenarioLab() {
             <span className="text-xs text-muted-foreground">Compare to: {timelineCompare}</span>
           </div>
         </div>
+
+        <BenchmarkStrip
+          message="Scenario quality is assessed against margin, cash runway and CAC payback benchmarks."
+          status="in"
+        />
+
+        <DataQualityNote note="Scenario outputs are directional estimates based on connected sales, marketing, cost and cash data." />
 
         {/* ══ 2. CFO INSIGHT CARD ═════════════════════════════════════════════ */}
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">

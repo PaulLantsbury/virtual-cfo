@@ -11,6 +11,8 @@ import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
+import { BenchmarkStrip } from "@/components/BenchmarkStrip";
+import { DataQualityNote } from "@/components/DataQualityNote";
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true  },
@@ -396,7 +398,7 @@ export default function MarginAnalysis() {
   return (
     <AppLayout>
       {/* ── Page header ── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Profit Margin Analysis
@@ -408,6 +410,13 @@ export default function MarginAnalysis() {
 
         <TimelineSelector />
       </div>
+
+      <BenchmarkStrip
+        message="Typical healthy DTC contribution margin range: 45–60%. Current: 42.3%."
+        status="below"
+      />
+
+      <DataQualityNote note="Margin analysis depends on product costs, shipping, discounts and marketing spend being mapped correctly." />
 
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 1 — CFO INSIGHT

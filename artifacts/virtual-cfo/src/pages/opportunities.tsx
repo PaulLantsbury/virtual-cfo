@@ -1,119 +1,78 @@
-import { TrendingUp, Target, ArrowRight, Zap, Lock } from "lucide-react";
+import { TrendingUp, Zap, Lock, Tag } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/plan";
+import { SHARED_OPPORTUNITIES } from "@/lib/mock-data";
+import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { TimingBadge } from "@/components/TimingBadge";
+import { BenchmarkStrip } from "@/components/BenchmarkStrip";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
 /**
- * @dynamic Total range = sum of opportunity uplifts ± uncertainty factor.
- * Update when opportunity estimates are replaced with live data.
+ * Monthly contribution opportunity range (excludes opp-d which is a
+ * one-off cash release, not a recurring contribution improvement).
+ * @dynamic Recompute as sum of monthly contribution uplifts ± uncertainty.
  */
-const TOTAL_LOW  = 28_000;
-const TOTAL_HIGH = 46_000;
+const TOTAL_LOW  = 18_000;
+const TOTAL_HIGH = 42_000;
 
 /**
- * Capital-free subset: opportunities requiring no new budget spend —
- * only reallocation or policy change.
- * @dynamic Recompute as sum of capitalFree=true opportunity uplift ± uncertainty.
+ * Capital-free subset: Low-effort opportunities requiring no new budget.
+ * opp-a (£12k–18k) + opp-b (£6k–10k) = £18k–28k.
+ * @dynamic Recompute as sum of effort=Low opportunity uplift ± uncertainty.
  */
 const CAPITAL_FREE_LOW  = 18_000;
 const CAPITAL_FREE_HIGH = 26_000;
 
-type ImpactLevel  = "high" | "medium" | "quick-win";
-type Confidence   = "High" | "Medium";
-type TimeToImpact =
-  | "Immediate impact (0–30 days)"
-  | "Short-term impact (1–2 months)"
-  | "Structural impact (2–3 months)";
+type ImpactLevel = "high" | "medium" | "quick-win";
 
-/**
- * @dynamic Each uplift estimate is computed from:
- *   uplift = orderVolume × perOrderGain
- * where perOrderGain is derived from the specific lever (CAC delta,
- * discount reduction, shipping renegotiation, email margin per send, etc.)
- */
-const OPPORTUNITIES: {
-  id:                 string;
-  label:              string;
-  description:        string;
-  uplift:             number;
-  impact:             ImpactLevel;
-  implementationType: string;
-  timeToImpact:       TimeToImpact;
-  confidence:         Confidence;
-  /** True = no new budget required; eligible for capital-free uplift total */
-  capitalFree:        boolean;
-  /** Analysis pages this recommendation is derived from */
-  sources:            { label: string; href: string }[];
-}[] = [
-  {
-    id:    "o1",
-    label: "Reallocate Meta spend",
-    description:
-      "Shift 15% of Meta budget to email and organic. Meta CAC (£28) runs 5.8× higher than email CAC (£4.80) — the same spend generates significantly more profitable customers through email. Every £1 reallocated recovers approximately £1.20 in contribution.",
-    uplift:             14_600,
-    impact:             "high",
-    implementationType: "No additional investment required",
-    timeToImpact:       "Immediate impact (0–30 days)",
-    confidence:         "High",
-    capitalFree:        true,
-    sources:            [{ label: "Marketing Efficiency", href: "/marketing-efficiency" }],
-  },
-  {
-    id:    "o2",
-    label: "Reduce discount depth",
-    description:
-      "Lower discount depth from 7% to 5% on returning segments. Returning customers have already demonstrated purchase intent — discounting them is pure margin loss, not acquisition spend. Recovering 2pp across 3,680 monthly repeat orders adds approximately £9.2k contribution.",
-    uplift:             9_200,
-    impact:             "high",
-    implementationType: "No additional investment required",
-    timeToImpact:       "Immediate impact (0–30 days)",
-    confidence:         "High",
-    capitalFree:        true,
-    sources:            [
-      { label: "Growth Quality",  href: "/growth-quality"  },
-      { label: "Margin Analysis", href: "/margin-analysis" },
-    ],
-  },
-  {
-    id:    "o3",
-    label: "Renegotiate shipping rates",
-    description:
-      "Reduce per-order fulfilment cost through carrier renegotiation or free-shipping thresholds. At current volume, a 10% reduction in shipping cost adds £3.70 per order to contribution. AOV thresholds above £60 typically cut the subsidy rate by 18–22%.",
-    uplift:             6_800,
-    impact:             "medium",
-    implementationType: "Requires supplier negotiation",
-    timeToImpact:       "Short-term impact (1–2 months)",
-    confidence:         "Medium",
-    capitalFree:        false,
-    sources:            [{ label: "Margin Analysis", href: "/margin-analysis" }],
-  },
-  {
-    id:    "o4",
-    label: "Activate email conversion flows",
-    description:
-      "Build post-purchase and winback sequences targeting lapsed customers. Email delivers the highest contribution margin of any channel (58.6%) at the lowest CAC (£4.80). A 0.4pp lift in email-attributed conversion adds approximately £4.3k monthly contribution from existing list volume.",
-    uplift:             4_300,
-    impact:             "quick-win",
-    implementationType: "Requires CRM setup",
-    timeToImpact:       "Short-term impact (1–2 months)",
-    confidence:         "Medium",
-    capitalFree:        false,
-    sources:            [
-      { label: "Growth Quality",       href: "/growth-quality"       },
-      { label: "Marketing Efficiency", href: "/marketing-efficiency" },
-    ],
-  },
-];
+// ─── Adapt shared opportunities to page format ────────────────────────────────
 
-const TOP_TWO_UPLIFT = OPPORTUNITIES.slice(0, 2).reduce((s, o) => s + o.uplift, 0);
-const TOTAL_MID      = (TOTAL_LOW + TOTAL_HIGH) / 2;
-const TOP_TWO_PCT    = Math.round((TOP_TWO_UPLIFT / TOTAL_MID) * 100);
+const CATEGORY_COLORS: Record<string, string> = {
+  Pricing:    "bg-indigo-50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-400 border-indigo-200/60 dark:border-indigo-700/30",
+  Marketing:  "bg-violet-50 dark:bg-violet-950/20 text-violet-700 dark:text-violet-400 border-violet-200/60 dark:border-violet-700/30",
+  Margin:     "bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/30",
+  Cash:       "bg-amber-50 dark:bg-amber-950/15 text-amber-700 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/30",
+  Operations: "bg-secondary text-muted-foreground border-border/50",
+  Retention:  "bg-rose-50 dark:bg-rose-950/10 text-rose-700 dark:text-rose-400 border-rose-200/50 dark:border-rose-700/25",
+};
+
+const EFFORT_COLORS: Record<string, string> = {
+  Low:    "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-800/25",
+  Medium: "bg-secondary text-muted-foreground border-border/50",
+  High:   "bg-rose-50/70 dark:bg-rose-950/10 text-rose-700 dark:text-rose-400 border-rose-200/50 dark:border-rose-700/25",
+};
+
+const OPPORTUNITIES = SHARED_OPPORTUNITIES.map((opp) => {
+  const midpoint   = Math.round((opp.monthlyImpactLow + opp.monthlyImpactHigh) / 2);
+  const impactLevel: ImpactLevel =
+    opp.confidence === "High" && opp.effort === "Low" ? "high"
+    : opp.effort === "Low" ? "quick-win"
+    : "medium";
+
+  return {
+    ...opp,
+    label:              opp.title,
+    description:        opp.recommendedAction,
+    uplift:             midpoint,
+    impact:             impactLevel,
+    implementationType: opp.effort === "Low" ? "No additional investment required" : "Requires operational change",
+    timeToImpact:       opp.timing === "Immediate" ? "Immediate impact (0–30 days)"
+                        : opp.timing === "1–2 weeks" || opp.timing === "2–4 weeks" || opp.timing === "30 days"
+                          ? "Short-term impact (1–2 months)"
+                          : "Structural impact (2–3 months)",
+    capitalFree:        opp.effort === "Low",
+    sources:            [{ label: opp.linkedPageLabel, href: opp.linkedPage }],
+    impactRangeLabel:   opp.impactType === "cash_improvement"
+                        ? `£${(opp.monthlyImpactLow / 1000).toFixed(0)}k–£${(opp.monthlyImpactHigh / 1000).toFixed(0)}k cash`
+                        : `£${(opp.monthlyImpactLow / 1000).toFixed(0)}k–£${(opp.monthlyImpactHigh / 1000).toFixed(0)}k/mo`,
+  };
+});
 
 const PRIORITY_NOTE =
-  `Start with reallocating Meta spend and reducing discount depth. Together these two changes represent over ${TOP_TWO_PCT > 60 ? "60" : TOP_TWO_PCT}% of the recoverable contribution improvement this month — and both require no additional investment, only reallocation and a pricing policy change.`;
+  "Start with reducing discount depth and reallocating Meta spend. Together, these two changes represent the highest-confidence, lowest-effort opportunities this month — and both require no additional investment, only a pricing policy change and a budget reallocation.";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -165,12 +124,22 @@ export default function Opportunities() {
               /* Pro: full £ value */
               <>
                 <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
-                  £{(TOTAL_LOW / 1000).toFixed(0)}k–£{(TOTAL_HIGH / 1000).toFixed(0)}k
+                  £{(TOTAL_LOW / 1000).toFixed(0)}k–£{(TOTAL_HIGH / 1000).toFixed(0)}k/month
                 </p>
                 <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 mt-2 leading-snug">
-                  Based on {OPPORTUNITIES.length} identified improvement opportunities at current sales volume.
+                  Recoverable contribution identified across pricing, marketing, margin and cash.
                   Estimates update automatically when live data is connected.
                 </p>
+                <div className="flex flex-wrap gap-3 mt-3">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-800/70 dark:text-emerald-300/80">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                    Highest confidence: Reduce average discount depth
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-800/70 dark:text-emerald-300/80">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                    Fastest: Reduce discount depth — Immediate
+                  </span>
+                </div>
               </>
             ) : (
               /* Free: blurred value + upgrade prompt */
@@ -259,25 +228,43 @@ export default function Opportunities() {
                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold shrink-0 mt-0.5">
                       {idx + 1}
                     </span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
+                      {/* Category badge + title */}
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                        <span className={cn(
+                          "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border",
+                          CATEGORY_COLORS[opp.category] ?? "bg-secondary text-muted-foreground border-border/50",
+                        )}>
+                          <Tag className="w-2.5 h-2.5" />
+                          {opp.category}
+                        </span>
+                      </div>
                       <p className="font-semibold text-foreground text-sm leading-snug">{opp.label}</p>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{opp.description}</p>
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <span className="text-[11px] text-muted-foreground/70 font-medium">
-                          {opp.timeToImpact}
-                        </span>
-                        <span className="text-muted-foreground/30 text-[11px]">·</span>
+                      {/* Badge row: timing, confidence, effort */}
+                      <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                        <TimingBadge timing={opp.timing} />
+                        <ConfidenceBadge
+                          level={opp.confidence}
+                          helper={
+                            opp.confidence === "High"
+                              ? "Based on direct Shopify and cost data."
+                              : opp.confidence === "Medium"
+                                ? "Based on channel-level attribution and recent trend data."
+                                : "Requires more complete mapping or longer trading history."
+                          }
+                        />
                         <span className={cn(
-                          "text-[11px] font-medium",
-                          opp.confidence === "High"
-                            ? "text-emerald-600/70 dark:text-emerald-500/70"
-                            : "text-amber-600/70 dark:text-amber-500/70",
+                          "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border",
+                          EFFORT_COLORS[opp.effort],
                         )}>
-                          Confidence: {opp.confidence}
+                          Effort: {opp.effort}
                         </span>
-                        <span className="text-muted-foreground/30 text-[11px]">·</span>
+                      </div>
+                      {/* Source link */}
+                      <div className="mt-1.5">
                         <span className="text-[11px] text-muted-foreground/50">
-                          Source:{" "}
+                          See analysis:{" "}
                           {opp.sources.map((src, i) => (
                             <span key={src.href}>
                               {i > 0 && <span className="text-muted-foreground/30">, </span>}
@@ -296,18 +283,27 @@ export default function Opportunities() {
 
                   <div className="flex flex-col items-end gap-1.5 shrink-0">
                     {showUpliftValues && (
-                      <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
-                        +£{opp.uplift.toLocaleString()}
-                      </span>
+                      <div className="text-right">
+                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap leading-tight">
+                          {opp.impactRangeLabel}
+                        </p>
+                        {opp.impactType === "monthly_contribution" && opp.annualImpact > 0 && (
+                          <p className="text-[10px] text-muted-foreground/60 whitespace-nowrap">
+                            ≈ £{(opp.annualImpact / 1000).toFixed(0)}k/year
+                          </p>
+                        )}
+                        {opp.impactType === "cash_improvement" && (
+                          <p className="text-[10px] text-muted-foreground/60 whitespace-nowrap">
+                            One-off cash release
+                          </p>
+                        )}
+                      </div>
                     )}
                     <span className={cn(
                       "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap",
                       impactClasses,
                     )}>
                       {impactLabel}
-                    </span>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap bg-secondary text-muted-foreground/70 border border-border/50">
-                      {opp.implementationType}
                     </span>
                   </div>
                 </div>

@@ -9,6 +9,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TopDrivers, type Driver } from "@/components/TopDrivers";
 import { canAccess } from "@/lib/plan";
+import { BenchmarkStrip } from "@/components/BenchmarkStrip";
+import { DataQualityNote } from "@/components/DataQualityNote";
+import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { TimingBadge } from "@/components/TimingBadge";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
@@ -94,6 +98,7 @@ const PRIORITY_ACTIONS = [
     reason: "Fulfilment and shipping costs are the largest margin drag this month.",
     badge:  "High impact",
     color:  "red",
+    timing: "2–4 weeks" as const,
   },
   {
     title:  "Tighten discount exposure",
@@ -101,6 +106,7 @@ const PRIORITY_ACTIONS = [
     reason: "Discount usage is rising faster than revenue growth.",
     badge:  "High impact",
     color:  "red",
+    timing: "Immediate" as const,
   },
   {
     title:  "Reallocate inefficient Meta spend",
@@ -108,6 +114,7 @@ const PRIORITY_ACTIONS = [
     reason: "Meta CAC has increased while ROAS has weakened.",
     badge:  "Medium impact",
     color:  "orange",
+    timing: "1–2 weeks" as const,
   },
 ] as const;
 
@@ -185,6 +192,16 @@ export default function Dashboard() {
           </Button>
         </div>
       </div>
+
+      <BenchmarkStrip
+        message="Contribution margin is 42.3%, below the typical healthy range of 45–60%."
+        status="below"
+      />
+
+      <DataQualityNote
+        note="Dashboard insights combine data from sales, marketing, pricing, margin and cash pages. Accuracy improves as source data mappings improve."
+        className="mb-5"
+      />
 
       {/* ══ BUSINESS HEALTH VERDICT HERO ════════════════════════════════════ */}
       <div className="bg-card rounded-2xl shadow-sm border border-amber-200/70 dark:border-amber-800/30 mb-5 overflow-hidden">
@@ -300,7 +317,7 @@ export default function Dashboard() {
                   Estimated monthly contribution upside if the issues above are addressed.
                 </p>
                 <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap mb-2">
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/30">
                     £12k within 30 days
                   </span>
@@ -308,6 +325,10 @@ export default function Dashboard() {
                     £30k within 90 days
                   </span>
                 </div>
+                <ConfidenceBadge
+                  level="Medium-High"
+                  helper="Based on 90-day trading data, discount history and channel performance trends."
+                />
               </div>
               <div className="shrink-0 sm:pt-2">
                 <Link href="/profit-opportunities" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
@@ -478,6 +499,7 @@ export default function Dashboard() {
                     )}>
                       {action.badge}
                     </span>
+                    <TimingBadge timing={action.timing} />
                   </div>
                   <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
                   <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">{action.impact}</p>
@@ -510,6 +532,7 @@ export default function Dashboard() {
                       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400">
                         {action.badge}
                       </span>
+                      <TimingBadge timing={action.timing} />
                     </div>
                     <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
                     <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">{action.impact}</p>

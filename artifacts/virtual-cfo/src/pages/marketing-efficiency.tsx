@@ -13,6 +13,9 @@ import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { cn } from "@/lib/utils";
+import { BenchmarkStrip } from "@/components/BenchmarkStrip";
+import { DataQualityNote } from "@/components/DataQualityNote";
+import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
@@ -518,6 +521,13 @@ export default function MarketingEfficiency() {
         <TimelineSelector />
       </div>
 
+      <BenchmarkStrip
+        message="Meta CAC payback is 2.1 orders, above the safe range of <1.2 orders."
+        status="above"
+      />
+
+      <DataQualityNote note="Channel contribution estimates rely on revenue attribution from Google and Meta. Cross-channel attribution differences may affect channel comparisons." />
+
       {/* ══════════════════════════════════════════════════════════════════════
           §1  MARKETING EFFICIENCY SUMMARY
           Diagnosis: what is happening and why it matters
@@ -764,7 +774,7 @@ export default function MarketingEfficiency() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 mb-3">
                 <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 shrink-0" />
                   <span className="font-semibold">High confidence</span>&ensp;£{simHighConf.toLocaleString()}
@@ -774,6 +784,7 @@ export default function MarketingEfficiency() {
                   <span className="font-semibold">Medium confidence</span>&ensp;£{simMedConf.toLocaleString()}
                 </p>
               </div>
+              <ConfidenceBadge level="Medium" helper="Based on channel-level attribution and recent trend data." />
             </div>
           ) : (
             <div className="relative rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/30 px-5 py-4 mb-5 overflow-hidden">

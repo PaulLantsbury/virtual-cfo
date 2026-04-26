@@ -14,6 +14,9 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
+import { BenchmarkStrip } from "@/components/BenchmarkStrip";
+import { DataQualityNote } from "@/components/DataQualityNote";
+import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const GROSS_REVENUE       = 420_000;
@@ -276,6 +279,13 @@ export default function PricingOptimisation() {
         <TimelineSelector />
       </div>
 
+      <BenchmarkStrip
+        message="Discount dependency is 38%, above the preferred range of 15–25%."
+        status="above"
+      />
+
+      <DataQualityNote note="Discount analysis assumes discounts are recorded using Shopify discount codes or compare-at pricing. If product list prices are manually reduced instead, discount impact may be understated." />
+
       {/* ── 1. Top CFO Insight ── */}
       <div className="mb-6">
         <CfoInsightCard text="Discounting is currently the largest drag on margin. Reducing the average discount by 3pp would increase contribution by approximately £38k per month without requiring additional traffic." />
@@ -314,10 +324,13 @@ export default function PricingOptimisation() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/70 dark:bg-emerald-950/20">
           <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">High confidence</p>
-              <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">£38,000</span>
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">High confidence</p>
+                <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">£38,000</span>
+              </div>
+              <ConfidenceBadge level="High" helper="Based on direct Shopify and cost data." />
             </div>
             <p className="text-xs text-emerald-700/80 dark:text-emerald-400/75 leading-relaxed">Recoverable by reducing average discount by 3pp with limited conversion risk.</p>
           </div>

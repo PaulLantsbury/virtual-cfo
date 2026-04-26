@@ -13,6 +13,8 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
+import { BenchmarkStrip } from "@/components/BenchmarkStrip";
+import { DataQualityNote } from "@/components/DataQualityNote";
 
 // ─── Base data constants ──────────────────────────────────────────────────────
 const CASH_BALANCE        = 186_000;
@@ -275,6 +277,13 @@ export default function CashControl() {
         <TimelineSelector />
       </div>
 
+      <BenchmarkStrip
+        message="Cash runway is 3.4 months, within monitor range but below strong cover."
+        status="watch"
+      />
+
+      <DataQualityNote note="Cash and working capital insights depend on accurate stock, supplier payment and bank transaction data." />
+
       {/* ── A. Cash Control Summary ── */}
       <div className="mb-8 space-y-4">
         <CfoInsightCard text="Your business is profitable, but cash is tightening because inventory and supplier payments are absorbing more cash than expected. Reduce working capital drag before increasing growth spend — each additional £100k of inventory currently delays cash recovery by around 3 weeks." />
@@ -431,10 +440,16 @@ export default function CashControl() {
                 </div>
                 <p className="text-sm font-semibold text-foreground">Main Risk Driver</p>
               </div>
-              <p className="text-3xl font-display font-bold text-red-600 dark:text-red-400 mb-1 text-xl leading-tight">Inventory build</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-2xl font-display font-bold text-red-600 dark:text-red-400 mb-1 leading-tight">Inventory build</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-2">
                 Stock build is the largest pressure on cash recovery.
               </p>
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/25">
+                <TrendingUp className="w-3 h-3 text-amber-600 dark:text-amber-400 shrink-0" />
+                <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+                  £40k–£60k cash headroom opportunity
+                </p>
+              </div>
             </div>
             <div className="bg-card rounded-2xl border border-amber-200 dark:border-amber-800/40 p-5">
               <div className="flex items-center gap-2 mb-3">

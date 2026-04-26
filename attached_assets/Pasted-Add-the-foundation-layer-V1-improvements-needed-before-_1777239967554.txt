@@ -1,0 +1,302 @@
+Add the foundation-layer V1 improvements needed before we move into data structure design.
+
+Do not rebuild the app. Keep existing pages, routes, styling, plan gating, mock data and calculations.
+
+Objective:
+Introduce consistent benchmark, confidence, data quality, opportunity and action structures across the app so the UI is ready for a real data model later.
+
+1. Add benchmark context model
+
+Create a reusable benchmark object / mock data structure.
+
+Include benchmark ranges for:
+- Contribution Margin
+- Repeat Purchase Rate
+- Discount Dependency
+- CAC Payback
+- Return Rate
+- Cash Runway
+- Working Capital Drag
+
+Each benchmark should include:
+- metric name
+- lower bound
+- typical range
+- top quartile
+- current value
+- status: Above range / In range / Below range / Watch
+
+Use this benchmark context in relevant pages where appropriate, but keep UI subtle.
+
+2. Add benchmark strips to key pages
+
+Add compact benchmark strips to:
+
+Dashboard:
+“Contribution margin is 42.3%, below the typical healthy range of 45–60%.”
+
+Profit Margin Analysis:
+“Typical healthy DTC contribution margin range: 45–60%. Current: 42.3%.”
+
+Growth Quality:
+“Repeat purchase rate is 28%, within the typical healthy range for this stage.”
+
+Pricing Optimisation:
+“Discount dependency is 38%, above the preferred range of 15–25%.”
+
+Marketing Efficiency:
+“Meta CAC payback is 2.1 orders, above the safe range of <1.2 orders.”
+
+Cash Control:
+“Cash runway is 3.4 months, within monitor range but below strong cover.”
+
+Scenario Lab:
+“Scenario quality is assessed against margin, cash runway and CAC payback benchmarks.”
+
+3. Add confidence scoring structure
+
+Create a reusable confidence score pattern.
+
+Each major insight or opportunity should support:
+- confidence level: High / Medium / Low
+- confidence reason
+- data dependencies
+
+Add confidence badges to:
+- Dashboard Recoverable Contribution Opportunity
+- Profit Opportunities ranked list
+- Scenario Lab suggested plans
+- Pricing Optimisation Recoverable Contribution Opportunity
+- Marketing Efficiency Recoverable Contribution Opportunity
+- Profit Margin Recovery Opportunities
+- Cash Control Cash Stability Outlook
+
+Example badge:
+Confidence: Medium-High
+
+Example tooltip/helper:
+“Based on 90-day trading data, discount history and channel performance trends.”
+
+4. Add data quality flags
+
+Create a reusable Data Quality Note / Data Quality Flag component.
+
+Use subtle neutral styling, not alarm styling.
+
+Add page-level data quality notes:
+
+Pricing Optimisation:
+“Discount analysis assumes discounts are recorded using Shopify discount codes or compare-at pricing. If product list prices are manually reduced instead, discount impact may be understated.”
+
+Marketing Efficiency:
+“Channel contribution estimates rely on revenue attribution from Google and Meta. Cross-channel attribution differences may affect channel comparisons.”
+
+Profit Margin Analysis:
+“Margin analysis depends on product costs, shipping, discounts and marketing spend being mapped correctly.”
+
+Cash Control:
+“Cash and working capital insights depend on accurate stock, supplier payment and bank transaction data.”
+
+Scenario Lab:
+“Scenario outputs are directional estimates based on connected sales, marketing, cost and cash data.”
+
+Dashboard:
+“Dashboard insights combine data from sales, marketing, pricing, margin and cash pages. Accuracy improves as source data mappings improve.”
+
+5. Add Opportunity object structure
+
+Create a shared mock opportunity structure to be reused across Dashboard, Profit Opportunities and Scenario Lab.
+
+Each opportunity should include:
+- id
+- title
+- category: Pricing / Marketing / Cash / Margin / Operations / Retention
+- driver metric
+- estimated monthly impact low
+- estimated monthly impact high
+- estimated annual impact
+- confidence level
+- effort level
+- timing: Immediate / 30 days / 90 days / 6 months
+- priority rank
+- linked page
+- recommended action
+- dependencies
+
+Populate mock opportunities:
+A. Reduce average discount depth
+Monthly impact: £12k–£18k
+Category: Pricing
+Confidence: High
+Effort: Low
+Timing: Immediate
+Linked page: Pricing Optimisation
+
+B. Reallocate inefficient Meta spend
+Monthly impact: £6k–£10k
+Category: Marketing
+Confidence: Medium
+Effort: Low
+Timing: 1–2 weeks
+Linked page: Marketing Efficiency
+
+C. Reduce shipping cost per order
+Monthly impact: £5k–£7k
+Category: Margin
+Confidence: High
+Effort: Medium
+Timing: 2–4 weeks
+Linked page: Profit Margin Analysis
+
+D. Reduce inventory days
+Cash impact: £40k–£60k
+Category: Cash
+Confidence: Medium
+Effort: Medium
+Timing: 30–90 days
+Linked page: Cash Control
+
+E. Improve full-price order ratio
+Monthly impact: £8k–£14k
+Category: Pricing
+Confidence: Medium
+Effort: Medium
+Timing: 30 days
+Linked page: Pricing Optimisation
+
+6. Update Profit Opportunities page to use Opportunity objects
+
+Refactor the Profit Opportunities page so the visible opportunity list uses the shared opportunity mock data.
+
+Each card/table row should show:
+- opportunity title
+- category
+- monthly impact range
+- annualised impact
+- confidence badge
+- effort badge
+- timing badge
+- recommended action
+- linked page CTA
+
+Top summary:
+“£18k–£42k/month recoverable contribution identified across pricing, marketing, margin and cash.”
+
+Add:
+“Highest confidence opportunity: Reduce average discount depth.”
+
+Add:
+“Fastest opportunity: Reduce discount depth immediately.”
+
+7. Add Action Library structure
+
+Create a shared mock action library.
+
+Each action should include:
+- action id
+- action title
+- category
+- trigger metric
+- trigger condition
+- expected impact range
+- confidence weight
+- effort level
+- timing
+- recommended owner
+- linked opportunity id
+
+Example actions:
+- Reduce discounting by 3pp
+- Reallocate 15% of Meta spend to Email / Organic
+- Renegotiate shipping provider rates
+- Reduce inventory days by 12
+- Hold fixed costs flat
+- Improve full-price order mix
+
+Use this action library to support:
+- Dashboard priority actions
+- Scenario Lab implementation plan
+- Profit Opportunities recommended actions
+
+Do not fully automate dynamic rules yet; just introduce consistent shared mock data.
+
+8. Add impact range fields to relevant UI
+
+Where pages currently show a single opportunity value, add low/high impact range where useful.
+
+Examples:
+Dashboard:
+£18k–£42k/month
+
+Profit Opportunities:
+show low/high range per opportunity
+
+Scenario Lab:
+show base / expected / upside where appropriate
+
+Pricing Optimisation:
+show “£38k high-confidence / £52k total opportunity”
+
+Marketing Efficiency:
+show “£9.8k high-confidence / £18.2k total opportunity”
+
+Cash Control:
+show “£40k–£60k cash headroom opportunity”
+
+Keep the UI clean and do not overcrowd pages.
+
+9. Add timing horizon badges
+
+Add timing badges to opportunity/action cards:
+- Immediate
+- 1–2 weeks
+- 2–4 weeks
+- 30–90 days
+- 6 months
+
+Use these on:
+- Dashboard priority actions
+- Profit Opportunities
+- Scenario Lab implementation plan
+- Pricing Optimisation priorities
+- Marketing Efficiency opportunities
+- Profit Margin recovery opportunities
+- Cash Control action recommendations
+
+10. Add confidence explanations
+
+Where confidence badges are shown, add a small helper tooltip or muted helper text.
+
+Examples:
+High confidence:
+“Based on direct Shopify and cost data.”
+
+Medium confidence:
+“Based on channel-level attribution and recent trend data.”
+
+Low confidence:
+“Requires more complete mapping or longer trading history.”
+
+11. Do not add unnecessary V2 features
+
+Do not add:
+- cohort modelling
+- ML forecasting
+- benchmark crowdsourcing
+- event pipeline logic
+- real integrations
+- warehouse sync
+
+This is only a mock data / UI foundation pass.
+
+12. Final checks
+
+Ensure:
+- all pages still compile
+- no route changes
+- no duplicate toggles
+- no broken gating
+- Free/Pro modes still work
+- no page becomes visually overcrowded
+- shared mock data is centralised where practical
+- styling remains consistent with the rest of the app

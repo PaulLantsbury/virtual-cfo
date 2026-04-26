@@ -1,0 +1,246 @@
+Refine the existing Scenario Lab page.
+
+Do not rebuild from scratch. Keep the route, sidebar nav, styling, mock data, tabs, sliders, plan cards, calculations, Free/Pro gating and responsive behaviour.
+
+Objective:
+Improve the page hierarchy so it feels like:
+Diagnosis → CFO recommendation → impact → confidence → plan rationale → scenario editing → execution.
+
+1. Reorder the page sections
+
+Use this final order:
+
+1. Page header
+2. CFO Insight
+3. Recommended Scenario: Balanced Growth Plan
+4. AI CFO Recommendation
+5. Scenario Impact
+6. Scenario Quality Score
+7. Why this plan?
+8. CFO Suggested Plans / Choose your plan
+9. Scenario Builder
+10. Imported assumptions
+11. Scenario Contribution Bridge
+12. Cash and Profit Consequence
+13. Implementation Plan
+14. Data Quality Note
+
+2. Move AI CFO Recommendation higher
+
+Move the existing AI CFO Recommendation section so it appears directly below the Recommended Scenario summary.
+
+Keep the existing recommendation text, but tighten it to:
+
+“Start with the Balanced Growth Plan. It delivers meaningful contribution uplift while protecting cash runway and avoiding over-reliance on new paid acquisition. Prioritise discount discipline, Meta budget reallocation and inventory control before increasing growth spend.”
+
+Keep the three action bullets:
+- Apply the Balanced Growth Plan this month
+- Review Meta and Google performance weekly
+- Reassess inventory and cash runway after 30 days
+
+3. Add board-level summary sentence
+
+Directly under the main CFO Insight card, add a compact green/neutral insight strip:
+
+“This scenario increases contribution by approximately 21% without requiring additional customer acquisition.”
+
+Use subtle styling, not a large card.
+
+4. Move Scenario Impact higher
+
+Move Scenario Impact so it appears directly below AI CFO Recommendation.
+
+Keep the before/after cards:
+- Revenue
+- Contribution
+- EBITDA
+- Cash Balance
+- Cash Runway
+- Working Capital Drag
+- CAC Payback
+- Contribution / Order
+
+Make sure the first row contains the main commercial outputs:
+- Revenue
+- Contribution
+- EBITDA
+- Cash Balance
+
+And the second row contains:
+- Cash Runway
+- Working Capital Drag
+- CAC Payback
+- Contribution / Order
+
+5. Merge duplicated impact content
+
+The page currently has both Scenario Impact and Cash and Profit Consequence.
+
+Keep both section names if already implemented, but reduce duplication:
+
+Scenario Impact should show the numbers.
+
+Cash and Profit Consequence should become a shorter explanation section only.
+
+In Cash and Profit Consequence, keep four small cards:
+- Profit uplift
+- Cash uplift
+- Runway extension
+- Risk movement
+
+But remove any repeated large headline numbers if they duplicate Scenario Impact too heavily.
+
+Add/keep this CFO insight:
+“Cash improves because inventory reduction releases working capital as well as improving operating performance.”
+
+6. Move Scenario Quality Score higher
+
+Move Scenario Quality Score directly below Scenario Impact.
+
+Keep:
+- Score: Strong
+- Profit uplift: Strong
+- Cash impact: Strong
+- Implementation risk: Moderate
+- Confidence level: Medium-High
+- Payback period: Fast
+
+Add footer note:
+“Confidence reflects stability of CAC trends, discount behaviour and shipping cost variance over the last 90 days.”
+
+7. Improve Why this plan copy
+
+Replace the current Why this plan CFO Insight copy with:
+
+“This plan is recommended because Meta CAC is reducing contribution by £3.40 per order, discounting has increased by 1.8pp, and inventory build is tightening cash runway within 60 days. It improves contribution without requiring additional stock investment.”
+
+Keep the three evidence cards:
+- Margin pressure
+- Marketing inefficiency
+- Cash tightening
+
+8. Add Active Scenario banner above Scenario Builder
+
+At the top of the Scenario Builder section, add a small active-state banner:
+
+Active scenario: Balanced Growth Plan
+
+Supporting text:
+“These assumptions are loaded from the recommended plan and can be adjusted below.”
+
+Buttons:
+- Reapply plan
+- Reset
+- Save as new scenario
+
+The Reapply plan button should load the Balanced Growth Plan defaults.
+
+The Reset button should reset all sliders to base case.
+
+Save as new scenario can remain a mock button with no backend.
+
+9. Make Imported assumptions collapsible
+
+Change Imported from page sliders into a collapsible accordion-style section.
+
+Default state:
+Collapsed
+
+Closed title:
+Imported assumptions from other scenario tools
+
+Closed subtitle:
+“Show assumptions pulled from page-level what-if sliders.”
+
+When expanded, show the existing chips:
+- Pricing Optimisation: discount reduced by 3pp
+- Marketing Efficiency: 15% Meta spend reallocated
+- Cash Control: inventory days reduced by 12
+- Profit Margin: shipping cost reduced by £1.50/order
+- Profit Engine: fixed costs held flat
+
+Keep buttons:
+- Apply current page assumptions
+- Clear imported assumptions
+
+10. Make Implementation Plan feel more actionable
+
+Add checkbox-style icons to each row/action.
+
+Rows should appear as actionable tasks:
+- Reduce discounting by 3pp
+- Reallocate Meta spend
+- Reduce inventory days
+- Renegotiate shipping
+- Hold fixed costs flat
+
+Keep columns:
+Action
+Impact
+Confidence
+Effort
+Timing
+
+Do not implement persistence yet — checkbox visuals only.
+
+11. Improve Suggested Plans section placement
+
+Move “CFO Suggested Plans / Choose your plan” below Why this plan and above Scenario Builder.
+
+Rename section title to:
+
+Choose or adjust your plan
+
+Subtitle:
+“Start with the recommended plan, or switch to a more profit-focused or cash-focused scenario.”
+
+Keep the three plan cards:
+- Margin Recovery Plan
+- Cash Protection Plan
+- Balanced Growth Plan
+
+Keep Balanced Growth visually highlighted as recommended.
+
+12. Keep calculations and Apply Plan behaviour
+
+Do not break existing Apply Plan buttons.
+
+When user selects:
+- Margin Recovery Plan
+- Cash Protection Plan
+- Balanced Growth Plan
+
+Update:
+- active scenario label
+- sliders
+- scenario impact outputs
+- quality score where currently dynamic
+- recommendation text if currently dynamic
+
+If dynamic switching is not yet fully implemented, at minimum update the active scenario label and sliders.
+
+13. Free vs Pro behaviour
+
+Free mode:
+- show the CFO Insight
+- show board-level summary strip
+- show Recommended Scenario summary
+- show AI CFO Recommendation preview
+- show headline Scenario Impact
+- lock detailed Scenario Builder
+- lock Save/Compare
+- lock detailed contribution bridge
+- lock Implementation Plan
+
+Pro mode:
+- show everything fully unlocked
+- no blur overlays
+- no upgrade CTAs
+
+14. Final output
+
+Update the existing Scenario Lab page only.
+
+Do not add live integrations.
+Keep all calculations client-side.
+Keep visual style consistent with Profit Engine, Cash Control, Pricing Optimisation, Marketing Efficiency and Profit Margin Analysis.

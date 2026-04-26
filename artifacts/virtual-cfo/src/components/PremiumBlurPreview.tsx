@@ -41,6 +41,11 @@ interface PremiumBlurPreviewProps {
    * When omitted, falls back to full blur of children.
    */
   ghostContent?: React.ReactNode;
+  /**
+   * Optional explanatory paragraph shown below the header in both locked and
+   * unlocked states. Use for "why this metric matters" context lines.
+   */
+  description?: string;
   /** Extra classes for the outer card wrapper */
   className?: string;
 }
@@ -69,6 +74,7 @@ export function PremiumBlurPreview({
   isPro,
   children,
   ghostContent,
+  description,
   className,
 }: PremiumBlurPreviewProps) {
   return (
@@ -79,7 +85,7 @@ export function PremiumBlurPreview({
       )}
     >
       {/* ── Header — always visible ── */}
-      <div className={cn("flex items-start justify-between gap-4", isPro ? "mb-5" : "mb-4")}>
+      <div className={cn("flex items-start justify-between gap-4", description ? "mb-2" : isPro ? "mb-5" : "mb-4")}>
         <div className="min-w-0">
           <h3 className="font-semibold text-lg text-foreground">{title}</h3>
           {subtitle && (
@@ -97,6 +103,12 @@ export function PremiumBlurPreview({
           </span>
         )}
       </div>
+
+      {description && (
+        <p className="text-xs text-muted-foreground leading-relaxed mb-4 border-l-2 border-border/60 pl-3 italic">
+          {description}
+        </p>
+      )}
 
       {isPro ? (
         /* ── Unlocked: full content ── */

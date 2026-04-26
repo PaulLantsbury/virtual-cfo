@@ -1,0 +1,124 @@
+Refine the existing Marketing Efficiency page.
+
+Do not rebuild the page from scratch. Keep the current styling, route, timeframe selector, mock data, simulator, charts, Free/Pro gating and responsive behaviour.
+
+Make the following targeted improvements:
+
+1. Reduce duplication between simulator and opportunities section
+
+The Budget Reallocation Simulator already shows the key recoverable contribution number.
+
+Update the Opportunities section so it no longer feels like it repeats the same headline.
+
+Rename the Opportunities section title to:
+
+Top opportunities driving this estimate
+
+Subtitle:
+The main actions behind the recoverable contribution opportunity.
+
+Keep the opportunity rows:
+- Reallocate Meta spend
+- Increase lifecycle email conversion
+- Improve paid acquisition mix toward higher-contribution products
+
+Keep the £ uplift and contribution margin uplift values.
+
+Remove or reduce the large repeated £18,200 headline in this section if it appears redundant. The simulator should remain the primary place where the £18,200 headline is shown.
+
+2. Improve CAC Payback explanation
+
+In the CAC Payback by Channel section, add this explanatory line directly below the subtitle:
+
+“Payback speed determines how quickly marketing spend returns usable cash. Faster payback reduces growth risk even when contribution per order is similar.”
+
+Keep existing channel payback bars and values.
+
+3. Add CAC payback threshold bands
+
+Add a small legend or helper note in the CAC Payback by Channel section:
+
+Safe: below 1.2 orders  
+Monitor: 1.2–1.6 orders  
+Risk: above 1.6 orders
+
+Use subtle colour coding consistent with the rest of the app:
+- green for Safe
+- amber for Monitor
+- red for Risk
+
+Apply these classifications to the existing channels:
+- Email: 0.6 orders = Safe
+- Organic: 0.8 orders = Safe
+- Google Shopping: 1.3 orders = Monitor
+- Meta: 2.1 orders = Risk
+
+Change Meta’s badge from:
+Above target
+
+To:
+Risk
+
+Keep the blended average and target threshold markers.
+
+4. Strengthen CAC Payback interpretation
+
+Replace the current bottom interpretation text with:
+
+“Meta requires 2.1 orders to recover acquisition cost, placing it in the risk zone. Email and Organic recover spend fastest, making them safer channels to scale when cash efficiency matters.”
+
+5. Clarify difference between Contribution per Order and CAC Payback
+
+In the Contribution per Order by Channel section, add a short helper note at the bottom:
+
+“Contribution per order shows which channels create the most profit per sale. CAC payback shows how quickly acquisition spend is recovered.”
+
+This should make it clear the two sections are complementary, not duplicates.
+
+6. Add a small liquidity insight badge to CAC Payback
+
+Add a small CFO-style badge/card near the top right of the CAC Payback section:
+
+Cash recovery risk:
+Moderate
+
+Supporting text:
+“Paid acquisition is becoming less cash-efficient because Meta payback is above the risk threshold.”
+
+Use amber styling.
+
+7. Preserve existing sections
+
+Do not remove:
+- Marketing Efficiency Summary
+- Budget Reallocation Simulator
+- Contribution Profit by Channel
+- Revenue Share vs Contribution Share
+- CAC by Channel table
+- CAC Payback by Channel
+- Key Drivers
+- Marketing Efficiency Trend
+- Recommended Actions
+
+Only refine wording, hierarchy and section interpretation as specified.
+
+8. Free vs Pro behaviour
+
+In Free mode:
+- keep simulator locked/blurred if currently locked
+- keep payback section visible if already visible
+- show threshold band explanation
+- keep any upgrade prompts intact
+
+In Pro mode:
+- show all simulator and opportunity detail fully
+- no blur overlays
+- no upgrade CTAs
+
+9. Final output
+
+Update the existing Marketing Efficiency page only.
+
+Do not add live integrations.
+Keep all calculations client-side.
+Keep the visual style consistent with Profit Engine, Cash Control and Pricing Optimisation.

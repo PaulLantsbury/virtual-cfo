@@ -405,6 +405,32 @@ const EFFICIENCY_CONFIG: Record<EfficiencyRating, { label: string; badge: string
   },
 };
 
+/**
+ * Three-band CAC payback classification used for channel badges and colouring.
+ * Thresholds: Safe < 1.2 orders · Monitor 1.2–1.6 · Risk > 1.6
+ */
+function getPaybackBand(payback: number): {
+  label: "Safe" | "Monitor" | "Risk";
+  badgeCls: string;
+  dotCls: string;
+} {
+  if (payback < 1.2) return {
+    label: "Safe",
+    badgeCls: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300",
+    dotCls:   "bg-emerald-500",
+  };
+  if (payback <= 1.6) return {
+    label: "Monitor",
+    badgeCls: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300",
+    dotCls:   "bg-amber-400",
+  };
+  return {
+    label: "Risk",
+    badgeCls: "bg-destructive/10 text-destructive",
+    dotCls:   "bg-destructive",
+  };
+}
+
 /** Reserved for upcoming Contribution Margin by Channel chart */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const maxCm = Math.max(...CHANNEL_CM.map((c) => c.cm));
@@ -879,76 +905,30 @@ export default function MarketingEfficiency() {
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Opportunities</h2>
+        <h2 className="text-xl font-bold text-foreground">Top opportunities driving this estimate</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Ranked by contribution uplift — {framing.rowLabel}, at {framing.baselineNote}.
+          The main actions behind the recoverable contribution opportunity.
         </p>
       </div>
 
       {/* ── Structured opportunities panel ── */}
       <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 shadow-sm mb-8 overflow-hidden">
 
-        {/* ── Hero headline ── */}
-        <div className="bg-emerald-50 dark:bg-emerald-950/25 px-8 py-6 border-b border-emerald-200 dark:border-emerald-800/40">
-          <div className="flex items-center gap-2 mb-3">
-            <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-              Recoverable contribution — {framing.rowLabel}
-            </p>
-          </div>
-          {/* Dual metric row — £ value + pp equivalent */}
-          <div className="flex flex-wrap items-end gap-x-8 gap-y-3 mb-3">
-            {/* Primary: cash value */}
-            <div>
-              <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
-                £{ESTIMATED_CONTRIBUTION.toLocaleString()}
-              </p>
-              <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 mt-1.5">
-                +{OPPORTUNITY_UPLIFT_PCT}% contribution uplift vs current marketing contribution profit
-              </p>
-            </div>
-            {/* Secondary: margin pp equivalent */}
-            <div className="pl-7 border-l-2 border-emerald-300/60 dark:border-emerald-700/40 pb-0.5">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600/70 dark:text-emerald-400/60 mb-1">
-                Equivalent to
-              </p>
-              <p className="text-3xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none">
-                +{ME_TOTAL_PP.toFixed(1)}pp
-              </p>
-              <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 leading-snug mt-1">
-                marketing contribution margin
-              </p>
-            </div>
-          </div>
-
-          {/* Confidence breakdown */}
-          <div className="flex flex-col gap-1 mb-3">
-            {ME_CONFIDENCE_TOTALS.high > 0 && (
-              <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 shrink-0" />
-                <span className="font-semibold">High confidence</span>&ensp;£{ME_CONFIDENCE_TOTALS.high.toLocaleString()}
-              </p>
-            )}
-            {ME_CONFIDENCE_TOTALS.medium > 0 && (
-              <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/50 dark:bg-emerald-400/50 shrink-0" />
-                <span className="font-semibold">Medium confidence</span>&ensp;£{ME_CONFIDENCE_TOTALS.medium.toLocaleString()}
-              </p>
-            )}
-            {ME_CONFIDENCE_TOTALS.low > 0 && (
-              <p className="text-xs text-emerald-700/40 dark:text-emerald-400/40 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/30 dark:bg-emerald-400/30 shrink-0" />
-                <span className="font-semibold">Requires validation</span>&ensp;£{ME_CONFIDENCE_TOTALS.low.toLocaleString()}
-              </p>
-            )}
-          </div>
-
-          <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 leading-snug">
-            Based on quantified budget reallocation impact from the {framing.baselineNote}
+        {/* ── Compact reference bar (replaces the large repeated hero) ── */}
+        <div className="flex items-center gap-3 px-6 py-3 bg-emerald-50 dark:bg-emerald-950/20 border-b border-emerald-200/70 dark:border-emerald-800/40">
+          <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80">
+            Combined impact — {framing.rowLabel}:
+            <span className="font-bold text-emerald-700 dark:text-emerald-300 ml-1.5 tabular-nums">
+              ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+            </span>
+            <span className="ml-2 text-emerald-600/70 dark:text-emerald-400/60">
+              (+{ME_TOTAL_PP.toFixed(1)}pp contribution margin)
+            </span>
           </p>
-          <p className="text-xs text-emerald-700/50 dark:text-emerald-400/50 leading-snug mt-1">
-            Current Marketing Contribution Profit: £{MKT_CP.toLocaleString()} · {periodBadge}
-          </p>
+          <span className="ml-auto text-[10px] text-emerald-600/60 dark:text-emerald-400/50 whitespace-nowrap shrink-0">
+            See simulator above for full breakdown ↑
+          </span>
         </div>
 
         {/* ── Opportunity rows — gated by plan via inline blur pattern ── */}
@@ -1491,6 +1471,16 @@ export default function MarketingEfficiency() {
           increasing revenue.
         </p>
 
+        {/* Differentiator note vs CAC Payback */}
+        <div className="flex items-start gap-2 mt-3 px-3 py-2.5 rounded-lg bg-secondary/50 border border-border/40">
+          <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground leading-snug">
+            <span className="font-semibold text-foreground">Contribution per order</span> shows which channels create the most profit per sale.{" "}
+            <span className="font-semibold text-foreground">CAC payback</span> shows how quickly acquisition spend is recovered.
+            Together they give a complete picture of channel efficiency.
+          </p>
+        </div>
+
       </div>
 
       {/* Revenue Share vs Contribution Share — sub-section of Allocation Diagnostics */}
@@ -1882,11 +1872,23 @@ export default function MarketingEfficiency() {
       <PremiumBlurPreview
         title="CAC Payback by Channel"
         subtitle="Orders required to recover acquisition cost using contribution profit per order."
+        description="Payback speed determines how quickly marketing spend returns usable cash. Faster payback reduces growth risk even when contribution per order is similar."
         badgeText="PRO — Unlock cash recovery diagnostics"
         headerExtra={
-          <div className="text-right pt-0.5">
-            <p className="text-xs text-muted-foreground">Blended avg</p>
-            <p className="text-sm font-bold text-foreground tabular-nums">{CAC_PAYBACK} orders</p>
+          <div className="flex items-start gap-3 shrink-0">
+            <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/40 px-3 py-2 text-right">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                Cash recovery risk
+              </p>
+              <p className="text-sm font-bold text-amber-700 dark:text-amber-300 leading-snug mt-0.5">Moderate</p>
+              <p className="text-[10px] text-amber-600/70 dark:text-amber-400/60 leading-snug mt-0.5 max-w-[18ch]">
+                Paid acquisition is becoming less cash-efficient because Meta payback is above the risk threshold.
+              </p>
+            </div>
+            <div className="text-right pt-0.5">
+              <p className="text-xs text-muted-foreground">Blended avg</p>
+              <p className="text-sm font-bold text-foreground tabular-nums">{CAC_PAYBACK} orders</p>
+            </div>
           </div>
         }
         ctaTitle="Unlock CAC payback by channel"
@@ -1909,7 +1911,7 @@ export default function MarketingEfficiency() {
                           <span className="text-sm font-bold tabular-nums text-foreground/25 dark:text-foreground/20">—.— orders</span>
                           {overThreshold && (
                             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
-                              Above target
+                              Risk
                             </span>
                           )}
                         </div>
@@ -1941,10 +1943,24 @@ export default function MarketingEfficiency() {
           </div>
         }
       >
+        {/* ── Threshold band legend ── */}
+        <div className="flex flex-wrap items-center gap-3 mb-5 pb-4 border-b border-border/40">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mr-1">Payback bands</span>
+          {([
+            { label: "Safe", note: "< 1.2 orders",    cls: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300" },
+            { label: "Monitor", note: "1.2–1.6 orders", cls: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300" },
+            { label: "Risk",  note: "> 1.6 orders",   cls: "bg-destructive/10 text-destructive" },
+          ] as const).map(({ label, note, cls }) => (
+            <span key={label} className={cn("inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full", cls)}>
+              {label} <span className="font-normal opacity-70">{note}</span>
+            </span>
+          ))}
+        </div>
+
         {/* ── Chart rows — real data, blurred for free users ── */}
         <div className="space-y-4">
           {[...PAYBACK_BY_CHANNEL].sort((a, b) => a.payback - b.payback).map((row) => {
-            const overThreshold = row.payback > PAYBACK_THRESHOLD;
+            const band = getPaybackBand(row.payback);
             const barPct = Math.min((row.payback / 3) * 100, 100);
             /** @dynamic diff = row.payback − CAC_PAYBACK (live) */
             const paybackDiff = +(row.payback - CAC_PAYBACK).toFixed(1);
@@ -1956,6 +1972,9 @@ export default function MarketingEfficiency() {
             /** @dynamic reference line positions within 0–3 order scale */
             const blendedPct = (CAC_PAYBACK / 3) * 100;
             const thresholdPct = (PAYBACK_THRESHOLD / 3) * 100;
+            const barColor =
+              band.label === "Safe"    ? "bg-emerald-500" :
+              band.label === "Monitor" ? "bg-amber-400"   : "bg-destructive";
             return (
               <div key={row.channel}>
                 <div className="flex items-center justify-between mb-1.5">
@@ -1974,16 +1993,16 @@ export default function MarketingEfficiency() {
                     <span
                       className={cn(
                         "text-sm font-bold tabular-nums",
-                        overThreshold ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
+                        band.label === "Risk"    ? "text-destructive" :
+                        band.label === "Monitor" ? "text-amber-600 dark:text-amber-400" :
+                        "text-emerald-600 dark:text-emerald-400"
                       )}
                     >
                       {row.payback} orders
                     </span>
-                    {overThreshold && (
-                      <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
-                        Above target
-                      </span>
-                    )}
+                    <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded", band.badgeCls)}>
+                      {band.label}
+                    </span>
                   </div>
                 </div>
                 {/* Bar track with reference line ticks */}
@@ -1998,7 +2017,7 @@ export default function MarketingEfficiency() {
                   />
                   <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 bg-secondary rounded-full overflow-hidden">
                     <div
-                      className={cn("h-2 rounded-full transition-all", overThreshold ? "bg-destructive" : "bg-emerald-500")}
+                      className={cn("h-2 rounded-full transition-all", barColor)}
                       style={{ width: `${barPct}%` }}
                     />
                   </div>
@@ -2023,17 +2042,14 @@ export default function MarketingEfficiency() {
           </div>
         </div>
 
-        {/* @dynamic Insight: identifies the worst channel above blended avg */}
-        {(() => {
-          const worst = [...PAYBACK_BY_CHANNEL].reduce((a, b) => a.payback > b.payback ? a : b);
-          const worstDiff = +(worst.payback - CAC_PAYBACK).toFixed(1);
-          return worstDiff > 0 ? (
-            <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3">
-              <span className="font-semibold text-foreground">{worst.channel}</span> payback is{" "}
-              <span className="font-semibold tabular-nums">{worstDiff} orders</span> slower than the blended average, increasing short-term cash recovery risk.
-            </p>
-          ) : null;
-        })()}
+        {/* Interpretation */}
+        <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3">
+          <span className="font-semibold text-destructive">Meta</span> requires 2.1 orders to recover acquisition cost,
+          placing it in the risk zone.{" "}
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Email</span> and{" "}
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Organic</span> recover spend fastest,
+          making them safer channels to scale when cash efficiency matters.
+        </p>
       </PremiumBlurPreview>
 
       {/*

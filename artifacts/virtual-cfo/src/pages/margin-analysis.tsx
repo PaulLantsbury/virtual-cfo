@@ -134,6 +134,7 @@ const RECOVERY_SCENARIOS = [
     confidence:  "medium" as const,
     /** @dynamic effort = "low" | "medium" | "high" */
     effort:      "low" as const,
+    timeframe:   "1–2 weeks",
   },
   {
     shortLabel:  "Reduce shipping costs",
@@ -144,6 +145,7 @@ const RECOVERY_SCENARIOS = [
     cashImpact:  6_800,
     confidence:  "high" as const,
     effort:      "medium" as const,
+    timeframe:   "2–4 weeks",
   },
   {
     shortLabel:  "Lower discount depth",
@@ -154,6 +156,7 @@ const RECOVERY_SCENARIOS = [
     cashImpact:  4_100,
     confidence:  "high" as const,
     effort:      "low" as const,
+    timeframe:   "Immediate",
   },
 ];
 
@@ -370,6 +373,21 @@ export default function MarginAnalysis() {
   const simRisk = getSimRiskLevel(simProjCM);
   const isPro   = canAccess("margin_simulator");
 
+  // Dynamic simulator insight: label the largest positive contributor
+  const simLargestContrib = [
+    { value: simMetaContrib,  label: "reducing Meta CAC" },
+    { value: simShipContrib,  label: "reducing shipping cost per order" },
+    { value: simDiscContrib,  label: "reducing discount depth" },
+    { value: simRetContrib,   label: "reducing returns" },
+    { value: simPayContrib,   label: "reducing payment processing fees" },
+  ].filter(c => c.value > 0).sort((a, b) => b.value - a.value)[0];
+
+  const simInsight = simTotalContrib <= 0
+    ? "Adjust the sliders to see which margin lever creates the strongest recovery."
+    : simLargestContrib
+      ? `Most efficient improvement in this scenario comes from ${simLargestContrib.label}.`
+      : "Most efficient improvement comes from reducing Meta CAC and improving channel mix.";
+
   const visibleScenarios = showAllOpportunities
     ? RECOVERY_SCENARIOS
     : RECOVERY_SCENARIOS.slice(0, VISIBLE_SCENARIO_COUNT);
@@ -465,6 +483,9 @@ export default function MarginAnalysis() {
               <p className="text-xs text-muted-foreground leading-snug max-w-[26ch]">
                 Based on the 30-day trading baseline — see breakdown below
               </p>
+              <p className="text-xs text-muted-foreground/60 mt-2">
+                ≈ £0.85 additional contribution per order
+              </p>
             </div>
 
           </div>
@@ -544,6 +565,34 @@ export default function MarginAnalysis() {
 
           </div>
 
+        </div>
+      </div>
+
+      {/* ── Margin benchmark strip ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-5 py-4 mb-8 rounded-2xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-0.5">
+            Margin benchmark
+          </p>
+          <p className="text-sm text-amber-900 dark:text-amber-200 leading-snug">
+            Typical healthy DTC contribution margin range: 45–60%. Current position: {CM_PCT}%, below target range.
+          </p>
+        </div>
+        <div className="flex items-center gap-4 shrink-0 flex-wrap">
+          <div className="text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Target range</p>
+            <p className="text-sm font-bold text-foreground">45–55%</p>
+          </div>
+          <div className="w-px h-8 bg-amber-200 dark:bg-amber-700/50 hidden sm:block" />
+          <div className="text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Top quartile</p>
+            <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">55%+</p>
+          </div>
+          <div className="w-px h-8 bg-amber-200 dark:bg-amber-700/50 hidden sm:block" />
+          <div className="text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Current</p>
+            <p className="text-sm font-bold text-amber-600 dark:text-amber-400">{CM_PCT}%</p>
+          </div>
         </div>
       </div>
 
@@ -724,6 +773,11 @@ export default function MarginAnalysis() {
                 <p className="text-xs text-muted-foreground">Base: £{CONTRIBUTION_PER_ORDER.toFixed(2)}</p>
               </div>
             </div>
+
+            {/* Dynamic insight sentence */}
+            <p className="text-xs text-muted-foreground italic mb-4 leading-relaxed">
+              {simInsight}
+            </p>
 
             {/* Risk level bar */}
             <div className={cn(
@@ -949,6 +1003,9 @@ export default function MarginAnalysis() {
                               : "bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400"
                           )}>
                             {s.effort === "low" ? "Low effort" : s.effort === "medium" ? "Medium effort" : "High effort"}
+                          </span>
+                          <span className="inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap bg-primary/8 text-primary border border-primary/15">
+                            ⏱ {s.timeframe}
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>
@@ -1428,6 +1485,12 @@ export default function MarginAnalysis() {
                     </li>
                   ))}
                 </ul>
+                <p className={cn(
+                  "mt-3 text-xs font-semibold leading-snug",
+                  t.color === "red" ? "text-destructive/80" : "text-amber-700 dark:text-amber-400"
+                )}>
+                  At this level, scaling paid acquisition becomes capital-destructive.
+                </p>
               </div>
             ))}
           </div>
@@ -1731,9 +1794,14 @@ export default function MarginAnalysis() {
             </ul>
             <div className="mt-5 flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
               <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-              <p className="text-xs text-muted-foreground leading-snug">
-                Meta has the widest revenue share (£41,800) but the lowest contribution margin at 34.2%. The 24pp spread between Meta and Email is the primary driver of channel mix underperformance — reflected in the estimated additional contribution quantified above.
-              </p>
+              <div>
+                <p className="text-xs text-muted-foreground leading-snug">
+                  Meta has the widest revenue share (£41,800) but the lowest contribution margin at 34.2%. The 24pp spread between Meta and Email is the primary driver of channel mix underperformance — reflected in the estimated additional contribution quantified above.
+                </p>
+                <p className="text-xs text-muted-foreground/60 mt-2 leading-snug italic">
+                  If Meta improved to Organic-level margin (52.3%), estimated contribution would increase materially at the current revenue mix — without increasing total spend.
+                </p>
+              </div>
             </div>
           </PremiumBlurPreview>
         );

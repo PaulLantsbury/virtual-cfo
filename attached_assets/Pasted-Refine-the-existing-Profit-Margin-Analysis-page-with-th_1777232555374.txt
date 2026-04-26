@@ -1,0 +1,107 @@
+Refine the existing Profit Margin Analysis page with the final micro-upgrades discussed.
+
+Do not rebuild the page from scratch. Keep the existing route, layout, styling, timeframe selector, mock data, simulator, charts, Free/Pro gating and responsive behaviour.
+
+1. Add per-order translation under the £20,400 opportunity
+
+In the Profit Margin Summary hero section, under:
+
+Estimated Additional Contribution
+£20,400
+
+Add a small supporting line:
+
+“Equivalent to approximately £0.85 additional contribution per order.”
+
+Keep this subtle, but visible.
+
+2. Add benchmark context strip near the top
+
+Add a compact benchmark strip below the Profit Margin Summary and before the simulator/opportunities sections.
+
+Title:
+Margin benchmark
+
+Text:
+“Typical healthy DTC contribution margin range: 45–60%. Current position: 42.3%, below target range.”
+
+Add small labels:
+- Target range: 45–55%
+- Top quartile: 55%+
+- Current: 42.3%
+
+Use neutral/amber styling because current margin is below target.
+
+3. Add dynamic simulator insight sentence
+
+In the Margin Recovery Simulator, beneath the projected output cards and above the risk level bar, add a dynamic insight sentence.
+
+Default text:
+“Most efficient improvement comes from reducing Meta CAC and improving channel mix.”
+
+If Meta CAC reduction slider is the largest positive contributor:
+“Most efficient improvement in this scenario comes from reducing Meta CAC.”
+
+If shipping cost reduction slider is the largest positive contributor:
+“Most efficient improvement in this scenario comes from reducing shipping cost per order.”
+
+If discount depth reduction is the largest positive contributor:
+“Most efficient improvement in this scenario comes from reducing discount depth.”
+
+If returns reduction is the largest positive contributor:
+“Most efficient improvement in this scenario comes from reducing returns.”
+
+If no improvement is selected:
+“Adjust the sliders to see which margin lever creates the strongest recovery.”
+
+4. Improve Margin Risk Outlook wording
+
+In the Margin Risk Outlook section, add this line to the warning/critical commentary:
+
+“At this level, scaling paid acquisition becomes capital-destructive.”
+
+Use strong but not alarmist wording.
+
+5. Add implementation timeframe to Top Margin Recovery Opportunities
+
+In the opportunities table/list, add an implementation timeframe badge to each opportunity:
+
+Reallocate Meta spend:
+“1–2 weeks”
+
+Reduce shipping costs:
+“2–4 weeks”
+
+Lower discount depth:
+“Immediate”
+
+Keep existing confidence and effort badges.
+
+6. Optional channel scenario line
+
+In the Contribution Margin by Channel section, add a subtle note below the existing insight:
+
+“If Meta improved to Organic-level margin, estimated contribution would increase materially at the current revenue mix.”
+
+Keep this as a qualitative note unless an existing mock value is already available.
+
+7. Keep Free vs Pro behaviour
+
+Free mode:
+- show benchmark strip
+- show per-order opportunity translation
+- keep simulator locked if currently locked
+- keep detailed Pro-only values masked if currently gated
+
+Pro mode:
+- show all sections fully unlocked
+- no blur overlays
+- no upgrade CTAs
+
+8. Final output
+
+Update the existing Profit Margin Analysis page only.
+
+Do not add live integrations.
+Keep all calculations client-side.
+Keep visual style consistent with Profit Engine, Cash Control, Pricing Optimisation and Marketing Efficiency.

@@ -1,14 +1,13 @@
 import {
   ArrowUpRight, ArrowDownRight, Minus, Download,
   Sparkles, TrendingUp, AlertTriangle, ArrowRight,
-  ChevronRight, Lock, Lightbulb,
+  ChevronRight, Lock,
 } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TopDrivers, type Driver } from "@/components/TopDrivers";
-import { ActionRecommendations, type Recommendation } from "@/components/ActionRecommendations";
 import { canAccess } from "@/lib/plan";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
@@ -88,12 +87,6 @@ const TOP_DRIVERS: Driver[] = [
   },
 ];
 
-const RECOMMENDATIONS: Recommendation[] = [
-  { id: "1", text: "Review fulfilment partner pricing to improve contribution margin",           impact: "high"      },
-  { id: "2", text: "Reduce discount usage on returning customers",                              impact: "high"      },
-  { id: "3", text: "Reallocate ad spend from Meta toward higher-contribution channels",          impact: "medium"    },
-];
-
 const PRIORITY_ACTIONS = [
   {
     title:  "Reduce fulfilment cost leakage",
@@ -118,86 +111,63 @@ const PRIORITY_ACTIONS = [
   },
 ] as const;
 
+// Engine cards — ordered per spec
 const HEALTH_MODULES = [
   {
-    id:        "profit",
-    title:     "Profit Quality",
-    headline:  "£20.4k margin recovery identified",
-    subtitle:  "See where contribution margin is being eroded and how to recover it.",
-    cta:       "Analyse margin",
-    href:      "/margin-analysis",
+    id:       "profit",
+    title:    "Profit Quality / Margin Analysis",
+    headline: "£20.4k margin recovery identified",
+    subtitle: "See where contribution margin is being eroded and how to recover it.",
+    cta:      "Analyse margin",
+    href:     "/margin-analysis",
   },
   {
-    id:        "growth",
-    title:     "Growth Quality",
-    headline:  "38% discount dependency",
-    subtitle:  "Understand whether growth is healthy or reliant on promotions and paid spend.",
-    cta:       "Analyse growth",
-    href:      "/growth-quality",
+    id:       "pricing",
+    title:    "Pricing Optimisation",
+    headline: "£52k recoverable contribution",
+    subtitle: "Identify discount leakage and pricing opportunities.",
+    cta:      "Improve pricing",
+    href:     "/pricing-optimisation",
   },
   {
-    id:        "acquisition",
-    title:     "Acquisition Efficiency",
-    headline:  "Meta CAC +14%",
-    subtitle:  "Diagnose which channels are creating profitable customers.",
-    cta:       "Diagnose acquisition",
-    href:      "/marketing-efficiency",
+    id:       "growth",
+    title:    "Growth Quality",
+    headline: "38% discount dependency",
+    subtitle: "Understand whether growth is healthy or reliant on promotions and paid spend.",
+    cta:      "Analyse growth",
+    href:     "/growth-quality",
   },
   {
-    id:        "scenario",
-    title:     "Opportunities / Scenario Lab",
-    headline:  "£18k–£42k contribution upside",
-    subtitle:  "See the highest-impact improvement actions and model the combined impact.",
-    cta:       "Model opportunity",
-    href:      "/scenario-lab",
+    id:       "acquisition",
+    title:    "Marketing / Acquisition Efficiency",
+    headline: "Meta CAC +14%",
+    subtitle: "Diagnose which channels are creating profitable customers.",
+    cta:      "Diagnose acquisition",
+    href:     "/marketing-efficiency",
   },
   {
-    id:        "cash",
-    title:     "Cash Efficiency",
-    headline:  "£64k cash headroom opportunity",
-    subtitle:  "See where cash is trapped and how to protect runway.",
-    cta:       "Analyse cash",
-    href:      "/cash-control",
+    id:       "cash",
+    title:    "Cash Control",
+    headline: "£64k cash headroom opportunity",
+    subtitle: "See where cash is trapped, how much runway you have, and what actions protect liquidity.",
+    cta:      "Review cash position",
+    href:     "/cash-control",
   },
   {
-    id:        "pricing",
-    title:     "Pricing Optimisation",
-    headline:  "£52k recoverable contribution",
-    subtitle:  "Identify discount leakage and pricing opportunities.",
-    cta:       "Improve pricing",
-    href:      "/pricing-optimisation",
+    id:       "scenario",
+    title:    "Scenario Lab / Opportunities",
+    headline: "£18k–£42k contribution upside",
+    subtitle: "See the highest-impact improvement actions and model the combined impact.",
+    cta:      "Model opportunity",
+    href:     "/scenario-lab",
   },
 ] as const;
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function ImpactBadge({ impact }: { impact: Recommendation["impact"] }) {
-  const cfg = {
-    high:        "bg-destructive/10 text-destructive",
-    medium:      "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
-    "quick-win": "bg-success/10 text-success",
-  } as const;
-  const label = {
-    high:        "High impact",
-    medium:      "Medium impact",
-    "quick-win": "Quick win",
-  } as const;
-  return (
-    <span className={cn(
-      "px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap shrink-0",
-      cfg[impact],
-    )}>
-      {label[impact]}
-    </span>
-  );
-}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
-  const isPro            = canAccess("dashboard_recovery_upside");
-  const hasActionPlan    = canAccess("dashboard_full_action_plan");
-  const hasDriverDetail  = canAccess("dashboard_driver_detail");
+  const isPro           = canAccess("dashboard_recovery_upside");
+  const hasDriverDetail = canAccess("dashboard_driver_detail");
 
   return (
     <AppLayout>
@@ -230,7 +200,7 @@ export default function Dashboard() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed sm:max-w-sm">
-            You are profitable, but margin quality and acquisition efficiency are weakening. Fix pricing, fulfilment costs and Meta spend before growth becomes expensive.
+            The business is profitable, but margin quality, acquisition efficiency and cash runway are weakening.
           </p>
         </div>
 
@@ -255,11 +225,11 @@ export default function Dashboard() {
         <div className="px-6 py-4">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5">
             {[
-              { area: "Profitability",            label: "Healthy",   text: "Profit remains positive.",                            style: "green"  },
-              { area: "Margin Quality",           label: "Weakening", text: "Contribution margin is below target and falling.",     style: "amber"  },
-              { area: "Cash Runway",              label: "Runway tightening",       text: "Cash is stable, but runway is tightening.",    style: "amber"  },
-              { area: "Acquisition Efficiency",   label: "At risk",                 text: "Meta CAC is rising and ROAS is weakening.",    style: "red"    },
-              { area: "Retention",                label: "Retention strengthening", text: "Repeat purchase rate is improving.",           style: "green"  },
+              { area: "Profitability",          label: "Healthy",               text: "Profit remains positive.",                         style: "green" },
+              { area: "Margin Quality",          label: "Weakening",             text: "Contribution margin is below target and falling.",  style: "amber" },
+              { area: "Cash Runway",             label: "Runway tightening",     text: "Cash remains positive, but runway is tightening.",  style: "amber" },
+              { area: "Acquisition Efficiency",  label: "At risk",               text: "Meta CAC is rising and ROAS is weakening.",         style: "red"   },
+              { area: "Retention",               label: "Retention strengthening", text: "Repeat purchase rate is improving.",              style: "green" },
             ].map(({ area, label, text, style }) => (
               <div key={area} className={cn(
                 "rounded-xl p-3 border flex flex-col gap-1.5",
@@ -295,7 +265,7 @@ export default function Dashboard() {
               { pos: "Moderate Risk", active: true,  done: false },
               { pos: "High Risk",     active: false, done: false },
               { pos: "Critical",      active: false, done: false },
-            ].map(({ pos, active, done }, i) => (
+            ].map(({ pos, active, done }) => (
               <div key={pos} className={cn(
                 "flex-1 text-center py-2 text-[10px] font-bold border-r border-border/30 last:border-0 transition-colors",
                 active  ? "bg-amber-400 dark:bg-amber-500 text-white"
@@ -327,7 +297,7 @@ export default function Dashboard() {
                   <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
                 </p>
                 <p className="text-sm text-foreground font-medium mb-1">
-                  Potential monthly contribution upside if the issues above are addressed.
+                  Estimated monthly contribution upside if the issues above are addressed.
                 </p>
                 <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
                 <div className="flex items-center gap-3 flex-wrap">
@@ -346,54 +316,54 @@ export default function Dashboard() {
               </div>
             </div>
           ) : (
-            /* ── Free layout ────────────────────────────────────────────────── */
-            <div>
-              <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
-                <div className="flex-1">
-                  <p className="text-3xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
-                    £18k–£42k potential improvement identified
-                  </p>
-                  <p className="text-sm text-foreground font-medium mb-1">
-                    Potential monthly contribution upside if the issues above are addressed.
-                  </p>
-                  <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
-                  <div className="flex items-center gap-3 flex-wrap mb-4">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary text-muted-foreground/40 border border-border/40 blur-[2px] select-none pointer-events-none">
-                      <Lock className="w-3 h-3" /> £12k within 30 days
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary text-muted-foreground/40 border border-border/40 blur-[2px] select-none pointer-events-none">
-                      <Lock className="w-3 h-3" /> £30k within 90 days
-                    </span>
-                  </div>
-                  <div className="mb-1">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Opportunity sources identified</p>
-                    <ul className="space-y-1.5">
-                      {[
-                        "Fulfilment cost optimisation",
-                        "Discount discipline improvements",
-                        "Channel reallocation potential",
-                        "Pricing leakage recovery",
-                      ].map(src => (
-                        <li key={src} className="flex items-center gap-2 text-xs text-muted-foreground/50 select-none">
-                          <Lock className="w-3 h-3 shrink-0 text-muted-foreground/30" />
-                          <span className="blur-[2px]">{src}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+            /* ── Free layout: show headline value, gate the detail ─────────── */
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+              <div className="flex-1">
+                <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
+                  £18k–£42k
+                  <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
+                </p>
+                <p className="text-sm text-foreground font-medium mb-1">
+                  Estimated monthly contribution upside if the issues above are addressed.
+                </p>
+                <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
+                <div className="flex items-center gap-3 flex-wrap mb-4">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary text-muted-foreground/40 border border-border/40 blur-[2px] select-none pointer-events-none">
+                    <Lock className="w-3 h-3" /> £12k within 30 days
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary text-muted-foreground/40 border border-border/40 blur-[2px] select-none pointer-events-none">
+                    <Lock className="w-3 h-3" /> £30k within 90 days
+                  </span>
                 </div>
-                <div className="shrink-0 sm:pt-2">
-                  <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-                    <Lock className="w-3.5 h-3.5" /> Unlock your £18k–£42k recovery plan
-                  </a>
+                <div className="mb-1">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Opportunity sources identified</p>
+                  <ul className="space-y-1.5">
+                    {[
+                      "Fulfilment cost optimisation",
+                      "Discount discipline improvements",
+                      "Channel reallocation potential",
+                      "Pricing leakage recovery",
+                    ].map(src => (
+                      <li key={src} className="flex items-center gap-2 text-xs text-muted-foreground/50 select-none">
+                        <Lock className="w-3 h-3 shrink-0 text-muted-foreground/30" />
+                        <span className="blur-[2px]">{src}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
+              </div>
+              <div className="shrink-0 sm:pt-2">
+                <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+                  <Lock className="w-3.5 h-3.5" /> Unlock the full opportunity breakdown
+                  <ChevronRight className="w-4 h-4" />
+                </a>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* ══ CFO INSIGHT ═════════════════════════════════════════════════════ */}
+      {/* ══ FASTEST ROUTE TO PROFIT IMPROVEMENT ════════════════════════════ */}
       <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-5 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
           <Sparkles className="w-4 h-4 text-primary shrink-0" />
@@ -488,42 +458,115 @@ export default function Dashboard() {
           <div className="h-px bg-border/60 mt-3" />
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-4 mb-4">
-          {PRIORITY_ACTIONS.map(action => (
-            <div key={action.title} className={cn(
-              "bg-card rounded-2xl p-5 shadow-sm border",
-              action.color === "red"    ? "border-rose-200/60 dark:border-rose-800/30"
-              : action.color === "orange" ? "border-orange-200/60 dark:border-orange-800/30"
-              : "border-border/50"
-            )}>
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className={cn(
-                  "text-[11px] font-bold px-2.5 py-1 rounded-full",
-                  action.color === "red"    ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
-                  : action.color === "orange" ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
-                  : "bg-secondary text-muted-foreground"
+        {isPro ? (
+          /* ── Pro: all 3 actions, fully unlocked ─────────────────────────── */
+          <>
+            <div className="grid sm:grid-cols-3 gap-4 mb-4">
+              {PRIORITY_ACTIONS.map(action => (
+                <div key={action.title} className={cn(
+                  "bg-card rounded-2xl p-5 shadow-sm border",
+                  action.color === "red"    ? "border-rose-200/60 dark:border-rose-800/30"
+                  : action.color === "orange" ? "border-orange-200/60 dark:border-orange-800/30"
+                  : "border-border/50"
                 )}>
-                  {action.badge}
-                </span>
-              </div>
-              <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
-              <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">{action.impact}</p>
-              <p className="text-xs text-muted-foreground leading-snug mb-4">{action.reason}</p>
-              <div className="flex items-center gap-3 pt-3 border-t border-border/40">
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary/60 cursor-default select-none">
-                  Model impact <ArrowRight className="w-3 h-3" />
-                </span>
-                <span className="inline-flex items-center text-xs font-medium text-muted-foreground/50 cursor-default select-none border border-border/40 rounded-md px-2 py-0.5">
-                  Mark as done
-                </span>
-              </div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className={cn(
+                      "text-[11px] font-bold px-2.5 py-1 rounded-full",
+                      action.color === "red"    ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
+                      : action.color === "orange" ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
+                      : "bg-secondary text-muted-foreground"
+                    )}>
+                      {action.badge}
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
+                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">{action.impact}</p>
+                  <p className="text-xs text-muted-foreground leading-snug mb-4">{action.reason}</p>
+                  <div className="flex items-center gap-3 pt-3 border-t border-border/40">
+                    <Link href="/scenario-lab" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
+                      Model impact <ArrowRight className="w-3 h-3" />
+                    </Link>
+                    <span className="inline-flex items-center text-xs font-medium text-muted-foreground/50 cursor-default select-none border border-border/40 rounded-md px-2 py-0.5">
+                      Mark as done
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+            <Link href="/scenario-lab" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+              View full action plan <ArrowRight className="w-4 h-4" />
+            </Link>
+          </>
+        ) : (
+          /* ── Free: action 1 visible, actions 2+3 locked ─────────────────── */
+          <>
+            <div className="grid sm:grid-cols-3 gap-4 mb-4">
+              {/* Action 1 — fully visible */}
+              {(() => {
+                const action = PRIORITY_ACTIONS[0];
+                return (
+                  <div className="bg-card rounded-2xl p-5 shadow-sm border border-rose-200/60 dark:border-rose-800/30">
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400">
+                        {action.badge}
+                      </span>
+                    </div>
+                    <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
+                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">{action.impact}</p>
+                    <p className="text-xs text-muted-foreground leading-snug mb-4">{action.reason}</p>
+                    <div className="flex items-center gap-3 pt-3 border-t border-border/40">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary/50 cursor-default select-none">
+                        Model impact <ArrowRight className="w-3 h-3" />
+                      </span>
+                      <span className="inline-flex items-center text-xs font-medium text-muted-foreground/50 cursor-default select-none border border-border/40 rounded-md px-2 py-0.5">
+                        Mark as done
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
 
-        <Link href="/scenario-lab" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-          View full action plan <ArrowRight className="w-4 h-4" />
-        </Link>
+              {/* Actions 2 & 3 — blurred/locked */}
+              {PRIORITY_ACTIONS.slice(1).map(action => (
+                <div key={action.title} className={cn(
+                  "bg-card rounded-2xl p-5 shadow-sm border relative select-none pointer-events-none",
+                  action.color === "red"    ? "border-rose-200/30 dark:border-rose-800/15"
+                  : "border-orange-200/30 dark:border-orange-800/15"
+                )}>
+                  <div className="absolute inset-0 rounded-2xl bg-card/60 backdrop-blur-[3px] z-10 flex items-center justify-center">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/80 border border-border/50">
+                      <Lock className="w-3 h-3 text-muted-foreground/60" />
+                      <span className="text-[11px] font-semibold text-muted-foreground/60">Pro only</span>
+                    </div>
+                  </div>
+                  <div className="blur-[3px] opacity-50">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={cn(
+                        "text-[11px] font-bold px-2.5 py-1 rounded-full",
+                        action.color === "red"    ? "bg-rose-100 text-rose-700"
+                        : "bg-orange-100 text-orange-600"
+                      )}>
+                        {action.badge}
+                      </span>
+                    </div>
+                    <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
+                    <p className="text-xs font-bold text-emerald-600 mb-2">{action.impact}</p>
+                    <p className="text-xs text-muted-foreground leading-snug">{action.reason}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <p className="text-sm text-muted-foreground">
+                2 more priority actions available on Pro.
+              </p>
+              <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors whitespace-nowrap">
+                <Lock className="w-3.5 h-3.5" /> Unlock full prioritised action plan <ChevronRight className="w-4 h-4" />
+              </a>
+            </div>
+          </>
+        )}
       </div>
 
       {/* ══ WHAT CHANGED AND WHY IT MATTERS ══════════════════════════════════ */}
@@ -533,55 +576,6 @@ export default function Dashboard() {
         title="What changed and why it matters"
         subtitle="The biggest movements behind this month's financial performance."
       />
-
-      {/* ══ CFO ACTION PLAN ══════════════════════════════════════════════════ */}
-      {hasActionPlan ? (
-        <ActionRecommendations
-          recommendations={RECOMMENDATIONS}
-          title="CFO action plan"
-          subtitle="Three actions ranked by commercial impact."
-          viewAllHref="/scenario-lab"
-          defaultExpanded
-        />
-      ) : (
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
-          <div className="flex items-center justify-between gap-4 p-6 pb-0">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10 shrink-0">
-                <Lightbulb className="w-4 h-4 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-foreground leading-none mb-1">CFO action plan</h3>
-                <p className="text-sm text-muted-foreground">Three actions ranked by commercial impact</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-6 pt-5 pb-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Recommended actions</p>
-            <ul className="space-y-0">
-              <li className="flex items-center gap-3 py-2.5 border-b border-border/40">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary/40 shrink-0" />
-                <span className="flex-1 text-sm text-foreground">{RECOMMENDATIONS[0].text}</span>
-                <ImpactBadge impact={RECOMMENDATIONS[0].impact} />
-              </li>
-              {RECOMMENDATIONS.slice(1).map(rec => (
-                <li key={rec.id} className="flex items-center gap-3 py-2.5 border-b border-border/40 last:border-0 select-none pointer-events-none" aria-hidden="true">
-                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/20 shrink-0" />
-                  <span className="flex-1 text-sm text-foreground blur-[5px] opacity-40">{rec.text}</span>
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-secondary text-muted-foreground/30 blur-[4px] opacity-40 whitespace-nowrap">High impact</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-5 pt-4 border-t border-border/40 flex items-center justify-between gap-4">
-              <p className="text-xs text-muted-foreground">Unlock 5 prioritised actions ranked by contribution impact</p>
-              <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors whitespace-nowrap">
-                <Lock className="w-3.5 h-3.5" /> Unlock full prioritised action plan
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ══ FREE UPGRADE PROMPT ═══════════════════════════════════════════════ */}
       {!isPro && (

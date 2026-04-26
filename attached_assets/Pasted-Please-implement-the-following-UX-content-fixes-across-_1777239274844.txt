@@ -1,0 +1,104 @@
+Please implement the following UX/content fixes across the Virtual CFO app.
+
+1. Dashboard: fix Cash Control module
+- Find the “Cash Efficiency” module/card currently marked “Coming soon”.
+- Rename it to: “Cash Control”
+- Remove any “Coming soon” badge/disabled styling.
+- Make the card active/clickable.
+- Link it to: /cash-control
+- Update card copy to:
+  “See where cash is trapped, how much runway you have, and what actions protect liquidity.”
+- CTA text:
+  “Review cash position →”
+
+2. Dashboard: reorder detailed engine cards
+Please order the dashboard module cards like this:
+- Profit Quality / Margin Analysis
+- Pricing Optimisation
+- Growth Quality
+- Marketing Efficiency / Acquisition Efficiency
+- Cash Control
+- Scenario Lab / Opportunities
+
+Use consistent card sizing, spacing, hover states and CTA styling.
+
+3. Dashboard: strengthen business health section
+Add a clearer traffic-light verdict at the top of the dashboard:
+- Overall status: “AMBER — Moderate Risk”
+- Short explanation:
+  “The business is profitable, but margin quality, acquisition efficiency and cash runway are weakening.”
+- Include five mini status chips/cards:
+  - Profitability: Green / Healthy — “Profit remains positive.”
+  - Margin Quality: Amber / Weakening — “Contribution margin is below target and falling.”
+  - Acquisition Efficiency: Red / At risk — “Meta CAC is rising and ROAS is weakening.”
+  - Cash Runway: Amber / Tightening — “Cash remains positive, but runway is tightening.”
+  - Retention: Green / Improving — “Repeat purchase rate is improving.”
+
+4. Dashboard: make opportunity value visible in Free mode
+In Free mode, do NOT hide the opportunity value completely.
+Replace any “£—k–£—k” placeholder with:
+  “£18k–£42k / month”
+Supporting copy:
+  “Estimated monthly contribution upside if the issues above are addressed.”
+Then gate the detail, not the headline.
+Show a Pro CTA:
+  “Unlock the full opportunity breakdown →”
+Keep detailed drivers, confidence levels, and scenario modelling gated behind Pro.
+
+5. Dashboard: simplify action plan gating in Free mode
+In Free mode:
+- Show the first priority action clearly.
+- Blur or lock actions 2 and 3.
+- Add copy:
+  “2 more priority actions available on Pro.”
+- CTA:
+  “Unlock full prioritised action plan →”
+
+In Pro mode:
+- Show all three actions.
+- Ensure each action has:
+  - impact badge
+  - estimated contribution/cash value
+  - short rationale
+  - link/button to model the impact in Scenario Lab.
+
+6. Dashboard: remove duplicate or old action blocks
+Check for duplicate “What to do next”, “CFO action plan”, or “Priority actions this month” sections.
+Keep only one final section called:
+  “Priority actions this month”
+Subtitle:
+  “The highest-impact actions your CFO would focus on first.”
+
+7. Dashboard: update export/report actions
+Remove “Create Report” from the dashboard.
+Keep “Export CSV” only if already functional.
+If Export CSV is not functional, hide it for now.
+
+8. Cash Control page visibility
+Ensure the Cash Control page is included in navigation and not treated as coming soon anywhere.
+Use the label:
+  “Cash Control”
+not:
+  “Cash Efficiency”
+
+9. Navigation cleanup
+Ensure the left navigation includes the current active pages only:
+- Dashboard
+- Profit Margin Analysis
+- Growth Quality
+- Marketing Efficiency
+- Pricing Optimisation
+- Profit Engine
+- Cash Control
+- Scenario Lab
+
+Remove Reports if it still appears, as it duplicates Dashboard.
+
+10. Consistency checks
+Please check both Free and Pro mode after changes:
+- Free mode should show enough value to encourage upgrade.
+- Pro mode should show full unlocked analysis.
+- No duplicated Free/Pro toggles.
+- No user/avatar photo in the header.
+- No broken “coming soon” labels on built pages.
+- All dashboard cards should route to the correct pages.

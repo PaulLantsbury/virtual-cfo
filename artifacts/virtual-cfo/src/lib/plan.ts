@@ -90,6 +90,11 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   profit_driver_table:              ["pro"],
   profit_simulator:                 ["pro"],
   profit_recommendations:           ["pro"],
+  cash_driver_table:                ["pro"],
+  cash_bridge_table:                ["pro"],
+  cash_cost_pressure:               ["pro"],
+  cash_simulator:                   ["pro"],
+  cash_recommendations:             ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

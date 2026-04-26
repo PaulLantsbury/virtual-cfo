@@ -1,0 +1,825 @@
+import { useState } from "react";
+import {
+  Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
+  AlertTriangle, CheckCircle, Info, Zap, Activity, Shield, Lock,
+  Wallet, RefreshCw, Clock, Package,
+} from "lucide-react";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Cell, ReferenceLine,
+} from "recharts";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
+import { TimelineSelector } from "@/components/TimelineSelector";
+import { canAccess } from "@/lib/plan";
+import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
+
+// ─── Base data constants ──────────────────────────────────────────────────────
+const CASH_BALANCE       = 186_000;
+const MONTHLY_FIXED_COSTS = 120_000;
+const WORKING_CAPITAL_DRAG = 74_000;
+const NET_CASH_MOVEMENT   = 14_000;
+const INVENTORY_DAYS      = 82;
+const SUPPLIER_DAYS       = 42;
+const CASH_CONVERSION_CYCLE = 47;
+// Runway denominator: net monthly obligation after operating inflows
+const RUNWAY_DENOM        = Math.round(CASH_BALANCE / 3.4); // ≈ 54,706
+
+// ─── Bridge waterfall data ────────────────────────────────────────────────────
+const BRIDGE_DATA = [
+  { name: "Opening Cash",   invisible: 0,       value: 172_000, type: "positive" },
+  { name: "Trading Profit", invisible: 172_000, value: 78_000,  type: "positive" },
+  { name: "Stock Build",    invisible: 204_000, value: 46_000,  type: "negative" },
+  { name: "Receivables",    invisible: 204_000, value: 18_000,  type: "positive" },
+  { name: "Supplier Pmts",  invisible: 191_000, value: 31_000,  type: "negative" },
+  { name: "Tax / Other",    invisible: 186_000, value: 5_000,   type: "negative" },
+  { name: "Closing Cash",   invisible: 0,       value: 186_000, type: "result"   },
+];
+
+const BRIDGE_COLOR: Record<string, string> = {
+  positive: "#22c55e",
+  negative: "#ef4444",
+  result:   "#6366f1",
+};
+
+// ─── Bridge table rows ────────────────────────────────────────────────────────
+const BRIDGE_TABLE = [
+  { step: "Opening cash",      amount:  172_000, meaning: "Cash at start of period",                         isTotal: false, isResult: false, positive: true  },
+  { step: "Trading profit",    amount:  78_000,  meaning: "Profit generated before working capital movements", isTotal: false, isResult: false, positive: true  },
+  { step: "Stock build",       amount: -46_000,  meaning: "Extra stock purchased or not yet sold",            isTotal: false, isResult: false, positive: false },
+  { step: "Receivables",       amount:  18_000,  meaning: "More cash collected from customers",               isTotal: false, isResult: false, positive: true  },
+  { step: "Supplier payments", amount: -31_000,  meaning: "Faster payments reduced available cash",           isTotal: false, isResult: false, positive: false },
+  { step: "Tax / other",       amount:  -5_000,  meaning: "Other operating outflows",                         isTotal: false, isResult: false, positive: false },
+  { step: "Closing cash",      amount:  186_000, meaning: "Cash available at period end",                     isTotal: true,  isResult: true,  positive: true  },
+];
+
+// ─── Driver data ──────────────────────────────────────────────────────────────
+// 78 - 46 - 31 + 18 - 5 = 14 ✓
+const CASH_DRIVER_DATA = [
+  { driver: "Trading profit",       impact:  78_000, explanation: "Profit generated cash before working capital" },
+  { driver: "Stock build",          impact: -46_000, explanation: "More cash was tied up in inventory" },
+  { driver: "Supplier payments",    impact: -31_000, explanation: "Suppliers were paid faster than last period" },
+  { driver: "Customer receipts",    impact:  18_000, explanation: "Cash collections improved" },
+  { driver: "Tax / other payments", impact:  -5_000, explanation: "Other cash outflows increased" },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const fmt = (n: number) =>
+  (n < 0 ? "-" : "") + "£" + Math.abs(Math.round(n)).toLocaleString("en-GB");
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function CfoInsightCard({ text }: { text: string }) {
+  return (
+    <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm overflow-hidden">
+      <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
+        <Sparkles className="w-4 h-4 text-primary shrink-0" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-primary">CFO Insight</span>
+      </div>
+      <div className="px-6 py-5">
+        <p className="text-sm font-medium text-foreground leading-relaxed">{text}</p>
+      </div>
+    </div>
+  );
+}
+
+function InlineCfoInsight({ text }: { text: string }) {
+  return (
+    <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+      <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-1">CFO Insight</p>
+      <p className="text-sm text-foreground leading-relaxed">{text}</p>
+    </div>
+  );
+}
+
+interface KpiCardProps {
+  label: string;
+  value: string;
+  delta: string;
+  positive: boolean;
+  neutral?: boolean;
+  deltaLabel?: string;
+  insight: string;
+  subValue?: string;
+}
+function KpiCard({ label, value, delta, positive, neutral, deltaLabel = "vs prior period", insight, subValue }: KpiCardProps) {
+  const DeltaIcon = neutral ? Zap : positive ? ArrowUpRight : ArrowDownRight;
+  return (
+    <div className="bg-card rounded-2xl border border-border/50 shadow-sm px-5 py-4 flex flex-col gap-1.5">
+      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
+      <p className="text-2xl font-display font-bold text-foreground leading-none">{value}</p>
+      {subValue && <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 -mt-0.5">{subValue}</p>}
+      <div className="flex items-center gap-1.5">
+        <span className={cn(
+          "inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-full",
+          neutral
+            ? "bg-secondary text-muted-foreground"
+            : positive
+              ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400"
+              : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+        )}>
+          <DeltaIcon className="w-3 h-3" />
+          {delta}
+        </span>
+        <span className="text-[11px] text-muted-foreground">{deltaLabel}</span>
+      </div>
+      <p className="text-[11px] text-muted-foreground/80 leading-snug mt-0.5">{insight}</p>
+    </div>
+  );
+}
+
+function BridgeTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  const row = BRIDGE_DATA.find(d => d.name === label);
+  if (!row) return null;
+  const isNeg = row.type === "negative";
+  return (
+    <div className="bg-card border border-border rounded-xl shadow-lg px-3 py-2.5 text-sm">
+      <p className="font-semibold text-foreground mb-0.5">{label}</p>
+      <p className={cn("font-bold", isNeg ? "text-red-500" : "text-emerald-600")}>
+        {isNeg ? "-" : ""}£{Math.abs(row.value).toLocaleString()}
+      </p>
+    </div>
+  );
+}
+
+function DriverTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  const val = payload[0].value as number;
+  return (
+    <div className="bg-card border border-border rounded-xl shadow-lg px-3 py-2.5 text-sm max-w-48">
+      <p className="font-semibold text-foreground mb-0.5">{label}</p>
+      <p className={cn("font-bold", val >= 0 ? "text-emerald-600" : "text-red-500")}>
+        {val >= 0 ? "+" : ""}£{Math.abs(val).toLocaleString()}
+      </p>
+    </div>
+  );
+}
+
+// ─── Slider row sub-component ─────────────────────────────────────────────────
+interface SliderRowProps {
+  label: string; value: number; min: number; max: number; step: number;
+  unit: string; showSign?: boolean; description?: string;
+  positiveIsGood?: boolean; onChange: (v: number) => void;
+}
+function SliderRow({ label, value, min, max, step, unit, showSign, description, positiveIsGood = true, onChange }: SliderRowProps) {
+  const isPositive = value > 0;
+  const isNegative = value < 0;
+  const valueGood = positiveIsGood ? isPositive : isNegative;
+  const valueBad  = positiveIsGood ? isNegative : isPositive;
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-sm font-medium text-foreground">{label}</label>
+        <span className={cn(
+          "text-sm font-bold tabular-nums px-2 py-0.5 rounded-md min-w-[4rem] text-right",
+          valueGood ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20" :
+          valueBad  ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20" :
+                      "text-muted-foreground bg-secondary",
+        )}>
+          {showSign && value > 0 ? "+" : ""}{value % 1 === 0 ? value : value.toFixed(1)}{unit}
+        </span>
+      </div>
+      <Slider min={min} max={max} step={step} value={[value]} onValueChange={(vals) => onChange(vals[0])} />
+      <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+        <span>{showSign && min > 0 ? "+" : ""}{min}{unit}</span>
+        {description && <span className="text-center flex-1 px-2 text-[10px] text-muted-foreground/70 truncate">{description}</span>}
+        <span>+{max}{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main page component ──────────────────────────────────────────────────────
+export default function CashControl() {
+  const [revChange,       setRevChange]       = useState(0);
+  const [inventoryChange, setInventoryChange] = useState(0);
+  const [supplierChange,  setSupplierChange]  = useState(0);
+  const [fixedCostChange, setFixedCostChange] = useState(0);
+  const [marketingChange, setMarketingChange] = useState(0);
+
+  // Simulator calculations
+  const revenueEffect   = (revChange / 100) * 520_000 * 0.38 * 0.4;
+  const inventoryEffect = -inventoryChange * 900;
+  const supplierEffect  = supplierChange * 500;
+  const fixedCostEffect = -(MONTHLY_FIXED_COSTS * fixedCostChange / 100);
+  const marketingEffect = -(Math.max(0, marketingChange) * 1_800) + (marketingChange < 0 ? Math.abs(marketingChange) * 1_200 : 0);
+
+  const projCashDelta    = revenueEffect + inventoryEffect + supplierEffect + fixedCostEffect + marketingEffect;
+  const projCashBalance  = CASH_BALANCE + projCashDelta;
+  const projFixedCosts   = MONTHLY_FIXED_COSTS * (1 + fixedCostChange / 100);
+  const projRunwayDenom  = Math.max(10_000, RUNWAY_DENOM + (projFixedCosts - MONTHLY_FIXED_COSTS));
+  const projRunway       = projCashBalance / projRunwayDenom;
+  const projWCDrag       = Math.max(0, WORKING_CAPITAL_DRAG - inventoryEffect + Math.max(0, -supplierEffect));
+  const projCashMovement = NET_CASH_MOVEMENT + projCashDelta;
+  const runwayDelta      = projRunway - 3.4;
+
+  const simInterpretation =
+    projRunway < 2
+      ? "This scenario creates a cash risk within 60 days. Slow spend, reduce stock build or renegotiate supplier terms."
+      : runwayDelta >= 0
+        ? "This scenario improves cash headroom because cash is released back into the business."
+        : "This scenario reduces cash runway because working capital and fixed costs absorb cash faster than trading generates it.";
+
+  const simColor =
+    projRunway < 2
+      ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/40 text-red-700 dark:text-red-400"
+      : runwayDelta >= 0
+        ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400"
+        : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400";
+
+  const SimIcon = projRunway < 2 ? AlertTriangle : runwayDelta >= 0 ? TrendingUp : TrendingDown;
+
+  return (
+    <AppLayout>
+      {/* ── Page header ── */}
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-foreground">Cash Control</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            See where cash is coming from, where it is getting trapped, and whether growth is creating or consuming cash.
+          </p>
+        </div>
+        <TimelineSelector />
+      </div>
+
+      {/* ── A. Cash Control Summary ── */}
+      <div className="mb-8 space-y-4">
+        <CfoInsightCard text="Your business is profitable, but cash is tightening because inventory and supplier payments are absorbing more cash than expected. The priority is to reduce working capital drag before increasing growth spend." />
+
+        {/* Cash Safety Buffer — free */}
+        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-sky-200 dark:border-sky-800/40 bg-sky-50/70 dark:bg-sky-950/15">
+          <Shield className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold text-sky-800 dark:text-sky-300 mb-0.5">Cash Safety Buffer</p>
+            <p className="text-sm text-sky-700/90 dark:text-sky-400/85 leading-relaxed">
+              Current cash covers 3.4 months of fixed costs.
+            </p>
+          </div>
+        </div>
+
+        {/* Cash Risk Level */}
+        <div className="flex items-start gap-4 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20">
+          <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+            <Shield className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">Cash Risk Level</p>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-300">
+                Moderate
+              </span>
+            </div>
+            <p className="text-sm text-amber-800 dark:text-amber-300/80 leading-relaxed">
+              Cash remains positive, but current working capital trends could reduce available headroom over the next 60 days.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Cash Trend bar ── */}
+      <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-950/15 mb-4">
+        <TrendingUp className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs font-bold text-amber-800 dark:text-amber-300">Cash Trend: Stable but tightening</span>
+          <span className="text-xs text-amber-700/70 dark:text-amber-400/70">Cash increased by £14k this month, but inventory and supplier timing absorbed £77k of cash.</span>
+        </div>
+      </div>
+
+      {/* ── B. KPI Strip ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+        <KpiCard
+          label="Cash Balance"
+          value="£186,000"
+          delta="+£22,000"
+          positive={true}
+          insight="Cash available today"
+        />
+        <KpiCard
+          label="Cash Runway"
+          value="3.4 months"
+          delta="-0.6 months"
+          positive={false}
+          insight="Months of fixed costs covered by current cash"
+        />
+        <KpiCard
+          label="Net Cash Movement"
+          value="+£14,000"
+          delta="+£38,000"
+          positive={true}
+          insight="Cash generated after trading and working capital"
+        />
+        <KpiCard
+          label="Working Capital Drag"
+          value="£74,000"
+          delta="+£21,000"
+          positive={false}
+          insight="Cash tied up in stock, receivables and supplier timing"
+        />
+        <KpiCard
+          label="Inventory Days"
+          value="82 days"
+          delta="+11 days"
+          positive={false}
+          insight="Stock is turning more slowly than last period"
+        />
+        <KpiCard
+          label="Supplier Cover"
+          value="42 days"
+          delta="-8 days"
+          positive={false}
+          insight="Average days before suppliers are paid"
+        />
+      </div>
+
+      {/* ── C. What Changed Cash This Month? ── */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
+        <div className="px-6 py-5 border-b border-border/50">
+          <h3 className="font-semibold text-lg text-foreground">What Changed Cash This Month?</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Cash increased by £14k this month. Here are the main reasons.
+          </p>
+        </div>
+
+        <div className="px-6 pt-5 pb-2">
+          <InlineCfoInsight text="Trading generated cash, but this was partly offset by stock build and faster supplier payments." />
+        </div>
+
+        {canAccess("cash_driver_table") ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-6">
+            {/* Driver table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/40 bg-secondary/40">
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Driver</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cash Impact</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">What happened</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/40">
+                  {CASH_DRIVER_DATA.map((row) => (
+                    <tr key={row.driver} className="hover:bg-secondary/20 transition-colors">
+                      <td className="px-6 py-3 font-medium text-foreground text-sm">{row.driver}</td>
+                      <td className={cn(
+                        "px-4 py-3 text-right font-semibold text-sm tabular-nums",
+                        row.impact >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+                      )}>
+                        {row.impact >= 0 ? `+£${row.impact.toLocaleString()}` : `(£${Math.abs(row.impact).toLocaleString()})`}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">{row.explanation}</td>
+                    </tr>
+                  ))}
+                  <tr className="bg-emerald-50/50 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40">
+                    <td className="px-6 py-3 font-semibold text-foreground text-sm">Net cash movement</td>
+                    <td className="px-4 py-3 text-right font-bold text-emerald-600 dark:text-emerald-400 text-sm tabular-nums">+£14,000</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">Overall cash increased this period</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Driver bar chart */}
+            <div className="px-6 pb-6 pt-4 lg:pt-4">
+              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Cash Impact by Driver</h4>
+              <div className="h-52">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={CASH_DRIVER_DATA} layout="vertical" margin={{ top: 0, right: 48, left: 0, bottom: 0 }} barSize={22}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                    <XAxis type="number" tickFormatter={(v) => `£${(Math.abs(v) / 1_000).toFixed(0)}k`}
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="driver" width={130}
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                    <ReferenceLine x={0} stroke="hsl(var(--border))" strokeWidth={1.5} />
+                    <Tooltip content={<DriverTooltip />} />
+                    <Bar dataKey="impact" radius={[0, 4, 4, 0]}>
+                      {CASH_DRIVER_DATA.map((entry) => (
+                        <Cell key={entry.driver} fill={entry.impact >= 0 ? "#22c55e" : "#ef4444"} fillOpacity={0.8} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="px-6 pb-6">
+            <div className="blur-sm opacity-40 pointer-events-none select-none" aria-hidden>
+              <table className="w-full text-sm mb-4">
+                <thead>
+                  <tr className="border-b border-border/40 bg-secondary/40">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Driver</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cash Impact</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/40">
+                  {CASH_DRIVER_DATA.map((row) => (
+                    <tr key={row.driver}>
+                      <td className="px-4 py-3 text-sm text-foreground">{row.driver}</td>
+                      <td className="px-4 py-3 text-right font-semibold text-sm">████████</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <a href="/upgrade" className="mt-2 flex items-center gap-4 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-5 py-4 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors cursor-pointer">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+                <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">Upgrade to Pro to unlock the cash driver breakdown</p>
+                <p className="text-xs text-indigo-700/70 dark:text-indigo-400/70 mt-0.5">See exactly what moved your cash this month — by driver, amount and explanation.</p>
+              </div>
+              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade →</span>
+            </a>
+          </div>
+        )}
+      </div>
+
+      {/* ── D. Where Your Cash Gets Trapped ── */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
+        <div className="px-6 py-5 border-b border-border/50">
+          <h3 className="font-semibold text-lg text-foreground">Where Your Cash Gets Trapped</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            See how profit turns into cash after stock, receivables and supplier timing.
+          </p>
+        </div>
+
+        <div className="px-6 pt-5 pb-2">
+          <InlineCfoInsight text="Profit is not fully converting into cash because working capital is absorbing part of the month's trading benefit." />
+        </div>
+
+        {/* Bridge waterfall chart — always visible */}
+        <div className="px-6 pt-4 pb-2">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Cash Bridge: Opening to Closing</h4>
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={BRIDGE_DATA} margin={{ top: 4, right: 24, left: 0, bottom: 0 }} barSize={36}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={(v) => `£${(v / 1_000).toFixed(0)}k`}
+                  tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={48} />
+                <Tooltip content={<BridgeTooltip />} />
+                <Bar dataKey="invisible" stackId="a" fill="transparent" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="value" stackId="a" radius={[4, 4, 0, 0]}>
+                  {BRIDGE_DATA.map((entry) => (
+                    <Cell key={entry.name} fill={BRIDGE_COLOR[entry.type]} fillOpacity={0.85} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Bridge table — Pro gated */}
+        {canAccess("cash_bridge_table") ? (
+          <div className="overflow-x-auto px-0 pb-4">
+            <table className="w-full text-sm mt-2">
+              <thead>
+                <tr className="border-b border-border/40 bg-secondary/40">
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Step</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">What it means</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40">
+                {BRIDGE_TABLE.map((row) => (
+                  <tr key={row.step} className={cn(
+                    "transition-colors",
+                    row.isResult ? "bg-indigo-50/50 dark:bg-indigo-950/10 border-t-2 border-indigo-200 dark:border-indigo-800/40" : "hover:bg-secondary/20",
+                  )}>
+                    <td className={cn("px-6 py-3 text-sm", row.isTotal || row.isResult ? "font-semibold text-foreground" : "font-medium text-foreground")}>{row.step}</td>
+                    <td className={cn(
+                      "px-4 py-3 text-right font-semibold text-sm tabular-nums",
+                      row.isResult ? "text-indigo-600 dark:text-indigo-400 font-bold" :
+                      row.positive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+                    )}>
+                      {row.amount >= 0 ? `£${row.amount.toLocaleString()}` : `(£${Math.abs(row.amount).toLocaleString()})`}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground hidden sm:table-cell">{row.meaning}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="px-6 pb-6">
+            <a href="/upgrade" className="flex items-center gap-4 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-5 py-4 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors cursor-pointer">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+                <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200">Upgrade to Pro to unlock the detailed cash bridge table</p>
+                <p className="text-xs text-indigo-700/70 dark:text-indigo-400/70 mt-0.5">See every step from opening cash to closing cash with plain-English explanations.</p>
+              </div>
+              <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade →</span>
+            </a>
+          </div>
+        )}
+
+        <p className="text-xs text-muted-foreground/60 italic px-6 pb-5 mt-1">
+          The goal is not just to make profit — it is to convert profit into cash.
+        </p>
+      </div>
+
+      {/* ── E. How Efficiently Cash Moves ── */}
+      <div className="mb-8">
+        <div className="mb-4">
+          <h3 className="font-semibold text-lg text-foreground">How Efficiently Cash Moves Through the Business</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Shows whether cash is being released or trapped as the business grows.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          {/* Inventory Days */}
+          <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <Package className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Inventory Days</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground mb-1">{INVENTORY_DAYS} days</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Stock is taking 82 days to convert back into cash. Lower is usually better unless stock build is planned.
+            </p>
+          </div>
+
+          {/* Cash Conversion Cycle */}
+          <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                <RefreshCw className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Cash Conversion Cycle</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground mb-1">{CASH_CONVERSION_CYCLE} days</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              On average, cash is tied up for 47 days between paying suppliers and receiving customer cash.
+            </p>
+          </div>
+
+          {/* Working Capital Drag */}
+          <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-red-600 dark:text-red-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Working Capital Drag</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground mb-1">£74,000</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              £74k of cash is currently tied up in stock, receivables and supplier timing.
+            </p>
+          </div>
+        </div>
+
+        <p className="text-xs text-muted-foreground/70 italic">
+          Working capital improves when stock sells faster, customers pay sooner and supplier terms are managed effectively.
+        </p>
+      </div>
+
+      {/* ── F. Cash Cost Pressure — Pro gated ── */}
+      <PremiumBlurPreview
+        title="Cash Cost Pressure"
+        subtitle="Shows how much recurring cost your cash balance needs to support."
+        isPro={canAccess("cash_cost_pressure")}
+        ctaTitle="Upgrade to Pro to unlock Cash Cost Pressure analysis"
+        ctaDescription="See how fixed cash costs are trending and whether rising overheads are reducing your resilience."
+        ctaText="Upgrade →"
+        className="mb-8"
+      >
+        <div className="mb-5">
+          <InlineCfoInsight text="Fixed cash costs are rising faster than cash generation, reducing resilience if sales slow." />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-secondary/30 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Monthly Fixed Cash Costs</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground mb-1">£120,000</p>
+            <p className="text-xs text-muted-foreground">Payroll, software, rent and other recurring overheads.</p>
+          </div>
+          <div className="bg-secondary/30 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Cash Cover</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground mb-1">3.4 months</p>
+            <p className="text-xs text-muted-foreground">Current cash balance divided by monthly fixed costs.</p>
+          </div>
+          <div className="bg-secondary/30 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-red-600 dark:text-red-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Fixed Cost Trend</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-red-600 dark:text-red-400 mb-1">Rising</p>
+            <p className="text-xs text-muted-foreground">Fixed cash costs increased 9% vs prior period.</p>
+          </div>
+        </div>
+      </PremiumBlurPreview>
+
+      {/* ── G0. Cash Sensitivity Ranking teaser — free ── */}
+      <div className="mb-6 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Cash Sensitivity Ranking</p>
+            <p className="text-xs text-muted-foreground mt-0.5">What affects your cash most?</p>
+          </div>
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">
+            PRO
+          </span>
+        </div>
+        <div className="px-5 py-4">
+          <ol className="space-y-2 mb-4">
+            {["Inventory days", "Supplier payment timing", "Fixed costs", "Marketing spend"].map((item, i) => (
+              <li key={item} className="flex items-center gap-3">
+                <span className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-[11px] font-bold text-muted-foreground shrink-0">
+                  {i + 1}
+                </span>
+                <span className="text-sm text-foreground">{item}</span>
+                <span className="ml-auto text-xs text-muted-foreground/50 tabular-nums">£ ——,———</span>
+              </li>
+            ))}
+          </ol>
+          <a href="/upgrade" className="flex items-center gap-3 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-4 py-3 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
+            <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <span className="text-xs text-indigo-800 dark:text-indigo-200 flex-1">Upgrade to Pro to see the £ impact of each cash lever.</span>
+            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade to Pro</span>
+          </a>
+        </div>
+      </div>
+
+      {/* ── G. Cash Sensitivity Simulator — Pro gated ── */}
+      <PremiumBlurPreview
+        title="Cash Sensitivity Simulator"
+        subtitle="Test how sales, stock, supplier timing and overhead changes affect your cash runway."
+        isPro={canAccess("cash_simulator")}
+        ctaTitle="Upgrade to Pro to unlock the Cash Sensitivity Simulator"
+        ctaDescription="Model how inventory, supplier timing, marketing spend and fixed costs affect your cash runway — before you commit."
+        ctaText="Upgrade →"
+        className="mb-8"
+      >
+        <div className="mb-5">
+          <InlineCfoInsight text="Cash is currently most sensitive to inventory days and supplier payment timing. Use this tool before increasing marketing spend, buying stock or adding overheads." />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Sliders */}
+          <div className="space-y-6">
+            <SliderRow
+              label="Revenue Change"
+              value={revChange}
+              min={-20} max={30} step={1} unit="%" showSign
+              onChange={setRevChange}
+              description={`Adjusted cash from revenue: ${fmt(CASH_BALANCE + revenueEffect)}`}
+            />
+            <SliderRow
+              label="Inventory Days Change"
+              value={inventoryChange}
+              min={-20} max={30} step={1} unit=" days" showSign
+              positiveIsGood={false}
+              onChange={setInventoryChange}
+              description="Extra inventory days tie up more cash"
+            />
+            <SliderRow
+              label="Supplier Payment Days Change"
+              value={supplierChange}
+              min={-20} max={20} step={1} unit=" days" showSign
+              positiveIsGood={true}
+              onChange={setSupplierChange}
+              description="Paying later preserves cash"
+            />
+            <SliderRow
+              label="Fixed Cost Change"
+              value={fixedCostChange}
+              min={-20} max={20} step={1} unit="%" showSign
+              positiveIsGood={false}
+              onChange={setFixedCostChange}
+              description={`Projected fixed costs: ${fmt(projFixedCosts)}`}
+            />
+            <SliderRow
+              label="Marketing Spend Change"
+              value={marketingChange}
+              min={-30} max={30} step={1} unit="%" showSign
+              positiveIsGood={false}
+              onChange={setMarketingChange}
+              description="Higher marketing spend consumes cash"
+            />
+          </div>
+
+          {/* Results */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>
+            <div className="space-y-2">
+              {[
+                { label: "Projected Cash Balance",        value: fmt(projCashBalance),                                                          highlight: true  },
+                { label: "Projected Runway",              value: `${projRunway.toFixed(1)} months`,                                             highlight: true  },
+                { label: "Projected Working Capital Drag",value: fmt(projWCDrag),                                                               highlight: false },
+                { label: "Cash Movement vs Base",         value: (projCashDelta >= 0 ? "+" : "") + fmt(Math.abs(projCashDelta)),                highlight: true  },
+                { label: "Cash Risk Level",               value: projRunway < 2 ? "High" : projRunway < 3 ? "Moderate" : "Low",                highlight: false },
+              ].map(({ label, value, highlight }) => (
+                <div key={label} className={cn(
+                  "flex items-center justify-between px-4 py-2.5 rounded-xl",
+                  highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30",
+                )}>
+                  <span className={cn("text-xs", highlight ? "font-semibold text-foreground" : "text-muted-foreground")}>{label}</span>
+                  <span className={cn(
+                    "text-sm font-bold tabular-nums",
+                    highlight
+                      ? projCashBalance < 50_000
+                        ? "text-red-600 dark:text-red-400"
+                        : runwayDelta >= 0
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-amber-600 dark:text-amber-400"
+                      : "text-foreground",
+                  )}>
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className={cn("rounded-xl border px-4 py-3 mt-2 flex items-start gap-2.5", simColor)}>
+              <SimIcon className="w-4 h-4 shrink-0 mt-0.5" />
+              <p className="text-xs leading-relaxed font-medium">{simInterpretation}</p>
+            </div>
+
+            {(revChange !== 0 || inventoryChange !== 0 || supplierChange !== 0 || fixedCostChange !== 0 || marketingChange !== 0) && (
+              <button
+                onClick={() => { setRevChange(0); setInventoryChange(0); setSupplierChange(0); setFixedCostChange(0); setMarketingChange(0); }}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline mt-1"
+              >
+                Reset to base case
+              </button>
+            )}
+          </div>
+        </div>
+      </PremiumBlurPreview>
+
+      {/* ── H0. CFO Recommendations teaser — free ── */}
+      <div className="mb-4 flex items-center gap-2.5 px-5 py-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15">
+        <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+        <p className="text-sm text-indigo-800 dark:text-indigo-300">
+          <span className="font-semibold">One priority cash action has been identified for this month.</span>{" "}
+          Upgrade to Pro to see the full CFO Recommendations.
+        </p>
+      </div>
+
+      {/* ── H. CFO Recommendations — Pro gated ── */}
+      <PremiumBlurPreview
+        title="CFO Recommendations"
+        subtitle="Three priority actions your CFO would give you based on this month's cash data."
+        isPro={canAccess("cash_recommendations")}
+        ctaTitle="Upgrade to Pro to unlock CFO Recommendations"
+        ctaDescription="Get three high-priority cash actions — what improved, what to watch, and what to do next."
+        ctaText="Upgrade →"
+        className="mb-8"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* What Improved */}
+          <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/20 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">What Improved</p>
+            </div>
+            <p className="text-sm text-emerald-700/85 dark:text-emerald-400/85 leading-relaxed">
+              Customer cash receipts improved this month, adding £18k of cash and partially offsetting stock build.
+            </p>
+          </div>
+
+          {/* What To Watch */}
+          <div className="rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">What To Watch</p>
+            </div>
+            <p className="text-sm text-amber-700/85 dark:text-amber-400/85 leading-relaxed">
+              Inventory days increased to 82 days. If this continues, more cash will be tied up before sales convert back into cash.
+            </p>
+          </div>
+
+          {/* Recommended Action */}
+          <div className="rounded-2xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50 dark:bg-indigo-950/20 p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <p className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-300">Recommended Action</p>
+            </div>
+            <p className="text-sm text-indigo-700/85 dark:text-indigo-400/85 leading-relaxed">
+              Prioritise stock turn, delay non-essential overhead growth and review supplier payment terms before increasing marketing spend.
+            </p>
+          </div>
+        </div>
+      </PremiumBlurPreview>
+    </AppLayout>
+  );
+}

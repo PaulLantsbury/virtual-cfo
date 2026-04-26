@@ -1,0 +1,471 @@
+Add a new page to the app called “Cash Control”.
+
+This page should mirror the structure, tone and visual style of the existing Profit Engine page.
+
+The objective is to help ecommerce founders understand:
+1. whether the business is generating or consuming cash
+2. where cash is getting trapped
+3. how much runway they have
+4. whether growth is creating or consuming cash
+5. what they should do next
+
+This page should feel like an AI CFO explaining cash flow in plain English, not like an accounting report.
+
+Add this page to the main navigation as:
+Cash Control
+
+Use mock ecommerce data for now. Do not add live integrations.
+
+Design style:
+- same layout wrapper, sidebar, header and card styling as Profit Engine
+- modern SaaS dashboard
+- clean white cards
+- rounded corners
+- subtle shadows
+- CFO Insight cards throughout
+- simple plain-English explanations
+- Free / Pro gating consistent with Profit Engine
+- include the same reusable timeframe selector at the top right
+
+Default timeframe:
+This month
+
+Comparison:
+Previous period
+
+1. Page Header
+
+Title:
+Cash Control
+
+Subtitle:
+See where cash is coming from, where it is getting trapped, and whether growth is creating or consuming cash.
+
+Top CFO Insight card:
+
+“Your business is profitable, but cash is tightening because inventory and supplier payments are absorbing more cash than expected. The priority is to reduce working capital drag before increasing growth spend.”
+
+2. Cash Risk Level
+
+Add a risk card below the top insight.
+
+Title:
+Cash Risk Level
+
+Status:
+Moderate
+
+Text:
+“Cash remains positive, but current working capital trends could reduce available headroom over the next 60 days.”
+
+Use amber/moderate styling.
+
+3. Cash Safety Buffer
+
+Add a compact helper card below the risk level.
+
+Title:
+Cash Safety Buffer
+
+Text:
+“Current cash covers 3.4 months of fixed costs.”
+
+Use positive or neutral styling.
+
+4. Cash Trend
+
+Add a compact horizontal summary bar.
+
+Title:
+Cash Trend: Stable but tightening
+
+Text:
+“Cash increased by £14k this month, but inventory and supplier timing absorbed £77k of cash.”
+
+Use amber/neutral styling.
+
+5. KPI Strip
+
+Create 6 KPI cards.
+
+A. Cash Balance
+Value:
+£186,000
+
+Delta:
++£22,000 vs prior period
+
+Supporting text:
+Cash available today
+
+B. Cash Runway
+Value:
+3.4 months
+
+Delta:
+-0.6 months vs prior period
+
+Supporting text:
+Months of fixed costs covered by current cash
+
+C. Net Cash Movement
+Value:
++£14,000
+
+Delta:
++£38,000 vs prior period
+
+Supporting text:
+Cash generated after trading and working capital
+
+D. Working Capital Drag
+Value:
+£74,000
+
+Delta:
++£21,000 vs prior period
+
+Supporting text:
+Cash tied up in stock, receivables and supplier timing
+
+E. Inventory Days
+Value:
+82 days
+
+Delta:
++11 days vs prior period
+
+Supporting text:
+Stock is turning more slowly than last period
+
+F. Supplier Cover
+Value:
+42 days
+
+Delta:
+-8 days vs prior period
+
+Supporting text:
+Average days before suppliers are paid
+
+Use positive/negative styling based on whether the change helps or hurts cash.
+
+6. What Changed Cash This Month?
+
+Create a section immediately below the KPI strip.
+
+Section title:
+What Changed Cash This Month?
+
+Subtitle:
+Cash increased by £14k this month. Here are the main reasons.
+
+CFO Insight:
+“Trading generated cash, but this was partly offset by stock build and faster supplier payments.”
+
+Add a table with columns:
+Driver
+Cash Impact
+What happened
+
+Rows:
+Trading profit | +£78,000 | Profit generated cash before working capital
+Stock build | (£46,000) | More cash was tied up in inventory
+Supplier payments | (£31,000) | Suppliers were paid faster than last period
+Customer receipts | +£18,000 | Cash collections improved
+Tax / other payments | (£5,000) | Other cash outflows increased
+Net cash movement | +£14,000 | Overall cash increased this period
+
+Add a matching driver impact bar chart using the same style as Profit Engine.
+
+7. Where Your Cash Gets Trapped
+
+Create a section similar to the Revenue to Profit bridge.
+
+Section title:
+Where Your Cash Gets Trapped
+
+Subtitle:
+See how profit turns into cash after stock, receivables and supplier timing.
+
+CFO Insight:
+“Profit is not fully converting into cash because working capital is absorbing part of the month’s trading benefit.”
+
+Create a bridge chart with:
+Opening cash: £172,000
+Trading profit: +£78,000
+Stock build: (£46,000)
+Receivables movement: +£18,000
+Supplier payments: (£31,000)
+Tax / other: (£5,000)
+Closing cash: £186,000
+
+Add a table with columns:
+Step
+Amount
+What it means
+
+Rows:
+Opening cash | £172,000 | Cash at start of period
+Trading profit | +£78,000 | Profit generated before working capital movements
+Stock build | (£46,000) | Extra stock purchased or not yet sold
+Receivables | +£18,000 | More cash collected from customers
+Supplier payments | (£31,000) | Faster payments reduced available cash
+Tax / other | (£5,000) | Other operating outflows
+Closing cash | £186,000 | Cash available at period end
+
+Add helper note:
+“The goal is not just to make profit — it is to convert profit into cash.”
+
+8. How Efficiently Cash Moves Through the Business
+
+Create a section mirroring “How Easily Profit Scales”.
+
+Section title:
+How Efficiently Cash Moves Through the Business
+
+Subtitle:
+Shows whether cash is being released or trapped as the business grows.
+
+Create three cards:
+
+A. Inventory Days
+Value:
+82 days
+
+Text:
+“Stock is taking 82 days to convert back into cash. Lower is usually better unless stock build is planned.”
+
+B. Cash Conversion Cycle
+Value:
+47 days
+
+Text:
+“On average, cash is tied up for 47 days between paying suppliers and receiving customer cash.”
+
+C. Working Capital Drag
+Value:
+£74,000
+
+Text:
+“£74k of cash is currently tied up in stock, receivables and supplier timing.”
+
+Add a note:
+“Working capital improves when stock sells faster, customers pay sooner and supplier terms are managed effectively.”
+
+9. Cash Cost Pressure
+
+Create a section.
+
+Section title:
+Cash Cost Pressure
+
+Subtitle:
+Shows how much recurring cost your cash balance needs to support.
+
+CFO Insight:
+“Fixed cash costs are rising faster than cash generation, reducing resilience if sales slow.”
+
+Create three cards:
+
+A. Monthly Fixed Cash Costs
+Value:
+£120,000
+
+Text:
+“Payroll, software, rent and other recurring overheads.”
+
+B. Cash Cover
+Value:
+3.4 months
+
+Text:
+“Current cash balance divided by monthly fixed costs.”
+
+C. Fixed Cost Trend
+Value:
+Rising
+
+Text:
+“Fixed cash costs increased 9% vs prior period.”
+
+10. Cash Sensitivity Simulator
+
+Create a Pro-gated section, similar to Profit Sensitivity Simulator.
+
+Section title:
+Cash Sensitivity Simulator
+
+Subtitle:
+Test how sales, stock, supplier timing and overhead changes affect your cash runway.
+
+CFO Insight:
+“Cash is currently most sensitive to inventory days and supplier payment timing. Use this tool before increasing marketing spend, buying stock or adding overheads.”
+
+Create sliders:
+
+Revenue Change
+Range: -20% to +30%
+Default: 0%
+
+Inventory Days Change
+Range: -20 days to +30 days
+Default: 0 days
+
+Supplier Payment Days Change
+Range: -20 days to +20 days
+Default: 0 days
+
+Fixed Cost Change
+Range: -20% to +20%
+Default: 0%
+
+Marketing Spend Change
+Range: -30% to +30%
+Default: 0%
+
+Base assumptions:
+Cash balance = 186000
+Monthly fixed cash costs = 120000
+Base runway = 3.4
+Working capital drag = 74000
+Net cash movement = 14000
+
+Outputs:
+Projected Cash Balance
+Projected Runway
+Projected Working Capital Drag
+Cash Movement vs Base
+Cash Risk Level
+
+Use simple client-side calculations for now.
+
+Example logic:
+- revenue increase improves projected cash modestly
+- inventory days increase worsens working capital drag
+- supplier days decrease worsens cash
+- fixed cost increase reduces runway
+- marketing spend increase reduces projected cash
+
+Show dynamic interpretation:
+If projected runway improves:
+“This scenario improves cash headroom because cash is released back into the business.”
+
+If projected runway weakens:
+“This scenario reduces cash runway because working capital and fixed costs absorb cash faster than trading generates it.”
+
+If projected runway is below 2 months:
+“This scenario creates a cash risk within 60 days. Slow spend, reduce stock build or renegotiate supplier terms.”
+
+11. Cash Sensitivity Ranking Free Teaser
+
+For Free users, add a locked teaser before the simulator.
+
+Title:
+Cash Sensitivity Ranking
+
+Subtitle:
+What affects your cash most?
+
+Show ranking:
+1. Inventory days
+2. Supplier payment timing
+3. Fixed costs
+4. Marketing spend
+
+Overlay CTA:
+“Upgrade to Pro to see the £ impact of each cash lever.”
+
+Button:
+Upgrade to Pro
+
+12. CFO Recommendations
+
+Create a Pro-gated section.
+
+Section title:
+CFO Recommendations
+
+Subtitle:
+Three priority actions your CFO would give you based on this month’s cash data.
+
+Cards:
+
+A. What Improved
+“Customer cash receipts improved this month, adding £18k of cash and partially offsetting stock build.”
+
+B. What To Watch
+“Inventory days increased to 82 days. If this continues, more cash will be tied up before sales convert back into cash.”
+
+C. Recommended Action
+“Prioritise stock turn, delay non-essential overhead growth and review supplier payment terms before increasing marketing spend.”
+
+For Free users:
+Show a locked preview with:
+“One priority cash action has been identified for this month.”
+
+CTA:
+Upgrade to Pro
+
+13. Free vs Pro Gating
+
+Use the same gating approach as Profit Engine.
+
+Free version should show:
+- Cash Control Summary
+- Cash Risk Level
+- Cash Safety Buffer
+- Cash Trend
+- KPI strip
+- basic Where Your Cash Gets Trapped bridge
+- headline Working Capital Health cards
+- locked teaser for detailed driver breakdown
+- locked teaser for sensitivity ranking
+- locked sensitivity simulator
+- locked CFO recommendations
+
+Pro version should show:
+- full What Changed Cash This Month driver table and chart
+- full bridge chart and table
+- full Working Capital Health section
+- full Cash Cost Pressure section
+- full Cash Sensitivity Simulator
+- full CFO Recommendations
+- full detailed explanations
+
+Principle:
+Free = diagnosis
+Pro = action, explanation and modelling
+
+14. Language rules
+
+Use:
+- cash
+- runway
+- stock
+- supplier payments
+- cash tied up
+- cash headroom
+
+Avoid overly technical finance terms in main headings where possible.
+
+Keep “working capital” where useful, but explain it in plain English.
+
+15. Navigation and Routing
+
+Add the new page to the sidebar/menu as:
+Cash Control
+
+Make sure the route works correctly.
+
+Use the same app layout wrapper, header, sidebar and plan gating logic as the existing pages.
+
+16. Final output
+
+Build the full Cash Control page using mock data.
+
+Do not add live API integrations yet.
+
+Keep all calculations client-side for now.
+
+Make sure the page is responsive, but optimised for desktop dashboard viewing.

@@ -15,6 +15,7 @@ import GrowthQuality from "@/pages/growth-quality";
 import MarketingEfficiency from "@/pages/marketing-efficiency";
 import Opportunities from "@/pages/opportunities";
 import ProfitEngine from "@/pages/profit-engine";
+import CashControl from "@/pages/cash-control";
 import Settings from "@/pages/settings";
 import Upgrade from "@/pages/upgrade";
 
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/marketing-efficiency" component={MarketingEfficiency} />
       <Route path="/opportunities" component={Opportunities} />
       <Route path="/profit-engine" component={ProfitEngine} />
+      <Route path="/cash-control" component={CashControl} />
       <Route path="/settings" component={Settings} />
       <Route path="/upgrade" component={Upgrade} />
       <Route component={NotFound} />

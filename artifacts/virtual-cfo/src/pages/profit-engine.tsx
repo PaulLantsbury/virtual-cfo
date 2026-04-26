@@ -233,7 +233,18 @@ export default function ProfitEngine() {
 
       {/* ── A. Profit Engine Summary ── */}
       <div className="mb-8 space-y-4">
-        <CfoInsightCard text="Your business is trading profitably and is operating 39% above break-even. Profit quality is improving, but rising overheads are increasing sensitivity to cost growth. Focus on scaling revenue before adding new fixed costs." />
+        <CfoInsightCard text="Your business is trading profitably and is operating 39% above break-even. Profit quality is improving, but rising overheads are increasing sensitivity to cost growth. Focus on scaling revenue before adding new fixed costs — each additional £100k of sales currently converts into approximately £38k of contribution." />
+
+        {/* Profit Safety Buffer — free */}
+        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-sky-200 dark:border-sky-800/40 bg-sky-50/70 dark:bg-sky-950/15">
+          <Shield className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold text-sky-800 dark:text-sky-300 mb-0.5">Profit Safety Buffer</p>
+            <p className="text-sm text-sky-700/90 dark:text-sky-400/85 leading-relaxed">
+              Revenue could fall by £204k before the business reaches break-even.
+            </p>
+          </div>
+        </div>
 
         {/* Risk level pill */}
         <div className="flex items-start gap-4 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20">
@@ -248,7 +259,7 @@ export default function ProfitEngine() {
               </span>
             </div>
             <p className="text-sm text-amber-800 dark:text-amber-300/80 leading-relaxed">
-              Profitability is stable, but rising overheads mean profit will fall faster if revenue slows.
+              Profitability is stable, but rising overheads are increasing sensitivity to revenue slowdowns.
             </p>
           </div>
         </div>
@@ -272,12 +283,12 @@ export default function ProfitEngine() {
         <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Profit Trend: Improving</span>
-          <span className="text-xs text-emerald-700/70 dark:text-emerald-400/70">Profit increased by £18k this month and profit margin expanded by 2.4pp.</span>
+          <span className="text-xs text-emerald-700/70 dark:text-emerald-400/70">Profit increased by £18k this month, driven by margin expansion and stronger contribution.</span>
         </div>
       </div>
 
       {/* ── B. Decision KPI Strip ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
         <KpiCard
           label="Monthly Profit"
           value="£78,000"
@@ -291,7 +302,7 @@ export default function ProfitEngine() {
           value="£316,000"
           delta="£24,000 lower"
           positive={true}
-          insight="Revenue must stay above this level to remain profitable"
+          insight="If monthly revenue falls below this level, profit turns negative."
         />
         <KpiCard
           label="Safety Margin"
@@ -301,11 +312,18 @@ export default function ProfitEngine() {
           insight="Revenue could fall 39% before profit turns negative"
         />
         <KpiCard
-          label="Profit Per £10k Revenue"
+          label="Contribution Margin"
+          value="38.0%"
+          delta="+2.4pp"
+          positive={true}
+          insight="Revenue available to pay overheads and generate profit."
+        />
+        <KpiCard
+          label="Profit Conversion"
           value="£3,800"
           delta="+£240"
           positive={true}
-          insight="Each £10k of revenue creates £3.8k before overheads"
+          insight="Every £10k of sales creates £3.8k before overheads."
         />
         <KpiCard
           label="Overhead Load"
@@ -314,6 +332,33 @@ export default function ProfitEngine() {
           positive={true}
           insight="61% of contribution is used by fixed costs"
         />
+      </div>
+
+      {/* ── B2. What would improve profit fastest? — free ── */}
+      <div className="mb-8 rounded-2xl border border-border/50 bg-card shadow-sm p-5">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+            <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">What would improve profit fastest?</p>
+            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+              The fastest route to higher profit is to protect margin, reduce discounting and grow revenue without adding overheads.
+            </p>
+          </div>
+        </div>
+        <ul className="space-y-2">
+          {[
+            "Reduce discounting by 3pp",
+            "Increase contribution margin by 2pp",
+            "Grow revenue by £60k without increasing overheads",
+          ].map((item) => (
+            <li key={item} className="flex items-start gap-2.5">
+              <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 shrink-0" />
+              <span className="text-sm text-foreground/80">{item}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* ── C. Staff Cost Efficiency ── */}
@@ -769,6 +814,37 @@ export default function ProfitEngine() {
         </div>
       </div>
 
+      {/* ── F0. Profit Sensitivity Ranking teaser — free ── */}
+      <div className="mb-6 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Profit Sensitivity Ranking</p>
+            <p className="text-xs text-muted-foreground mt-0.5">What affects your profit most?</p>
+          </div>
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">
+            PRO
+          </span>
+        </div>
+        <div className="px-5 py-4">
+          <ol className="space-y-2 mb-4">
+            {["Discounting", "Overheads", "Returns", "Marketing efficiency"].map((item, i) => (
+              <li key={item} className="flex items-center gap-3">
+                <span className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-[11px] font-bold text-muted-foreground shrink-0">
+                  {i + 1}
+                </span>
+                <span className="text-sm text-foreground">{item}</span>
+                <span className="ml-auto text-xs text-muted-foreground/50 tabular-nums">£ ——,———</span>
+              </li>
+            ))}
+          </ol>
+          <a href="/upgrade" className="flex items-center gap-3 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-4 py-3 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
+            <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <span className="text-xs text-indigo-800 dark:text-indigo-200 flex-1">Upgrade to Pro to see the £ impact of each profit lever.</span>
+            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade to Pro</span>
+          </a>
+        </div>
+      </div>
+
       {/* ── F. Profit Sensitivity Simulator ── Pro gated ── */}
       <PremiumBlurPreview
         title="Profit Sensitivity Simulator"
@@ -896,6 +972,15 @@ export default function ProfitEngine() {
           </div>
         </div>
       </PremiumBlurPreview>
+
+      {/* ── G0. Recommendations teaser — free ── */}
+      <div className="mb-4 flex items-center gap-2.5 px-5 py-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15">
+        <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+        <p className="text-sm text-indigo-800 dark:text-indigo-300">
+          <span className="font-semibold">One priority action has been identified for this month.</span>{" "}
+          Upgrade to Pro to see the full CFO Recommendations.
+        </p>
+      </div>
 
       {/* ── G. CFO Recommendations ── Pro gated ── */}
       <PremiumBlurPreview

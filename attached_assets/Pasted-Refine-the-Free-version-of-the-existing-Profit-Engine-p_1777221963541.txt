@@ -1,0 +1,152 @@
+Refine the Free version of the existing Profit Engine page.
+
+Do not rebuild the page from scratch. Keep the current layout, styling, mock data, timeframe selector, Free/Pro gating and navigation.
+
+Make the following targeted improvements:
+
+1. Tighten Profit Risk wording
+
+Replace the Profit Risk Level supporting text with:
+
+“Profitability is stable, but rising overheads are increasing sensitivity to revenue slowdowns.”
+
+2. Strengthen the top CFO Insight
+
+Replace the final sentence in the top CFO Insight with:
+
+“Focus on scaling revenue before adding new fixed costs — each additional £100k of sales currently converts into approximately £38k of contribution.”
+
+Keep the rest of the insight broadly the same.
+
+3. Add Profit Safety Buffer line
+
+Directly below the top CFO Insight, add a compact line or mini-card:
+
+Title:
+Profit Safety Buffer
+
+Text:
+“Revenue could fall by £204k before the business reaches break-even.”
+
+This should be visible in the Free version.
+
+4. Add Contribution Margin KPI
+
+Add a new KPI card to the top metric strip:
+
+Title:
+Contribution Margin
+
+Value:
+38.0%
+
+Delta:
++2.4pp vs prior period
+
+Supporting text:
+“Revenue available to pay overheads and generate profit.”
+
+If space is tight, use a responsive 3-column / 6-card layout rather than squeezing the cards too tightly.
+
+5. Rename Profit Per £10k Revenue
+
+Rename the existing KPI card:
+
+From:
+Profit Per £10k Revenue
+
+To:
+Profit Conversion
+
+Value:
+£3,800
+
+Supporting text:
+“Every £10k of sales creates £3.8k before overheads.”
+
+Keep the delta:
++£240 vs prior period
+
+6. Improve Profit Threshold wording
+
+Replace the Profit Threshold supporting text with:
+
+“If monthly revenue falls below this level, profit turns negative.”
+
+7. Improve Profit Trend explanation
+
+Under:
+Profit Trend: Improving
+
+Add or replace supporting text with:
+
+“Profit increased by £18k this month, driven by margin expansion and stronger contribution.”
+
+8. Add “What Would Improve Profit Fastest?” free insight
+
+Add a compact insight card below the KPI strip and before Staff Cost Efficiency.
+
+Title:
+What would improve profit fastest?
+
+Text:
+“The fastest route to higher profit is to protect margin, reduce discounting and grow revenue without adding overheads.”
+
+Add three short bullets:
+- Reduce discounting by 3pp
+- Increase contribution margin by 2pp
+- Grow revenue by £60k without increasing overheads
+
+Keep this visible in the Free version. It should feel useful but not too detailed.
+
+9. Add locked Profit Sensitivity Ranking teaser
+
+Add a small locked preview card in the Free version, before the locked Profit Sensitivity Simulator.
+
+Title:
+Profit Sensitivity Ranking
+
+Subtitle:
+“What affects your profit most?”
+
+Show the ranking visibly but keep detailed impacts locked:
+1. Discounting
+2. Overheads
+3. Returns
+4. Marketing efficiency
+
+Add overlay CTA:
+“Upgrade to Pro to see the £ impact of each profit lever.”
+
+Button:
+Upgrade to Pro
+
+10. Add recommendation preview teaser
+
+In the Free version, before the locked CFO Recommendations section, add a small teaser line:
+
+“One priority action has been identified for this month.”
+
+Then keep the detailed CFO Recommendations locked behind Pro.
+
+11. Preserve Free vs Pro logic
+
+Free should show:
+- Profit Engine Summary
+- Profit Risk Level
+- Profit Safety Buffer
+- KPI strip
+- What would improve profit fastest?
+- Staff Cost Efficiency headline cards
+- basic Revenue to Profit bridge chart/table
+- locked teasers for trend, drivers, simulator and recommendations
+
+Pro should show everything fully unlocked.
+
+12. Final output
+
+Update the existing Profit Engine page only.
+
+Do not change the route or page name.
+Do not add live integrations.
+Keep calculations client-side.

@@ -1,0 +1,167 @@
+Update the app layout so the page background uses a premium two-tone deep navy gradient instead of a flat colour.
+
+Do not change card backgrounds, text colours, charts or badges unless readability requires adjustment.
+
+Objective:
+Create a high-end “AI CFO control centre” visual style where cards sit above a deep gradient canvas.
+
+1. Apply gradient background globally
+
+Update the main app layout wrapper so the background behind all content cards becomes a vertical navy gradient:
+
+Top:
+#0B1F3A
+
+Middle:
+#0E2748
+
+Bottom:
+#071629
+
+Apply gradient:
+
+background: linear-gradient(
+  180deg,
+  #0B1F3A 0%,
+  #0E2748 50%,
+  #071629 100%
+);
+
+Ensure background fills full viewport height:
+
+min-height: 100vh;
+
+Apply across:
+
+- Dashboard
+- Profit Margin Analysis
+- Growth Quality
+- Marketing Efficiency
+- Pricing Optimisation
+- Profit Engine
+- Cash Control
+- Profit Opportunities
+- Scenario Lab
+- CFO Alerts
+
+Do not apply gradient individually per page — apply once at layout shell level.
+
+2. Add subtle vignette depth effect (optional but recommended)
+
+Add a very subtle radial overlay to create a premium “depth” feel:
+
+background-image:
+radial-gradient(
+  circle at 20% 10%,
+  rgba(255,255,255,0.03),
+  transparent 40%
+);
+
+Combine with the gradient above if supported.
+
+This should be barely visible.
+
+3. Keep cards white
+
+Ensure the following remain unchanged:
+
+- KPI cards
+- insight cards
+- opportunity cards
+- simulator panels
+- tables
+- AI CFO panels
+- alerts panels
+- scenario panels
+
+Cards should visually float above the navy canvas.
+
+4. Improve card elevation slightly
+
+Because darker backgrounds absorb shadows, increase card depth slightly:
+
+box-shadow:
+
+0 8px 24px rgba(0,0,0,0.18)
+
+Apply only if current shadows look too faint.
+
+Do not exaggerate.
+
+5. Sidebar styling
+
+If sidebar is currently light:
+
+leave unchanged unless contrast looks weak.
+
+If adjustment is needed, update sidebar background to:
+
+#08172B
+
+Ensure navigation text remains readable.
+
+6. Header styling
+
+Keep header readable against navy background.
+
+If necessary update header background to:
+
+#0E2748
+
+Otherwise leave unchanged.
+
+7. Charts
+
+Do not invert chart themes.
+
+Charts should remain light-background compatible.
+
+Only adjust chart container backgrounds if contrast breaks.
+
+8. Maintain contrast accessibility
+
+Verify:
+
+- headings readable
+- KPI numbers readable
+- helper text readable
+- badge colours readable
+- table headers readable
+- sliders readable
+- simulator outputs readable
+
+If needed adjust text colour slightly rather than changing gradient.
+
+9. Mobile layout behaviour
+
+Ensure gradient fills entire viewport on:
+
+desktop
+tablet
+mobile
+
+Avoid white edges or scroll gaps.
+
+10. Preserve overlays and drawers
+
+Ensure these remain unchanged and readable:
+
+- AI CFO drawer
+- Free/Pro overlays
+- locked sections
+- alert panels
+- scenario simulator overlays
+
+11. Final checks
+
+Confirm:
+
+- gradient visible across all pages
+- cards float clearly above background
+- no layout shifts
+- no text contrast issues
+- sidebar readable
+- header readable
+- scenario lab readable
+- alerts page readable
+- no performance impact

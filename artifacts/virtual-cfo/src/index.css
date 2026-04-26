@@ -133,3 +133,42 @@
     @apply font-bold tracking-tight;
   }
 }
+
+/* ── Navy canvas — text contrast ──────────────────────────────────────────── */
+/* Flip foreground tokens to light so headings/labels on the dark gradient    */
+/* remain readable. Cards and light-tinted panels restore their own dark text. */
+
+main {
+  --foreground: 0 0% 97%;
+  --muted-foreground: 0 0% 62%;
+}
+
+/* Restore dark text inside white or light-background surfaces */
+main .bg-card,
+main .bg-background,
+main .bg-secondary,
+main .bg-popover,
+main .bg-white,
+main .bg-amber-50,
+main .bg-amber-100,
+main .bg-emerald-50,
+main .bg-emerald-100,
+main .bg-indigo-50,
+main .bg-indigo-100,
+main .bg-rose-50,
+main .bg-rose-100,
+main .bg-blue-50,
+main .bg-blue-100,
+main .bg-violet-50,
+main .bg-violet-100,
+main .bg-slate-50,
+main .bg-slate-100 {
+  --foreground: 222 47% 11%;
+  --muted-foreground: 215 16% 47%;
+}
+
+/* ── Elevated card depth against the navy canvas ──────────────────────────── */
+/* Cards that float above the dark gradient background need stronger shadows  */
+.bg-card {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20), 0 1px 4px rgba(0, 0, 0, 0.14);
+}

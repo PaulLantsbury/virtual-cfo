@@ -1,0 +1,615 @@
+Add a new page to the app called “Pricing & Discount Optimisation”.
+
+This page should mirror the structure, tone, gating and visual style of the existing Profit Engine and Cash Control pages.
+
+The objective is to help ecommerce founders understand:
+1. whether discounts are helping growth or damaging margin
+2. where contribution is being lost
+3. how much profit could be recovered through better pricing
+4. what pricing action would improve margin fastest
+5. how changes in discounting, full-price orders and returns affect contribution
+
+This page should feel like an AI CFO explaining pricing power in plain English, not a pricing spreadsheet.
+
+Add this page to the main navigation as:
+Pricing Optimisation
+
+Use mock ecommerce data for now.
+Do not add live integrations.
+
+Design style:
+- same layout wrapper, sidebar, header and card styling as Profit Engine and Cash Control
+- modern SaaS dashboard
+- clean white cards
+- rounded corners
+- subtle shadows
+- CFO Insight cards throughout
+- plain-English explanations
+- Free / Pro gating consistent with the other pages
+- same reusable timeframe selector at the top right
+
+Default timeframe:
+This month
+
+Comparison:
+Previous period
+
+1. Page Header
+
+Title:
+Pricing & Discount Optimisation
+
+Subtitle:
+See how pricing, discounting and returns affect contribution — and how much profit you could recover without increasing traffic.
+
+Top CFO Insight card:
+
+“Discounting is currently the largest drag on margin. Reducing the average discount by 3pp would increase contribution by approximately £38k per month without requiring additional traffic.”
+
+2. Pricing Power Risk Level
+
+Add a risk card below the top insight.
+
+Title:
+Pricing Power Level
+
+Status:
+Moderate
+
+Text:
+“Pricing power is stable, but promotional reliance is increasing and could weaken margin if it continues.”
+
+Use amber/moderate styling.
+
+3. Contribution Recovery Opportunity
+
+Add a compact helper card below the risk level.
+
+Title:
+Recoverable Contribution Opportunity
+
+Text:
+“Approximately £52k of monthly contribution could be recovered through better discount control, improved full-price sales and lower returns.”
+
+Use positive styling.
+
+4. Pricing Trend
+
+Add a compact horizontal summary bar.
+
+Title:
+Pricing Trend: Margin under pressure
+
+Text:
+“Average discount increased by 3pp and full-price orders fell from 52% to 46%.”
+
+Use amber styling.
+
+5. KPI Strip
+
+Create 8 KPI cards in a responsive 4-column grid on desktop.
+
+A. Average Selling Price
+Value:
+£42.60
+
+Delta:
+-£1.20 vs prior period
+
+Supporting text:
+Average realised price per order after discounts.
+
+B. Average Discount
+Value:
+18%
+
+Delta:
++3pp vs prior period
+
+Supporting text:
+Average discount applied across orders.
+
+C. Full-Price Order Ratio
+Value:
+46%
+
+Delta:
+-6pp vs prior period
+
+Supporting text:
+Orders completed without discount.
+
+D. Contribution per Order
+Value:
+£12.40
+
+Delta:
+-£2.10 vs prior period
+
+Supporting text:
+Profit before overheads generated per order.
+
+E. Discount Cost
+Value:
+£64,000
+
+Delta:
++£14,000 vs prior period
+
+Supporting text:
+Revenue given away through promotions and discount codes.
+
+F. Returns Impact
+Value:
+£18,000
+
+Delta:
++£5,000 vs prior period
+
+Supporting text:
+Contribution lost through returned orders.
+
+G. Pricing Power Index
+Value:
+Moderate
+
+Delta:
+Stable vs prior period
+
+Supporting text:
+Based on discount reliance, full-price mix and contribution stability.
+
+H. Recoverable Contribution
+Value:
+£52,000
+
+Delta:
++£11,000 vs prior period
+
+Supporting text:
+Estimated monthly contribution recoverable through pricing improvements.
+
+Use positive/negative styling based on whether the change helps or hurts margin.
+
+6. What Would Improve Margin Fastest?
+
+Create a compact insight card below the KPI strip.
+
+Title:
+What would improve margin fastest?
+
+Text:
+“The fastest route to higher contribution is to reduce discount depth, increase full-price orders and reduce returns on discounted sales.”
+
+Add three bullets:
+- Reduce average discount from 18% to 15%
+- Increase full-price order ratio by 6pp
+- Reduce returns on discounted orders by 2pp
+
+Add a summary line:
+“Together, these changes could increase contribution by approximately £42k per month.”
+
+This section should be visible in both Free and Pro.
+
+7. Discount Impact Analysis
+
+Create a section titled:
+Discount Impact Analysis
+
+Subtitle:
+See how gross sales reduce through discounts and returns before becoming realised revenue.
+
+CFO Insight:
+“Discounts reduced realised revenue by 15% this month. This is the largest single pricing-related margin leakage.”
+
+Create a bridge chart showing:
+
+Gross revenue: £420,000
+Discounts applied: (£64,000)
+Net realised revenue: £356,000
+Returns impact: (£18,000)
+Net retained revenue: £338,000
+
+Add a table with columns:
+Step
+Amount
+What it means
+
+Rows:
+Gross revenue | £420,000 | Sales before discounts and returns
+Discounts applied | (£64,000) | Revenue given away through promotions and discount codes
+Net realised revenue | £356,000 | Revenue retained after discounts
+Returns impact | (£18,000) | Revenue and contribution lost through returned orders
+Net retained revenue | £338,000 | Revenue retained after discounts and returns
+
+Helper note:
+“The goal is not just to increase sales — it is to retain more value from each sale.”
+
+8. Contribution Leakage Detector
+
+Create a section titled:
+Contribution Leakage Detector
+
+Subtitle:
+Shows where contribution is disappearing before it reaches profit.
+
+CFO Insight:
+“Discounting accounts for 71% of contribution leakage this month, making it the highest-priority margin lever.”
+
+Create four cards:
+
+A. Discount Leakage
+Value:
+£64,000
+
+Text:
+Largest contributor to margin leakage this month.
+
+B. Returns Leakage
+Value:
+£18,000
+
+Text:
+Returned orders reduced net retained revenue and contribution.
+
+C. Shipping Subsidy Leakage
+Value:
+£11,000
+
+Text:
+Free or subsidised shipping reduced contribution.
+
+D. Payment Fee Leakage
+Value:
+£9,000
+
+Text:
+Payment processing costs reduced contribution.
+
+Add a simple bar chart showing the four leakage categories.
+
+9. Discount Dependence Risk
+
+Create a section titled:
+Discount Dependence Risk
+
+Subtitle:
+Shows how reliant the business is on promotions to generate sales.
+
+Add three cards:
+
+A. Discount Dependence Level
+Value:
+Moderate
+
+Text:
+41% of orders currently use a discount code or promotion.
+
+B. Promotion Frequency
+Value:
+High
+
+Text:
+Promotions were active on 19 days this month.
+
+C. Full-Price Resilience
+Value:
+Weakening
+
+Text:
+Full-price order ratio fell from 52% to 46%.
+
+CFO Insight:
+“Discount reliance is increasing. If this continues, customers may be trained to wait for promotions before buying.”
+
+10. Price vs Volume Trade-off Analysis
+
+Create a Pro-gated section.
+
+Section title:
+Price vs Volume Trade-off
+
+Subtitle:
+Estimate whether reducing discounts improves contribution even if sales volume falls.
+
+CFO Insight:
+“Reducing average discount by 3pp is expected to improve contribution even after allowing for a small fall in conversion.”
+
+Create comparison cards:
+
+Scenario:
+Reduce discount by 3pp
+
+Contribution gain:
++£38,000
+
+Estimated revenue risk:
+(£12,000)
+
+Net improvement:
++£26,000
+
+Interpretation:
+“Contribution improves because the margin gained from lower discounting outweighs the expected volume risk.”
+
+For Free users:
+Show a blurred preview with CTA:
+“Upgrade to Pro to estimate how conversion would change if discounts fall.”
+
+11. Pricing Sensitivity Simulator
+
+Create a Pro-gated interactive section.
+
+Section title:
+Pricing Sensitivity Simulator
+
+Subtitle:
+Test how changes in discounts, full-price orders and returns affect contribution.
+
+CFO Insight:
+“Contribution is currently most sensitive to discount depth and full-price order mix. Use this tool before changing promotional strategy.”
+
+Create sliders:
+
+Average Discount Change
+Range: -8pp to +8pp
+Default: 0pp
+
+Full-Price Order Ratio Change
+Range: -15pp to +20pp
+Default: 0pp
+
+Conversion Rate Impact
+Range: -15% to +10%
+Default: 0%
+
+Returns Rate Change
+Range: -5pp to +5pp
+Default: 0pp
+
+Shipping Subsidy Change
+Range: -30% to +30%
+Default: 0%
+
+Base assumptions:
+Gross revenue = 420000
+Average discount = 18%
+Returns impact = 18000
+Contribution per order = 12.40
+Orders = 16000
+Base contribution = 198000
+Base contribution margin = 38%
+
+Outputs:
+Projected Revenue
+Projected Contribution
+Contribution Movement vs Base
+Projected Contribution Margin
+Pricing Risk Level
+
+Use simple client-side calculations:
+- lower average discount improves contribution
+- higher full-price order ratio improves contribution
+- negative conversion impact reduces revenue and contribution
+- higher returns reduce contribution
+- higher shipping subsidy reduces contribution
+
+Dynamic interpretation:
+If contribution increases:
+“This scenario strengthens contribution because improved pricing more than offsets any volume impact.”
+
+If contribution decreases:
+“This scenario weakens contribution because volume loss, returns or discounting absorb margin.”
+
+If pricing risk is high:
+“This scenario creates pricing risk. Discounting or conversion pressure is likely to reduce contribution materially.”
+
+Add a compact insight near outputs:
+
+Title:
+Fastest lever to improve contribution
+
+Text:
+“Reducing average discount by 3pp would increase contribution by approximately £38k.”
+
+12. Pricing Sensitivity Ranking
+
+Create a section titled:
+Pricing Sensitivity Ranking
+
+Subtitle:
+What affects your contribution most?
+
+For Pro users, show:
+1. Average discount | £38,000 potential contribution impact
+2. Full-price order ratio | £26,000 potential contribution impact
+3. Returns rate | £18,000 potential contribution impact
+4. Shipping subsidy | £11,000 potential contribution impact
+
+For Free users, show masked values:
+1. Average discount | £—,—
+2. Full-price order ratio | £—,—
+3. Returns rate | £—,—
+4. Shipping subsidy | £—,—
+
+Free CTA:
+“Upgrade to Pro to see the £ impact of each pricing lever.”
+
+13. Monthly Pricing Movement Bridge
+
+Create a Pro-gated section.
+
+Section title:
+What Changed Contribution This Month?
+
+Subtitle:
+Contribution fell by £24k this month. Here are the main pricing drivers.
+
+CFO Insight:
+“Contribution fell primarily due to increased discounting and weaker full-price sales, partly offset by improved product mix.”
+
+Driver table:
+Driver | Contribution Impact | What happened
+
+Rows:
+ASP change | (£8,000) | Average selling price fell this month
+Discount increase | (£14,000) | Higher discounting reduced retained revenue
+Full-price mix | (£9,000) | Fewer orders converted at full price
+Returns movement | (£5,000) | Returns increased contribution leakage
+Product mix improvement | +£12,000 | Higher-margin products partially offset pressure
+Net contribution movement | (£24,000) | Overall contribution decreased this period
+
+Add a matching bar chart using the same style as Profit Engine and Cash Control.
+
+For Free users:
+Show blurred preview with CTA:
+“Upgrade to Pro to see exactly what moved contribution this month.”
+
+14. Pricing Power Trend
+
+Create a section.
+
+Title:
+Pricing Power Trend
+
+Subtitle:
+Shows whether the business is becoming more or less reliant on discounting.
+
+Pro version:
+Show a 6-period trend chart with:
+- Average Discount %
+- Full-Price Order Ratio
+- Contribution per Order
+
+Mock data:
+Jan: discount 13%, full-price 58%, contribution/order £15.10
+Feb: discount 14%, full-price 56%, contribution/order £14.80
+Mar: discount 15%, full-price 54%, contribution/order £14.20
+Apr: discount 16%, full-price 51%, contribution/order £13.70
+May: discount 17%, full-price 49%, contribution/order £13.10
+Jun: discount 18%, full-price 46%, contribution/order £12.40
+
+CFO Insight:
+“Pricing power is weakening because discounting is rising while full-price order ratio and contribution per order are falling.”
+
+Free version:
+Show headline only:
+Pricing Power Trend: Weakening
+
+Lock detailed trend chart with CTA:
+“Upgrade to Pro to see pricing power trends over time.”
+
+15. This Month’s Pricing Priorities
+
+Create a Pro-gated recommendations section.
+
+Section title:
+This Month’s Pricing Priorities
+
+Subtitle:
+Three priority actions your CFO would give you based on this month’s pricing data.
+
+Cards:
+
+A. What Improved
+“Product mix improved this month, adding £12k of contribution and partly offsetting discount pressure.”
+
+B. What To Watch
+“Average discount increased to 18%, while full-price orders fell to 46%. This indicates rising promotional dependence.”
+
+C. Recommended Action
+“Reduce blanket discounting, test smaller targeted offers and protect full-price conversion before increasing promotional frequency.”
+
+For Free users:
+Show teaser:
+“One pricing action could increase contribution this month.”
+
+CTA:
+Upgrade to Pro
+
+16. Free vs Pro gating
+
+Use the same gating approach as Profit Engine and Cash Control.
+
+Free version should show:
+- Pricing summary
+- Pricing Power Level
+- Recoverable Contribution Opportunity
+- Pricing Trend
+- KPI strip
+- What would improve margin fastest?
+- Discount Impact Analysis chart
+- headline Contribution Leakage Detector cards
+- headline Discount Dependence Risk cards
+- masked Pricing Sensitivity Ranking
+- locked simulator
+- locked trade-off analysis
+- locked monthly contribution movement
+- locked pricing priorities
+- locked detailed trend chart
+
+Pro version should show:
+- everything fully unlocked
+- full simulator
+- full sensitivity ranking with £ impacts
+- full pricing movement bridge
+- full price vs volume trade-off
+- full trend chart
+- full priorities
+- no blur overlays
+- no upgrade CTAs
+
+17. Add consolidated Free upgrade card
+
+In Free mode only, add an upgrade card after the KPI strip.
+
+Title:
+Unlock your pricing action plan
+
+Text:
+“Upgrade to Pro to move from seeing margin leakage to actively improving contribution.”
+
+Bullets:
+- Model pricing and discount scenarios
+- See which pricing lever has the biggest £ impact
+- Understand what moved contribution this month
+- Get priority pricing actions
+
+CTA:
+Unlock Pro
+
+18. Language rules
+
+Use plain-English ecommerce-friendly language:
+- discounting
+- full-price orders
+- margin leakage
+- contribution
+- recoverable contribution
+- pricing power
+- retained revenue
+
+Avoid overly academic pricing terminology such as:
+- elasticity
+- marginal utility
+- demand curve
+- price discrimination
+
+19. Navigation and routing
+
+Add the new page to the sidebar/menu as:
+Pricing Optimisation
+
+Make sure the route works correctly.
+
+Use the same app layout wrapper, header, sidebar, timeframe selector and plan gating logic as the existing pages.
+
+20. Final output
+
+Build the full Pricing & Discount Optimisation page using mock data.
+
+Do not add live API integrations yet.
+
+Keep all calculations client-side.
+
+Make sure the page is responsive, but optimised for desktop dashboard viewing.

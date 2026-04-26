@@ -59,7 +59,12 @@ export type FeatureName =
   | "cash_bridge_table"               // Cash Control — Detailed cash bridge table
   | "cash_cost_pressure"              // Cash Control — Cash Cost Pressure analysis section
   | "cash_simulator"                  // Cash Control — Cash Sensitivity Simulator + Ranking
-  | "cash_recommendations";           // Cash Control — This Month's Cash Priorities section
+  | "cash_recommendations"            // Cash Control — This Month's Cash Priorities section
+  | "pricing_simulator"               // Pricing — Pricing Sensitivity Simulator + Ranking £ impacts
+  | "pricing_driver_table"            // Pricing — What Changed Contribution driver table + chart
+  | "pricing_trade_off"               // Pricing — Price vs Volume Trade-off Analysis
+  | "pricing_trend_chart"             // Pricing — Pricing Power Trend 6-period chart
+  | "pricing_recommendations";        // Pricing — This Month's Pricing Priorities section
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -100,6 +105,11 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   cash_cost_pressure:               ["pro"],
   cash_simulator:                   ["pro"],
   cash_recommendations:             ["pro"],
+  pricing_simulator:                ["pro"],
+  pricing_driver_table:             ["pro"],
+  pricing_trade_off:                ["pro"],
+  pricing_trend_chart:              ["pro"],
+  pricing_recommendations:          ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

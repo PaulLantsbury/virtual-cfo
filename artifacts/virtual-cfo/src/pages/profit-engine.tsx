@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
+import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 
 // ─── Base data constants ─────────────────────────────────────────────────────
 // @dynamic Replace with Xero-derived figures when live data is connected.
@@ -1027,6 +1028,13 @@ export default function ProfitEngine() {
           </div>
         </div>
       </PremiumBlurPreview>
+
+      <DataBenchmarkAssumptions
+        benchmarkNote="Profit health is assessed using contribution margin, overhead load and break-even distance."
+        dataQualityNote="Profit analysis depends on accurate fixed cost, contribution and overhead mapping."
+        className="mb-2"
+      />
+
     </AppLayout>
   );
 }

@@ -1,4 +1,4 @@
-import { TrendingUp, Zap, Lock, Tag } from "lucide-react";
+import { TrendingUp, Zap, Lock, Tag, Target, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";

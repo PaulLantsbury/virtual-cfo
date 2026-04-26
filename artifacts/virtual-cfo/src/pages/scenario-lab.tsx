@@ -292,7 +292,7 @@ const IMPL_ACTIONS = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ScenarioLab() {
-  const { label: timelineLabel, compare: timelineCompare } = useTimeline();
+  const { selectedLabel: timelineLabel } = useTimeline();
 
   const isPro       = canAccess("scenario_lab_builder");
   const isProPlans  = canAccess("scenario_lab_plans");
@@ -333,13 +333,7 @@ export default function ScenarioLab() {
   ] as const;
 
   return (
-    <AppLayout
-      headerRight={
-        <div className="flex items-center gap-3">
-          <TimelineSelector />
-        </div>
-      }
-    >
+    <AppLayout>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-10">
 
         {/* ══ 1. PAGE HEADER ══════════════════════════════════════════════════ */}
@@ -352,9 +346,9 @@ export default function ScenarioLab() {
               Build a joined-up forecast across profit, cash, pricing and marketing before making decisions.
             </p>
           </div>
-          <div className="flex flex-col items-end gap-1 shrink-0 text-right">
-            <span className="text-sm font-semibold text-foreground">{timelineLabel}</span>
-            <span className="text-xs text-muted-foreground">Compare to: {timelineCompare}</span>
+          <div className="flex flex-col items-end gap-1.5 shrink-0 text-right">
+            <TimelineSelector />
+            <span className="text-xs text-muted-foreground">{timelineLabel} · vs previous period</span>
           </div>
         </div>
 

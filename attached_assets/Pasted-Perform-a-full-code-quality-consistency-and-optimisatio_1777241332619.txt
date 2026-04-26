@@ -1,0 +1,278 @@
+Perform a full code quality, consistency and optimisation review across all built pages.
+
+Scope:
+- Dashboard / Business Control Centre
+- Profit Margin Analysis
+- Growth Quality
+- Marketing Efficiency
+- Pricing Optimisation
+- Profit Engine
+- Cash Control
+- Profit Opportunities
+- Scenario Lab
+- shared layout/header/sidebar/components
+
+Objective:
+Improve code consistency, remove duplication, fix unused code, standardise gating, and ensure all pages build cleanly without changing the visual design or product logic.
+
+1. Build and TypeScript check
+
+Run the project build/typecheck.
+
+Fix:
+- TypeScript errors
+- missing imports
+- unused imports
+- unused variables
+- broken component references
+- route errors
+- duplicate component names
+
+Do not suppress errors unless genuinely safe.
+
+2. Remove dead or duplicate code
+
+Search for and remove:
+- old Reports page references
+- old Create Report handlers
+- duplicate Free/Pro toggles
+- unused Review Mode components
+- old avatar/profile photo code
+- unused “coming soon” Cash Efficiency references
+- duplicate opportunity/action components
+- duplicate benchmark/data-quality components
+
+Keep:
+- the single existing DEV / FREE / PRO selector
+- the current dashboard structure
+- all live pages listed above
+
+3. Standardise Free / Pro gating
+
+Create or use one shared access helper, e.g.:
+
+hasProAccess
+
+All pages should use the same gating logic.
+
+Ensure:
+- Free mode shows headline value/opportunity
+- Pro mode unlocks detailed breakdowns, simulators and action plans
+- no page has its own conflicting gating logic
+- no blur overlays appear in Pro mode
+- no upgrade CTAs appear in Pro mode
+- Free mode still shows enough value to motivate upgrade
+
+4. Standardise shared components
+
+Where practical, reuse shared components for:
+
+- CFO Insight card
+- KPI card
+- risk/status badge
+- opportunity card
+- action card
+- data & benchmark assumptions accordion
+- upgrade/paywall card
+- simulator output card
+- confidence badge
+- timing badge
+- route/navigation card
+
+Do not over-refactor if it risks breaking the app. Prioritise safe clean-up.
+
+5. Centralise mock data
+
+Move repeated mock values into shared mock data files where practical.
+
+Examples:
+- benchmark ranges
+- opportunity objects
+- action library
+- page KPI data
+- plan/scenario data
+- confidence labels
+- timing labels
+
+Avoid hardcoding the same opportunity values in multiple page components if they should stay consistent.
+
+Values that should remain consistent across app:
+- Recoverable contribution: £18k–£42k/month
+- Scenario Lab plan impact: +£42k contribution/month
+- Cash opportunity: £64k
+- Contribution margin: 42.3%
+- Cash runway: 3.4 months
+- Discount dependency: 38%
+- Marketing opportunity: £18.2k
+- Pricing opportunity: £52k
+- Margin recovery: £20.4k
+
+6. Standardise navigation and routes
+
+Check sidebar navigation order:
+
+- Dashboard
+- Profit Margin Analysis
+- Growth Quality
+- Marketing Efficiency
+- Pricing Optimisation
+- Profit Engine
+- Cash Control
+- Profit Opportunities
+- Scenario Lab
+
+Ensure:
+- no Reports link
+- no broken Opportunities link
+- Profit Opportunities route works
+- Cash Control route works
+- all dashboard CTAs route correctly
+- all engine cards route correctly
+- active page highlighting works
+
+7. Standardise page hierarchy
+
+Each page should start with the page-specific main story, not benchmark/data notes.
+
+Confirm top content order:
+
+Dashboard:
+Business Health verdict
+
+Profit Margin Analysis:
+Profit Margin Summary / CFO insight
+
+Growth Quality:
+Growth Quality verdict
+
+Marketing Efficiency:
+Marketing Efficiency Summary / CFO insight
+
+Pricing Optimisation:
+Pricing Power summary
+
+Profit Engine:
+Profit Engine Summary
+
+Cash Control:
+Cash Control summary / Cash Risk
+
+Profit Opportunities:
+Recoverable Opportunity summary
+
+Scenario Lab:
+Recommended Scenario / CFO insight
+
+Move benchmark/data-quality notes into the lower “Data & benchmark assumptions” accordion if any are still at the top.
+
+8. Standardise wording patterns
+
+Use consistent language across pages:
+
+Use:
+- contribution
+- cash runway
+- margin recovery
+- recoverable contribution
+- opportunity
+- confidence
+- timing
+- recommended action
+- scenario
+- CFO recommendation
+
+Avoid inconsistent labels like:
+- Cash Efficiency
+- Opportunities only
+- Create Report
+- generic “report”
+- excessive EBITDA language where “profit” is clearer
+
+9. Check simulator behaviour
+
+Check all sliders/simulators:
+
+- Profit Engine simulator
+- Cash Control simulator
+- Pricing Optimisation simulator
+- Marketing Efficiency budget reallocation simulator
+- Profit Margin recovery simulator
+- Scenario Lab builder
+
+Ensure:
+- sliders render correctly
+- values update visibly
+- outputs do not become NaN
+- negative values display cleanly
+- currency formatting is consistent
+- percentages use pp where appropriate
+- Pro mode unlocks simulators
+- Free mode locks or previews simulators consistently
+
+10. Check responsive layout
+
+Review desktop and mobile/tablet behaviour.
+
+Fix obvious issues:
+- KPI grids overflowing
+- cards too narrow
+- CTA buttons wrapping badly
+- simulator sliders breaking layout
+- sidebars overlapping content
+- badges overlapping text
+- tables causing horizontal scroll unnecessarily
+
+11. Performance clean-up
+
+Where safe:
+- avoid unnecessary duplicated calculations on every render
+- memoise large static mock arrays if useful
+- remove console.log/debug statements
+- remove temporary comments or unused experimental code
+- keep components readable and maintainable
+
+12. Accessibility and usability
+
+Ensure:
+- buttons have clear labels
+- locked sections have readable upgrade copy
+- colour is not the only indicator of status
+- traffic light statuses include text labels
+- CTAs are keyboard-clickable
+- links use accessible text
+- tooltips/accordions are usable
+
+13. Visual consistency
+
+Do not redesign the app, but standardise:
+
+- card padding
+- section spacing
+- badge sizing
+- CTA button styles
+- green/amber/red status colours
+- insight card styles
+- paywall/locked-overlay styles
+- table header styles
+- chart container sizing
+
+14. Final verification
+
+After changes:
+- run build/typecheck
+- app loads
+- no console errors
+- all routes work
+- Free/Pro toggle works globally
+- no duplicate toggles
+- no Reports page
+- no Create Report button
+- Cash Control is live
+- Profit Opportunities is live
+- benchmark/data-quality notes are not at the top of pages
+- Pro mode has no locked overlays
+- Free mode still shows opportunity headline values
+
+Do not add new features in this pass.
+Do not change the product design direction.
+Focus on stability, consistency and maintainability.

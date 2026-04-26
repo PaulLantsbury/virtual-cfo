@@ -1,0 +1,141 @@
+Add a persistent “CFO Monitoring Status” indicator across the app.
+
+Objective:
+Make the product feel alive by showing that the AI CFO is actively monitoring the business and can alert the user when attention is needed.
+
+Do not rebuild the app. Add this as a shared header-level component.
+
+1. Add header status indicator
+
+Add a compact indicator in the top-right header area, near the existing DEV / FREE / PRO selector.
+
+Label:
+CFO Monitoring
+
+Status:
+Action recommended
+
+Visual:
+Amber dot or amber pulse indicator
+
+Supporting tooltip / hover text:
+“Your AI CFO is monitoring margin, cash, marketing efficiency and pricing signals. 3 areas need attention.”
+
+Click behaviour:
+Clicking the indicator should navigate to the CFO Alerts page.
+
+Route:
+`/cfo-alerts`
+
+If the app uses a route prefix, use the existing route helper / sidebar route for CFO Alerts.
+
+2. Status states
+
+Create mock status states:
+
+Green:
+Monitoring active
+Text:
+“No urgent issues detected.”
+
+Amber:
+Action recommended
+Text:
+“3 areas need attention: margin, Meta CAC and discounting.”
+
+Red:
+Immediate attention
+Text:
+“Critical movement detected in cash runway or margin.”
+
+For now, default to Amber / Action recommended.
+
+3. Badge details
+
+On hover or click preview, show a small popover if easy to implement.
+
+Popover content:
+CFO Monitoring Status
+- Margin quality: Watch
+- Meta CAC: At risk
+- Discount dependency: Watch
+- Cash runway: Monitor
+
+CTA:
+View alerts →
+
+Clicking CTA should navigate to CFO Alerts.
+
+If popover is too complex, use a simple tooltip and make the full badge clickable.
+
+4. Free vs Pro behaviour
+
+Free mode:
+Show the indicator, but add small lock marker or tooltip:
+“Monitoring preview available. Upgrade to Pro to activate alerts.”
+
+Clicking still routes to CFO Alerts preview page.
+
+Pro mode:
+Show normal active indicator:
+“CFO monitoring active.”
+
+Clicking routes to CFO Alerts.
+
+5. Styling
+
+Use same style system as the app:
+- compact pill badge
+- rounded corners
+- amber status colour
+- small pulse/dot indicator
+- no large visual distraction
+- should not crowd the header
+- responsive on mobile
+
+6. Placement
+
+Final header right-side order should be clean and not duplicated.
+
+Suggested order:
+- page-level controls / timeframe selector if present
+- CFO Monitoring status
+- DEV / FREE / PRO toggle
+- notification icon if present
+
+Do not re-add user avatar/photo.
+
+7. Shared component
+
+Create or update a shared component:
+
+CfoMonitoringStatus
+
+Use it in the shared header/layout component so it appears on:
+- Dashboard
+- Profit Margin Analysis
+- Growth Quality
+- Marketing Efficiency
+- Pricing Optimisation
+- Profit Engine
+- Cash Control
+- Profit Opportunities
+- Scenario Lab
+- CFO Alerts
+
+8. Avoid duplication
+
+Make sure the status does not appear twice on any page.
+
+Do not add it individually to every page if the shared header can handle it.
+
+9. Final checks
+
+Ensure:
+- badge appears across all pages
+- clicking it opens CFO Alerts
+- Free/Pro tooltip/message differs correctly
+- header still looks clean
+- no duplicate toggles
+- no avatar
+- app builds without errors

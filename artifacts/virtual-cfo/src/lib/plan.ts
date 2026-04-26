@@ -65,7 +65,9 @@ export type FeatureName =
   | "pricing_trade_off"               // Pricing — Price vs Volume Trade-off Analysis
   | "pricing_trend_chart"             // Pricing — Pricing Power Trend 6-period chart
   | "pricing_recommendations"         // Pricing — This Month's Pricing Priorities section
-  | "marketing_budget_simulator";     // Marketing Efficiency — Budget Reallocation Simulator + Recoverable Contribution card
+  | "marketing_budget_simulator"      // Marketing Efficiency — Budget Reallocation Simulator + Recoverable Contribution card
+  | "margin_simulator"               // Margin Analysis — Margin Recovery Simulator (5 sliders)
+  | "margin_sensitivity_ranking";    // Margin Analysis — Sensitivity Ranking with £ impact per lever
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 
@@ -112,6 +114,8 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   pricing_trend_chart:              ["pro"],
   pricing_recommendations:          ["pro"],
   marketing_budget_simulator:       ["pro"],
+  margin_simulator:                 ["pro"],
+  margin_sensitivity_ranking:       ["pro"],
 };
 
 // ─── Plan resolution ──────────────────────────────────────────────────────────

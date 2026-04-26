@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown, Lock } from "lucide-react";
+import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown, Lock, SlidersHorizontal, Shield, Zap } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Cell,
@@ -271,6 +272,36 @@ const MONTHLY_ORDER_VOLUME = 2000;
 const CHANGE_DRIVERS_MONTHLY_IMPACT =
   Math.round((CHANGE_DRIVERS_TOTAL * MONTHLY_ORDER_VOLUME) / 100) * 100;
 
+// ─── Simulator & Sensitivity ─────────────────────────────────────────────────
+
+const SIM_REVENUE = BRIDGE_ROWS[0].total; // 124,500
+const SIM_ORDERS  = 1_512;
+
+/**
+ * @dynamic Each lever's impact is derived from the real cost share:
+ *   metaContrib / 1% = marketingSpend × metaShareOfMarketing × 0.01 / revenue × orders
+ * Simplified to a per-% multiplier for the static mock.
+ */
+const SIM_MULTIPLIERS = {
+  metaPerPct:     633,   // −1% Meta CAC → +£633 contribution
+  shippingPerPct: 340,   // −1% shipping → +£340 contribution
+  discountPerPp:  820,   // −1pp discount depth → +£820 contribution
+  returnsPerPp:   540,   // −1pp returns rate → +£540 contribution
+  paymentPerPp:   450,   // −1pp payment rate → +£450 contribution
+} as const;
+
+/**
+ * @dynamic Sensitivity ranked by maximum achievable £ uplift at realistic lever change.
+ * All impacts use same 30-day baseline as Recovery Scenarios.
+ */
+const SENSITIVITY_RANKING = [
+  { rank: 1, lever: "Meta CAC",            basis: "−15% Meta CAC",          impact:  9_500 },
+  { rank: 2, lever: "Shipping costs",      basis: "−8% carrier rates",       impact:  6_800 },
+  { rank: 3, lever: "Discount depth",      basis: "−2pp discount depth",     impact:  4_100 },
+  { rank: 4, lever: "Returns rate",        basis: "−2pp returns rate",       impact:  2_700 },
+  { rank: 5, lever: "Payment processing",  basis: "−1pp processing rate",    impact:    900 },
+] as const;
+
 function fmt(n: number) {
   return `£${Math.abs(n).toLocaleString()}`;
 }
@@ -312,6 +343,32 @@ function SectionHeading({ title, subtitle, support }: { title: string; subtitle?
 export default function MarginAnalysis() {
   const { selectedLabel, periodPhrase } = useTimeline();
   const [showAllOpportunities, setShowAllOpportunities] = useState(false);
+
+  // ── Simulator state ──────────────────────────────────────────────────────
+  const [simMetaCac,  setSimMetaCac]  = useState(0);
+  const [simShipping, setSimShipping] = useState(0);
+  const [simDiscount, setSimDiscount] = useState(0);
+  const [simReturns,  setSimReturns]  = useState(0);
+  const [simPayment,  setSimPayment]  = useState(0);
+
+  const simMetaContrib  = Math.round(-simMetaCac  * SIM_MULTIPLIERS.metaPerPct);
+  const simShipContrib  = Math.round(-simShipping * SIM_MULTIPLIERS.shippingPerPct);
+  const simDiscContrib  = Math.round(-simDiscount * SIM_MULTIPLIERS.discountPerPp);
+  const simRetContrib   = Math.round(-simReturns  * SIM_MULTIPLIERS.returnsPerPp);
+  const simPayContrib   = Math.round(-simPayment  * SIM_MULTIPLIERS.paymentPerPp);
+  const simTotalContrib = simMetaContrib + simShipContrib + simDiscContrib + simRetContrib + simPayContrib;
+  const simProjCP       = CM_VALUE + simTotalContrib;
+  const simProjCM       = +((simProjCP / SIM_REVENUE) * 100).toFixed(1);
+  const simProjCPO      = +(simProjCP / SIM_ORDERS).toFixed(2);
+
+  const getSimRiskLevel = (cm: number) => {
+    if (cm >= 45) return { label: "Strong — within target",          color: "emerald" as const };
+    if (cm >= 42) return { label: "Below target — monitor closely",  color: "amber"   as const };
+    if (cm >= 40) return { label: "Warning — approaching threshold", color: "orange"  as const };
+    return               { label: "Critical — immediate action",      color: "red"     as const };
+  };
+  const simRisk = getSimRiskLevel(simProjCM);
+  const isPro   = canAccess("margin_simulator");
 
   const visibleScenarios = showAllOpportunities
     ? RECOVERY_SCENARIOS
@@ -491,12 +548,323 @@ export default function MarginAnalysis() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
+          MARGIN RECOVERY MODELLER
+      ══════════════════════════════════════════════════════════════════════ */}
+      <SectionHeading
+        title="Margin Recovery Modeller"
+        subtitle="Adjust cost and pricing levers to model the real-time impact on contribution margin."
+      />
+
+      {isPro ? (
+        <div className="rounded-2xl border border-primary/30 shadow-md mb-8 overflow-hidden">
+          <div className="flex items-center gap-3 px-6 py-3 bg-primary/10 border-b border-primary/20">
+            <SlidersHorizontal className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+              Margin Recovery Simulator
+            </span>
+            <span className="ml-auto text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary uppercase tracking-wider">
+              Pro
+            </span>
+          </div>
+          <div className="bg-primary/5 px-6 py-6">
+
+            {/* Sliders grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 mb-8">
+
+              {/* 1 — Meta CAC */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold text-foreground">Meta CAC change</p>
+                  <span className={cn(
+                    "text-sm font-bold tabular-nums",
+                    simMetaCac < 0 ? "text-emerald-600 dark:text-emerald-400"
+                                   : simMetaCac > 0 ? "text-destructive" : "text-muted-foreground"
+                  )}>
+                    {simMetaCac > 0 ? "+" : ""}{simMetaCac}%
+                  </span>
+                </div>
+                <Slider
+                  min={-25} max={25} step={1}
+                  value={[simMetaCac]}
+                  onValueChange={([v]) => setSimMetaCac(v)}
+                />
+                <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5">
+                  <span>−25% (reduce)</span><span>+25% (increase)</span>
+                </div>
+              </div>
+
+              {/* 2 — Shipping */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold text-foreground">Shipping cost change</p>
+                  <span className={cn(
+                    "text-sm font-bold tabular-nums",
+                    simShipping < 0 ? "text-emerald-600 dark:text-emerald-400"
+                                    : simShipping > 0 ? "text-destructive" : "text-muted-foreground"
+                  )}>
+                    {simShipping > 0 ? "+" : ""}{simShipping}%
+                  </span>
+                </div>
+                <Slider
+                  min={-20} max={20} step={1}
+                  value={[simShipping]}
+                  onValueChange={([v]) => setSimShipping(v)}
+                />
+                <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5">
+                  <span>−20% (reduce)</span><span>+20% (increase)</span>
+                </div>
+              </div>
+
+              {/* 3 — Discount depth */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold text-foreground">Discount depth change</p>
+                  <span className={cn(
+                    "text-sm font-bold tabular-nums",
+                    simDiscount < 0 ? "text-emerald-600 dark:text-emerald-400"
+                                    : simDiscount > 0 ? "text-destructive" : "text-muted-foreground"
+                  )}>
+                    {simDiscount > 0 ? "+" : ""}{simDiscount}pp
+                  </span>
+                </div>
+                <Slider
+                  min={-5} max={5} step={0.5}
+                  value={[simDiscount]}
+                  onValueChange={([v]) => setSimDiscount(v)}
+                />
+                <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5">
+                  <span>−5pp (tighter)</span><span>+5pp (deeper)</span>
+                </div>
+              </div>
+
+              {/* 4 — Returns rate */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold text-foreground">Returns rate change</p>
+                  <span className={cn(
+                    "text-sm font-bold tabular-nums",
+                    simReturns < 0 ? "text-emerald-600 dark:text-emerald-400"
+                                   : simReturns > 0 ? "text-destructive" : "text-muted-foreground"
+                  )}>
+                    {simReturns > 0 ? "+" : ""}{simReturns}pp
+                  </span>
+                </div>
+                <Slider
+                  min={-5} max={5} step={0.5}
+                  value={[simReturns]}
+                  onValueChange={([v]) => setSimReturns(v)}
+                />
+                <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5">
+                  <span>−5pp (fewer)</span><span>+5pp (more)</span>
+                </div>
+              </div>
+
+              {/* 5 — Payment processing */}
+              <div className="sm:col-span-2 sm:max-w-xs">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold text-foreground">Payment processing change</p>
+                  <span className={cn(
+                    "text-sm font-bold tabular-nums",
+                    simPayment < 0 ? "text-emerald-600 dark:text-emerald-400"
+                                   : simPayment > 0 ? "text-destructive" : "text-muted-foreground"
+                  )}>
+                    {simPayment > 0 ? "+" : ""}{simPayment.toFixed(1)}pp
+                  </span>
+                </div>
+                <Slider
+                  min={-2} max={2} step={0.1}
+                  value={[simPayment]}
+                  onValueChange={([v]) => setSimPayment(Math.round(v * 10) / 10)}
+                />
+                <div className="flex justify-between text-[10px] text-muted-foreground mt-1.5">
+                  <span>−2pp (reduce)</span><span>+2pp (increase)</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Projected output cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+              <div className="bg-card rounded-xl p-4 border border-border/50">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Projected CM</p>
+                <p className={cn(
+                  "text-2xl font-bold font-display leading-none mb-1",
+                  simProjCM >= 45 ? "text-emerald-600 dark:text-emerald-400"
+                  : simProjCM >= 42 ? "text-amber-600 dark:text-amber-400"
+                  : "text-destructive"
+                )}>
+                  {simProjCM}%
+                </p>
+                <p className="text-xs text-muted-foreground">Base: {CM_PCT}%</p>
+              </div>
+              <div className="bg-card rounded-xl p-4 border border-border/50">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Projected CP</p>
+                <p className="text-2xl font-bold font-display text-foreground leading-none mb-1">
+                  £{simProjCP.toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground">Base: £{CM_VALUE.toLocaleString()}</p>
+              </div>
+              <div className="bg-card rounded-xl p-4 border border-border/50">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Movement</p>
+                <p className={cn(
+                  "text-2xl font-bold font-display leading-none mb-1",
+                  simTotalContrib > 0 ? "text-emerald-600 dark:text-emerald-400"
+                  : simTotalContrib < 0 ? "text-destructive"
+                  : "text-muted-foreground"
+                )}>
+                  {simTotalContrib >= 0 ? "+" : ""}£{Math.abs(simTotalContrib).toLocaleString()}
+                </p>
+                <p className="text-xs text-muted-foreground">vs base — this month</p>
+              </div>
+              <div className="bg-card rounded-xl p-4 border border-border/50">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Proj. CPO</p>
+                <p className="text-2xl font-bold font-display text-foreground leading-none mb-1">
+                  £{simProjCPO.toFixed(2)}
+                </p>
+                <p className="text-xs text-muted-foreground">Base: £{CONTRIBUTION_PER_ORDER.toFixed(2)}</p>
+              </div>
+            </div>
+
+            {/* Risk level bar */}
+            <div className={cn(
+              "flex items-center gap-3 px-4 py-3 rounded-xl border text-sm",
+              simRisk.color === "emerald" && "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40 text-emerald-800 dark:text-emerald-300",
+              simRisk.color === "amber"   && "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40 text-amber-800 dark:text-amber-300",
+              simRisk.color === "orange"  && "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800/40 text-orange-800 dark:text-orange-300",
+              simRisk.color === "red"     && "bg-destructive/10 border-destructive/30 text-destructive"
+            )}>
+              <Shield className="w-4 h-4 shrink-0" />
+              <span className="font-medium"><span className="font-bold">Risk level:</span> {simRisk.label}</span>
+              {simTotalContrib !== 0 && (
+                <span className="ml-auto text-xs font-normal text-muted-foreground hidden sm:block">
+                  {simTotalContrib > 0 ? "Improvement" : "Deterioration"} of {Math.abs(+(simProjCM - CM_PCT).toFixed(1))}pp vs base
+                </span>
+              )}
+            </div>
+
+            {/* Reset */}
+            {(simMetaCac !== 0 || simShipping !== 0 || simDiscount !== 0 || simReturns !== 0 || simPayment !== 0) && (
+              <button
+                onClick={() => { setSimMetaCac(0); setSimShipping(0); setSimDiscount(0); setSimReturns(0); setSimPayment(0); }}
+                className="mt-3 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ↺ Reset to base assumptions
+              </button>
+            )}
+
+          </div>
+        </div>
+      ) : (
+        /* ── FREE: upgrade block ── */
+        <div className="rounded-2xl border border-primary/20 bg-card shadow-sm mb-8 overflow-hidden">
+          <div className="flex items-center gap-3 px-6 py-3 bg-primary/5 border-b border-primary/15">
+            <SlidersHorizontal className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+              Margin Recovery Simulator
+            </span>
+          </div>
+          <div className="px-6 py-8 text-center">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-4">
+              <Lock className="w-4 h-4 text-primary" />
+            </div>
+            <p className="text-base font-semibold text-foreground mb-2">
+              Model your margin recovery in real time
+            </p>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6 leading-relaxed">
+              Adjust 5 cost and pricing levers — Meta CAC, shipping, discount depth, returns, and payment fees — to see projected contribution margin and risk level instantly.
+            </p>
+            <a
+              href="/upgrade"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+            >
+              Unlock Simulator →
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* ── Margin Sensitivity Ranking ── */}
+      <div className="rounded-2xl border border-border/50 shadow-sm bg-card mb-10 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+          <div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-primary shrink-0" />
+              <p className="text-sm font-semibold text-foreground">Margin Sensitivity Ranking</p>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Which levers move the margin needle most — ranked by estimated monthly contribution uplift.
+            </p>
+          </div>
+          {!canAccess("margin_sensitivity_ranking") && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0 ml-4">
+              PRO
+            </span>
+          )}
+        </div>
+        <div className="divide-y divide-border/40">
+          {SENSITIVITY_RANKING.map((item) => {
+            const maxImpact = SENSITIVITY_RANKING[0].impact;
+            const barWidth  = `${(item.impact / maxImpact) * 100}%`;
+            const isTop     = item.rank === 1;
+            return (
+              <div key={item.lever} className="flex items-center gap-4 px-6 py-4 hover:bg-secondary/20 transition-colors">
+                <span className={cn(
+                  "flex items-center justify-center w-6 h-6 rounded-full shrink-0 text-[11px] font-bold",
+                  isTop ? "bg-primary/20 text-primary" : "bg-secondary text-muted-foreground"
+                )}>
+                  {item.rank}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="text-sm font-semibold text-foreground">
+                      {item.lever}
+                      {isTop && (
+                        <span className="ml-2 inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                          Highest impact
+                        </span>
+                      )}
+                    </p>
+                    {canAccess("margin_sensitivity_ranking") ? (
+                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums ml-4 shrink-0">
+                        +£{item.impact.toLocaleString()}
+                      </span>
+                    ) : (
+                      <span className="text-sm font-bold text-foreground/20 tabular-nums ml-4 shrink-0 select-none">
+                        +£ —,———
+                      </span>
+                    )}
+                  </div>
+                  <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className={cn("h-full rounded-full transition-all", isTop ? "bg-primary" : "bg-primary/50")}
+                      style={{ width: barWidth }}
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1">{item.basis}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {!canAccess("margin_sensitivity_ranking") && (
+          <div className="px-6 py-4 border-t border-border/50 bg-secondary/20">
+            <a
+              href="/upgrade"
+              className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+            >
+              Unlock estimated £ impact for each lever →
+            </a>
+          </div>
+        )}
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
           SECTION 2 — OPPORTUNITIES
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
-        title="Opportunities"
-        subtitle="Top profit improvement opportunities ranked by expected contribution uplift next month."
-        support="Based on the current 30-day trading baseline — estimates are stable and independent of the timeframe selected above."
+        title="Top Margin Recovery Opportunities"
+        subtitle="The main actions behind the estimated additional contribution opportunity."
+        support="Opportunities are based on the current 30-day trading baseline and are independent of the timeframe selected above."
       />
 
       {/* ── Structured opportunities panel ── */}
@@ -736,85 +1104,6 @@ export default function MarginAnalysis() {
         </div>
       </div>
 
-      {/* Margin Risk Monitor */}
-      <div className="mb-10">
-        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden shadow-sm">
-          <div className="flex items-center gap-3 px-6 py-4 border-b border-amber-200 dark:border-amber-800/50">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40">
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
-                Margin Risk Monitor
-              </p>
-              <p className="text-sm text-amber-800 dark:text-amber-300 mt-0.5 leading-snug">
-                {RISK_MONITOR.trajectoryNote}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-amber-200 dark:bg-amber-800/40">
-            {RISK_MONITOR.thresholds.map((t) => (
-              <div key={t.pct} className="bg-amber-50 dark:bg-amber-950/20 px-6 py-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className={
-                      t.color === "red"
-                        ? "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive/10 text-destructive"
-                        : "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-200"
-                    }>
-                      {t.label}
-                    </span>
-                    <span className="text-xs text-muted-foreground">if CM falls below</span>
-                    <span className={
-                      t.color === "red"
-                        ? "text-base font-bold text-destructive"
-                        : "text-base font-bold text-amber-700 dark:text-amber-300"
-                    }>
-                      {t.pct}%
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">at current rate</p>
-                    <p className={
-                      t.color === "red"
-                        ? "text-sm font-semibold text-destructive"
-                        : "text-sm font-semibold text-amber-700 dark:text-amber-300"
-                    }>
-                      ~{t.monthsAtCurrentRate} months
-                    </p>
-                  </div>
-                </div>
-                <ul className="space-y-1.5">
-                  {t.implications.map((imp) => (
-                    <li key={imp} className="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
-                      <span className={
-                        t.color === "red"
-                          ? "mt-1.5 w-1.5 h-1.5 rounded-full bg-destructive flex-shrink-0"
-                          : "mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"
-                      } />
-                      {imp}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="px-6 py-3 bg-amber-100/60 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800/50">
-            <p className="text-xs text-amber-700 dark:text-amber-400">
-              Current margin:{" "}
-              <span className="font-semibold">{RISK_MONITOR.currentCm}%</span>
-              {" "}·{" "}
-              <span className="font-semibold">
-                {(RISK_MONITOR.currentCm - RISK_MONITOR.thresholds[0].pct).toFixed(1)}pp
-              </span>
-              {" "}above the warning threshold · Updates automatically with live data.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* ══════════════════════════════════════════════════════════════════════
           SECTION 3 — ACTUAL PERFORMANCE
       ══════════════════════════════════════════════════════════════════════ */}
@@ -925,12 +1214,20 @@ export default function MarginAnalysis() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          SECTION 4 — KEY DRIVERS
+          SECTION 4 — WHAT CHANGED MARGIN
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
-        title="Key Drivers"
-        subtitle={`What changed over ${periodPhrase} and the financial impact per order on contribution margin.`}
+        title="What Changed Margin This Month?"
+        subtitle={`Attributed cost and pricing changes over ${periodPhrase} — ranked by per-order margin impact.`}
       />
+
+      {/* CFO insight strip */}
+      <div className="flex items-start gap-3 mb-4 px-5 py-3.5 rounded-xl bg-primary/5 border border-primary/15">
+        <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+        <p className="text-sm text-foreground leading-relaxed">
+          <span className="font-semibold">Meta CAC is the single largest drag</span> — accounting for £3.40 of the £8.90 total per-order margin decline this month. The fastest path to margin recovery runs through channel mix and discount discipline.
+        </p>
+      </div>
 
       {/* Summary line */}
       <div className="flex items-start justify-between mb-4 px-5 py-3.5 rounded-xl bg-destructive/5 border border-destructive/15 gap-6">
@@ -1068,6 +1365,94 @@ export default function MarginAnalysis() {
       </PremiumBlurPreview>
 
       {/* ══════════════════════════════════════════════════════════════════════
+          MARGIN RISK OUTLOOK
+      ══════════════════════════════════════════════════════════════════════ */}
+      <div className="mb-10">
+        <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden shadow-sm">
+
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-amber-200 dark:border-amber-800/50">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40">
+              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                Margin Risk Outlook
+              </p>
+              <p className="text-sm text-amber-800 dark:text-amber-300 mt-0.5 leading-snug">
+                {RISK_MONITOR.trajectoryNote}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-amber-200 dark:bg-amber-800/40">
+            {RISK_MONITOR.thresholds.map((t) => (
+              <div key={t.pct} className="bg-amber-50 dark:bg-amber-950/20 px-6 py-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className={
+                      t.color === "red"
+                        ? "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-destructive/10 text-destructive"
+                        : "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-200"
+                    }>
+                      {t.label}
+                    </span>
+                    <span className="text-xs text-muted-foreground">if CM falls below</span>
+                    <span className={
+                      t.color === "red"
+                        ? "text-base font-bold text-destructive"
+                        : "text-base font-bold text-amber-700 dark:text-amber-300"
+                    }>
+                      {t.pct}%
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">at current rate</p>
+                    <p className={
+                      t.color === "red"
+                        ? "text-sm font-semibold text-destructive"
+                        : "text-sm font-semibold text-amber-700 dark:text-amber-300"
+                    }>
+                      ~{t.monthsAtCurrentRate} months
+                    </p>
+                  </div>
+                </div>
+                <ul className="space-y-1.5">
+                  {t.implications.map((imp) => (
+                    <li key={imp} className="flex items-start gap-2 text-sm text-amber-900 dark:text-amber-200">
+                      <span className={
+                        t.color === "red"
+                          ? "mt-1.5 w-1.5 h-1.5 rounded-full bg-destructive flex-shrink-0"
+                          : "mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"
+                      } />
+                      {imp}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="px-6 py-4 bg-amber-100/60 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800/50">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+              <p className="text-xs text-amber-700 dark:text-amber-400">
+                Current margin:{" "}
+                <span className="font-semibold">{RISK_MONITOR.currentCm}%</span>
+                {" "}·{" "}
+                <span className="font-semibold">
+                  {(RISK_MONITOR.currentCm - RISK_MONITOR.thresholds[0].pct).toFixed(1)}pp
+                </span>
+                {" "}above the warning threshold · Updates automatically with live data.
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 font-semibold sm:ml-auto whitespace-nowrap shrink-0">
+                Recommended action: Reduce Meta CAC by 10–15%
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
           SECTION 5 — DETAILED ANALYSIS
       ══════════════════════════════════════════════════════════════════════ */}
 
@@ -1093,6 +1478,7 @@ export default function MarginAnalysis() {
         ctaTitle="Unlock contribution margin bridge"
         ctaDescription="See exactly where margin is being lost across discounts, shipping, fulfilment, and marketing."
         isPro={canAccess("margin_bridge")}
+        description="Figures sourced from Shopify orders data. Fulfilment and payment costs are estimated from 3PL invoices and Shopify Payments reports — verify against actual invoices for final accuracy."
         className="mb-8"
         ghostContent={
           <div className="overflow-x-auto">
@@ -1417,7 +1803,7 @@ export default function MarginAnalysis() {
           </ResponsiveContainer>
         </div>
         <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/50 pt-4">
-          Contribution margin has declined 5.9pp year-on-year (48.2% → 42.3%). See Key Drivers above for a full breakdown of contributing factors.
+          Contribution margin has declined 5.9pp year-on-year (48.2% → 42.3%). The steepest decline occurred Jan–Mar 2026 (−2.6pp), coinciding with Meta CAC increases and deeper discount use post-Christmas. See "What Changed Margin This Month?" above for a full attributed breakdown.
         </p>
       </div>
 

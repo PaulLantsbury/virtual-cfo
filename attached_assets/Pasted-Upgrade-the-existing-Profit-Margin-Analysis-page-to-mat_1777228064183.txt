@@ -1,0 +1,330 @@
+Upgrade the existing Profit Margin Analysis page to match the newer structure used in Profit Engine, Cash Control, Pricing Optimisation and Marketing Efficiency.
+
+Do not rebuild the page from scratch. Keep the existing route, styling, timeframe selector, mock data, charts, layout wrapper and responsive behaviour.
+
+Objective:
+Make the page more decision-led, AI CFO-led and action-oriented. Add a margin recovery simulator, improve Pro gating, and make the page clearly answer:
+1. Why did margin fall?
+2. Which drivers matter most?
+3. How much contribution can be recovered?
+4. What should the user do next?
+5. What happens if key margin levers improve?
+
+--------------------------------------------------
+1. Add Margin Recovery Simulator near the top
+--------------------------------------------------
+
+Insert a new section directly after the Profit Margin Summary and before Opportunities.
+
+Title:
+Margin Recovery Simulator
+
+Subtitle:
+Model how changes in CAC, shipping, discounting and returns affect contribution margin and contribution profit.
+
+Add CFO Insight:
+“Margin is currently most sensitive to Meta CAC, shipping costs and discount depth. Use this tool to test which margin levers create the fastest recovery.”
+
+Add sliders:
+
+A. Meta CAC Change
+Range: -25% to +25%
+Default: 0%
+
+B. Shipping Cost Change
+Range: -20% to +20%
+Default: 0%
+
+C. Discount Depth Change
+Range: -5pp to +5pp
+Default: 0pp
+
+D. Returns Rate Change
+Range: -5pp to +5pp
+Default: 0pp
+
+E. Payment Processing Cost Change
+Range: -2pp to +2pp
+Default: 0pp
+
+Use mock base assumptions:
+Revenue = £124,500
+Current contribution margin = 42.3%
+Current contribution profit = £52,913
+Contribution per order = £35.00
+Orders = 1,512
+Current estimated opportunity = £20,400
+
+Projected outputs:
+- Projected Contribution Margin
+- Projected Contribution Profit
+- Contribution Movement vs Base
+- Contribution per Order
+- Margin Risk Level
+
+Dynamic interpretation:
+If contribution improves:
+“This scenario strengthens margin because cost improvements more than offset current pressure.”
+
+If contribution weakens:
+“This scenario weakens margin because cost increases or discounting absorb contribution.”
+
+If margin falls below 40%:
+“This scenario pushes contribution margin below the warning threshold and should trigger immediate action.”
+
+Add compact insight:
+Fastest lever to improve margin:
+“Reducing Meta CAC by 15% would add approximately £9,500 of contribution next month.”
+
+Add second compact insight:
+Safest lever to improve margin:
+“Reducing shipping costs by renegotiating carrier rates improves margin without affecting conversion.”
+
+--------------------------------------------------
+2. Add early Pro upgrade block in Free mode
+--------------------------------------------------
+
+In Free mode only, add a compact upgrade card directly below the summary section and above the simulator.
+
+Title:
+Unlock your margin recovery plan
+
+Text:
+“Upgrade to Pro to move from seeing margin pressure to modelling how to recover contribution.”
+
+Bullets:
+- Model margin recovery scenarios
+- See which cost driver has the biggest £ impact
+- Identify the fastest recovery lever
+- Get priority margin actions
+
+CTA:
+Unlock Pro
+
+In Free mode:
+- show the simulator blurred/locked
+- show slider names but mask projected values
+- keep the top summary and KPI cards visible
+
+In Pro mode:
+- show the simulator fully unlocked
+- no blur overlays
+- no upgrade CTAs
+
+--------------------------------------------------
+3. Improve Opportunities section hierarchy
+--------------------------------------------------
+
+Keep the Opportunities section, but change its title to:
+
+Top margin recovery opportunities
+
+Subtitle:
+The main actions behind the estimated additional contribution opportunity.
+
+Keep the main figure:
+£20,400 estimated additional contribution available next month
+
+Keep the opportunity rows:
+- Reallocate Meta spend
+- Reduce shipping costs
+- Lower discount depth
+
+Add confidence badges:
+- Reallocate Meta spend: Medium confidence, Low effort
+- Reduce shipping costs: High confidence, Medium effort
+- Lower discount depth: High confidence, Low effort
+
+Add a short note:
+“Opportunities are based on current 30-day trading baseline and should be reviewed alongside conversion impact.”
+
+--------------------------------------------------
+4. Add Margin Sensitivity Ranking
+--------------------------------------------------
+
+Add a section after the simulator.
+
+Title:
+Margin Sensitivity Ranking
+
+Subtitle:
+What affects contribution margin most?
+
+For Pro users show:
+1. Meta CAC | £9,500 potential contribution impact
+2. Shipping costs | £6,800 potential contribution impact
+3. Discount depth | £4,100 potential contribution impact
+4. Returns rate | £2,700 potential contribution impact
+5. Payment processing | £900 potential contribution impact
+
+For Free users show masked values:
+1. Meta CAC | £—,—
+2. Shipping costs | £—,—
+3. Discount depth | £—,—
+4. Returns rate | £—,—
+5. Payment processing | £—,—
+
+Free CTA:
+“Upgrade to Pro to see the £ impact of each margin lever.”
+
+--------------------------------------------------
+5. Improve Key Drivers section
+--------------------------------------------------
+
+Rename:
+Key Drivers
+
+To:
+What Changed Margin This Month?
+
+Subtitle:
+Contribution margin fell by 3.5pp this month. Here are the main reasons.
+
+Add CFO Insight:
+“Margin decline was driven primarily by higher Meta CAC, rising shipping costs and deeper discounting.”
+
+Keep the existing driver rows:
+- Meta CAC
+- Shipping costs
+- Discount depth
+- Returns rate
+- Payment processing rate
+
+Add a matching horizontal bar chart on the right if not already present, consistent with Profit Engine / Cash Control / Pricing Optimisation.
+
+--------------------------------------------------
+6. Add “What Would Improve Margin Fastest?” compact card
+--------------------------------------------------
+
+Add this near the top, after the KPI cards or immediately before the simulator.
+
+Title:
+What would improve margin fastest?
+
+Text:
+“The fastest route to margin recovery is to reduce paid acquisition inefficiency, renegotiate shipping costs and reduce blanket discounting.”
+
+Bullets:
+- Reduce Meta CAC by 15%
+- Reduce shipping cost per order by £1.50
+- Reduce average discount depth by 2pp
+
+Summary:
+“Together, these changes could recover approximately £20.4k of contribution next month.”
+
+Visible in both Free and Pro.
+
+--------------------------------------------------
+7. Improve Margin Risk Monitor
+--------------------------------------------------
+
+Keep the Margin Risk Monitor but make it more concise.
+
+Title:
+Margin Risk Outlook
+
+Main text:
+“At the current decline rate of ~1.1pp per month, contribution margin could fall below 40% within 2 months without corrective action.”
+
+Keep warning threshold:
+40%
+
+Keep critical threshold:
+35%
+
+Add simple recommended action:
+“Prioritise Meta CAC reduction, shipping cost control and discount discipline before increasing paid growth spend.”
+
+--------------------------------------------------
+8. Move passive trend charts lower
+--------------------------------------------------
+
+Move these sections lower on the page:
+- Margin Trend
+- Unit Economics — 13-Month View
+
+They should appear after:
+- Summary
+- Simulator
+- Opportunities
+- What Changed Margin
+- Margin Risk Outlook
+
+These trend charts should feel like supporting evidence, not primary decision content.
+
+Add one annotation to Margin Trend around Jan/Feb:
+“Margin pressure accelerated”
+
+Supporting note:
+“Decline accelerated as CAC, shipping costs and discount depth increased.”
+
+--------------------------------------------------
+9. Add data quality note
+--------------------------------------------------
+
+Inside the Contribution Margin Bridge section, add a small neutral info card below the table or CFO insight.
+
+Title:
+Data quality note
+
+Text:
+“Margin analysis depends on product costs, shipping costs, discounts and marketing spend being mapped correctly. If COGS or discounts are incomplete, contribution margin may be understated or overstated.”
+
+Supporting sentence:
+“Structured cost mapping improves the accuracy of margin recovery recommendations.”
+
+Use subtle neutral styling, not warning styling.
+
+Show in both Free and Pro.
+
+--------------------------------------------------
+10. Improve terminology
+--------------------------------------------------
+
+Use plain-English founder-friendly language:
+- margin pressure
+- contribution recovered
+- cost per order
+- discount depth
+- shipping cost per order
+- contribution profit
+- recovery lever
+
+Avoid overly technical labels in main headings.
+
+--------------------------------------------------
+11. Free vs Pro behaviour
+--------------------------------------------------
+
+Free should show:
+- Profit Margin Summary
+- Margin Risk Outlook headline
+- KPI cards
+- What would improve margin fastest
+- basic Contribution Margin Bridge
+- headline Opportunities
+- locked simulator
+- locked sensitivity ranking
+- locked detailed driver impact values
+- locked detailed trend analysis if currently gated
+
+Pro should show:
+- everything fully unlocked
+- simulator
+- sensitivity ranking with £ values
+- full driver analysis
+- full opportunity breakdown
+- trend charts
+- data quality note
+- no blur overlays
+- no upgrade CTAs
+
+--------------------------------------------------
+12. Final output
+--------------------------------------------------
+
+Update the existing Profit Margin Analysis page only.
+
+Do not add live integrations.
+Keep calculations client-side.
+Keep visual style consistent with the newer pages.

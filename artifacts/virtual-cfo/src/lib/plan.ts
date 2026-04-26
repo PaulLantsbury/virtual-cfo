@@ -54,7 +54,12 @@ export type FeatureName =
   | "profit_staff_cost_trend"         // Profit Engine — Staff cost efficiency 6-period trend chart
   | "profit_driver_table"             // Profit Engine — What Changed driver table + bar chart
   | "profit_simulator"                // Profit Engine — Profit Sensitivity Simulator
-  | "profit_recommendations";         // Profit Engine — CFO Recommendations section
+  | "profit_recommendations"          // Profit Engine — CFO Recommendations section
+  | "cash_driver_table"               // Cash Control — What Changed driver table + bar chart
+  | "cash_bridge_table"               // Cash Control — Detailed cash bridge table
+  | "cash_cost_pressure"              // Cash Control — Cash Cost Pressure analysis section
+  | "cash_simulator"                  // Cash Control — Cash Sensitivity Simulator + Ranking
+  | "cash_recommendations";           // Cash Control — This Month's Cash Priorities section
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 

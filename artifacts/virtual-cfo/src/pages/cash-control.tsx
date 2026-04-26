@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
   AlertTriangle, CheckCircle, Info, Zap, Activity, Shield, Lock,
-  Wallet, RefreshCw, Clock, Package,
+  Wallet, RefreshCw, Clock, Package, ListOrdered,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -16,15 +16,22 @@ import { canAccess } from "@/lib/plan";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 
 // ─── Base data constants ──────────────────────────────────────────────────────
-const CASH_BALANCE       = 186_000;
+const CASH_BALANCE        = 186_000;
 const MONTHLY_FIXED_COSTS = 120_000;
 const WORKING_CAPITAL_DRAG = 74_000;
 const NET_CASH_MOVEMENT   = 14_000;
 const INVENTORY_DAYS      = 82;
 const SUPPLIER_DAYS       = 42;
 const CASH_CONVERSION_CYCLE = 47;
-// Runway denominator: net monthly obligation after operating inflows
-const RUNWAY_DENOM        = Math.round(CASH_BALANCE / 3.4); // ≈ 54,706
+const RUNWAY_DENOM        = Math.round(CASH_BALANCE / 3.4);
+
+// ─── Cash Sensitivity Ranking data ───────────────────────────────────────────
+const RANKING_DATA = [
+  { label: "Inventory days",           impact: 46_000 },
+  { label: "Supplier payment timing",  impact: 31_000 },
+  { label: "Fixed costs",              impact: 24_000 },
+  { label: "Marketing spend",          impact: 18_000 },
+];
 
 // ─── Bridge waterfall data ────────────────────────────────────────────────────
 const BRIDGE_DATA = [
@@ -45,13 +52,13 @@ const BRIDGE_COLOR: Record<string, string> = {
 
 // ─── Bridge table rows ────────────────────────────────────────────────────────
 const BRIDGE_TABLE = [
-  { step: "Opening cash",      amount:  172_000, meaning: "Cash at start of period",                         isTotal: false, isResult: false, positive: true  },
+  { step: "Opening cash",      amount:  172_000, meaning: "Cash at start of period",                          isTotal: false, isResult: false, positive: true  },
   { step: "Trading profit",    amount:  78_000,  meaning: "Profit generated before working capital movements", isTotal: false, isResult: false, positive: true  },
-  { step: "Stock build",       amount: -46_000,  meaning: "Extra stock purchased or not yet sold",            isTotal: false, isResult: false, positive: false },
-  { step: "Receivables",       amount:  18_000,  meaning: "More cash collected from customers",               isTotal: false, isResult: false, positive: true  },
-  { step: "Supplier payments", amount: -31_000,  meaning: "Faster payments reduced available cash",           isTotal: false, isResult: false, positive: false },
-  { step: "Tax / other",       amount:  -5_000,  meaning: "Other operating outflows",                         isTotal: false, isResult: false, positive: false },
-  { step: "Closing cash",      amount:  186_000, meaning: "Cash available at period end",                     isTotal: true,  isResult: true,  positive: true  },
+  { step: "Stock build",       amount: -46_000,  meaning: "Extra stock purchased or not yet sold",             isTotal: false, isResult: false, positive: false },
+  { step: "Receivables",       amount:  18_000,  meaning: "More cash collected from customers",                isTotal: false, isResult: false, positive: true  },
+  { step: "Supplier payments", amount: -31_000,  meaning: "Faster payments reduced available cash",            isTotal: false, isResult: false, positive: false },
+  { step: "Tax / other",       amount:  -5_000,  meaning: "Other operating outflows",                          isTotal: false, isResult: false, positive: false },
+  { step: "Closing cash",      amount:  186_000, meaning: "Cash available at period end",                      isTotal: true,  isResult: true,  positive: true  },
 ];
 
 // ─── Driver data ──────────────────────────────────────────────────────────────
@@ -101,15 +108,14 @@ interface KpiCardProps {
   neutral?: boolean;
   deltaLabel?: string;
   insight: string;
-  subValue?: string;
+  helperText?: string;
 }
-function KpiCard({ label, value, delta, positive, neutral, deltaLabel = "vs prior period", insight, subValue }: KpiCardProps) {
+function KpiCard({ label, value, delta, positive, neutral, deltaLabel = "vs prior period", insight, helperText }: KpiCardProps) {
   const DeltaIcon = neutral ? Zap : positive ? ArrowUpRight : ArrowDownRight;
   return (
     <div className="bg-card rounded-2xl border border-border/50 shadow-sm px-5 py-4 flex flex-col gap-1.5">
       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
       <p className="text-2xl font-display font-bold text-foreground leading-none">{value}</p>
-      {subValue && <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 -mt-0.5">{subValue}</p>}
       <div className="flex items-center gap-1.5">
         <span className={cn(
           "inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-full",
@@ -125,6 +131,9 @@ function KpiCard({ label, value, delta, positive, neutral, deltaLabel = "vs prio
         <span className="text-[11px] text-muted-foreground">{deltaLabel}</span>
       </div>
       <p className="text-[11px] text-muted-foreground/80 leading-snug mt-0.5">{insight}</p>
+      {helperText && (
+        <p className="text-[10px] text-muted-foreground/60 leading-snug italic mt-0.5 border-t border-border/40 pt-1.5">{helperText}</p>
+      )}
     </div>
   );
 }
@@ -199,6 +208,8 @@ export default function CashControl() {
   const [fixedCostChange, setFixedCostChange] = useState(0);
   const [marketingChange, setMarketingChange] = useState(0);
 
+  const isPro = canAccess("cash_simulator");
+
   // Simulator calculations
   const revenueEffect   = (revChange / 100) * 520_000 * 0.38 * 0.4;
   const inventoryEffect = -inventoryChange * 900;
@@ -212,15 +223,21 @@ export default function CashControl() {
   const projRunwayDenom  = Math.max(10_000, RUNWAY_DENOM + (projFixedCosts - MONTHLY_FIXED_COSTS));
   const projRunway       = projCashBalance / projRunwayDenom;
   const projWCDrag       = Math.max(0, WORKING_CAPITAL_DRAG - inventoryEffect + Math.max(0, -supplierEffect));
-  const projCashMovement = NET_CASH_MOVEMENT + projCashDelta;
   const runwayDelta      = projRunway - 3.4;
 
-  const simInterpretation =
+  const simPrimaryText =
     projRunway < 2
       ? "This scenario creates a cash risk within 60 days. Slow spend, reduce stock build or renegotiate supplier terms."
       : runwayDelta >= 0
         ? "This scenario improves cash headroom because cash is released back into the business."
         : "This scenario reduces cash runway because working capital and fixed costs absorb cash faster than trading generates it.";
+
+  const simSecondaryText =
+    projRunway > 3
+      ? "At this level, the business retains reasonable cash headroom."
+      : projRunway >= 2
+        ? "At this level, cash runway is becoming tight and should be monitored weekly."
+        : "At this level, cash runway would fall below 2 months and require immediate action.";
 
   const simColor =
     projRunway < 2
@@ -246,15 +263,27 @@ export default function CashControl() {
 
       {/* ── A. Cash Control Summary ── */}
       <div className="mb-8 space-y-4">
-        <CfoInsightCard text="Your business is profitable, but cash is tightening because inventory and supplier payments are absorbing more cash than expected. The priority is to reduce working capital drag before increasing growth spend." />
+        {/* Updated CFO Insight */}
+        <CfoInsightCard text="Your business is profitable, but cash is tightening because inventory and supplier payments are absorbing more cash than expected. Reduce working capital drag before increasing growth spend — each additional £100k of inventory currently delays cash recovery by around 3 weeks." />
 
-        {/* Cash Safety Buffer — free */}
+        {/* Cash Safety Buffer */}
         <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-sky-200 dark:border-sky-800/40 bg-sky-50/70 dark:bg-sky-950/15">
           <Shield className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
           <div>
             <p className="text-xs font-semibold text-sky-800 dark:text-sky-300 mb-0.5">Cash Safety Buffer</p>
             <p className="text-sm text-sky-700/90 dark:text-sky-400/85 leading-relaxed">
               Current cash covers 3.4 months of fixed costs.
+            </p>
+          </div>
+        </div>
+
+        {/* Cash Headroom */}
+        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/15">
+          <Wallet className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-0.5">Cash Headroom</p>
+            <p className="text-sm text-amber-700/90 dark:text-amber-400/85 leading-relaxed">
+              Cash could fall by £64k before runway drops below 2 months.
             </p>
           </div>
         </div>
@@ -283,12 +312,12 @@ export default function CashControl() {
         <TrendingUp className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
         <div className="flex items-center gap-3 flex-wrap">
           <span className="text-xs font-bold text-amber-800 dark:text-amber-300">Cash Trend: Stable but tightening</span>
-          <span className="text-xs text-amber-700/70 dark:text-amber-400/70">Cash increased by £14k this month, but inventory and supplier timing absorbed £77k of cash.</span>
+          <span className="text-xs text-amber-700/70 dark:text-amber-400/70">Stock build absorbed 59% of this month's trading cash.</span>
         </div>
       </div>
 
-      {/* ── B. KPI Strip ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+      {/* ── B. KPI Strip (8 cards, 4-column on desktop) ── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <KpiCard
           label="Cash Balance"
           value="£186,000"
@@ -315,7 +344,7 @@ export default function CashControl() {
           value="£74,000"
           delta="+£21,000"
           positive={false}
-          insight="Cash tied up in stock, receivables and supplier timing"
+          insight="Cash currently tied up before it returns to the bank account."
         />
         <KpiCard
           label="Inventory Days"
@@ -331,6 +360,45 @@ export default function CashControl() {
           positive={false}
           insight="Average days before suppliers are paid"
         />
+        <KpiCard
+          label="Cash Break-Even Revenue"
+          value="£405,000"
+          delta="+£22,000"
+          positive={false}
+          insight="Revenue required to remain cash neutral at current working capital levels."
+          helperText="Cash break-even is the revenue needed to stop cash falling after working capital and fixed cash costs."
+        />
+        <KpiCard
+          label="Profit → Cash Conversion"
+          value="18%"
+          delta="-12pp"
+          positive={false}
+          insight="Only 18% of profit converted into cash this month."
+        />
+      </div>
+
+      {/* ── B1. What Would Improve Cash Fastest? ── */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
+        <div className="px-6 py-5 border-b border-border/50">
+          <h3 className="font-semibold text-lg text-foreground">What Would Improve Cash Fastest?</h3>
+        </div>
+        <div className="px-6 py-5 space-y-4">
+          <p className="text-sm text-foreground leading-relaxed">
+            The fastest route to stronger cash headroom is to reduce stock days, slow non-essential spend and protect supplier terms.
+          </p>
+          <ul className="space-y-2">
+            {[
+              "Reduce inventory days by 12",
+              "Delay non-essential supplier payments by 6 days",
+              "Pause £10k of discretionary marketing spend",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2.5">
+                <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <span className="text-sm text-foreground">{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {/* ── C. What Changed Cash This Month? ── */}
@@ -523,7 +591,7 @@ export default function CashControl() {
         </p>
       </div>
 
-      {/* ── E. How Efficiently Cash Moves ── */}
+      {/* ── E. How Efficiently Cash Moves (4 cards, 2×2 on desktop) ── */}
       <div className="mb-8">
         <div className="mb-4">
           <h3 className="font-semibold text-lg text-foreground">How Efficiently Cash Moves Through the Business</h3>
@@ -532,7 +600,7 @@ export default function CashControl() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           {/* Inventory Days */}
           <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-5">
             <div className="flex items-center gap-2 mb-3">
@@ -571,7 +639,21 @@ export default function CashControl() {
             </div>
             <p className="text-3xl font-display font-bold text-foreground mb-1">£74,000</p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              £74k of cash is currently tied up in stock, receivables and supplier timing.
+              £74k of cash is currently tied up before it returns to the bank account.
+            </p>
+          </div>
+
+          {/* Profit to Cash Conversion */}
+          <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">Profit to Cash Conversion</p>
+            </div>
+            <p className="text-3xl font-display font-bold text-foreground mb-1">18%</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Only 18% of profit converted into cash this month, with the remainder absorbed by working capital movements.
             </p>
           </div>
         </div>
@@ -628,34 +710,62 @@ export default function CashControl() {
         </div>
       </PremiumBlurPreview>
 
-      {/* ── G0. Cash Sensitivity Ranking teaser — free ── */}
+      {/* ── G0. Cash Sensitivity Ranking ── conditional Pro/Free ── */}
       <div className="mb-6 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-foreground">Cash Sensitivity Ranking</p>
-            <p className="text-xs text-muted-foreground mt-0.5">What affects your cash most?</p>
+          <div className="flex items-center gap-2.5">
+            <ListOrdered className="w-4 h-4 text-primary shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Cash Sensitivity Ranking</p>
+              <p className="text-xs text-muted-foreground mt-0.5">What affects your cash most?</p>
+            </div>
           </div>
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">
-            PRO
-          </span>
+          {!isPro && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">
+              PRO
+            </span>
+          )}
         </div>
         <div className="px-5 py-4">
-          <ol className="space-y-2 mb-4">
-            {["Inventory days", "Supplier payment timing", "Fixed costs", "Marketing spend"].map((item, i) => (
-              <li key={item} className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-[11px] font-bold text-muted-foreground shrink-0">
-                  {i + 1}
-                </span>
-                <span className="text-sm text-foreground">{item}</span>
-                <span className="ml-auto text-xs text-muted-foreground/50 tabular-nums">£ ——,———</span>
-              </li>
-            ))}
-          </ol>
-          <a href="/upgrade" className="flex items-center gap-3 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-4 py-3 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
-            <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-            <span className="text-xs text-indigo-800 dark:text-indigo-200 flex-1">Upgrade to Pro to see the £ impact of each cash lever.</span>
-            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade to Pro</span>
-          </a>
+          {isPro ? (
+            <ol className="space-y-2">
+              {RANKING_DATA.map((item, i) => (
+                <li key={item.label} className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary shrink-0">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm text-foreground flex-1">{item.label}</span>
+                  <span className={cn(
+                    "text-xs font-bold tabular-nums px-2 py-0.5 rounded-lg",
+                    i === 0 ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20" :
+                    i === 1 ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20" :
+                              "text-muted-foreground bg-secondary",
+                  )}>
+                    £{item.impact.toLocaleString()} potential cash impact
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <>
+              <ol className="space-y-2 mb-4">
+                {RANKING_DATA.map((item, i) => (
+                  <li key={item.label} className="flex items-center gap-3">
+                    <span className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-[11px] font-bold text-muted-foreground shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm text-foreground">{item.label}</span>
+                    <span className="ml-auto text-xs text-muted-foreground/50 tabular-nums">£—,———</span>
+                  </li>
+                ))}
+              </ol>
+              <a href="/upgrade" className="flex items-center gap-3 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-4 py-3 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors">
+                <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <span className="text-xs text-indigo-800 dark:text-indigo-200 flex-1">Upgrade to Pro to see the £ impact of each cash lever.</span>
+                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade to Pro</span>
+              </a>
+            </>
+          )}
         </div>
       </div>
 
@@ -722,11 +832,11 @@ export default function CashControl() {
             <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>
             <div className="space-y-2">
               {[
-                { label: "Projected Cash Balance",        value: fmt(projCashBalance),                                                          highlight: true  },
-                { label: "Projected Runway",              value: `${projRunway.toFixed(1)} months`,                                             highlight: true  },
-                { label: "Projected Working Capital Drag",value: fmt(projWCDrag),                                                               highlight: false },
-                { label: "Cash Movement vs Base",         value: (projCashDelta >= 0 ? "+" : "") + fmt(Math.abs(projCashDelta)),                highlight: true  },
-                { label: "Cash Risk Level",               value: projRunway < 2 ? "High" : projRunway < 3 ? "Moderate" : "Low",                highlight: false },
+                { label: "Projected Cash Balance",         value: fmt(projCashBalance),                                                          highlight: true  },
+                { label: "Projected Runway",               value: `${projRunway.toFixed(1)} months`,                                             highlight: true  },
+                { label: "Projected Working Capital Drag", value: fmt(projWCDrag),                                                               highlight: false },
+                { label: "Cash Movement vs Base",          value: (projCashDelta >= 0 ? "+" : "") + fmt(Math.abs(projCashDelta)),                highlight: true  },
+                { label: "Cash Risk Level",                value: projRunway < 2 ? "High" : projRunway < 3 ? "Moderate" : "Low",                highlight: false },
               ].map(({ label, value, highlight }) => (
                 <div key={label} className={cn(
                   "flex items-center justify-between px-4 py-2.5 rounded-xl",
@@ -749,9 +859,13 @@ export default function CashControl() {
               ))}
             </div>
 
+            {/* Primary + predictive secondary sentence */}
             <div className={cn("rounded-xl border px-4 py-3 mt-2 flex items-start gap-2.5", simColor)}>
               <SimIcon className="w-4 h-4 shrink-0 mt-0.5" />
-              <p className="text-xs leading-relaxed font-medium">{simInterpretation}</p>
+              <p className="text-xs leading-relaxed font-medium">
+                {simPrimaryText}{" "}
+                <span className="font-normal opacity-85">{simSecondaryText}</span>
+              </p>
             </div>
 
             {(revChange !== 0 || inventoryChange !== 0 || supplierChange !== 0 || fixedCostChange !== 0 || marketingChange !== 0) && (
@@ -766,21 +880,23 @@ export default function CashControl() {
         </div>
       </PremiumBlurPreview>
 
-      {/* ── H0. CFO Recommendations teaser — free ── */}
-      <div className="mb-4 flex items-center gap-2.5 px-5 py-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15">
-        <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-        <p className="text-sm text-indigo-800 dark:text-indigo-300">
-          <span className="font-semibold">One priority cash action has been identified for this month.</span>{" "}
-          Upgrade to Pro to see the full CFO Recommendations.
-        </p>
-      </div>
+      {/* ── H0. Teaser — only shown to Free users ── */}
+      {!canAccess("cash_recommendations") && (
+        <div className="mb-4 flex items-center gap-2.5 px-5 py-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15">
+          <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+          <p className="text-sm text-indigo-800 dark:text-indigo-300">
+            <span className="font-semibold">One priority cash action has been identified for this month.</span>{" "}
+            Upgrade to Pro to see the full recommendations.
+          </p>
+        </div>
+      )}
 
-      {/* ── H. CFO Recommendations — Pro gated ── */}
+      {/* ── H. This Month's Cash Priorities — Pro gated ── */}
       <PremiumBlurPreview
-        title="CFO Recommendations"
+        title="This Month's Cash Priorities"
         subtitle="Three priority actions your CFO would give you based on this month's cash data."
         isPro={canAccess("cash_recommendations")}
-        ctaTitle="Upgrade to Pro to unlock CFO Recommendations"
+        ctaTitle="Upgrade to Pro to unlock This Month's Cash Priorities"
         ctaDescription="Get three high-priority cash actions — what improved, what to watch, and what to do next."
         ctaText="Upgrade →"
         className="mb-8"

@@ -1340,3 +1340,117 @@ main p[class*="text-[11px]"][class*="uppercase"][class*="tracking-widest"] {
   color:          #A5B4FC   !important;
   letter-spacing: 0.04em    !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* GLOBAL SLIDER STYLING                                                      */
+/*                                                                            */
+/* Covers all Radix UI SliderPrimitive instances across the entire app:      */
+/*   Profit Sensitivity, Margin Recovery, Marketing Reallocation,            */
+/*   Scenario Lab, Pricing Optimisation, Cash Control, Growth Quality.       */
+/*                                                                            */
+/* Three key discriminators prevent false positives:                         */
+/*   Track   → bg-primary/20 + h-1.5  (progress.tsx uses h-2, excluded) ✓  */
+/*   Thumb   → border-primary/50 as a STATIC class (hover: variants are     */
+/*             different tokens → AiCfoInlineButtons, landing excluded) ✓   */
+/*   Values  → tabular-nums + rounded-md + px-2  (simulator rows only) ✓   */
+/*                                                                            */
+/* No slider logic, calculations, or JSX structure is modified.              */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Inactive track background ────────────────────────────────────────── */
+/* h-1.5 discriminates from progress.tsx (h-2). overflow-hidden stays —     */
+/* it clips the Range bar only; the Thumb is a sibling of the Track, not    */
+/* inside it, so it is never clipped. ✓                                     */
+
+main [class~="bg-primary/20"][class~="h-1.5"] {
+  background-color: #263B63 !important;
+  height:           6px     !important;
+  border-radius:    999px   !important;
+}
+
+/* ── 2. Active track (Range fill) ────────────────────────────────────────── */
+/* Supersedes the existing line-719 rule, which remains harmless since this  */
+/* one is placed later and matches the same specificity tier.               */
+
+main [class~="bg-primary/20"][class~="h-1.5"] > [class~="bg-primary"] {
+  background-color: #3B82F6 !important;
+}
+
+/* ── 3. Thumb — default state ────────────────────────────────────────────── */
+/* border-primary/50 is static only on SliderPrimitive.Thumb. In             */
+/* AiCfoInlineButtons and landing, it appears as hover:border-primary/50,   */
+/* a different class token not matched by [class~="border-primary/50"]. ✓   */
+/* shadow class default box-shadow is cleared here and re-added per state.  */
+
+main [class~="border-primary/50"][class*="rounded-full"] {
+  width:            18px                !important;
+  height:           18px                !important;
+  background-color: #F8FAFC             !important;
+  border:           2px solid #3B82F6   !important;
+  border-radius:    50%                 !important;
+  box-shadow:       none                !important;
+  cursor:           pointer             !important;
+  transition:       background-color 0.15s ease,
+                    border-color    0.15s ease,
+                    box-shadow      0.15s ease  !important;
+}
+
+/* ── 4. Thumb hover ──────────────────────────────────────────────────────── */
+
+main [class~="border-primary/50"][class*="rounded-full"]:hover {
+  background-color: #FFFFFF  !important;
+  border-color:     #60A5FA  !important;
+  cursor:           pointer  !important;
+}
+
+/* ── 5. Thumb focus (keyboard accessibility glow) ────────────────────────── */
+
+main [class~="border-primary/50"][class*="rounded-full"]:focus-visible,
+main [class~="border-primary/50"][class*="rounded-full"]:focus {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.35) !important;
+  outline:    none                               !important;
+}
+
+/* ── 6. Thumb active / drag state ────────────────────────────────────────── */
+
+main [class~="border-primary/50"][class*="rounded-full"]:active {
+  background-color: #FFFFFF                        !important;
+  border-color:     #2563EB                        !important;
+  box-shadow:       0 0 0 6px rgba(37, 99, 235, 0.25) !important;
+}
+
+/* ── 7. Slider row labels (<label> elements) ─────────────────────────────── */
+/* label.text-sm.font-medium is used for slider row labels across all        */
+/* simulator pages (profit-engine, cash-control, pricing-optimisation).      */
+/* Also covers form labels in login/signup — #CBD5E1 is still clearly       */
+/* readable (intentionally slightly dimmer than the value at #F8FAFC). ✓    */
+
+main label[class~="text-sm"][class*="font-medium"] {
+  color:     #CBD5E1 !important;
+  font-size: 14px    !important;
+}
+
+/* ── 8. Slider value badge (most simulator pages) ────────────────────────── */
+/* span.text-sm.font-bold.tabular-nums.px-2.py-0.5.rounded-md: the          */
+/* tabular-nums + rounded-md + px-2 triple is unique to SliderRow values.   */
+/* Does NOT override positive (emerald) or negative (red) colour coding —   */
+/* only size and weight are set. Neutral zero-state colour raised to        */
+/* #F8FAFC via the bg-secondary discriminator rule below. ✓                 */
+
+main span[class~="tabular-nums"][class*="rounded-md"][class*="px-2"] {
+  font-size:   1rem !important;   /* 16px */
+  font-weight: 600  !important;
+}
+
+main span[class~="tabular-nums"][class*="rounded-md"][class*="px-2"][class~="bg-secondary"] {
+  color: #F8FAFC !important;
+}
+
+/* ── 9. Slider value badge (Scenario Lab) ────────────────────────────────── */
+/* Scenario Lab uses span.text-sm.font-semibold.tabular-nums.min-w-[64px]:  */
+/* no padding or rounded-md classes. Discriminated by [64px] minimum width. */
+
+main span[class~="tabular-nums"][class*="min-w-[64px]"] {
+  font-size:   1rem !important;   /* 16px */
+  font-weight: 600  !important;
+}

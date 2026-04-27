@@ -281,11 +281,11 @@ export default function CashControl() {
       <div className="mb-8 space-y-4">
         <CfoInsightCard text="Your business is profitable, but cash is tightening because inventory and supplier payments are absorbing more cash than expected. Reduce working capital drag before increasing growth spend — each additional £100k of inventory currently delays cash recovery by around 3 weeks." />
 
-        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-sky-200 dark:border-sky-800/40 bg-sky-50/70 dark:bg-sky-950/15">
-          <Shield className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-[#3B82F6]/30 bg-[#13233F]">
+          <Shield className="w-4 h-4 text-[#7DD3FC] shrink-0 mt-0.5" />
           <div>
-            <p className="text-xs font-semibold text-sky-800 dark:text-sky-300 mb-0.5">Cash Safety Buffer</p>
-            <p className="text-sm text-sky-700/90 dark:text-sky-400/85 leading-relaxed">
+            <p className="text-xs font-semibold text-[#7DD3FC] mb-0.5">Cash Safety Buffer</p>
+            <p className="text-sm text-[#A9B8D3] leading-relaxed">
               Current cash covers 3.4 months of fixed costs.
             </p>
           </div>

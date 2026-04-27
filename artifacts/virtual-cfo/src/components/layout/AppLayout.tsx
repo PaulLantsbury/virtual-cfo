@@ -20,7 +20,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <div
       className="flex h-screen"
       style={{
-        background: "linear-gradient(180deg, #0B1F3A 0%, #0E2748 50%, #071629 100%)",
+        background: "#07182E",
       }}
     >
       {/* Subtle vignette depth layer */}

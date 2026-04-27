@@ -1,0 +1,68 @@
+Global visual correction: convert the app to a consistent dark navy card system.
+
+The current app has inconsistent box colours, unreadable purple text, dark grey cards with poor contrast, and some missing card backgrounds. Replace the mixed light/dark card system with one consistent dark executive dashboard palette inspired by modern finance dashboards.
+
+Use this palette globally:
+
+Page canvas:
+#07182E
+
+Main card background:
+#13233F
+
+Elevated/featured card background:
+#182A4A
+
+Card border:
+#263B63
+
+Primary text:
+#F8FAFC
+
+Secondary text:
+#A9B8D3
+
+Muted text:
+#7F8FAE
+
+Primary blue:
+#2563EB
+
+Bright blue:
+#3B82F6
+
+AI / CFO accent:
+#6366F1
+
+Positive:
+#22C55E
+
+Warning:
+#F59E0B
+
+Risk:
+#EF4444
+
+Neutral badge:
+#334155
+
+Rules:
+1. All major cards, KPI boxes, insight boxes, simulator boxes, tables and panels must use #13233F or #182A4A as the background.
+2. Do not use pure white cards anywhere on the main pages.
+3. Do not use pale pastel fills on dark backgrounds.
+4. All main text inside cards must be #F8FAFC.
+5. All helper/subtitle text must be #A9B8D3.
+6. All muted labels must be #7F8FAE.
+7. Remove any purple text that sits on dark backgrounds unless it is changed to #A5B4FC or #F8FAFC.
+8. All cards must have a visible border: 1px solid #263B63.
+9. Keep semantic colours only for icons, badges, left borders and key numbers.
+10. Positive numbers use #22C55E.
+11. Warning numbers use #F59E0B.
+12. Risk/negative numbers use #EF4444.
+13. CFO Insight panels should use card background #182A4A, border #263B63, left border #6366F1, title text #A5B4FC and body text #F8FAFC.
+14. Recoverable contribution / opportunity panels should use #13233F background, border #22C55E or #2563EB, key number #22C55E.
+15. Tables should use #13233F background, header rows #182A4A, borders #263B63, body text #F8FAFC, helper text #A9B8D3.
+16. Input boxes should use #0F1E36 background, border #263B63, text #F8FAFC, placeholder #7F8FAE.
+17. Make sure every page has visible card backgrounds, especially Profit Margin Analysis.
+18. Do not change page structure, routes, calculations, gating logic or content.
+19. Only correct visual styling and text contrast.

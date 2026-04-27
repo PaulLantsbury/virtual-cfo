@@ -62,61 +62,65 @@
   --radius-2xl: calc(var(--radius) + 8px);
 }
 
+/* ═══ Dark Executive Dashboard Palette ══════════════════════════════════════ */
+/* Page canvas: #07182E  Card: #13233F  Elevated: #182A4A  Border: #263B63   */
+/* Text: #F8FAFC (primary) · #A9B8D3 (secondary) · #7F8FAE (muted)          */
+
 :root {
-  --background: 210 20% 98%;
-  --foreground: 222 47% 11%;
-  
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
+  --background: 214 74% 10%;      /* #07182E */
+  --foreground: 210 40% 98%;      /* #F8FAFC */
+
+  --border: 219 44% 27%;          /* #263B63 */
+  --input: 217 56% 14%;           /* #0F1E36 */
   --ring: 228 89% 58%;
 
-  --card: 210 40% 96%;
-  --card-foreground: 222 47% 11%;
-  --card-border: 214 32% 91%;
+  --card: 218 54% 16%;            /* #13233F */
+  --card-foreground: 210 40% 98%; /* #F8FAFC */
+  --card-border: 219 44% 27%;     /* #263B63 */
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --popover-border: 214 32% 91%;
+  --popover: 218 54% 16%;         /* #13233F */
+  --popover-foreground: 210 40% 98%;
+  --popover-border: 219 44% 27%;
 
   /* Navy/Indigo primary */
-  --primary: 228 89% 58%;
+  --primary: 228 89% 58%;         /* #2563EB-ish */
   --primary-foreground: 210 40% 98%;
   --primary-border: 228 89% 58%;
 
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
-  --secondary-border: 214 32% 91%;
+  --secondary: 218 47% 19%;       /* #182A4A */
+  --secondary-foreground: 218 32% 75%; /* #A9B8D3 */
+  --secondary-border: 219 44% 27%;
 
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --muted-border: 214 32% 91%;
+  --muted: 218 47% 19%;           /* #182A4A */
+  --muted-foreground: 218 32% 75%; /* #A9B8D3 */
+  --muted-border: 219 44% 27%;
 
-  --accent: 230 100% 67%;
+  --accent: 228 89% 58%;
   --accent-foreground: 210 40% 98%;
-  --accent-border: 230 100% 67%;
+  --accent-border: 228 89% 58%;
 
-  --destructive: 0 84% 60%;
+  --destructive: 0 84% 60%;       /* #EF4444 */
   --destructive-foreground: 210 40% 98%;
   --destructive-border: 0 84% 60%;
 
-  --success: 142 71% 45%;
+  --success: 142 71% 45%;         /* #22C55E */
   --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%;
+  --warning: 38 92% 50%;          /* #F59E0B */
   --warning-foreground: 0 0% 100%;
 
   /* Dark Sidebar */
   --sidebar: 224 71% 4%;
   --sidebar-foreground: 213 31% 91%;
-  --sidebar-border: 222 47% 11%;
+  --sidebar-border: 219 44% 27%;
   --sidebar-primary: 228 89% 58%;
   --sidebar-primary-foreground: 210 40% 98%;
   --sidebar-primary-border: 228 89% 58%;
-  --sidebar-accent: 222 47% 11%;
+  --sidebar-accent: 218 54% 16%;
   --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-accent-border: 222 47% 11%;
+  --sidebar-accent-border: 219 44% 27%;
   --sidebar-ring: 228 89% 58%;
 
-  --radius: 0.75rem; 
+  --radius: 0.75rem;
 }
 
 @layer base {
@@ -134,91 +138,91 @@
   }
 }
 
-/* ── Navy canvas — text contrast ──────────────────────────────────────────── */
-/* Flip foreground tokens to light so headings/labels on the dark gradient    */
-/* remain readable. Cards and light-tinted panels restore their own dark text. */
+/* ── Signal card semantic themes — dark executive palette ────────────────── */
+/* Each insight panel type: dark surface + 4px semantic left accent border.  */
+/* CFO spec rules 13–14 applied per card type.                               */
 
-main {
-  --foreground: 0 0% 97%;
-  --muted-foreground: 0 0% 62%;
-}
+.sc-green  { background: #13233F; border: 1px solid #22C55E;  border-left: 4px solid #22C55E;  }
+.sc-amber  { background: #13233F; border: 1px solid #263B63;  border-left: 4px solid #F59E0B;  }
+.sc-teal   { background: #13233F; border: 1px solid #2563EB;  border-left: 4px solid #06B6D4;  }
+.sc-slate  { background: #13233F; border: 1px solid #263B63;  border-left: 4px solid #7F8FAE;  }
+.sc-orange { background: #182A4A; border: 1px solid #263B63;  border-left: 4px solid #EF4444;  }
+.sc-purple { background: #182A4A; border: 1px solid #263B63;  border-left: 4px solid #6366F1;  }
+.sc-purple-header { background: rgba(99, 102, 241, 0.12); border-bottom: 1px solid rgba(99, 102, 241, 0.28); }
 
-/* Restore dark text inside white or light-background surfaces */
-main .bg-card,
-main .bg-background,
-main .bg-secondary,
-main .bg-popover,
-main .bg-white,
-main .bg-amber-50,
-main .bg-amber-100,
-main .bg-emerald-50,
-main .bg-emerald-100,
-main .bg-indigo-50,
-main .bg-indigo-100,
-main .bg-rose-50,
-main .bg-rose-100,
-main .bg-blue-50,
-main .bg-blue-100,
-main .bg-violet-50,
-main .bg-violet-100,
-main .bg-slate-50,
-main .bg-slate-100 {
-  --foreground: 222 47% 11%;
-  --muted-foreground: 215 16% 47%;
-}
+/* ── Signal card accent label colours ───────────────────────────────────── */
+/* On dark (#13233F / #182A4A) use light, accessible versions of each hue.  */
 
-/* ── Signal card semantic themes — unified light surface ─────────────────── */
-/* All insight panels share one surface (#F4F7FB); semantic meaning is        */
-/* carried solely by the 4px left accent border. KPI cards use #F1F5F9.      */
+/* CFO insight title → #A5B4FC (spec rule 13) */
+.sc-purple       [class*="text-indigo-3"]   { color: #A5B4FC; }
+.sc-purple-header [class*="text-indigo-3"]  { color: #A5B4FC; }
 
-.sc-green  { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #22C55E; }
-.sc-amber  { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #F59E0B; }
-.sc-teal   { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #06B6D4; }
-.sc-slate  { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #94A3B8; }
-.sc-orange { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #F97316; }
-.sc-purple { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #6366F1; }
-.sc-purple-header { background: #EEF2FF; border-bottom: 1px solid #C7D2FE; }
+/* Opportunity/recoverable key number → #22C55E (spec rule 14) */
+.sc-green  [class*="text-[#34D399]"]        { color: #22C55E; }
 
-/* Restore dark foreground tokens inside light panels                         */
-/* (main sets --foreground to near-white for the navy canvas; panels need it  */
-/* restored so text-foreground and text-muted-foreground render dark.)        */
-.sc-green, .sc-amber, .sc-teal, .sc-slate, .sc-orange, .sc-purple {
-  --foreground: 222 47% 11%;
-  --muted-foreground: 215 16% 47%;
-}
+/* Icon container tints for dark surface */
+.sc-purple [class*="bg-indigo-9"]           { background-color: rgba(99,  102, 241, 0.15); }
+.sc-slate  [class*="bg-slate-7"]            { background-color: rgba(148, 163, 184, 0.15); }
 
-/* ── Accent labels — semantic colour per panel type ─────────────────────── */
-/* Uses accessible (600/700) hues of each accent on the #F4F7FB surface.     */
-
-.sc-purple [class*="text-indigo-3"]        { color: #4F46E5; }
-.sc-purple-header [class*="text-indigo-3"] { color: #4F46E5; }
-
-.sc-teal   [class*="text-[#22D3EE]"]       { color: #0891B2; }
-.sc-green  [class*="text-[#34D399]"]       { color: #16A34A; }
-.sc-orange [class*="text-[#FB923C]"]       { color: #EA580C; }
-/* sc-amber: #F59E0B is already accessible on white — no override needed     */
-
-/* ── Body text — map light 300-series Tailwind classes to slate-600 ──────── */
-/* These were legible on the old dark panel backgrounds but not on #F4F7FB.  */
-.sc-teal   [class*="text-cyan-"]           { color: #475569; }
-.sc-teal   [class*="text-emerald-3"]       { color: #475569; }
-.sc-green  [class*="text-emerald-3"]       { color: #475569; }
-.sc-orange [class*="text-orange-3"],
-.sc-orange [class*="text-orange-4"]        { color: #475569; }
-.sc-amber  [class*="text-amber-3"]         { color: #475569; }
-.sc-slate  [class*="text-slate-2"],
-.sc-slate  [class*="text-slate-3"]         { color: #64748B; }
-
-/* ── Icon container backgrounds — appropriate tints for white surface ─────── */
-.sc-purple [class*="bg-indigo-9"]          { background-color: rgba(99,  102, 241, 0.10); }
-.sc-slate  [class*="bg-slate-7"]           { background-color: rgba(148, 163, 184, 0.20); }
-.sc-teal   [class*="bg-emerald-100"]       { background-color: rgba(6,   182, 212, 0.10); }
-.sc-green  [class*="bg-emerald-100"]       { background-color: rgba(34,  197,  94, 0.10); }
-.sc-amber  [class*="bg-amber-100"]         { background-color: rgba(245, 158,  11, 0.12); }
-.sc-orange [class*="bg-amber-100"]         { background-color: rgba(249, 115,  22, 0.12); }
-
-/* ── Elevated card depth against the navy canvas ──────────────────────────── */
-/* Cards that float above the dark gradient background need stronger shadows  */
+/* ── Card depth on dark canvas ───────────────────────────────────────────── */
 .bg-card {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.40), 0 1px 4px rgba(0, 0, 0, 0.30);
 }
+
+/* ── Convert residual light-theme Tailwind panels to dark palette ─────────── */
+/* Covers: safety buffers, risk level cards, upgrade CTAs, table highlight    */
+/* rows, and inline insight panels that use hardcoded Tailwind colour classes. */
+
+/* ── Amber (warning states, risk panels) ── */
+main [class*="bg-amber-50"]       { background-color: #182A4A; background-image: none; }
+main [class*="bg-amber-1"]        { background-color: rgba(245, 158, 11, 0.12); }
+main [class*="border-amber-2"]    { border-color: rgba(245, 158, 11, 0.30); }
+
+/* ── Sky (safety buffer panels) ── */
+main [class*="bg-sky-50"]         { background-color: #13233F; background-image: none; }
+main [class*="bg-sky-1"]          { background-color: rgba(14, 165, 233, 0.12); }
+main [class*="border-sky-2"]      { border-color: rgba(14, 165, 233, 0.30); }
+
+/* ── Emerald (positive states, recoverable, table totals) ── */
+main [class*="bg-emerald-50"]     { background-color: #13233F; background-image: none; }
+main [class*="bg-emerald-1"]      { background-color: rgba(34, 197, 94, 0.12); }
+main [class*="border-emerald-2"]  { border-color: rgba(34, 197, 94, 0.30); }
+
+/* ── Indigo (upgrade CTAs, insight boxes, table result rows) ── */
+main [class*="bg-indigo-50"]      { background-color: #182A4A; background-image: none; }
+main [class*="from-indigo-50"]    { background-color: #182A4A; background-image: none; }
+main [class*="bg-indigo-1"]       { background-color: rgba(99, 102, 241, 0.12); }
+main [class*="border-indigo-2"]   { border-color: rgba(99, 102, 241, 0.30); }
+
+/* ── Red (risk/danger) ── */
+main [class*="bg-red-50"]         { background-color: #182A4A; background-image: none; }
+main [class*="bg-red-1"]          { background-color: rgba(239, 68, 68, 0.12); }
+main [class*="border-red-2"]      { border-color: rgba(239, 68, 68, 0.30); }
+
+/* ── Text colour fixes for now-dark panel backgrounds ───────────────────── */
+/* Map dark Tailwind 600-900 text classes (designed for light surfaces) to   */
+/* readable equivalents on the dark palette. Scoped to main to avoid sidebar.*/
+
+/* Amber text → semantic amber (#F59E0B) */
+main [class*="text-amber-6"],
+main [class*="text-amber-7"],
+main [class*="text-amber-8"],
+main [class*="text-amber-9"]      { color: #F59E0B; }
+
+/* Sky text → light blue (#7DD3FC) */
+main [class*="text-sky-6"],
+main [class*="text-sky-7"],
+main [class*="text-sky-8"],
+main [class*="text-sky-9"]        { color: #7DD3FC; }
+
+/* Emerald text → semantic green (#22C55E) */
+main [class*="text-emerald-6"],
+main [class*="text-emerald-7"],
+main [class*="text-emerald-8"],
+main [class*="text-emerald-9"]    { color: #22C55E; }
+
+/* Indigo text → accessible indigo on dark (#A5B4FC / #A9B8D3) */
+main [class*="text-indigo-7"],
+main [class*="text-indigo-6"]     { color: #A5B4FC; }
+main [class*="text-indigo-8"],
+main [class*="text-indigo-9"]     { color: #A9B8D3; }

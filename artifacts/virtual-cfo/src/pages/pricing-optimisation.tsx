@@ -287,18 +287,18 @@ export default function PricingOptimisation() {
       <AiCfoAskCard pageId="pricing" />
 
       {/* ── 2. Pricing Power Risk Level ── */}
-      <div className="flex items-start gap-4 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
-          <Shield className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+      <div className="flex items-start gap-4 p-5 rounded-2xl border border-[#F59E0B]/30 bg-[#182A4A] mb-4">
+        <div className="w-9 h-9 rounded-xl bg-[#F59E0B]/15 flex items-center justify-center shrink-0">
+          <Shield className="w-4 h-4 text-[#F59E0B]" />
         </div>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">Pricing Power Level</p>
-            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-300">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#F59E0B]">Pricing Power Level</p>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#F59E0B]/20 text-[#F59E0B]">
               Moderate
             </span>
           </div>
-          <p className="text-sm text-amber-800 dark:text-amber-300/80 leading-relaxed">
+          <p className="text-sm text-[#A9B8D3] leading-relaxed">
             Pricing power is stable, but promotional reliance is increasing and could weaken margin if it continues.
           </p>
         </div>

@@ -238,29 +238,29 @@ export default function ProfitEngine() {
         <CfoInsightCard text="Your business is trading profitably and is operating 39% above break-even. Profit quality is improving, but rising overheads are increasing sensitivity to cost growth. Focus on scaling revenue before adding new fixed costs — each additional £100k of sales currently converts into approximately £38k of contribution." />
 
         {/* Profit Safety Buffer — free */}
-        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-sky-200 dark:border-sky-800/40 bg-sky-50/70 dark:bg-sky-950/15">
-          <Shield className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-[#3B82F6]/30 bg-[#13233F]">
+          <Shield className="w-4 h-4 text-[#7DD3FC] shrink-0 mt-0.5" />
           <div>
-            <p className="text-xs font-semibold text-sky-800 dark:text-sky-300 mb-0.5">Profit Safety Buffer</p>
-            <p className="text-sm text-sky-700/90 dark:text-sky-400/85 leading-relaxed">
+            <p className="text-xs font-semibold text-[#7DD3FC] mb-0.5">Profit Safety Buffer</p>
+            <p className="text-sm text-[#A9B8D3] leading-relaxed">
               Revenue could fall by £204k before the business reaches break-even.
             </p>
           </div>
         </div>
 
         {/* Risk level pill */}
-        <div className="flex items-start gap-4 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20">
-          <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
-            <Shield className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+        <div className="flex items-start gap-4 p-5 rounded-2xl border border-[#F59E0B]/30 bg-[#182A4A]">
+          <div className="w-9 h-9 rounded-xl bg-[#F59E0B]/15 flex items-center justify-center shrink-0">
+            <Shield className="w-4 h-4 text-[#F59E0B]" />
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">Profit Risk Level</p>
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-300">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#F59E0B]">Profit Risk Level</p>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#F59E0B]/20 text-[#F59E0B]">
                 Moderate
               </span>
             </div>
-            <p className="text-sm text-amber-800 dark:text-amber-300/80 leading-relaxed">
+            <p className="text-sm text-[#A9B8D3] leading-relaxed">
               Profitability is stable, but rising overheads are increasing sensitivity to revenue slowdowns.
             </p>
           </div>

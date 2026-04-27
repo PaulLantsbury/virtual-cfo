@@ -318,12 +318,12 @@ export default function GrowthQuality() {
 
       {/* ── Growth Classification & Risk Signal ── */}
       <div className={cn(
-        "rounded-2xl border px-6 py-5 mb-8",
+        "rounded-2xl border px-6 py-5 mb-8 bg-[#182A4A]",
         GROWTH_TYPE.risk === "high"
-          ? "bg-destructive/5 border-destructive/20 dark:bg-destructive/10 dark:border-destructive/30"
+          ? "border-[#EF4444]/30"
           : GROWTH_TYPE.risk === "medium"
-          ? "bg-amber-50/60 border-amber-200/70 dark:bg-amber-950/15 dark:border-amber-800/35"
-          : "bg-emerald-50/50 border-emerald-200/70 dark:bg-emerald-950/15 dark:border-emerald-800/35"
+          ? "border-[#F59E0B]/30"
+          : "border-[#22C55E]/30"
       )}>
         {/* Row 1: classification label + risk badge */}
         <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -333,8 +333,8 @@ export default function GrowthQuality() {
               GROWTH_TYPE.risk === "high"
                 ? "text-destructive/60"
                 : GROWTH_TYPE.risk === "medium"
-                ? "text-amber-600/70 dark:text-amber-500/70"
-                : "text-emerald-600/70 dark:text-emerald-500/70"
+                ? "text-[#F59E0B]/70"
+                : "text-[#22C55E]/70"
             )}>
               Growth Classification
             </p>
@@ -347,8 +347,8 @@ export default function GrowthQuality() {
             GROWTH_TYPE.risk === "high"
               ? "bg-destructive/10 text-destructive border-destructive/20"
               : GROWTH_TYPE.risk === "medium"
-              ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700/50"
-              : "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-700/40"
+              ? "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30"
+              : "bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/30"
           )}>
             <span className={cn(
               "w-1.5 h-1.5 rounded-full shrink-0",
@@ -359,12 +359,12 @@ export default function GrowthQuality() {
         </div>
         {/* Row 2: risk signal */}
         <p className={cn(
-          "mt-3 pt-3 border-t text-sm leading-relaxed",
+          "mt-3 pt-3 border-t text-sm leading-relaxed text-[#A9B8D3]",
           GROWTH_TYPE.risk === "high"
-            ? "border-destructive/15 text-destructive/70 dark:text-destructive/60"
+            ? "border-destructive/20"
             : GROWTH_TYPE.risk === "medium"
-            ? "border-amber-200/50 dark:border-amber-700/30 text-amber-900/75 dark:text-amber-200/60"
-            : "border-emerald-200/50 dark:border-emerald-700/30 text-emerald-900/75 dark:text-emerald-200/60"
+            ? "border-[#F59E0B]/25"
+            : "border-[#22C55E]/25"
         )}>
           {GROWTH_TYPE.signal}
         </p>

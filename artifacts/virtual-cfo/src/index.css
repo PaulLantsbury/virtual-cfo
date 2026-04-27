@@ -1226,16 +1226,37 @@ main p[class*="font-display"][class*="font-black"][class*="text-emerald"] {
   color:       #22C55E  !important;
 }
 
-/* ── D. Traffic-light scorecard status labels — restore 11px size ─────────── */
-/* Rule C inflated these spans (font-bold + text-emerald in bg-emerald-50).  */
-/* They lack uppercase/tracking-wider so Rule A doesn't counteract them.     */
-/* Discriminator: text-[11px] marks these as tiny labels, not £ values.      */
-/* Extra attribute vs Rule C → higher specificity → font-size !important wins */
+/* ── D. Business Health scorecard tile typography — unified across all variants */
+/* Replaces the old 11px restore rule. All five tiles (green / amber / red)    */
+/* use identical font sizes per the design spec, colour coding is preserved.   */
+/*                                                                              */
+/* Discriminator: [class*="sm:grid-cols-5"][class*="mb-5"] matches only the    */
+/* 5-column scorecard grid on Dashboard. No other grid uses this combination.  */
+/*                                                                              */
+/* Three elements per tile:                                                     */
+/*   1. Status label span  — 15px / 700 / 1.25  (Healthy, Weakening, …)       */
+/*   2. Area title p       — 16px / 700 / 1.3   (Profitability, …)            */
+/*   3. Description p      — 15px / 400 / 1.45  (supporting sentence)         */
 
-main [class*="bg-emerald-50"] span[class*="text-[11px]"][class*="font-bold"][class*="text-emerald"]:not([class*="rounded-full"]) {
-  font-size:   0.6875rem !important;  /* 11px — restore original label size */
-  font-weight: 700       !important;
-  line-height: 1.3       !important;
+/* 1 — Status label: last <span> in the dot+label flex row */
+[class*="sm:grid-cols-5"][class*="mb-5"] > div > div > span:last-child {
+  font-size:   15px !important;
+  font-weight: 700  !important;
+  line-height: 1.25 !important;
+}
+
+/* 2 — Area title: first <p> directly inside the tile */
+[class*="sm:grid-cols-5"][class*="mb-5"] > div > p:first-of-type {
+  font-size:   16px !important;
+  font-weight: 700  !important;
+  line-height: 1.3  !important;
+}
+
+/* 3 — Description: second (last) <p> directly inside the tile */
+[class*="sm:grid-cols-5"][class*="mb-5"] > div > p:last-of-type {
+  font-size:   15px !important;
+  font-weight: 400  !important;
+  line-height: 1.45 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */

@@ -1,12 +1,11 @@
 import {
-  ArrowUpRight, ArrowDownRight, Minus, Download,
+  ArrowUpRight, ArrowDownRight, Minus,
   Sparkles, TrendingUp, AlertTriangle, ArrowRight,
   ChevronRight, Lock,
 } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { TopDrivers, type Driver } from "@/components/TopDrivers";
 import { canAccess } from "@/lib/plan";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
@@ -181,17 +180,9 @@ export default function Dashboard() {
     <AppLayout>
 
       {/* ══ PAGE HEADER ═══════════════════════════════════════════════════════ */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Business Control Centre</h1>
-          <p className="text-muted-foreground mt-1 text-sm">See what is happening, how much profit and cash is at risk, and where to act first.</p>
-        </div>
-        <div className="flex gap-3 shrink-0">
-          <Button variant="outline" className="bg-[#13233F]">
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Business Control Centre</h1>
+        <p className="text-muted-foreground mt-1 text-sm">See what is happening, how much profit and cash is at risk, and where to act first.</p>
       </div>
 
       {/* ══ BUSINESS HEALTH VERDICT HERO ════════════════════════════════════ */}

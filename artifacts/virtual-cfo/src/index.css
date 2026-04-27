@@ -70,7 +70,7 @@
   --input: 214 32% 91%;
   --ring: 228 89% 58%;
 
-  --card: 0 0% 100%;
+  --card: 213 46% 97%;
   --card-foreground: 222 47% 11%;
   --card-border: 214 32% 91%;
 
@@ -203,5 +203,5 @@ main .bg-slate-100 {
 /* ── Elevated card depth against the navy canvas ──────────────────────────── */
 /* Cards that float above the dark gradient background need stronger shadows  */
 .bg-card {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20), 0 1px 4px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.10);
 }

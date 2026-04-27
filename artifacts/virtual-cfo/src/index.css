@@ -997,6 +997,85 @@ aside[aria-label="AI CFO Analysis"] a       { color: #60A5FA; }
 aside[aria-label="AI CFO Analysis"] a:hover { color: #93C5FD; }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
+/* MARKETING EFFICIENCY — Opportunity value hierarchy                         */
+/*                                                                            */
+/* Scope: ONLY the ME "Top opportunities" panel.                              */
+/*                                                                            */
+/* Key discriminators:                                                        */
+/*  • ME row cash containers use class w-28; Margin Analysis uses w-20.      */
+/*    → [class~="w-28"] ancestor scopes £ p-rules to ME only.                */
+/*  • ME simulator cards use font-display; opportunity rows do not.           */
+/*    → :not([class*="font-display"]) excludes simulator card values.         */
+/*  • pp span column header uses w-12 + text-right but NOT tabular-nums.      */
+/*    → tabular-nums discriminator excludes header labels.                    */
+/*  • :has([class~="w-28"]) on the gap-5 flex parent scopes pp spans to ME.  */
+/*                                                                            */
+/* !important required: prior whitespace-nowrap rule (specificity 0,4,2)     */
+/* would otherwise win for the pp spans.                                      */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. £ uplift — row values (desktop: 32px) ────────────────────────────── */
+/* Scoped to w-28 ancestor (ME) + text-emerald (exclude ghost/masked rows)   */
+/* + not font-display (exclude simulator card hero values).                  */
+
+main [class~="w-28"] p[class*="tabular-nums"][class*="leading-none"][class*="text-emerald"]:not([class*="font-display"]) {
+  font-size:   2rem       !important;   /* 32px */
+  font-weight: 800        !important;
+  line-height: 1.05       !important;
+  color:       #22C55E    !important;
+}
+
+/* ── 2. £ uplift — combined footer (36px) ────────────────────────────────── */
+/* Footer parent has bg-emerald-50/70, a unique token on this row.           */
+/* The w-28 ancestor is also present in the footer. ✓                        */
+
+main [class*="bg-emerald-50/70"] [class~="w-28"] p[class*="tabular-nums"][class*="leading-none"][class*="text-emerald"] {
+  font-size: 2.25rem !important;   /* 36px */
+}
+
+/* ── 3. CM (pp) uplift — row values (desktop: 18px, secondary weight) ────── */
+/* Scoped via :has([class~="w-28"]) on the gap-5 flex parent.                */
+/* This excludes Margin Analysis rows (which use w-20) without :has issues.  */
+/* text-emerald check excludes ghost/masked rows (text-foreground/[0.13]).   */
+/* Column header span: w-12 + text-right but no tabular-nums → not matched. ✓*/
+
+main [class~="gap-5"]:has([class~="w-28"]) > span[class~="w-12"][class*="tabular-nums"][class*="text-emerald"] {
+  font-size:   1.125rem   !important;   /* 18px */
+  font-weight: 600        !important;
+  line-height: 1.05       !important;
+  color:       #34D399    !important;   /* emerald-400 — intentionally lighter */
+}
+
+/* ── 4. CM (pp) uplift — combined footer (16px) ──────────────────────────── */
+
+main [class*="bg-emerald-50/70"] [class~="gap-5"]:has([class~="w-28"]) > span[class~="w-12"][class*="tabular-nums"][class*="text-emerald"] {
+  font-size: 1rem !important;   /* 16px */
+}
+
+/* ── 5. Reference bar compact summary — £ value ──────────────────────────── */
+/* span.ml-1.5.tabular-nums.text-emerald unique to the compact reference bar.*/
+
+main span[class*="ml-1.5"][class*="tabular-nums"][class*="text-emerald"] {
+  font-size:   1.125rem  !important;   /* 18px — compact but legible */
+  font-weight: 800       !important;
+  color:       #22C55E   !important;
+}
+
+/* ── 6. Mobile responsive overrides ──────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  main [class~="w-28"] p[class*="tabular-nums"][class*="leading-none"][class*="text-emerald"]:not([class*="font-display"]) {
+    font-size: 1.5rem !important;     /* 24px on mobile */
+  }
+  main [class*="bg-emerald-50/70"] [class~="w-28"] p[class*="tabular-nums"][class*="leading-none"][class*="text-emerald"] {
+    font-size: 1.5rem !important;
+  }
+  main [class~="gap-5"]:has([class~="w-28"]) > span[class~="w-12"][class*="tabular-nums"][class*="text-emerald"] {
+    font-size: 0.875rem !important;   /* 14px on mobile */
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
 /* OPPORTUNITY AMOUNT PROMINENCE                                               */
 /* Make quantified £ values visually larger and easier to spot across all    */
 /* opportunity / recoverable contribution / improvement plan cards.           */

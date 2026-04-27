@@ -623,3 +623,59 @@ main [class*="border-indigo-7"]    { border-color: rgba(99, 102, 241, 0.35); }
 
 main [class~="bg-secondary/30"]    { background-color: #182A4A; }
 main [class~="bg-secondary/40"]    { background-color: rgba(19, 35, 63, 0.80); }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* PRICING OPTIMISATION PAGE — card, badge & text readability fixes           */
+/* Pure CSS only — no JSX changes. All selectors scoped to main.             */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── A. Ask AI CFO card — card surface, input bg & Ask button colour ─────── */
+/* The card's unique identifier is border-primary/25.                        */
+/* Card surface → solid #13233F; input → slightly elevated #0F1E36;         */
+/* Ask button → blue-600 (#2563EB) per spec.                                 */
+
+main [class~="border-primary/25"]                        { background-color: #13233F; }
+main [class~="border-primary/25"] input                  { background-color: #0F1E36; color: #F8FAFC; }
+main [class~="border-primary/25"] [class~="bg-primary"]  { background-color: #2563EB; }
+
+/* ── B. Pricing Power Level card — surface and border fixes ─────────────── */
+/* JSX hard-codes bg-[#182A4A] (elevated) and border-[#F59E0B]/30 (faint).  */
+/* Override: card surface #13233F, solid amber border #F59E0B.              */
+/* [class~=] is word-boundary — bracket/hash chars are literal in attr vals. */
+
+main [class~="bg-[#182A4A]"]         { background-color: #13233F; }
+main [class~="border-[#F59E0B]/30"]  { border-color: #F59E0B; }
+
+/* ── C. Indigo gradient upgrade panel — flatten to dark tint ─────────────── */
+/* "Unlock your pricing action plan" uses bg-gradient-to-br from-indigo-50   */
+/* to-indigo-50/30 — renders as pale lavender without dark mode.            */
+/* Kill gradient via background-image: none; replace with flat indigo tint.  */
+
+main [class~="from-indigo-50"]        { background-image: none; background-color: rgba(99, 102, 241, 0.10); }
+
+/* ── D. Yellow leakage card (Payment Fee Leakage chip) ───────────────────── */
+/* bg-yellow-50/60 dark:bg-yellow-950/15, border-yellow-200 dark:border-yellow-800/40 */
+
+main [class*="bg-yellow-50"]          { background-color: rgba(234, 179, 8, 0.08); background-image: none; }
+main [class*="bg-yellow-950/"]        { background-color: rgba(234, 179, 8, 0.08); }
+main [class*="border-yellow-2"]       { border-color: rgba(234, 179, 8, 0.35); }
+main [class*="text-yellow-6"],
+main [class*="text-yellow-7"],
+main [class*="text-yellow-8"],
+main [class*="text-yellow-9"]         { color: #FDE68A; }
+
+/* ── E. Red fractional bg variants (bg-red-50/50, bg-red-50/60, etc.) ────── */
+/* [class*="bg-red-50/"] safely avoids "bg-red-500" (no slash in that token). */
+/* [class~="bg-red-50"] (word-boundary) was added in the ME section above     */
+/* but that only matched exact token; fractional variants need the / pattern. */
+
+main [class*="bg-red-50/"]            { background-color: rgba(239, 68, 68, 0.08); }
+main [class*="bg-red-100/"]           { background-color: rgba(239, 68, 68, 0.14); }
+
+/* ── F. Dark 800–900-series text — near-black on dark bg, promote lighter ─── */
+/* text-red-800/900 and text-orange-800 appear near-black without dark mode. */
+/* Promote to lighter readable variants (red-300, orange-300).               */
+
+main [class*="text-red-8"],
+main [class*="text-red-9"]            { color: #FCA5A5; }
+main [class*="text-orange-8"]         { color: #FDBA74; }

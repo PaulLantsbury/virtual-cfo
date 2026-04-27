@@ -16,6 +16,9 @@ import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { useAiCfo } from "@/components/AiCfoProvider";
+import { MONTHLY_CM_PCT } from "@/lib/data/business-snapshot";
+import { CASH_RUNWAY } from "@/lib/data/cash-snapshot";
+import { DISCOUNT_DEP } from "@/lib/data/growth-metrics";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -200,10 +203,10 @@ const CFO_REPORTS: ReportConfig[] = [
 ];
 
 const RECENT_ALERTS_FEED: RecentAlertItem[] = [
-  { date: "Today",     alert: "Meta CAC increased 18% week-on-week",  impact: "Potential impact: −£6.4k/month contribution",                    severity: "red",   action: "Review Meta campaigns",       status: "new"      },
-  { date: "Yesterday", alert: "Discount dependency reached 38%",       impact: "Potential impact: −£9.2k/month contribution",                    severity: "amber", action: "Reduce blanket offers",       status: "new"      },
-  { date: "Monday",    alert: "Cash runway fell to 3.4 months",        impact: "Potential impact: increased liquidity risk within 60 days",      severity: "amber", action: "Reduce stock build",          status: "reviewed" },
-  { date: "Last week", alert: "Contribution margin fell to 42.3%",     impact: "Potential impact: −£12k/month contribution",                     severity: "amber", action: "Review margin recovery plan", status: "reviewed" },
+  { date: "Today",     alert: "Meta CAC increased 18% week-on-week",                       impact: "Potential impact: −£6.4k/month contribution",               severity: "red",   action: "Review Meta campaigns",       status: "new"      },
+  { date: "Yesterday", alert: `Discount dependency reached ${DISCOUNT_DEP}%`,              impact: "Potential impact: −£9.2k/month contribution",               severity: "amber", action: "Reduce blanket offers",       status: "new"      },
+  { date: "Monday",    alert: `Cash runway fell to ${CASH_RUNWAY} months`,                 impact: "Potential impact: increased liquidity risk within 60 days", severity: "amber", action: "Reduce stock build",          status: "reviewed" },
+  { date: "Last week", alert: `Contribution margin fell to ${MONTHLY_CM_PCT}%`,            impact: "Potential impact: −£12k/month contribution",                severity: "amber", action: "Review margin recovery plan", status: "reviewed" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -623,7 +626,7 @@ export default function CfoAlerts() {
           },
           {
             label: "Contribution margin",
-            value: "42.3%  ↓",
+            value: `${MONTHLY_CM_PCT}%  ↓`,
             sub: "Flagged — approaching 40% threshold",
             icon: BarChart2,
             status: "amber" as const,

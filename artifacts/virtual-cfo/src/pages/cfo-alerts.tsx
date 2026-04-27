@@ -580,12 +580,12 @@ export default function CfoAlerts() {
       </div>
 
       {/* ── CFO monitoring status panel ─────────────────────────────────────── */}
-      <div className="rounded-2xl border border-primary/25 bg-primary/5 px-5 py-4 mb-6">
+      <div className="sc-purple rounded-2xl px-5 py-4 mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 shrink-0">
-            <Activity className="w-3.5 h-3.5 text-primary" />
+          <div className="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-900/50 shrink-0">
+            <Activity className="w-3.5 h-3.5 text-indigo-300" />
           </div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Your CFO is currently monitoring</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-300">Your CFO is currently monitoring</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[

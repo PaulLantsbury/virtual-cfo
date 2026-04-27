@@ -112,10 +112,10 @@ export default function Opportunities() {
       </div>
 
       {/* ── Total recoverable block ── */}
-      <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-800/50 shadow-sm mb-6 overflow-hidden">
+      <div className="sc-teal rounded-2xl shadow-sm mb-6 overflow-hidden">
         <div className="px-8 py-8 flex flex-col sm:flex-row sm:items-center gap-6">
-          <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 shrink-0">
-            <TrendingUp className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
+          <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-[#22D3EE]/15 shrink-0">
+            <TrendingUp className="w-7 h-7 text-[#22D3EE]" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
@@ -166,8 +166,8 @@ export default function Opportunities() {
 
         {/* Capital-free uplift strip — Pro only (contains £ values) */}
         {showHeadline && (
-          <div className="px-8 py-3.5 border-t border-emerald-200 dark:border-emerald-800/40 bg-emerald-100/40 dark:bg-emerald-900/20 flex items-center gap-3">
-            <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-500 shrink-0" />
+          <div className="px-8 py-3.5 border-t border-[#2E7C8F]/50 bg-[#22D3EE]/8 flex items-center gap-3">
+            <Zap className="w-3.5 h-3.5 text-[#22D3EE] shrink-0" />
             <p className="text-xs text-emerald-800/70 dark:text-emerald-400/80 leading-snug">
               <span className="font-semibold">
                 Estimated capital-free uplift: £{(CAPITAL_FREE_LOW / 1000).toFixed(0)}k–£{(CAPITAL_FREE_HIGH / 1000).toFixed(0)}k
@@ -182,12 +182,12 @@ export default function Opportunities() {
 
       {/* ── Execution priority strip — Pro only ── */}
       {showExecPriority && (
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 px-6 py-5 mb-6 flex items-start gap-4">
-          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary/10 shrink-0 mt-0.5">
-            <Zap className="w-4 h-4 text-primary" />
+        <div className="sc-purple rounded-2xl px-6 py-5 mb-6 flex items-start gap-4">
+          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-900/40 shrink-0 mt-0.5">
+            <Zap className="w-4 h-4 text-indigo-300" />
           </div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-primary/70 mb-1.5">
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-300/80 mb-1.5">
               Execution priority this month
             </p>
             <p className="text-sm font-medium text-foreground leading-relaxed">
@@ -437,10 +437,10 @@ export default function Opportunities() {
       </div>
 
       {/* ── Where to start — always visible; content gated ── */}
-      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm overflow-hidden">
-        <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
-          <Target className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+      <div className="sc-purple rounded-2xl shadow-sm overflow-hidden">
+        <div className="sc-purple-header flex items-center gap-2.5 px-6 py-3.5">
+          <Target className="w-4 h-4 text-indigo-300 shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
             Where to start
           </span>
         </div>

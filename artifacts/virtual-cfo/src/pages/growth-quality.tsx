@@ -285,10 +285,10 @@ export default function GrowthQuality() {
       </div>
 
       {/* ── CFO Insight ── */}
-      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-8 overflow-hidden">
-        <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
-          <Sparkles className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+      <div className="sc-purple rounded-2xl shadow-sm mb-8 overflow-hidden">
+        <div className="sc-purple-header flex items-center gap-2.5 px-6 py-3.5">
+          <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
             CFO Insight
           </span>
         </div>
@@ -776,19 +776,19 @@ export default function GrowthQuality() {
         {/* Pro: full upside block */}
         <div>
           {/* Headline */}
-          <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-800/50 px-6 py-5 mb-5 flex items-center gap-5">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 shrink-0">
-              <TrendingUp className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+          <div className="sc-teal rounded-xl px-6 py-5 mb-5 flex items-center gap-5">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#22D3EE]/15 shrink-0">
+              <TrendingUp className="w-6 h-6 text-[#22D3EE]" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#22D3EE] mb-1">
                 Estimated recoverable contribution
               </p>
-              <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
+              <p className="text-4xl font-display font-bold text-[#22D3EE] leading-none">
                 £{(RECOVERABLE_UPSIDE.cashLow / 1_000).toFixed(0)}k–£{(RECOVERABLE_UPSIDE.cashHigh / 1_000).toFixed(0)}k
-                <span className="text-base font-medium text-emerald-600/70 dark:text-emerald-400/70 ml-2">per month</span>
+                <span className="text-base font-medium text-cyan-300/70 ml-2">per month</span>
               </p>
-              <p className="text-xs text-emerald-700/70 dark:text-emerald-400/80 mt-2 leading-snug max-w-xl">
+              <p className="text-xs text-cyan-300/75 mt-2 leading-snug max-w-xl">
                 {RECOVERABLE_UPSIDE.supporting}
               </p>
               <p className="text-[11px] text-muted-foreground/40 mt-2">

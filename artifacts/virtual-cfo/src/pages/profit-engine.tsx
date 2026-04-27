@@ -96,10 +96,10 @@ const fmtPct = (n: number, decimals = 1) => (n * 100).toFixed(decimals) + "%";
 
 function CfoInsightCard({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
-        <Sparkles className="w-4 h-4 text-primary shrink-0" />
-        <span className="text-xs font-semibold uppercase tracking-wider text-primary">CFO Insight</span>
+    <div className="sc-purple rounded-2xl shadow-sm overflow-hidden">
+      <div className="sc-purple-header flex items-center gap-2.5 px-6 py-3.5">
+        <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">CFO Insight</span>
       </div>
       <div className="px-6 py-5">
         <p className="text-sm font-medium text-foreground leading-relaxed">{text}</p>
@@ -110,8 +110,8 @@ function CfoInsightCard({ text }: { text: string }) {
 
 function InlineCfoInsight({ text }: { text: string }) {
   return (
-    <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
-      <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-1">CFO Insight</p>
+    <div className="sc-purple rounded-xl px-4 py-3">
+      <p className="text-xs text-indigo-300 font-semibold uppercase tracking-wider mb-1">CFO Insight</p>
       <p className="text-sm text-foreground leading-relaxed">{text}</p>
     </div>
   );
@@ -268,11 +268,11 @@ export default function ProfitEngine() {
 
         {/* What would move risk lower? — Pro only */}
         {canAccess("profit_risk_actions") && (
-          <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/15">
-            <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+          <div className="sc-green flex items-start gap-3 px-5 py-4 rounded-2xl">
+            <CheckCircle className="w-4 h-4 text-[#34D399] shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 mb-1">What would move risk lower?</p>
-              <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 leading-relaxed">
+              <p className="text-xs font-semibold text-[#34D399] mb-1">What would move risk lower?</p>
+              <p className="text-xs text-emerald-300/80 leading-relaxed">
                 Reduce overhead load below 55%, increase monthly revenue by approximately £80k, or improve margin without increasing discounting.
               </p>
             </div>
@@ -283,11 +283,11 @@ export default function ProfitEngine() {
       <AiCfoAskCard pageId="profit" />
 
       {/* ── Profit Trend micro-summary ── */}
-      <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/50 dark:bg-emerald-950/15 mb-4">
-        <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+      <div className="sc-teal flex items-center gap-3 px-5 py-3 rounded-xl mb-4">
+        <TrendingUp className="w-4 h-4 text-[#22D3EE] shrink-0" />
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Profit Trend: Improving</span>
-          <span className="text-xs text-emerald-700/70 dark:text-emerald-400/70">Profit increased by £18k this month, driven by margin expansion and stronger contribution.</span>
+          <span className="text-xs font-bold text-[#22D3EE]">Profit Trend: Improving</span>
+          <span className="text-xs text-cyan-300/70">Profit increased by £18k this month, driven by margin expansion and stronger contribution.</span>
         </div>
       </div>
 

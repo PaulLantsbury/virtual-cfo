@@ -93,10 +93,10 @@ const fmt = (n: number) =>
 
 function CfoInsightCard({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
-        <Sparkles className="w-4 h-4 text-primary shrink-0" />
-        <span className="text-xs font-semibold uppercase tracking-wider text-primary">CFO Insight</span>
+    <div className="sc-purple rounded-2xl shadow-sm overflow-hidden">
+      <div className="sc-purple-header flex items-center gap-2.5 px-6 py-3.5">
+        <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">CFO Insight</span>
       </div>
       <div className="px-6 py-5">
         <p className="text-sm font-medium text-foreground leading-relaxed">{text}</p>
@@ -107,8 +107,8 @@ function CfoInsightCard({ text }: { text: string }) {
 
 function InlineCfoInsight({ text }: { text: string }) {
   return (
-    <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
-      <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-1">CFO Insight</p>
+    <div className="sc-purple rounded-xl px-4 py-3">
+      <p className="text-xs text-indigo-300 font-semibold uppercase tracking-wider mb-1">CFO Insight</p>
       <p className="text-sm text-foreground leading-relaxed">{text}</p>
     </div>
   );
@@ -305,11 +305,11 @@ export default function PricingOptimisation() {
       </div>
 
       {/* ── 3. Contribution Recovery Opportunity ── */}
-      <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/15 mb-4">
-        <Target className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+      <div className="sc-teal flex items-start gap-3 px-5 py-4 rounded-2xl mb-4">
+        <Target className="w-4 h-4 text-[#22D3EE] shrink-0 mt-0.5" />
         <div>
-          <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 mb-0.5">Recoverable Contribution Opportunity</p>
-          <p className="text-sm text-emerald-700/90 dark:text-emerald-400/85 leading-relaxed">
+          <p className="text-xs font-semibold text-[#22D3EE] mb-0.5">Recoverable Contribution Opportunity</p>
+          <p className="text-sm text-cyan-300/80 leading-relaxed">
             Approximately £52k of monthly contribution could be recovered through better discount control, improved full-price sales and lower returns.
           </p>
         </div>
@@ -317,37 +317,37 @@ export default function PricingOptimisation() {
 
       {/* ── 3b. Recovery Confidence Band ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/70 dark:bg-emerald-950/20">
-          <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+        <div className="sc-green flex items-start gap-3 px-5 py-4 rounded-2xl">
+          <CheckCircle className="w-4 h-4 text-[#34D399] shrink-0 mt-0.5" />
           <div className="flex-1">
             <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
               <div className="flex items-center gap-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">High confidence</p>
-                <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">£38,000</span>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#34D399]">High confidence</p>
+                <span className="text-sm font-bold text-[#34D399]">£38,000</span>
               </div>
               <ConfidenceBadge level="High" helper="Based on direct Shopify and cost data." />
             </div>
-            <p className="text-xs text-emerald-700/80 dark:text-emerald-400/75 leading-relaxed">Recoverable by reducing average discount by 3pp with limited conversion risk.</p>
+            <p className="text-xs text-emerald-300/80 leading-relaxed">Recoverable by reducing average discount by 3pp with limited conversion risk.</p>
           </div>
         </div>
-        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/70 dark:bg-amber-950/15">
-          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="sc-amber flex items-start gap-3 px-5 py-4 rounded-2xl">
+          <AlertTriangle className="w-4 h-4 text-[#F59E0B] shrink-0 mt-0.5" />
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <p className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">Test carefully</p>
-              <span className="text-sm font-bold text-amber-700 dark:text-amber-400">£14,000</span>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#F59E0B]">Test carefully</p>
+              <span className="text-sm font-bold text-[#F59E0B]">£14,000</span>
             </div>
-            <p className="text-xs text-amber-700/80 dark:text-amber-400/75 leading-relaxed">Additional opportunity from targeted offers, shipping subsidy and returns improvements.</p>
+            <p className="text-xs text-amber-300/80 leading-relaxed">Additional opportunity from targeted offers, shipping subsidy and returns improvements.</p>
           </div>
         </div>
       </div>
 
       {/* ── 4. Pricing Trend bar ── */}
-      <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-950/15 mb-4">
-        <TrendingDown className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+      <div className="sc-orange flex items-center gap-3 px-5 py-3 rounded-xl mb-4">
+        <TrendingDown className="w-4 h-4 text-[#FB923C] shrink-0" />
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-xs font-bold text-amber-800 dark:text-amber-300">Pricing Trend: Margin under pressure</span>
-          <span className="text-xs text-amber-700/70 dark:text-amber-400/70">Average discount increased by 3pp and full-price orders fell from 52% to 46%.</span>
+          <span className="text-xs font-bold text-[#FB923C]">Pricing Trend: Margin under pressure</span>
+          <span className="text-xs text-orange-300/70">Average discount increased by 3pp and full-price orders fell from 52% to 46%.</span>
         </div>
       </div>
 
@@ -364,14 +364,14 @@ export default function PricingOptimisation() {
       </div>
 
       {/* ── 5b. Discount Increase Impact micro-card — always visible ── */}
-      <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-red-200 dark:border-red-800/40 bg-red-50/60 dark:bg-red-950/15 mb-6">
-        <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+      <div className="sc-orange flex items-start gap-3 px-5 py-4 rounded-2xl mb-6">
+        <AlertTriangle className="w-4 h-4 text-[#FB923C] shrink-0 mt-0.5" />
         <div className="flex-1">
           <div className="flex items-center gap-3 flex-wrap mb-1">
-            <p className="text-xs font-bold uppercase tracking-wider text-red-800 dark:text-red-300">Margin lost to discount increase</p>
-            <span className="text-lg font-display font-bold text-red-700 dark:text-red-400">£14,000</span>
+            <p className="text-xs font-bold uppercase tracking-wider text-[#FB923C]">Margin lost to discount increase</p>
+            <span className="text-lg font-display font-bold text-[#FB923C]">£14,000</span>
           </div>
-          <p className="text-xs text-red-700/80 dark:text-red-400/75 leading-relaxed">The increase in discounting vs the prior period reduced contribution by approximately £14k this month.</p>
+          <p className="text-xs text-orange-300/80 leading-relaxed">The increase in discounting vs the prior period reduced contribution by approximately £14k this month.</p>
         </div>
       </div>
 

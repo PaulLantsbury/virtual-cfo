@@ -79,10 +79,10 @@ const fmt = (n: number) =>
 
 function CfoInsightCard({ text }: { text: string }) {
   return (
-    <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm overflow-hidden">
-      <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
-        <Sparkles className="w-4 h-4 text-primary shrink-0" />
-        <span className="text-xs font-semibold uppercase tracking-wider text-primary">CFO Insight</span>
+    <div className="sc-purple rounded-2xl shadow-sm overflow-hidden">
+      <div className="sc-purple-header flex items-center gap-2.5 px-6 py-3.5">
+        <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
+        <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">CFO Insight</span>
       </div>
       <div className="px-6 py-5">
         <p className="text-sm font-medium text-foreground leading-relaxed">{text}</p>
@@ -93,8 +93,8 @@ function CfoInsightCard({ text }: { text: string }) {
 
 function InlineCfoInsight({ text }: { text: string }) {
   return (
-    <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
-      <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-1">CFO Insight</p>
+    <div className="sc-purple rounded-xl px-4 py-3">
+      <p className="text-xs text-indigo-300 font-semibold uppercase tracking-wider mb-1">CFO Insight</p>
       <p className="text-sm text-foreground leading-relaxed">{text}</p>
     </div>
   );
@@ -291,29 +291,29 @@ export default function CashControl() {
           </div>
         </div>
 
-        <div className="flex items-start gap-3 px-5 py-4 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/60 dark:bg-amber-950/15">
-          <Wallet className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="sc-orange flex items-start gap-3 px-5 py-4 rounded-2xl">
+          <Wallet className="w-4 h-4 text-[#FB923C] shrink-0 mt-0.5" />
           <div>
-            <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-0.5">Cash Headroom</p>
-            <p className="text-sm text-amber-700/90 dark:text-amber-400/85 leading-relaxed">
+            <p className="text-xs font-semibold text-[#FB923C] mb-0.5">Cash Headroom</p>
+            <p className="text-sm text-orange-300/85 leading-relaxed">
               Cash could fall by £64k before runway drops below 2 months.
             </p>
           </div>
         </div>
 
         {/* Cash Risk Level — updated text */}
-        <div className="flex items-start gap-4 p-5 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20">
-          <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
-            <Shield className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+        <div className="sc-slate flex items-start gap-4 p-5 rounded-2xl">
+          <div className="w-9 h-9 rounded-xl bg-slate-700/50 flex items-center justify-center shrink-0">
+            <Shield className="w-4 h-4 text-slate-300" />
           </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">Cash Risk Level</p>
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800/60 text-amber-800 dark:text-amber-300">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">Cash Risk Level</p>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-600/60 text-slate-200">
                 Moderate
               </span>
             </div>
-            <p className="text-sm text-amber-800 dark:text-amber-300/80 leading-relaxed">
+            <p className="text-sm text-slate-300/85 leading-relaxed">
               If inventory and supplier timing remain unchanged, available headroom is likely to tighten within the next 60 days.
             </p>
           </div>
@@ -323,11 +323,11 @@ export default function CashControl() {
       <AiCfoAskCard pageId="cash" />
 
       {/* ── Cash Trend bar ── */}
-      <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-950/15 mb-4">
-        <TrendingUp className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+      <div className="sc-orange flex items-center gap-3 px-5 py-3 rounded-xl mb-4">
+        <TrendingUp className="w-4 h-4 text-[#FB923C] shrink-0" />
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-xs font-bold text-amber-800 dark:text-amber-300">Cash Trend: Stable but tightening</span>
-          <span className="text-xs text-amber-700/70 dark:text-amber-400/70">Stock build absorbed 59% of this month's trading cash.</span>
+          <span className="text-xs font-bold text-[#FB923C]">Cash Trend: Stable but tightening</span>
+          <span className="text-xs text-orange-300/70">Stock build absorbed 59% of this month's trading cash.</span>
         </div>
       </div>
 

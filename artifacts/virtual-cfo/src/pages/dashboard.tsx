@@ -387,10 +387,10 @@ export default function Dashboard() {
       </div>
 
       {/* ══ FASTEST ROUTE TO PROFIT IMPROVEMENT ════════════════════════════ */}
-      <div className="rounded-2xl border border-primary/25 bg-primary/5 shadow-sm mb-5 overflow-hidden">
-        <div className="flex items-center gap-2.5 px-6 py-3.5 bg-primary/10 border-b border-primary/20">
-          <Sparkles className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">Fastest Route to Profit Improvement</span>
+      <div className="sc-purple rounded-2xl shadow-sm mb-5 overflow-hidden">
+        <div className="sc-purple-header flex items-center gap-2.5 px-6 py-3.5">
+          <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">Fastest Route to Profit Improvement</span>
         </div>
         <div className="px-6 py-5">
           {isPro ? (

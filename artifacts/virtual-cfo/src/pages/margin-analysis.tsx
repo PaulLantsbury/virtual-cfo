@@ -1283,15 +1283,15 @@ export default function MarginAnalysis() {
       />
 
       {/* CFO insight strip */}
-      <div className="flex items-start gap-3 mb-4 px-5 py-3.5 rounded-xl bg-primary/5 border border-primary/15">
-        <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+      <div className="sc-purple flex items-start gap-3 mb-4 px-5 py-3.5 rounded-xl">
+        <Sparkles className="w-4 h-4 text-indigo-300 shrink-0 mt-0.5" />
         <p className="text-sm text-foreground leading-relaxed">
           <span className="font-semibold">Meta CAC is the single largest drag</span> — accounting for £3.40 of the £8.90 total per-order margin decline this month. The fastest path to margin recovery runs through channel mix and discount discipline.
         </p>
       </div>
 
       {/* Summary line */}
-      <div className="flex items-start justify-between mb-4 px-5 py-3.5 rounded-xl bg-destructive/5 border border-destructive/15 gap-6">
+      <div className="sc-orange flex items-start justify-between mb-4 px-5 py-3.5 rounded-xl gap-6">
         <p className="text-sm font-semibold text-foreground mt-0.5">Total margin impact — {selectedLabel}</p>
         <div className="text-right shrink-0">
           <p className={cn(

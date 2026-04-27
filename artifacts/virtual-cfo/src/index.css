@@ -167,6 +167,39 @@ main .bg-slate-100 {
   --muted-foreground: 215 16% 47%;
 }
 
+/* ── Signal card semantic themes — navy canvas optimised ─────────────────── */
+/* Six surface types for insight panels, opportunities and warning strips.    */
+
+.sc-green  { background: #0F2E28; border: 1px solid #1F6F5E; border-left: 4px solid #34D399; }
+.sc-amber  { background: #2A2313; border: 1px solid #C28A2E; border-left: 4px solid #F59E0B; }
+.sc-teal   { background: #102A33; border: 1px solid #2E7C8F; }
+.sc-slate  { background: #1E293B; border: 1px solid #64748B; }
+.sc-orange { background: #2B1A12; border: 1px solid #EA580C; border-left: 4px solid #EA580C; }
+.sc-purple { background: #1B1F3B; border: 1px solid #6366F1; border-left: 4px solid #6366F1; }
+.sc-purple-header { background: rgba(99, 102, 241, 0.12); border-bottom: 1px solid rgba(99, 102, 241, 0.25); }
+
+/* Text accent overrides — lift dark Tailwind colour classes in each dark surface */
+.sc-green  [class*="text-emerald-"]       { color: #34D399; }
+.sc-teal   [class*="text-emerald-"]       { color: #22D3EE; }
+.sc-amber  [class*="text-amber-"]         { color: #F59E0B; }
+.sc-orange [class*="text-red-"],
+.sc-orange [class*="text-amber-"],
+.sc-orange [class*="text-destructive"]    { color: #FB923C; }
+
+/* Inner divider / sub-border overrides */
+.sc-teal   [class*="border-emerald-"]     { border-color: rgba(46, 124, 143, 0.40); }
+.sc-green  [class*="border-emerald-"]     { border-color: rgba(31, 111, 94,  0.50); }
+.sc-amber  [class*="border-amber-"]       { border-color: rgba(194, 138, 46, 0.45); }
+.sc-orange [class*="border-red-"],
+.sc-orange [class*="border-amber-"],
+.sc-orange [class*="border-destructive"]  { border-color: rgba(234, 88, 12, 0.45); }
+
+/* Icon container backgrounds inside signal panels */
+.sc-teal  .bg-emerald-100 { background-color: rgba(34, 211, 238, 0.12); }
+.sc-green .bg-emerald-100 { background-color: rgba(52, 211, 153, 0.12); }
+.sc-amber .bg-amber-100   { background-color: rgba(245, 158, 11, 0.15); }
+.sc-orange .bg-amber-100  { background-color: rgba(251, 146, 60, 0.15); }
+
 /* ── Elevated card depth against the navy canvas ──────────────────────────── */
 /* Cards that float above the dark gradient background need stronger shadows  */
 .bg-card {

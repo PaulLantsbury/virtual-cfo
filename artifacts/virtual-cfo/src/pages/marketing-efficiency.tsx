@@ -533,12 +533,12 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-primary/30 shadow-md mb-10 overflow-hidden">
+      <div className="sc-purple rounded-2xl shadow-md mb-10 overflow-hidden">
 
         {/* ── Header bar ── */}
-        <div className="flex items-center gap-3 px-6 py-3 bg-primary/10 border-b border-primary/20">
-          <Sparkles className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+        <div className="sc-purple-header flex items-center gap-3 px-6 py-3">
+          <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
+          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
             CFO Insight
           </span>
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-destructive/15 text-destructive whitespace-nowrap">
@@ -547,7 +547,7 @@ export default function MarketingEfficiency() {
         </div>
 
         {/* ── Body ── */}
-        <div className="bg-primary/5 px-6 pt-5 pb-6">
+        <div className="px-6 pt-5 pb-6">
 
           {/* ── Hero metrics ── */}
           <div className="grid grid-cols-2 mb-5 pb-5 border-b border-primary/15">
@@ -1597,7 +1597,7 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* Summary block */}
-      <div className="flex items-start justify-between mb-4 px-5 py-4 rounded-xl bg-destructive/5 border border-destructive/15 gap-6">
+      <div className="sc-orange flex items-start justify-between mb-4 px-5 py-4 rounded-xl gap-6">
         <p className="text-sm font-semibold text-foreground mt-0.5">
           Total marketing efficiency impact — {periodBadge}
         </p>

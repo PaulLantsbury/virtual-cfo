@@ -13,6 +13,9 @@ import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { MONTHLY_CM_PCT } from "@/lib/data/business-snapshot";
+import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
+import { CHANNEL_CM_PCT } from "@/lib/data/channel-metrics";
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true  },
@@ -31,12 +34,11 @@ const TREND_DATA = [
 ];
 
 const CM_VALUE = 52913;
-const CM_PCT   = 42.3;
+const CM_PCT   = MONTHLY_CM_PCT; // imported from business-snapshot (42.3)
 const CM_PREV  = 45.8;
 const CM_CHANGE = +(CM_PCT - CM_PREV).toFixed(1);
 
-const CAC_PAYBACK        = 1.4;
-const CAC_PAYBACK_PREV   = 1.1;
+// CAC_PAYBACK and CAC_PAYBACK_PREV imported from growth-metrics (1.4, 1.1)
 
 const BENCHMARK_TARGET = { low: 45, high: 55 };
 
@@ -236,11 +238,13 @@ const UNIT_ECON_HISTORY = [
   { month: "Mar '26", revenue: 68.40, contribution: 35.00, highlighted: true  },
 ];
 
+// Channel CM percentages imported from channel-metrics (shared with marketing-efficiency).
+// Revenue figures remain local — they reflect the margin-analysis period basis.
 const CHANNELS = [
-  { name: "Meta",             cm: 34.2, revenue: 41800 },
-  { name: "Google Shopping",  cm: 40.1, revenue: 28600 },
-  { name: "Email",            cm: 58.6, revenue: 22100 },
-  { name: "Organic",          cm: 52.3, revenue: 32000 },
+  { name: "Meta",            cm: CHANNEL_CM_PCT.meta,           revenue: 41800 },
+  { name: "Google Shopping", cm: CHANNEL_CM_PCT.googleShopping, revenue: 28600 },
+  { name: "Email",           cm: CHANNEL_CM_PCT.email,          revenue: 22100 },
+  { name: "Organic",         cm: CHANNEL_CM_PCT.organic,        revenue: 32000 },
 ];
 
 /**

@@ -17,16 +17,26 @@ import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { GROSS_REVENUE as BASE_REVENUE, BASE_CONTRIBUTION, CONTRIBUTION_PER_ORDER as BASE_CPO } from "@/lib/data/pricing-metrics";
+import { BASE_EBITDA } from "@/lib/data/business-snapshot";
+import { CASH_BALANCE as BASE_CASH, CASH_RUNWAY as BASE_RUNWAY, WORKING_CAPITAL_DRAG as BASE_WORKING_CAPITAL } from "@/lib/data/cash-snapshot";
 
 // ─── Base financial constants ─────────────────────────────────────────────────
-const BASE_REVENUE          = 420_000;
-const BASE_CONTRIBUTION     = 198_000;
-const BASE_EBITDA           = 78_000;
-const BASE_CASH             = 186_000;
-const BASE_RUNWAY           = 3.4;
-const BASE_WORKING_CAPITAL  = 74_000;
-const BASE_CAC_PAYBACK      = 1.6;
-const BASE_CPO              = 12.40;
+// Imported from central mock data layer — replace those files with live feeds
+// when Shopify / Xero integrations are connected.
+//
+// BASE_REVENUE         = 420,000  (GROSS_REVENUE from pricing-metrics)
+// BASE_CONTRIBUTION    = 198,000  (from pricing-metrics — same value as business-snapshot CONTRIBUTION)
+// BASE_EBITDA          = 78,000   (from business-snapshot)
+// BASE_CASH            = 186,000  (CASH_BALANCE from cash-snapshot)
+// BASE_RUNWAY          = 3.4      (CASH_RUNWAY from cash-snapshot)
+// BASE_WORKING_CAPITAL = 74,000   (WORKING_CAPITAL_DRAG from cash-snapshot)
+// BASE_CPO             = 12.40    (CONTRIBUTION_PER_ORDER from pricing-metrics)
+
+// Scenario-lab specific: BASE_CAC_PAYBACK uses 1.6 as a scenario modelling starting
+// point (intentionally higher than the shared CAC_PAYBACK = 1.4 in growth-metrics.ts,
+// which reflects the current actual payback — 1.6 is the conservative scenario base).
+const BASE_CAC_PAYBACK = 1.6;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ScenarioState {

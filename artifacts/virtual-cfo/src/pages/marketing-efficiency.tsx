@@ -16,27 +16,32 @@ import { cn } from "@/lib/utils";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import {
+  BLENDED_CAC,
+  BLENDED_CAC_PREV,
+  BLENDED_CAC_LY,
+  BLENDED_ROAS,
+  BLENDED_ROAS_PREV,
+  BLENDED_ROAS_LY,
+  CHANNEL_CM_PCT,
+  CAC_BY_CHANNEL,
+  PAYBACK_BY_CHANNEL,
+} from "@/lib/data/channel-metrics";
+import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
+// BLENDED_CAC, BLENDED_ROAS, CAC_BY_CHANNEL, PAYBACK_BY_CHANNEL, CHANNEL_CM_PCT
+//   imported from src/lib/data/channel-metrics.ts
+// CAC_PAYBACK, CAC_PAYBACK_PREV
+//   imported from src/lib/data/growth-metrics.ts
 
-/** @dynamic */
-const BLENDED_CAC        = 12.20;
-const BLENDED_CAC_PREV   = 9.80;   // last month
-const BLENDED_CAC_LY     = 10.20;  // 12-month average
-const BLENDED_CAC_CHANGE = +(BLENDED_CAC - BLENDED_CAC_PREV).toFixed(2);
+const BLENDED_CAC_CHANGE    = +(BLENDED_CAC - BLENDED_CAC_PREV).toFixed(2);
 const BLENDED_CAC_CHANGE_LY = +(BLENDED_CAC - BLENDED_CAC_LY).toFixed(2);
 
-/** @dynamic */
-const BLENDED_ROAS       = 2.8;
-const BLENDED_ROAS_PREV  = 3.4;    // last month
-const BLENDED_ROAS_LY    = 3.2;    // 12-month average
 const BLENDED_ROAS_CHANGE_MOM = +(BLENDED_ROAS - BLENDED_ROAS_PREV).toFixed(1);
 const BLENDED_ROAS_CHANGE_LY  = +(BLENDED_ROAS - BLENDED_ROAS_LY).toFixed(1);
 
-/** @dynamic */
-const CAC_PAYBACK        = 1.4;
-const CAC_PAYBACK_PREV   = 1.1;    // last month
-const CAC_PAYBACK_LY     = 1.0;    // 12-month average
+const CAC_PAYBACK_LY = 1.0;    // 12-month average — page-specific, not shared
 
 /** @dynamic */
 const MKT_CM             = 38.6;
@@ -105,12 +110,14 @@ const CFO_INSIGHT = {
   recoveryLever: "Reallocate 15–25% of paid acquisition spend toward Email and Organic — the two highest-contribution channels by profit margin",
 } as const;
 
+// Channel CM percentages imported from channel-metrics (shared with margin-analysis).
+// Revenue figures remain local — they reflect the marketing-efficiency period basis.
 /** @dynamic Replace with live channel-level margin data from Shopify + ad platforms */
 const CHANNEL_CM = [
-  { channel: "Email",           cm: 58.6, revenue: 18_200 },
-  { channel: "Organic",         cm: 52.3, revenue: 24_800 },
-  { channel: "Google Shopping", cm: 40.1, revenue: 42_600 },
-  { channel: "Meta",            cm: 34.2, revenue: 38_900 },
+  { channel: "Email",           cm: CHANNEL_CM_PCT.email,          revenue: 18_200 },
+  { channel: "Organic",         cm: CHANNEL_CM_PCT.organic,        revenue: 24_800 },
+  { channel: "Google Shopping", cm: CHANNEL_CM_PCT.googleShopping, revenue: 42_600 },
+  { channel: "Meta",            cm: CHANNEL_CM_PCT.meta,           revenue: 38_900 },
 ];
 
 /**
@@ -164,21 +171,9 @@ const CHANNEL_SHARE = CHANNEL_CM.map((c) => {
 
 type EfficiencyRating = "strong" | "watch" | "weak";
 
-/** @dynamic Replace with live CAC per channel from ad platform APIs */
-const CAC_BY_CHANNEL: {
-  channel: string;
-  cac: number;
-  change: number | null;
-  changeLabel: string;
-  efficiency: EfficiencyRating;
-}[] = [
-  { channel: "Meta",            cac: 18.40, change: 14,   changeLabel: "+14%",   efficiency: "weak"   },
-  { channel: "Google Shopping", cac: 11.20, change: 6,    changeLabel: "+6%",    efficiency: "watch"  },
-  { channel: "Email",           cac:  4.80, change: -2,   changeLabel: "−2%",    efficiency: "strong" },
-  { channel: "Organic",         cac:  2.10, change: null, changeLabel: "Stable", efficiency: "strong" },
-];
+// CAC_BY_CHANNEL and PAYBACK_BY_CHANNEL imported from channel-metrics.ts above.
+// EfficiencyRating type kept local for JSX compatibility.
 
-/** @dynamic */
 /**
  * Generic channel labels for the CAC Payback FREE ghost preview.
  * Ordered to match PAYBACK_BY_CHANNEL sorted by payback ascending:
@@ -187,14 +182,6 @@ const CAC_BY_CHANNEL: {
 const PAYBACK_CHANNEL_GHOST_NAMES = ["Channel A", "Channel B", "Channel C", "Channel D"] as const;
 
 const PAYBACK_THRESHOLD = 1.5;
-
-/** @dynamic Replace with live payback data */
-const PAYBACK_BY_CHANNEL = [
-  { channel: "Email",           payback: 0.6 },
-  { channel: "Organic",         payback: 0.8 },
-  { channel: "Google Shopping", payback: 1.3 },
-  { channel: "Meta",            payback: 2.1 },
-];
 
 /** @dynamic Replace with live monthly efficiency data */
 const TREND_DATA = [

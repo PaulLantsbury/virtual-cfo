@@ -17,24 +17,36 @@ import { canAccess } from "@/lib/plan";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import {
+  GROSS_REVENUE,
+  DISCOUNT_COST,
+  RETURNS_IMPACT,
+  ORDERS,
+  BASE_CONTRIBUTION,
+  AVG_DISCOUNT_PCT,
+} from "@/lib/data/pricing-metrics";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const GROSS_REVENUE       = 420_000;
-const DISCOUNT_COST       = 64_000;
-const BASE_NET_REVENUE    = GROSS_REVENUE - DISCOUNT_COST;  // 356,000
-const RETURNS_IMPACT      = 18_000;
-const BASE_NET_RETAINED   = BASE_NET_REVENUE - RETURNS_IMPACT; // 338,000
-const ORDERS              = 16_000;
-const BASE_CONTRIBUTION   = 198_000;
-const AVG_DISCOUNT_PCT    = 18;
+// Imported from src/lib/data/pricing-metrics.ts — the central source of truth
+// for pricing period metrics. Replace that file with live Shopify data feeds.
+//
+// GROSS_REVENUE    = 420,000
+// DISCOUNT_COST    = 64,000
+// RETURNS_IMPACT   = 18,000
+// ORDERS           = 16,000
+// BASE_CONTRIBUTION= 198,000
+// AVG_DISCOUNT_PCT = 18
+
+const BASE_NET_REVENUE  = GROSS_REVENUE - DISCOUNT_COST;   // 356,000
+const BASE_NET_RETAINED = BASE_NET_REVENUE - RETURNS_IMPACT; // 338,000
 
 // ─── Revenue bridge data ──────────────────────────────────────────────────────
 const REV_BRIDGE = [
-  { name: "Gross Revenue", invisible: 0,              value: 420_000, type: "base"     },
-  { name: "Discounts",     invisible: BASE_NET_REVENUE, value: 64_000,  type: "negative" },
-  { name: "Net Revenue",   invisible: 0,              value: 356_000, type: "result"   },
-  { name: "Returns",       invisible: BASE_NET_RETAINED, value: 18_000,  type: "negative" },
-  { name: "Net Retained",  invisible: 0,              value: 338_000, type: "result"   },
+  { name: "Gross Revenue", invisible: 0,                value: GROSS_REVENUE,     type: "base"     },
+  { name: "Discounts",     invisible: BASE_NET_REVENUE,  value: DISCOUNT_COST,     type: "negative" },
+  { name: "Net Revenue",   invisible: 0,                value: BASE_NET_REVENUE,  type: "result"   },
+  { name: "Returns",       invisible: BASE_NET_RETAINED, value: RETURNS_IMPACT,    type: "negative" },
+  { name: "Net Retained",  invisible: 0,                value: BASE_NET_RETAINED, type: "result"   },
 ];
 const REV_BRIDGE_COLOR: Record<string, string> = {
   base: "#6366f1", negative: "#ef4444", result: "#6366f1",
@@ -42,20 +54,20 @@ const REV_BRIDGE_COLOR: Record<string, string> = {
 
 // ─── Contribution leakage data ────────────────────────────────────────────────
 const LEAKAGE_DATA = [
-  { name: "Discounts",       value: 64_000 },
-  { name: "Returns",         value: 18_000 },
-  { name: "Shipping subsidy",value: 11_000 },
-  { name: "Payment fees",    value: 9_000  },
+  { name: "Discounts",        value: DISCOUNT_COST   },
+  { name: "Returns",          value: RETURNS_IMPACT  },
+  { name: "Shipping subsidy", value: 11_000 }, // page-specific — not shared
+  { name: "Payment fees",     value: 9_000  }, // page-specific — not shared
 ];
 const LEAKAGE_COLORS = ["#ef4444", "#f97316", "#f59e0b", "#84cc16"];
 
 // ─── Revenue bridge table ─────────────────────────────────────────────────────
 const REV_BRIDGE_TABLE = [
-  { step: "Gross revenue",      amount:  420_000, meaning: "Sales before discounts and returns",                       positive: true,  isResult: false },
-  { step: "Discounts applied",  amount: -64_000,  meaning: "Revenue given away through promotions and discount codes", positive: false, isResult: false },
-  { step: "Net realised revenue", amount: 356_000, meaning: "Revenue retained after discounts",                       positive: true,  isResult: true  },
-  { step: "Returns impact",     amount: -18_000,  meaning: "Revenue and contribution lost through returned orders",    positive: false, isResult: false },
-  { step: "Net retained revenue", amount: 338_000, meaning: "Revenue retained after discounts and returns",           positive: true,  isResult: true  },
+  { step: "Gross revenue",        amount:  GROSS_REVENUE,      meaning: "Sales before discounts and returns",                       positive: true,  isResult: false },
+  { step: "Discounts applied",    amount: -DISCOUNT_COST,      meaning: "Revenue given away through promotions and discount codes", positive: false, isResult: false },
+  { step: "Net realised revenue", amount:  BASE_NET_REVENUE,   meaning: "Revenue retained after discounts",                        positive: true,  isResult: true  },
+  { step: "Returns impact",       amount: -RETURNS_IMPACT,     meaning: "Revenue and contribution lost through returned orders",    positive: false, isResult: false },
+  { step: "Net retained revenue", amount:  BASE_NET_RETAINED,  meaning: "Revenue retained after discounts and returns",            positive: true,  isResult: true  },
 ];
 
 // ─── Pricing movement driver data ─────────────────────────────────────────────

@@ -1,0 +1,143 @@
+Create the first proper central mock data layer for the Virtual CFO app.
+
+Objective:
+Replace duplicated local mock values with a small number of central data files, without changing page layouts, calculations, visuals or gating.
+
+Do not connect real APIs yet.
+Do not add Shopify, Xero, Google or Meta integrations yet.
+Do not change UI design.
+
+Create these files:
+
+src/lib/data/business-snapshot.ts
+src/lib/data/cash-snapshot.ts
+src/lib/data/growth-metrics.ts
+src/lib/data/channel-metrics.ts
+src/lib/data/pricing-metrics.ts
+
+1. business-snapshot.ts
+
+Move the shared business P&L values here:
+
+- revenue
+- discounts
+- returns
+- net revenue
+- variable costs
+- contribution
+- contribution margin %
+- fixed costs
+- EBITDA / profit
+- contribution per order
+- period label
+
+Use this as the single source of truth for:
+Dashboard
+Margin Analysis
+Profit Engine
+Cash Control
+Scenario Lab
+
+2. cash-snapshot.ts
+
+Move shared cash values here:
+
+- cash balance
+- cash runway
+- working capital drag
+- inventory days
+- supplier days
+- cash bridge rows
+- monthly fixed costs
+
+Use this as the single source of truth for:
+Dashboard
+Cash Control
+Scenario Lab
+Alerts
+
+3. growth-metrics.ts
+
+Move shared growth quality values here:
+
+- repeat purchase rate
+- discount dependency
+- CAC payback
+- growth quality score
+- retention status
+- growth quality drivers
+
+Resolve the current repeat purchase mismatch by using 28% consistently unless another page depends on 27%.
+
+4. channel-metrics.ts
+
+Move shared marketing/channel values here:
+
+- channel name
+- revenue by channel
+- marketing spend by channel
+- CAC by channel
+- ROAS by channel
+- contribution profit by channel
+- contribution per order by channel
+- CAC payback by channel
+- blended CAC
+- blended ROAS
+
+Use this for:
+Marketing Efficiency
+Margin Analysis
+Growth Quality
+Dashboard
+Scenario Lab
+
+5. pricing-metrics.ts
+
+Move shared pricing/discount values here:
+
+- gross revenue
+- average discount %
+- discount cost
+- full-price order ratio
+- returns impact
+- average selling price
+- contribution per order
+- pricing power index
+- discount dependency
+- recoverable contribution from pricing
+
+Use this for:
+Pricing Optimisation
+Dashboard
+Margin Analysis
+Growth Quality
+Scenario Lab
+
+6. Replace duplicated local constants carefully
+
+For each page, replace duplicated hard-coded values with imports from these central files where safe.
+
+Do not refactor complex local chart arrays yet unless they are clearly repeated.
+
+7. Leave page-specific display data local for now
+
+Keep page-specific chart arrays, explanatory text, mock trends and simulator UI state local unless they use one of the shared base numbers.
+
+8. Add comments
+
+In each data file, add clear comments explaining:
+
+- this is temporary central mock data
+- it will later be replaced by Shopify / Xero / Google / Meta feeds
+- pages should import from these files rather than declaring duplicated base numbers
+
+9. Final report
+
+After making changes, report:
+
+- files created
+- pages updated
+- duplicate constants removed
+- values now centralised
+- values intentionally left local
+- any issues or conflicts found

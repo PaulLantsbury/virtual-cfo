@@ -13,48 +13,54 @@ import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
+import { MONTHLY_CM_PCT, MONTHLY_REVENUE } from "@/lib/data/business-snapshot";
+import { CASH_RUNWAY } from "@/lib/data/cash-snapshot";
+import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
+// KPI display values derived from central mock data layer imports above.
+// Status values require explicit typing now that `as const` is removed.
+type KpiStatus = "warning" | "positive" | "danger" | "neutral";
 
 const CFO_INSIGHT = {
   body: "The fastest route to improvement is reducing fulfilment costs, tightening discount exposure on returning customers and reallocating inefficient Meta spend toward higher-contribution channels.",
   upside: { cashLow: 18_000, cashHigh: 42_000 },
 } as const;
 
-const KPI_CARDS = [
+const KPI_CARDS: { id: string; title: string; value: string; change: string; status: KpiStatus; text: string }[] = [
   {
-    id: "cm",   title: "Contribution Margin",      value: "42.3%",         change: "↓ 2.8% vs last month",   status: "warning",
+    id: "cm",   title: "Contribution Margin",      value: `${MONTHLY_CM_PCT}%`,          change: "↓ 2.8% vs last month",                status: "warning",
     text: "Margin is below target and weakening.",
   },
   {
-    id: "rc",   title: "Recoverable Contribution", value: "£18k–£42k",     change: "Immediate margin recovery available",  status: "positive",
+    id: "rc",   title: "Recoverable Contribution", value: "£18k–£42k",                   change: "Immediate margin recovery available",  status: "positive",
     text: "Immediate margin recovery available from pricing, marketing and fulfilment improvements.",
   },
   {
-    id: "cr",   title: "Cash Runway",              value: "3.4 months",    change: "Moderate",                status: "warning",
+    id: "cr",   title: "Cash Runway",              value: `${CASH_RUNWAY} months`,        change: "Moderate",                            status: "warning",
     text: "Cash remains positive, but runway is tightening.",
   },
   {
-    id: "dd",   title: "Discount Dependency",      value: "38%",           change: "↑ 11% vs last month",    status: "danger",
+    id: "dd",   title: "Discount Dependency",      value: `${DISCOUNT_DEP}%`,             change: "↑ 11% vs last month",                status: "danger",
     text: "High reliance on promotions to sustain growth.",
   },
   {
-    id: "ae",   title: "Acquisition Efficiency",   value: "Meta CAC +14%", change: "↓ efficiency",           status: "danger",
+    id: "ae",   title: "Acquisition Efficiency",   value: "Meta CAC +14%",                change: "↓ efficiency",                       status: "danger",
     text: "Meta CAC is rising faster than contribution per order.",
   },
   {
-    id: "rpr",  title: "Repeat Purchase Rate",     value: "28%",           change: "↑ 4.2% vs last month",   status: "positive",
+    id: "rpr",  title: "Repeat Purchase Rate",     value: `${REPEAT_RATE}%`,              change: "↑ 4.2% vs last month",               status: "positive",
     text: "Retention is strengthening as more customers place second orders.",
   },
   {
-    id: "mr",   title: "Monthly Revenue",          value: "£124,500",      change: "↑ 12.4% vs last month",  status: "positive",
+    id: "mr",   title: "Monthly Revenue",          value: `£${MONTHLY_REVENUE.toLocaleString("en-GB")}`, change: "↑ 12.4% vs last month", status: "positive",
     text: "Revenue is growing, but margin quality is weakening.",
   },
   {
-    id: "np",   title: "Net Profit",               value: "£56,300",       change: "↑ 18.7% vs last month",  status: "positive",
+    id: "np",   title: "Net Profit",               value: "£56,300",                      change: "↑ 18.7% vs last month",              status: "positive",
     text: "Profit remains positive, but quality of growth needs attention.",
   },
-] as const;
+];
 
 const TOP_DRIVERS: Driver[] = [
   {

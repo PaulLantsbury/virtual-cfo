@@ -16,18 +16,30 @@ import { canAccess } from "@/lib/plan";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
+import {
+  ANNUAL_REVENUE as BASE_REVENUE,
+  ANNUAL_DISCOUNTS as DISCOUNTS,
+  ANNUAL_RETURNS as RETURNS,
+  ANNUAL_NET_REVENUE as NET_REVENUE,
+  ANNUAL_VARIABLE_COSTS as VARIABLE_COSTS,
+  CONTRIBUTION,
+  BASE_EBITDA,
+} from "@/lib/data/business-snapshot";
+import { MONTHLY_FIXED_COSTS as BASE_FIXED_COSTS } from "@/lib/data/cash-snapshot";
 
 // ─── Base data constants ─────────────────────────────────────────────────────
-// @dynamic Replace with Xero-derived figures when live data is connected.
-
-const BASE_REVENUE         = 520_000;
-const DISCOUNTS            = 82_000;
-const RETURNS              = 41_000;
-const NET_REVENUE          = BASE_REVENUE - DISCOUNTS - RETURNS; // 397,000
-const VARIABLE_COSTS       = 199_000;
-const CONTRIBUTION         = NET_REVENUE - VARIABLE_COSTS;       // 198,000
-const BASE_FIXED_COSTS     = 120_000;
-const BASE_EBITDA          = CONTRIBUTION - BASE_FIXED_COSTS;    // 78,000
+// Values imported from central mock data layer (src/lib/data/business-snapshot.ts
+// and src/lib/data/cash-snapshot.ts). Replace those files with live Xero/Shopify
+// feeds when integrations are connected.
+//
+// BASE_REVENUE     = 520,000  (ANNUAL_REVENUE)
+// DISCOUNTS        = 82,000   (ANNUAL_DISCOUNTS)
+// RETURNS          = 41,000   (ANNUAL_RETURNS)
+// NET_REVENUE      = 397,000  (ANNUAL_NET_REVENUE — derived)
+// VARIABLE_COSTS   = 199,000  (ANNUAL_VARIABLE_COSTS)
+// CONTRIBUTION     = 198,000  (derived: NET_REVENUE − VARIABLE_COSTS)
+// BASE_FIXED_COSTS = 120,000  (MONTHLY_FIXED_COSTS from cash-snapshot)
+// BASE_EBITDA      = 78,000   (derived: CONTRIBUTION − BASE_FIXED_COSTS)
 
 // Derived percentages
 const CONTRIBUTION_MARGIN_PCT   = CONTRIBUTION / BASE_REVENUE;                          // ≈ 38.08%

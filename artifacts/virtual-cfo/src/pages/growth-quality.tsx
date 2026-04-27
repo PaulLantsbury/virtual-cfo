@@ -14,28 +14,27 @@ import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import {
+  REPEAT_RATE,
+  REPEAT_RATE_PREV,
+  DISCOUNT_DEP,
+  DISCOUNT_DEP_PREV,
+  CAC_PAYBACK,
+  CAC_PAYBACK_PREV,
+  GQ_SCORE,
+  GQ_SCORE_PREV,
+} from "@/lib/data/growth-metrics";
 
 // ─── Data constants ──────────────────────────────────────────────────────────
+// REPEAT_RATE, DISCOUNT_DEP, CAC_PAYBACK, GQ_SCORE imported from
+// src/lib/data/growth-metrics.ts — the central source of truth for growth metrics.
+// REPEAT_RATE resolved to 28% (was 27% here; Dashboard and BENCHMARKS both use 28%).
 
-/** @dynamic Replace with live-computed growth quality score when data is connected */
-const GQ_SCORE        = "B-";
-const GQ_SCORE_PREV   = "B";
 const GQ_SCORE_DIR    = "down" as const;
 
-/** @dynamic */
-const REPEAT_RATE       = 27.0;
-const REPEAT_RATE_PREV  = 24.6;
-const REPEAT_RATE_CHANGE = +(REPEAT_RATE - REPEAT_RATE_PREV).toFixed(1);
-
-/** @dynamic */
-const DISCOUNT_DEP       = 38.0;
-const DISCOUNT_DEP_PREV  = 36.2;
+const REPEAT_RATE_CHANGE  = +(REPEAT_RATE  - REPEAT_RATE_PREV).toFixed(1);
 const DISCOUNT_DEP_CHANGE = +(DISCOUNT_DEP - DISCOUNT_DEP_PREV).toFixed(1);
-
-/** @dynamic */
-const CAC_PAYBACK       = 1.4;
-const CAC_PAYBACK_PREV  = 1.1;
-const CAC_PAYBACK_CHANGE = +(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1);
+const CAC_PAYBACK_CHANGE  = +(CAC_PAYBACK  - CAC_PAYBACK_PREV).toFixed(1);
 
 /**
  * @ai-commentary Replace with AI-generated insight when ready.

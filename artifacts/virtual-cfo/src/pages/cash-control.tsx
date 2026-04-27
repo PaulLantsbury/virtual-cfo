@@ -15,16 +15,24 @@ import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
+import {
+  CASH_BALANCE,
+  CASH_RUNWAY,
+  MONTHLY_FIXED_COSTS,
+  WORKING_CAPITAL_DRAG,
+  INVENTORY_DAYS,
+  SUPPLIER_DAYS,
+  CASH_CONVERSION_CYCLE,
+} from "@/lib/data/cash-snapshot";
+import { ANNUAL_REVENUE } from "@/lib/data/business-snapshot";
 
 // ─── Base data constants ──────────────────────────────────────────────────────
-const CASH_BALANCE        = 186_000;
-const MONTHLY_FIXED_COSTS = 120_000;
-const WORKING_CAPITAL_DRAG = 74_000;
-const NET_CASH_MOVEMENT   = 14_000;
-const INVENTORY_DAYS      = 82;
-const SUPPLIER_DAYS       = 42;
-const CASH_CONVERSION_CYCLE = 47;
-const RUNWAY_DENOM        = Math.round(CASH_BALANCE / 3.4);
+// Values imported from central mock data layer (src/lib/data/cash-snapshot.ts
+// and src/lib/data/business-snapshot.ts). Replace those files with live
+// Xero / Shopify feeds when integrations are connected.
+
+const NET_CASH_MOVEMENT = 14_000; // unique to Cash Control — not shared elsewhere
+const RUNWAY_DENOM      = Math.round(CASH_BALANCE / CASH_RUNWAY);
 
 // ─── Cash Sensitivity Ranking data ───────────────────────────────────────────
 const RANKING_DATA = [
@@ -196,7 +204,7 @@ export default function CashControl() {
   const isProCost  = canAccess("cash_cost_pressure");
 
   // ── Simulator math ──────────────────────────────────────────────────────────
-  const revenueEffect   = (revChange / 100) * 520_000 * 0.38 * 0.4;
+  const revenueEffect   = (revChange / 100) * ANNUAL_REVENUE * 0.38 * 0.4;
   const inventoryEffect = -inventoryChange * 900;
   const supplierEffect  = supplierChange * 500;
   const fixedCostEffect = -(MONTHLY_FIXED_COSTS * fixedCostChange / 100);
@@ -208,7 +216,7 @@ export default function CashControl() {
   const projRunwayDenom = Math.max(10_000, RUNWAY_DENOM + (projFixedCosts - MONTHLY_FIXED_COSTS));
   const projRunway      = projCashBalance / projRunwayDenom;
   const projWCDrag      = Math.max(0, WORKING_CAPITAL_DRAG - inventoryEffect + Math.max(0, -supplierEffect));
-  const runwayDelta     = projRunway - 3.4;
+  const runwayDelta     = projRunway - CASH_RUNWAY;
 
   const simPrimaryText =
     projRunway < 2

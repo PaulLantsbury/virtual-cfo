@@ -70,7 +70,7 @@
   --input: 214 32% 91%;
   --ring: 228 89% 58%;
 
-  --card: 213 46% 97%;
+  --card: 210 40% 96%;
   --card-foreground: 222 47% 11%;
   --card-border: 214 32% 91%;
 
@@ -167,38 +167,55 @@ main .bg-slate-100 {
   --muted-foreground: 215 16% 47%;
 }
 
-/* ── Signal card semantic themes — navy canvas optimised ─────────────────── */
-/* Six surface types for insight panels, opportunities and warning strips.    */
+/* ── Signal card semantic themes — unified light surface ─────────────────── */
+/* All insight panels share one surface (#F4F7FB); semantic meaning is        */
+/* carried solely by the 4px left accent border. KPI cards use #F1F5F9.      */
 
-.sc-green  { background: #0F2E28; border: 1px solid #1F6F5E; border-left: 4px solid #34D399; }
-.sc-amber  { background: #2A2313; border: 1px solid #C28A2E; border-left: 4px solid #F59E0B; }
-.sc-teal   { background: #102A33; border: 1px solid #2E7C8F; }
-.sc-slate  { background: #1E293B; border: 1px solid #64748B; }
-.sc-orange { background: #2B1A12; border: 1px solid #EA580C; border-left: 4px solid #EA580C; }
-.sc-purple { background: #1B1F3B; border: 1px solid #6366F1; border-left: 4px solid #6366F1; }
-.sc-purple-header { background: rgba(99, 102, 241, 0.12); border-bottom: 1px solid rgba(99, 102, 241, 0.25); }
+.sc-green  { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #22C55E; }
+.sc-amber  { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #F59E0B; }
+.sc-teal   { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #06B6D4; }
+.sc-slate  { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #94A3B8; }
+.sc-orange { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #F97316; }
+.sc-purple { background: #F4F7FB; border: 1px solid #E2E8F0; border-left: 4px solid #6366F1; }
+.sc-purple-header { background: #EEF2FF; border-bottom: 1px solid #C7D2FE; }
 
-/* Text accent overrides — lift dark Tailwind colour classes in each dark surface */
-.sc-green  [class*="text-emerald-"]       { color: #34D399; }
-.sc-teal   [class*="text-emerald-"]       { color: #22D3EE; }
-.sc-amber  [class*="text-amber-"]         { color: #F59E0B; }
-.sc-orange [class*="text-red-"],
-.sc-orange [class*="text-amber-"],
-.sc-orange [class*="text-destructive"]    { color: #FB923C; }
+/* Restore dark foreground tokens inside light panels                         */
+/* (main sets --foreground to near-white for the navy canvas; panels need it  */
+/* restored so text-foreground and text-muted-foreground render dark.)        */
+.sc-green, .sc-amber, .sc-teal, .sc-slate, .sc-orange, .sc-purple {
+  --foreground: 222 47% 11%;
+  --muted-foreground: 215 16% 47%;
+}
 
-/* Inner divider / sub-border overrides */
-.sc-teal   [class*="border-emerald-"]     { border-color: rgba(46, 124, 143, 0.40); }
-.sc-green  [class*="border-emerald-"]     { border-color: rgba(31, 111, 94,  0.50); }
-.sc-amber  [class*="border-amber-"]       { border-color: rgba(194, 138, 46, 0.45); }
-.sc-orange [class*="border-red-"],
-.sc-orange [class*="border-amber-"],
-.sc-orange [class*="border-destructive"]  { border-color: rgba(234, 88, 12, 0.45); }
+/* ── Accent labels — semantic colour per panel type ─────────────────────── */
+/* Uses accessible (600/700) hues of each accent on the #F4F7FB surface.     */
 
-/* Icon container backgrounds inside signal panels */
-.sc-teal  .bg-emerald-100 { background-color: rgba(34, 211, 238, 0.12); }
-.sc-green .bg-emerald-100 { background-color: rgba(52, 211, 153, 0.12); }
-.sc-amber .bg-amber-100   { background-color: rgba(245, 158, 11, 0.15); }
-.sc-orange .bg-amber-100  { background-color: rgba(251, 146, 60, 0.15); }
+.sc-purple [class*="text-indigo-3"]        { color: #4F46E5; }
+.sc-purple-header [class*="text-indigo-3"] { color: #4F46E5; }
+
+.sc-teal   [class*="text-[#22D3EE]"]       { color: #0891B2; }
+.sc-green  [class*="text-[#34D399]"]       { color: #16A34A; }
+.sc-orange [class*="text-[#FB923C]"]       { color: #EA580C; }
+/* sc-amber: #F59E0B is already accessible on white — no override needed     */
+
+/* ── Body text — map light 300-series Tailwind classes to slate-600 ──────── */
+/* These were legible on the old dark panel backgrounds but not on #F4F7FB.  */
+.sc-teal   [class*="text-cyan-"]           { color: #475569; }
+.sc-teal   [class*="text-emerald-3"]       { color: #475569; }
+.sc-green  [class*="text-emerald-3"]       { color: #475569; }
+.sc-orange [class*="text-orange-3"],
+.sc-orange [class*="text-orange-4"]        { color: #475569; }
+.sc-amber  [class*="text-amber-3"]         { color: #475569; }
+.sc-slate  [class*="text-slate-2"],
+.sc-slate  [class*="text-slate-3"]         { color: #64748B; }
+
+/* ── Icon container backgrounds — appropriate tints for white surface ─────── */
+.sc-purple [class*="bg-indigo-9"]          { background-color: rgba(99,  102, 241, 0.10); }
+.sc-slate  [class*="bg-slate-7"]           { background-color: rgba(148, 163, 184, 0.20); }
+.sc-teal   [class*="bg-emerald-100"]       { background-color: rgba(6,   182, 212, 0.10); }
+.sc-green  [class*="bg-emerald-100"]       { background-color: rgba(34,  197,  94, 0.10); }
+.sc-amber  [class*="bg-amber-100"]         { background-color: rgba(245, 158,  11, 0.12); }
+.sc-orange [class*="bg-amber-100"]         { background-color: rgba(249, 115,  22, 0.12); }
 
 /* ── Elevated card depth against the navy canvas ──────────────────────────── */
 /* Cards that float above the dark gradient background need stronger shadows  */

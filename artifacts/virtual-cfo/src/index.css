@@ -764,3 +764,56 @@ main [class*="border-violet-2"]    { border-color: rgba(139,  92, 246, 0.40); }
 
 main [class~="text-sm"]            { font-size: 15px; }
 main [class~="text-xs"]            { font-size: 14px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* SCENARIO LAB — readability fixes                                           */
+/* No JSX changes. All selectors scoped to main.                             */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. CFO Insight / AI CFO Recommendation cards → sc-purple elevation ──── */
+/* Both bg-card panels contain a direct descendant with BOTH text-primary AND */
+/* uppercase tokens (the label paragraph). :has() is safe because:           */
+/*   – AiCfoAskCard wrapper uses bg-primary/5, NOT bg-card               */
+/*   – Recommended Scenario card has no text-primary+uppercase descendant     */
+/*   – "Why this plan?" icon has text-primary but no uppercase sibling on it  */
+/* border-left overrides only the left side of the existing border shorthand. */
+
+main [class~="bg-card"]:has([class~="text-primary"][class~="uppercase"]) {
+  background-color: #182A4A;
+  border-left:      4px solid #6366F1;
+}
+
+/* AI label text within those cards → #A5B4FC; icon (no uppercase) untouched */
+main [class~="bg-card"]:has([class~="text-primary"][class~="uppercase"]) [class~="text-primary"][class~="uppercase"] {
+  color: #A5B4FC;
+}
+
+/* ── 2. Scenario builder — active tab button → visible selection ────────── */
+/* Active tab: bg-background (= #07182E page bg) inside bg-secondary/60 bar. */
+/* Renders dark-on-dark without override. Target direct button children only. */
+
+main [class*="bg-secondary/60"] > button[class~="bg-background"] {
+  background-color: #2563EB;
+  color:            #FFFFFF;
+}
+
+/* ── 3. Unlock Pro button (bg-indigo-6xx) — restore white text ─────────── */
+/* The a[href="/upgrade"]:not([class*="bg-primary"]) rule inadvertently      */
+/* catches bg-indigo-600 styled buttons (no bg-primary in class list).       */
+/* Same specificity; position later in cascade → wins and restores white.    */
+
+main a[href="/upgrade"][class*="bg-indigo"] { color: #FFFFFF; }
+
+/* ── 4. Upgrade link hover → #93C5FD ────────────────────────────────────── */
+/* Beats Tailwind hover:text-indigo-700 at (0,2,0) — our rule is (0,4,2).   */
+
+main a[href="/upgrade"]:not([class*="bg-primary"]):not([class*="bg-indigo"]):hover {
+  color: #93C5FD;
+}
+
+/* ── 5. Plan card selected border (emerald-400 active state) → #22C55E ──── */
+/* Balanced Growth active card uses border-emerald-400 (Tailwind = #34D399). */
+/* Spec: selected border #22C55E. Substring "border-emerald-4" is safe:      */
+/* border-emerald-200 → "border-emerald-2", not "border-emerald-4". ✓       */
+
+main [class*="border-emerald-4"]   { border-color: #22C55E; }

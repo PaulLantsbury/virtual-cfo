@@ -333,7 +333,10 @@ main [class*="bg-green-500/"]     { background-color: rgba(34,  197, 94,  0.15);
 
 /* ─── KPI number legibility boost ────────────────────────────────────────── */
 /* Ensure all font-display KPI values are crisp white on dark card surfaces. */
-main .bg-card [class*="font-display"] { color: #F8FAFC; }
+main .bg-card [class*="font-display"]                              { color: #F8FAFC; }
+/* Exception: emerald font-display numbers (recoverable opportunity amount)  */
+/* Higher specificity (0,3,1) overrides the white rule above (0,2,1).        */
+main .bg-card [class*="font-display"][class*="text-emerald"]       { color: #22C55E; }
 
 /* Tooltip popover — keep on dark surface */
 [data-radix-popper-content-wrapper] [class*="bg-white"],
@@ -354,7 +357,7 @@ main h1, main h2, main h3,
 main h4, main h5, main h6       { line-height: 1.3; }
 
 /* ── Links on dark navy: bright readable blue ─────────────────────────────── */
-main a                          { color: #60A5FA; text-decoration-color: transparent; }
+main a                          { color: #60A5FA; text-decoration-color: transparent; font-weight: 600; }
 main a:hover                    { color: #93C5FD; }
 
 /* text-primary used for CFO labels, outline buttons and link text            */
@@ -403,3 +406,71 @@ main [class~="text-muted-foreground"] { color: #94A3B8; }
 /* ── KPI label text ──────────────────────────────────────────────────────── */
 /* Uppercase tracking-wider labels within cards use text-xs — already bumped  */
 /* to 13px above. Ensure they are also readable colour (muted or foreground). */
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* DASHBOARD READABILITY — targeted per-card colour & border fixes            */
+/* Pure CSS only. All selectors scoped to avoid other pages.                 */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Verdict card: solid amber border ─────────────────────────────────── */
+/* border-amber-200/70 class is unique to the verdict card outer wrapper.    */
+/* Must appear AFTER `border-amber-2` rule (same specificity, later wins).   */
+main [class*="border-amber-200/70"]   { border-color: #F59E0B; }
+
+/* Inner strip borders inside verdict card (amber-100 / amber-900/30)        */
+main [class*="border-amber-9"]        { border-color: rgba(245, 158, 11, 0.20); }
+main [class*="border-amber-1"]        { border-color: rgba(245, 158, 11, 0.18); }
+
+/* Amber text 300–500 series used for dark-mode label variants → readable amber */
+main [class*="text-amber-3"],
+main [class*="text-amber-4"],
+main [class*="text-amber-5"]          { color: #F59E0B; }
+
+/* ── 2. Recoverable contribution card: solid green border ────────────────── */
+/* border-emerald-200/70 is unique to the recoverable card outer wrapper.    */
+main [class*="border-emerald-200/70"] { border-color: #22C55E; }
+
+/* Inner strip borders (emerald-8xx dark-mode variants)                      */
+main [class*="border-emerald-7"],
+main [class*="border-emerald-8"],
+main [class*="border-emerald-9"]      { border-color: rgba(34, 197, 94, 0.25); }
+
+/* Emerald 300–500 text used in dark mode label variants                     */
+main [class*="text-emerald-3"],
+main [class*="text-emerald-4"],
+main [class*="text-emerald-5"]        { color: #22C55E; }
+
+/* ── 3. sc-purple CFO Insight card: already has border-left in sc-purple ─── */
+/* .sc-purple { border-left: 4px solid #6366F1 } is defined at line 150.    */
+/* Indigo label (text-indigo-300) is covered by .sc-purple rule at line 157.  */
+
+/* ── 4. Solid border-border/* variants (removes opacity on dark canvas) ──── */
+/* border-border/50, /40, /30, /20 — all resolve to the same dark colour.   */
+main [class*="border-border/"]        { border-color: #263B63; }
+
+/* ── 5. Indigo 2xx–5xx text on dark backgrounds (currently uncovered) ─────── */
+/* Tailwind's 200–500 indigo is designed for light surfaces → too dark here. */
+main [class*="text-indigo-2"],
+main [class*="text-indigo-3"],
+main [class*="text-indigo-4"],
+main [class*="text-indigo-5"]         { color: #A5B4FC; }
+
+/* ── 6. KPI card labels: brighter than generic muted text ───────────────── */
+/* KPI titles use text-sm/xs + font-medium + text-muted-foreground.         */
+/* Higher specificity (0,2,1) beats the global muted rule (0,1,1).          */
+main [class*="font-medium"][class~="text-muted-foreground"]  { color: #CBD5E1; }
+
+/* ── 7. Priority action card borders → neutral dark ──────────────────────── */
+/* Cards inside the sm:grid-cols-3 priority grid. Override the rose/orange   */
+/* semi-transparent borders (which carry semantic colour via the badge/icon). */
+main [class*="sm:grid-cols-3"][class*="mb-4"] [class*="border-rose-2"],
+main [class*="sm:grid-cols-3"][class*="mb-4"] [class*="border-rose-8"],
+main [class*="sm:grid-cols-3"][class*="mb-4"] [class*="border-orange-2"],
+main [class*="sm:grid-cols-3"][class*="mb-4"] [class*="border-orange-8"] {
+  border-color: #263B63;
+}
+
+/* ── 8. Rose text (rose-4xx used in dark-mode badge labels) ─────────────── */
+main [class*="text-rose-3"],
+main [class*="text-rose-4"],
+main [class*="text-rose-5"]           { color: #EF4444; }

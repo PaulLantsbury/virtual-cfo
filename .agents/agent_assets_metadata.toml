@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "8sAHEvIEjIznZ_tZKvUAr"
+uri = "file://artifacts/virtual-cfo/docs/data-dictionary-v1.md"
+type = "text"
+title = "Data Dictionary v1 — Virtual CFO"

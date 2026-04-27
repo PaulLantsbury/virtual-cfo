@@ -535,3 +535,36 @@ main [class~="bg-secondary/50"]    { background-color: rgba(24, 42, 74, 0.80); }
 /* bg-destructive (no slash) is the solid red btn — NOT matched by this rule. */
 
 main [class*="bg-destructive/"]    { background-color: rgba(239, 68, 68, 0.15); }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* GROWTH QUALITY PAGE — panel & chart readability fixes                      */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── A. 900-series badge chip backgrounds ──────────────────────────────────── */
+/* STATUS_CONFIG badges use pattern: bg-X-100 dark:bg-X-900/40.               */
+/* X-900 dark green/amber at 40% opacity is nearly invisible on dark navy.    */
+/* Substring match on "bg-*-900/" covers all fractional 900 variants.        */
+/* Also matches "dark:bg-emerald-900/40" class tokens (slash is present).     */
+
+main [class*="bg-emerald-900/"]    { background-color: rgba(34,  197, 94,  0.14); }
+main [class*="bg-amber-900/"]      { background-color: rgba(245, 158, 11,  0.14); }
+main [class*="bg-indigo-900/"]     { background-color: rgba(99,  102, 241, 0.14); }
+
+/* ── B. Recharts chart tooltips — dark surface override (all pages) ─────── */
+/* JSX contentStyle sets border/radius/shadow but leaves background unset.    */
+/* Recharts injects white via its own stylesheet; override it globally.       */
+
+.recharts-default-tooltip {
+  background-color: #182A4A !important;
+  border: 1px solid #263B63 !important;
+}
+.recharts-default-tooltip .recharts-tooltip-label {
+  color: #F8FAFC !important;
+}
+.recharts-default-tooltip .recharts-tooltip-item {
+  color: #CBD5E1 !important;
+}
+/* cursor highlight band inside chart area */
+.recharts-rectangle.recharts-tooltip-cursor {
+  fill: rgba(99, 102, 241, 0.06) !important;
+}

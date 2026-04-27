@@ -817,3 +817,43 @@ main a[href="/upgrade"]:not([class*="bg-primary"]):not([class*="bg-indigo"]):hov
 /* border-emerald-200 → "border-emerald-2", not "border-emerald-4". ✓       */
 
 main [class*="border-emerald-4"]   { border-color: #22C55E; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* CFO ALERTS — readability fixes                                             */
+/* No JSX changes. All selectors scoped to main.                             */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Traffic-light status card borders → solid semantic colours ────────── */
+/* The 4-column status grid (sm:grid-cols-4) holds green/amber/red status    */
+/* cards. The global border-X-2 rules emit rgba (e.g. 30–65% opacity),      */
+/* which is fine for badge chips but too muted for full-card severity cues.  */
+/* The > div combinator scopes to DIRECT children only, leaving nested badge */
+/* chips untouched. Specificity (0,3,2) beats the global rules at (0,1,0).  */
+
+main [class*="sm:grid-cols-4"] > div[class~="bg-card"][class*="border-emerald-2"] { border-color: #22C55E; }
+main [class*="sm:grid-cols-4"] > div[class~="bg-card"][class*="border-amber-2"]   { border-color: #F59E0B; }
+main [class*="sm:grid-cols-4"] > div[class~="bg-card"][class*="border-red-2"]     { border-color: #EF4444; }
+
+/* ── 2. Primary buttons and links → higher-contrast blue #2563EB ─────────── */
+/* Current --primary (#3B82F6) is blue-500; #2563EB (blue-700) gives better  */
+/* contrast on the dark navy surface. [class~=] word-boundary ensures        */
+/* fractional utilities (bg-primary/5, bg-primary/10, bg-primary/90, etc.)  */
+/* are NOT matched — only solid bg-primary elements get the upgrade.         */
+
+main button[class~="bg-primary"],
+main a[class~="bg-primary"]     { background-color: #2563EB; }
+
+/* ── 3. Native <select> inputs → force readable text on dark background ──── */
+/* Native selects do not reliably inherit CSS color across browsers.          */
+/* Any select with bg-background or bg-card class gets explicit white text.  */
+
+main select[class*="bg-background"],
+main select[class~="bg-card"]   { color: #F8FAFC; }
+
+/* ── 4. Raise smallest arbitrary text sizes to 14px minimum ──────────────── */
+/* text-[10px] and text-[11px] tokens sit below the text-xs (14px) floor.   */
+/* Brackets inside CSS attribute-value strings need no escaping.             */
+/* Applies globally (index.css) — badge chips, threshold labels, meta rows.  */
+
+main [class*="text-[10px]"]     { font-size: 14px; }
+main [class*="text-[11px]"]     { font-size: 14px; }

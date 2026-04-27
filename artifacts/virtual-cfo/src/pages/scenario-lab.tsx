@@ -1,9 +1,9 @@
 import { useState } from "react";
 import {
-  Sparkles, TrendingUp, AlertTriangle, Info, SlidersHorizontal,
+  Sparkles, TrendingUp, AlertTriangle, Info,
   Zap, Shield, CheckCircle, ArrowUpRight, Lock,
-  RefreshCw, Save, BarChart2, Layers, Target, ChevronRight,
-  ChevronDown, Square,
+  RefreshCw, Save, Layers, Target, ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,

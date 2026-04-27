@@ -9,7 +9,7 @@ import {
   LineChart, Line, Dot,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Slider } from "@/components/ui/slider";
+import { SimulatorSlider } from "@/components/SimulatorSlider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
@@ -867,7 +867,7 @@ export default function ProfitEngine() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Sliders */}
             <div className="space-y-6">
-              <SliderRow
+              <SimulatorSlider
                 label="Revenue Change"
                 value={revChange}
                 min={-20} max={30} step={1}
@@ -875,7 +875,7 @@ export default function ProfitEngine() {
                 onChange={(v) => setRevChange(v)}
                 description={`Adjusted revenue: ${fmt(adjRevenue)}`}
               />
-              <SliderRow
+              <SimulatorSlider
                 label="Discount Rate Change"
                 value={discountChange}
                 min={-5} max={8} step={0.5}
@@ -884,7 +884,7 @@ export default function ProfitEngine() {
                 description="Impact on margin from discounting"
                 positiveIsGood={false}
               />
-              <SliderRow
+              <SimulatorSlider
                 label="Returns Rate Change"
                 value={returnsChange}
                 min={-5} max={5} step={0.5}
@@ -893,7 +893,7 @@ export default function ProfitEngine() {
                 description="Impact on margin from returns"
                 positiveIsGood={false}
               />
-              <SliderRow
+              <SimulatorSlider
                 label="Variable Cost Change"
                 value={varCostChange}
                 min={-5} max={5} step={0.5}
@@ -902,7 +902,7 @@ export default function ProfitEngine() {
                 description="Impact on margin from variable costs"
                 positiveIsGood={false}
               />
-              <SliderRow
+              <SimulatorSlider
                 label="Overhead Change"
                 value={fixedChange}
                 min={-20} max={20} step={1}
@@ -1039,53 +1039,5 @@ export default function ProfitEngine() {
       />
 
     </AppLayout>
-  );
-}
-
-// ─── SliderRow sub-component ──────────────────────────────────────────────────
-interface SliderRowProps {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  unit: string;
-  showSign?: boolean;
-  description?: string;
-  positiveIsGood?: boolean;
-  onChange: (v: number) => void;
-}
-function SliderRow({ label, value, min, max, step, unit, showSign, description, positiveIsGood = true, onChange }: SliderRowProps) {
-  const isPositive = value > 0;
-  const isNegative = value < 0;
-  const valueGood = positiveIsGood ? isPositive : isNegative;
-  const valueBad  = positiveIsGood ? isNegative : isPositive;
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-foreground">{label}</label>
-        <span className={cn(
-          "text-sm font-bold tabular-nums px-2 py-0.5 rounded-md min-w-[4rem] text-right",
-          valueGood ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20" :
-          valueBad  ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20" :
-                      "text-muted-foreground bg-secondary",
-        )}>
-          {showSign && value > 0 ? "+" : ""}{value % 1 === 0 ? value : value.toFixed(1)}{unit}
-        </span>
-      </div>
-      <Slider
-        min={min}
-        max={max}
-        step={step}
-        value={[value]}
-        onValueChange={(vals) => onChange(vals[0])}
-      />
-      <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-        <span>{showSign && min > 0 ? "+" : ""}{min}{unit}</span>
-        {description && <span className="text-center flex-1 px-2 text-[10px] text-muted-foreground/70 truncate">{description}</span>}
-        <span>+{max}{unit}</span>
-      </div>
-    </div>
   );
 }

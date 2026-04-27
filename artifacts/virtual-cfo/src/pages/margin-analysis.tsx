@@ -637,6 +637,7 @@ export default function MarginAnalysis() {
                   </span>
                 </div>
                 <Slider
+                  aria-label="Meta CAC change"
                   min={-25} max={25} step={1}
                   value={[simMetaCac]}
                   onValueChange={([v]) => setSimMetaCac(v)}
@@ -659,6 +660,7 @@ export default function MarginAnalysis() {
                   </span>
                 </div>
                 <Slider
+                  aria-label="Shipping cost change"
                   min={-20} max={20} step={1}
                   value={[simShipping]}
                   onValueChange={([v]) => setSimShipping(v)}
@@ -681,6 +683,7 @@ export default function MarginAnalysis() {
                   </span>
                 </div>
                 <Slider
+                  aria-label="Discount depth change"
                   min={-5} max={5} step={0.5}
                   value={[simDiscount]}
                   onValueChange={([v]) => setSimDiscount(v)}
@@ -703,6 +706,7 @@ export default function MarginAnalysis() {
                   </span>
                 </div>
                 <Slider
+                  aria-label="Returns rate change"
                   min={-5} max={5} step={0.5}
                   value={[simReturns]}
                   onValueChange={([v]) => setSimReturns(v)}
@@ -725,6 +729,7 @@ export default function MarginAnalysis() {
                   </span>
                 </div>
                 <Slider
+                  aria-label="Payment processing change"
                   min={-2} max={2} step={0.1}
                   value={[simPayment]}
                   onValueChange={([v]) => setSimPayment(Math.round(v * 10) / 10)}

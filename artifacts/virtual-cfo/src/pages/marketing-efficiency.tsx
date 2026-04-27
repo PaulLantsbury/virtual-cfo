@@ -692,6 +692,7 @@ export default function MarketingEfficiency() {
                 <span className="text-sm font-bold text-primary tabular-nums">{metaToEmail}%</span>
               </div>
               <Slider
+                aria-label="Shift Meta budget to Email"
                 min={0} max={25} step={1}
                 value={[metaToEmail]}
                 onValueChange={([v]) => setMetaToEmail(v)}
@@ -707,6 +708,7 @@ export default function MarketingEfficiency() {
                 <span className="text-sm font-bold text-primary tabular-nums">{metaToOrganic}%</span>
               </div>
               <Slider
+                aria-label="Shift Meta budget to Organic"
                 min={0} max={25} step={1}
                 value={[metaToOrganic]}
                 onValueChange={([v]) => setMetaToOrganic(v)}
@@ -722,6 +724,7 @@ export default function MarketingEfficiency() {
                 <span className="text-sm font-bold text-primary tabular-nums">{googleToEmail}%</span>
               </div>
               <Slider
+                aria-label="Shift Google budget to Email"
                 min={0} max={25} step={1}
                 value={[googleToEmail]}
                 onValueChange={([v]) => setGoogleToEmail(v)}
@@ -737,6 +740,7 @@ export default function MarketingEfficiency() {
                 <span className="text-sm font-bold text-primary tabular-nums">{googleToOrganic}%</span>
               </div>
               <Slider
+                aria-label="Shift Google budget to Organic"
                 min={0} max={25} step={1}
                 value={[googleToOrganic]}
                 onValueChange={([v]) => setGoogleToOrganic(v)}

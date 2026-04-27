@@ -1,8 +1,8 @@
 import { useState } from "react";
 import {
   Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
-  AlertTriangle, CheckCircle, Info, Zap, Tag, Shield, Lock,
-  BarChart3, RefreshCw, Target, Package, ListOrdered,
+  AlertTriangle, CheckCircle, Info, Zap, Shield, Lock,
+  Target, ListOrdered,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -10,7 +10,7 @@ import {
   ComposedChart, Legend,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Slider } from "@/components/ui/slider";
+import { SimulatorSlider } from "@/components/SimulatorSlider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
@@ -191,37 +191,6 @@ function LeakageTooltip({ active, payload, label }: any) {
     <div className="bg-card border border-border rounded-xl shadow-lg px-3 py-2.5 text-sm">
       <p className="font-semibold text-foreground mb-0.5">{label}</p>
       <p className="font-bold text-red-600">£{payload[0].value.toLocaleString()}</p>
-    </div>
-  );
-}
-
-interface SliderRowProps {
-  label: string; value: number; min: number; max: number; step: number;
-  unit: string; showSign?: boolean; description?: string;
-  positiveIsGood?: boolean; onChange: (v: number) => void;
-}
-function SliderRow({ label, value, min, max, step, unit, showSign, description, positiveIsGood = true, onChange }: SliderRowProps) {
-  const valueGood = positiveIsGood ? value > 0 : value < 0;
-  const valueBad  = positiveIsGood ? value < 0 : value > 0;
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-foreground">{label}</label>
-        <span className={cn(
-          "text-sm font-bold tabular-nums px-2 py-0.5 rounded-md min-w-[4rem] text-right",
-          valueGood ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20" :
-          valueBad  ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20" :
-                      "text-muted-foreground bg-secondary",
-        )}>
-          {showSign && value > 0 ? "+" : ""}{value % 1 === 0 ? value : value.toFixed(1)}{unit}
-        </span>
-      </div>
-      <Slider min={min} max={max} step={step} value={[value]} onValueChange={(vals) => onChange(vals[0])} />
-      <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-        <span>{min}{unit}</span>
-        {description && <span className="text-center flex-1 px-2 text-muted-foreground/70 truncate">{description}</span>}
-        <span>+{max}{unit}</span>
-      </div>
     </div>
   );
 }
@@ -694,11 +663,11 @@ export default function PricingOptimisation() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Sliders */}
               <div className="space-y-6">
-                <SliderRow label="Average Discount Change"      value={discountChange}  min={-8}  max={8}  step={0.5} unit="pp"  showSign onChange={setDiscountChange}  positiveIsGood={false} description="Reducing discount improves retained revenue" />
-                <SliderRow label="Full-Price Order Ratio Change" value={fullPriceChange} min={-15} max={20} step={1}   unit="pp"  showSign onChange={setFullPriceChange} positiveIsGood={true}  description="More full-price orders improve contribution" />
-                <SliderRow label="Conversion Rate Impact"       value={convChange}      min={-15} max={10} step={0.5} unit="%"   showSign onChange={setConvChange}      positiveIsGood={true}  description="Conversion change affects revenue and contribution" />
-                <SliderRow label="Returns Rate Change"          value={returnsChange}   min={-5}  max={5}  step={0.5} unit="pp"  showSign onChange={setReturnsChange}   positiveIsGood={false} description="Lower returns preserve contribution" />
-                <SliderRow label="Shipping Subsidy Change"      value={shippingChange}  min={-30} max={30} step={1}   unit="%"   showSign onChange={setShippingChange}  positiveIsGood={false} description="Higher subsidy reduces contribution" />
+                <SimulatorSlider label="Average Discount Change"      value={discountChange}  min={-8}  max={8}  step={0.5} unit="pp"  showSign onChange={setDiscountChange}  positiveIsGood={false} description="Reducing discount improves retained revenue" />
+                <SimulatorSlider label="Full-Price Order Ratio Change" value={fullPriceChange} min={-15} max={20} step={1}   unit="pp"  showSign onChange={setFullPriceChange} positiveIsGood={true}  description="More full-price orders improve contribution" />
+                <SimulatorSlider label="Conversion Rate Impact"       value={convChange}      min={-15} max={10} step={0.5} unit="%"   showSign onChange={setConvChange}      positiveIsGood={true}  description="Conversion change affects revenue and contribution" />
+                <SimulatorSlider label="Returns Rate Change"          value={returnsChange}   min={-5}  max={5}  step={0.5} unit="pp"  showSign onChange={setReturnsChange}   positiveIsGood={false} description="Lower returns preserve contribution" />
+                <SimulatorSlider label="Shipping Subsidy Change"      value={shippingChange}  min={-30} max={30} step={1}   unit="%"   showSign onChange={setShippingChange}  positiveIsGood={false} description="Higher subsidy reduces contribution" />
               </div>
 
               {/* Outputs */}

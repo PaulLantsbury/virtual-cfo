@@ -9,7 +9,7 @@ import {
   ResponsiveContainer, Cell, ReferenceLine,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Slider } from "@/components/ui/slider";
+import { SimulatorSlider } from "@/components/SimulatorSlider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
@@ -177,37 +177,6 @@ function DriverTooltip({ active, payload, label }: any) {
       <p className={cn("font-bold", val >= 0 ? "text-emerald-600" : "text-red-500")}>
         {val >= 0 ? "+" : ""}£{Math.abs(val).toLocaleString()}
       </p>
-    </div>
-  );
-}
-
-interface SliderRowProps {
-  label: string; value: number; min: number; max: number; step: number;
-  unit: string; showSign?: boolean; description?: string;
-  positiveIsGood?: boolean; onChange: (v: number) => void;
-}
-function SliderRow({ label, value, min, max, step, unit, showSign, description, positiveIsGood = true, onChange }: SliderRowProps) {
-  const valueGood = positiveIsGood ? value > 0 : value < 0;
-  const valueBad  = positiveIsGood ? value < 0 : value > 0;
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-medium text-foreground">{label}</label>
-        <span className={cn(
-          "text-sm font-bold tabular-nums px-2 py-0.5 rounded-md min-w-[4rem] text-right",
-          valueGood ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20" :
-          valueBad  ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20" :
-                      "text-muted-foreground bg-secondary",
-        )}>
-          {showSign && value > 0 ? "+" : ""}{value % 1 === 0 ? value : value.toFixed(1)}{unit}
-        </span>
-      </div>
-      <Slider min={min} max={max} step={step} value={[value]} onValueChange={(vals) => onChange(vals[0])} />
-      <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-        <span>{showSign && min > 0 ? "+" : ""}{min}{unit}</span>
-        {description && <span className="text-center flex-1 px-2 text-[10px] text-muted-foreground/70 truncate">{description}</span>}
-        <span>+{max}{unit}</span>
-      </div>
     </div>
   );
 }
@@ -863,11 +832,11 @@ export default function CashControl() {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-6">
-                <SliderRow label="Revenue Change"               value={revChange}       min={-20} max={30} step={1} unit="%" showSign onChange={setRevChange}       positiveIsGood={true}  description={`Cash from revenue: ${fmt(CASH_BALANCE + revenueEffect)}`} />
-                <SliderRow label="Inventory Days Change"        value={inventoryChange} min={-20} max={30} step={1} unit=" days" showSign onChange={setInventoryChange} positiveIsGood={false} description="Extra inventory days tie up more cash" />
-                <SliderRow label="Supplier Payment Days Change" value={supplierChange}  min={-20} max={20} step={1} unit=" days" showSign onChange={setSupplierChange}  positiveIsGood={true}  description="Paying later preserves cash" />
-                <SliderRow label="Fixed Cost Change"            value={fixedCostChange} min={-20} max={20} step={1} unit="%" showSign onChange={setFixedCostChange} positiveIsGood={false} description={`Projected fixed costs: ${fmt(projFixedCosts)}`} />
-                <SliderRow label="Marketing Spend Change"       value={marketingChange} min={-30} max={30} step={1} unit="%" showSign onChange={setMarketingChange} positiveIsGood={false} description="Higher marketing spend consumes cash" />
+                <SimulatorSlider label="Revenue Change"               value={revChange}       min={-20} max={30} step={1} unit="%" showSign onChange={setRevChange}       positiveIsGood={true}  description={`Cash from revenue: ${fmt(CASH_BALANCE + revenueEffect)}`} />
+                <SimulatorSlider label="Inventory Days Change"        value={inventoryChange} min={-20} max={30} step={1} unit=" days" showSign onChange={setInventoryChange} positiveIsGood={false} description="Extra inventory days tie up more cash" />
+                <SimulatorSlider label="Supplier Payment Days Change" value={supplierChange}  min={-20} max={20} step={1} unit=" days" showSign onChange={setSupplierChange}  positiveIsGood={true}  description="Paying later preserves cash" />
+                <SimulatorSlider label="Fixed Cost Change"            value={fixedCostChange} min={-20} max={20} step={1} unit="%" showSign onChange={setFixedCostChange} positiveIsGood={false} description={`Projected fixed costs: ${fmt(projFixedCosts)}`} />
+                <SimulatorSlider label="Marketing Spend Change"       value={marketingChange} min={-30} max={30} step={1} unit="%" showSign onChange={setMarketingChange} positiveIsGood={false} description="Higher marketing spend consumes cash" />
               </div>
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>

@@ -727,3 +727,40 @@ main [class~="bg-primary/20"] > [class~="bg-primary"] { background-color: #3B82F
 main a[href="/upgrade"]:not([class*="bg-primary"])           { color: #60A5FA; font-size: 15px; }
 main a[href="/upgrade"]:not([class*="bg-primary"]) p         { color: #60A5FA; font-size: 15px; }
 main a[href="/upgrade"]:not([class*="bg-primary"]) span      { color: #60A5FA; font-size: 15px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* PROFIT OPPORTUNITIES — readability fixes                                   */
+/* All selectors scoped to main. No JSX changes.                             */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. sc-teal summary card — emerald fractional text overrides ─────────── */
+/* text-emerald-7 substring maps ALL emerald-7xx to #22C55E (correct for     */
+/* the main headline value). But fractional variants like text-emerald-700/70 */
+/* (body) and text-emerald-800/70 (helper strip) need different colours.     */
+/* "/" in the substring ensures plain "text-emerald-700" is NOT matched here. */
+
+main [class*="text-emerald-700/"]  { color: #F8FAFC; }   /* body → white        */
+main [class*="text-emerald-800/"]  { color: #CBD5E1; }   /* helper → secondary  */
+
+/* ── 2. Blue-400 for all text-blue-6/7 (overrides line 275 #A5B4FC) ──────── */
+/* Margin category badge, TimingBadge "1–2 weeks", inline blue CTAs.         */
+/* Same specificity as line 275 (0,1,1) but later in the cascade → wins.     */
+
+main [class*="text-blue-7"],
+main [class*="text-blue-6"]        { color: #60A5FA; }   /* blue-400            */
+
+/* ── 3. Category badge borders — Margin (blue) and Marketing (violet) ──────── */
+/* bg-blue-50 (Margin) uses border-blue-200/60; bg-violet-50 uses             */
+/* border-violet-200/60. Without overrides these render as bright light hues. */
+
+main [class*="border-blue-2"]      { border-color: rgba(59,  130, 246, 0.40); }
+main [class*="border-violet-2"]    { border-color: rgba(139,  92, 246, 0.40); }
+
+/* ── 4. Global body / helper text minimum sizes ──────────────────────────── */
+/* text-sm (14px) → 15px, text-xs (12px) → 14px.                            */
+/* Word-boundary [class~=] matches only the exact token; arbitrary sizes     */
+/* like text-[10px] / text-[11px] are unaffected. Scoped to main so the     */
+/* sidebar and nav are not resized.                                          */
+
+main [class~="text-sm"]            { font-size: 15px; }
+main [class~="text-xs"]            { font-size: 14px; }

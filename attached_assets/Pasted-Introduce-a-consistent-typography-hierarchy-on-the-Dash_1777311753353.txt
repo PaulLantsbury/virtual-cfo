@@ -1,0 +1,172 @@
+Introduce a consistent typography hierarchy on the Dashboard page so section headers, card titles, KPI values and helper text each have clearly defined roles.
+
+Objective:
+Create a structured executive-summary layout where users can scan:
+
+1) page meaning
+2) section meaning
+3) card meaning
+4) financial impact
+
+Apply only to:
+/dashboard
+
+Do not modify calculations, layout structure, or other pages.
+
+1. Page title styling
+
+Apply to:
+
+"Dashboard"
+or equivalent page header
+
+Set:
+
+font-size: 32px
+font-weight: 700
+colour: #F8FAFC
+line-height: 1.2
+margin-bottom: 12px
+
+2. Section header styling
+
+Apply to section labels such as:
+
+"Business health verdict"
+"Top opportunities"
+"Priority actions"
+"Actual performance"
+"Recommended plan"
+"CFO Insight summary"
+"Drivers of change"
+"Marketing efficiency signals"
+
+Set:
+
+font-size: 22px
+font-weight: 600
+colour: #E2E8F0
+line-height: 1.25
+margin-top: 28px
+margin-bottom: 12px
+
+Ensure these are visually larger than card titles but smaller than KPI values.
+
+3. Card title styling (standardised)
+
+Apply to ALL dashboard card titles:
+
+Examples:
+
+"Recoverable contribution opportunity"
+"Reallocate Meta spend"
+"Increase lifecycle email conversion"
+"Improve paid acquisition mix"
+
+Set:
+
+font-size: 16px
+font-weight: 600
+colour: #CBD5E1
+line-height: 1.3
+
+Ensure no card title appears larger than this.
+
+4. KPI / opportunity amount styling
+
+Apply to all £ opportunity amounts and KPI metrics inside dashboard cards:
+
+Set:
+
+font-size: 36px
+font-weight: 800
+line-height: 1.05
+
+Colour rules:
+
+positive opportunity:
+#22C55E
+
+neutral KPI:
+#F8FAFC
+
+negative movement:
+#EF4444
+
+These must remain the most visually prominent elements inside each card.
+
+5. Supporting explanation text
+
+Apply to descriptive lines under KPIs:
+
+Examples:
+
+"Recoverable through pricing, lifecycle and returns optimisation"
+"Next month · 30-day run rate"
+"Based on current channel mix"
+
+Set:
+
+font-size: 15px
+colour: #A9B8D3
+line-height: 1.45
+
+6. Badge styling
+
+Apply to:
+
+High confidence
+Medium confidence
+Low effort
+Medium effort
+Recommended
+Monitor
+
+Set:
+
+font-size: 12px
+font-weight: 600
+padding: 4px 10px
+border-radius: 999px
+
+Ensure badges never appear larger than titles.
+
+7. CFO Insight panel label styling
+
+Apply to:
+
+"CFO Insight"
+
+Set:
+
+font-size: 13px
+font-weight: 600
+colour: #A5B4FC
+letter-spacing: 0.02em
+text-transform: uppercase
+
+8. Ensure visual hierarchy order
+
+Each dashboard card must render as:
+
+Card title (16px)
+Primary metric (£ value at 36px)
+Supporting explanation (15px)
+
+Never allow:
+
+metric smaller than title
+title larger than section header
+helper text same size as title
+
+9. Final validation pass
+
+Confirm:
+
+page title largest text on page (except hero KPI values)
+section headers clearly visible separators
+card titles consistent size everywhere
+£ opportunity values dominant
+helper text readable but secondary
+badges visually subordinate
+no typography conflicts remain

@@ -1,0 +1,113 @@
+Fix inconsistent card title sizing on the Dashboard page.
+
+Problem:
+Some dashboard cards (especially green opportunity cards) have larger titles than others because opportunity values (£ amounts) are being styled like headings instead of metrics.
+
+Objective:
+Make all dashboard card titles the same size and restore a consistent hierarchy:
+
+Title (same size everywhere)
+Primary metric (£ amount)
+Supporting explanation
+
+Apply only to:
+/dashboard
+
+Do not change calculations, layout structure, or data values.
+
+1. Standardise all card titles
+
+Set ALL dashboard card titles to:
+
+font-size: 16px
+font-weight: 600
+colour: #CBD5E1
+line-height: 1.3
+
+Examples:
+
+"Recoverable contribution opportunity"
+"Priority actions"
+"Marketing efficiency"
+"Margin pressure drivers"
+"CFO Insight"
+"Growth quality signals"
+
+Ensure none render larger than others.
+
+2. Standardise opportunity values separately
+
+All £ opportunity amounts inside dashboard cards must use:
+
+font-size: 36px
+font-weight: 800
+colour: #22C55E
+line-height: 1.05
+
+These are metrics, not titles.
+
+3. Standardise KPI metric hierarchy
+
+Each dashboard card should follow:
+
+Title
+Primary metric (£ value or KPI)
+Supporting sentence
+
+Example:
+
+Recoverable contribution opportunity
+£52,000
+Recoverable through pricing, lifecycle and returns optimisation
+
+4. Fix green cards specifically
+
+Some green cards currently render titles larger than other cards.
+
+Reduce their titles to match:
+
+font-size: 16px
+font-weight: 600
+colour: #CBD5E1
+
+Keep their £ values large:
+
+font-size: 36px
+font-weight: 800
+colour: #22C55E
+
+5. Ensure consistency across dashboard sections
+
+Apply to:
+
+Business health verdict card
+Recoverable contribution card
+Priority action cards
+Opportunity summary cards
+Simulator summary cards
+Top drivers panels
+
+6. Do not modify
+
+Do not change:
+
+Margin Analysis page
+Marketing Efficiency page
+Scenario Lab
+Cash Control
+Profit Opportunities
+AI CFO cards
+Charts
+Tables
+Alert panels
+
+Only fix Dashboard title typography.
+
+7. Final check
+
+Confirm:
+
+All dashboard card titles identical size
+£ values remain dominant
+No title appears bold like a KPI number
+Visual hierarchy is consistent across all dashboard cards

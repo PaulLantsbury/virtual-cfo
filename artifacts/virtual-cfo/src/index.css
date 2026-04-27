@@ -1301,10 +1301,10 @@ main p[class*="font-display"][class*="font-black"][class*="text-emerald"] {
   color:      #2DD4BF                  !important;  /* teal-400 */
 }
 
-/* 3 — Moderate Risk — solid amber (active position) */
+/* 3 — Moderate Risk — softened amber, less dominant than High Risk */
 [class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(3) {
-  background: #F59E0B !important;
-  color:      #FFFFFF !important;
+  background: rgba(245, 158, 11, 0.82) !important;
+  color:      #FFF7ED                  !important;
 }
 
 /* 4 — High Risk — strong red with urgency glow */

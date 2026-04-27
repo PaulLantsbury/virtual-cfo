@@ -187,7 +187,7 @@ export default function Dashboard() {
           <p className="text-muted-foreground mt-1 text-sm">See what is happening, how much profit and cash is at risk, and where to act first.</p>
         </div>
         <div className="flex gap-3 shrink-0">
-          <Button variant="outline" className="bg-white dark:bg-transparent">
+          <Button variant="outline" className="bg-[#13233F]">
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>

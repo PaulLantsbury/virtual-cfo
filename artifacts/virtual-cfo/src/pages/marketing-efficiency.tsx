@@ -864,7 +864,7 @@ export default function MarketingEfficiency() {
             <div className="relative rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/50 dark:bg-indigo-950/20 mb-6 overflow-hidden">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 blur-sm select-none pointer-events-none" aria-hidden="true">
                 {["Contribution uplift", "Blended CAC change", "Margin improvement", "Risk level"].map((label) => (
-                  <div key={label} className="rounded-xl bg-white/70 dark:bg-slate-800/40 border border-border/50 px-4 py-3">
+                  <div key={label} className="rounded-xl bg-[#13233F] border border-border/50 px-4 py-3">
                     <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">{label}</p>
                     <p className="text-2xl font-display font-bold leading-none text-emerald-600">+£18,200</p>
                   </div>

@@ -226,3 +226,54 @@ main [class*="text-indigo-7"],
 main [class*="text-indigo-6"]     { color: #A5B4FC; }
 main [class*="text-indigo-8"],
 main [class*="text-indigo-9"]     { color: #A9B8D3; }
+
+/* ── Rose (risk/danger) — separate colour family from red ─────────────────── */
+main [class*="bg-rose-50"]        { background-color: #182A4A; background-image: none; }
+main [class*="bg-rose-1"]         { background-color: rgba(239, 68, 68, 0.12); }
+main [class*="border-rose-2"]     { border-color: rgba(239, 68, 68, 0.30); }
+
+/* Rose text → semantic risk red (#EF4444) */
+main [class*="text-rose-6"],
+main [class*="text-rose-7"]       { color: #EF4444; }
+
+/* Red text (belt-and-braces alongside bg-red-* rules above) */
+main [class*="text-red-6"],
+main [class*="text-red-7"]        { color: #EF4444; }
+
+/* ── Orange (high-severity warning) ──────────────────────────────────────── */
+main [class*="bg-orange-50"]      { background-color: #182A4A; background-image: none; }
+main [class*="bg-orange-1"]       { background-color: rgba(249, 115, 22, 0.12); }
+main [class*="border-orange-2"]   { border-color: rgba(249, 115, 22, 0.30); }
+
+/* Orange text → readable on dark (#FB923C is orange-400) */
+main [class*="text-orange-5"],
+main [class*="text-orange-6"],
+main [class*="text-orange-7"]     { color: #FB923C; }
+
+/* ── Slate (neutral secondary panels) ────────────────────────────────────── */
+main [class*="bg-slate-50"]       { background-color: #13233F; background-image: none; }
+main [class*="bg-slate-1"]        { background-color: rgba(148, 163, 184, 0.12); }
+main [class*="border-slate-2"]    { border-color: rgba(148, 163, 184, 0.30); }
+
+/* Slate text → secondary palette (#A9B8D3) */
+main [class*="text-slate-5"],
+main [class*="text-slate-6"],
+main [class*="text-slate-7"]      { color: #A9B8D3; }
+
+/* Gray-900 text (e.g. 404 page) → lightest foreground on dark canvas */
+[class*="text-gray-9"]            { color: #F8FAFC; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* RESTORE 500-SERIES SOLID COLOUR DOTS & ELEMENTS                           */
+/* The bg-*-50 substring rules above also match bg-*-500 (since "bg-*-50"   */
+/* is a prefix of "bg-*-500"). These rules come AFTER, so they win the       */
+/* cascade and restore the correct saturated hue for solid indicators.       */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+main [class*="bg-emerald-500"]    { background-color: #22C55E; background-image: none; }
+main [class*="bg-amber-500"]      { background-color: #F59E0B; background-image: none; }
+main [class*="bg-rose-500"]       { background-color: #EF4444; background-image: none; }
+main [class*="bg-red-500"]        { background-color: #EF4444; background-image: none; }
+main [class*="bg-indigo-500"]     { background-color: #6366F1; background-image: none; }
+main [class*="bg-sky-500"]        { background-color: #0EA5E9; background-image: none; }
+main [class*="bg-orange-500"]     { background-color: #F97316; background-image: none; }
+main [class*="bg-slate-500"]      { background-color: #64748B; background-image: none; }

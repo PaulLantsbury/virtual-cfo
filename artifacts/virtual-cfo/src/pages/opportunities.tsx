@@ -4,6 +4,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/plan";
 import { SHARED_OPPORTUNITIES } from "@/lib/mock-data";
+import { RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
@@ -15,10 +16,11 @@ import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
 /**
  * Monthly contribution opportunity range (excludes opp-d which is a
  * one-off cash release, not a recurring contribution improvement).
- * @dynamic Recompute as sum of monthly contribution uplifts ± uncertainty.
+ * Imported from business-snapshot.ts — shared with Dashboard CFO_INSIGHT.upside.
+ * @future Recompute as sum of monthly contribution uplifts ± uncertainty.
  */
-const TOTAL_LOW  = 18_000;
-const TOTAL_HIGH = 42_000;
+const TOTAL_LOW  = RECOVERABLE_LOW;
+const TOTAL_HIGH = RECOVERABLE_HIGH;
 
 /**
  * Capital-free subset: Low-effort opportunities requiring no new budget.

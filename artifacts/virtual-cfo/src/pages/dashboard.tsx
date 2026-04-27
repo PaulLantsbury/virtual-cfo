@@ -13,7 +13,7 @@ import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
-import { MONTHLY_CM_PCT, MONTHLY_REVENUE } from "@/lib/data/business-snapshot";
+import { MONTHLY_CM_PCT, MONTHLY_REVENUE, RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
 import { CASH_RUNWAY } from "@/lib/data/cash-snapshot";
 import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 
@@ -24,7 +24,7 @@ type KpiStatus = "warning" | "positive" | "danger" | "neutral";
 
 const CFO_INSIGHT = {
   body: "The fastest route to improvement is reducing fulfilment costs, tightening discount exposure on returning customers and reallocating inefficient Meta spend toward higher-contribution channels.",
-  upside: { cashLow: 18_000, cashHigh: 42_000 },
+  upside: { cashLow: RECOVERABLE_LOW, cashHigh: RECOVERABLE_HIGH },
 } as const;
 
 const KPI_CARDS: { id: string; title: string; value: string; change: string; status: KpiStatus; text: string }[] = [

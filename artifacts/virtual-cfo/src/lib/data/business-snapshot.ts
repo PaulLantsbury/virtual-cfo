@@ -92,3 +92,21 @@ export const MONTHLY_ORDER_VOLUME   = 2_000;
 
 /** Human-readable label for the current reporting period */
 export const CURRENT_PERIOD         = "March 2026";
+
+// ─── Recoverable contribution range ───────────────────────────────────────────
+// Used by: Dashboard (CFO_INSIGHT.upside), Profit Opportunities (TOTAL_LOW / TOTAL_HIGH)
+
+/**
+ * Low end of the estimated monthly contribution improvement range (£).
+ * Represents the conservative case if margin, marketing and fulfilment
+ * opportunities are addressed.
+ * @future Recompute as sum of low-estimate uplifts across all active opportunities.
+ */
+export const RECOVERABLE_LOW  = 18_000;
+
+/**
+ * High end of the estimated monthly contribution improvement range (£).
+ * Represents the optimistic case across the same opportunity set.
+ * @future Recompute as sum of high-estimate uplifts across all active opportunities.
+ */
+export const RECOVERABLE_HIGH = 42_000;

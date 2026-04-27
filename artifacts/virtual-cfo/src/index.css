@@ -342,3 +342,64 @@ main .bg-card [class*="font-display"] { color: #F8FAFC; }
   color: #F8FAFC !important;
   border-color: #263B63 !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* GLOBAL READABILITY — LINK COLOURS · TEXT CONTRAST · TYPE SCALE MINIMUMS   */
+/* Applies to all content within <main> without touching structure/gating.   */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Default line-height for the main content area ───────────────────────── */
+main                            { line-height: 1.45; }
+main h1, main h2, main h3,
+main h4, main h5, main h6       { line-height: 1.3; }
+
+/* ── Links on dark navy: bright readable blue ─────────────────────────────── */
+main a                          { color: #60A5FA; text-decoration-color: transparent; }
+main a:hover                    { color: #93C5FD; }
+
+/* text-primary used for CFO labels, outline buttons and link text            */
+/* Switch from the CSS-variable blue (can be low contrast) to #60A5FA        */
+main [class~="text-primary"]    { color: #60A5FA; }
+main [class*="text-primary/"]   { color: #60A5FA; }
+
+/* ── Opacity-reduced text: replace with solid accessible colours ──────────── */
+/* text-muted-foreground/60, /70, /80 etc. become unreadable on dark surfaces */
+main [class*="text-muted-foreground/"] { color: #94A3B8; }
+
+/* text-foreground at reduced opacity (e.g. /50, /60 used in helper lines)   */
+main [class*="text-foreground/5"],
+main [class*="text-foreground/6"],
+main [class*="text-foreground/7"],
+main [class*="text-foreground/8"] { color: #CBD5E1; }
+
+/* ── Type scale minimums ──────────────────────────────────────────────────── */
+/* Bump Tailwind utility classes to minimum sizes. Specificity (0,2,0)       */
+/* beats single-class Tailwind utilities (0,1,0) so these always win.        */
+
+/* Page title ≥ 32px — text-3xl is 30px */
+main .text-3xl                  { font-size: 2rem; }          /* 32px */
+
+/* Section title ≥ 22px — text-xl is 20px, text-2xl is 24px (already fine)  */
+main .text-xl                   { font-size: 1.375rem; }      /* 22px */
+
+/* Body text ≥ 15px — text-sm is 14px */
+main .text-sm                   { font-size: 0.9375rem; }     /* 15px */
+
+/* Helper / label text ≥ 13px — text-xs is 12px */
+main .text-xs                   { font-size: 0.8125rem; }     /* 13px */
+
+/* Badge / tag text ≥ 12px — literal tiny pixel classes */
+main [class*="text-[10px]"]     { font-size: 0.75rem; }       /* 12px */
+main [class*="text-[11px]"]     { font-size: 0.75rem; }       /* 12px */
+main [class*="text-[9px]"]      { font-size: 0.75rem; }       /* 12px */
+
+/* ── Helper / subtitle text colour ───────────────────────────────────────── */
+/* muted-foreground (#94A3B8) is spec for helper text — ensure it is solid.  */
+main [class~="text-muted-foreground"] { color: #94A3B8; }
+
+/* Subtitle / secondary body text between muted and foreground (#CBD5E1)     */
+/* Applied where the class explicitly requests it — no blanket override.     */
+
+/* ── KPI label text ──────────────────────────────────────────────────────── */
+/* Uppercase tracking-wider labels within cards use text-xs — already bumped  */
+/* to 13px above. Ensure they are also readable colour (muted or foreground). */

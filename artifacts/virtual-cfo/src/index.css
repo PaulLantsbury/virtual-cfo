@@ -263,6 +263,42 @@ main [class*="text-slate-7"]      { color: #A9B8D3; }
 /* Gray-900 text (e.g. 404 page) → lightest foreground on dark canvas */
 [class*="text-gray-9"]            { color: #F8FAFC; }
 
+/* ── Blue (confidence badges, plan buttons, category badges) ──────────────── */
+main [class*="bg-blue-50"]        { background-color: #13233F; background-image: none; }
+main [class*="bg-blue-1"]         { background-color: rgba(99, 102, 241, 0.12); }
+main [class*="border-blue-2"]     { border-color: rgba(99, 102, 241, 0.30); }
+main [class*="border-blue-3"]     { border-color: rgba(99, 102, 241, 0.40); }
+
+main [class*="text-blue-3"],
+main [class*="text-blue-4"],
+main [class*="text-blue-6"],
+main [class*="text-blue-7"]       { color: #A5B4FC; }
+
+/* ── Violet (marketing category badges) ──────────────────────────────────── */
+main [class*="bg-violet-50"]      { background-color: #182A4A; background-image: none; }
+main [class*="bg-violet-1"]       { background-color: rgba(139, 92, 246, 0.12); }
+main [class*="border-violet-2"]   { border-color: rgba(139, 92, 246, 0.30); }
+
+main [class*="text-violet-6"],
+main [class*="text-violet-7"]     { color: #C4B5FD; }
+
+/* ── Green (landing page dot, positive signals) ───────────────────────────── */
+main [class*="bg-green-50"]       { background-color: #13233F; background-image: none; }
+main [class*="bg-green-1"]        { background-color: rgba(34, 197, 94, 0.12); }
+
+main [class*="text-green-6"],
+main [class*="text-green-7"]      { color: #22C55E; }
+
+/* ── Border -300 series (still light in Tailwind; darken for dark palette) ── */
+main [class*="border-emerald-3"]  { border-color: rgba(34,  197, 94,  0.40); }
+main [class*="border-amber-3"]    { border-color: rgba(245, 158, 11,  0.40); }
+main [class*="border-rose-3"]     { border-color: rgba(239, 68,  68,  0.40); }
+main [class*="border-sky-3"]      { border-color: rgba(14,  165, 233, 0.40); }
+main [class*="border-indigo-3"]   { border-color: rgba(99,  102, 241, 0.40); }
+main [class*="border-slate-3"]    { border-color: rgba(148, 163, 184, 0.30); }
+main [class*="border-blue-3"]     { border-color: rgba(99,  102, 241, 0.40); }
+main [class*="border-violet-3"]   { border-color: rgba(139, 92,  246, 0.40); }
+
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /* RESTORE 500-SERIES SOLID COLOUR DOTS & ELEMENTS                           */
 /* The bg-*-50 substring rules above also match bg-*-500 (since "bg-*-50"   */
@@ -277,3 +313,32 @@ main [class*="bg-indigo-500"]     { background-color: #6366F1; background-image:
 main [class*="bg-sky-500"]        { background-color: #0EA5E9; background-image: none; }
 main [class*="bg-orange-500"]     { background-color: #F97316; background-image: none; }
 main [class*="bg-slate-500"]      { background-color: #64748B; background-image: none; }
+main [class*="bg-blue-500"]       { background-color: #6366F1; background-image: none; }
+main [class*="bg-violet-500"]     { background-color: #8B5CF6; background-image: none; }
+main [class*="bg-green-500"]      { background-color: #22C55E; background-image: none; }
+
+/* ─── Fractional 500-series fix ──────────────────────────────────────────── */
+/* bg-*-500 restoration above also matches bg-*-500/10 etc. (solid → bad).   */
+/* These rules re-apply a subtle transparent dark fill for opacity variants.  */
+/* They come AFTER the 500 restoration so same specificity, later wins.       */
+main [class*="bg-emerald-500/"]   { background-color: rgba(34,  197, 94,  0.15); }
+main [class*="bg-amber-500/"]     { background-color: rgba(245, 158, 11,  0.15); }
+main [class*="bg-rose-500/"]      { background-color: rgba(239, 68,  68,  0.15); }
+main [class*="bg-red-500/"]       { background-color: rgba(239, 68,  68,  0.15); }
+main [class*="bg-sky-500/"]       { background-color: rgba(14,  165, 233, 0.15); }
+main [class*="bg-indigo-500/"]    { background-color: rgba(99,  102, 241, 0.15); }
+main [class*="bg-blue-500/"]      { background-color: rgba(99,  102, 241, 0.15); }
+main [class*="bg-violet-500/"]    { background-color: rgba(139, 92,  246, 0.15); }
+main [class*="bg-green-500/"]     { background-color: rgba(34,  197, 94,  0.15); }
+
+/* ─── KPI number legibility boost ────────────────────────────────────────── */
+/* Ensure all font-display KPI values are crisp white on dark card surfaces. */
+main .bg-card [class*="font-display"] { color: #F8FAFC; }
+
+/* Tooltip popover — keep on dark surface */
+[data-radix-popper-content-wrapper] [class*="bg-white"],
+.recharts-tooltip-wrapper [class*="bg-white"] {
+  background-color: #182A4A !important;
+  color: #F8FAFC !important;
+  border-color: #263B63 !important;
+}

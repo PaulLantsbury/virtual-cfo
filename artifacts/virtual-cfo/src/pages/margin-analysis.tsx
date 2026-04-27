@@ -609,7 +609,7 @@ export default function MarginAnalysis() {
       />
 
       {isPro ? (
-        <div className="rounded-2xl border border-primary/30 shadow-md mb-8 overflow-hidden">
+        <div className="rounded-2xl border border-primary/30 shadow-md mb-8 overflow-hidden bg-card">
           <div className="flex items-center gap-3 px-6 py-3 bg-primary/10 border-b border-primary/20">
             <SlidersHorizontal className="w-4 h-4 text-primary shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wider text-primary">
@@ -926,7 +926,7 @@ export default function MarginAnalysis() {
       />
 
       {/* ── Structured opportunities panel ── */}
-      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 shadow-sm mb-8 overflow-hidden">
+      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 shadow-sm mb-8 overflow-hidden bg-card">
 
         {/* ── Hero headline — single full-width block ── */}
         <div className="bg-emerald-50 dark:bg-emerald-950/25 px-8 py-6 border-b border-emerald-200 dark:border-emerald-800/40">

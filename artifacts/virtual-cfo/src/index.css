@@ -474,3 +474,64 @@ main [class*="sm:grid-cols-3"][class*="mb-4"] [class*="border-orange-8"] {
 main [class*="text-rose-3"],
 main [class*="text-rose-4"],
 main [class*="text-rose-5"]           { color: #EF4444; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* MARGIN ANALYSIS PAGE — section & panel readability fixes                   */
+/* Pure CSS only — no JSX changes. All selectors scoped to main.             */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── A. Primary-tinted panels (CFO Insight card, Modeller, Sensitivity) ──── */
+/* bg-primary/* and border-primary/* at low opacity = near-invisible on dark  */
+/* navy. [class~=] is a word-boundary match — avoids hitting the solid        */
+/* bg-primary button class (which has no slash token).                        */
+
+main [class~="bg-primary/5"]       { background-color: rgba(99, 102, 241, 0.07); }
+main [class~="bg-primary/8"]       { background-color: rgba(99, 102, 241, 0.10); }
+main [class~="bg-primary/10"]      { background-color: rgba(99, 102, 241, 0.12); }
+main [class~="bg-primary/20"]      { background-color: rgba(99, 102, 241, 0.18); }
+main [class~="border-primary/10"]  { border-color: rgba(99, 102, 241, 0.30); }
+main [class~="border-primary/15"]  { border-color: rgba(99, 102, 241, 0.35); }
+main [class~="border-primary/20"]  { border-color: rgba(99, 102, 241, 0.45); }
+main [class~="border-primary/30"]  { border-color: rgba(99, 102, 241, 0.60); }
+
+/* ── B. 900/950-series dark tints (near-invisible → subtle visible tint) ─── */
+/* These classes are the Tailwind "dark:" counterparts that exist in the JSX  */
+/* without a media-query dark mode. Without overrides they resolve to almost  */
+/* zero opacity on the dark page background.                                  */
+
+main [class*="bg-amber-950/"]      { background-color: rgba(245, 158, 11, 0.08); }
+main [class*="bg-emerald-950/"]    { background-color: rgba(34,  197, 94, 0.08); }
+main [class*="bg-indigo-950/"]     { background-color: rgba(99,  102, 241, 0.10); }
+main [class*="bg-indigo-900/"]     { background-color: rgba(99,  102, 241, 0.12); }
+
+/* ── C. Exact amber-200 borders & fills ──────────────────────────────────── */
+/* benchmark strip border, risk-outlook grid separator, risk-panel borders.   */
+/* [class~=] is word-boundary: "border-amber-200" ≠ "border-amber-200/70"   */
+/* so the verdict card (border-amber-200/70 → #F59E0B via rule above) is     */
+/* unaffected.                                                                */
+
+main [class~="border-amber-200"]   { border-color: rgba(245, 158, 11, 0.55); }
+main [class~="bg-amber-200"]       { background-color: rgba(245, 158, 11, 0.30); }
+main [class~="bg-amber-100"]       { background-color: rgba(245, 158, 11, 0.14); }
+
+/* border-amber-200/80 time-to-risk indicator — substring covers /80 variant */
+main [class*="border-amber-200/8"] { border-color: rgba(245, 158, 11, 0.55); }
+
+/* ── D. Exact emerald-200 border & fills (recovery opportunities card) ────── */
+/* The outer card uses border-emerald-200 (exact token); dashboard's           */
+/* recoverable card uses border-emerald-200/70 (different token) — unaffected */
+
+main [class~="border-emerald-200"] { border-color: rgba(34, 197, 94, 0.60); }
+main [class~="bg-emerald-100"]     { background-color: rgba(34, 197, 94, 0.10); }
+
+/* ── E. Table/section header-row background (driver table, opportunity list) ─ */
+/* bg-secondary/20 as an exact class token → solid elevated surface           */
+/* hover:bg-secondary/20 is a DIFFERENT class token — not matched, no impact. */
+
+main [class~="bg-secondary/20"]    { background-color: #182A4A; }
+main [class~="bg-secondary/50"]    { background-color: rgba(24, 42, 74, 0.80); }
+
+/* ── F. Destructive tints (alert badges, risk callouts, benchmark badges) ─── */
+/* bg-destructive (no slash) is the solid red btn — NOT matched by this rule. */
+
+main [class*="bg-destructive/"]    { background-color: rgba(239, 68, 68, 0.15); }

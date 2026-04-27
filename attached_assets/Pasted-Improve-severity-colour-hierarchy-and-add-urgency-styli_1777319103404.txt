@@ -1,0 +1,105 @@
+Improve severity colour hierarchy and add urgency styling to the Dashboard Business Health risk scale.
+
+Problem:
+Moderate Risk currently stands out more strongly than High Risk and Critical. High Risk and Critical must read as stronger risk states.
+
+Apply only to the Dashboard Business Health section.
+
+Do not change:
+- layout
+- spacing
+- typography
+- calculations
+- risk logic
+- page structure
+
+Only adjust severity colours and visual emphasis.
+
+1. Update severity scale colours
+
+Strong:
+background: rgba(34,197,94,0.18)
+border-color: #22C55E
+text-color: #22C55E
+
+Stable:
+background: rgba(45,212,191,0.16)
+border-color: #2DD4BF
+text-color: #2DD4BF
+
+Moderate Risk:
+background: #F59E0B
+border-color: #F59E0B
+text-color: #FFFFFF
+
+High Risk:
+background: linear-gradient(0deg, rgba(239,68,68,0.34), rgba(239,68,68,0.34))
+border-color: #EF4444
+text-color: #FCA5A5
+
+Critical:
+background: linear-gradient(0deg, rgba(185,28,28,0.48), rgba(185,28,28,0.48))
+border-color: #B91C1C
+text-color: #FECACA
+
+2. Remove purple/grey risk tones
+
+Do not use purple, mauve, grey or muted slate for High Risk or Critical.
+
+High Risk must be clearly red.
+Critical must be clearly deep red.
+
+3. Add urgency glow
+
+Add a subtle glow to High Risk and Critical segments:
+
+High Risk:
+box-shadow: inset 0 0 0 1px rgba(239,68,68,0.55), 0 0 14px rgba(239,68,68,0.18)
+
+Critical:
+box-shadow: inset 0 0 0 1px rgba(185,28,28,0.7), 0 0 18px rgba(185,28,28,0.28)
+
+4. Add active risk pulse only when active
+
+If High Risk or Critical is the active overall business health state, add a slow subtle pulse to that active segment only.
+
+Pulse:
+duration: 2.4s
+ease-in-out
+infinite
+subtle opacity/box-shadow change only
+
+Do not pulse inactive High Risk or Critical segments.
+
+Do not pulse Moderate Risk.
+
+5. Add left-to-right intensity ramp
+
+Ensure severity visually increases left to right:
+
+Strong = soft green
+Stable = soft teal
+Moderate Risk = solid amber
+High Risk = strong red
+Critical = deepest red
+
+6. Apply same palette consistently
+
+Apply this same severity palette to:
+
+- risk scale bar segments
+- active severity marker
+- dashboard health tiles if severity-mapped
+- any dashboard status chips using High Risk or Critical
+
+7. Final validation
+
+Confirm:
+
+- Moderate Risk remains orange
+- High Risk is visibly stronger than Moderate Risk
+- Critical is visibly stronger than High Risk
+- no purple/grey remains in High Risk or Critical
+- Retention strengthening remains green/Strong
+- pulse only appears if High Risk or Critical is the active overall status
+- no layout shift occurs

@@ -1280,30 +1280,82 @@ main p[class*="font-display"][class*="font-black"][class*="text-emerald"] {
   color: #FB7185 !important;   /* rose-400 — matches dark:text-rose-400 */
 }
 
-/* ── E. Severity scale bar — per-segment colour system ──────────────────────*/
-/* The scale bar items use a done/active/inactive pattern that leaves High     */
-/* Risk (4th) and Critical (5th) falling through to bg-secondary/40 (grey).  */
-/* This is a bug: those positions must render red and deep red respectively.  */
+/* ── E. Severity scale bar — full per-segment colour system ─────────────────*/
+/*                                                                             */
+/* Left-to-right intensity ramp:                                               */
+/*   Strong(1) soft green → Stable(2) soft teal → Moderate Risk(3) solid amber*/
+/*   → High Risk(4) strong red → Critical(5) deepest red                      */
 /*                                                                             */
 /* Discriminator: gap-0 + rounded-xl + overflow-hidden is unique to this bar. */
 /* nth-child order: Strong(1) Stable(2) Moderate Risk(3) High Risk(4) Crit(5) */
 
-/* Stable — teal, visually distinct from Strong (green) */
+/* 1 — Strong — soft green */
+[class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(1) {
+  background: rgba(34, 197, 94, 0.18)  !important;
+  color:      #22C55E                  !important;  /* green-500 */
+}
+
+/* 2 — Stable — soft teal */
 [class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(2) {
-  background-color: rgba(20, 184, 166, 0.15) !important;
-  color:            #2DD4BF                  !important;  /* teal-400 */
+  background: rgba(45, 212, 191, 0.16) !important;
+  color:      #2DD4BF                  !important;  /* teal-400 */
 }
 
-/* High Risk — red */
+/* 3 — Moderate Risk — solid amber (active position) */
+[class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(3) {
+  background: #F59E0B !important;
+  color:      #FFFFFF !important;
+}
+
+/* 4 — High Risk — strong red with urgency glow */
 [class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(4) {
-  background: rgba(239, 68, 68, 0.15) !important;
-  color:      #F87171                 !important;  /* red-400 */
+  background:  linear-gradient(0deg, rgba(239, 68, 68, 0.34), rgba(239, 68, 68, 0.34)) !important;
+  color:       #FCA5A5 !important;  /* red-300 */
+  box-shadow:  inset 0 0 0 1px rgba(239, 68, 68, 0.55), 0 0 14px rgba(239, 68, 68, 0.18) !important;
 }
 
-/* Critical — deep red */
+/* 5 — Critical — deepest red with stronger urgency glow */
 [class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(5) {
-  background: rgba(185, 28, 28, 0.18) !important;
-  color:      #FCA5A5                 !important;  /* red-300 */
+  background:  linear-gradient(0deg, rgba(185, 28, 28, 0.48), rgba(185, 28, 28, 0.48)) !important;
+  color:       #FECACA !important;  /* red-200 */
+  box-shadow:  inset 0 0 0 1px rgba(185, 28, 28, 0.70), 0 0 18px rgba(185, 28, 28, 0.28) !important;
+}
+
+/* ── E2. Pulse — only fires when High Risk or Critical is the active position */
+/* When active=true the JSX adds bg-amber-4* to the segment. Within the scale  */
+/* bar discriminator this uniquely identifies the currently-active segment.    */
+/* Pulse is opacity+glow only — no layout/size change so no reflow.            */
+
+@keyframes severity-high-risk-pulse {
+  0%, 100% {
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.55), 0 0 14px rgba(239, 68, 68, 0.18);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.85), 0 0 24px rgba(239, 68, 68, 0.38);
+    opacity: 0.88;
+  }
+}
+
+@keyframes severity-critical-pulse {
+  0%, 100% {
+    box-shadow: inset 0 0 0 1px rgba(185, 28, 28, 0.70), 0 0 18px rgba(185, 28, 28, 0.28);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: inset 0 0 0 1px rgba(185, 28, 28, 0.95), 0 0 30px rgba(185, 28, 28, 0.50);
+    opacity: 0.88;
+  }
+}
+
+/* High Risk active pulse */
+[class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(4)[class*="bg-amber"] {
+  animation: severity-high-risk-pulse 2.4s ease-in-out infinite !important;
+}
+
+/* Critical active pulse */
+[class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(5)[class*="bg-amber"] {
+  animation: severity-critical-pulse 2.4s ease-in-out infinite !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */

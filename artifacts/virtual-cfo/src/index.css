@@ -857,3 +857,141 @@ main select[class~="bg-card"]   { color: #F8FAFC; }
 
 main [class*="text-[10px]"]     { font-size: 14px; }
 main [class*="text-[11px]"]     { font-size: 14px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* AI CFO COMPONENTS — AiCfoAskCard (main) + AiCfoDrawer (aside) readability */
+/* AiCfoAskCard renders inside <main> → main-scoped rules apply.             */
+/* AiCfoDrawer is a fixed <aside role="dialog"> OUTSIDE <main> — none of our */
+/* existing main-scoped rules reach it, so all drawer fixes use the          */
+/* aside[aria-label="AI CFO Analysis"] scope.                                */
+/* No JSX changes.                                                            */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ══ A. AiCfoAskCard (inside main) ══════════════════════════════════════════ */
+
+/* ── A1. Card wrapper → #13233F surface, solid #263B63 border ─────────────── */
+/* Identifier: both bg-primary/5 AND border-primary/25 token present.        */
+/* AlertToggleCard (enabled) uses bg-primary/3 (not /5) → not matched. ✓    */
+
+main [class*="bg-primary/5"][class*="border-primary/25"] {
+  background-color: #13233F;
+  border-color:     #263B63;
+}
+
+/* ── A2. Input field → darker inset #0F1E36, white text, slate placeholder ── */
+
+main [class*="bg-primary/5"][class*="border-primary/25"] input[class*="bg-background"] {
+  background-color: #0F1E36;
+  color:            #F8FAFC;
+}
+main [class*="bg-primary/5"][class*="border-primary/25"] input[class*="bg-background"]::placeholder {
+  color:   #94A3B8;
+  opacity: 1;
+}
+
+/* ── A3. Suggested question chips (rounded-full) → elevated chip style ──────── */
+/* Ask button uses rounded-xl — rounded-full isolates the chip only. ✓       */
+
+main [class*="bg-primary/5"][class*="border-primary/25"] button[class*="rounded-full"] {
+  background-color: #182A4A;
+  border-color:     #263B63;
+  color:            #CBD5E1;
+}
+main [class*="bg-primary/5"][class*="border-primary/25"] button[class*="rounded-full"]:hover {
+  background-color: #1E3A5F;
+  color:            #FFFFFF;
+}
+
+/* ══ B. AiCfoDrawer (aside[aria-label="AI CFO Analysis"]) ═════════════════════ */
+
+/* ── B1. Font sizes — drawer is outside <main>, so main-scoped floor rules    */
+/*   don't apply. Replicate the same hierarchy for the drawer context.        */
+
+aside[aria-label="AI CFO Analysis"] [class~="text-sm"]     { font-size: 15px; }
+aside[aria-label="AI CFO Analysis"] [class~="text-xs"]     { font-size: 14px; }
+aside[aria-label="AI CFO Analysis"] [class*="text-[10px]"] { font-size: 14px; }
+aside[aria-label="AI CFO Analysis"] [class*="text-[11px]"] { font-size: 14px; }
+
+/* ── B2. Confidence badge colours — badge uses hardcoded Tailwind classes    */
+/*   (bg-emerald-100, text-emerald-700, border-emerald-300, etc.) that       */
+/*   don't reference CSS vars, so they render as bright light-mode colours   */
+/*   unless overridden here.                                                  */
+/*   Specificity: aside+[aria-label]+[class*] = (0,2,1) — beats Tailwind.   */
+
+aside[aria-label="AI CFO Analysis"] [class*="bg-emerald-1"]     { background-color: rgba(34,  197,  94, 0.12); }
+aside[aria-label="AI CFO Analysis"] [class*="text-emerald-7"]   { color: #22C55E; }
+aside[aria-label="AI CFO Analysis"] [class*="border-emerald-3"] { border-color: rgba(34,  197,  94, 0.35); }
+
+aside[aria-label="AI CFO Analysis"] [class*="bg-amber-1"]       { background-color: rgba(245, 158,  11, 0.12); }
+aside[aria-label="AI CFO Analysis"] [class*="text-amber-7"]     { color: #F59E0B; }
+aside[aria-label="AI CFO Analysis"] [class*="border-amber-3"]   { border-color: rgba(245, 158,  11, 0.35); }
+
+aside[aria-label="AI CFO Analysis"] [class*="bg-slate-1"]       { background-color: rgba(148, 163, 184, 0.12); }
+aside[aria-label="AI CFO Analysis"] [class*="text-slate-6"]     { color: #94A3B8; }
+aside[aria-label="AI CFO Analysis"] [class*="border-slate-3"]   { border-color: rgba(148, 163, 184, 0.30); }
+
+/* ── B3. Drawer header label → #A5B4FC ────────────────────────────────────── */
+/* Header div has bg-primary/5 AND shrink-0. The Verdict card also has       */
+/* bg-primary/5 but NOT shrink-0, so shrink-0 is the discriminator. ✓       */
+
+aside[aria-label="AI CFO Analysis"] [class*="bg-primary/5"][class*="shrink-0"] [class*="text-primary"] {
+  color: #A5B4FC;
+}
+
+/* ── B4. AI response cards → unified sc-purple elevation ──────────────────── */
+/* Verdict card:            rounded-xl bg-primary/5  border border-primary/20 */
+/* Recommended Action card: rounded-xl bg-emerald-50 border border-emerald-200*/
+/* Expected Impact card:    rounded-xl bg-indigo-50  border border-indigo-200 */
+/* All three → #182A4A surface, 1px subtle indigo all sides, 4px left accent. */
+/* [class~="rounded-xl"] word-boundary avoids rounded-full chip elements. ✓  */
+/* Upgrade prompt uses bg-primary/3 (not /5) → not matched. ✓               */
+
+aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-primary/5"],
+aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-emerald-50"],
+aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"] {
+  background-color: #182A4A;
+  border:           1px solid rgba(99, 102, 241, 0.25);
+  border-left:      4px solid #6366F1;
+}
+
+/* ── B5. Response card labels & icons → #A5B4FC ───────────────────────────── */
+/* Verdict label:            text-primary (also on Lightbulb icon → both ✓)  */
+/* Recommended Action label: text-emerald-700 (and ChevronRight icon)         */
+/* Expected Impact label:    text-indigo-700  (and TrendingUp icon)           */
+/* Higher specificity (0,4,1) than B2 confidence-badge rules (0,2,1).        */
+/* Wins for card labels while B2 still controls the top-level badge chips.   */
+
+aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-primary/5"]  [class*="text-primary"],
+aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-emerald-50"] [class*="text-emerald-7"],
+aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"]  [class*="text-indigo-7"] {
+  color: #A5B4FC;
+}
+
+/* ── B6. Response card body text → #F8FAFC ────────────────────────────────── */
+/* text-emerald-900 (Recommended Action) and text-indigo-900 (Expected       */
+/* Impact) are hardcoded Tailwind dark-green / dark-indigo — unreadable on   */
+/* the new dark #182A4A surface without this override.                        */
+
+aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-emerald-50"] [class*="text-emerald-9"],
+aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"]  [class*="text-indigo-9"] {
+  color: #F8FAFC;
+}
+
+/* ── B7. Follow-up chips (unlocked) → elevated chip style ─────────────────── */
+/* Unlocked chips: bg-background text-foreground border-border/60 rounded-full*/
+/* Locked chips:   bg-secondary → already dark, leave untouched.             */
+
+aside[aria-label="AI CFO Analysis"] button[class~="bg-background"][class*="rounded-full"] {
+  background-color: #182A4A;
+  border-color:     #263B63;
+  color:            #CBD5E1;
+}
+aside[aria-label="AI CFO Analysis"] button[class~="bg-background"][class*="rounded-full"]:hover {
+  background-color: #1E3A5F;
+  color:            #FFFFFF;
+}
+
+/* ── B8. Links inside the drawer → #60A5FA, hover #93C5FD ─────────────────── */
+
+aside[aria-label="AI CFO Analysis"] a       { color: #60A5FA; }
+aside[aria-label="AI CFO Analysis"] a:hover { color: #93C5FD; }

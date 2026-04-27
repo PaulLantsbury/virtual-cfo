@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard",              href: "/dashboard"              },
-  { icon: TrendingDown,    label: "Profit Margin Analysis", href: "/margin-analysis"        },
+  { icon: TrendingDown,    label: "Margin Analysis",         href: "/margin-analysis"        },
   { icon: BarChart2,       label: "Growth Quality",         href: "/growth-quality"         },
   { icon: Megaphone,       label: "Marketing Efficiency",   href: "/marketing-efficiency"   },
   { icon: Tag,             label: "Pricing Optimisation",   href: "/pricing-optimisation"   },

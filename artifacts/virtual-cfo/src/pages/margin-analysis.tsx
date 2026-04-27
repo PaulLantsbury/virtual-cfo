@@ -401,7 +401,7 @@ export default function MarginAnalysis() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Profit Margin Analysis
+            Margin Analysis
           </h1>
           <p className="text-muted-foreground mt-1">
             Understand current profit performance, the biggest upside opportunities, and what is driving change.

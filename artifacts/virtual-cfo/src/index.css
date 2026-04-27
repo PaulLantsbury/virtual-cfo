@@ -995,3 +995,106 @@ aside[aria-label="AI CFO Analysis"] button[class~="bg-background"][class*="round
 
 aside[aria-label="AI CFO Analysis"] a       { color: #60A5FA; }
 aside[aria-label="AI CFO Analysis"] a:hover { color: #93C5FD; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* OPPORTUNITY AMOUNT PROMINENCE                                               */
+/* Make quantified £ values visually larger and easier to spot across all    */
+/* opportunity / recoverable contribution / improvement plan cards.           */
+/* Rule A targets hero values (already large) → reinforce weight/line-height. */
+/* Rule B targets card-level amounts (text-sm/xl) → scale up to 28px min.   */
+/* Specificity (0,2,2) beats global text-sm/xs floor rules at (0,1,1).       */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── A. Hero opportunity values (font-display, text-5xl) ────────────────── */
+/* Already ≥ 48px via text-5xl — reinforce weight 800 and tight line-height. */
+
+main p[class*="font-display"][class*="font-bold"][class*="text-emerald"] {
+  font-weight: 800;
+  line-height: 1.05;
+  color:       #22C55E;
+}
+
+/* ── B. Card-level amounts — whitespace-nowrap as structural discriminator ── */
+/* Opportunity row amounts always carry whitespace-nowrap (to stay inline).  */
+/* Dashboard status labels ("Healthy", impact tags) do NOT have this class.  */
+/* Scoped to p and span; badge chips additionally excluded via rounded-full. */
+
+main p[class*="font-bold"][class*="text-emerald"][class*="whitespace-nowrap"],
+main span[class*="font-bold"][class*="text-emerald"][class*="whitespace-nowrap"]:not([class*="rounded-full"]) {
+  font-size:   1.75rem;   /* 28px */
+  font-weight: 800;
+  line-height: 1.05;
+  color:       #22C55E;
+}
+
+/* ── C. Total-uplift footer strip — span.text-xl.font-bold inside emerald   */
+/* strip row at the bottom of the opportunities list card.                   */
+/* bg-emerald-50 strip is unique to this summary row.                        */
+
+main [class*="bg-emerald-50"] span[class*="font-bold"][class*="text-emerald"]:not([class*="rounded-full"]) {
+  font-size:   1.75rem;
+  font-weight: 800;
+  line-height: 1.05;
+  color:       #22C55E;
+}
+
+/* ── D. "Where to start" card amounts — shrink-0 as discriminator ──────────── */
+/* The +£X,XXX spans inside the where-to-start grid cards use shrink-0.     */
+
+main .sc-purple span[class*="font-bold"][class*="text-emerald"][class*="shrink-0"] {
+  font-size:   1.75rem;
+  font-weight: 800;
+  line-height: 1.05;
+  color:       #22C55E;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* CFO MONITORING BADGE — navy-complement teal style                          */
+/* Overrides the Tailwind amber/emerald pill classes used in STATUS_CONFIG    */
+/* so the badge stands out against the dark navy header without clashing.    */
+/* Scoped to header to avoid touching main content. !important beats the     */
+/* Tailwind specificity pile-up from cn() merging multiple class groups.     */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Badge pill button ──────────────────────────────────────────────────── */
+header .relative > button[class*="select-none"] {
+  background-color: #102A33 !important;
+  border-color:     #22D3EE !important;
+  color:            #E0F2FE !important;
+  opacity:          1       !important;
+}
+header .relative > button[class*="select-none"]:hover {
+  background-color: #12384A !important;
+  border-color:     #38BDF8 !important;
+  opacity:          1       !important;
+}
+
+/* ── Status label text (the · Monitoring active / · Action recommended span) */
+/* Amber "Action recommended" → gold #FDE68A                                 */
+header .relative > button[class*="select-none"] [class*="text-amber"] {
+  color: #FDE68A !important;
+}
+/* Red "Immediate attention" → rose #FCA5A5                                  */
+header .relative > button[class*="select-none"] [class*="text-red"] {
+  color: #FCA5A5 !important;
+}
+/* Emerald "Monitoring active" → bright green #22C55E                        */
+header .relative > button[class*="select-none"] [class*="text-emerald"] {
+  color: #22C55E !important;
+}
+
+/* ── Pulse dot colours ──────────────────────────────────────────────────── */
+/* The badge renders inside the button wrapper; target both dot + ring spans */
+
+header .relative > button [class*="bg-amber-4"],
+header .relative > button [class*="bg-amber-5"] {
+  background-color: #F59E0B !important;
+}
+header .relative > button [class*="bg-emerald-4"],
+header .relative > button [class*="bg-emerald-5"] {
+  background-color: #22C55E !important;
+}
+header .relative > button [class*="bg-red-4"],
+header .relative > button [class*="bg-red-5"] {
+  background-color: #EF4444 !important;
+}

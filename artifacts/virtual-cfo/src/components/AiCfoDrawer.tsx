@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const PAGE_NAMES: Record<PageId, string> = {
   dashboard:     "Dashboard",
-  margin:        "Profit Margin Analysis",
+  margin:        "Margin Analysis",
   growth:        "Growth Quality",
   marketing:     "Marketing Efficiency",
   pricing:       "Pricing Optimisation",

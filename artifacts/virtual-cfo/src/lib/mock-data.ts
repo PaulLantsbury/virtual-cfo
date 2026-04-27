@@ -176,7 +176,7 @@ export const SHARED_OPPORTUNITIES: SharedOpportunity[] = [
     timing:            "2–4 weeks",
     priorityRank:      3,
     linkedPage:        "/margin-analysis",
-    linkedPageLabel:   "Profit Margin Analysis",
+    linkedPageLabel:   "Margin Analysis",
     recommendedAction: "Renegotiate rates with current carrier or introduce a minimum order threshold for free shipping. At current volume, a 10% reduction in shipping cost adds £3.70 per order to contribution.",
     impactType:        "monthly_contribution",
   },

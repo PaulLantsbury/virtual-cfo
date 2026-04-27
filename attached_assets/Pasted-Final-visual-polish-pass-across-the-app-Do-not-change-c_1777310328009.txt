@@ -1,0 +1,103 @@
+Final visual polish pass across the app.
+
+Do not change calculations, routes, gating logic or page structure unless specifically requested below.
+
+1. Increase opportunity amount prominence
+
+Across all pages, make quantified opportunity amounts visually larger and easier to spot.
+
+Examples:
+- £18k–£42k
+- £20.4k
+- £52k
+- £64k
+- £38k
+- £9.5k
+- £6.8k
+- £4.2k
+
+Apply wherever these appear in opportunity / recoverable contribution / improvement plan cards.
+
+Style:
+- font-size: 40px desktop minimum for hero opportunity values
+- font-size: 28px minimum for card-level opportunity values
+- font-weight: 800
+- colour: #22C55E for positive contribution / cash upside
+- line-height: 1.05
+
+Ensure mobile remains responsive.
+
+2. Improve CFO Monitoring badge
+
+Update the top-right CFO Monitoring badge so it stands out better against the dark navy header, but still uses complementary colours.
+
+Use:
+background: #102A33
+border: 1px solid #22D3EE
+text: #E0F2FE
+status dot: #22C55E
+
+For “Action recommended” state:
+status dot: #F59E0B
+status text: #FDE68A
+
+Hover:
+background: #12384A
+border-color: #38BDF8
+
+Ensure it remains compact and does not clash with the DEV / FREE / PRO toggle.
+
+3. Rename page label
+
+Rename all visible instances of:
+
+“Profit Margin Analysis”
+
+to:
+
+“Margin Analysis”
+
+This includes:
+- page title
+- sidebar navigation
+- breadcrumbs if any
+- module cards
+- internal links
+- page header text
+
+Do not rename underlying route unless necessary.
+
+4. Final readability check
+
+Check every page for:
+- no unreadable blue/purple text
+- no missing card backgrounds
+- no tiny opportunity values
+- no overly bright white panels
+- no clashing badges
+- no duplicate monitoring badges
+- no duplicate Free/Pro toggles
+
+Pages to check:
+- Dashboard
+- Margin Analysis
+- Growth Quality
+- Marketing Efficiency
+- Pricing Optimisation
+- Profit Engine
+- Cash Control
+- Profit Opportunities
+- Scenario Lab
+- CFO Alerts
+- Ask Your AI CFO
+
+5. Preserve everything else
+
+Do not alter:
+- calculations
+- mock data values
+- charts
+- page ordering
+- gating logic
+- AI CFO behaviour
+- alert logic

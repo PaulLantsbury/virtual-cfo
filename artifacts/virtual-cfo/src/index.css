@@ -568,3 +568,58 @@ main [class*="bg-indigo-900/"]     { background-color: rgba(99,  102, 241, 0.14)
 .recharts-rectangle.recharts-tooltip-cursor {
   fill: rgba(99, 102, 241, 0.06) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* MARKETING EFFICIENCY PAGE — badge, panel & table readability fixes         */
+/* Pure CSS only — no JSX changes. All selectors scoped to main.             */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── A. Red badge chip backgrounds ──────────────────────────────────────────── */
+/* Channel-extreme "Weakest" badge: bg-red-100 dark:bg-red-900/30            */
+/* High-effort badge: bg-red-50 dark:bg-red-950/20                          */
+/* [class~] word-boundary so "bg-red-500" solid bars are NOT matched.        */
+
+main [class~="bg-red-50"]          { background-color: rgba(239, 68, 68, 0.08); }
+main [class~="bg-red-100"]         { background-color: rgba(239, 68, 68, 0.14); }
+main [class*="bg-red-900/"]        { background-color: rgba(239, 68, 68, 0.14); }
+main [class*="bg-red-950/"]        { background-color: rgba(239, 68, 68, 0.08); }
+
+/* text-red-400/500 on dark: promote to brighter red-400 for readability      */
+main [class*="text-red-4"],
+main [class*="text-red-5"]         { color: #F87171; }
+
+/* ── B. Blue confidence-badge backgrounds (medium confidence chips) ──────────── */
+/* bg-blue-50 → #13233F already covered.                                     */
+/* bg-blue-950/25 — dark counterpart of bg-blue-50 confidence chip          */
+/* border-blue-700/40 — dark counterpart of border-blue-200/60              */
+
+main [class*="bg-blue-950/"]       { background-color: rgba(59, 130, 246, 0.10); }
+main [class*="border-blue-7"]      { border-color: rgba(59, 130, 246, 0.35); }
+
+/* ── C. Orange medium-effort badge dark-mode background ─────────────────────── */
+/* bg-orange-50 → #182A4A already covered (bg-orange-50 rule).              */
+/* bg-orange-950/20 — dark counterpart, maps to a visible orange tint.      */
+
+main [class*="bg-orange-950/"]     { background-color: rgba(249, 115, 22, 0.10); }
+
+/* ── D. Slate low-effort badge and ghost-bullet dark backgrounds ─────────────── */
+/* bg-slate-100 → bg-slate-1 already covered.                                */
+/* bg-slate-800/60 — dark counterpart for low-effort badge chip             */
+/* bg-slate-700/30 — ghost ranking bullet in opportunity free preview        */
+
+main [class*="bg-slate-800/"]      { background-color: rgba(100, 116, 139, 0.12); }
+main [class*="bg-slate-700/"]      { background-color: rgba(100, 116, 139, 0.10); }
+
+/* ── E. Indigo upgrade-card border (dark counterpart) ───────────────────────── */
+/* border-indigo-200 already covered by border-indigo-2.                    */
+/* border-indigo-700/50 — dark counterpart for upgrade card outline         */
+
+main [class*="border-indigo-7"]    { border-color: rgba(99, 102, 241, 0.35); }
+
+/* ── F. Section-header rows and simulator output mini-cards ──────────────────── */
+/* bg-secondary/30 — Budget Sim header bar, Key Drivers group heading rows  */
+/* bg-secondary/40 — Simulator output metric mini-card panels               */
+/* [class~] word-boundary: hover:bg-secondary/30 etc. remain unaffected.    */
+
+main [class~="bg-secondary/30"]    { background-color: #182A4A; }
+main [class~="bg-secondary/40"]    { background-color: rgba(19, 35, 63, 0.80); }

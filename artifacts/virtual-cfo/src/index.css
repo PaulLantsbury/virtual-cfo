@@ -1237,3 +1237,106 @@ main [class*="bg-emerald-50"] span[class*="text-[11px]"][class*="font-bold"][cla
   font-weight: 700       !important;
   line-height: 1.3       !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* DASHBOARD — Typography hierarchy v2                                         */
+/*                                                                            */
+/* Executive reading order:                                                   */
+/*   page h1 (32px/700) → section h3 (22px/600) → card titles (16px/600)   */
+/*   → KPI values (36px/800) → supporting text (15px) → badges (12px/600)  */
+/*                                                                            */
+/* All rules use !important and scoped discriminators so other pages are     */
+/* unaffected. Discriminator rationale noted in each block.                  */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── H1 page title — 30px → 32px ─────────────────────────────────────────── */
+/* The 2px bump is imperceptible on other pages; colour already #F8FAFC.    */
+/* No margin-bottom set here — existing page-wrapper mb-6 handles spacing.  */
+
+main h1[class*="text-3xl"] {
+  font-size:   2rem    !important;   /* 32px */
+  font-weight: 700     !important;
+  color:       #F8FAFC !important;
+  line-height: 1.2     !important;
+}
+
+/* ── H3 section headers — 20px → 22px, #E2E8F0 ──────────────────────────── */
+/* h3.font-bold.text-xl.text-foreground: UNIQUE to dashboard.               */
+/* landing.tsx h3 uses text-xl.font-bold.mb-3 WITHOUT text-foreground → ✓   */
+/* TopDrivers h3 uses text-lg (not text-xl) → excluded. ✓                  */
+
+main h3[class*="text-xl"][class*="text-foreground"] {
+  font-size:   1.375rem !important;  /* 22px */
+  font-weight: 600      !important;
+  color:       #E2E8F0  !important;
+  line-height: 1.25     !important;
+}
+
+/* ── KPI grid card titles — 15px → 16px, #CBD5E1 ────────────────────────── */
+/* p.text-sm.font-medium.text-muted-foreground.mb-1 also in growth-quality, */
+/* marketing-efficiency, margin-analysis. Scoped via the KPI grid wrapper:  */
+/* div.grid.grid-cols-2.lg:grid-cols-4.gap-4.mb-8 is unique to dashboard.  */
+
+main [class*="lg:grid-cols-4"][class~="mb-8"] p[class*="text-sm"][class*="font-medium"] {
+  font-size:   1rem     !important;  /* 16px */
+  font-weight: 600      !important;
+  color:       #CBD5E1  !important;
+  line-height: 1.3      !important;
+}
+
+/* ── Priority action card titles — 15px → 16px, #CBD5E1 ─────────────────── */
+/* p.text-sm.font-semibold.text-foreground.mb-1.5.leading-snug:             */
+/* This exact class combo appears ONLY in dashboard priority action cards. ✓ */
+
+main p[class*="font-semibold"][class*="text-foreground"][class~="mb-1.5"][class*="leading-snug"] {
+  font-size:   1rem     !important;  /* 16px */
+  font-weight: 600      !important;
+  color:       #CBD5E1  !important;
+  line-height: 1.3      !important;
+}
+
+/* ── KPI grid metric values — 24px → 36px, #F8FAFC ──────────────────────── */
+/* p.text-2xl.font-display.font-bold.text-foreground.mb-2:                  */
+/* UNIQUE to dashboard.tsx — other pages use text-3xl or leading-none. ✓    */
+/* Neutral KPI colour: #F8FAFC. Positive/negative already handled by Rules  */
+/* A–D above (text-emerald → #22C55E, text-rose handled upstream).          */
+
+main p[class*="text-2xl"][class*="font-display"][class~="mb-2"] {
+  font-size:   2.25rem  !important;  /* 36px */
+  font-weight: 800      !important;
+  line-height: 1.05     !important;
+  color:       #F8FAFC  !important;
+}
+
+/* ── KPI card supporting explanation text — 12px → 15px ─────────────────── */
+/* p.text-xs.text-muted-foreground/80.leading-snug.border-t.border-border/50.pt-2 */
+/* cfo-alerts.tsx has border-t.pt-2 on a DIV element, not a p. → safe. ✓   */
+
+main p[class~="pt-2"][class*="border-t"][class*="text-muted-foreground"] {
+  font-size:   0.9375rem !important;  /* 15px */
+  color:       #A9B8D3   !important;
+  line-height: 1.45      !important;
+}
+
+/* ── KPI status badge sizing ─────────────────────────────────────────────── */
+/* inline-flex.rounded-full.text-xs.font-semibold.mb-2 status pills.        */
+/* mb-2 is on the badge span itself → discriminates from other pill spans    */
+/* (improvement-plan and recovery pill spans do NOT carry mb-2). ✓          */
+
+main span[class*="rounded-full"][class*="font-semibold"][class~="mb-2"] {
+  font-size: 0.75rem  !important;   /* 12px */
+  padding:   4px 10px !important;
+}
+
+/* ── CFO Insight card label — 11px → 13px, #A5B4FC ──────────────────────── */
+/* p.text-[11px].font-bold.uppercase.tracking-widest in AiCfoAskCard.       */
+/* tracking-widest (not tracking-wider) is the safe discriminator:          */
+/* engine module titles use tracking-wider → excluded. ✓                    */
+/* Inline "Ask your AI CFO:" span uses tracking-wide (not widest) → ✓      */
+
+main p[class*="text-[11px]"][class*="uppercase"][class*="tracking-widest"] {
+  font-size:      0.8125rem !important;  /* 13px */
+  font-weight:    600       !important;
+  color:          #A5B4FC   !important;
+  letter-spacing: 0.04em    !important;
+}

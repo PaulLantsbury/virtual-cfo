@@ -1,0 +1,237 @@
+Run a full code validation and optimisation pass across the entire Virtual CFO application.
+
+Objective:
+Improve stability, consistency, maintainability and performance before data-layer integration.
+
+Scope:
+
+Dashboard
+Margin Analysis
+Marketing Efficiency
+Pricing Optimisation
+Growth Quality
+Profit Opportunities
+Cash Control
+Scenario Lab
+Alerts Engine
+Ask Your AI CFO components
+Simulator sliders
+Header controls
+Plan gating system
+
+Do NOT change calculations or business logic.
+Do NOT remove features.
+Do NOT modify layout structure unless fixing conflicts.
+Only clean, standardise and optimise code.
+
+----------------------------------------
+
+1. Remove duplicate components
+
+Search for duplicate:
+
+cards
+insight panels
+CFO Insight blocks
+Ask AI CFO panels
+simulator slider components
+confidence badges
+effort badges
+monitoring badges
+
+Create shared reusable components where possible.
+
+----------------------------------------
+
+2. Standardise typography system
+
+Ensure hierarchy:
+
+Page titles
+Section headers
+Card titles
+Primary KPI values
+Supporting text
+Badges
+
+Fix any inconsistencies across pages.
+
+----------------------------------------
+
+3. Validate colour usage
+
+Ensure palette consistency:
+
+primary accent = blue
+positive = green
+warning = amber
+risk = red
+neutral = slate
+
+Replace hard-coded colours with shared theme tokens where possible.
+
+Remove unreadable:
+
+purple text on navy
+dark grey text on dark background
+low-contrast labels
+
+----------------------------------------
+
+4. Validate slider components globally
+
+Confirm:
+
+consistent handle styling
+hover state visible
+focus accessibility enabled
+active track colour correct
+mobile responsiveness working
+
+Ensure one shared slider component is reused everywhere.
+
+----------------------------------------
+
+5. Validate plan gating logic
+
+Confirm:
+
+PRO-only sections locked correctly
+FREE users can preview but not interact
+blur overlays consistent
+upgrade prompts consistent
+no hidden logic conflicts
+
+Ensure gating state is controlled centrally.
+
+----------------------------------------
+
+6. Optimise layout containers
+
+Ensure:
+
+consistent padding between cards
+consistent grid spacing
+no overflow clipping on mobile
+no duplicated wrappers
+no nested unnecessary div structures
+
+Reduce DOM complexity where possible.
+
+----------------------------------------
+
+7. Validate monitoring badge logic
+
+Ensure:
+
+single monitoring badge instance in header
+no duplicate monitoring toggles
+consistent styling across pages
+state stored globally
+
+----------------------------------------
+
+8. Validate AI CFO panels
+
+Ensure:
+
+Ask AI CFO input field works consistently
+suggested prompts render correctly
+panel spacing matches CFO Insight panels
+no duplicate components created per page
+
+----------------------------------------
+
+9. Validate Alerts Engine page
+
+Ensure:
+
+FREE preview mode visible
+PRO controls gated properly
+toggle UI consistent
+notification configuration components reusable
+
+----------------------------------------
+
+10. Improve accessibility
+
+Add or confirm:
+
+hover states
+focus states
+keyboard navigation for sliders
+ARIA labels on simulator inputs
+button accessibility tags
+
+----------------------------------------
+
+11. Remove unused code
+
+Delete:
+
+unused imports
+unused variables
+unused styles
+unused helper functions
+dead components
+
+----------------------------------------
+
+12. Optimise performance
+
+Check:
+
+unnecessary re-renders
+duplicate state hooks
+duplicate context providers
+large inline style objects
+repeated calculations inside render loops
+
+Refactor safely where needed.
+
+----------------------------------------
+
+13. Standardise naming conventions
+
+Ensure consistency for:
+
+components
+props
+hooks
+state variables
+CSS classes
+
+Prefer:
+
+InsightCard
+MetricCard
+SimulatorSlider
+ConfidenceBadge
+MonitoringBadge
+
+----------------------------------------
+
+14. Confirm global styling system
+
+Ensure:
+
+shared theme variables used
+no inline hex duplication
+no page-specific overrides conflicting with theme
+
+----------------------------------------
+
+15. Final validation summary
+
+Return report confirming:
+
+duplicate components removed
+typography hierarchy consistent
+slider system unified
+plan gating stable
+alerts engine correct
+AI CFO panels consistent
+monitoring badge correct
+accessibility improved
+performance optimised
+codebase ready for data-layer integration

@@ -679,3 +679,51 @@ main [class*="bg-red-100/"]           { background-color: rgba(239, 68, 68, 0.14
 main [class*="text-red-8"],
 main [class*="text-red-9"]            { color: #FCA5A5; }
 main [class*="text-orange-8"]         { color: #FDBA74; }
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/* CASH CONTROL PAGE — panel surface, badge, slider & link readability fixes  */
+/* Pure CSS only — no JSX changes. All selectors scoped to main.             */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── A. bg-amber-50 chip vs outer-card disambiguation ────────────────────── */
+/* The global bg-amber-50 substring rule (line 177) sends all amber-50 hits  */
+/* to #182A4A. On Cash Control there are two distinct use-cases:             */
+/*   1. bg-amber-50/xx fractional (Cash Stability Outlook outer wrapper)     */
+/*      → user spec for risk panel: bg #13233F (card surface).               */
+/*   2. bg-amber-50 exact token (headroom opportunity chip inside card)      */
+/*      → should be a subtle amber tint, not a solid dark surface.           */
+/* Both rules land AFTER line 177 so they win the cascade (same specificity).*/
+
+main [class*="bg-amber-50/"]          { background-color: #13233F; }
+main [class~="bg-amber-50"]           { background-color: rgba(245, 158, 11, 0.10); }
+
+/* ── B. bg-secondary/60 — simulator highlighted outcome rows ─────────────── */
+/* bg-secondary/30 and /40 already mapped (lines 627-628).                   */
+/* bg-secondary/60 is used for the highlight=true rows in the outcomes panel. */
+
+main [class~="bg-secondary/60"]       { background-color: #182A4A; }
+
+/* ── C. Color-tinted risk-panel borders — raise opacity for legibility ────── */
+/* border-red-2 substring (line 200) → 30% red.  For risk cards: upgrade.   */
+/* border-indigo-2 substring (line 195) → 30% indigo. For upgrade CTAs:     */
+/* word-boundary rules placed later override the substring catch-alls.        */
+
+main [class~="border-red-200"]        { border-color: rgba(239, 68, 68,   0.65); }
+main [class~="border-indigo-200"]     { border-color: rgba(99,  102, 241, 0.50); }
+
+/* ── D. Slider active track → blue-500 (#3B82F6) ─────────────────────────── */
+/* SliderPrimitive.Track gets class "... bg-primary/20".                     */
+/* SliderPrimitive.Range gets "absolute h-full bg-primary" and is a direct   */
+/* child of the Track. Target it with the direct-child (>) combinator.       */
+
+main [class~="bg-primary/20"] > [class~="bg-primary"] { background-color: #3B82F6; }
+
+/* ── E. Upgrade CTAs — blue colour (#60A5FA) and minimum 15px font size ──── */
+/* All upgrade CTA anchors point to /upgrade. Colour and size apply to the   */
+/* link itself and all p/span children. Excluding [class*="bg-primary"]      */
+/* skips the "Unlock Pro" primary button (direct text, no wrapper p/span).   */
+/* Specificity (0,2,2) beats text-indigo-6/7/8/9 rules at (0,1,1).         */
+
+main a[href="/upgrade"]:not([class*="bg-primary"])           { color: #60A5FA; font-size: 15px; }
+main a[href="/upgrade"]:not([class*="bg-primary"]) p         { color: #60A5FA; font-size: 15px; }
+main a[href="/upgrade"]:not([class*="bg-primary"]) span      { color: #60A5FA; font-size: 15px; }

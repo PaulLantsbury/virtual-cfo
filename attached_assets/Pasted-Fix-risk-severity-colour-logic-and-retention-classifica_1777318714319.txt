@@ -1,0 +1,115 @@
+Fix risk severity colour logic and retention classification on the Dashboard "Overall Business Health" section.
+
+Do not modify layout structure.
+Do not change typography.
+Do not change spacing.
+Only correct severity colours and status logic.
+
+----------------------------------------
+
+1. Correct severity colour mapping
+
+Ensure severity colours follow this system everywhere in the Dashboard health indicator scale:
+
+Strong → green
+Stable → teal
+Moderate Risk → amber/orange
+High Risk → red
+Critical → deep red
+
+Apply:
+
+High Risk
+background: rgba(239,68,68,0.15)
+border: #EF4444
+text: #F87171
+
+Critical
+background: rgba(185,28,28,0.18)
+border: #B91C1C
+text: #FCA5A5
+
+These must visually stand out more strongly than Moderate Risk.
+
+----------------------------------------
+
+2. Fix retention classification logic
+
+Currently:
+
+"Retention strengthening"
+is incorrectly appearing as Critical.
+
+Correct behaviour:
+
+Retention strengthening must always map to:
+
+Status: Strong
+Colour: green
+Severity position: Strong segment (far left of scale)
+
+Apply:
+
+status dot colour = green
+tile border colour = green
+scale highlight = Strong
+
+----------------------------------------
+
+3. Validate severity scale highlight bar
+
+In the horizontal severity scale:
+
+Strong | Stable | Moderate Risk | High Risk | Critical
+
+Ensure:
+
+Moderate Risk = orange highlight
+High Risk = red highlight
+Critical = deep red highlight
+
+Do not allow High Risk or Critical to appear grey or neutral.
+
+----------------------------------------
+
+4. Ensure tile severity matches scale severity
+
+Each tile must visually match its severity category:
+
+Profitability → Strong → green
+Margin Quality → Weakening → amber
+Cash Runway → Runway tightening → amber
+Acquisition Efficiency → At risk → red
+Retention → Strengthening → green
+
+No tile should contradict the scale.
+
+----------------------------------------
+
+5. Add severity fallback logic safety rule
+
+Add safeguard:
+
+If status label contains:
+
+"strengthening"
+"improving"
+"healthy"
+"strong"
+
+then severity must default to Strong (green)
+
+Never Critical.
+
+----------------------------------------
+
+6. Final validation
+
+Confirm:
+
+High Risk now renders red
+Critical now renders deep red
+Moderate Risk remains orange
+Retention strengthening renders green
+Severity scale matches tile statuses
+No neutral styling applied to High Risk or Critical states

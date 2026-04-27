@@ -1259,6 +1259,53 @@ main p[class*="font-display"][class*="font-black"][class*="text-emerald"] {
   line-height: 1.45 !important;
 }
 
+/* ── D2. Scorecard tile status-label colour guard ────────────────────────── */
+/* Ensures no upstream rule (Rule A, C, etc.) can accidentally override the   */
+/* semantic colour on the status-label spans inside the 5-tile scorecard.     */
+/* Each tile's colour is driven purely by JSX (style prop); these rules lock  */
+/* in the correct colour per variant so it can never be washed to grey.       */
+
+/* Green tiles (Profitability / Retention) — emerald label colour */
+[class*="sm:grid-cols-5"][class*="mb-5"] > [class*="bg-emerald"] > div > span:last-child {
+  color: #34D399 !important;   /* emerald-400 — matches dark:text-emerald-400 */
+}
+
+/* Amber tiles (Margin Quality / Cash Runway) — amber label colour */
+[class*="sm:grid-cols-5"][class*="mb-5"] > [class*="bg-amber"] > div > span:last-child {
+  color: #FBBF24 !important;   /* amber-400 — matches dark:text-amber-400 */
+}
+
+/* Red tiles (Acquisition Efficiency) — rose label colour */
+[class*="sm:grid-cols-5"][class*="mb-5"] > [class*="bg-rose"] > div > span:last-child {
+  color: #FB7185 !important;   /* rose-400 — matches dark:text-rose-400 */
+}
+
+/* ── E. Severity scale bar — per-segment colour system ──────────────────────*/
+/* The scale bar items use a done/active/inactive pattern that leaves High     */
+/* Risk (4th) and Critical (5th) falling through to bg-secondary/40 (grey).  */
+/* This is a bug: those positions must render red and deep red respectively.  */
+/*                                                                             */
+/* Discriminator: gap-0 + rounded-xl + overflow-hidden is unique to this bar. */
+/* nth-child order: Strong(1) Stable(2) Moderate Risk(3) High Risk(4) Crit(5) */
+
+/* Stable — teal, visually distinct from Strong (green) */
+[class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(2) {
+  background-color: rgba(20, 184, 166, 0.15) !important;
+  color:            #2DD4BF                  !important;  /* teal-400 */
+}
+
+/* High Risk — red */
+[class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(4) {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color:      #F87171                 !important;  /* red-400 */
+}
+
+/* Critical — deep red */
+[class*="gap-0"][class*="rounded-xl"][class*="overflow-hidden"] > div:nth-child(5) {
+  background: rgba(185, 28, 28, 0.18) !important;
+  color:      #FCA5A5                 !important;  /* red-300 */
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /* DASHBOARD — Typography hierarchy v2                                         */
 /*                                                                            */

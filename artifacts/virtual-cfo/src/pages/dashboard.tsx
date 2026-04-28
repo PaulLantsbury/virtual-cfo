@@ -1,3 +1,5 @@
+import { getCommerceMetrics } from "@/lib/analytics/commerceMetrics";
+import { useEffect, useState } from "react";
 import {
   ArrowUpRight, ArrowDownRight, Minus,
   Sparkles, TrendingUp, AlertTriangle, ArrowRight,
@@ -18,8 +20,8 @@ import { CASH_RUNWAY } from "@/lib/data/cash-snapshot";
 import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
-// KPI display values derived from central mock data layer imports above.
-// Status values require explicit typing now that `as const` is removed.
+// Live KPI overrides from Supabase-backed commerce metrics.
+// Any KPI not listed here continues to use the mock snapshot value.
 type KpiStatus = "warning" | "positive" | "danger" | "neutral";
 
 const CFO_INSIGHT = {
@@ -31,6 +33,14 @@ const KPI_CARDS: { id: string; title: string; value: string; change: string; sta
   {
     id: "cm",   title: "Contribution Margin",      value: `${MONTHLY_CM_PCT}%`,          change: "↓ 2.8% vs last month",                status: "warning",
     text: "Margin is below target and weakening.",
+  },
+  {
+    id: "ns",
+    title: "Net Sales",
+    value: "£0",
+    change: "",
+    status: "positive",
+    text: "Revenue after discounts and refunds.",
   },
   {
     id: "rc",   title: "Recoverable Contribution", value: "£18k–£42k",                   change: "Immediate margin recovery available",  status: "positive",
@@ -59,6 +69,22 @@ const KPI_CARDS: { id: string; title: string; value: string; change: string; sta
   {
     id: "np",   title: "Net Profit",               value: "£56,300",                      change: "↑ 18.7% vs last month",              status: "positive",
     text: "Profit remains positive, but quality of growth needs attention.",
+  },
+  {
+    id: "aov",
+    title: "Average Order Value",
+    value: "£0",
+    change: "",
+    status: "positive",
+    text: "Average revenue generated per order.",
+  },
+  {
+    id: "rr",
+    title: "Refund Rate",
+    value: "0%",
+    change: "",
+    status: "warning",
+    text: "Share of gross sales refunded to customers.",
   },
 ];
 
@@ -179,9 +205,66 @@ const HEALTH_MODULES = [
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
+  const [metrics, setMetrics] = useState<any>(null);
+
+  useEffect(() => {
+    getCommerceMetrics().then(setMetrics);
+  }, []);
+  const liveKpiCards = KPI_CARDS.map((card) => {
+    if (!metrics) return card;
+
+    if (card.id === "mr") {
+      return {
+        ...card,
+        value: `£${metrics.totalRevenue.toLocaleString("en-GB")}`,
+      };
+    }
+    if (card.id === "rpr") {
+      return {
+        ...card,
+        value: `${Math.round(metrics.repeatPurchaseRate * 100)}%`,
+      };
+    }
+    if (card.id === "dd") {
+      return {
+        ...card,
+        value: `${Math.round(metrics.discountRate * 100)}%`,
+      };
+    }
+    if (card.id === "aov") {
+      return {
+        ...card,
+        value: `£${metrics.averageOrderValue.toFixed(2)}`,
+      };
+    }
+    if (card.id === "rr") {
+      return {
+        ...card,
+        value: `${Math.round(metrics.refundRate * 100)}%`,
+      };
+    }
+    if (card.id === "ns") {
+      return {
+        ...card,
+        value: `£${metrics.netSales.toLocaleString("en-GB")}`,
+      };
+    }
+    if (card.id === "cm") {
+      return {
+        ...card,
+        value: `${Math.round(metrics.contributionMarginPercent * 100)}%`,
+      };
+    }
+    if (card.id === "rc") {
+      return {
+        ...card,
+        value: `£${Math.round(metrics.recoverableContribution).toLocaleString("en-GB")}`,
+      };
+    }
+    return card;
+  });
   const isPro           = canAccess("dashboard_recovery_upside");
   const hasDriverDetail = canAccess("dashboard_driver_detail");
-
   return (
     <AppLayout>
 
@@ -449,7 +532,7 @@ export default function Dashboard() {
 
       {/* ══ KPI GRID ═════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {KPI_CARDS.map(kpi => (
+        {liveKpiCards.map((kpi) => (
           <div key={kpi.id} className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
             <p className="text-sm font-medium text-muted-foreground mb-1">{kpi.title}</p>
             <p className="text-2xl font-display font-bold text-foreground mb-2">{kpi.value}</p>

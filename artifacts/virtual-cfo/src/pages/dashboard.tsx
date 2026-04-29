@@ -410,7 +410,7 @@ export default function Dashboard() {
                   <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
                 </p>
                 <p className="text-sm text-foreground font-medium mb-1">
-                  Estimated monthly contribution upside if the issues above are addressed.
+                  The data has identified a recoverable contribution opportunity in your current margin, marketing and fulfilment performance.
                 </p>
                 <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
                 <div className="flex items-center gap-3 flex-wrap mb-2">
@@ -444,7 +444,7 @@ export default function Dashboard() {
                   <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
                 </p>
                 <p className="text-sm text-foreground font-medium mb-1">
-                  Estimated monthly contribution upside if the issues above are addressed.
+                  The data has identified a recoverable contribution opportunity in your current margin, marketing and fulfilment performance.
                 </p>
                 <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
                 <div className="flex items-center gap-3 flex-wrap mb-4">
@@ -492,6 +492,9 @@ export default function Dashboard() {
         <div className="px-6 py-5">
           {isPro ? (
             <div className="space-y-4">
+              <p className="text-xs text-indigo-300/70 leading-snug mb-1">
+                These are the key drivers behind the £18k–£42k opportunity identified above. Address them in order for the fastest contribution recovery.
+              </p>
               {CFO_INSIGHT.weeklyPriorities.map((priority, i) => (
                 <div
                   key={i}
@@ -525,11 +528,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ══ RECOMMENDED IMPROVEMENT PLAN PREVIEW ════════════════════════════ */}
+      {/* ══ EXPECTED IMPACT IF IMPLEMENTED ══════════════════════════════════ */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3.5 bg-secondary/60 border-b border-border/40">
           <Sparkles className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Recommended improvement plan</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Expected impact if implemented</span>
           <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
             <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border/50">
               Expected within 60–90 days
@@ -544,7 +547,7 @@ export default function Dashboard() {
         </div>
         <div className="px-6 py-5">
           <p className="text-sm text-foreground leading-relaxed mb-5">
-            This plan improves profit without choking growth. It combines pricing discipline, marketing reallocation, stock control and overhead restraint.
+            If the recommended priorities are implemented, the model indicates a 60–90 day improvement across contribution, cash and margin.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             {[

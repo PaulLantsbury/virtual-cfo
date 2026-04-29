@@ -1,0 +1,72 @@
+Please refine the dashboard opportunity/action section so each block has a clearer and non-repetitive role.
+
+Keep all existing calculations, values and data sources for now. This is mainly a UX/copy/layout clarification task.
+
+Please structure the three blocks as follows:
+
+1. Top block = opportunity size
+Current title:
+“Recoverable contribution available immediately”
+
+Keep this block broadly as-is.
+
+Purpose:
+Answer: “How big is the opportunity?”
+
+Please make the supporting copy clearly frame this as the headline opportunity detected from the data.
+
+2. Middle block = weekly priorities
+Current title:
+“What to focus on this week”
+
+Keep this title.
+
+Purpose:
+Answer: “Where should I act first this week?”
+
+Please keep this block focused on tactical actions only.
+
+Each row should follow:
+- Action
+- Why it matters
+- Estimated impact
+
+This block should explain the key drivers behind the recoverable contribution number above.
+
+3. Bottom block = projected outcome
+Current title:
+“Recommended improvement plan”
+
+Rename this to:
+
+“Expected impact if implemented”
+
+Purpose:
+Answer: “What happens if I follow through on the plan?”
+
+This block should not repeat the actions from the middle block. Instead, frame it as the projected 60–90 day financial outcome of implementing the weekly priorities.
+
+Suggested supporting copy:
+“If the recommended priorities are implemented, the model indicates a 60–90 day improvement across contribution, cash and margin.”
+
+Keep the existing output metrics:
+- Contribution / month
+- Cash improvement
+- Runway extension
+- Margin improvement
+
+Keep the existing badges:
+- Expected within 60–90 days
+- Confidence: Medium-High
+- Balanced Growth Plan
+
+Please ensure the narrative flow is clear:
+
+Opportunity detected
+→ Priorities identified
+→ Financial impact projected
+
+Do not add new metrics.
+Do not change the calculation logic.
+Do not connect any new data sources.
+Only update the user-facing copy, titles, labels and layout if needed to make the distinction between the three blocks clearer.

@@ -46,6 +46,19 @@ const CFO_INSIGHT = {
   upside: { cashLow: RECOVERABLE_LOW, cashHigh: RECOVERABLE_HIGH },
 };
 
+// Recoverable contribution tile value — derived from the same RECOVERABLE_LOW / RECOVERABLE_HIGH
+// constants used by the opportunity panel, not from the live commerceMetrics calculation.
+// Shows "Opportunity being calculated" when no opportunity data exists yet (both values zero).
+const RECOVERABLE_TILE_VALUE =
+  RECOVERABLE_LOW > 0 || RECOVERABLE_HIGH > 0
+    ? `£${(RECOVERABLE_LOW  / 1_000).toFixed(0)}k–£${(RECOVERABLE_HIGH / 1_000).toFixed(0)}k`
+    : "Opportunity being calculated";
+
+const RECOVERABLE_TILE_CHANGE =
+  RECOVERABLE_LOW > 0 || RECOVERABLE_HIGH > 0
+    ? "Immediate margin recovery available"
+    : "Analysis in progress";
+
 const KPI_CARDS: { id: string; title: string; value: string; change: string; status: KpiStatus; text: string }[] = [
   {
     id: "cm",   title: "Contribution Margin",      value: `${MONTHLY_CM_PCT}%`,          change: "↓ 2.8% vs last month",                status: "warning",
@@ -60,7 +73,11 @@ const KPI_CARDS: { id: string; title: string; value: string; change: string; sta
     text: "Revenue after discounts and refunds.",
   },
   {
-    id: "rc",   title: "Recoverable Contribution", value: "£18k–£42k",                   change: "Immediate margin recovery available",  status: "positive",
+    id: "rc",
+    title: "Recoverable Contribution",
+    value: RECOVERABLE_TILE_VALUE,
+    change: RECOVERABLE_TILE_CHANGE,
+    status: RECOVERABLE_LOW > 0 || RECOVERABLE_HIGH > 0 ? "positive" : "neutral",
     text: "Immediate margin recovery available from pricing, marketing and fulfilment improvements.",
   },
   {
@@ -272,12 +289,9 @@ export default function Dashboard() {
         value: `${Math.round(metrics.contributionMarginPercent * 100)}%`,
       };
     }
-    if (card.id === "rc") {
-      return {
-        ...card,
-        value: `£${Math.round(metrics.recoverableContribution).toLocaleString("en-GB")}`,
-      };
-    }
+    // "rc" is intentionally NOT overridden here.
+    // The tile uses RECOVERABLE_LOW / RECOVERABLE_HIGH (opportunity-engine figures),
+    // not metrics.recoverableContribution (a live excess-cost formula from sparse order data).
     return card;
   });
   const isPro           = canAccess("dashboard_recovery_upside");

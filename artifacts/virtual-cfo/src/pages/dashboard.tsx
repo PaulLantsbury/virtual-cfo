@@ -362,18 +362,33 @@ export default function Dashboard() {
       };
     }
 
+    // ── Discount Dependency tile — wired to Phase 1 Supabase function ──────────
+    // @canonical METRIC.DISCOUNT_DEPENDENCY_RATIO / tile id "dd"
+    // Source (primary):  phase1Metrics.data.discountDependency   [0, 1] ratio → × 100 for %
+    //   Formula: SUM(discounts) / SUM(gross_sales), excl. cancelled orders
+    //            (discount_cost / gross_revenue in the period — value-based, not order-count-based)
+    //   Period:  current calendar month (PHASE1_DATE_FROM → PHASE1_DATE_TO)
+    // Source (fallback): metrics.discountRate from commerceMetrics.ts   [0, 1] ratio
+    //   Formula: SUM(discounts) / SUM(gross_sales), all-time, no date filter
+    // Source (static):   KPI_CARDS "dd" card.value while both still loading
+    if (card.id === "dd") {
+      const ddValue =
+        phase1Metrics !== null && phase1Metrics.errors.length === 0
+          ? phase1Metrics.data.discountDependency   // canonical — phase1 SQL function [0,1]
+          : metrics?.discountRate;                  // fallback  — commerceMetrics (all-time) [0,1]
+      if (ddValue == null) return card;             // static fallback while both loading
+      return {
+        ...card,
+        value: `${Math.round(ddValue * 100)}%`,
+      };
+    }
+
     // All other tiles — unchanged, still use commerceMetrics
     if (!metrics) return card;
     if (card.id === "rpr") {
       return {
         ...card,
         value: `${Math.round(metrics.repeatPurchaseRate * 100)}%`,
-      };
-    }
-    if (card.id === "dd") {
-      return {
-        ...card,
-        value: `${Math.round(metrics.discountRate * 100)}%`,
       };
     }
     if (card.id === "cm") {

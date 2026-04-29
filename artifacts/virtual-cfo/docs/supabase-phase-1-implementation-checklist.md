@@ -42,7 +42,7 @@ Create in dependency order. Items marked **(Phase 1)** are required for go-live.
   - Feeds: `repeat_purchase_rate` (`METRIC.REPEAT_PURCHASE_RATE`)
 
 - [ ] **`orders`** — central revenue fact table; one row per Shopify order **(Phase 1)**
-  - Columns: `id uuid PK`, `store_id uuid FK → stores.id NOT NULL`, `shopify_order_id bigint NOT NULL`, `customer_id uuid FK → customers.id NULLABLE`, `created_at timestamptz NOT NULL`, `financial_status text NOT NULL`, `gross_sales numeric NOT NULL DEFAULT 0`, `discounts numeric NOT NULL DEFAULT 0`, `refunds numeric NOT NULL DEFAULT 0`, `tax numeric NOT NULL DEFAULT 0`, `total_sales numeric NOT NULL DEFAULT 0`, `discount_codes jsonb`, `is_guest_checkout boolean GENERATED ALWAYS AS (customer_id IS NULL) STORED`, `has_discount boolean GENERATED ALWAYS AS (discounts > 0) STORED`, `is_cancelled boolean GENERATED ALWAYS AS (financial_status = 'cancelled') STORED`
+  - Columns: `id uuid PK`, `store_id uuid FK → stores.id NOT NULL`, `shopify_order_id bigint NOT NULL`, `customer_id uuid FK → customers.id NULLABLE`, `created_at timestamptz NOT NULL`, `updated_at timestamptz NOT NULL`, `financial_status text NOT NULL`, `gross_sales numeric NOT NULL DEFAULT 0`, `discounts numeric NOT NULL DEFAULT 0`, `refunds numeric NOT NULL DEFAULT 0`, `tax numeric NOT NULL DEFAULT 0`, `total_sales numeric NOT NULL DEFAULT 0`, `discount_codes jsonb`, `is_guest_checkout boolean GENERATED ALWAYS AS (customer_id IS NULL) STORED`, `has_discount boolean GENERATED ALWAYS AS (discounts > 0) STORED`, `is_cancelled boolean GENERATED ALWAYS AS (financial_status = 'cancelled') STORED`
   - Index: `UNIQUE (store_id, shopify_order_id)`, `(store_id, created_at)`, `(store_id, financial_status)`, `(store_id, updated_at)`
   - Feeds: `net_sales`, `monthly_revenue`, `average_order_value`, `discount_dependency_ratio`, `refund_rate_pct`, `contribution_margin_pct`, `live_order_leakage_estimate` — all dashboard tiles in rows 1 and 2
 
@@ -51,12 +51,13 @@ Create in dependency order. Items marked **(Phase 1)** are required for go-live.
   - Index: `UNIQUE (store_id, shopify_refund_id)`, `(store_id, order_id)`, `(store_id, created_at)`
   - Needed to prevent double-counting on partially-refunded orders
 
+- [ ] **`order_line_items`** — one row per line item; required for AOV per-unit and markdown detection **(Phase 1)**
+  - Columns: `id uuid PK`, `store_id uuid FK → stores.id NOT NULL`, `order_id uuid FK → orders.id NOT NULL`, `product_id uuid FK → products.id NULLABLE`, `variant_id uuid FK → product_variants.id NULLABLE`, `shopify_line_item_id bigint NOT NULL`, `title text`, `quantity int NOT NULL`, `price numeric NOT NULL`, `compare_at_price numeric NULLABLE`, `total_discount numeric NOT NULL DEFAULT 0`, `gross_line_total numeric GENERATED ALWAYS AS (price * quantity) STORED`, `is_markdown boolean GENERATED ALWAYS AS (compare_at_price IS NOT NULL AND compare_at_price > price) STORED`
+  - ⚠ Must be created before `refund_line_items` — `refund_line_items.order_line_item_id` FK references this table
+
 - [ ] **`refund_line_items`** — line-item detail within a refund; prevents double-counting **(Phase 1)**
   - Columns: `id uuid PK`, `store_id uuid FK → stores.id NOT NULL`, `refund_id uuid FK → refunds.id NOT NULL`, `order_line_item_id uuid FK → order_line_items.id NOT NULL`, `quantity int NOT NULL`, `subtotal numeric NOT NULL`
   - Required to correctly attribute refund amounts to specific line items
-
-- [ ] **`order_line_items`** — one row per line item; required for AOV per-unit and markdown detection **(Phase 1)**
-  - Columns: `id uuid PK`, `store_id uuid FK → stores.id NOT NULL`, `order_id uuid FK → orders.id NOT NULL`, `product_id uuid FK → products.id NULLABLE`, `variant_id uuid FK → product_variants.id NULLABLE`, `shopify_line_item_id bigint NOT NULL`, `title text`, `quantity int NOT NULL`, `price numeric NOT NULL`, `compare_at_price numeric NULLABLE`, `total_discount numeric NOT NULL DEFAULT 0`, `gross_line_total numeric GENERATED ALWAYS AS (price * quantity) STORED`, `is_markdown boolean GENERATED ALWAYS AS (compare_at_price IS NOT NULL AND compare_at_price > price) STORED`
 
 ### 1.3 Shopify Product Catalogue (depend on `stores`)
 
@@ -83,8 +84,8 @@ Create in dependency order. Items marked **(Phase 1)** are required for go-live.
 - [ ] **`opportunities`** — one row per identified margin recovery opportunity **(Phase 1 — seed only)**
   - Columns: `id uuid PK`, `store_id uuid FK → stores.id NOT NULL`, `title text NOT NULL`, `description text`, `category text`, `status text CHECK (status IN ('draft','active','in_progress','resolved','dismissed')) DEFAULT 'active'`, `uplift_low numeric NOT NULL DEFAULT 0`, `uplift_high numeric NOT NULL DEFAULT 0`, `action_label text`, `why_label text`, `priority_rank int`, `created_at timestamptz`, `updated_at timestamptz`
   - Seed immediately: the three current mock weekly priorities from `dashboard.tsx` as real rows
-  - Once seeded, `v_recoverable_contribution` view replaces `RECOVERABLE_LOW` / `RECOVERABLE_HIGH` from `business-snapshot.ts`
-  - Unblocks `recoverable_contribution_range` (`METRIC.RECOVERABLE_CONTRIBUTION_RANGE`) from static to live
+  - Once seeded, `v_recoverable_contribution` view replaces `RECOVERABLE_LOW` / `RECOVERABLE_HIGH` from `business-snapshot.ts` — the tile becomes **database-backed**
+  - The values remain **seeded/mock** until the opportunity engine calculates real opportunity rows from live Shopify data; the tile is not fully live until then
 
 - [ ] **`cfo_alerts`** — one row per alert type per store; tracks trigger state **(Phase 1 — seed only)**
   - Columns: `id uuid PK`, `store_id uuid FK → stores.id NOT NULL`, `alert_key text NOT NULL`, `is_triggered boolean DEFAULT false`, `triggered_at timestamptz NULLABLE`, `acknowledged_at timestamptz NULLABLE`, `severity text CHECK (severity IN ('info','warn','danger'))`
@@ -147,11 +148,17 @@ All functions exclude `financial_status = 'cancelled'` and limit to `financial_s
   - Excludes guest orders (`is_guest_checkout = true`) from both numerator and denominator
   - Feeds: `repeat_purchase_rate` (`METRIC.REPEAT_PURCHASE_RATE`)
 
-- [ ] **`discount_dependency(p_store_id, p_date_from, p_date_to)`** — % of orders that include a discount
-  - Formula: `COUNT(*) WHERE has_discount = true` / `order_count() × 100`
+- [ ] **`discount_dependency(p_store_id, p_date_from, p_date_to)`** — discount value as a share of gross sales
+  - Formula: `discount_cost() / gross_revenue() × 100` (value-based: £ discounts surrendered / £ gross sales)
   - Returns: headline rate + optional breakdown by `discounts.category` when populated
   - Feeds: `discount_dependency_ratio` (`METRIC.DISCOUNT_DEPENDENCY_RATIO`)
-  - ⚠ Current live `commerceMetrics.discountRate` is value-based (£ discounts / £ gross sales); this function is count-based (orders with discount / total orders) — the canonical definition. The gap must be documented until the formula is aligned.
+  - Aligns with: `commerceMetrics.discountRate` — both use the value-based formula; no formula alignment gap
+
+- [ ] **`discount_usage_rate(p_store_id, p_date_from, p_date_to)`** — secondary diagnostic: frequency of discount code use **(Phase 1+, not required for go-live)**
+  - Formula: `COUNT(*) FILTER (WHERE has_discount = true) / order_count() × 100` (count-based: orders that applied a discount code / total orders)
+  - Status: future / secondary diagnostic — this is NOT `discount_dependency_ratio` and must not be used in its place
+  - Purpose: shows how often customers apply codes, regardless of the value surrendered; useful for understanding promotional behaviour alongside the headline value-based ratio
+  - Implement after `discount_dependency()` is live and the distinction between the two signals is documented in the merchant-facing UI
 
 - [ ] **`refund_rate(p_store_id, p_date_from, p_date_to)`** — share of gross sales refunded
   - Formula: `return_amount() / gross_revenue() × 100`
@@ -166,7 +173,8 @@ All functions exclude `financial_status = 'cancelled'` and limit to `financial_s
 - [ ] **`v_recoverable_contribution`** — one row per store with active opportunity range
   - Formula: `SELECT store_id, SUM(uplift_low) AS recoverable_low, SUM(uplift_high) AS recoverable_high FROM opportunities WHERE status = 'active' GROUP BY store_id`
   - Replaces: `RECOVERABLE_LOW` / `RECOVERABLE_HIGH` static constants in `business-snapshot.ts`
-  - Once seeded, `dashboard.tsx` KPI tile `rc` reads from this view
+  - Once created, `dashboard.tsx` KPI tile `rc` reads from this view — the tile becomes **database-backed** rather than reading a TypeScript constant
+  - ⚠ The range values remain **seeded/mock** until the opportunity engine derives `uplift_low` / `uplift_high` from live Shopify data; being database-backed is not the same as being live
 
 - [ ] **`v_current_cost_assumptions`** — latest cost assumption row per store
   - Formula: `DISTINCT ON (store_id) ... ORDER BY store_id, effective_from DESC`
@@ -248,7 +256,8 @@ Seed data populates tables immediately after creation so the app is functional f
   - Row 2: repeat rate / retention opportunity
   - Row 3: ad spend efficiency opportunity
   - Set `status = 'active'`, `uplift_low` / `uplift_high` matching current mock values (£18k–£42k total)
-  - Once seeded, `v_recoverable_contribution` makes the `rc` tile live
+  - Once seeded and `v_recoverable_contribution` is created, the `rc` tile becomes **database-backed** — it reads from the DB rather than a TypeScript constant
+  - The tile remains **seeded/mock** until the opportunity engine replaces these rows with values computed from live Shopify data
 
 - [ ] **`cfo_alerts`** — seed one row per alert key per store with `is_triggered = false`
   - Alert keys: `low_runway`, `high_discount_dep`, `falling_repeat_rate`, `rising_cac`, `high_refund_rate`
@@ -295,7 +304,7 @@ No additional integration is required.
 | `mr` | `monthly_revenue` | `METRIC.MONTHLY_REVENUE` | `commerceMetrics.totalRevenue` | Works on `orders` ingest. Future: align formula to `gross_revenue()` function for canonical pre-discount revenue |
 | `aov` | `average_order_value` | `METRIC.AVERAGE_ORDER_VALUE` | `commerceMetrics.averageOrderValue` | Works immediately on `orders` ingest. Confirm denominator excludes cancelled/refunded orders |
 | `rpr` | `repeat_purchase_rate` | `METRIC.REPEAT_PURCHASE_RATE` | `commerceMetrics.repeatPurchaseRate` | Requires `customers` table with `first_order_at` populated; wire `repeat_purchase_rate()` SQL function and surface guest checkout rate alongside tile |
-| `dd` | `discount_dependency_ratio` | `METRIC.DISCOUNT_DEPENDENCY_RATIO` | `commerceMetrics.discountRate` | Works immediately. ⚠ Add badge "Measured by discount value, not order count" until count-based formula is adopted |
+| `dd` | `discount_dependency_ratio` | `METRIC.DISCOUNT_DEPENDENCY_RATIO` | `commerceMetrics.discountRate` | Works immediately. Formula is value-based (Discount Value / Gross Sales) — matches the product definition and `commerceMetrics.discountRate`; no alignment badge required |
 | `rr` | `refund_rate_pct` | `METRIC.REFUND_RATE_PCT` | `commerceMetrics.refundRate` | Works immediately. Confirm period attribution uses `orders.created_at`, not `refunds.created_at` |
 
 **Also wirable immediately (internal diagnostic — not a KPI tile):**
@@ -314,7 +323,7 @@ These tiles cannot be wired to live data in Phase 1. The table states exactly wh
 
 | Tile ID | Canonical Metric | `METRIC.*` Key | Blocker | Unblock Action |
 |---|---|---|---|---|
-| `rc` | `recoverable_contribution_range` | `METRIC.RECOVERABLE_CONTRIBUTION_RANGE` | `opportunities` table not yet created and seeded | Create `opportunities` table → seed 3 rows → create `v_recoverable_contribution` view → update `dashboard.tsx` tile `rc` to query the view |
+| `rc` | `recoverable_contribution_range` | `METRIC.RECOVERABLE_CONTRIBUTION_RANGE` | `opportunities` table not yet created and seeded | Create `opportunities` table → seed 3 rows → create `v_recoverable_contribution` view → update `dashboard.tsx` tile `rc` to query the view. Result: tile becomes **database-backed** but values remain **seeded/mock** until the opportunity engine computes rows from live Shopify data |
 
 ### 6.2 Requires Xero integration (Phase 2)
 

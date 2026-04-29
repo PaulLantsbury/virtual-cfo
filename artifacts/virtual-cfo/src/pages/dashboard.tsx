@@ -435,13 +435,38 @@ export default function Dashboard() {
       };
     }
 
+    // ── Recoverable Contribution tile — wired to recoverable_contribution_range() ──
+    // @canonical METRIC.RECOVERABLE_CONTRIBUTION_RANGE / tile id "rc"
+    // Source (primary):  phase1Metrics.data.recoverableLow / recoverableHigh
+    //   Formula: SUM(impact_low), SUM(impact_high) from non-archived opportunities
+    //   No date filter — opportunities are store-level, not period-bound.
+    // Source (fallback): RECOVERABLE_LOW / RECOVERABLE_HIGH from business-snapshot.ts
+    //   Static constants seeded from the opportunity-engine snapshot.
+    // Source (static):   KPI_CARDS "rc" card.value ("Opportunity being calculated")
+    if (card.id === "rc") {
+      const lo =
+        phase1Metrics !== null &&
+        !phase1Metrics.errors.some(e => e.fn === "recoverable_contribution_range")
+          ? phase1Metrics.data.recoverableLow
+          : RECOVERABLE_LOW;                    // fallback — business-snapshot.ts constant
+      const hi =
+        phase1Metrics !== null &&
+        !phase1Metrics.errors.some(e => e.fn === "recoverable_contribution_range")
+          ? phase1Metrics.data.recoverableHigh
+          : RECOVERABLE_HIGH;                   // fallback — business-snapshot.ts constant
+      const hasData = lo > 0 || hi > 0;
+      return {
+        ...card,
+        value:  hasData
+          ? `£${(lo / 1_000).toFixed(0)}k–£${(hi / 1_000).toFixed(0)}k`
+          : "Opportunity being calculated",
+        change: hasData ? "Immediate margin recovery available" : "Analysis in progress",
+        status: (hasData ? "positive" : "neutral") as KpiStatus,
+      };
+    }
+
     // All other tiles — unchanged, still use commerceMetrics
     if (!metrics) return card;
-    // "rc" is intentionally NOT overridden here.
-    // The tile uses RECOVERABLE_LOW / RECOVERABLE_HIGH from business-snapshot.ts
-    // (the headline opportunity-engine range), not metrics.liveOrderLeakageEstimate
-    // (a separate diagnostic signal computed from actual order data in commerceMetrics.ts).
-    // See the CommerceMetrics type comment in commerceMetrics.ts for the full distinction.
     return card;
   });
   const isPro           = canAccess("dashboard_recovery_upside");

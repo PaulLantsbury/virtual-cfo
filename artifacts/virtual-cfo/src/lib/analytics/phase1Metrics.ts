@@ -129,6 +129,22 @@ export type Phase1MetricsResult = {
    * @canonical METRIC.CONTRIBUTION_MARGIN_PCT
    */
   contributionMarginPct: number | null;
+
+  /**
+   * SUM(impact_low) across all non-archived opportunities for the store.
+   * Currency value (e.g. 18000 = £18,000). 0 when no qualifying rows exist.
+   * No date filtering — opportunities are store-level, not period-bound.
+   * @canonical METRIC.RECOVERABLE_CONTRIBUTION_RANGE (low bound), tile id "rc"
+   */
+  recoverableLow: number;
+
+  /**
+   * SUM(impact_high) across all non-archived opportunities for the store.
+   * Currency value (e.g. 42000 = £42,000). 0 when no qualifying rows exist.
+   * No date filtering — opportunities are store-level, not period-bound.
+   * @canonical METRIC.RECOVERABLE_CONTRIBUTION_RANGE (high bound), tile id "rc"
+   */
+  recoverableHigh: number;
 };
 
 // ── Error type ────────────────────────────────────────────────────────────────
@@ -206,6 +222,32 @@ async function callRpcNullable(
   return Number.isFinite(n) ? n : null;
 }
 
+/**
+ * Calls a Supabase RPC function that returns RETURNS TABLE (i.e. an array of
+ * rows) and coerces the first row to the provided fallback shape.
+ *
+ * Unlike callRpc / callRpcNullable (which handle scalar-returning functions),
+ * this helper is needed for recoverable_contribution_range() which uses
+ * RETURNS TABLE(recoverable_low numeric, recoverable_high numeric).
+ * The Supabase JS client returns such results as an array; we always take [0].
+ *
+ * On error, pushes to the shared errors array and returns the fallback value.
+ */
+async function callRpcRow<T extends Record<string, unknown>>(
+  fnName: string,
+  params: Record<string, unknown>,
+  errors: Phase1MetricsError[],
+  fallback: T,
+): Promise<T> {
+  const { data, error } = await supabase.rpc(fnName, params);
+  if (error) {
+    errors.push({ fn: fnName, message: error.message });
+    return fallback;
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  return (row ?? fallback) as T;
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
@@ -239,6 +281,11 @@ export async function getPhase1Metrics(
     p_date_to: dateTo,
   };
 
+  // recoverable_contribution_range takes only p_store_id (no date range) —
+  // opportunities are store-level signals, not period-bound.
+  const rcParams = { p_store_id: storeId };
+  const rcFallback = { recoverable_low: 0, recoverable_high: 0 };
+
   const [
     grossRevenue,
     discountCost,
@@ -250,17 +297,19 @@ export async function getPhase1Metrics(
     discountDependency,
     refundRate,
     contributionMarginPct,
+    rcRow,
   ] = await Promise.all([
-    callRpc("gross_revenue",          params, errors), // → METRIC.MONTHLY_REVENUE (period gross)
-    callRpc("discount_cost",          params, errors), // → feeds METRIC.DISCOUNT_DEPENDENCY_RATIO
-    callRpc("return_amount",          params, errors), // → feeds METRIC.REFUND_RATE_PCT
-    callRpc("net_sales",              params, errors), // → METRIC.NET_SALES
-    callRpc("order_count",            params, errors), // → denominator for METRIC.AVERAGE_ORDER_VALUE
-    callRpc("average_order_value",    params, errors), // → METRIC.AVERAGE_ORDER_VALUE
-    callRpc("repeat_purchase_rate",   params, errors), // → METRIC.REPEAT_PURCHASE_RATE  [0,1]
-    callRpc("discount_dependency",    params, errors), // → METRIC.DISCOUNT_DEPENDENCY_RATIO [0,1]
-    callRpc("refund_rate",            params, errors), // → METRIC.REFUND_RATE_PCT [0,1]
+    callRpc("gross_revenue",          params,   errors), // → METRIC.MONTHLY_REVENUE (period gross)
+    callRpc("discount_cost",          params,   errors), // → feeds METRIC.DISCOUNT_DEPENDENCY_RATIO
+    callRpc("return_amount",          params,   errors), // → feeds METRIC.REFUND_RATE_PCT
+    callRpc("net_sales",              params,   errors), // → METRIC.NET_SALES
+    callRpc("order_count",            params,   errors), // → denominator for METRIC.AVERAGE_ORDER_VALUE
+    callRpc("average_order_value",    params,   errors), // → METRIC.AVERAGE_ORDER_VALUE
+    callRpc("repeat_purchase_rate",   params,   errors), // → METRIC.REPEAT_PURCHASE_RATE  [0,1]
+    callRpc("discount_dependency",    params,   errors), // → METRIC.DISCOUNT_DEPENDENCY_RATIO [0,1]
+    callRpc("refund_rate",            params,   errors), // → METRIC.REFUND_RATE_PCT [0,1]
     callRpcNullable("contribution_margin_pct", params, errors), // → METRIC.CONTRIBUTION_MARGIN_PCT [0,1] | null
+    callRpcRow("recoverable_contribution_range", rcParams, errors, rcFallback), // → METRIC.RECOVERABLE_CONTRIBUTION_RANGE
   ]);
 
   // Suppress unused import warning — METRIC is imported for the JSDoc
@@ -279,6 +328,8 @@ export async function getPhase1Metrics(
       discountDependency,
       refundRate,
       contributionMarginPct,
+      recoverableLow:  toNumber(rcRow.recoverable_low),
+      recoverableHigh: toNumber(rcRow.recoverable_high),
     },
     errors,
   };

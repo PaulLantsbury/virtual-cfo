@@ -77,8 +77,9 @@ export const METRIC = {
   REPEAT_PURCHASE_RATE:            "repeat_purchase_rate",
 
   /**
-   * Discount Dependency Ratio = Discount Value / Gross Sales.
-   * (Canonical formula is count-based; current live impl uses value-based — see data dict.)
+   * Discount Dependency Ratio = Discount Value / Gross Revenue.
+   * Formula: SUM(discounts) / SUM(gross_sales) — value-based revenue rate.
+   * See also: Discount Usage Rate (future secondary diagnostic) = orders with code / total orders.
    * tile id: "dd"
    */
   DISCOUNT_DEPENDENCY_RATIO:       "discount_dependency_ratio",

@@ -514,11 +514,11 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 
 | Property | Detail |
 |---|---|
-| Formula | `count(orders WHERE length(discount_codes) > 0) / count(all_paid_orders) × 100` |
-| Source fields | `orders.discount_codes[]`, `orders.financial_status`, `orders.created_at` |
+| Formula | `SUM(discounts) / SUM(gross_sales) × 100` — **value-based: revenue surrendered as a percentage of gross revenue** |
+| Source fields | `orders.discounts`, `orders.gross_sales`, `orders.financial_status`, `orders.created_at` |
 | Consuming pages | Growth Quality, Dashboard, CFO Alerts |
-| Confidence risks | Does not distinguish strategic discount codes (loyalty, ambassador) from margin-diluting blanket promotions. All discounts are treated equally |
-| Data quality flags | Allow merchant to tag discount code categories (loyalty / promotional / referral). Show breakdown by category as a secondary metric |
+| Confidence risks | Does not distinguish strategic discount codes (loyalty, ambassador) from margin-diluting blanket promotions. All discounts are treated equally. Silent markdowns (price reductions without a code) are invisible to this metric |
+| Data quality flags | Allow merchant to tag discount code categories (loyalty / promotional / referral). Show breakdown by category as a secondary metric. See `DISCOUNT_USAGE_RATE` for the complementary count-based signal |
 
 ---
 
@@ -526,11 +526,11 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 
 | Property | Detail |
 |---|---|
-| Formula | Same as DISCOUNT_DEP applied to prior period |
-| Source fields | Same as above, prior period date range |
+| Formula | Same as `DISCOUNT_DEP` applied to prior period — `SUM(discounts) / SUM(gross_sales) × 100` (value-based) |
+| Source fields | `orders.discounts`, `orders.gross_sales`, prior period date range |
 | Consuming pages | Growth Quality (MoM trend) |
-| Confidence risks | Same as DISCOUNT_DEP |
-| Data quality flags | Same as DISCOUNT_DEP_PREV |
+| Confidence risks | Same as `DISCOUNT_DEP` |
+| Data quality flags | Same as `DISCOUNT_DEP` |
 
 ---
 
@@ -1020,15 +1020,16 @@ When a new KPI tile is added, the required steps are: (1) add the canonical name
 |---|---|
 | **Dashboard label** | Discount Dependency |
 | **Canonical metric name** | `DISCOUNT_DEP` |
+| **Canonical formula** | `SUM(discounts) / SUM(gross_sales) × 100` — **value-based: discount value surrendered as a percentage of gross revenue** |
 | **Current formula (mock init)** | Static constant: `DISCOUNT_DEP` from `growth-metrics.ts` |
-| **Current formula (live override)** | `SUM(discounts) / SUM(gross_sales) × 100` · `commerceMetrics.discountRate` — **value-based rate: revenue surrendered as a % of gross revenue** |
-| **Canonical formula (intended)** | `count(orders WHERE has_discount = true) / count(all_paid_orders) × 100` — **count-based rate: % of orders that included any discount code** |
-| **Formula divergence** | The live code computes a discount revenue rate (what % of gross revenue was given away). The canonical `DISCOUNT_DEP` defined in §3.3 and used across Growth Quality and CFO Alerts is a count-based order rate (what % of orders used a code). These produce different numbers and have different strategic meanings: a few very deep discounts on small orders could produce a low count rate but a high revenue rate |
+| **Current formula (live override)** | `SUM(discounts) / SUM(gross_sales) × 100` · `commerceMetrics.discountRate` — matches the canonical definition |
+| **Formula status** | **Resolved.** The live formula and the canonical definition are aligned. No divergence exists between the two |
 | **Source system** | Supabase |
-| **Source table / view** | `orders` (columns: `discounts`, `gross_sales` current) → future: `orders.has_discount` computed column for canonical formula |
-| **Current status** | **PARTIAL** — a live formula runs but it computes discount rate (revenue-weighted) rather than the canonical discount dependency (order-count-weighted). Both are valid metrics but they are different and must be labelled distinctly |
-| **Confidence risk** | Does not distinguish loyalty codes from promotional codes. Silent markdowns (price reductions without a code) are invisible to both formulas |
+| **Source table / view** | `orders` (columns: `discounts`, `gross_sales`) |
+| **Current status** | **LIVE** — formula runs against Supabase and matches canonical definition. Initialises to 0% when orders table is empty |
+| **Confidence risk** | Does not distinguish loyalty codes from promotional codes. Silent markdowns (price reductions without a code) are invisible to this metric |
 | **Data quality flag** | Check 4.3 (silent markdowns) in `shopify-phase-1-schema.md`; surface badge if markdown value > 0. Add discount categorisation step at onboarding (see §5.2 of this document) |
+| **See also** | `DISCOUNT_USAGE_RATE` — future secondary diagnostic: `count(orders WHERE has_discount = true) / count(all_paid_orders) × 100`. Count-based rate showing how frequently customers use a discount code. Distinct metric, not a replacement for `DISCOUNT_DEP`. Planned for the Pricing Optimisation secondary panel |
 
 ---
 
@@ -1101,7 +1102,7 @@ When a new KPI tile is added, the required steps are: (1) add the canonical name
 | Monthly Revenue | `MONTHLY_REVENUE` | `SUM(gross_sales + discounts)` for calendar month | **LIVE** | `total_sales` vs gross reconstruction gap | Align `totalRevenue` formula to gross revenue reconstruction |
 | Average Order Value | `AOV` | `Net Sales / Order Count` | **PARTIAL** | Current impl uses `total_sales`; overstates vs canonical | Update `averageOrderValue` to use `netSales / orderCount` before Phase 1 |
 | Repeat Purchase Rate | `REPEAT_RATE` | `Orders from returning customers / Total orders in period` | **PARTIAL** | Live formula measures repeat customer ratio, not rate | Populate `customers` table; fix period-bound formula |
-| Discount Dependency | `DISCOUNT_DEP` | `Count(orders with discount) / Count(all orders) × 100` | **PARTIAL** | Live formula uses revenue rate, not count rate | Add `has_discount` column at ingest; align label to live formula or fix formula |
+| Discount Dependency | `DISCOUNT_DEP` | `SUM(discounts) / SUM(gross_sales) × 100` — value-based | **LIVE** | Silent markdowns invisible; no code-category breakdown yet | Check 4.3 (silent markdowns); add discount categorisation at onboarding |
 | Acquisition Efficiency | `META_CAC_TREND` | `Meta CAC (current period) vs Meta CAC (prior period) — Meta CAC = Meta spend / new customers attributed to Meta` | **MOCK** | Attribution quality; Conversions API required for HIGH confidence | Phase 4 (Meta Ads API); not blended CAC or payback |
 | Refund Rate | `REFUND_RATE` | `Refund Value / Gross Sales × 100` | **LIVE** | Partial refund storage model unconfirmed | Confirm cumulative refund storage at ingest; add UI tooltip |
 | Net Profit | `OPERATING_PROFIT_ESTIMATE` | `Contribution − Fixed Operating Costs` — estimate only; not accounting net profit | **MOCK** | Xero not connected; nominal codes not mapped | Phase 2 (Xero P&L); label as "est." until fully live |

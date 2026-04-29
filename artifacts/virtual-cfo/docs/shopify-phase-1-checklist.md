@@ -145,12 +145,14 @@ All functions exclude cancelled orders and limit to `financial_status IN ('paid'
   - Returns companion fields: `total_orders`, `guest_orders`, `guest_rate_pct`
   - Excludes guest orders (`is_guest_checkout = true`) from both numerator and denominator
 
-- [ ] `discount_dependency(store_id, date_from, date_to)` — % of orders with any discount code
-  - Uses computed column `has_discount` on orders table
+- [ ] `discount_dependency(store_id, date_from, date_to)` — discount value as a % of gross revenue (value-based)
+  - Formula: `SUM(discounts) / SUM(gross_sales) × 100`
+  - Excludes cancelled orders; includes partially_refunded and fully refunded
   - Returns single rate; category breakdown available once `discounts.category` is populated
+  - See also: `discount_usage_rate` (Phase 1+ secondary diagnostic — count-based, not a replacement for this metric)
 
-- [ ] `full_price_order_ratio(store_id, date_from, date_to)` — % of orders at full price
-  - Complement of `discount_dependency`: both should sum to 100%
+- [ ] `full_price_order_ratio(store_id, date_from, date_to)` — % of orders at full price (count-based)
+  - Complement of `discount_usage_rate` (both count-based); does NOT sum to 100% with value-based `discount_dependency`
 
 ### 2.4 Materialised Views (static, refreshed on demand)
 

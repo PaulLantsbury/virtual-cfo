@@ -161,7 +161,8 @@ INDEX        idx_orders_updated_at     ON orders (store_id, updated_at);  -- inc
 | `ANNUAL_REVENUE` / `MONTHLY_REVENUE` / `GROSS_REVENUE` | `SUM(gross_price)` filtered by period |
 | `ANNUAL_DISCOUNTS` / `DISCOUNT_COST` | `SUM(total_discounts)` |
 | `ORDER_COUNT` / `ORDERS` | `COUNT(*)` |
-| `DISCOUNT_DEP` | `COUNT(*) FILTER (has_discount) / COUNT(*)` |
+| `DISCOUNT_DEP` | `SUM(discounts) / SUM(gross_sales)` — value-based revenue rate |
+| `DISCOUNT_USAGE_RATE` | `COUNT(*) FILTER (has_discount) / COUNT(*)` — count-based, future secondary diagnostic |
 | `AVERAGE_SELLING_PRICE` | `SUM(total_price) / SUM(item_quantity)` (joined to line items) |
 | `FULL_PRICE_ORDER_RATIO` | `COUNT(*) FILTER (NOT has_discount) / COUNT(*)` |
 | `REPEAT_RATE` | Joined with `customers.first_order_at < period_start` |
@@ -745,23 +746,50 @@ WHERE o.store_id        = $store_id
 
 ### 3.7 `discount_dependency(store_id, date_from, date_to)`
 
-Percentage of orders that include any discount code, regardless of value.
+Discount value surrendered as a percentage of gross revenue.
+
+**Definition:** `Discount Dependency = Discount Value / Gross Revenue`
+
+This is a **value-based revenue rate** — it measures how much gross revenue was given away as discounts, not how many orders contained a code. A few very deep discounts will produce a high dependency even if most orders are full-price. This is the more financially meaningful signal for a CFO context.
 
 ```sql
 SELECT
+  COALESCE(SUM(discounts), 0)
+  / NULLIF(SUM(gross_sales), 0) * 100
+  AS discount_dependency
+FROM orders
+WHERE store_id        = $store_id
+  AND created_at      BETWEEN $date_from AND $date_to
+  AND financial_status NOT IN ('cancelled');
+
+-- Feeds: DISCOUNT_DEP, DISCOUNT_DEP_PREV
+-- Note: Value-based. Includes ALL discount types (loyalty, promotional, referral).
+--       Category breakdown available if discounts.category is populated.
+--       Excludes cancelled orders; includes partially_refunded and fully refunded.
+-- Pages: Growth Quality, Dashboard, CFO Alerts
+```
+
+#### 3.7a `discount_usage_rate(store_id, date_from, date_to)` — future secondary diagnostic
+
+Percentage of orders that include any discount code, regardless of value. This is the **count-based complement** to `discount_dependency`. It answers "how often do customers use a code?" rather than "how much revenue is being given away?".
+
+**Status:** Future / secondary diagnostic. Not required for Phase 1 go-live. Planned for the Pricing Optimisation secondary panel. Must not be used in place of `DISCOUNT_DEP`.
+
+```sql
+-- Phase 1+ only — implement after discount_dependency() is live
+SELECT
   COUNT(CASE WHEN has_discount THEN 1 END)::float
   / NULLIF(COUNT(*), 0) * 100
-  AS discount_dependency
+  AS discount_usage_rate
 FROM orders
 WHERE store_id        = $store_id
   AND created_at      BETWEEN $date_from AND $date_to
   AND financial_status IN ('paid', 'partially_refunded')
   AND cancelled_at    IS NULL;
 
--- Feeds: DISCOUNT_DEP, DISCOUNT_DEP_PREV
--- Note: Includes ALL discount types (loyalty, promotional, referral).
---       Category breakdown available if discounts.category is populated.
--- Pages: Growth Quality, Dashboard, CFO Alerts
+-- Feeds: DISCOUNT_USAGE_RATE (secondary diagnostic only — NOT DISCOUNT_DEP)
+-- Note: Count-based. Requires has_discount computed column to be populated.
+-- Pages: Pricing Optimisation (secondary panel)
 ```
 
 ---
@@ -803,7 +831,8 @@ WHERE store_id        = $store_id
   AND financial_status IN ('paid', 'partially_refunded')
   AND cancelled_at    IS NULL;
 
--- Complement of discount_dependency: full_price_ratio + discount_dependency = 100%
+-- Note: full_price_order_ratio is the count-based complement of discount_usage_rate
+--       (both count-based), not the value-based complement of discount_dependency.
 -- Feeds: Full-price order ratio (Pricing Optimisation KPI)
 -- Note: Does NOT detect silent markdowns (items sold below compare_at without a code).
 --       Those are surfaced separately by the is_markdown data quality check.

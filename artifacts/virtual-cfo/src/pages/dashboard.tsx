@@ -319,6 +319,28 @@ export default function Dashboard() {
       };
     }
 
+    // ── Average Order Value tile — wired to Phase 1 Supabase function ─────────
+    // @canonical METRIC.AVERAGE_ORDER_VALUE / tile id "aov"
+    // Source (primary):  phase1Metrics.data.averageOrderValue
+    //   Formula: net_sales / qualifying_order_count
+    //            where qualifying = non-cancelled AND non-fully-refunded orders
+    //   Period:  current calendar month (PHASE1_DATE_FROM → PHASE1_DATE_TO)
+    // Source (fallback): metrics.averageOrderValue from commerceMetrics.ts
+    //   Formula: total_sales / COUNT(*) — all orders, no date filter, no exclusions
+    //   NOTE: this formula differs from phase1; see docs/data-dictionary-v1.md §A.6
+    // Source (static):   KPI_CARDS "aov" card.value ("£0") while both still loading
+    if (card.id === "aov") {
+      const aovValue =
+        phase1Metrics !== null && phase1Metrics.errors.length === 0
+          ? phase1Metrics.data.averageOrderValue   // canonical — phase1 SQL function
+          : metrics?.averageOrderValue;             // fallback  — commerceMetrics (all-time)
+      if (aovValue == null) return card;            // static fallback while both loading
+      return {
+        ...card,
+        value: `£${aovValue.toFixed(2)}`,
+      };
+    }
+
     // All other tiles — unchanged, still use commerceMetrics
     if (!metrics) return card;
     if (card.id === "rpr") {
@@ -331,12 +353,6 @@ export default function Dashboard() {
       return {
         ...card,
         value: `${Math.round(metrics.discountRate * 100)}%`,
-      };
-    }
-    if (card.id === "aov") {
-      return {
-        ...card,
-        value: `£${metrics.averageOrderValue.toFixed(2)}`,
       };
     }
     if (card.id === "rr") {

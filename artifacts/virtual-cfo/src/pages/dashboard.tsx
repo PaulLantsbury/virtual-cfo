@@ -571,26 +571,54 @@ export default function Dashboard() {
       </div>
 
       {/* ══ KPI GRID ═════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {liveKpiCards.map((kpi) => (
-          <div key={kpi.id} className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-            <p className="text-sm font-medium text-muted-foreground mb-1">{kpi.title}</p>
-            <p className="text-2xl font-display font-bold text-foreground mb-2">{kpi.value}</p>
-            <span className={cn(
-              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold mb-2",
-              kpi.status === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
-              : kpi.status === "warning"  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
-              : kpi.status === "danger"   ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
-              : "bg-secondary text-muted-foreground"
-            )}>
-              {kpi.status === "positive" && <ArrowUpRight className="w-3 h-3" />}
-              {kpi.status === "danger"   && <ArrowDownRight className="w-3 h-3" />}
-              {kpi.status === "warning"  && <Minus className="w-3 h-3" />}
-              {kpi.change}
-            </span>
-            <p className="text-xs text-muted-foreground/80 leading-snug border-t border-border/50 pt-2">{kpi.text}</p>
-          </div>
-        ))}
+      {/* Three diagnostic rows: health → quality → efficiency               */}
+      <div className="mb-8 space-y-6">
+        {([
+          { label: "Business health summary",            ids: ["ns","cm","rc","cr"], cols: "lg:grid-cols-4" },
+          { label: "Revenue quality diagnostics",         ids: ["mr","aov","rpr","dd"], cols: "lg:grid-cols-4" },
+          { label: "Efficiency and profit leakage",       ids: ["ae","rr","np"],       cols: "lg:grid-cols-3" },
+        ] as { label: string; ids: string[]; cols: string }[]).map(({ label, ids, cols }) => {
+          const row = ids.map(id => liveKpiCards.find(c => c.id === id)!);
+          return (
+            <div key={label}>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mb-3">{label}</p>
+              <div className={cn("grid grid-cols-2 gap-4", cols)}>
+                {row.map(kpi => (
+                  <div
+                    key={kpi.id}
+                    className={cn(
+                      "bg-card rounded-2xl p-5 shadow-sm border",
+                      kpi.id === "rc"
+                        ? "border-emerald-300/60 dark:border-emerald-700/50"
+                        : "border-border/50"
+                    )}
+                  >
+                    <p className="text-sm font-medium text-muted-foreground mb-1">{kpi.title}</p>
+                    <p className={cn(
+                      "text-2xl font-display font-bold mb-2",
+                      kpi.id === "rc" ? "text-emerald-700 dark:text-emerald-400" : "text-foreground"
+                    )}>
+                      {kpi.value}
+                    </p>
+                    <span className={cn(
+                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold mb-2",
+                      kpi.status === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
+                      : kpi.status === "warning"  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
+                      : kpi.status === "danger"   ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
+                      : "bg-secondary text-muted-foreground"
+                    )}>
+                      {kpi.status === "positive" && <ArrowUpRight className="w-3 h-3" />}
+                      {kpi.status === "danger"   && <ArrowDownRight className="w-3 h-3" />}
+                      {kpi.status === "warning"  && <Minus className="w-3 h-3" />}
+                      {kpi.change}
+                    </span>
+                    <p className="text-xs text-muted-foreground/80 leading-snug border-t border-border/50 pt-2">{kpi.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* ══ PRIORITY ACTIONS THIS MONTH ══════════════════════════════════════ */}

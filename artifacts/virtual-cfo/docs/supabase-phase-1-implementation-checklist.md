@@ -136,9 +136,12 @@ All functions exclude `financial_status = 'cancelled'` and limit to `financial_s
   - Excludes cancelled and fully-refunded orders
   - Feeds: denominator of `average_order_value` (`METRIC.AVERAGE_ORDER_VALUE`) and `repeat_purchase_rate` (`METRIC.REPEAT_PURCHASE_RATE`)
 
-- [ ] **`average_order_value(p_store_id, p_date_from, p_date_to)`** — net sales per order
-  - Formula: `net_sales() / order_count()`
-  - Feeds: `average_order_value` (`METRIC.AVERAGE_ORDER_VALUE`) — replaces current `commerceMetrics.averageOrderValue`
+- [x] **`average_order_value(p_store_id, p_date_from, p_date_to)`** — net sales per qualifying order ✓ **DONE**
+  - Formula: `SUM(gross_sales − discounts − refunds − tax) / COUNT(*) FILTER (financial_status NOT IN ('cancelled','refunded'))`
+  - Supabase function is implemented and uses the canonical definition
+  - **Frontend mismatch (open):** `commerceMetrics.averageOrderValue` still computes `total_sales / count(*)` — a different numerator (includes discounts, refunds, tax) and a different denominator (all orders regardless of status). The dashboard tile currently shows the frontend figure, not the Supabase function result
+  - **Do not change frontend logic in isolation.** The frontend formula will be replaced when the dashboard tile is wired to this Supabase function as part of the dashboard wiring step
+  - Feeds: `average_order_value` (`METRIC.AVERAGE_ORDER_VALUE`)
 
 ### 2.3 Customer Quality Functions
 

@@ -179,7 +179,7 @@ These metrics are already computed at runtime from the Supabase `orders` table v
 | **Net Sales** | `commerceMetrics.netSales` — `gross_sales - discounts - refunds - tax` per order | Yes (row 1) |
 | **Contribution Margin %** | `commerceMetrics.contributionMarginPercent` — net sales minus variable costs from `store_cost_assumptions` | Yes (row 1) |
 | **Monthly Revenue** | `commerceMetrics.totalRevenue` — `SUM(total_sales)` | Yes (row 2) |
-| **Average Order Value** | `commerceMetrics.averageOrderValue` — `totalRevenue / orderCount` | Yes (row 2) |
+| **Average Order Value** | `commerceMetrics.averageOrderValue` — `totalRevenue / orderCount` ⚠️ **formula mismatch:** frontend uses `total_sales / count(*)` (all orders); Supabase function `average_order_value()` uses `net_sales / qualifying_order_count` (canonical). Dashboard tile shows frontend figure until wiring step. Do not change frontend formula before wiring | Yes (row 2) |
 | **Repeat Purchase Rate** | `commerceMetrics.repeatPurchaseRate` — multi-order customer ratio from `customer_id` grouping | Yes (row 2) |
 | **Discount Dependency** | `commerceMetrics.discountRate` — `totalDiscounts / grossSales` | Yes (row 2) |
 | **Refund Rate** | `commerceMetrics.refundRate` — `totalRefunds / grossSales` | Yes (row 3) |

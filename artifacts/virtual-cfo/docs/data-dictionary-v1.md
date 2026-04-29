@@ -985,13 +985,15 @@ When a new KPI tile is added, the required steps are: (1) add the canonical name
 | **Canonical metric name** | `AOV` |
 | **Canonical definition** | `AOV = Net Sales / Order Count` |
 | **Rationale** | Net Sales (after discounts, refunds/returns and VAT/sales tax) is the appropriate numerator because it represents revenue the merchant actually retains before variable costs. Using net sales aligns AOV with the Net Sales tile and makes the two figures internally consistent. The formula mirrors `commerceMetrics.netSales / commerceMetrics.orderCount` |
-| **Current formula (live)** | `SUM(orders.total_sales) / count(orders)` · `commerceMetrics.averageOrderValue` — currently uses `total_sales` (post-discount, tax-varies) rather than `netSales`. To be corrected before Phase 1 go-live |
-| **Intended formula (production)** | `commerceMetrics.netSales / commerceMetrics.orderCount` — aligns to the canonical definition |
+| **Supabase function** | `average_order_value(p_store_id, p_date_from, p_date_to)` — **implemented and correct.** Formula: `SUM(gross_sales − discounts − refunds − tax) / COUNT(*) FILTER (financial_status NOT IN ('cancelled','refunded'))`. Denominator excludes cancelled and fully-refunded orders. Returns 0 for an empty period |
+| **Frontend formula (current — not yet wired)** | `SUM(orders.total_sales) / count(orders)` · `commerceMetrics.averageOrderValue` — uses `total_sales` (post-discount, tax-varies) and includes all orders in the denominator regardless of status. This is the formula currently displayed on the dashboard tile |
+| **Formula mismatch** | The Supabase function and the frontend compute different values. The delta is: discounts + refunds + tax in the numerator, plus cancelled/refunded orders in the denominator. In a period with meaningful discounting or returns the Supabase figure will be lower than the frontend figure. **The frontend formula must not be changed until the dashboard tile wiring step** |
+| **Correction plan** | When dashboard tiles are wired to Supabase functions, replace `commerceMetrics.averageOrderValue` with a call to `average_order_value()`. At that point the frontend formula can be removed or retained only as a fallback |
 | **Future secondary metric** | Gross AOV (`SUM(gross_sales) / orderCount`) may be added as a secondary figure on the Margin Analysis drill-down page for benchmarking against industry averages, where pre-discount figures are the norm |
 | **Source system** | Supabase |
-| **Source table / view** | `orders` (columns: `gross_sales`, `discounts`, `refunds`, `tax` for net; current code uses `total_sales`) |
-| **Current status** | **PARTIAL** — formula runs against live Supabase data but uses `total_sales` rather than `netSales`. Initialises to £0 when orders table is empty |
-| **Confidence risk** | Current implementation using `total_sales` produces a different figure from the canonical `netSales / orderCount` definition — the gap equals discounts, refunds and tax treatment. Until corrected, AOV will be overstated vs the canonical definition in stores with significant discounting or high-value returns |
+| **Source table / view** | `orders` (columns: `gross_sales`, `discounts`, `refunds`, `tax`; Supabase function) · frontend currently reads `total_sales` |
+| **Current status** | **PARTIAL** — Supabase function uses canonical formula and is correct. Dashboard tile still reads from `commerceMetrics.averageOrderValue` (frontend formula, `total_sales / count(*)`). Wiring step required to resolve the mismatch |
+| **Confidence risk** | Until the tile is wired to the Supabase function, AOV on the dashboard will be overstated vs the canonical definition in stores with significant discounting or high-value returns. The gap = discounts + refunds + tax treatment |
 | **Data quality flag** | Add UI tooltip: "Average net revenue per order (after discounts, returns and VAT), showing [period]" |
 
 ---

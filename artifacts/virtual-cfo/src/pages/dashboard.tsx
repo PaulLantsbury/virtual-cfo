@@ -290,8 +290,10 @@ export default function Dashboard() {
       };
     }
     // "rc" is intentionally NOT overridden here.
-    // The tile uses RECOVERABLE_LOW / RECOVERABLE_HIGH (opportunity-engine figures),
-    // not metrics.recoverableContribution (a live excess-cost formula from sparse order data).
+    // The tile uses RECOVERABLE_LOW / RECOVERABLE_HIGH from business-snapshot.ts
+    // (the headline opportunity-engine range), not metrics.liveOrderLeakageEstimate
+    // (a separate diagnostic signal computed from actual order data in commerceMetrics.ts).
+    // See the CommerceMetrics type comment in commerceMetrics.ts for the full distinction.
     return card;
   });
   const isPro           = canAccess("dashboard_recovery_upside");

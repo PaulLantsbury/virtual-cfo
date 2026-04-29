@@ -1,5 +1,28 @@
 import { supabase } from "../supabase";
 import { COST_ASSUMPTIONS } from "./costAssumptions";
+
+/**
+ * CommerceMetrics
+ *
+ * Values computed at runtime from the Supabase `orders` table.
+ *
+ * IMPORTANT — two distinct "recoverable" concepts exist in this codebase:
+ *
+ * 1. liveOrderLeakageEstimate  (this file)
+ *    A diagnostic signal computed order-by-order from actual Supabase data.
+ *    Formula: excessDiscountLoss + excessRefundLoss + excessPaymentFees
+ *    Use: internal diagnostic tooling, future Profit Opportunities deep-dive.
+ *    NOT used as the headline dashboard KPI.
+ *
+ * 2. Headline Recoverable Contribution  (business-snapshot.ts)
+ *    The strategic opportunity range shown in the KPI tile and opportunity panel.
+ *    Source: RECOVERABLE_LOW / RECOVERABLE_HIGH (static) →
+ *            future: sum of active rows in the `opportunities` table.
+ *    NOT computed here.
+ *
+ * Do not conflate these. The KPI tile reads from business-snapshot.ts.
+ * The live order leakage estimate is available for future diagnostic pages.
+ */
 export type CommerceMetrics = {
   totalRevenue: number;
   netSales: number;
@@ -14,8 +37,20 @@ export type CommerceMetrics = {
   refundRate: number;
   contributionMargin: number;
   contributionMarginPercent: number;
-  recoverableContribution: number;
-  recoverableContributionPercent: number;
+  /**
+   * Live diagnostic leakage estimate.
+   * Sum of contribution lost to above-benchmark discount rates, refund rates,
+   * and payment fees — computed from actual order data in the `orders` table.
+   *
+   * This is NOT the headline Recoverable Contribution shown on the dashboard KPI tile.
+   * The headline figure comes from RECOVERABLE_LOW / RECOVERABLE_HIGH in business-snapshot.ts.
+   */
+  liveOrderLeakageEstimate: number;
+  /**
+   * liveOrderLeakageEstimate expressed as a percentage of net sales.
+   * Same caveat as liveOrderLeakageEstimate — diagnostic only, not the KPI headline.
+   */
+  liveOrderLeakageEstimatePct: number;
 };
 
 export async function getCommerceMetrics(): Promise<CommerceMetrics> {
@@ -39,8 +74,8 @@ export async function getCommerceMetrics(): Promise<CommerceMetrics> {
       refundRate: 0,
       contributionMargin: 0,
       contributionMarginPercent: 0,
-      recoverableContribution: 0,
-      recoverableContributionPercent: 0,
+      liveOrderLeakageEstimate: 0,
+      liveOrderLeakageEstimatePct: 0,
     };
   }
 
@@ -91,9 +126,14 @@ export async function getCommerceMetrics(): Promise<CommerceMetrics> {
 
   const contributionMarginPercent =
     netSales > 0 ? contributionMargin / netSales : 0;
-  const benchmarkDiscountRate = 0.10;
-  const benchmarkRefundRate = 0.05;
-  const benchmarkPaymentFeeRate = 0.02;
+
+  // ── Live diagnostic leakage estimate ─────────────────────────────────────────
+  // Measures contribution currently being lost to above-benchmark rates.
+  // This is a diagnostic signal — not the headline Recoverable Contribution KPI.
+  // The KPI tile uses RECOVERABLE_LOW / RECOVERABLE_HIGH from business-snapshot.ts.
+  const benchmarkDiscountRate    = 0.10;
+  const benchmarkRefundRate      = 0.05;
+  const benchmarkPaymentFeeRate  = 0.02;
 
   const excessDiscountLoss =
     discountRate > benchmarkDiscountRate
@@ -111,15 +151,17 @@ export async function getCommerceMetrics(): Promise<CommerceMetrics> {
         (COST_ASSUMPTIONS.paymentFeeRate - benchmarkPaymentFeeRate)
       : 0;
 
-  const recoverableContribution =
+  const liveOrderLeakageEstimate =
     excessDiscountLoss +
     excessRefundLoss +
     excessPaymentFees;
 
-  const recoverableContributionPercent =
+  const liveOrderLeakageEstimatePct =
     netSales > 0
-      ? recoverableContribution / netSales
+      ? liveOrderLeakageEstimate / netSales
       : 0;
+
+  // ── Customer repeat analysis ──────────────────────────────────────────────────
   const ordersByCustomer = new Map<string, number>();
 
   rows.forEach((row) => {
@@ -151,7 +193,7 @@ export async function getCommerceMetrics(): Promise<CommerceMetrics> {
     refundRate,
     contributionMargin,
     contributionMarginPercent,
-    recoverableContribution,
-    recoverableContributionPercent,
+    liveOrderLeakageEstimate,
+    liveOrderLeakageEstimatePct,
   };
 }

@@ -1,0 +1,93 @@
+Please create Phase 1 Shopify seed/test data for the Supabase tables.
+
+Important:
+- Do not build Shopify API ingestion yet.
+- Do not create metric views/functions yet.
+- Do not change dashboard UI.
+- This is seed/test data only.
+
+Create a seed script or migration suitable for local/dev Supabase that inserts realistic test data into:
+
+1. stores
+2. store_settings
+3. store_cost_assumptions
+4. customers
+5. products
+6. product_variants
+7. orders
+8. order_line_items
+9. refunds
+10. refund_line_items
+11. discounts
+12. discount_codes
+13. opportunities
+14. cfo_alerts
+
+Seed data requirements:
+
+- 1 test store
+- default store_settings
+- default store_cost_assumptions matching current assumptions:
+  - payment_fee_rate = 0.025
+  - fulfilment_cost_per_order = 3.50
+  - packaging_cost_per_order = 1.20
+  - return_handling_rate = 0.15
+
+Orders:
+- at least 100 orders
+- spread across at least 3 calendar months
+- include paid, partially_refunded, refunded and cancelled orders
+- include discounted and non-discounted orders
+- include guest checkouts with customer_id NULL
+- include repeat customers
+- include VAT/tax values
+- ensure gross_sales, discounts, refunds, tax and total_sales reconcile sensibly
+
+Refunds:
+- include at least 5 refunded or partially refunded orders
+- include at least one order with two partial refund events
+- ensure refund totals do not exceed order total_sales
+
+Products:
+- include several products and variants
+- include some variants with cost populated
+- include some variants with cost NULL
+- include at least one markdown case where compare_at_price > price
+
+Discounts:
+- include several discount codes
+- include categories:
+  - loyalty
+  - promotional
+  - referral
+  - wholesale
+  - other
+
+Opportunities:
+- seed the current three weekly priority opportunities as active rows
+- uplift_low / uplift_high should sum to the current recoverable contribution range of £18k–£42k
+
+CFO alerts:
+- seed:
+  - low_runway
+  - high_discount_dep
+  - falling_repeat_rate
+  - rising_cac
+  - high_refund_rate
+- all should start as is_triggered = false
+
+After seeding:
+1. run the seed locally against the test database
+2. confirm row counts by table
+3. confirm generated columns work
+4. confirm there are no FK errors
+5. confirm refund totals do not exceed order totals
+6. confirm there is enough data to test:
+   - Net Sales
+   - Monthly Revenue
+   - AOV
+   - Refund Rate
+   - Discount Dependency
+   - Repeat Purchase Rate
+
+Report the row counts and any assumptions made.

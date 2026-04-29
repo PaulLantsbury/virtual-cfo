@@ -841,21 +841,48 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 
 ---
 
+### Canonical Metric Registry
+
+**TypeScript source of truth:** `src/lib/metrics.ts`
+
+The codebase has a central metric name registry at `src/lib/metrics.ts`. It is the authoritative single location for all canonical metric naming. Nothing in any other file should define or re-declare metric names; it should reference this file.
+
+The file exports two objects:
+
+- **`METRIC`** — a `const` object mapping TypeScript keys (e.g. `METRIC.NET_SALES`) to canonical snake_case metric name strings (e.g. `"net_sales"`). These names match this Data Dictionary and are the stable identifiers to use for analytics event tracking, alert rule keys, and metric snapshot storage keys.
+
+- **`TILE_METRIC_MAP`** — a `Record<tileId, MetricName>` mapping each dashboard tile's short id (e.g. `"ns"`) to exactly one value from `METRIC`. This is the definitive answer to "which canonical metric does this tile display?"
+
+Each constant in the data files that feeds a dashboard tile carries a `@canonical` JSDoc tag cross-referencing its entry in `METRIC`. Example:
+
+```typescript
+/**
+ * @canonical net_sales (see src/lib/metrics.ts METRIC.NET_SALES)
+ */
+export const MONTHLY_REVENUE = 124_500;
+```
+
+When a new KPI tile is added, the required steps are: (1) add the canonical name to `METRIC`, (2) add the tile id → name mapping in `TILE_METRIC_MAP`, (3) add a `@canonical` JSDoc tag to the supplying data-file constant, (4) add an entry to this Appendix.
+
+---
+
 ### Quick Reference — Dashboard KPI Status Summary
 
-| KPI Name | Canonical Metric Name | Source System | Status | Confidence | Notes |
-|---|---|---|---|---|---|
-| Net Sales | `net_sales` | Shopify (tax-adjusted reconstruction) | **Live** | Medium | Requires explicit VAT/sales-tax separation from Shopify `total_price` |
-| Contribution Margin | `contribution_margin_pct` | Shopify + assumptions (future Xero) | **Partial** | Medium | Variable cost assumptions hardcoded until Xero integration |
-| Recoverable Contribution | `recoverable_contribution_range` | Opportunity engine (`RECOVERABLE_LOW` / `RECOVERABLE_HIGH`) | **Live** | Medium–High | Not derived from `commerceMetrics.ts` diagnostic leakage formula |
-| Cash Runway | `cash_runway_months` | Xero + assumptions layer | **Partial** | Medium | Confidence improves after nominal code mapping is complete |
-| Monthly Revenue | `monthly_revenue` | Shopify | **Live** | High | Derived from reconstructed gross sales |
-| Average Order Value | `average_order_value` | Shopify | **Live** | High | Defined as Net Sales / Order Count |
-| Repeat Purchase Rate | `repeat_purchase_rate` | Shopify customers / orders | **Live** | Medium | Guest checkout rate directly affects accuracy |
-| Discount Dependency | `discount_dependency_ratio` | Shopify discounts | **Live** | High | Defined as Discount Value / Gross Sales |
-| Acquisition Efficiency | `meta_cac_trend` | Meta Ads + Shopify attribution | **Partial** | Medium | Channel-level trend signal only — not blended CAC, CAC payback, or ROAS |
-| Refund Rate | `refund_rate_pct` | Shopify refunds | **Live** | High | Defined as Refund Value / Gross Sales |
-| Net Profit (Estimate) | `operating_profit_estimate` | Shopify + assumptions (future Xero) | **Partial** | Medium | Contribution minus fixed operating costs — not statutory net profit |
+| Tile ID | KPI Name | Canonical Metric (`METRIC.*` key) | Source Constants | Source System | Status | Confidence | Notes |
+|---|---|---|---|---|---|---|---|
+| `ns` | Net Sales | `net_sales` (`METRIC.NET_SALES`) | `commerceMetrics.netSales` (live); no mock init | Shopify (tax-adjusted reconstruction) | **Live** | Medium | Requires explicit VAT/sales-tax separation from Shopify `total_price` |
+| `cm` | Contribution Margin | `contribution_margin_pct` (`METRIC.CONTRIBUTION_MARGIN_PCT`) | `business-snapshot.ts` `MONTHLY_CM_PCT` (mock init); `commerceMetrics.contributionMarginPercent` (live) | Shopify + assumptions (future Xero) | **Partial** | Medium | Variable cost assumptions hardcoded until Xero integration |
+| `rc` | Recoverable Contribution | `recoverable_contribution_range` (`METRIC.RECOVERABLE_CONTRIBUTION_RANGE`) | `business-snapshot.ts` `RECOVERABLE_LOW` / `RECOVERABLE_HIGH` | Opportunity engine | **Mock** | Medium–High | Not derived from `commerceMetrics.ts` diagnostic leakage formula |
+| `cr` | Cash Runway | `cash_runway_months` (`METRIC.CASH_RUNWAY_MONTHS`) | `cash-snapshot.ts` `CASH_RUNWAY` | Xero + assumptions layer | **Mock** | Medium | Confidence improves after nominal code mapping is complete |
+| `mr` | Monthly Revenue | `monthly_revenue` (`METRIC.MONTHLY_REVENUE`) | `business-snapshot.ts` `MONTHLY_REVENUE` (mock init); `commerceMetrics.totalRevenue` (live) | Shopify | **Live** | High | Derived from reconstructed gross sales |
+| `aov` | Average Order Value | `average_order_value` (`METRIC.AVERAGE_ORDER_VALUE`) | `commerceMetrics.averageOrderValue` (live); no mock init (shows £0) | Shopify | **Live** | High | Defined as Net Sales / Order Count |
+| `rpr` | Repeat Purchase Rate | `repeat_purchase_rate` (`METRIC.REPEAT_PURCHASE_RATE`) | `growth-metrics.ts` `REPEAT_RATE` (mock init); `commerceMetrics.repeatPurchaseRate` (live) | Shopify customers / orders | **Live** | Medium | Guest checkout rate directly affects accuracy |
+| `dd` | Discount Dependency | `discount_dependency_ratio` (`METRIC.DISCOUNT_DEPENDENCY_RATIO`) | `growth-metrics.ts` `DISCOUNT_DEP` (mock init); `commerceMetrics.discountRate` (live) | Shopify discounts | **Live** | High | Defined as Discount Value / Gross Sales |
+| `ae` | Acquisition Efficiency | `meta_cac_trend` (`METRIC.META_CAC_TREND`) | `channel-metrics.ts` `CAC_BY_CHANNEL` Meta row `changeLabel` | Meta Ads + Shopify attribution | **Partial** | Medium | Channel-level trend signal only — not blended CAC, CAC payback, or ROAS |
+| `rr` | Refund Rate | `refund_rate_pct` (`METRIC.REFUND_RATE_PCT`) | `commerceMetrics.refundRate` (live); no mock init (shows 0%) | Shopify refunds | **Live** | High | Defined as Refund Value / Gross Sales |
+| `np` | Net Profit (Estimate) | `operating_profit_estimate` (`METRIC.OPERATING_PROFIT_ESTIMATE`) | Hardcoded `"£56,300"` in `dashboard.tsx` ⚠️ — see warning below | Shopify + assumptions (future Xero) | **Partial** | Medium | Contribution minus fixed operating costs — not statutory net profit |
+
+> **⚠️ Net Profit tile (`np`) — known gap:** The tile currently displays a hardcoded value (`£56,300`) with no backing constant in any data file. It maps canonically to `operating_profit_estimate` (`METRIC.OPERATING_PROFIT_ESTIMATE`). The closest named value is `BASE_EBITDA` in `business-snapshot.ts`, which uses the annual P&L basis rather than the monthly snapshot. This tile should be cleaned up in a future pass once Xero/P&L logic is wired: introduce a `MONTHLY_OPERATING_PROFIT` constant (or compute it from `MONTHLY_CM_VALUE − MONTHLY_FIXED_COSTS`) and remove the hardcoded string from `dashboard.tsx`.
 
 > **Confidence level definitions:** `High` — formula, source and denominator are fully confirmed; no known ingest risks · `Medium` — formula confirmed but one or more inputs use assumptions, have an unresolved ingest risk, or depend on a partially connected source · `Low` — significant definitional, ingest or source uncertainty that materially affects the displayed value.
 

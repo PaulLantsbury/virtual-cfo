@@ -36,6 +36,7 @@ export async function getCommerceMetrics(): Promise<CommerceMetrics> {
       totalDiscounts: 0,
       discountRate: 0,
       repeatPurchaseRate: 0,
+      refundRate: 0,
       contributionMargin: 0,
       contributionMarginPercent: 0,
       recoverableContribution: 0,

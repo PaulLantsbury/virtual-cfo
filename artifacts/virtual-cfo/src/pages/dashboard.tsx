@@ -25,9 +25,26 @@ import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 type KpiStatus = "warning" | "positive" | "danger" | "neutral";
 
 const CFO_INSIGHT = {
-  body: "The fastest route to improvement is reducing fulfilment costs, tightening discount exposure on returning customers and reallocating inefficient Meta spend toward higher-contribution channels.",
+  // Weekly action priorities — user-facing text only. Underlying upside values unchanged.
+  weeklyPriorities: [
+    {
+      action: "Reduce discount leakage",
+      why: "Discount dependency is at 38% and rising, eroding contribution margin and weakening growth quality scores.",
+      impact: `£${(RECOVERABLE_LOW / 1_000).toFixed(0)}k–£${(RECOVERABLE_HIGH / 1_000).toFixed(0)}k / month recoverable`,
+    },
+    {
+      action: "Reallocate inefficient Meta spend",
+      why: "Meta CAC is up 14% while email and organic channels deliver significantly higher contribution margins.",
+      impact: "Improves blended acquisition efficiency and reduces CAC payback period",
+    },
+    {
+      action: "Address fulfilment cost leakage",
+      why: "Variable costs are compressing contribution margin below target, reducing the value of each order shipped.",
+      impact: "Largest single lever in the identified monthly opportunity",
+    },
+  ],
   upside: { cashLow: RECOVERABLE_LOW, cashHigh: RECOVERABLE_HIGH },
-} as const;
+};
 
 const KPI_CARDS: { id: string; title: string; value: string; change: string; status: KpiStatus; text: string }[] = [
   {
@@ -466,22 +483,42 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ══ FASTEST ROUTE TO PROFIT IMPROVEMENT ════════════════════════════ */}
+      {/* ══ WHAT TO FOCUS ON THIS WEEK ══════════════════════════════════════ */}
       <div className="sc-purple rounded-2xl shadow-sm mb-5 overflow-hidden">
         <div className="sc-purple-header flex items-center gap-2.5 px-6 py-3.5">
           <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">Fastest Route to Profit Improvement</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">What to focus on this week</span>
         </div>
         <div className="px-6 py-5">
           {isPro ? (
-            <p className="text-sm font-medium text-foreground leading-relaxed">{CFO_INSIGHT.body}</p>
+            <div className="space-y-4">
+              {CFO_INSIGHT.weeklyPriorities.map((priority, i) => (
+                <div
+                  key={i}
+                  className="grid sm:grid-cols-[1fr_1.5fr_1fr] gap-x-6 gap-y-1.5 border-b border-indigo-800/30 last:border-0 pb-4 last:pb-0"
+                >
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-400/60 mb-1">Action</p>
+                    <p className="text-sm font-semibold text-foreground leading-snug">{priority.action}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-400/60 mb-1">Why it matters</p>
+                    <p className="text-sm text-foreground/80 leading-snug">{priority.why}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-400/60 mb-1">Estimated impact</p>
+                    <p className="text-sm font-medium text-emerald-400 leading-snug">{priority.impact}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div>
               <p className="text-sm font-medium text-foreground leading-relaxed mb-3">
-                We've identified three priority actions with the highest contribution impact.
+                Your three highest-impact actions for this week have been identified.
               </p>
               <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-                <Lock className="w-3.5 h-3.5" /> Unlock prioritised action plan <ChevronRight className="w-4 h-4" />
+                <Lock className="w-3.5 h-3.5" /> Unlock this week's action plan <ChevronRight className="w-4 h-4" />
               </a>
             </div>
           )}

@@ -406,14 +406,37 @@ export default function Dashboard() {
       };
     }
 
-    // All other tiles — unchanged, still use commerceMetrics
-    if (!metrics) return card;
+    // ── Contribution Margin tile — wired to Phase 1 Supabase cost model ─────────
+    // @canonical METRIC.CONTRIBUTION_MARGIN_PCT / tile id "cm"
+    // Source (primary):  phase1Metrics.data.contributionMarginPct   [0, 1] | null → × 100 for %
+    //   Formula: (net_sales − payment_fees − fulfilment − packaging − return_handling) / net_sales
+    //     payment_fees         = net_sales × payment_fee_rate
+    //     fulfilment_cost      = order_count × fulfilment_cost_per_order
+    //     packaging_cost       = order_count × packaging_cost_per_order
+    //     return_handling_cost = return_amount × return_handling_rate
+    //   Cost rates: v_current_cost_assumptions (most recent effective_from ≤ today row per store)
+    //   Period:  current calendar month (PHASE1_DATE_FROM → PHASE1_DATE_TO)
+    //   NULL:  when no cost assumption row exists for the store → triggers fallback
+    //   0:     when net_sales = 0 in the period (legitimate zero margin)
+    // Source (fallback): metrics.contributionMarginPercent from commerceMetrics.ts   [0, 1]
+    //   Formula: estimated from static cost assumptions — not store-personalised
+    // Source (static):   KPI_CARDS "cm" card.value while both still loading
     if (card.id === "cm") {
+      const cmValue =
+        phase1Metrics !== null &&
+        phase1Metrics.errors.length === 0 &&
+        phase1Metrics.data.contributionMarginPct !== null
+          ? phase1Metrics.data.contributionMarginPct   // canonical — phase1 SQL function [0,1]
+          : metrics?.contributionMarginPercent;         // fallback  — commerceMetrics (estimated) [0,1]
+      if (cmValue == null) return card;                 // static fallback while both loading
       return {
         ...card,
-        value: `${Math.round(metrics.contributionMarginPercent * 100)}%`,
+        value: `${Math.round(cmValue * 100)}%`,
       };
     }
+
+    // All other tiles — unchanged, still use commerceMetrics
+    if (!metrics) return card;
     // "rc" is intentionally NOT overridden here.
     // The tile uses RECOVERABLE_LOW / RECOVERABLE_HIGH from business-snapshot.ts
     // (the headline opportunity-engine range), not metrics.liveOrderLeakageEstimate

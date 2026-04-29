@@ -1,0 +1,95 @@
+Please add a "Dashboard KPI Status Summary" table at the top of the Dashboard KPI Coverage Appendix in the Data Dictionary.
+
+This table should provide a quick implementation-status overview of each dashboard tile.
+
+Include the following columns:
+
+- KPI Name
+- Canonical Metric Name
+- Source System
+- Status (Live / Partial / Mock / Future)
+- Confidence Level (High / Medium / Low)
+- Notes
+
+Populate the table using the current architecture as follows:
+
+Net Sales
+Canonical Metric: net_sales
+Source: Shopify (tax-adjusted reconstruction)
+Status: Live
+Confidence: Medium
+Notes: Requires explicit VAT/sales-tax separation from Shopify total_price
+
+Contribution Margin
+Canonical Metric: contribution_margin_pct
+Source: Shopify + assumptions (future Xero)
+Status: Partial
+Confidence: Medium
+Notes: Variable cost assumptions until Xero integration
+
+Recoverable Contribution
+Canonical Metric: recoverable_contribution_range
+Source: Opportunity engine (RECOVERABLE_LOW / RECOVERABLE_HIGH)
+Status: Live
+Confidence: Medium-High
+Notes: Not derived from commerceMetrics diagnostic leakage
+
+Cash Runway
+Canonical Metric: cash_runway_months
+Source: Xero + assumptions layer
+Status: Partial
+Confidence: Medium
+Notes: Improves after nominal mapping complete
+
+Monthly Revenue
+Canonical Metric: monthly_revenue
+Source: Shopify
+Status: Live
+Confidence: High
+Notes: Derived from reconstructed net sales
+
+Average Order Value
+Canonical Metric: average_order_value
+Source: Shopify
+Status: Live
+Confidence: High
+Notes: Defined as Net Sales / Order Count
+
+Repeat Purchase Rate
+Canonical Metric: repeat_purchase_rate
+Source: Shopify customers/orders
+Status: Live
+Confidence: Medium
+Notes: Guest checkout affects accuracy
+
+Discount Dependency
+Canonical Metric: discount_dependency_ratio
+Source: Shopify discounts
+Status: Live
+Confidence: High
+Notes: Defined as Discount Value / Gross Sales
+
+Acquisition Efficiency (Meta CAC)
+Canonical Metric: meta_cac_trend
+Source: Meta Ads + Shopify attribution
+Status: Partial
+Confidence: Medium
+Notes: Channel-level signal only (not blended CAC)
+
+Refund Rate
+Canonical Metric: refund_rate_pct
+Source: Shopify refunds
+Status: Live
+Confidence: High
+Notes: Defined as Refund Value / Gross Sales
+
+Net Profit (Estimate)
+Canonical Metric: operating_profit_estimate
+Source: Shopify + assumptions (future Xero)
+Status: Partial
+Confidence: Medium
+Notes: Contribution minus fixed operating costs; not statutory net profit
+
+Place this table immediately before the detailed KPI definitions in the appendix.
+
+Do not change any metric formulas or logic. This is documentation structure only.

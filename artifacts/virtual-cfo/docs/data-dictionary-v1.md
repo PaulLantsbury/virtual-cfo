@@ -841,6 +841,26 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 
 ---
 
+### Quick Reference — Dashboard KPI Status Summary
+
+| KPI Name | Canonical Metric Name | Source System | Status | Confidence | Notes |
+|---|---|---|---|---|---|
+| Net Sales | `net_sales` | Shopify (tax-adjusted reconstruction) | **Live** | Medium | Requires explicit VAT/sales-tax separation from Shopify `total_price` |
+| Contribution Margin | `contribution_margin_pct` | Shopify + assumptions (future Xero) | **Partial** | Medium | Variable cost assumptions hardcoded until Xero integration |
+| Recoverable Contribution | `recoverable_contribution_range` | Opportunity engine (`RECOVERABLE_LOW` / `RECOVERABLE_HIGH`) | **Live** | Medium–High | Not derived from `commerceMetrics.ts` diagnostic leakage formula |
+| Cash Runway | `cash_runway_months` | Xero + assumptions layer | **Partial** | Medium | Confidence improves after nominal code mapping is complete |
+| Monthly Revenue | `monthly_revenue` | Shopify | **Live** | High | Derived from reconstructed gross sales |
+| Average Order Value | `average_order_value` | Shopify | **Live** | High | Defined as Net Sales / Order Count |
+| Repeat Purchase Rate | `repeat_purchase_rate` | Shopify customers / orders | **Live** | Medium | Guest checkout rate directly affects accuracy |
+| Discount Dependency | `discount_dependency_ratio` | Shopify discounts | **Live** | High | Defined as Discount Value / Gross Sales |
+| Acquisition Efficiency | `meta_cac_trend` | Meta Ads + Shopify attribution | **Partial** | Medium | Channel-level trend signal only — not blended CAC, CAC payback, or ROAS |
+| Refund Rate | `refund_rate_pct` | Shopify refunds | **Live** | High | Defined as Refund Value / Gross Sales |
+| Net Profit (Estimate) | `operating_profit_estimate` | Shopify + assumptions (future Xero) | **Partial** | Medium | Contribution minus fixed operating costs — not statutory net profit |
+
+> **Confidence level definitions:** `High` — formula, source and denominator are fully confirmed; no known ingest risks · `Medium` — formula confirmed but one or more inputs use assumptions, have an unresolved ingest risk, or depend on a partially connected source · `Low` — significant definitional, ingest or source uncertainty that materially affects the displayed value.
+
+---
+
 ### A.1 Net Sales
 
 | Property | Detail |

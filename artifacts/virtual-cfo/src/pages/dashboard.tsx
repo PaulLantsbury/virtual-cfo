@@ -1,4 +1,5 @@
 import { getCommerceMetrics } from "@/lib/analytics/commerceMetrics";
+import { getPhase1Metrics, type Phase1MetricsResponse } from "@/lib/analytics/phase1Metrics";
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight, ArrowDownRight, Minus,
@@ -22,6 +23,20 @@ import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 // ─── Data constants ───────────────────────────────────────────────────────────
 // Live KPI overrides from Supabase-backed commerce metrics.
 // Any KPI not listed here continues to use the mock snapshot value.
+
+// ── Phase 1 metrics config ────────────────────────────────────────────────────
+// Store ID for the seeded dev store.  Will be replaced with a per-session
+// store ID once auth and multi-tenancy are wired.
+const PHASE1_STORE_ID = "10000000-0000-0000-0000-000000000001";
+
+// Date range: current calendar month (inclusive both ends).
+// Recomputed once at module load; does not reactively update mid-session.
+const _now            = new Date();
+const _pad            = (n: number) => String(n).padStart(2, "0");
+const PHASE1_DATE_FROM = `${_now.getFullYear()}-${_pad(_now.getMonth() + 1)}-01`;
+const PHASE1_DATE_TO   = new Date(_now.getFullYear(), _now.getMonth() + 1, 0)
+  .toISOString().slice(0, 10);
+
 type KpiStatus = "warning" | "positive" | "danger" | "neutral";
 
 const CFO_INSIGHT = {
@@ -244,10 +259,47 @@ const HEALTH_MODULES = [
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<any>(null);
 
+  // ── Phase 1 metrics: Net Sales tile (METRIC.NET_SALES / tile id "ns") ────────
+  // Fetches the canonical net_sales() Supabase function result for the current
+  // calendar month.  Loaded independently of the main commerceMetrics query so
+  // that a failure in either source does not block the other.
+  const [phase1Metrics, setPhase1Metrics] = useState<Phase1MetricsResponse | null>(null);
+
   useEffect(() => {
     getCommerceMetrics().then(setMetrics);
   }, []);
+
+  useEffect(() => {
+    getPhase1Metrics(PHASE1_STORE_ID, PHASE1_DATE_FROM, PHASE1_DATE_TO)
+      .then(setPhase1Metrics)
+      .catch(() => {
+        // Network or RPC error: leave phase1Metrics null so the tile falls
+        // back to the commerceMetrics value rather than breaking.
+      });
+  }, []);
+
   const liveKpiCards = KPI_CARDS.map((card) => {
+    // ── Net Sales tile — wired to Phase 1 Supabase function ──────────────────
+    // @canonical METRIC.NET_SALES / tile id "ns"
+    // Source (primary):  phase1Metrics.data.netSales
+    //   Formula: SUM(gross_sales − discounts − refunds − tax), excl. cancelled
+    //   Period:  current calendar month (PHASE1_DATE_FROM → PHASE1_DATE_TO)
+    // Source (fallback): metrics.netSales from commerceMetrics.ts
+    //   Formula: SUM(gross_sales − discounts − refunds − tax), all-time, no date filter
+    // Source (static):   KPI_CARDS "ns" card.value ("£0") while both still loading
+    if (card.id === "ns") {
+      const nsValue =
+        phase1Metrics !== null && phase1Metrics.errors.length === 0
+          ? phase1Metrics.data.netSales   // canonical — phase1 SQL function
+          : metrics?.netSales;            // fallback  — commerceMetrics (all-time)
+      if (nsValue == null) return card;   // static fallback while both loading
+      return {
+        ...card,
+        value: `£${Math.round(nsValue).toLocaleString("en-GB")}`,
+      };
+    }
+
+    // All other tiles — unchanged, still use commerceMetrics
     if (!metrics) return card;
 
     if (card.id === "mr") {
@@ -278,12 +330,6 @@ export default function Dashboard() {
       return {
         ...card,
         value: `${Math.round(metrics.refundRate * 100)}%`,
-      };
-    }
-    if (card.id === "ns") {
-      return {
-        ...card,
-        value: `£${metrics.netSales.toLocaleString("en-GB")}`,
       };
     }
     if (card.id === "cm") {

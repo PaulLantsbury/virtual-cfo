@@ -50,6 +50,10 @@ export const CONTRIBUTION_MARGIN_PCT = CONTRIBUTION / ANNUAL_REVENUE;
 /**
  * EBITDA / operating profit — derived from contribution minus fixed costs.
  * Fixed costs (120k) are imported from cash-snapshot to avoid duplication.
+ * Feeds tile id "np" (annual basis). Dashboard currently uses a hardcoded monthly
+ * figure (£56,300 = MONTHLY_CM_VALUE − MONTHLY_FIXED_COSTS estimate).
+ * @canonical operating_profit_estimate (see src/lib/metrics.ts METRIC.OPERATING_PROFIT_ESTIMATE)
+ * @future Replace dashboard "np" tile hardcoded value with a MONTHLY_OPERATING_PROFIT constant.
  */
 export const BASE_EBITDA            = CONTRIBUTION - MONTHLY_FIXED_COSTS; // 78,000
 
@@ -58,6 +62,8 @@ export const BASE_EBITDA            = CONTRIBUTION - MONTHLY_FIXED_COSTS; // 78,
 
 /**
  * Monthly gross revenue — current month (March 2026).
+ * Feeds tile id "mr". Live override: commerceMetrics.totalRevenue.
+ * @canonical monthly_revenue (see src/lib/metrics.ts METRIC.MONTHLY_REVENUE)
  * @future Sourced from Shopify: sum of order totals for the calendar month
  */
 export const MONTHLY_REVENUE        = 124_500;
@@ -66,6 +72,8 @@ export const MONTHLY_REVENUE        = 124_500;
  * Current month contribution margin %.
  * This is the headline margin figure shown in Dashboard and Margin Analysis.
  * Different from CONTRIBUTION_MARGIN_PCT (38.08%) which uses the annual basis.
+ * Feeds tile id "cm". Live override: commerceMetrics.contributionMarginPercent.
+ * @canonical contribution_margin_pct (see src/lib/metrics.ts METRIC.CONTRIBUTION_MARGIN_PCT)
  * @future Computed from monthly Shopify + Xero data
  */
 export const MONTHLY_CM_PCT         = 42.3;
@@ -100,6 +108,10 @@ export const CURRENT_PERIOD         = "March 2026";
  * Low end of the estimated monthly contribution improvement range (£).
  * Represents the conservative case if margin, marketing and fulfilment
  * opportunities are addressed.
+ * Feeds tile id "rc" (lower bound of displayed range).
+ * Must NOT be replaced by commerceMetrics.liveOrderLeakageEstimate — these
+ * are opportunity-engine figures, not live diagnostic leakage.
+ * @canonical recoverable_contribution_range (see src/lib/metrics.ts METRIC.RECOVERABLE_CONTRIBUTION_RANGE)
  * @future Recompute as sum of low-estimate uplifts across all active opportunities.
  */
 export const RECOVERABLE_LOW  = 18_000;
@@ -107,6 +119,8 @@ export const RECOVERABLE_LOW  = 18_000;
 /**
  * High end of the estimated monthly contribution improvement range (£).
  * Represents the optimistic case across the same opportunity set.
+ * Feeds tile id "rc" (upper bound of displayed range).
+ * @canonical recoverable_contribution_range (see src/lib/metrics.ts METRIC.RECOVERABLE_CONTRIBUTION_RANGE)
  * @future Recompute as sum of high-estimate uplifts across all active opportunities.
  */
 export const RECOVERABLE_HIGH = 42_000;

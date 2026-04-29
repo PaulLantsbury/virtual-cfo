@@ -24,18 +24,25 @@ import { COST_ASSUMPTIONS } from "./costAssumptions";
  * The live order leakage estimate is available for future diagnostic pages.
  */
 export type CommerceMetrics = {
+  /** Raw total from orders.total_sales. Feeds tile id "mr". @canonical monthly_revenue */
   totalRevenue: number;
+  /** Gross Sales − Discounts − Refunds − Tax. Feeds tile id "ns". @canonical net_sales */
   netSales: number;
   grossSales: number;
   orderCount: number;
   customerCount: number;
   repeatCustomerCount: number;
+  /** SUM(total_sales) / orderCount. Feeds tile id "aov". @canonical average_order_value */
   averageOrderValue: number;
   totalDiscounts: number;
+  /** SUM(discounts) / SUM(gross_sales). Feeds tile id "dd". @canonical discount_dependency_ratio */
   discountRate: number;
+  /** Repeat customer ratio (count-based). Feeds tile id "rpr". @canonical repeat_purchase_rate */
   repeatPurchaseRate: number;
+  /** SUM(refunds) / SUM(gross_sales). Feeds tile id "rr". @canonical refund_rate_pct */
   refundRate: number;
   contributionMargin: number;
+  /** (Net Sales − Variable Costs) / Net Sales. Feeds tile id "cm". @canonical contribution_margin_pct */
   contributionMarginPercent: number;
   /**
    * Live diagnostic leakage estimate.
@@ -44,6 +51,8 @@ export type CommerceMetrics = {
    *
    * This is NOT the headline Recoverable Contribution shown on the dashboard KPI tile.
    * The headline figure comes from RECOVERABLE_LOW / RECOVERABLE_HIGH in business-snapshot.ts.
+   *
+   * @canonical live_order_leakage_estimate
    */
   liveOrderLeakageEstimate: number;
   /**

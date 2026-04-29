@@ -59,6 +59,9 @@ const RECOVERABLE_TILE_CHANGE =
     ? "Immediate margin recovery available"
     : "Analysis in progress";
 
+// Tile IDs (id field below) are the internal short codes for each KPI card.
+// Each tile id maps to exactly one canonical metric name defined in src/lib/metrics.ts.
+// See TILE_METRIC_MAP for the authoritative tile id → canonical name mapping.
 const KPI_CARDS: { id: string; title: string; value: string; change: string; status: KpiStatus; text: string }[] = [
   {
     id: "cm",   title: "Contribution Margin",      value: `${MONTHLY_CM_PCT}%`,          change: "↓ 2.8% vs last month",                status: "warning",

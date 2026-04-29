@@ -13,7 +13,12 @@
 /** Current cash balance at period end (£) */
 export const CASH_BALANCE = 186_000;
 
-/** Cash runway — months of fixed costs covered by current cash balance */
+/**
+ * Cash runway — months of fixed costs covered by current cash balance.
+ * Feeds tile id "cr".
+ * @canonical cash_runway_months (see src/lib/metrics.ts METRIC.CASH_RUNWAY_MONTHS)
+ * @future Computed: CASH_BALANCE / MONTHLY_FIXED_COSTS — both inputs from Xero
+ */
 export const CASH_RUNWAY = 3.4;
 
 /**

@@ -17,14 +17,19 @@
  * Repeat purchase rate — % of orders placed by returning customers.
  * Resolved from prior discrepancy: Dashboard showed 28%, Growth Quality showed 27%.
  * Canonical value is 28%, consistent with Dashboard display and mock-data BENCHMARKS.
+ * Feeds tile id "rpr". Live override: commerceMetrics.repeatPurchaseRate.
+ * @canonical repeat_purchase_rate (see src/lib/metrics.ts METRIC.REPEAT_PURCHASE_RATE)
  * @future Computed from Shopify: repeatOrders / totalOrders for the period
  */
 export const REPEAT_RATE      = 28.0;
 export const REPEAT_RATE_PREV = 24.6; // prior month
 
 /**
- * Discount dependency — % of orders that include a discount code.
- * @future Computed from Shopify: ordersWithDiscount / totalOrders
+ * Discount dependency — % of orders that include a discount code (count-based, mock).
+ * Note: Live override (commerceMetrics.discountRate) uses value-based ratio. See data dict.
+ * Feeds tile id "dd". Live override: commerceMetrics.discountRate.
+ * @canonical discount_dependency_ratio (see src/lib/metrics.ts METRIC.DISCOUNT_DEPENDENCY_RATIO)
+ * @future Computed from Shopify: ordersWithDiscount / totalOrders (count-based)
  */
 export const DISCOUNT_DEP      = 38.0;
 export const DISCOUNT_DEP_PREV = 36.2; // prior month

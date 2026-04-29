@@ -43,6 +43,9 @@ type EfficiencyRating = "strong" | "watch" | "weak";
 /**
  * CAC by channel — cost to acquire one new customer per acquisition channel.
  * Shared between Marketing Efficiency and Dashboard (headline Meta CAC figure).
+ * The "Meta" row's changeLabel feeds tile id "ae" (Acquisition Efficiency).
+ * @canonical meta_cac_trend (see src/lib/metrics.ts METRIC.META_CAC_TREND) — Meta row only.
+ *   The canonical metric is the Meta CAC period-over-period change (+14%), not blended CAC.
  * @future Sourced from ad platform APIs: channelSpend / uniqueNewCustomersAttributed
  */
 export const CAC_BY_CHANNEL: {

@@ -341,6 +341,27 @@ export default function Dashboard() {
       };
     }
 
+    // ── Refund Rate tile — wired to Phase 1 Supabase function ───────────────
+    // @canonical METRIC.REFUND_RATE_PCT / tile id "rr"
+    // Source (primary):  phase1Metrics.data.refundRate   [0, 1] ratio → × 100 for %
+    //   Formula: SUM(refunds) / SUM(gross_sales), excl. cancelled orders
+    //            (return_amount / gross_revenue in the period)
+    //   Period:  current calendar month (PHASE1_DATE_FROM → PHASE1_DATE_TO)
+    // Source (fallback): metrics.refundRate from commerceMetrics.ts   [0, 1] ratio
+    //   Formula: SUM(refunds) / SUM(gross_sales), all-time, no date filter
+    // Source (static):   KPI_CARDS "rr" card.value ("0%") while both still loading
+    if (card.id === "rr") {
+      const rrValue =
+        phase1Metrics !== null && phase1Metrics.errors.length === 0
+          ? phase1Metrics.data.refundRate   // canonical — phase1 SQL function [0,1]
+          : metrics?.refundRate;            // fallback  — commerceMetrics (all-time) [0,1]
+      if (rrValue == null) return card;     // static fallback while both loading
+      return {
+        ...card,
+        value: `${Math.round(rrValue * 100)}%`,
+      };
+    }
+
     // All other tiles — unchanged, still use commerceMetrics
     if (!metrics) return card;
     if (card.id === "rpr") {
@@ -353,12 +374,6 @@ export default function Dashboard() {
       return {
         ...card,
         value: `${Math.round(metrics.discountRate * 100)}%`,
-      };
-    }
-    if (card.id === "rr") {
-      return {
-        ...card,
-        value: `${Math.round(metrics.refundRate * 100)}%`,
       };
     }
     if (card.id === "cm") {

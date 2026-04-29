@@ -12,3 +12,9 @@ id = "X0hy1hUZCw34eh91WCQZc"
 uri = "file://artifacts/virtual-cfo/docs/shopify-phase-1-schema.md"
 type = "text"
 title = "Shopify Phase 1 Schema Design"
+
+[[outputs]]
+id = "25DkIA8o-jCLWsDBd8erw"
+uri = "file://docs/phase1-dashboard-completion-checklist.md"
+type = "text"
+title = "Phase 1 Dashboard Completion Checklist"

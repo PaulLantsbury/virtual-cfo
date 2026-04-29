@@ -826,3 +826,240 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 
 *Document version: 1.0 · Created: April 2026 · Owner: Virtual CFO product team*
 *Next review: When Phase 1 (Shopify) integration is built — update §3 with confirmed field mappings and any formula corrections.*
+
+---
+
+## Appendix A — Dashboard KPI Tile Coverage
+
+> **Purpose:** One entry per Dashboard KPI tile. Documents exactly what each tile shows today (live vs mock), what the canonical formula will be when live, and where definitional ambiguities must be resolved before go-live.
+> **Row order:** Matches the three diagnostic rows on the Dashboard — Business Health Summary / Revenue Quality Diagnostics / Efficiency and Profit Leakage.
+> **Status definitions:**
+> - `LIVE` — formula runs against real Supabase data; tile reflects actual orders (returns £0 when table is empty, not a fallback string)
+> - `PARTIAL` — formula runs against Supabase but uses at least one hardcoded assumption (e.g. cost rates from `costAssumptions.ts` instead of Xero) — or the live formula definition diverges from the canonical metric definition
+> - `MOCK` — value is a static constant or hardcoded string from a TypeScript data file; no formula runs against real data
+> - `FUTURE` — metric cannot be computed until a Phase 3+ integration is built
+
+---
+
+### A.1 Net Sales
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Net Sales |
+| **Canonical metric name** | `NET_SALES` |
+| **Current formula (live)** | `SUM(gross_sales − discounts − refunds − tax)` per order row · `commerceMetrics.netSales` |
+| **Intended formula (live)** | Same — see confidence note on tax field below |
+| **Source system** | Supabase |
+| **Source table / view** | `orders` (columns: `gross_sales`, `discounts`, `refunds`, `tax`) |
+| **Current status** | **LIVE** — tile shows real data when `orders` table is populated; shows £0 when empty |
+| **Mock fallback** | None — tile initialises to £0, not a string constant |
+| **Confidence risk** | The `tax` column behaviour depends on the merchant's Shopify tax settings (tax-inclusive vs tax-exclusive pricing). In tax-inclusive stores, `gross_sales` already nets out tax; subtracting `tax` again will understate net sales. This must be resolved at ingest time by reading `orders.taxes_included` |
+| **Data quality flag** | None defined yet. Add: flag if `SUM(tax)` represents more than 30% of `SUM(gross_sales)` — likely indicates double-deduction |
+
+---
+
+### A.2 Contribution Margin
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Contribution Margin |
+| **Canonical metric name** | `MONTHLY_CM_PCT` |
+| **Current formula (mock init)** | Static constant: `MONTHLY_CM_PCT = 42.3` from `business-snapshot.ts` — shown until Supabase loads |
+| **Current formula (live override)** | `(netSales − paymentFees − fulfilmentCosts − packagingCosts − returnHandlingCosts) / netSales × 100` · `commerceMetrics.contributionMarginPercent` |
+| **Cost rates used in live formula** | All hardcoded in `costAssumptions.ts`: payment fee rate 2.5%, fulfilment £3.50/order, packaging £1.20/order, return handling 15% of refund value |
+| **Intended formula (production)** | `(MONTHLY_NET_REVENUE − MONTHLY_VARIABLE_COSTS) / MONTHLY_REVENUE × 100` · where `MONTHLY_VARIABLE_COSTS` comes from Xero P&L for the period, not hardcoded rates |
+| **Source system** | Shopify (numerator) + Xero (denominator) — Xero not yet connected |
+| **Source table / view** | `orders` (live cost approximation) → future: `store_cost_assumptions` + Xero P&L integration |
+| **Current status** | **PARTIAL** — formula runs against live order data but variable cost rates are hardcoded per-merchant assumptions, not actual Xero costs. The tile will show a plausible number but not the merchant's true margin |
+| **Confidence risk** | Hardcoded cost rates will not reflect individual merchant's actual payment fee negotiation, pick-and-pack contracts, or seasonal cost variation. The gap between the live approximation and Xero actuals may be material (±5–10pp) |
+| **Data quality flag** | Add "Cost rates estimated" badge until `store_cost_assumptions` is populated from Xero |
+
+---
+
+### A.3 Recoverable Contribution
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Recoverable Contribution |
+| **Canonical metric name** | `RECOVERABLE_RANGE` (displayed as a range: `RECOVERABLE_LOW` – `RECOVERABLE_HIGH`) |
+| **Current formula** | Conditional display: `£18k–£42k` if both constants > 0, otherwise "Opportunity being calculated" · Source: `RECOVERABLE_LOW = 18_000` / `RECOVERABLE_HIGH = 42_000` in `business-snapshot.ts` |
+| **Intended formula** | `SUM(opportunities.uplift_low WHERE status = 'active')` → `SUM(opportunities.uplift_high WHERE status = 'active')` · Exposed via `v_recoverable_contribution` view |
+| **Source system** | Internal opportunity engine |
+| **Source table / view** | Future: `opportunities` table → `v_recoverable_contribution` view |
+| **Current status** | **MOCK** — both endpoints of the range are static constants |
+| **Distinction from liveOrderLeakageEstimate** | The tile value is the strategic opportunity range from the opportunity engine. `metrics.liveOrderLeakageEstimate` in `commerceMetrics.ts` is a separate diagnostic signal (excess discount + refund + payment fee leakage computed from order data). These are not the same figure and must not be confused. See `commerceMetrics.ts` type comment |
+| **Confidence risk** | Opportunity uplift methodology is not yet documented per opportunity type. Once live, each opportunity row should carry a `confidence` field (`HIGH / MEDIUM / LOW`) and the range should be labelled accordingly |
+| **Data quality flag** | Surface "Opportunity being calculated" when no active opportunities exist; alert if any opportunity's underlying data is stale |
+
+---
+
+### A.4 Cash Runway
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Cash Runway |
+| **Canonical metric name** | `CASH_RUNWAY` |
+| **Current formula** | Static constant: `CASH_RUNWAY = 3.4` from `cash-snapshot.ts` |
+| **Intended formula** | `CASH_BALANCE / MONTHLY_FIXED_COSTS` · `CASH_BALANCE` from Xero tagged operating bank accounts; `MONTHLY_FIXED_COSTS` from Xero P&L fixed overhead nominal codes |
+| **Source system** | Xero (Phase 2) |
+| **Source table / view** | Future: Xero `bank_accounts` + `profit_and_loss` report via Xero API |
+| **Current status** | **MOCK** — static constant; no formula runs against real data |
+| **Confidence risk** | Both inputs depend on Xero setup quality: (1) bank account tagging must distinguish operating from credit/savings; (2) nominal code classification must separate fixed from variable costs. Either error yields a misleading runway figure |
+| **Data quality flag** | Alert in CFO Alerts if `CASH_RUNWAY < 3 months`; add "Last reconciled: N days ago" badge when Xero is connected |
+
+---
+
+### A.5 Monthly Revenue
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Monthly Revenue |
+| **Canonical metric name** | `MONTHLY_REVENUE` |
+| **Current formula (mock init)** | Static constant: `MONTHLY_REVENUE = 124_500` from `business-snapshot.ts` |
+| **Current formula (live override)** | `SUM(orders.total_sales)` · `commerceMetrics.totalRevenue` |
+| **Intended formula** | `SUM(orders.subtotal_price + orders.total_discounts)` for the calendar month — Shopify gross revenue reconstruction (pre-discount, pre-tax) |
+| **Formula ambiguity** | The live code uses `total_sales` (Shopify `total_price` — post-discount, includes tax in some configurations). The data dictionary §3.1 and the schema define gross revenue as `subtotal_price + total_discounts` (pre-discount, pre-tax). These two figures will differ by the discount amount and potentially tax. The formula should be aligned to the canonical gross revenue reconstruction before Phase 1 goes live |
+| **Source system** | Supabase / Shopify |
+| **Source table / view** | `orders` (column: `total_sales` current → `gross_sales + discounts` intended) |
+| **Current status** | **LIVE** — tile shows real Supabase data; formula uses `total_sales` rather than the canonical gross revenue reconstruction |
+| **Confidence risk** | Month-to-date figures shift until month close; tile should carry a "Month to date" label when current month data is shown |
+| **Data quality flag** | Flag if pulled mid-month. Add period label: "Month to date — final figure after [month end date]" |
+
+---
+
+### A.6 Average Order Value
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Average Order Value |
+| **Canonical metric name** | `AOV` |
+| **Current formula (live)** | `SUM(orders.total_sales) / count(orders)` · `commerceMetrics.averageOrderValue` |
+| **Formula ambiguity — decision required** | Three different AOV definitions are in common use: |
+| | **Option A — Gross AOV** (industry standard for e-commerce benchmarking): `SUM(gross_sales) / count(orders)` — pre-discount, pre-refund, pre-tax. Measures full price potential per order. |
+| | **Option B — Net AOV** (profitability view): `SUM(gross_sales − discounts − refunds − tax) / count(orders)` — equivalent to `netSales / orderCount`. Measures what the merchant actually keeps before variable costs. |
+| | **Option C — Transaction AOV** (current implementation): `SUM(total_sales) / count(orders)` — Shopify `total_price` — post-discount, includes tax in tax-inclusive stores. This is neither gross nor net in a clean sense. |
+| **Recommendation** | Align to **Option A (Gross AOV)** as the primary tile value, matching e-commerce benchmarks. Add Net AOV as a secondary figure on the Margin Analysis drill-down. The current implementation (Option C) should be replaced before Phase 1 go-live |
+| **Source system** | Supabase |
+| **Source table / view** | `orders` (columns: `total_sales` current → `gross_sales` recommended) |
+| **Current status** | **LIVE** — formula runs but definition is unresolved. Initialises to £0 when orders table is empty |
+| **Confidence risk** | Tax-inclusive vs tax-exclusive Shopify stores will produce different `total_sales` values for the same underlying sale. Until the AOV denominator is fixed to `gross_sales`, this figure is not comparable across merchants |
+| **Data quality flag** | None defined; add tooltip in UI: "Average order value before returns, showing [period]" |
+
+---
+
+### A.7 Repeat Purchase Rate
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Repeat Purchase Rate |
+| **Canonical metric name** | `REPEAT_RATE` |
+| **Current formula (mock init)** | Static constant: `REPEAT_RATE` from `growth-metrics.ts` |
+| **Current formula (live override)** | `count(customer_ids with more than one order in dataset) / count(all distinct customer_ids) × 100` · `commerceMetrics.repeatPurchaseRate` |
+| **Canonical formula (intended)** | `count(orders WHERE customer.first_order_at < period_start) / count(all_paid_orders in period) × 100` — orders in the period from customers who had already purchased before the period began |
+| **Formula divergence** | The live code measures "repeat customer rate" — what fraction of all customers (ever) have placed more than one order. This is not the same as the canonical repeat purchase rate (what fraction of orders in the period came from returning customers). The two figures will differ materially in growing businesses where most customers are new |
+| **Source system** | Supabase |
+| **Source table / view** | `orders` (column: `customer_id`) → future: requires `customers` table with `first_order_at` for canonical formula |
+| **Current status** | **PARTIAL** — a live formula runs against Supabase but it measures repeat customer ratio not repeat purchase rate. The canonical formula requires the `customers` table with `first_order_at` populated |
+| **Confidence risk** | Guest checkouts (no `customer_id`) are silently excluded from both numerator and denominator. If the merchant has a high guest rate, this figure overstates repeat purchasing. The guest rate itself is not surfaced on the tile |
+| **Data quality flag** | Require guest checkout rate check (§4.1 in `shopify-phase-1-schema.md`); surface badge: "X% of orders excluded (guest checkouts)" |
+
+---
+
+### A.8 Discount Dependency
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Discount Dependency |
+| **Canonical metric name** | `DISCOUNT_DEP` |
+| **Current formula (mock init)** | Static constant: `DISCOUNT_DEP` from `growth-metrics.ts` |
+| **Current formula (live override)** | `SUM(discounts) / SUM(gross_sales) × 100` · `commerceMetrics.discountRate` — **value-based rate: revenue surrendered as a % of gross revenue** |
+| **Canonical formula (intended)** | `count(orders WHERE has_discount = true) / count(all_paid_orders) × 100` — **count-based rate: % of orders that included any discount code** |
+| **Formula divergence** | The live code computes a discount revenue rate (what % of gross revenue was given away). The canonical `DISCOUNT_DEP` defined in §3.3 and used across Growth Quality and CFO Alerts is a count-based order rate (what % of orders used a code). These produce different numbers and have different strategic meanings: a few very deep discounts on small orders could produce a low count rate but a high revenue rate |
+| **Source system** | Supabase |
+| **Source table / view** | `orders` (columns: `discounts`, `gross_sales` current) → future: `orders.has_discount` computed column for canonical formula |
+| **Current status** | **PARTIAL** — a live formula runs but it computes discount rate (revenue-weighted) rather than the canonical discount dependency (order-count-weighted). Both are valid metrics but they are different and must be labelled distinctly |
+| **Confidence risk** | Does not distinguish loyalty codes from promotional codes. Silent markdowns (price reductions without a code) are invisible to both formulas |
+| **Data quality flag** | Check 4.3 (silent markdowns) in `shopify-phase-1-schema.md`; surface badge if markdown value > 0. Add discount categorisation step at onboarding (see §5.2 of this document) |
+
+---
+
+### A.9 Acquisition Efficiency
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Acquisition Efficiency |
+| **Canonical metric name** | Not yet defined — see ambiguity note below |
+| **Current value** | Hardcoded string: `"Meta CAC +14%"` |
+| **Ambiguity — decision required** | The tile label is "Acquisition Efficiency" but the current display value is a Meta-specific CAC trend string. Four distinct candidate metrics exist: |
+| | **Option A — Meta CAC (absolute):** `£28` — channel spend on Meta divided by Meta-attributed new customers. Source: `CAC_BY_CHANNEL[Meta].cac`. Channel-specific, not blended |
+| | **Option B — Meta CAC trend (current display):** `+14%` MoM change in Meta CAC. Source: `CAC_BY_CHANNEL[Meta].change`. A trend label, not an absolute value |
+| | **Option C — Blended CAC:** `£12.20` — total marketing spend divided by all new customers across all channels. Source: `BLENDED_CAC` in `channel-metrics.ts`. More representative but requires all channel connections |
+| | **Option D — CAC Payback:** `1.4 orders` — how many orders a new customer must place to recover their acquisition cost. Source: `CAC_PAYBACK` in `growth-metrics.ts`. Best for showing acquisition sustainability |
+| **Recommendation** | Define the tile as **Blended CAC** as the primary value, with Meta CAC trend as a secondary indicator in the tile body text. This avoids conflating a channel-specific signal with an overall efficiency metric. Until Phase 4 (ad APIs) is live, the tile should remain labelled as MOCK with a clear "Integration required" note |
+| **Source system** | Meta Ads API (Phase 4) |
+| **Source table / view** | Future: `marketing_spend` table + `CAC_BY_CHANNEL` computed from ad platform data |
+| **Current status** | **MOCK** — hardcoded string; no formula; no live data source |
+| **Confidence risk** | Attribution confidence (HIGH / MEDIUM / LOW) propagates from channel connection quality. Without Conversions API, Meta-reported new customer counts may deviate from Shopify-attributed counts. See §5.5 |
+| **Data quality flag** | Flag if any connected ad platform is stale > 48h; suppress tile with "Data unavailable" if platform connection is missing entirely |
+
+---
+
+### A.10 Refund Rate
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Refund Rate |
+| **Canonical metric name** | `REFUND_RATE` |
+| **Current formula (mock init)** | Static value: `0%` — tile initialises to zero |
+| **Current formula (live override)** | `SUM(refunds) / SUM(gross_sales) × 100` · `commerceMetrics.refundRate` — **value-based: revenue refunded as a % of gross revenue** |
+| **Denominator clarification** | Three definitions are in use across the industry: |
+| | **Option A — Refund value / gross sales (current implementation):** Measures the proportion of pre-discount revenue that was refunded. Sensitive to high-value single returns. |
+| | **Option B — Refund value / net sales:** Measures returns impact relative to actually-received revenue. More relevant to contribution margin analysis. |
+| | **Option C — Refunded order count / total order count:** Measures how frequently orders result in any refund. Less sensitive to order value; better proxy for operational quality. |
+| **Decision recorded** | The current implementation uses **Option A (refund value / gross sales)**. This is the correct choice for a financial metric that feeds into the live leakage diagnostic (`liveOrderLeakageEstimate`). However, the tile tooltip should make the denominator explicit to avoid misinterpretation |
+| **Source system** | Supabase |
+| **Source table / view** | `orders` (columns: `refunds`, `gross_sales`) |
+| **Current status** | **LIVE** — formula runs against Supabase. Returns 0% when table is empty |
+| **Confidence risk** | Partial refunds: an order with two separate refund events (e.g. customer returns two items at different times) will have both `refund` amounts in the same row if stored cumulatively, or may be split across rows depending on schema design. The current `orders`-level query aggregates at the order row level which avoids double-counting only if `refunds` is a cumulative total per order. Needs verification at ingest design |
+| **Data quality flag** | Check 4.4 (partial refund double-counting) in `shopify-phase-1-schema.md`; confirm cumulative vs event-level storage before Phase 1 launch |
+
+---
+
+### A.11 Net Profit
+
+| Property | Detail |
+|---|---|
+| **Dashboard label** | Net Profit |
+| **Canonical metric name** | Not yet defined — see ambiguity note below |
+| **Current value** | Hardcoded string: `"£56,300"` — no formula backs this value |
+| **Ambiguity — decision required** | "Net Profit" has multiple industry definitions. The intended meaning for this tile must be resolved before go-live: |
+| | **Option A — Accounting net profit:** Revenue minus all costs including depreciation, interest, and tax. Requires Xero P&L with all lines classified. Cannot be computed from Shopify alone |
+| | **Option B — EBITDA (operating profit):** Earnings before interest, tax, depreciation and amortisation. Closest to `BASE_EBITDA = CONTRIBUTION − MONTHLY_FIXED_COSTS = £78,000` in `business-snapshot.ts`. Note the mock value £56,300 does not match this figure |
+| | **Option C — Contribution after fixed costs:** `CONTRIBUTION − MONTHLY_FIXED_COSTS`. Equivalent to Option B in the absence of interest and depreciation lines. This is the most practical definition given Xero data |
+| | **Option D — Mock placeholder only:** The current £56,300 figure does not correspond to any formula in the codebase (`BASE_EBITDA = £78,000`, `CONTRIBUTION = £198,000`, `MONTHLY_CM_VALUE = £52,913`). It is an ad hoc placeholder |
+| **Recommendation** | Define the tile as **Contribution after fixed overheads** (Option C) and label it accordingly in the UI — this is achievable with Xero Phase 2 and is the most actionable figure for a Shopify founder. Reserve "Net Profit" as a label only if accounting-standard net profit (after depreciation and interest) is computed from Xero |
+| **Source system** | Xero (Phase 2) |
+| **Source table / view** | Future: Xero P&L (`profit_and_loss` report) — `CONTRIBUTION − MONTHLY_FIXED_COSTS` |
+| **Current status** | **MOCK** — hardcoded string with no formula basis and no correspondence to any computed value in the codebase |
+| **Confidence risk** | Depends entirely on Xero nominal code classification quality (§5.1). If fixed costs are misclassified, this figure will be wrong by design |
+| **Data quality flag** | Flag as "Estimated" until Xero is connected; flag individual component confidence if either `CONTRIBUTION` or `MONTHLY_FIXED_COSTS` carries a LOW confidence rating |
+
+---
+
+### Summary Table
+
+| Tile | Canonical Name | Current Status | Source (live) | Source (target) | Decision Required |
+|---|---|---|---|---|---|
+| Net Sales | `NET_SALES` | **LIVE** | `orders` (Supabase) | `orders` | Tax-inclusive handling at ingest |
+| Contribution Margin | `MONTHLY_CM_PCT` | **PARTIAL** | `orders` + hardcoded rates | `orders` + Xero P&L | Replace cost rates with Xero actuals (Phase 2) |
+| Recoverable Contribution | `RECOVERABLE_RANGE` | **MOCK** | `business-snapshot.ts` constants | `opportunities` table | Seed opportunities table; document uplift methodology |
+| Cash Runway | `CASH_RUNWAY` | **MOCK** | `cash-snapshot.ts` constant | Xero bank accounts + P&L | Phase 2; bank account tagging setup step |
+| Monthly Revenue | `MONTHLY_REVENUE` | **LIVE** | `orders.total_sales` | `orders.gross_sales + discounts` | Align formula to canonical gross revenue reconstruction |
+| Average Order Value | `AOV` | **LIVE** (formula ambiguous) | `total_sales / orderCount` | `gross_sales / orderCount` (recommended) | Decide: gross vs net vs transaction AOV |
+| Repeat Purchase Rate | `REPEAT_RATE` | **PARTIAL** | Repeat customer ratio | `customers.first_order_at` + period filter | Fix formula; populate `customers` table |
+| Discount Dependency | `DISCOUNT_DEP` | **PARTIAL** | `discounts / gross_sales` (value) | `has_discount count / order count` | Decide: revenue rate vs order rate; align labels |
+| Acquisition Efficiency | *(undefined)* | **MOCK** | Hardcoded string | Meta Ads API + `marketing_spend` | Decide: Blended CAC vs Meta CAC vs CAC payback |
+| Refund Rate | `REFUND_RATE` | **LIVE** | `refunds / gross_sales` (value) | `refunds / gross_sales` (same) | Confirm partial refund storage model; add tooltip |
+| Net Profit | *(undefined)* | **MOCK** | Hardcoded string (no formula) | Xero P&L (Phase 2) | Decide: accounting net profit vs EBITDA vs contribution after fixed costs |
+
+*Appendix version: 1.0 · April 2026 · Derived from dashboard.tsx, commerceMetrics.ts, business-snapshot.ts, cash-snapshot.ts, growth-metrics.ts, channel-metrics.ts.*

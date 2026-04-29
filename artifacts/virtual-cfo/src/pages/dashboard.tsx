@@ -383,14 +383,31 @@ export default function Dashboard() {
       };
     }
 
-    // All other tiles — unchanged, still use commerceMetrics
-    if (!metrics) return card;
+    // ── Repeat Purchase Rate tile — wired to Phase 1 Supabase function ─────────
+    // @canonical METRIC.REPEAT_PURCHASE_RATE / tile id "rpr"
+    // Source (primary):  phase1Metrics.data.repeatPurchaseRate   [0, 1] ratio → × 100 for %
+    //   Formula: returning_customers / all_period_customers
+    //     returning  = customer whose first_order_at < period start (ordered before this month)
+    //     all        = distinct non-guest customers who placed a non-cancelled order this period
+    //     guest checkouts excluded from both numerator and denominator (customer_id IS NULL)
+    //   Period:  current calendar month (PHASE1_DATE_FROM → PHASE1_DATE_TO)
+    // Source (fallback): metrics.repeatPurchaseRate from commerceMetrics.ts   [0, 1] ratio
+    //   Formula: customers with > 1 order / all customers — all-time, no date filter
+    // Source (static):   KPI_CARDS "rpr" card.value while both still loading
     if (card.id === "rpr") {
+      const rprValue =
+        phase1Metrics !== null && phase1Metrics.errors.length === 0
+          ? phase1Metrics.data.repeatPurchaseRate   // canonical — phase1 SQL function [0,1]
+          : metrics?.repeatPurchaseRate;            // fallback  — commerceMetrics (all-time) [0,1]
+      if (rprValue == null) return card;            // static fallback while both loading
       return {
         ...card,
-        value: `${Math.round(metrics.repeatPurchaseRate * 100)}%`,
+        value: `${Math.round(rprValue * 100)}%`,
       };
     }
+
+    // All other tiles — unchanged, still use commerceMetrics
+    if (!metrics) return card;
     if (card.id === "cm") {
       return {
         ...card,

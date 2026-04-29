@@ -299,15 +299,28 @@ export default function Dashboard() {
       };
     }
 
-    // All other tiles — unchanged, still use commerceMetrics
-    if (!metrics) return card;
-
+    // ── Monthly Revenue tile — wired to Phase 1 Supabase function ────────────
+    // @canonical METRIC.MONTHLY_REVENUE / tile id "mr"
+    // Source (primary):  phase1Metrics.data.grossRevenue
+    //   Formula: SUM(gross_sales), excl. cancelled orders
+    //   Period:  current calendar month (PHASE1_DATE_FROM → PHASE1_DATE_TO)
+    // Source (fallback): metrics.totalRevenue from commerceMetrics.ts
+    //   Formula: SUM(gross_sales), all-time, no date filter
+    // Source (static):   KPI_CARDS "mr" card.value while both still loading
     if (card.id === "mr") {
+      const mrValue =
+        phase1Metrics !== null && phase1Metrics.errors.length === 0
+          ? phase1Metrics.data.grossRevenue   // canonical — phase1 SQL function
+          : metrics?.totalRevenue;             // fallback  — commerceMetrics (all-time)
+      if (mrValue == null) return card;        // static fallback while both loading
       return {
         ...card,
-        value: `£${metrics.totalRevenue.toLocaleString("en-GB")}`,
+        value: `£${Math.round(mrValue).toLocaleString("en-GB")}`,
       };
     }
+
+    // All other tiles — unchanged, still use commerceMetrics
+    if (!metrics) return card;
     if (card.id === "rpr") {
       return {
         ...card,

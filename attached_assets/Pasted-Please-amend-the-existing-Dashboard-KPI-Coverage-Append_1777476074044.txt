@@ -1,0 +1,81 @@
+Please amend the existing Dashboard KPI Coverage Appendix in the Data Dictionary.
+
+Do not recreate the appendix from scratch. Update the existing appendix to tighten the definitions and resolve the remaining partial/ambiguous metrics.
+
+Please make the following amendments:
+
+1. Average Order Value
+Ensure the appendix defines AOV explicitly as:
+
+AOV = Net Sales / Order Count
+
+Use Net Sales after discounts, refunds/returns and VAT/sales tax, unless the app deliberately chooses a gross AOV view later. Add a note that gross AOV could be added as a secondary metric in future.
+
+2. Acquisition Efficiency
+Clarify exactly what the dashboard tile currently represents.
+
+For now, define it as:
+
+Meta CAC trend / channel acquisition efficiency signal
+
+Formula:
+Current period Meta CAC compared with prior period Meta CAC.
+
+Meta CAC = Meta spend / new customers attributed to Meta
+
+Add a note that this is not the same as blended CAC, CAC payback or ROAS. Those should remain separate metrics in Marketing Efficiency.
+
+3. Refund Rate
+Define Refund Rate clearly as:
+
+Refund Rate = Refund Value / Gross Sales
+
+Where:
+Refund Value = sum of refunded order/subtotal value in the selected period
+Gross Sales = sales before discounts, refunds and VAT/sales tax
+
+Add a note that a future operational view may also show:
+Refunded Orders / Total Orders
+
+4. Net Profit
+Clarify that the current dashboard Net Profit tile is not final statutory/accounting net profit.
+
+For v1, define it as:
+
+Operating Profit Estimate = Contribution after fixed operating costs
+
+Formula:
+Net Profit Estimate = Contribution - Fixed Operating Costs
+
+Source:
+Shopify revenue/order data + Xero cost data + temporary assumptions where Xero is not yet connected.
+
+Add a confidence note:
+This should be labelled as an estimate until Xero P&L integration and nominal-code mapping are complete.
+
+5. Net Sales
+Ensure Net Sales is defined consistently as:
+
+Net Sales = Gross Sales - Discounts - Refunds/Returns - VAT/Sales Tax
+
+Add a note that Shopify total_price can include tax, so tax should be stored separately and deducted where the dashboard is presenting net sales excluding VAT/sales tax.
+
+6. Recoverable Contribution
+Ensure the appendix confirms that the dashboard KPI uses the same source as the opportunity panel:
+
+RECOVERABLE_LOW / RECOVERABLE_HIGH from the internal opportunity engine.
+
+It should not use diagnosticLeakageEstimate or any commerceMetrics.ts live diagnostic leakage formula.
+
+7. Status labels
+For every dashboard KPI, please add or confirm a status:
+- Live
+- Mock
+- Partial
+- Future
+
+8. Confidence risks
+For every KPI, ensure there is a short confidence risk note.
+
+Do not change any dashboard code or calculation logic in this step.
+This is a documentation alignment task only.

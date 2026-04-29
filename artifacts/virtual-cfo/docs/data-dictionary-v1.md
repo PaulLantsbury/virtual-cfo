@@ -847,14 +847,16 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 |---|---|
 | **Dashboard label** | Net Sales |
 | **Canonical metric name** | `NET_SALES` |
+| **Canonical definition** | `Net Sales = Gross Sales − Discounts − Refunds/Returns − VAT/Sales Tax` |
 | **Current formula (live)** | `SUM(gross_sales − discounts − refunds − tax)` per order row · `commerceMetrics.netSales` |
-| **Intended formula (live)** | Same — see confidence note on tax field below |
+| **Intended formula (production)** | Same structure — confirmed correct. Tax must be stored as a separate column at ingest and deducted explicitly so that the dashboard always presents net sales excluding VAT/sales tax, regardless of the merchant's Shopify tax configuration |
+| **Tax handling note** | Shopify `total_price` can include tax (tax-inclusive pricing) or exclude it (tax-exclusive). The ingest pipeline must read `orders.taxes_included` at the store level and store tax as a separate `tax` column in all cases. This ensures the deduction `− tax` in the formula is always valid and never double-counts |
 | **Source system** | Supabase |
 | **Source table / view** | `orders` (columns: `gross_sales`, `discounts`, `refunds`, `tax`) |
 | **Current status** | **LIVE** — tile shows real data when `orders` table is populated; shows £0 when empty |
 | **Mock fallback** | None — tile initialises to £0, not a string constant |
-| **Confidence risk** | The `tax` column behaviour depends on the merchant's Shopify tax settings (tax-inclusive vs tax-exclusive pricing). In tax-inclusive stores, `gross_sales` already nets out tax; subtracting `tax` again will understate net sales. This must be resolved at ingest time by reading `orders.taxes_included` |
-| **Data quality flag** | None defined yet. Add: flag if `SUM(tax)` represents more than 30% of `SUM(gross_sales)` — likely indicates double-deduction |
+| **Confidence risk** | Until the tax-inclusive/exclusive handling is confirmed at ingest, the `tax` deduction may double-count VAT in tax-inclusive stores, understating net sales. Flag at ingest time if `SUM(tax) / SUM(gross_sales) > 30%` — likely a double-deduction signal |
+| **Data quality flag** | Flag if `SUM(tax)` represents more than 30% of `SUM(gross_sales)` — likely indicates double-deduction from tax-inclusive pricing |
 
 ---
 
@@ -884,12 +886,13 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 | **Canonical metric name** | `RECOVERABLE_RANGE` (displayed as a range: `RECOVERABLE_LOW` – `RECOVERABLE_HIGH`) |
 | **Current formula** | Conditional display: `£18k–£42k` if both constants > 0, otherwise "Opportunity being calculated" · Source: `RECOVERABLE_LOW = 18_000` / `RECOVERABLE_HIGH = 42_000` in `business-snapshot.ts` |
 | **Intended formula** | `SUM(opportunities.uplift_low WHERE status = 'active')` → `SUM(opportunities.uplift_high WHERE status = 'active')` · Exposed via `v_recoverable_contribution` view |
-| **Source system** | Internal opportunity engine |
-| **Source table / view** | Future: `opportunities` table → `v_recoverable_contribution` view |
+| **Source system** | Internal opportunity engine — the same source that feeds the opportunity panel |
+| **Source table / view** | Current: `RECOVERABLE_LOW` / `RECOVERABLE_HIGH` constants in `business-snapshot.ts` · Future: `opportunities` table → `v_recoverable_contribution` view |
 | **Current status** | **MOCK** — both endpoints of the range are static constants |
-| **Distinction from liveOrderLeakageEstimate** | The tile value is the strategic opportunity range from the opportunity engine. `metrics.liveOrderLeakageEstimate` in `commerceMetrics.ts` is a separate diagnostic signal (excess discount + refund + payment fee leakage computed from order data). These are not the same figure and must not be confused. See `commerceMetrics.ts` type comment |
+| **Source confirmation** | The dashboard KPI tile must use `RECOVERABLE_LOW` / `RECOVERABLE_HIGH` from the internal opportunity engine (currently `business-snapshot.ts`, future: `opportunities` table). It must **not** use `diagnosticLeakageEstimate`, `liveOrderLeakageEstimate`, or any formula from `commerceMetrics.ts`. Those are internal diagnostic signals, not the headline opportunity range |
+| **Distinction from liveOrderLeakageEstimate** | `metrics.liveOrderLeakageEstimate` in `commerceMetrics.ts` computes excess discount + refund + payment fee leakage order-by-order from Supabase data. It is a diagnostic tool for the engineering layer and future Profit Opportunities detail pages — it does not power the KPI tile. The KPI tile value is the strategic opportunity range from the opportunity engine. See `commerceMetrics.ts` type header for the full distinction |
 | **Confidence risk** | Opportunity uplift methodology is not yet documented per opportunity type. Once live, each opportunity row should carry a `confidence` field (`HIGH / MEDIUM / LOW`) and the range should be labelled accordingly |
-| **Data quality flag** | Surface "Opportunity being calculated" when no active opportunities exist; alert if any opportunity's underlying data is stale |
+| **Data quality flag** | Surface "Opportunity being calculated" when no active opportunities exist; alert if any active opportunity's underlying data is stale > 7 days |
 
 ---
 
@@ -933,17 +936,16 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 |---|---|
 | **Dashboard label** | Average Order Value |
 | **Canonical metric name** | `AOV` |
-| **Current formula (live)** | `SUM(orders.total_sales) / count(orders)` · `commerceMetrics.averageOrderValue` |
-| **Formula ambiguity — decision required** | Three different AOV definitions are in common use: |
-| | **Option A — Gross AOV** (industry standard for e-commerce benchmarking): `SUM(gross_sales) / count(orders)` — pre-discount, pre-refund, pre-tax. Measures full price potential per order. |
-| | **Option B — Net AOV** (profitability view): `SUM(gross_sales − discounts − refunds − tax) / count(orders)` — equivalent to `netSales / orderCount`. Measures what the merchant actually keeps before variable costs. |
-| | **Option C — Transaction AOV** (current implementation): `SUM(total_sales) / count(orders)` — Shopify `total_price` — post-discount, includes tax in tax-inclusive stores. This is neither gross nor net in a clean sense. |
-| **Recommendation** | Align to **Option A (Gross AOV)** as the primary tile value, matching e-commerce benchmarks. Add Net AOV as a secondary figure on the Margin Analysis drill-down. The current implementation (Option C) should be replaced before Phase 1 go-live |
+| **Canonical definition** | `AOV = Net Sales / Order Count` |
+| **Rationale** | Net Sales (after discounts, refunds/returns and VAT/sales tax) is the appropriate numerator because it represents revenue the merchant actually retains before variable costs. Using net sales aligns AOV with the Net Sales tile and makes the two figures internally consistent. The formula mirrors `commerceMetrics.netSales / commerceMetrics.orderCount` |
+| **Current formula (live)** | `SUM(orders.total_sales) / count(orders)` · `commerceMetrics.averageOrderValue` — currently uses `total_sales` (post-discount, tax-varies) rather than `netSales`. To be corrected before Phase 1 go-live |
+| **Intended formula (production)** | `commerceMetrics.netSales / commerceMetrics.orderCount` — aligns to the canonical definition |
+| **Future secondary metric** | Gross AOV (`SUM(gross_sales) / orderCount`) may be added as a secondary figure on the Margin Analysis drill-down page for benchmarking against industry averages, where pre-discount figures are the norm |
 | **Source system** | Supabase |
-| **Source table / view** | `orders` (columns: `total_sales` current → `gross_sales` recommended) |
-| **Current status** | **LIVE** — formula runs but definition is unresolved. Initialises to £0 when orders table is empty |
-| **Confidence risk** | Tax-inclusive vs tax-exclusive Shopify stores will produce different `total_sales` values for the same underlying sale. Until the AOV denominator is fixed to `gross_sales`, this figure is not comparable across merchants |
-| **Data quality flag** | None defined; add tooltip in UI: "Average order value before returns, showing [period]" |
+| **Source table / view** | `orders` (columns: `gross_sales`, `discounts`, `refunds`, `tax` for net; current code uses `total_sales`) |
+| **Current status** | **PARTIAL** — formula runs against live Supabase data but uses `total_sales` rather than `netSales`. Initialises to £0 when orders table is empty |
+| **Confidence risk** | Current implementation using `total_sales` produces a different figure from the canonical `netSales / orderCount` definition — the gap equals discounts, refunds and tax treatment. Until corrected, AOV will be overstated vs the canonical definition in stores with significant discounting or high-value returns |
+| **Data quality flag** | Add UI tooltip: "Average net revenue per order (after discounts, returns and VAT), showing [period]" |
 
 ---
 
@@ -988,19 +990,17 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 | Property | Detail |
 |---|---|
 | **Dashboard label** | Acquisition Efficiency |
-| **Canonical metric name** | Not yet defined — see ambiguity note below |
-| **Current value** | Hardcoded string: `"Meta CAC +14%"` |
-| **Ambiguity — decision required** | The tile label is "Acquisition Efficiency" but the current display value is a Meta-specific CAC trend string. Four distinct candidate metrics exist: |
-| | **Option A — Meta CAC (absolute):** `£28` — channel spend on Meta divided by Meta-attributed new customers. Source: `CAC_BY_CHANNEL[Meta].cac`. Channel-specific, not blended |
-| | **Option B — Meta CAC trend (current display):** `+14%` MoM change in Meta CAC. Source: `CAC_BY_CHANNEL[Meta].change`. A trend label, not an absolute value |
-| | **Option C — Blended CAC:** `£12.20` — total marketing spend divided by all new customers across all channels. Source: `BLENDED_CAC` in `channel-metrics.ts`. More representative but requires all channel connections |
-| | **Option D — CAC Payback:** `1.4 orders` — how many orders a new customer must place to recover their acquisition cost. Source: `CAC_PAYBACK` in `growth-metrics.ts`. Best for showing acquisition sustainability |
-| **Recommendation** | Define the tile as **Blended CAC** as the primary value, with Meta CAC trend as a secondary indicator in the tile body text. This avoids conflating a channel-specific signal with an overall efficiency metric. Until Phase 4 (ad APIs) is live, the tile should remain labelled as MOCK with a clear "Integration required" note |
+| **Canonical metric name** | `META_CAC_TREND` |
+| **Definition for v1** | This tile is defined as a **Meta CAC trend / channel acquisition efficiency signal**. It shows whether Meta acquisition cost is improving or deteriorating relative to the prior period. It is not blended CAC, CAC payback, or ROAS — those remain separate metrics on the Marketing Efficiency page |
+| **Canonical formula** | `Meta CAC (current period) vs Meta CAC (prior period)` expressed as a percentage change · `Meta CAC = Meta spend / new customers attributed to Meta` |
+| **Current value** | Hardcoded string: `"Meta CAC +14%"` — representing a +14% increase in Meta CAC from prior period (£24 → £28) |
+| **Current value source** | `CAC_BY_CHANNEL[Meta].changeLabel` from `channel-metrics.ts` — static mock |
+| **What this tile is not** | — Not blended CAC (`BLENDED_CAC` — total spend / all new customers) · — Not CAC payback (`CAC_PAYBACK` — orders to recover acquisition cost) · — Not ROAS (attributed revenue / spend) · All three are available in the Marketing Efficiency page and carry their own definitions in §3.4 |
 | **Source system** | Meta Ads API (Phase 4) |
-| **Source table / view** | Future: `marketing_spend` table + `CAC_BY_CHANNEL` computed from ad platform data |
-| **Current status** | **MOCK** — hardcoded string; no formula; no live data source |
-| **Confidence risk** | Attribution confidence (HIGH / MEDIUM / LOW) propagates from channel connection quality. Without Conversions API, Meta-reported new customer counts may deviate from Shopify-attributed counts. See §5.5 |
-| **Data quality flag** | Flag if any connected ad platform is stale > 48h; suppress tile with "Data unavailable" if platform connection is missing entirely |
+| **Source table / view** | Future: `marketing_spend` table → `CAC_BY_CHANNEL` computed from Meta Ads API spend + Shopify new customer attribution |
+| **Current status** | **MOCK** — hardcoded string; no formula runs against real data |
+| **Confidence risk** | Meta CAC accuracy depends on new customer attribution quality. Without Conversions API (server-side events), iOS 14.5+ signal loss means Meta-reported new customer counts may understate true acquisition, overstating CAC. See §5.5 for confidence tier framework |
+| **Data quality flag** | Flag if Meta Ads connection is stale > 48h; suppress tile with "Integration required" if no ad platform is connected |
 
 ---
 
@@ -1010,18 +1010,16 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 |---|---|
 | **Dashboard label** | Refund Rate |
 | **Canonical metric name** | `REFUND_RATE` |
-| **Current formula (mock init)** | Static value: `0%` — tile initialises to zero |
-| **Current formula (live override)** | `SUM(refunds) / SUM(gross_sales) × 100` · `commerceMetrics.refundRate` — **value-based: revenue refunded as a % of gross revenue** |
-| **Denominator clarification** | Three definitions are in use across the industry: |
-| | **Option A — Refund value / gross sales (current implementation):** Measures the proportion of pre-discount revenue that was refunded. Sensitive to high-value single returns. |
-| | **Option B — Refund value / net sales:** Measures returns impact relative to actually-received revenue. More relevant to contribution margin analysis. |
-| | **Option C — Refunded order count / total order count:** Measures how frequently orders result in any refund. Less sensitive to order value; better proxy for operational quality. |
-| **Decision recorded** | The current implementation uses **Option A (refund value / gross sales)**. This is the correct choice for a financial metric that feeds into the live leakage diagnostic (`liveOrderLeakageEstimate`). However, the tile tooltip should make the denominator explicit to avoid misinterpretation |
+| **Canonical definition** | `Refund Rate = Refund Value / Gross Sales` |
+| **Components** | **Refund Value** — sum of refunded order/subtotal value in the selected period (revenue reversed, not fulfilment cost) · **Gross Sales** — sales before discounts, refunds and VAT/sales tax (pre-deduction revenue) |
+| **Rationale** | Using Gross Sales as the denominator measures the proportion of full-price revenue potential that was lost to returns. This is the correct basis for a financial leakage metric and aligns with the `liveOrderLeakageEstimate` diagnostic in `commerceMetrics.ts` |
+| **Current formula (live)** | `SUM(orders.refunds) / SUM(orders.gross_sales) × 100` · `commerceMetrics.refundRate` — matches the canonical definition |
+| **Future operational view** | A future view may also surface **Refunded Orders / Total Orders** (count-based rate) as a secondary operational metric on the Profit Opportunities or Pricing Optimisation pages, to distinguish high-frequency low-value returns from low-frequency high-value returns |
 | **Source system** | Supabase |
 | **Source table / view** | `orders` (columns: `refunds`, `gross_sales`) |
-| **Current status** | **LIVE** — formula runs against Supabase. Returns 0% when table is empty |
-| **Confidence risk** | Partial refunds: an order with two separate refund events (e.g. customer returns two items at different times) will have both `refund` amounts in the same row if stored cumulatively, or may be split across rows depending on schema design. The current `orders`-level query aggregates at the order row level which avoids double-counting only if `refunds` is a cumulative total per order. Needs verification at ingest design |
-| **Data quality flag** | Check 4.4 (partial refund double-counting) in `shopify-phase-1-schema.md`; confirm cumulative vs event-level storage before Phase 1 launch |
+| **Current status** | **LIVE** — formula runs against Supabase. Initialises to 0% when orders table is empty |
+| **Confidence risk** | Partial refunds: if a single order is refunded in two events, the `refunds` column must store a cumulative total (not individual event amounts) to avoid double-counting. This must be confirmed as part of the ingest design. See data quality check 4.4 in `shopify-phase-1-schema.md` |
+| **Data quality flag** | Confirm cumulative vs event-level refund storage before Phase 1 launch; add UI tooltip: "Refund value as a percentage of gross sales (before discounts and VAT), showing [period]" |
 
 ---
 
@@ -1030,36 +1028,36 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 | Property | Detail |
 |---|---|
 | **Dashboard label** | Net Profit |
-| **Canonical metric name** | Not yet defined — see ambiguity note below |
-| **Current value** | Hardcoded string: `"£56,300"` — no formula backs this value |
-| **Ambiguity — decision required** | "Net Profit" has multiple industry definitions. The intended meaning for this tile must be resolved before go-live: |
-| | **Option A — Accounting net profit:** Revenue minus all costs including depreciation, interest, and tax. Requires Xero P&L with all lines classified. Cannot be computed from Shopify alone |
-| | **Option B — EBITDA (operating profit):** Earnings before interest, tax, depreciation and amortisation. Closest to `BASE_EBITDA = CONTRIBUTION − MONTHLY_FIXED_COSTS = £78,000` in `business-snapshot.ts`. Note the mock value £56,300 does not match this figure |
-| | **Option C — Contribution after fixed costs:** `CONTRIBUTION − MONTHLY_FIXED_COSTS`. Equivalent to Option B in the absence of interest and depreciation lines. This is the most practical definition given Xero data |
-| | **Option D — Mock placeholder only:** The current £56,300 figure does not correspond to any formula in the codebase (`BASE_EBITDA = £78,000`, `CONTRIBUTION = £198,000`, `MONTHLY_CM_VALUE = £52,913`). It is an ad hoc placeholder |
-| **Recommendation** | Define the tile as **Contribution after fixed overheads** (Option C) and label it accordingly in the UI — this is achievable with Xero Phase 2 and is the most actionable figure for a Shopify founder. Reserve "Net Profit" as a label only if accounting-standard net profit (after depreciation and interest) is computed from Xero |
-| **Source system** | Xero (Phase 2) |
-| **Source table / view** | Future: Xero P&L (`profit_and_loss` report) — `CONTRIBUTION − MONTHLY_FIXED_COSTS` |
-| **Current status** | **MOCK** — hardcoded string with no formula basis and no correspondence to any computed value in the codebase |
-| **Confidence risk** | Depends entirely on Xero nominal code classification quality (§5.1). If fixed costs are misclassified, this figure will be wrong by design |
-| **Data quality flag** | Flag as "Estimated" until Xero is connected; flag individual component confidence if either `CONTRIBUTION` or `MONTHLY_FIXED_COSTS` carries a LOW confidence rating |
+| **Canonical metric name** | `OPERATING_PROFIT_ESTIMATE` |
+| **Definition for v1** | This tile is defined as an **Operating Profit Estimate**, not statutory or accounting net profit. It does not include depreciation, interest, or corporation tax. The label on the tile should read "Net Profit (est.)" or "Operating Profit (est.)" until Xero integration is complete |
+| **Canonical formula** | `Operating Profit Estimate = Contribution − Fixed Operating Costs` · where Contribution = Net Sales − Variable Costs; Fixed Operating Costs = monthly fixed overheads from Xero nominal codes |
+| **Data sources** | Shopify revenue and order data → Net Sales and Contribution (variable costs applied) · Xero P&L fixed overhead lines → Fixed Operating Costs · Temporary hardcoded cost assumptions where Xero is not yet connected |
+| **Current value** | Hardcoded string: `"£56,300"` — this is a mock placeholder with no formula basis. It does not correspond to any computed value in the codebase (`BASE_EBITDA = CONTRIBUTION − MONTHLY_FIXED_COSTS = £78,000`; `MONTHLY_CM_VALUE = £52,913`). It will be replaced once the formula is wired to real data |
+| **Confidence note** | This figure must be labelled as an estimate on the dashboard until Xero P&L integration is live and nominal code mapping is complete. Where Xero is not yet connected, the value uses temporary cost assumptions and should carry a visible "Estimated" badge |
+| **What this tile is not** | — Not statutory net profit (no depreciation, interest or tax deducted) · — Not EBITDA (a formal accounting concept requiring full P&L classification) · These measures will require Xero P&L integration and additional mapping beyond Phase 2 scope |
+| **Source system** | Shopify (revenue component) + Xero (fixed costs component) — Xero not yet connected |
+| **Source table / view** | Future: `orders` (Supabase) + Xero `profit_and_loss` report → `CONTRIBUTION − MONTHLY_FIXED_COSTS` |
+| **Current status** | **MOCK** — hardcoded string; no formula; placeholder value does not match any derived computation in the codebase |
+| **Confidence risk** | Accuracy depends on two inputs: (1) Xero nominal code classification separating fixed from variable costs (§5.1) — misclassification will over- or understate the figure; (2) the monthly Contribution estimate, which itself uses hardcoded variable cost rates until Xero is connected (see A.2) |
+| **Data quality flag** | Show "Estimated" badge until Xero P&L is connected and nominal codes are mapped; flag LOW confidence if either `CONTRIBUTION` or `MONTHLY_FIXED_COSTS` carries a LOW confidence rating from their respective sources |
 
 ---
 
 ### Summary Table
 
-| Tile | Canonical Name | Current Status | Source (live) | Source (target) | Decision Required |
+| Tile | Canonical Name | Formula (resolved) | Current Status | Confidence Risk (summary) | Next Action |
 |---|---|---|---|---|---|
-| Net Sales | `NET_SALES` | **LIVE** | `orders` (Supabase) | `orders` | Tax-inclusive handling at ingest |
-| Contribution Margin | `MONTHLY_CM_PCT` | **PARTIAL** | `orders` + hardcoded rates | `orders` + Xero P&L | Replace cost rates with Xero actuals (Phase 2) |
-| Recoverable Contribution | `RECOVERABLE_RANGE` | **MOCK** | `business-snapshot.ts` constants | `opportunities` table | Seed opportunities table; document uplift methodology |
-| Cash Runway | `CASH_RUNWAY` | **MOCK** | `cash-snapshot.ts` constant | Xero bank accounts + P&L | Phase 2; bank account tagging setup step |
-| Monthly Revenue | `MONTHLY_REVENUE` | **LIVE** | `orders.total_sales` | `orders.gross_sales + discounts` | Align formula to canonical gross revenue reconstruction |
-| Average Order Value | `AOV` | **LIVE** (formula ambiguous) | `total_sales / orderCount` | `gross_sales / orderCount` (recommended) | Decide: gross vs net vs transaction AOV |
-| Repeat Purchase Rate | `REPEAT_RATE` | **PARTIAL** | Repeat customer ratio | `customers.first_order_at` + period filter | Fix formula; populate `customers` table |
-| Discount Dependency | `DISCOUNT_DEP` | **PARTIAL** | `discounts / gross_sales` (value) | `has_discount count / order count` | Decide: revenue rate vs order rate; align labels |
-| Acquisition Efficiency | *(undefined)* | **MOCK** | Hardcoded string | Meta Ads API + `marketing_spend` | Decide: Blended CAC vs Meta CAC vs CAC payback |
-| Refund Rate | `REFUND_RATE` | **LIVE** | `refunds / gross_sales` (value) | `refunds / gross_sales` (same) | Confirm partial refund storage model; add tooltip |
-| Net Profit | *(undefined)* | **MOCK** | Hardcoded string (no formula) | Xero P&L (Phase 2) | Decide: accounting net profit vs EBITDA vs contribution after fixed costs |
+| Net Sales | `NET_SALES` | `Gross Sales − Discounts − Refunds − VAT/Tax` | **LIVE** | Tax-inclusive/exclusive handling at ingest | Confirm `taxes_included` handling at Phase 1 ingest |
+| Contribution Margin | `MONTHLY_CM_PCT` | `(Net Sales − Variable Costs) / Net Sales × 100` | **PARTIAL** | Variable cost rates hardcoded, not from Xero | Replace `costAssumptions.ts` rates with `store_cost_assumptions` (Phase 2) |
+| Recoverable Contribution | `RECOVERABLE_RANGE` | `SUM(opportunities.uplift_low/high WHERE active)` — from opportunity engine only, never from `commerceMetrics.ts` | **MOCK** | Uplift methodology undocumented | Seed `opportunities` table; document per-type methodology |
+| Cash Runway | `CASH_RUNWAY` | `Cash Balance / Monthly Fixed Costs` | **MOCK** | Both inputs from Xero — not yet connected | Phase 2; bank account tagging setup step |
+| Monthly Revenue | `MONTHLY_REVENUE` | `SUM(gross_sales + discounts)` for calendar month | **LIVE** | `total_sales` vs gross reconstruction gap | Align `totalRevenue` formula to gross revenue reconstruction |
+| Average Order Value | `AOV` | `Net Sales / Order Count` | **PARTIAL** | Current impl uses `total_sales`; overstates vs canonical | Update `averageOrderValue` to use `netSales / orderCount` before Phase 1 |
+| Repeat Purchase Rate | `REPEAT_RATE` | `Orders from returning customers / Total orders in period` | **PARTIAL** | Live formula measures repeat customer ratio, not rate | Populate `customers` table; fix period-bound formula |
+| Discount Dependency | `DISCOUNT_DEP` | `Count(orders with discount) / Count(all orders) × 100` | **PARTIAL** | Live formula uses revenue rate, not count rate | Add `has_discount` column at ingest; align label to live formula or fix formula |
+| Acquisition Efficiency | `META_CAC_TREND` | `Meta CAC (current period) vs Meta CAC (prior period) — Meta CAC = Meta spend / new customers attributed to Meta` | **MOCK** | Attribution quality; Conversions API required for HIGH confidence | Phase 4 (Meta Ads API); not blended CAC or payback |
+| Refund Rate | `REFUND_RATE` | `Refund Value / Gross Sales × 100` | **LIVE** | Partial refund storage model unconfirmed | Confirm cumulative refund storage at ingest; add UI tooltip |
+| Net Profit | `OPERATING_PROFIT_ESTIMATE` | `Contribution − Fixed Operating Costs` — estimate only; not accounting net profit | **MOCK** | Xero not connected; nominal codes not mapped | Phase 2 (Xero P&L); label as "est." until fully live |
 
-*Appendix version: 1.0 · April 2026 · Derived from dashboard.tsx, commerceMetrics.ts, business-snapshot.ts, cash-snapshot.ts, growth-metrics.ts, channel-metrics.ts.*
+*Appendix version: 1.1 · Amended April 2026 · All four v1 ambiguities resolved (AOV, Acquisition Efficiency, Refund Rate, Net Profit). Net Sales and Recoverable Contribution definitions tightened.*
+*Derived from: dashboard.tsx, commerceMetrics.ts, business-snapshot.ts, cash-snapshot.ts, growth-metrics.ts, channel-metrics.ts.*

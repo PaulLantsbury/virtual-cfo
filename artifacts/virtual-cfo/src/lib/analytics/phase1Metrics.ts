@@ -3,9 +3,10 @@
  *
  * Phase 1 Dashboard Metrics Query Layer.
  *
- * Fetches all nine Phase 1 canonical metric function results from Supabase
- * for a given store and date range.  This helper is the bridge between the
- * Supabase SQL functions (migration 20260429000001) and the dashboard.
+ * Fetches the eight active Phase 1 canonical metric function results from
+ * Supabase for a given store and date range.  This helper is the bridge
+ * between the Supabase SQL functions (migration 20260429000001) and the
+ * dashboard.
  *
  * IMPORTANT — this module is intentionally decoupled from the dashboard UI.
  * It does not read from commerceMetrics.ts and does not replace it yet.
@@ -15,13 +16,16 @@
  *
  * DESIGN
  * ------
- * - All nine SQL functions are called in parallel (Promise.all).
+ * - Eight SQL functions are called in parallel (Promise.all).
+ *   NOTE: discount_cost, return_amount, and order_count SQL functions exist
+ *   in the database but are not called here — their results are not consumed
+ *   by any dashboard tile.  contribution_margin_pct() uses return_amount
+ *   internally at the SQL level; the frontend does not need a separate call.
  * - Each RPC call is individually error-isolated: a failure in one function
  *   returns 0 for that field and records the error, leaving the remaining
  *   fields unaffected.
  * - No formatting is applied here.  All values are raw numbers:
  *     rates (repeatPurchaseRate, discountDependency, refundRate) → ratio [0, 1]
- *     counts (orderCount) → integer
  *     monetary values → decimal with full precision from the DB
  *   Callers are responsible for display formatting (× 100 for %, toFixed, etc.)
  *
@@ -59,31 +63,13 @@ export type Phase1MetricsResult = {
   grossRevenue: number;
 
   /**
-   * SUM(discounts) for non-cancelled orders in the period.
-   * No direct METRIC entry; feeds METRIC.DISCOUNT_DEPENDENCY_RATIO numerator.
-   */
-  discountCost: number;
-
-  /**
-   * SUM(refunds) attributed to original order created_at date, non-cancelled.
-   * No direct METRIC entry; feeds METRIC.REFUND_RATE_PCT numerator.
-   */
-  returnAmount: number;
-
-  /**
    * SUM(gross_sales − discounts − refunds − tax) for non-cancelled orders.
    * @canonical METRIC.NET_SALES
    */
   netSales: number;
 
   /**
-   * COUNT of qualifying orders — excludes cancelled AND fully-refunded.
-   * Denominator for METRIC.AVERAGE_ORDER_VALUE.
-   */
-  orderCount: number;
-
-  /**
-   * net_sales / qualifying_order_count.  Returns 0 when orderCount = 0.
+   * net_sales / qualifying_order_count.  Returns 0 when the qualifying order count is 0.
    * @canonical METRIC.AVERAGE_ORDER_VALUE
    * NOTE: differs from commerceMetrics.averageOrderValue (total_sales / count(*)).
    *       The frontend formula will be replaced at dashboard tile wiring time.
@@ -251,14 +237,22 @@ async function callRpcRow<T extends Record<string, unknown>>(
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
- * Fetches all nine Phase 1 canonical metrics from Supabase for the given
- * store and date range.  All RPC calls run in parallel.
+ * Fetches the eight active Phase 1 canonical metrics from Supabase for the
+ * given store and date range.  All RPC calls run in parallel.
+ *
+ * Functions NOT called (results unused by the dashboard):
+ *   discount_cost  — feeds discount_dependency() internally at SQL level
+ *   return_amount  — feeds contribution_margin_pct() internally at SQL level
+ *   order_count    — feeds average_order_value() internally at SQL level
+ * The SQL functions remain in the database and can be called independently.
  *
  * @param storeId  UUID of the store — matches orders.store_id.
  * @param dateFrom First day of the period, inclusive (e.g. "2026-02-01").
  * @param dateTo   Last day of the period, inclusive (e.g. "2026-02-28").
  *
  * @returns Phase1MetricsResponse with raw numeric data and any per-function errors.
+ *   A failure in one RPC records an error for that function only — other fields
+ *   are unaffected.  Check errors[] to know which individual functions failed.
  *
  * @example
  *   const { data, errors } = await getPhase1Metrics(
@@ -288,10 +282,7 @@ export async function getPhase1Metrics(
 
   const [
     grossRevenue,
-    discountCost,
-    returnAmount,
     netSales,
-    orderCount,
     averageOrderValue,
     repeatPurchaseRate,
     discountDependency,
@@ -300,10 +291,7 @@ export async function getPhase1Metrics(
     rcRow,
   ] = await Promise.all([
     callRpc("gross_revenue",          params,   errors), // → METRIC.MONTHLY_REVENUE (period gross)
-    callRpc("discount_cost",          params,   errors), // → feeds METRIC.DISCOUNT_DEPENDENCY_RATIO
-    callRpc("return_amount",          params,   errors), // → feeds METRIC.REFUND_RATE_PCT
     callRpc("net_sales",              params,   errors), // → METRIC.NET_SALES
-    callRpc("order_count",            params,   errors), // → denominator for METRIC.AVERAGE_ORDER_VALUE
     callRpc("average_order_value",    params,   errors), // → METRIC.AVERAGE_ORDER_VALUE
     callRpc("repeat_purchase_rate",   params,   errors), // → METRIC.REPEAT_PURCHASE_RATE  [0,1]
     callRpc("discount_dependency",    params,   errors), // → METRIC.DISCOUNT_DEPENDENCY_RATIO [0,1]
@@ -319,10 +307,7 @@ export async function getPhase1Metrics(
   return {
     data: {
       grossRevenue,
-      discountCost,
-      returnAmount,
       netSales,
-      orderCount,
       averageOrderValue,
       repeatPurchaseRate,
       discountDependency,

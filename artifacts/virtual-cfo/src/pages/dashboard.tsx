@@ -376,7 +376,7 @@ export default function Dashboard() {
     // Source (static):   KPI_CARDS "ns" card.value ("£0") while both still loading
     if (card.id === "ns") {
       const nsValue =
-        phase1Metrics !== null && phase1Metrics.errors.length === 0
+        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "net_sales")
           ? phase1Metrics.data.netSales   // canonical — phase1 SQL function
           : metrics?.netSales;            // DEV-ONLY fallback — commerceMetrics all-time, no date filter
       if (nsValue == null) return card;   // static fallback while both loading
@@ -396,7 +396,7 @@ export default function Dashboard() {
     // Source (static):   KPI_CARDS "mr" card.value while both still loading
     if (card.id === "mr") {
       const mrValue =
-        phase1Metrics !== null && phase1Metrics.errors.length === 0
+        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "gross_revenue")
           ? phase1Metrics.data.grossRevenue   // canonical — phase1 SQL function
           : metrics?.totalRevenue;             // DEV-ONLY fallback — commerceMetrics all-time, no date filter
       if (mrValue == null) return card;        // static fallback while both loading
@@ -418,13 +418,13 @@ export default function Dashboard() {
     // Source (static):   KPI_CARDS "aov" card.value ("£0") while both still loading
     if (card.id === "aov") {
       const aovValue =
-        phase1Metrics !== null && phase1Metrics.errors.length === 0
+        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "average_order_value")
           ? phase1Metrics.data.averageOrderValue   // canonical — phase1 SQL function
           : metrics?.averageOrderValue;             // DEV-ONLY fallback — commerceMetrics all-time; formula differs (see data dict §A.6)
       if (aovValue == null) return card;            // static fallback while both loading
       return {
         ...card,
-        value: `£${aovValue.toFixed(2)}`,
+        value: `£${aovValue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       };
     }
 
@@ -439,7 +439,7 @@ export default function Dashboard() {
     // Source (static):   KPI_CARDS "rr" card.value ("0%") while both still loading
     if (card.id === "rr") {
       const rrValue =
-        phase1Metrics !== null && phase1Metrics.errors.length === 0
+        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "refund_rate")
           ? phase1Metrics.data.refundRate   // canonical — phase1 SQL function [0,1]
           : metrics?.refundRate;            // DEV-ONLY fallback — commerceMetrics all-time, no date filter [0,1]
       if (rrValue == null) return card;     // static fallback while both loading
@@ -460,7 +460,7 @@ export default function Dashboard() {
     // Source (static):   KPI_CARDS "dd" card.value while both still loading
     if (card.id === "dd") {
       const ddValue =
-        phase1Metrics !== null && phase1Metrics.errors.length === 0
+        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "discount_dependency")
           ? phase1Metrics.data.discountDependency   // canonical — phase1 SQL function [0,1]
           : metrics?.discountRate;                  // DEV-ONLY fallback — commerceMetrics all-time, no date filter [0,1]
       if (ddValue == null) return card;             // static fallback while both loading
@@ -483,7 +483,7 @@ export default function Dashboard() {
     // Source (static):   KPI_CARDS "rpr" card.value while both still loading
     if (card.id === "rpr") {
       const rprValue =
-        phase1Metrics !== null && phase1Metrics.errors.length === 0
+        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "repeat_purchase_rate")
           ? phase1Metrics.data.repeatPurchaseRate   // canonical — phase1 SQL function [0,1]
           : metrics?.repeatPurchaseRate;            // DEV-ONLY fallback — commerceMetrics all-time, no date filter [0,1]
       if (rprValue == null) return card;            // static fallback while both loading
@@ -511,7 +511,7 @@ export default function Dashboard() {
     if (card.id === "cm") {
       const cmValue =
         phase1Metrics !== null &&
-        phase1Metrics.errors.length === 0 &&
+        !phase1Metrics.errors.some(e => e.fn === "contribution_margin_pct") &&
         phase1Metrics.data.contributionMarginPct !== null
           ? phase1Metrics.data.contributionMarginPct   // canonical — phase1 SQL function [0,1]
           : metrics?.contributionMarginPercent;         // DEV-ONLY fallback — commerceMetrics estimated value, not store-personalised [0,1]
@@ -527,28 +527,37 @@ export default function Dashboard() {
     // Source (primary):  phase1Metrics.data.recoverableLow / recoverableHigh
     //   Formula: SUM(impact_low), SUM(impact_high) from non-archived opportunities
     //   No date filter — opportunities are store-level, not period-bound.
+    //   A result of (0, 0) is valid — it means no non-archived opportunities exist.
     // Source (fallback): RECOVERABLE_LOW / RECOVERABLE_HIGH from business-snapshot.ts
+    //   Used when: RPC has not yet resolved (null) or the specific RPC failed.
     //   Static constants seeded from the opportunity-engine snapshot.
     // Source (static):   KPI_CARDS "rc" card.value ("Opportunity being calculated")
+    //   Shown only while phase1Metrics is still loading (null).
     if (card.id === "rc") {
-      const lo =
+      const rcResolved =
         phase1Metrics !== null &&
-        !phase1Metrics.errors.some(e => e.fn === "recoverable_contribution_range")
-          ? phase1Metrics.data.recoverableLow
-          : RECOVERABLE_LOW;                    // DEV-ONLY fallback — business-snapshot.ts snapshot constant; remove when Supabase opportunities table is reliable
-      const hi =
-        phase1Metrics !== null &&
-        !phase1Metrics.errors.some(e => e.fn === "recoverable_contribution_range")
-          ? phase1Metrics.data.recoverableHigh
-          : RECOVERABLE_HIGH;                   // DEV-ONLY fallback — business-snapshot.ts snapshot constant; remove when Supabase opportunities table is reliable
-      const hasData = lo > 0 || hi > 0;
+        !phase1Metrics.errors.some(e => e.fn === "recoverable_contribution_range");
+      const lo = rcResolved
+        ? phase1Metrics!.data.recoverableLow
+        : RECOVERABLE_LOW;                    // DEV-ONLY fallback — business-snapshot.ts snapshot constant; remove when Supabase opportunities table is reliable
+      const hi = rcResolved
+        ? phase1Metrics!.data.recoverableHigh
+        : RECOVERABLE_HIGH;                   // DEV-ONLY fallback — business-snapshot.ts snapshot constant; remove when Supabase opportunities table is reliable
+      // "Opportunity being calculated" only while the async call has not yet settled.
+      // Once resolved, a (0, 0) result is a legitimate £0k–£0k state, not an error.
+      const isCalculating = phase1Metrics === null;
+      const hasOpportunities = lo > 0 || hi > 0;
       return {
         ...card,
-        value:  hasData
-          ? `£${(lo / 1_000).toFixed(0)}k–£${(hi / 1_000).toFixed(0)}k`
-          : "Opportunity being calculated",
-        change: hasData ? "Immediate margin recovery available" : "Analysis in progress",
-        status: (hasData ? "positive" : "neutral") as KpiStatus,
+        value: isCalculating
+          ? "Opportunity being calculated"
+          : `£${(lo / 1_000).toFixed(0)}k–£${(hi / 1_000).toFixed(0)}k`,
+        change: isCalculating
+          ? "Analysis in progress"
+          : hasOpportunities
+            ? "Immediate margin recovery available"
+            : "No recovery opportunities identified",
+        status: (!isCalculating && hasOpportunities ? "positive" : "neutral") as KpiStatus,
       };
     }
 

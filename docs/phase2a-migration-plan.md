@@ -575,19 +575,22 @@ returns `NULL`. The 12-month seed (Jan–Dec 2026) prevents this for all 2026
 calendar months. After December 2026, new entries will need to be seeded or
 imported before the function returns a non-NULL value.
 
-**⚠️ Expected value after Phase 2a wiring:**
-The Supabase-computed runway will be approximately **1.55–1.56 months**, not the
-current mock value of `3.4` months shown in the dashboard. This is because:
-- `cash_runway_months()` computes: `£186,000 cash / ~£119,200–£120,000 overhead = ~1.55–1.56 months`
-- The `CASH_RUNWAY = 3.4` constant in `cash-snapshot.ts` is an illustrative mock
-  that was never derived from the formula
+**Expected value after Phase 2a wiring:**
+The Supabase-computed runway will be approximately **1.55 months**
+(`£186,000 / £119,200–£120,000 ≈ 1.55`).
 
-This is a genuine data finding, not a bug. The real runway at a `£186k` cash
-balance with `£120k/month` in overheads is approximately 1.5 months. Before the
-`cr` tile is wired, the team should confirm whether the seed cash balance should
-be raised (e.g. to `£408,000` to produce a 3.4-month runway) or whether 1.55
-months is the intended result. **The cash balance seed value and the mock constant
-must be made consistent before frontend wiring.**
+The current `CASH_RUNWAY = 3.4` constant in `cash-snapshot.ts` is illustrative
+mock data. It will be replaced by the live RPC value when the `cr` tile is wired.
+**The visible tile value will move from 3.4 months to approximately 1.55 months
+at that point.** This is the mathematically correct result:
+
+- `£186,000` April cash balance is already aligned to the existing `CASH_BALANCE`
+  constant in `cash-snapshot.ts`.
+- `£120,000/month` overhead is already aligned to the existing
+  `MONTHLY_FIXED_COSTS` constant.
+- `1.55 months` is therefore the correct runway at current cash and overhead levels.
+
+The seed cash balance will not be inflated to reverse-engineer the old mock value.
 
 ---
 
@@ -701,10 +704,10 @@ wiring exists.
 2. Wire the result into the `cr` tile in `dashboard.tsx` `liveKpiCards` block.
 3. Remove or flag the `CASH_RUNWAY = 3.4` constant as replaced.
 
-**⚠️ Pre-wiring decision required:** Resolve the cash balance seed discrepancy
-documented in the `cash_runway_months` RPC section above before wiring. The
-Supabase-computed value (~1.55 months) will differ significantly from the current
-mock (3.4 months).
+**Note on tile value change:** The displayed value will move from the current
+illustrative mock of `3.4` months to the Supabase-computed value of approximately
+`1.55` months when this tile is wired. This is expected and correct — see the
+`cash_runway_months` RPC section above for rationale.
 
 ---
 

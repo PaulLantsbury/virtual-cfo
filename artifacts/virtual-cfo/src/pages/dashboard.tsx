@@ -17,7 +17,7 @@ import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
-import { MONTHLY_CM_PCT, MONTHLY_REVENUE, RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
+import { MONTHLY_CM_PCT, MONTHLY_REVENUE, MONTHLY_OPERATING_PROFIT, RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
 import { CASH_RUNWAY } from "@/lib/data/cash-snapshot";
 import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 
@@ -88,6 +88,26 @@ const RECOVERABLE_TILE_CHANGE =
     ? "Immediate margin recovery available"
     : "Analysis in progress";
 
+/**
+ * Formats an operating profit figure as a currency string.
+ * Negative values use the Unicode minus sign (−, U+2212) rather than a hyphen
+ * so the display reads as "−£10,184" rather than "-£10,184".
+ * Zero renders as "£0".  Rounded to the nearest whole pound.
+ */
+function formatOpProfit(v: number): string {
+  const abs = Math.abs(Math.round(v));
+  if (v < 0)  return `\u2212£${abs.toLocaleString("en-GB")}`;
+  if (v === 0) return "£0";
+  return `£${abs.toLocaleString("en-GB")}`;
+}
+
+/** Status derived from sign of an operating profit value. */
+function opProfitStatus(v: number): KpiStatus {
+  if (v < 0) return "danger";
+  if (v > 0) return "positive";
+  return "neutral";
+}
+
 // Tile IDs (id field below) are the internal short codes for each KPI card.
 // Each tile id maps to exactly one canonical metric name defined in src/lib/metrics.ts.
 // See TILE_METRIC_MAP for the authoritative tile id → canonical name mapping.
@@ -102,10 +122,10 @@ const RECOVERABLE_TILE_CHANGE =
 //   Tier 3 (static):    values declared in this array are loading sentinels shown
 //                       only while both async sources are still pending.
 //
-//   Exceptions — tiles with NO live wiring (fully mock, Phase 1 DEV-ONLY):
-//     "cr"  — CASH_RUNWAY snapshot constant.  Needs Xero cash balance (Phase 2).
+//   Exceptions — tiles with no commerceMetrics fallback (Tier 2 is snapshot constant):
+//     "cr"  — CASH_RUNWAY snapshot constant.  Primary: cash_runway_months() Phase 2a RPC.
 //     "ae"  — "Meta CAC +14%" literal.  Needs Meta Ads API integration (Phase 3).
-//     "np"  — "£56,300" literal.  Needs Xero P&L operating profit (Phase 2).
+//     "np"  — MONTHLY_OPERATING_PROFIT snapshot constant.  Primary: operating_profit_monthly() Phase 2a RPC.
 //
 //   change strings — ALL static for every tile.  No prior-period SQL functions
 //                    exist yet.  Replace in Phase 2 with computed ±X% deltas.
@@ -192,15 +212,17 @@ const KPI_CARDS: { id: string; title: string; value: string; change: string; sta
     text: "Revenue is growing, but margin quality is weakening.",
   },
   {
-    // DEV-ONLY — NO LIVE WIRING.  value and change are fully mock (Phase 1 only).
-    // value:  "£56,300" is a hardcoded snapshot figure.
-    //         Primary source: operating_profit() Supabase RPC (Phase 2, requires Xero
-    //         P&L — contribution margin minus monthly fixed costs).
-    //         Do not ship to production without Xero.
-    // change: "↑ 18.7% vs last month" is a hardcoded snapshot string.
-    //         Replace with computed "±X.X% vs last month" once operating_profit() exists.
-    id: "np",   title: "Net Profit",               value: "£56,300",                      change: "↑ 18.7% vs last month",              status: "positive",
-    text: "Profit remains positive, but quality of growth needs attention.",
+    // value: Tier 3 loading sentinel — MONTHLY_OPERATING_PROFIT snapshot = −£10,184.
+    //        Shown only while phase2aMetrics is still loading (null).
+    //        Overridden by operating_profit_monthly() Phase 2a RPC in liveKpiCards (Tier 1).
+    //        Falls back to MONTHLY_OPERATING_PROFIT if the RPC fails or returns null (Tier 2).
+    // change: static — no prior-period operating_profit_monthly() delta yet (Phase 2).
+    //         Replace with computed "±X.X% vs last month" once prior-period RPC exists.
+    id: "np",   title: "Net Profit",
+    value:  formatOpProfit(MONTHLY_OPERATING_PROFIT),
+    change: "",
+    status: opProfitStatus(MONTHLY_OPERATING_PROFIT),
+    text: "Operating profit after fixed overheads.",
   },
   {
     // value: Tier 3 loading sentinel — "£0" shown while phase1Metrics and commerceMetrics
@@ -625,6 +647,39 @@ export default function Dashboard() {
         value:  crDisplay,
         change: crChange,
         status: crStatus,
+      };
+    }
+
+    // ── Net Profit tile — wired to Phase 2a Supabase function ────────────────
+    // @canonical METRIC.OPERATING_PROFIT_ESTIMATE / tile id "np"
+    // Source (primary):  phase2aMetrics.data.operatingProfitMonthly
+    //   Formula: (net_sales × contribution_margin_pct) − monthly_overhead_total('actual')
+    //   Period:  current calendar month (PHASE1_DATE_FROM → PHASE1_DATE_TO)
+    //   NULL:  when no store_cost_assumptions row exists → triggers fallback.
+    //   Negative values are valid and must be displayed, not suppressed.
+    // Source (fallback): MONTHLY_OPERATING_PROFIT constant from business-snapshot.ts (−£10,184)
+    //   Used when: RPC failed (error entry in phase2aMetrics.errors) or returned null.
+    //   No commerceMetrics equivalent — operating profit cannot be derived from order data alone.
+    // Source (static):   KPI_CARDS "np" card.value while phase2aMetrics is still loading (null)
+    if (card.id === "np") {
+      const npResolved = phase2aMetrics !== null;
+      // Use live RPC value when the call succeeded and returned a non-null number.
+      const npLive =
+        npResolved &&
+        !phase2aMetrics!.errors.some(e => e.fn === "operating_profit_monthly") &&
+        phase2aMetrics!.data.operatingProfitMonthly !== null
+          ? phase2aMetrics!.data.operatingProfitMonthly
+          : null;
+      // If resolved but live is null (RPC failed or DB returned null), use snapshot fallback.
+      const npValue = npLive ?? (npResolved ? MONTHLY_OPERATING_PROFIT : null);
+      if (npValue === null) return card;  // static sentinel while still loading
+
+      return {
+        ...card,
+        value:  formatOpProfit(npValue),
+        status: opProfitStatus(npValue),
+        // change: intentionally empty — no prior-period operating_profit_monthly() delta yet (Phase 2).
+        change: "",
       };
     }
 

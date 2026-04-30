@@ -103,6 +103,21 @@ export const MONTHLY_CM_VALUE       = 52_913;
 export const CONTRIBUTION_PER_ORDER = 35.00;
 
 /**
+ * Monthly operating profit snapshot (£) for the current reporting period.
+ * Negative value = the store is running at an operating loss for the month.
+ * Derived from contribution margin in £ minus total fixed overhead costs.
+ *
+ * @dev-only DEV-ONLY FALLBACK — April 2026 figure derived from
+ *   operating_profit_monthly() Supabase RPC for store 10000000-…-0001.
+ *   Used as the KPI_CARDS "np" Tier 3 loading sentinel in dashboard.tsx.
+ *   Primary source: operating_profit_monthly() Phase 2a RPC (live).
+ *   This constant is only visible while the Phase 2a async call is still loading,
+ *   or as a hard fallback if the RPC fails / returns null.
+ * @canonical METRIC.OPERATING_PROFIT_ESTIMATE — tile id "np"
+ */
+export const MONTHLY_OPERATING_PROFIT = -10_184;
+
+/**
  * Monthly order volume (current month).
  * @future Sourced from Shopify: count of fulfilled orders for the period
  */

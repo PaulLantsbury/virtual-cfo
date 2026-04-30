@@ -95,9 +95,12 @@ Supports both budget and actual tracking in a single table.
 | `created_at` | `timestamptz NOT NULL DEFAULT now()` | |
 | `updated_at` | `timestamptz NOT NULL DEFAULT now()` | |
 
-**Unique constraint:** `(store_id, category_id, period_start, entry_type)`
-— One budget and one actual row per category per month. If a month needs multiple
-actual entries (e.g. payroll split across two runs), sum before inserting or use
+**Unique constraint:** `(store_id, category_id, period_start, entry_type, is_recurring)`
+— Allows both a recurring and an exceptional one-off entry to coexist in the same
+category, period, and entry type without overwriting each other. For example,
+Finance & Legal can carry a £6,000 recurring retainer row (`is_recurring = true`)
+and a £20,000 litigation settlement row (`is_recurring = false`) in the same month
+as two separate actual entries. To update an existing row, use
 `ON CONFLICT DO UPDATE SET amount = excluded.amount`.
 
 **Recommended indexes:**
@@ -339,7 +342,7 @@ tables before any migrations are generated.
 | Table | FK relationships | Unique constraints |
 |---|---|---|
 | `overhead_categories` | `store_id → stores(id) CASCADE` | `(store_id, name)` |
-| `overhead_entries` | `store_id → stores(id) CASCADE`; `category_id → overhead_categories(id) RESTRICT` | `(store_id, category_id, period_start, entry_type)` |
+| `overhead_entries` | `store_id → stores(id) CASCADE`; `category_id → overhead_categories(id) RESTRICT` | `(store_id, category_id, period_start, entry_type, is_recurring)` |
 | `cash_balance_snapshots` | `store_id → stores(id) CASCADE` | `(store_id, snapshot_date, account_key)` |
 | `working_capital_snapshots` | `store_id → stores(id) CASCADE` | `(store_id, snapshot_date)` |
 | `budget_lines` | `store_id → stores(id) CASCADE` | `(store_id, period_start, metric_key, metric_scope)` |
@@ -427,7 +430,9 @@ SELECT
   SUM(oe.amount)    AS total_amount,
   COUNT(*)          AS entry_count
 FROM public.overhead_entries oe
-JOIN public.overhead_categories oc ON oc.id = oe.category_id
+JOIN public.overhead_categories oc
+  ON oc.id = oe.category_id
+ AND oc.is_active = true
 GROUP BY
   oe.store_id,
   oc.category_type,
@@ -594,6 +599,19 @@ relevant Phase 1 and Phase 2 RPCs for actual values. `metric_scope` and
 to filter the result set. It is the most complex function in Phase 2 and should
 be implemented last.
 
+**Date range join logic:** The same full-containment predicate used in
+`monthly_overhead_total()` applies when selecting budget rows:
+
+```sql
+WHERE period_start >= p_date_from
+  AND period_end   <= p_date_to
+```
+
+This ensures only budget rows whose entire period falls within the query window
+are matched. Partial-period rows (e.g. a quarterly budget line queried with a
+monthly date range) are excluded, which is the correct behaviour for a
+like-for-like actual vs budget comparison.
+
 ---
 
 ## 7. Dummy seed data required
@@ -618,24 +636,37 @@ in `cash-snapshot.ts`.
 
 ---
 
-### `overhead_entries` — 18 rows (actuals) + 18 rows (budgets)
+### `overhead_entries` — 72 rows (actuals) + 72 rows (budgets)
 
-Seed 3 months of data (February, March, April 2026) for each of 6 categories,
-in both `entry_type = 'actual'` and `entry_type = 'budget'`.
+Seed 12 months of data (January–December 2026) for each of 6 categories,
+in both `entry_type = 'actual'` and `entry_type = 'budget'`
+(6 categories × 12 months × 2 entry types = 144 rows total).
+
+Seeding the full calendar year prevents `cash_runway_months()` from returning `NULL`
+when `CURRENT_DATE` moves beyond a shorter seed window. The function computes
+`monthly_fixed` by calling `monthly_overhead_total()` for `date_trunc('month', CURRENT_DATE)`.
+Any month with no overhead rows returns 0, which triggers the division guard and
+surfaces `NULL` on the `cr` tile. A full-year seed eliminates this risk for the
+entire 2026 reporting period.
 
 All seed rows: `currency_code = 'GBP'`, `is_recurring = true`, `source = 'manual'`.
 
-The actual amounts vary slightly from budget to generate meaningful variance:
+Budget rows are uniform at £120,000 total per month across all 12 months. Actual
+rows vary for the first four months to generate meaningful variance; the remainder
+are seeded on-budget:
 
 | Month | Total actual | Total budget | Variance |
 |---|---|---|---|
+| Jan 2026 | £118,600 | £120,000 | −£1,400 (under) |
 | Feb 2026 | £117,400 | £120,000 | −£2,600 (under) |
 | Mar 2026 | £122,800 | £120,000 | +£2,800 (over) |
 | Apr 2026 | £119,200 | £120,000 | −£800 (near-budget) |
+| May–Dec 2026 | £120,000 | £120,000 | £0 (on-budget) |
 
-Variance is introduced at the category level (e.g. payroll slightly over in March,
-marketing fixed slightly under in February). This makes the Actual vs Budget page
-visually interesting from day one.
+Variance is introduced at the category level for Jan–Apr (e.g. payroll slightly over
+in March, marketing fixed slightly under in February). May–December are seeded
+on-budget to keep the migration concise while preserving a realistic 4-month
+variance history.
 
 ---
 
@@ -664,11 +695,14 @@ progression for the Cash Control page.
 | `currency_code` | `GBP` | |
 | `inventory_days` | 82 | Matches `INVENTORY_DAYS` constant |
 | `supplier_days` | 42 | Matches `SUPPLIER_DAYS` constant |
-| `receivable_days` | 0 | D2C default |
+| `receivable_days` | 7 | Aligned with `CASH_CONVERSION_CYCLE = 47` code constant |
 | `source` | `manual` | |
 
-Cash Conversion Cycle = 82 − 42 + 0 = **40 days** (slightly lower than the
-`CASH_CONVERSION_CYCLE = 47` constant, which may include a receivables buffer).
+Cash Conversion Cycle = 82 − 42 + 7 = **47 days**, matching the existing
+`CASH_CONVERSION_CYCLE = 47` constant in `cash-snapshot.ts`. Setting
+`receivable_days = 7` rather than 0 ensures the Supabase-backed value is
+consistent with the mock constant from the moment the tile is wired, preventing
+an unexplained 7-day drop on the Cash Control page.
 
 ---
 

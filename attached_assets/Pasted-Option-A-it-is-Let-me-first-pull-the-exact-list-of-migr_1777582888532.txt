@@ -1,0 +1,74 @@
+Option A it is. Let me first pull the exact list of migrations and verify what the cloud tracking table needs, then apply the fix:
+
+
+3 actions
+Good — supabase_migrations schema is completely absent. Let me check the column structure of the internal auth.schema_migrations so I match the exact format Supabase CLI expects:
+
+
+2 actions
+The format is confirmed: single version varchar NOT NULL PRIMARY KEY column, 14-digit timestamp string. Now I'll create the supabase_migrations schema and tracking table on cloud, marking all 19 applied migrations — and apply the same locally for consistency:
+
+
+3 actions
+Both local and cloud tracking tables are in sync — 19 rows on cloud, 19 locally. Now verify the tracking state looks exactly right and no migrations remain "unseen":
+
+
+2 actions
+All clean — 19/19 migrations tracked, no missing versions, metrics intact. Re-run the frontend build now:
+
+
+2 actions
+Build clean. Confirm marker and trigger republish:
+
+
+3 actions
+Here is the complete summary of the fix, validations, and what to check:
+
+Root cause (confirmed)
+The supabase_migrations schema and schema_migrations table did not exist on the production Supabase database. Replit's deployment pipeline uses this table to determine which migrations have already been applied. With it absent, it treated all 19 historical migrations as unrun and attempted to validate and replay every one of them — including migration 000000's discount_codes functional index, which its validator misrepresented as text_ops on a uuid column.
+
+The migration SQL text fix from the previous attempt was correct but irrelevant — the validator was never reaching the updated text because it was replaying from scratch regardless.
+
+What was done (Option A)
+Created the supabase_migrations schema and schema_migrations table on the production cloud database, then inserted a row for each of the 19 historically-applied migrations:
+
+supabase_migrations.schema_migrations
+──────────────────────────────────────
+20260429000000   phase1_shopify_tables
+20260429000001   phase1_metric_functions
+20260429000002   cloud_schema_remediation
+20260429000003   contribution_margin_pct
+20260429000004   cloud_seed
+20260429000005   recoverable_contribution_range
+20260430000000   overhead_categories
+20260430000001   overhead_entries
+20260430000002   cash_balance_snapshots
+20260430000003   phase2a_seed
+20260430000004   phase2a_views
+20260430000005   phase2a_rpcs
+20260430000006   phase1_april_seed_expansion
+20260430000007   phase2b_march_seed
+20260430000008   phase2b_trend_views
+20260430000009   phase2b_trend_rpcs
+20260430000010   vat_refund_correction
+20260430000011   aov_vat_correction
+20260430000012   add_vat_rate_to_cost_assumptions
+
+The same tracking table was created locally for consistency. Future migrations applied via supabase db push will register themselves here automatically.
+
+Validation results
+Check	Result
+Cloud tracking table exists	supabase_migrations.schema_migrations — EXISTS
+Versions tracked	19/19 — NONE missing
+Failed SQL statement (text_ops on uuid)	Will not be reached — migration 000000 is now tracked as already applied
+No production data overwritten	Confirmed — ON CONFLICT DO NOTHING inserts are additive only, no table modifications
+public.discount_codes indexes untouched	3 existing indexes intact (discount_codes_pkey, idx_discount_codes_store_discount, uq_discount_codes_store_code)
+net_sales post-repair	£124,516.60 — unchanged
+average_order_value post-repair	£62.73 — unchanged
+Frontend build	dist/public/index.html with <meta name="build-version" content="20260430-001" /> ✓
+How to confirm after publish
+Open your .replit.app URL in incognito → View Page Source → look for:
+
+<meta name="build-version" content="20260430-001" />
+
+If the validation error recurs with a different migration, the tracking table approach will still work — the pipeline will now see all 19 historical versions as already applied and only attempt to run any future migrations with a newer version timestamp

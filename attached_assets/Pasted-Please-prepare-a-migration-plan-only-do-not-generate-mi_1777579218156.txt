@@ -1,0 +1,63 @@
+Please prepare a migration plan only — do not generate migrations yet.
+
+Objective:
+Correct VAT treatment on refunded orders so Net Sales, Contribution Margin and Operating Profit are economically accurate.
+
+Current issue:
+- orders.gross_sales is VAT-exclusive
+- orders.tax stores VAT at 20%
+- partial refunds are currently stored VAT-exclusive
+- full refunds are currently stored VAT-inclusive
+- net_sales() currently calculates:
+  gross_sales - discounts - refunds - tax
+- This causes full refunds to double-count VAT and creates negative net sales on fully refunded orders.
+
+Goal:
+Make refund treatment consistent and VAT-correct.
+
+Please review the current schema and propose the safest fix.
+
+Consider these options:
+
+Option A:
+Standardise orders.refunds as VAT-exclusive for all orders.
+- Convert existing full-refund rows from VAT-inclusive to VAT-exclusive.
+- Ensure future seed/ingestion stores refunds ex-VAT.
+- Keep net_sales() logic mostly unchanged, but confirm tax treatment is still correct.
+
+Option B:
+Keep orders.refunds as customer-value/VAT-inclusive, but update net_sales() to remove VAT correctly using adjusted tax logic.
+
+Option C:
+Add explicit fields:
+- refund_tax
+- refund_amount_ex_vat
+- refund_amount_inc_vat
+and update net_sales() to use the correct ex-VAT amount.
+
+For each option, explain:
+- schema changes required
+- data migration required
+- impact on existing April/March seed metrics
+- impact on net_sales()
+- impact on contribution_margin_pct()
+- impact on operating_profit_monthly()
+- compatibility with real Shopify ingestion
+- risk of breaking current dashboard metrics
+
+Please recommend the best option for this stage of the build.
+
+Constraints:
+- Do not generate migrations yet.
+- Do not alter frontend code.
+- Do not change marketing/CAC tables.
+- Keep the solution simple and compatible with future Shopify/Xero ingestion.
+- Preserve the existing dashboard behaviour as much as possible.
+
+Return:
+1. recommended option
+2. rationale
+3. proposed schema or data changes
+4. expected effect on April metrics
+5. validation SQL required
+6. whether this should be done before configurable vat_rate

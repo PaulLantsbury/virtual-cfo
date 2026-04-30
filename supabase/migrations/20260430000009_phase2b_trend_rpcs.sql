@@ -35,7 +35,7 @@
 -- EXPECTED ALERT OUTCOMES (April 2026, seeded dev store)
 --   revenue_declining       → NOT triggered (+11.7% growth)
 --   revenue_stall           → NOT triggered
---   margin_falling          → NOT triggered (−0.77pp < threshold of −1.5pp)
+--   margin_falling          → TRIGGERED     (−0.77pp < threshold of −0.5pp)
 --   margin_critical         → NOT triggered (cm ≈ 88.7% > 70% floor)
 --   refunds_rising          → TRIGGERED  (+1.15pp > +0.5pp threshold)
 --   refunds_critical        → NOT triggered (2.47% < 8% floor)
@@ -329,7 +329,7 @@ COMMENT ON FUNCTION public.rolling_3m_averages(uuid, date) IS
 --
 -- THRESHOLD CONSTANTS (named for maintainability and auditability)
 --   revenue_decline_pct     : −5.0%       (gross_revenue delta < this)
---   margin_fall_pp          : −1.5pp      (cm_pct delta < this)
+--   margin_fall_pp          : −0.5pp      (cm_pct delta < this)
 --   margin_critical_floor   :  70.0%      (cm_pct_cur < this)
 --   refund_rise_pp          :  +0.5pp     (refund_rate delta > this)
 --   refund_critical_floor   :   8.0%      (refund_rate_cur > this)
@@ -369,7 +369,7 @@ AS $$
 DECLARE
   -- ── Named threshold constants ──────────────────────────────────────────────
   c_revenue_decline_pct     constant numeric :=  -5.0;
-  c_margin_fall_pp          constant numeric :=  -1.5;
+  c_margin_fall_pp          constant numeric :=  -0.5;
   c_margin_critical_floor   constant numeric :=  70.0;   -- percent (cm_pct × 100)
   c_refund_rise_pp          constant numeric :=   0.5;
   c_refund_critical_floor   constant numeric :=   8.0;   -- percent (refund_rate × 100)
@@ -563,8 +563,8 @@ COMMENT ON FUNCTION public.cfo_alerts(uuid, date, date) IS
   'The full set of 13 rows is always returned — filter on triggered=true for '
   'the active alert summary. '
   'Severity levels: info | warning | critical. '
-  'Expected active alerts for April 2026 dev store: '
+  'Expected active alerts for April 2026 dev store (4 of 13): '
+  '  margin_falling (−0.77pp < −0.5pp threshold), '
   '  refunds_rising (+1.15pp), discounts_rising (+1.89pp), '
   '  runway_tightening (1.56m in warning band). '
-  'margin_falling NOT triggered: −0.77pp delta < −1.5pp threshold. '
   'SECURITY DEFINER — runs as function owner, bypasses RLS for anon callers.';

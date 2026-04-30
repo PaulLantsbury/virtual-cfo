@@ -1,5 +1,6 @@
 import { getCommerceMetrics } from "@/lib/analytics/commerceMetrics";
 import { getPhase1Metrics, type Phase1MetricsResponse } from "@/lib/analytics/phase1Metrics";
+import { getPhase2aMetrics, type Phase2aMetricsResponse } from "@/lib/analytics/phase2aMetrics";
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight, ArrowDownRight, Minus,
@@ -365,6 +366,21 @@ export default function Dashboard() {
       });
   }, []);
 
+  // ── Phase 2a metrics: Cash Runway tile (METRIC.CASH_RUNWAY_MONTHS / tile id "cr") ──
+  // Fetches cash_runway_months() and operating_profit_monthly() independently of
+  // Phase 1.  A failure here leaves phase2aMetrics null and the affected tiles fall
+  // back to their snapshot constants.  Phase 1 tiles are completely unaffected.
+  const [phase2aMetrics, setPhase2aMetrics] = useState<Phase2aMetricsResponse | null>(null);
+
+  useEffect(() => {
+    getPhase2aMetrics(PHASE1_STORE_ID, PHASE1_DATE_FROM, PHASE1_DATE_TO)
+      .then(setPhase2aMetrics)
+      .catch(() => {
+        // Network or RPC error: leave phase2aMetrics null so affected tiles
+        // fall back to their snapshot constants rather than breaking.
+      });
+  }, []);
+
   const liveKpiCards = KPI_CARDS.map((card) => {
     // ── Net Sales tile — wired to Phase 1 Supabase function ──────────────────
     // @canonical METRIC.NET_SALES / tile id "ns"
@@ -558,6 +574,57 @@ export default function Dashboard() {
             ? "Immediate margin recovery available"
             : "No recovery opportunities identified",
         status: (!isCalculating && hasOpportunities ? "positive" : "neutral") as KpiStatus,
+      };
+    }
+
+    // ── Cash Runway tile — wired to Phase 2a Supabase function ──────────────
+    // @canonical METRIC.CASH_RUNWAY_MONTHS / tile id "cr"
+    // Source (primary):  phase2aMetrics.data.cashRunwayMonths
+    //   Formula: SUM(cash_balance at MAX(snapshot_date)) / current-month actual overhead
+    //   No date range — cash_runway_months() uses CURRENT_DATE internally.
+    //   NULL:  when no cash_balance_snapshots row exists, or overhead = 0.
+    // Source (fallback): CASH_RUNWAY constant (3.4) from cash-snapshot.ts
+    //   Used when: RPC failed (error entry in phase2aMetrics.errors) or returned null.
+    //   No commerceMetrics equivalent — cash runway cannot be derived from order data.
+    // Source (static):   KPI_CARDS "cr" card.value while phase2aMetrics is still loading
+    if (card.id === "cr") {
+      // Resolve: live RPC value → fallback constant → static sentinel (null = still loading)
+      const crResolved = phase2aMetrics !== null;
+      const crLive =
+        crResolved &&
+        !phase2aMetrics!.errors.some(e => e.fn === "cash_runway_months") &&
+        phase2aMetrics!.data.cashRunwayMonths !== null &&
+        phase2aMetrics!.data.cashRunwayMonths > 0
+          ? phase2aMetrics!.data.cashRunwayMonths
+          : null;
+      const crValue = crLive ?? (crResolved ? CASH_RUNWAY : null);
+      if (crValue === null) return card;  // static sentinel while still loading
+
+      // Format: "X.X months" — one decimal place, consistent with the mock "3.4 months"
+      const crDisplay = `${crValue.toFixed(1)} months`;
+
+      // Status and change text derived from runway duration
+      let crStatus: KpiStatus;
+      let crChange: string;
+      if (crValue >= 6.0) {
+        crStatus = "positive";
+        crChange = "Healthy — 6+ months headroom";
+      } else if (crValue >= 3.0) {
+        crStatus = "neutral";
+        crChange = "Adequate runway";
+      } else if (crValue >= 1.0) {
+        crStatus = "warning";
+        crChange = "Runway tightening";
+      } else {
+        crStatus = "danger";
+        crChange = "Critical — under 1 month";
+      }
+
+      return {
+        ...card,
+        value:  crDisplay,
+        change: crChange,
+        status: crStatus,
       };
     }
 

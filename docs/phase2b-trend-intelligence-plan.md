@@ -90,6 +90,25 @@ The only schema additions needed are:
 A `working_capital_snapshots` table and a `budget_lines` table are explicitly deferred
 — budget data from Xero is unreliable and out of scope for Phase 2b.
 
+### Existing tables accessed by Phase 2b views and RPCs
+
+No new tables are introduced. The following existing Phase 1 and Phase 2a tables are
+accessed — some directly by the new views/RPCs, others indirectly through the existing
+RPC call chain:
+
+| Table | Phase | How accessed in Phase 2b |
+|---|---|---|
+| `stores` | Phase 1 | Directly — `v_monthly_metrics` CROSS JOINs `stores` to enumerate store IDs |
+| `orders` | Phase 1 | Via Phase 1 RPCs: `gross_revenue()`, `net_sales()`, `average_order_value()`, `order_count()`, `discount_dependency()`, `refund_rate()`, `return_amount()`, `repeat_purchase_rate()` |
+| `customers` | Phase 1 | Via `repeat_purchase_rate()`, which JOINs `customers` for `first_order_at` |
+| `store_cost_assumptions` | Phase 1 | Via `contribution_margin_pct()`, which reads `v_current_cost_assumptions` |
+| `overhead_categories` | Phase 2a | Via `monthly_overhead_total()`, which JOINs `overhead_categories` for `is_active` filter |
+| `overhead_entries` | Phase 2a | Via `monthly_overhead_total()`, which aggregates `overhead_entries.amount` |
+| `cash_balance_snapshots` | Phase 2a | Directly — `month_on_month_delta()` queries this table inline to compute prior-month runway |
+
+All seven tables exist in the current schema. Phase 2b adds no columns, no constraints,
+and no new tables to any of them.
+
 ---
 
 ## 3. Seed Data Required
@@ -105,39 +124,87 @@ contribution_margin_pct) is undefined.
 ### March 2026 order seed — design constraints
 
 The seed must produce a realistic prior month that tells a coherent CFO story relative
-to April 2026. The target values for March 2026 are:
+to April 2026. **The seed is designed so that March has higher margin quality than
+April** — this makes April's margin compression real and computable from live data,
+which is a more useful and interesting CFO signal than the reverse.
 
-| Metric | April 2026 (current, cloud) | March 2026 (seed target) | MoM direction |
+**CFO story (Option B — margin compression):**
+March was a smaller-volume, higher-quality month: fewer orders, premium product mix,
+lower refund rate, less discounting, higher AOV, and therefore higher contribution
+margin. April saw a volume surge — more orders, mix shift toward lower-priced products,
+heavier promotional activity, and more refunds. Revenue grew strongly but margin
+quality deteriorated. The overhead normalisation (March payroll spike of £82k resolved
+to £80k in April) partially offset the margin compression, so the operating loss
+improved despite the quality decline. Cash runway remains critically short in both
+months.
+
+**Target metrics:**
+
+| Metric | March 2026 (seed target) | April 2026 (live) | MoM (Apr vs Mar) |
 |---|---|---|---|
-| gross_revenue | £167,853 | ~£149,000 | ↑ +12.4% (April up) |
-| net_sales | £122,921 | ~£107,500 | ↑ +14.3% |
-| average_order_value | £61.93 | ~£59.00 | ↑ +4.9% |
-| refund_rate | 3.62% | ~3.75% | ↓ −0.13pp (April improved) |
-| discount_dependency | 3.93% | ~3.56% | ↑ +0.37pp (April worse) |
-| repeat_purchase_rate | 71.43% | ~67.00% | ↑ +4.4pp (April improved) |
-| contribution_margin_pct | ~88.69% | ~87.10% | ↓ −1.6pp (April worse — more orders = higher fulfilment cost/order impact) |
-| operating_profit | −£10,184 | −£10,700 | ↑ slightly better in March (lower overhead) |
-| fixed overhead (actual) | £119,200 | £122,800 | ↓ April lower (March had payroll spike) |
-| cash_runway | ~1.56 months | ~1.45 months | ↑ April higher |
+| gross_revenue | ~£148,000 | £167,853 | ↑ +13.4% |
+| net_sales | ~£115,000 | £122,921 | ↑ +6.9% |
+| average_order_value | ~£67 | £61.93 | ↓ −7.6% (mix shift to lower-price products) |
+| refund_rate | ~2.50% | 3.62% | ↑ +1.1pp (April worse — more returns at higher volume) |
+| discount_dependency | ~2.00% | 3.93% | ↑ +1.9pp (April worse — heavier promotion) |
+| repeat_purchase_rate | ~67.0% | 71.43% | ↑ +4.4pp (April better — retention improving) |
+| contribution_margin_pct | ~90.3% | ~88.7% | ↓ −1.6pp (April worse — lower AOV raises per-order cost ratio) |
+| operating_profit | ~−£19,000 | −£10,184 | ↑ +46% (April better — overhead fell £3.6k, revenue grew) |
+| fixed overhead (actual) | £122,800 | £119,200 | ↓ −2.9% (April lower — March payroll spike resolved) |
+| cash_runway | ~1.45 months | ~1.56 months | ↑ +0.11 months (April slightly better) |
 
-**Design rationale for MoM story:**
-- Revenue is growing (good) — April gross_revenue clearly higher than March.
-- Margin is compressing slightly (concern) — contribution_margin_pct fell in April.
-- Overhead rose in March (payroll spike to £82k), then normalised in April (£80k).
-- Operating profit remains negative in both months — the business is still loss-making.
-- Runway is improving but still critical.
+**How March CM ~90.3% is achieved:**
+The `contribution_margin_pct()` formula uses fixed cost rates from `store_cost_assumptions`
+(unchanged for both months). CM is driven by:
+- **AOV effect:** per-order variable costs (£3.50 fulfilment + £1.25 packaging = £4.75)
+  are a smaller fraction of net_sales when AOV is higher. March AOV ~£67 vs April £62 →
+  March per-order costs represent a lower share of revenue → higher March CM.
+- **Refund effect:** return_handling_cost = 15% × refund_amount. March refund_rate ~2.5%
+  vs April 3.62% → lower March return_handling_cost → higher March CM.
 
-**Scale:** March seed should use ~1,750 orders (≈87% of April's 2,011). Same customer
-pool (c01–c20), same product mix, slightly lower AOV, slightly higher refund rate,
-slightly lower discount ratio.
+**Seed design to achieve these targets:**
+- Higher-AOV product mix in March (premium product slot at ~£95–100 gross price,
+  higher proportion of the cycle vs April's more dispersed mix).
+- Fewer discounted orders (~15% vs April's 25%) and lower discount amounts.
+- Fewer refunded orders — Loop B scale reduced (partially refunded share ~3.5% of orders
+  vs April's ~3.5%, but fully refunded reduced to ~1.3% vs April's ~1.2%, with lower
+  refund amounts per partially-refunded order).
+- Refund rate target ~2.5% is achieved through smaller partial refund amounts on Loop B
+  orders rather than a different batch count.
+
+**Operating profit arithmetic — both months negative:**
+```
+March: ~£115,000 × 90.3% − £122,800 = £103,845 − £122,800 = −£18,955 ≈ −£19,000
+April: £122,921 × 88.7% − £119,200 = £109,031 − £119,200 = −£10,169 ≈ −£10,184
+
+MoM delta: (−10,184 − (−19,000)) / ABS(−19,000) × 100 = +8,816 / 19,000 = +46.4%
+(positive = April improved, i.e. smaller loss)
+```
+
+**CFO alerts that will fire for April 2026:**
+- `margin_falling` — cm_pct_delta_pp = −1.6pp < threshold −1.5pp ✓
+- `refunds_rising` — refund_rate_delta_pp = +1.1pp > threshold +0.5pp ✓
+- `discounts_rising` — discount_dep_delta_pp = +1.9pp > threshold +1.0pp ✓
+- `runway_tightening` — runway_cur = 1.56 months (warning, BETWEEN 1.0 AND 2.0) ✓
+- `profit_deteriorating` — NO (op_profit improved +46%, delta is positive)
+- `revenue_declining` — NO (gross revenue up +13.4%)
+
+**Scale:** March seed uses ~1,736 new orders (≈86% of April's 2,011 new orders).
+Same customer pool (c01–c20). Premium product mix as described above.
+
+**Batch structure (aligned with April's three-loop pattern):**
+- Loop A (paid): ~1,653 orders, premium product cycle, ~15% discounted, ~9% guest
+- Loop B (partially refunded): ~61 orders, smaller partial refund amounts than April
+- Batch C (fully refunded): ~22 orders
 
 **Idempotency:** All INSERTs use `ON CONFLICT DO NOTHING`.
 
 **Schema-adaptive:** Same `is_cloud` detection pattern as migration 000006
 (`shopify_order_id BIGINT` vs `TEXT`, column name differences).
 
-**Shopify order ID range:** Use 60001–61750 to avoid collision with April's 50001–52125
-and the original 20001–20195 dev orders.
+**Shopify order ID range:** Use 60001–61736 to avoid collision with April's 50001–52125
+and the original 20001–20195 dev orders. (1,736 new March orders: Loop A 60001–61653,
+Loop B 61654–61714, Batch C 61715–61736.)
 
 ---
 
@@ -274,15 +341,30 @@ it. RPCs that read this view always filter to a specific month, so the full set 
 is never returned to the frontend.
 
 **Delta conventions:**
-- **Money metrics** (gross_revenue, net_sales, AOV, operating_profit): relative %
-  change. `(cur − prv) / ABS(prv) × 100`. `ABS(prv)` prevents sign inversion when
-  the prior value is negative (e.g. operating_profit going from −£10,700 to −£10,184:
-  the business improved, delta should be positive).
+- **Money metrics** (gross_revenue, net_sales, AOV): relative % change.
+  Formula: `(cur − prv) / ABS(prv) × 100`. `ABS(prv)` is used universally
+  as the denominator so the formula is safe even when the prior value is negative.
+  For these three metrics prior values are always ≥ 0 (COALESCE'd), so ABS() is
+  redundant but kept for consistency with operating_profit (see below).
 - **Ratio metrics** (refund_rate, discount_dependency, repeat_purchase_rate,
-  contribution_margin_pct): absolute percentage-point change. A move from 3.75% to
-  3.62% refund rate is −0.13pp, not −3.5% relative.
-- **Fixed overhead**: relative % change (same as money metrics).
-- **Operating profit**: relative % change using ABS(prv) as denominator — see above.
+  contribution_margin_pct): absolute percentage-point change.
+  Formula: `(cur − prv) × 100` (input values are ratios in [0,1]).
+  A move from 3.75% to 3.62% refund rate is −0.13pp, not −3.5% relative.
+- **Fixed overhead**: relative % change, same formula as money metrics.
+- **Operating profit — critical formula note:**
+  Formula: `(cur − prv) / ABS(prv) × 100`.
+  `ABS(prv)` is **required here**, not optional. Both months produce negative values
+  (the business is loss-making). Without ABS():
+  ```
+  cur = −£10,184   prv = −£19,000
+  naive:   (−10,184 − (−19,000)) / (−19,000) × 100 = 8,816 / −19,000 = −46.4%
+           → wrongly signals profit deteriorated
+  correct: (−10,184 − (−19,000)) / ABS(−19,000) × 100 = 8,816 / 19,000 = +46.4%
+           → correctly signals profit improved (smaller loss)
+  ```
+  The migration SQL for operating_profit delta **must** use `ABS(prv.operating_profit)`,
+  not `prv.operating_profit`, in the denominator. This applies in `v_month_on_month`
+  and is replicated in `month_on_month_delta()` if the RPC computes deltas inline.
 
 ---
 
@@ -368,18 +450,62 @@ Signature:
   )
 ```
 
-**Formula:** Average of months T, T−1, T−2.
+**Formula:** Average of months T, T−1, T−2, where T = `p_date_from`.
 
-**Implementation:** Reads three rows from `v_monthly_metrics` where `period_start IN
-(p_date_from, p_date_from − 1 month, p_date_from − 2 months)` and computes `AVG()`
-for each column. If fewer than 3 months of data exist, `AVG()` over the available rows
-is returned (no NULL suppression for missing months — the caller receives an average of
-what exists).
+**Zero-revenue month treatment:**
+All Phase 1 metric functions use `COALESCE(..., 0)` — a month with no orders returns
+`0` for gross_revenue, net_sales, and all commerce metrics, not `NULL`. Without an
+explicit filter, months with zero trading data (January and February 2026 currently
+have no orders seeded) would be included in the `AVG()` as zero values, distorting the
+rolling average downward.
+
+**Example without filter:**
+```
+AVG(gross_revenue for Feb, Mar, Apr) = AVG(0, 149000, 167853) / 3 = £105,618
+```
+**Example with filter:**
+```
+AVG(gross_revenue for Mar, Apr only) = AVG(149000, 167853) / 2 = £158,427
+```
+
+**Implementation:** The RPC queries `v_monthly_metrics` for the three candidate months
+and applies a `WHERE gross_revenue > 0` filter to exclude months with no trading data.
+This uses `gross_revenue` as the sentinel because it is the most fundamental metric —
+a month with zero gross revenue has no order data and should not contribute to averages.
+
+```sql
+-- Conceptual implementation (not final SQL):
+SELECT
+  AVG(gross_revenue)          AS gross_revenue_3m_avg,
+  AVG(net_sales)              AS net_sales_3m_avg,
+  AVG(contribution_margin_pct) AS cm_pct_3m_avg,
+  AVG(fixed_overhead_actual)  AS fixed_overhead_3m_avg,
+  AVG(operating_profit)       AS operating_profit_3m_avg
+FROM public.v_monthly_metrics
+WHERE store_id = p_store_id
+  AND period_start IN (
+    p_date_from,
+    (p_date_from - interval '1 month')::date,
+    (p_date_from - interval '2 months')::date
+  )
+  AND gross_revenue > 0;  -- exclude months with no trading data
+```
+
+**Assumption:** A month where `gross_revenue = 0` is treated as a month with no trading
+data for the purpose of rolling averages. This is correct for the current seed structure
+(Jan/Feb 2026 have no orders). If a live production month genuinely had £0 gross revenue,
+the average would exclude that month too — acceptable and documented.
+
+**Runway rolling average:** `cash_runway_months()` is not in `v_monthly_metrics`.
+The `runway_3m_avg` column is computed separately inside this RPC by querying
+`cash_balance_snapshots` for the three prior snapshot dates and dividing each by
+the corresponding month's `monthly_overhead_total()`. Months without a cash snapshot
+contribute NULL (excluded from AVG by default in Postgres).
 
 **Why only 6 metrics (not all 10):** Rolling averages are most meaningful for
 magnitudes that vary with business cycles. Ratio metrics (refund_rate, discount_dep,
 rpr) are better expressed as the most-recent period value with a MoM delta; a 3-month
-average obscures trend direction.
+average of a ratio obscures trend direction.
 
 **Dashboard use:** The 3-month averages feed the "Expected Impact if Implemented"
 panel (baseline reference) and the Scenario Lab comparison baseline. They are not
@@ -540,7 +666,7 @@ All files go in `supabase/migrations/`. Numbering follows the existing conventio
 
 | File | Contents | Sequence |
 |---|---|---|
-| `20260430000007_phase2b_march_seed.sql` | March 2026 orders + customers seed (~1,750 orders) | 1 |
+| `20260430000007_phase2b_march_seed.sql` | March 2026 orders + customers seed (~1,736 orders, premium mix) | 1 |
 | `20260430000008_phase2b_trend_views.sql` | `v_monthly_metrics`, `v_month_on_month` | 2 |
 | `20260430000009_phase2b_trend_rpcs.sql` | `month_on_month_delta`, `rolling_3m_averages`, `cfo_alerts` | 3 |
 
@@ -563,7 +689,8 @@ FROM orders
 WHERE store_id = '10000000-0000-0000-0000-000000000001'
   AND created_at::date BETWEEN '2026-03-01' AND '2026-03-31'
 GROUP BY financial_status;
--- Expected: ~1,530 paid, ~60 partially_refunded, ~25 refunded (totalling ~1,615 paid-equivalent)
+-- Expected: ~1,653 paid, ~61 partially_refunded, ~22 refunded (total ~1,736 new orders)
+-- (86% scale of April's 2,011 new orders, split across three batches matching Loop A / Loop B / Batch C pattern)
 
 -- 2. March 2026 metric spot-checks
 SELECT
@@ -573,7 +700,7 @@ SELECT
   public.refund_rate('10000000-0000-0000-0000-000000000001', '2026-03-01', '2026-03-31'),
   public.discount_dependency('10000000-0000-0000-0000-000000000001', '2026-03-01', '2026-03-31'),
   public.contribution_margin_pct('10000000-0000-0000-0000-000000000001', '2026-03-01', '2026-03-31');
--- Expected: gross ~£149k, net ~£107k, AOV ~£59, refund ~3.7%, discount ~3.6%, cm ~87%
+-- Expected: gross ~£148k, net ~£115k, AOV ~£67, refund ~2.5%, discount ~2.0%, cm ~90.3%
 
 -- 3. v_monthly_metrics populated for March and April
 SELECT period_start, gross_revenue, net_sales, contribution_margin_pct, operating_profit
@@ -596,7 +723,9 @@ SELECT
 FROM public.v_month_on_month
 WHERE store_id = '10000000-0000-0000-0000-000000000001'
   AND period_start = '2026-04-01';
--- Expected: gross_revenue +12.4%, cm_pct slightly negative, refund_rate negative (April improved)
+-- Expected: gross_revenue_delta_pct ~+13.4%, cm_pct_delta_pp ~−1.6pp (April worse),
+--           refund_rate_delta_pp ~+1.1pp (April worse), discount_dep_delta_pp ~+1.9pp (April worse),
+--           op_profit_delta_pct ~+46% (April improved — smaller loss), overhead_delta_pct ~−2.9%
 
 -- 5. month_on_month_delta RPC
 SELECT * FROM public.month_on_month_delta(
@@ -622,7 +751,12 @@ FROM public.cfo_alerts(
 )
 WHERE triggered = true
 ORDER BY severity, alert_key;
--- Expected: 'runway_tightening' (critical, 1.56 months), 'margin_falling' or similar
+-- Expected triggered alerts:
+--   'margin_falling'    (warning)  — cm_pct_delta_pp ~−1.6pp, below −1.5pp threshold
+--   'refunds_rising'    (warning)  — refund_rate_delta_pp ~+1.1pp, above +0.5pp threshold
+--   'discounts_rising'  (warning)  — discount_dep_delta_pp ~+1.9pp, above +1.0pp threshold
+--   'runway_tightening' (warning)  — runway_cur ~1.56 months (BETWEEN 1.0 AND 2.0; NOT critical)
+-- Note: 'runway_low' (critical) requires runway_cur < 1.0 — does NOT fire at 1.56 months
 ```
 
 ---
@@ -751,25 +885,52 @@ export async function getPhase2bMetrics(
 
 ## 14. Expected Metric Values After Phase 2b (Seed Validation Targets)
 
-For reference when writing the March 2026 seed and validating deltas:
+For reference when writing the March 2026 seed and validating deltas.
+**March targets reflect Option B (margin compression design)** — March has higher margin
+quality than April, making the MoM delta a real signal of quality deterioration under volume.
 
-| Metric | March 2026 (seed target) | April 2026 (live) | Delta |
+| Metric | March 2026 (seed target) | April 2026 (live) | MoM delta (Apr vs Mar) |
 |---|---|---|---|
-| gross_revenue | ~£149,000 | £167,853 | +12.7% |
-| net_sales | ~£107,500 | £122,921 | +14.3% |
-| average_order_value | ~£59.00 | £61.93 | +5.0% |
-| refund_rate | ~3.75% | 3.62% | −0.13pp |
-| discount_dependency | ~3.56% | 3.93% | +0.37pp |
-| repeat_purchase_rate | ~67% | 71.43% | +4.4pp |
-| contribution_margin_pct | ~87.1% | ~88.7% | −1.6pp |
-| operating_profit | ~−£10,700 | −£10,184 | +4.8% (improved) |
-| fixed_overhead_actual | £122,800 | £119,200 | −2.9% |
-| cash_runway | ~1.45 months | ~1.56 months | +0.11 months |
+| gross_revenue | ~£148,000 | £167,853 | ↑ +13.4% |
+| net_sales | ~£115,000 | £122,921 | ↑ +6.9% |
+| average_order_value | ~£67.00 | £61.93 | ↓ −7.6% (mix shift to lower-price products) |
+| refund_rate | ~2.50% | 3.62% | ↑ +1.1pp (April worse — more returns at volume) |
+| discount_dependency | ~2.00% | 3.93% | ↑ +1.9pp (April worse — heavier promotion) |
+| repeat_purchase_rate | ~67.0% | 71.43% | ↑ +4.4pp (April better — retention improving) |
+| contribution_margin_pct | ~90.3% | ~88.7% | ↓ −1.6pp (April worse — lower AOV raises variable cost ratio) |
+| operating_profit | ~−£19,000 | −£10,184 | ↑ +46.4% (April better — overhead fell, revenue grew) |
+| fixed_overhead_actual | £122,800 | £119,200 | ↓ −2.9% (March payroll spike resolved in April) |
+| cash_runway | ~1.45 months | ~1.56 months | ↑ +0.11 months |
+
+**Operating profit arithmetic (both months negative — ABS denominator required):**
+```
+March contribution: £115,000 × 90.3% = £103,845
+March op_profit:    £103,845 − £122,800 = −£18,955 ≈ −£19,000
+
+April contribution: £122,921 × 88.7% = £109,031
+April op_profit:    £109,031 − £119,200 = −£10,169 ≈ −£10,184
+
+MoM delta: (−10,184 − (−19,000)) / ABS(−19,000) × 100 = +8,816 / 19,000 ≈ +46.4%
+```
 
 **CFO story this tells:**
-Revenue is growing strongly (+14%). Margins are under modest pressure (−1.6pp) — the
-March payroll spike (£82k vs £80k in April) is now gone, but variable cost rates have
-crept up. Operating loss is improving slightly. Runway is critically short at 1.56 months
-and was even shorter in March. Refunds improved, discounting worsened slightly.
-The net assessment: growth is real but the path to profitability requires overhead
-control and margin defence — a coherent CFO story for the dashboard.
+April saw a volume surge — revenue up +13.4% — but the business traded quality for
+quantity. AOV fell (−7.6%) as the product mix shifted to lower-priced items. Refund
+rate increased (+1.1pp) and discount activity intensified (+1.9pp). Contribution margin
+compressed by −1.6pp, crossing the −1.5pp `margin_falling` alert threshold. The March
+overhead spike (payroll) resolved, reducing fixed costs by £3,600 and — combined with
+the revenue growth — cut the operating loss nearly in half (+46%). Repeat purchase rate
+improved (+4.4pp), suggesting retention is strengthening even as quality metrics wane.
+Cash runway is critically short in both months (1.45 → 1.56 months), improving slightly
+but not meaningfully.
+
+**CFO assessment:** Growth is accelerating, but the path to profitability requires
+defending contribution margin — not just growing revenue. The volume-driven AOV
+compression and rising refund/discount rates are early warning signs that need to be
+addressed before overhead can be outgrown.
+
+**Alerts firing for April 2026:**
+- `margin_falling` (warning) — −1.6pp compression
+- `refunds_rising` (warning) — +1.1pp increase
+- `discounts_rising` (warning) — +1.9pp increase
+- `runway_tightening` (warning) — 1.56 months remaining

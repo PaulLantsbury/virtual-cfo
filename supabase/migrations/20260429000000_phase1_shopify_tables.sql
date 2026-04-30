@@ -406,10 +406,22 @@ CREATE TABLE IF NOT EXISTS discount_codes (
   created_at   timestamptz NOT NULL DEFAULT now()
 );
 
--- Case-insensitive unique index: enforces that no two codes in the same store
--- differ only by case. Join convention: LOWER(code from orders JSONB) = LOWER(discount_codes.code).
-CREATE UNIQUE INDEX IF NOT EXISTS "uq_discount_codes_store_lower_code"
-  ON "discount_codes" (store_id, lower(code));
+-- Case-insensitive unique index (DISABLED — see note below).
+-- Migration 20260429000002 (cloud_schema_remediation) supersedes this table
+-- definition with CONSTRAINT uq_discount_codes_store_code UNIQUE (store_id, code),
+-- which provides equivalent uniqueness because codes are lowercase-normalised at
+-- ingest time.  The functional index below is therefore redundant.
+--
+-- Additionally, Replit's deployment validator normalises the functional index DDL
+-- to add explicit operator classes and incorrectly assigns text_ops to the uuid
+-- store_id column, producing invalid SQL that blocks every publish.  Production
+-- already has uq_discount_codes_store_code; this index has never existed there.
+--
+-- DO NOT RE-ENABLE without also fixing the operator-class handling in the
+-- deployment validator.
+--
+-- CREATE UNIQUE INDEX IF NOT EXISTS "uq_discount_codes_store_lower_code"
+--   ON "discount_codes" (store_id, lower(code));
 
 COMMENT ON TABLE  discount_codes IS 'One row per Shopify discount code. Joined to orders.discount_codes JSONB via LOWER(code).';
 COMMENT ON COLUMN discount_codes.code IS 'Stored as-is from Shopify. Unique index enforces case-insensitive uniqueness per store.';

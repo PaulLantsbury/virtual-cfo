@@ -17,6 +17,12 @@ export const CASH_BALANCE = 186_000;
  * Cash runway — months of fixed costs covered by current cash balance.
  * Feeds tile id "cr".
  * @canonical cash_runway_months (see src/lib/metrics.ts METRIC.CASH_RUNWAY_MONTHS)
+ * @dev-only DEV-ONLY FALLBACK — static snapshot value (3.4 months).
+ *   This constant is the ONLY data source for the cr tile; there is NO live wiring.
+ *   The tile displays this value directly with no Supabase RPC or commerceMetrics override.
+ *   Primary source: cash_runway_months() Supabase RPC (Phase 2).
+ *     Requires: Xero cash balance (CASH_BALANCE) + Xero monthly fixed costs (MONTHLY_FIXED_COSTS).
+ *   Do not ship the cr tile to production without the Xero integration.
  * @future Computed: CASH_BALANCE / MONTHLY_FIXED_COSTS — both inputs from Xero
  */
 export const CASH_RUNWAY = 3.4;

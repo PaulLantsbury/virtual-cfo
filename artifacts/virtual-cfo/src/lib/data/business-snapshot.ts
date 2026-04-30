@@ -64,6 +64,11 @@ export const BASE_EBITDA            = CONTRIBUTION - MONTHLY_FIXED_COSTS; // 78,
  * Monthly gross revenue — current month (March 2026).
  * Feeds tile id "mr". Live override: commerceMetrics.totalRevenue.
  * @canonical monthly_revenue (see src/lib/metrics.ts METRIC.MONTHLY_REVENUE)
+ * @dev-only DEV-ONLY FALLBACK — static March 2026 snapshot value (£124,500).
+ *   Used as the KPI_CARDS "mr" Tier 3 loading sentinel in dashboard.tsx.
+ *   Primary source: gross_revenue() Supabase RPC (Phase 1 — already live).
+ *   This constant is only visible while both async sources are loading.
+ *   Do not rely on this value in production once the RPC is stable.
  * @future Sourced from Shopify: sum of order totals for the calendar month
  */
 export const MONTHLY_REVENUE        = 124_500;
@@ -74,6 +79,11 @@ export const MONTHLY_REVENUE        = 124_500;
  * Different from CONTRIBUTION_MARGIN_PCT (38.08%) which uses the annual basis.
  * Feeds tile id "cm". Live override: commerceMetrics.contributionMarginPercent.
  * @canonical contribution_margin_pct (see src/lib/metrics.ts METRIC.CONTRIBUTION_MARGIN_PCT)
+ * @dev-only DEV-ONLY FALLBACK — static March 2026 snapshot value (42.3%).
+ *   Used as the KPI_CARDS "cm" Tier 3 loading sentinel in dashboard.tsx.
+ *   Primary source: contribution_margin_pct() Supabase RPC (Phase 1 — already live).
+ *   This constant is only visible while both async sources are loading.
+ *   Do not rely on this value in production once the RPC is stable.
  * @future Computed from monthly Shopify + Xero data
  */
 export const MONTHLY_CM_PCT         = 42.3;
@@ -112,6 +122,13 @@ export const CURRENT_PERIOD         = "March 2026";
  * Must NOT be replaced by commerceMetrics.liveOrderLeakageEstimate — these
  * are opportunity-engine figures, not live diagnostic leakage.
  * @canonical recoverable_contribution_range (see src/lib/metrics.ts METRIC.RECOVERABLE_CONTRIBUTION_RANGE)
+ * @dev-only DEV-ONLY FALLBACK — static snapshot value (£18,000).
+ *   Used in two roles in dashboard.tsx:
+ *     1. Tier 3 loading sentinel for the rc KPI tile (via RECOVERABLE_TILE_VALUE).
+ *     2. Tier 2 explicit fallback if the recoverable_contribution_range() RPC fails.
+ *   Primary source: recoverable_contribution_range() Supabase RPC (Phase 1 — already live).
+ *   This constant must not be promoted to a production default — it will diverge
+ *   from the live opportunities table as new opportunities are added or closed.
  * @future Recompute as sum of low-estimate uplifts across all active opportunities.
  */
 export const RECOVERABLE_LOW  = 18_000;
@@ -121,6 +138,13 @@ export const RECOVERABLE_LOW  = 18_000;
  * Represents the optimistic case across the same opportunity set.
  * Feeds tile id "rc" (upper bound of displayed range).
  * @canonical recoverable_contribution_range (see src/lib/metrics.ts METRIC.RECOVERABLE_CONTRIBUTION_RANGE)
+ * @dev-only DEV-ONLY FALLBACK — static snapshot value (£42,000).
+ *   Used in two roles in dashboard.tsx:
+ *     1. Tier 3 loading sentinel for the rc KPI tile (via RECOVERABLE_TILE_VALUE).
+ *     2. Tier 2 explicit fallback if the recoverable_contribution_range() RPC fails.
+ *   Primary source: recoverable_contribution_range() Supabase RPC (Phase 1 — already live).
+ *   This constant must not be promoted to a production default — it will diverge
+ *   from the live opportunities table as new opportunities are added or closed.
  * @future Recompute as sum of high-estimate uplifts across all active opportunities.
  */
 export const RECOVERABLE_HIGH = 42_000;

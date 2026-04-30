@@ -25,8 +25,10 @@ import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 // Any KPI not listed here continues to use the mock snapshot value.
 
 // ── Phase 1 metrics config ────────────────────────────────────────────────────
-// Store ID for the seeded dev store.  Will be replaced with a per-session
-// store ID once auth and multi-tenancy are wired.
+// DEV-ONLY — hardcoded seed store UUID.  Must be replaced with the
+// authenticated session's store_id before any real merchant can use this page.
+// Primary source: auth session → stores.id lookup.
+// Not safe for production multi-tenant deployment.
 const PHASE1_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 // Date range: current calendar month (inclusive both ends).
@@ -44,11 +46,19 @@ const CFO_INSIGHT = {
   weeklyPriorities: [
     {
       action: "Reduce discount leakage",
+      // DEV-ONLY — "38%" is the DISCOUNT_DEP snapshot constant, not the live discountDependency
+      // value from the Supabase discount_dependency() RPC.  Replace with an interpolated
+      // live value once prior-period delta strings are computed in Phase 2.
       why: "Discount dependency is at 38% and rising, eroding contribution margin and weakening growth quality scores.",
+      // DEV-ONLY FALLBACK — impact range uses RECOVERABLE_LOW/HIGH snapshot constants as
+      // fallback until phase1Metrics resolves.  Will automatically reflect live RPC values
+      // once the rc tile wiring propagates here; see rc wiring block in liveKpiCards.
       impact: `£${(RECOVERABLE_LOW / 1_000).toFixed(0)}k–£${(RECOVERABLE_HIGH / 1_000).toFixed(0)}k / month recoverable`,
     },
     {
       action: "Reallocate inefficient Meta spend",
+      // DEV-ONLY — "14%" is a hardcoded snapshot figure.  Primary source: meta_cac_trend()
+      // Supabase RPC (Phase 3, Meta Ads API integration).  Replace before production.
       why: "Meta CAC is up 14% while email and organic channels deliver significantly higher contribution margins.",
       impact: "Improves blended acquisition efficiency and reduces CAC payback period",
     },
@@ -61,9 +71,12 @@ const CFO_INSIGHT = {
   upside: { cashLow: RECOVERABLE_LOW, cashHigh: RECOVERABLE_HIGH },
 };
 
-// Recoverable contribution tile value — derived from the same RECOVERABLE_LOW / RECOVERABLE_HIGH
-// constants used by the opportunity panel, not from the live commerceMetrics calculation.
-// Shows "Opportunity being calculated" when no opportunity data exists yet (both values zero).
+// DEV-ONLY FALLBACK — RECOVERABLE_TILE_VALUE and RECOVERABLE_TILE_CHANGE are computed
+// from the RECOVERABLE_LOW / RECOVERABLE_HIGH snapshot constants (business-snapshot.ts).
+// They are used as the KPI_CARDS "rc" card's static initial value only.  The liveKpiCards
+// wiring block overrides both with values from the recoverable_contribution_range() Supabase
+// RPC once phase1Metrics resolves.  These constants remain as the explicit fallback if
+// the RPC fails.  Do not remove the fallback — it prevents a blank tile on RPC error.
 const RECOVERABLE_TILE_VALUE =
   RECOVERABLE_LOW > 0 || RECOVERABLE_HIGH > 0
     ? `£${(RECOVERABLE_LOW  / 1_000).toFixed(0)}k–£${(RECOVERABLE_HIGH / 1_000).toFixed(0)}k`
@@ -77,12 +90,39 @@ const RECOVERABLE_TILE_CHANGE =
 // Tile IDs (id field below) are the internal short codes for each KPI card.
 // Each tile id maps to exactly one canonical metric name defined in src/lib/metrics.ts.
 // See TILE_METRIC_MAP for the authoritative tile id → canonical name mapping.
+//
+// DEV-ONLY FALLBACK GUIDE — three tiers of data for every tile:
+//
+//   Tier 1 (canonical): liveKpiCards wiring block below overrides value/change/status
+//                       from a Supabase Phase 1 RPC once phase1Metrics resolves.
+//   Tier 2 (fallback):  if the Phase 1 RPC fails, liveKpiCards falls back to
+//                       commerceMetrics (all-time, no date filter, different formulas).
+//                       Both Tier 1 and Tier 2 are labelled in each wiring block.
+//   Tier 3 (static):    values declared in this array are loading sentinels shown
+//                       only while both async sources are still pending.
+//
+//   Exceptions — tiles with NO live wiring (fully mock, Phase 1 DEV-ONLY):
+//     "cr"  — CASH_RUNWAY snapshot constant.  Needs Xero cash balance (Phase 2).
+//     "ae"  — "Meta CAC +14%" literal.  Needs Meta Ads API integration (Phase 3).
+//     "np"  — "£56,300" literal.  Needs Xero P&L operating profit (Phase 2).
+//
+//   change strings — ALL static for every tile.  No prior-period SQL functions
+//                    exist yet.  Replace in Phase 2 with computed ±X% deltas.
 const KPI_CARDS: { id: string; title: string; value: string; change: string; status: KpiStatus; text: string }[] = [
   {
+    // value: Tier 3 loading sentinel (MONTHLY_CM_PCT snapshot = 42.3%) until
+    //        liveKpiCards wiring block resolves contribution_margin_pct() RPC (Tier 1)
+    //        or commerceMetrics.contributionMarginPercent (Tier 2 DEV-ONLY fallback).
+    // change: DEV-ONLY static string — no prior-period contribution_margin_pct() RPC yet.
+    //         Replace with computed "±X.Xpp vs last month" in Phase 2.
     id: "cm",   title: "Contribution Margin",      value: `${MONTHLY_CM_PCT}%`,          change: "↓ 2.8% vs last month",                status: "warning",
     text: "Margin is below target and weakening.",
   },
   {
+    // value: Tier 3 loading sentinel — "£0" shown while phase1Metrics and commerceMetrics
+    //        are both still loading.  Overridden by net_sales() RPC (Tier 1) or
+    //        commerceMetrics.netSales (Tier 2 DEV-ONLY fallback) in liveKpiCards.
+    // change: intentionally empty — no prior-period net_sales() delta yet (Phase 2).
     id: "ns",
     title: "Net Sales",
     value: "£0",
@@ -91,6 +131,10 @@ const KPI_CARDS: { id: string; title: string; value: string; change: string; sta
     text: "Revenue after discounts and refunds.",
   },
   {
+    // value/change/status: Tier 3 — RECOVERABLE_TILE_VALUE/CHANGE are derived from the
+    //   RECOVERABLE_LOW/HIGH snapshot constants (business-snapshot.ts) as the loading
+    //   sentinel.  Overridden by recoverable_contribution_range() RPC in liveKpiCards.
+    //   The snapshot constants also serve as the Tier 2 DEV-ONLY fallback if the RPC fails.
     id: "rc",
     title: "Recoverable Contribution",
     value: RECOVERABLE_TILE_VALUE,
@@ -99,30 +143,69 @@ const KPI_CARDS: { id: string; title: string; value: string; change: string; sta
     text: "Immediate margin recovery available from pricing, marketing and fulfilment improvements.",
   },
   {
+    // DEV-ONLY — NO LIVE WIRING.  value and change are fully mock (Phase 1 only).
+    // value:  CASH_RUNWAY = 3.4 from cash-snapshot.ts.
+    //         Primary source: cash_runway_months() Supabase RPC (Phase 2, requires Xero
+    //         cash balance + monthly fixed costs).  Do not ship to production without Xero.
+    // change: "Moderate" is a static qualitative label.
+    //         Replace with computed "±X.X months vs last month" once Xero is connected.
     id: "cr",   title: "Cash Runway",              value: `${CASH_RUNWAY} months`,        change: "Moderate",                            status: "warning",
     text: "Cash remains positive, but runway is tightening.",
   },
   {
+    // value: Tier 3 loading sentinel (DISCOUNT_DEP snapshot = 38%) until liveKpiCards
+    //        wiring block resolves discount_dependency() RPC (Tier 1) or
+    //        commerceMetrics.discountRate (Tier 2 DEV-ONLY fallback).
+    // change: DEV-ONLY static string — no prior-period discount_dependency() RPC yet.
+    //         Replace with computed "±X% vs last month" in Phase 2.
     id: "dd",   title: "Discount Dependency",      value: `${DISCOUNT_DEP}%`,             change: "↑ 11% vs last month",                status: "danger",
     text: "High reliance on promotions to sustain growth.",
   },
   {
+    // DEV-ONLY — NO LIVE WIRING.  value and change are fully mock (Phase 1 only).
+    // value:  "Meta CAC +14%" is a hardcoded snapshot string.
+    //         Primary source: meta_cac_trend() Supabase RPC (Phase 3, requires Meta
+    //         Ads API spend ingestion + customer acquisition source attribution).
+    //         Do not ship to production without the Meta integration.
+    // change: "↓ efficiency" is a hardcoded qualitative direction label.
+    //         Replace with computed "±X% vs last month" once meta_cac_trend() exists.
     id: "ae",   title: "Acquisition Efficiency",   value: "Meta CAC +14%",                change: "↓ efficiency",                       status: "danger",
     text: "Meta CAC is rising faster than contribution per order.",
   },
   {
+    // value: Tier 3 loading sentinel (REPEAT_RATE snapshot = 28%) until liveKpiCards
+    //        wiring block resolves repeat_purchase_rate() RPC (Tier 1) or
+    //        commerceMetrics.repeatPurchaseRate (Tier 2 DEV-ONLY fallback).
+    // change: DEV-ONLY static string — no prior-period repeat_purchase_rate() RPC yet.
+    //         Replace with computed "±X.X% vs last month" in Phase 2.
     id: "rpr",  title: "Repeat Purchase Rate",     value: `${REPEAT_RATE}%`,              change: "↑ 4.2% vs last month",               status: "positive",
     text: "Retention is strengthening as more customers place second orders.",
   },
   {
+    // value: Tier 3 loading sentinel (MONTHLY_REVENUE snapshot = £124,500) until
+    //        liveKpiCards wiring block resolves gross_revenue() RPC (Tier 1) or
+    //        commerceMetrics.totalRevenue (Tier 2 DEV-ONLY fallback).
+    // change: DEV-ONLY static string — no prior-period gross_revenue() RPC yet.
+    //         Replace with computed "±X.X% vs last month" in Phase 2.
     id: "mr",   title: "Monthly Revenue",          value: `£${MONTHLY_REVENUE.toLocaleString("en-GB")}`, change: "↑ 12.4% vs last month", status: "positive",
     text: "Revenue is growing, but margin quality is weakening.",
   },
   {
+    // DEV-ONLY — NO LIVE WIRING.  value and change are fully mock (Phase 1 only).
+    // value:  "£56,300" is a hardcoded snapshot figure.
+    //         Primary source: operating_profit() Supabase RPC (Phase 2, requires Xero
+    //         P&L — contribution margin minus monthly fixed costs).
+    //         Do not ship to production without Xero.
+    // change: "↑ 18.7% vs last month" is a hardcoded snapshot string.
+    //         Replace with computed "±X.X% vs last month" once operating_profit() exists.
     id: "np",   title: "Net Profit",               value: "£56,300",                      change: "↑ 18.7% vs last month",              status: "positive",
     text: "Profit remains positive, but quality of growth needs attention.",
   },
   {
+    // value: Tier 3 loading sentinel — "£0" shown while phase1Metrics and commerceMetrics
+    //        are both still loading.  Overridden by average_order_value() RPC (Tier 1) or
+    //        commerceMetrics.averageOrderValue (Tier 2 DEV-ONLY fallback) in liveKpiCards.
+    // change: intentionally empty — no prior-period average_order_value() delta yet (Phase 2).
     id: "aov",
     title: "Average Order Value",
     value: "£0",
@@ -131,6 +214,10 @@ const KPI_CARDS: { id: string; title: string; value: string; change: string; sta
     text: "Average revenue generated per order.",
   },
   {
+    // value: Tier 3 loading sentinel — "0%" shown while phase1Metrics and commerceMetrics
+    //        are both still loading.  Overridden by refund_rate() RPC (Tier 1) or
+    //        commerceMetrics.refundRate (Tier 2 DEV-ONLY fallback) in liveKpiCards.
+    // change: intentionally empty — no prior-period refund_rate() delta yet (Phase 2).
     id: "rr",
     title: "Refund Rate",
     value: "0%",
@@ -291,7 +378,7 @@ export default function Dashboard() {
       const nsValue =
         phase1Metrics !== null && phase1Metrics.errors.length === 0
           ? phase1Metrics.data.netSales   // canonical — phase1 SQL function
-          : metrics?.netSales;            // fallback  — commerceMetrics (all-time)
+          : metrics?.netSales;            // DEV-ONLY fallback — commerceMetrics all-time, no date filter
       if (nsValue == null) return card;   // static fallback while both loading
       return {
         ...card,
@@ -311,7 +398,7 @@ export default function Dashboard() {
       const mrValue =
         phase1Metrics !== null && phase1Metrics.errors.length === 0
           ? phase1Metrics.data.grossRevenue   // canonical — phase1 SQL function
-          : metrics?.totalRevenue;             // fallback  — commerceMetrics (all-time)
+          : metrics?.totalRevenue;             // DEV-ONLY fallback — commerceMetrics all-time, no date filter
       if (mrValue == null) return card;        // static fallback while both loading
       return {
         ...card,
@@ -333,7 +420,7 @@ export default function Dashboard() {
       const aovValue =
         phase1Metrics !== null && phase1Metrics.errors.length === 0
           ? phase1Metrics.data.averageOrderValue   // canonical — phase1 SQL function
-          : metrics?.averageOrderValue;             // fallback  — commerceMetrics (all-time)
+          : metrics?.averageOrderValue;             // DEV-ONLY fallback — commerceMetrics all-time; formula differs (see data dict §A.6)
       if (aovValue == null) return card;            // static fallback while both loading
       return {
         ...card,
@@ -354,7 +441,7 @@ export default function Dashboard() {
       const rrValue =
         phase1Metrics !== null && phase1Metrics.errors.length === 0
           ? phase1Metrics.data.refundRate   // canonical — phase1 SQL function [0,1]
-          : metrics?.refundRate;            // fallback  — commerceMetrics (all-time) [0,1]
+          : metrics?.refundRate;            // DEV-ONLY fallback — commerceMetrics all-time, no date filter [0,1]
       if (rrValue == null) return card;     // static fallback while both loading
       return {
         ...card,
@@ -375,7 +462,7 @@ export default function Dashboard() {
       const ddValue =
         phase1Metrics !== null && phase1Metrics.errors.length === 0
           ? phase1Metrics.data.discountDependency   // canonical — phase1 SQL function [0,1]
-          : metrics?.discountRate;                  // fallback  — commerceMetrics (all-time) [0,1]
+          : metrics?.discountRate;                  // DEV-ONLY fallback — commerceMetrics all-time, no date filter [0,1]
       if (ddValue == null) return card;             // static fallback while both loading
       return {
         ...card,
@@ -398,7 +485,7 @@ export default function Dashboard() {
       const rprValue =
         phase1Metrics !== null && phase1Metrics.errors.length === 0
           ? phase1Metrics.data.repeatPurchaseRate   // canonical — phase1 SQL function [0,1]
-          : metrics?.repeatPurchaseRate;            // fallback  — commerceMetrics (all-time) [0,1]
+          : metrics?.repeatPurchaseRate;            // DEV-ONLY fallback — commerceMetrics all-time, no date filter [0,1]
       if (rprValue == null) return card;            // static fallback while both loading
       return {
         ...card,
@@ -427,7 +514,7 @@ export default function Dashboard() {
         phase1Metrics.errors.length === 0 &&
         phase1Metrics.data.contributionMarginPct !== null
           ? phase1Metrics.data.contributionMarginPct   // canonical — phase1 SQL function [0,1]
-          : metrics?.contributionMarginPercent;         // fallback  — commerceMetrics (estimated) [0,1]
+          : metrics?.contributionMarginPercent;         // DEV-ONLY fallback — commerceMetrics estimated value, not store-personalised [0,1]
       if (cmValue == null) return card;                 // static fallback while both loading
       return {
         ...card,
@@ -448,12 +535,12 @@ export default function Dashboard() {
         phase1Metrics !== null &&
         !phase1Metrics.errors.some(e => e.fn === "recoverable_contribution_range")
           ? phase1Metrics.data.recoverableLow
-          : RECOVERABLE_LOW;                    // fallback — business-snapshot.ts constant
+          : RECOVERABLE_LOW;                    // DEV-ONLY fallback — business-snapshot.ts snapshot constant; remove when Supabase opportunities table is reliable
       const hi =
         phase1Metrics !== null &&
         !phase1Metrics.errors.some(e => e.fn === "recoverable_contribution_range")
           ? phase1Metrics.data.recoverableHigh
-          : RECOVERABLE_HIGH;                   // fallback — business-snapshot.ts constant
+          : RECOVERABLE_HIGH;                   // DEV-ONLY fallback — business-snapshot.ts snapshot constant; remove when Supabase opportunities table is reliable
       const hasData = lo > 0 || hi > 0;
       return {
         ...card,
@@ -594,6 +681,13 @@ export default function Dashboard() {
             /* ── Pro layout ─────────────────────────────────────────────────── */
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
               <div className="flex-1">
+                {/*
+                  DEV-ONLY — "£18k–£42k" is hardcoded in this JSX body.
+                  The rc KPI tile above correctly reads from phase1Metrics.data.recoverableLow/High
+                  (recoverable_contribution_range() RPC), but this panel has not yet been
+                  wired to the same live values.  Before Phase 2: replace with a dynamic
+                  expression using the resolved lo/hi values from the rc wiring block.
+                */}
                 <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
                   £18k–£42k
                   <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
@@ -603,6 +697,12 @@ export default function Dashboard() {
                 </p>
                 <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
                 <div className="flex items-center gap-3 flex-wrap mb-2">
+                  {/*
+                    DEV-ONLY — "£12k within 30 days" and "£30k within 90 days" are
+                    hardcoded horizon sub-ranges from the opportunity-engine snapshot.
+                    Replace with computed values once the opportunities table tracks a
+                    horizon or deadline field per opportunity row.
+                  */}
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/30">
                     £12k within 30 days
                   </span>
@@ -628,6 +728,11 @@ export default function Dashboard() {
             /* ── Free layout: show headline value, gate the detail ─────────── */
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
               <div className="flex-1">
+                {/*
+                  DEV-ONLY — "£18k–£42k" is hardcoded in this JSX body (same issue as Pro
+                  layout above).  Before Phase 2: wire to phase1Metrics.data.recoverableLow/High
+                  from the recoverable_contribution_range() Supabase RPC.
+                */}
                 <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
                   £18k–£42k
                   <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
@@ -738,6 +843,15 @@ export default function Dashboard() {
           <p className="text-sm text-foreground leading-relaxed mb-5">
             If the recommended priorities are implemented, the model indicates a 60–90 day improvement across contribution, cash and margin.
           </p>
+          {/*
+            DEV-ONLY — all four projection values below are hardcoded snapshot figures.
+            Primary sources (Phase 2):
+              "+£42k" contribution  → recoverableHigh from recoverable_contribution_range() RPC
+              "+£64k" cash          → Xero cash balance improvement model (not yet built)
+              "+0.8 months" runway  → computed (cash improvement / monthly_fixed_costs)
+              "+4.2pp" margin       → target_cm_pct − current contribution_margin_pct() RPC
+            Do not ship these literal values to production — they will not match real store data.
+          */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             {[
               { label: "Contribution / month", value: "+£42k",       color: "emerald" },

@@ -408,8 +408,8 @@ CREATE TABLE IF NOT EXISTS discount_codes (
 
 -- Case-insensitive unique index: enforces that no two codes in the same store
 -- differ only by case. Join convention: LOWER(code from orders JSONB) = LOWER(discount_codes.code).
-CREATE UNIQUE INDEX IF NOT EXISTS uq_discount_codes_store_lower_code
-  ON discount_codes (store_id, LOWER(code));
+CREATE UNIQUE INDEX IF NOT EXISTS "uq_discount_codes_store_lower_code"
+  ON "discount_codes" (store_id, lower(code));
 
 COMMENT ON TABLE  discount_codes IS 'One row per Shopify discount code. Joined to orders.discount_codes JSONB via LOWER(code).';
 COMMENT ON COLUMN discount_codes.code IS 'Stored as-is from Shopify. Unique index enforces case-insensitive uniqueness per store.';

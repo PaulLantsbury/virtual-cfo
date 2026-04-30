@@ -430,37 +430,30 @@ COMMENT ON COLUMN discount_codes.code IS 'Stored as-is from Shopify. Unique inde
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 13. opportunities
 --     One row per identified margin recovery opportunity.
---     Once seeded with 3 rows, v_recoverable_contribution (Phase 1 view, not
---     created in this migration) will replace RECOVERABLE_LOW / RECOVERABLE_HIGH
---     from business-snapshot.ts.
---
---     Status: seeding these rows makes tile rc "database-backed".
---     The values remain seeded/mock until the opportunity engine computes
---     uplift_low / uplift_high from live Shopify data.
+--     Column names match the production (cloud) schema established by migration
+--     000002 (cloud_schema_remediation): impact_low/impact_high/priority.
+--     Migration 000002 uses CREATE TABLE IF NOT EXISTS, so this definition
+--     is the authoritative source — 000002's CREATE is a no-op on shadow DB.
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS opportunities (
-  id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  store_id      uuid        NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
-  title         text        NOT NULL,
-  description   text,
-  category      text,
-  status        text        NOT NULL DEFAULT 'active'
-                CHECK (status IN ('draft','active','in_progress','resolved','dismissed')),
-  uplift_low    numeric(14,2) NOT NULL DEFAULT 0,   -- conservative uplift estimate (£/month)
-  uplift_high   numeric(14,2) NOT NULL DEFAULT 0,   -- optimistic uplift estimate (£/month)
-  action_label  text,                               -- short action text for the dashboard priority row
-  why_label     text,                               -- explanation text for the dashboard priority row
-  priority_rank int,                                -- display order; lower = higher priority
-  created_at    timestamptz NOT NULL DEFAULT now(),
-  updated_at    timestamptz NOT NULL DEFAULT now()
+CREATE TABLE IF NOT EXISTS public.opportunities (
+  id              uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id        uuid        NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
+  category        text        NOT NULL DEFAULT 'general',
+  title           text        NOT NULL,
+  description     text,
+  impact_low      numeric(14,2),          -- lower bound monthly £ impact
+  impact_high     numeric(14,2),          -- upper bound monthly £ impact
+  priority        int         NOT NULL DEFAULT 0,
+  status          text        NOT NULL DEFAULT 'open',
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS idx_opportunities_store_status
-  ON opportunities (store_id, status);
+  ON public.opportunities (store_id, status);
 
-COMMENT ON TABLE  opportunities IS 'One row per margin recovery opportunity. Feeds recoverable_contribution_range (METRIC.RECOVERABLE_CONTRIBUTION_RANGE) via v_recoverable_contribution view.';
-COMMENT ON COLUMN opportunities.uplift_low  IS 'Conservative monthly uplift estimate (£). Seed from mock RECOVERABLE_LOW. Future: computed by opportunity engine from live data.';
-COMMENT ON COLUMN opportunities.uplift_high IS 'Optimistic monthly uplift estimate (£). Seed from mock RECOVERABLE_HIGH. Future: computed by opportunity engine from live data.';
+COMMENT ON TABLE public.opportunities IS
+  'CFO-identified improvement opportunities. Feeds the recovery roadmap section.';
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -468,23 +461,24 @@ COMMENT ON COLUMN opportunities.uplift_high IS 'Optimistic monthly uplift estima
 --     One row per alert type per store. Tracks trigger state and acknowledgement.
 --     Seed with standard alert keys at onboarding.
 -- ─────────────────────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS cfo_alerts (
+-- cfo_alerts: use production-compatible schema (migration 000002 is the authoritative
+-- CREATE TABLE IF NOT EXISTS — this definition ensures shadow DB matches production).
+CREATE TABLE IF NOT EXISTS public.cfo_alerts (
   id              uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  store_id        uuid        NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
-  alert_key       text        NOT NULL,              -- e.g. 'low_runway', 'high_discount_dep'
-  is_triggered    boolean     NOT NULL DEFAULT false,
-  triggered_at    timestamptz,
-  acknowledged_at timestamptz,
-  severity        text        NOT NULL DEFAULT 'info'
-                  CHECK (severity IN ('info','warn','danger')),
-  created_at      timestamptz NOT NULL DEFAULT now(),
-  updated_at      timestamptz NOT NULL DEFAULT now(),
-
-  CONSTRAINT uq_cfo_alerts_store_key UNIQUE (store_id, alert_key)
+  store_id        uuid        NOT NULL REFERENCES public.stores(id) ON DELETE CASCADE,
+  alert_type      text        NOT NULL,
+  severity        text        NOT NULL DEFAULT 'warning',
+  title           text        NOT NULL,
+  body            text,
+  is_read         boolean     NOT NULL DEFAULT false,
+  created_at      timestamptz NOT NULL DEFAULT now()
 );
 
-COMMENT ON TABLE  cfo_alerts IS 'One alert state row per alert type per store. Seed keys: low_runway, high_discount_dep, falling_repeat_rate, rising_cac, high_refund_rate.';
-COMMENT ON COLUMN cfo_alerts.alert_key IS 'Stable identifier for the alert type. One row per key per store.';
+CREATE INDEX IF NOT EXISTS idx_cfo_alerts_store_read
+  ON public.cfo_alerts (store_id, is_read, created_at DESC);
+
+COMMENT ON TABLE public.cfo_alerts IS
+  'Persisted alert events for the CFO Alerts sidebar. One row per alert event.';
 
 
 -- =============================================================================

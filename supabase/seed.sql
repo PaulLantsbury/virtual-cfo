@@ -22,8 +22,8 @@
 --   refunds     ≤ total_sales  (partial); = total_sales  (full)
 --
 -- Opportunities seed:
---   uplift_low  sums to 18 000 = RECOVERABLE_LOW  in business-snapshot.ts ✓
---   uplift_high sums to 42 000 = RECOVERABLE_HIGH in business-snapshot.ts ✓
+--   impact_low  sums to 18 000 = RECOVERABLE_LOW  in business-snapshot.ts ✓
+--   impact_high sums to 42 000 = RECOVERABLE_HIGH in business-snapshot.ts ✓
 --
 -- Cost assumptions match current hardcoded values in commerceMetrics.ts:
 --   payment_fee_rate          = 0.025
@@ -699,47 +699,43 @@ BEGIN
   -- 14. OPPORTUNITIES (3 active weekly priorities)
   --
   --   Sum check:
-  --     uplift_low  total = 8 000 + 6 000 + 4 000 = 18 000 = RECOVERABLE_LOW  ✓
-  --     uplift_high total = 18 000 + 14 000 + 10 000 = 42 000 = RECOVERABLE_HIGH ✓
+  --     impact_low  total = 8 000 + 6 000 + 4 000 = 18 000 = RECOVERABLE_LOW  ✓
+  --     impact_high total = 18 000 + 14 000 + 10 000 = 42 000 = RECOVERABLE_HIGH ✓
   -- ===========================================================================
   INSERT INTO opportunities
-    (id, store_id, title, description, category, status,
-     uplift_low, uplift_high, action_label, why_label, priority_rank)
+    (id, store_id, category, title, description, impact_low, impact_high, priority, status)
   VALUES
     ('70000000-0000-0000-0000-000000000001', sid,
+     'pricing',
      'Reduce Discount Dependency',
      'Discount codes applied to ~25% of orders are eroding contribution margin. '
      'Shifting 5% of discounted orders to full price recovers an estimated £8k–£18k monthly.',
-     'pricing', 'active', 8000.00, 18000.00,
-     'Review discount strategy',
-     'Discount rate exceeds the 10% value-based benchmark', 1),
+     8000.00, 18000.00, 1, 'open'),
 
     ('70000000-0000-0000-0000-000000000002', sid,
+     'retention',
      'Improve Repeat Purchase Rate',
      'Only 22% of customers make a second purchase within 90 days. A post-purchase '
      'nurture sequence could recover £6k–£14k monthly in customer lifetime value.',
-     'retention', 'active', 6000.00, 14000.00,
-     'Build retention flow',
-     'Repeat purchase rate is below the 25% target', 2),
+     6000.00, 14000.00, 2, 'open'),
 
     ('70000000-0000-0000-0000-000000000003', sid,
+     'operations',
      'Reduce Refund Leakage',
      'Refund rate is running above the 5% benchmark. Tighter pre-despatch QC '
      'and improved size guidance could recover £4k–£10k monthly.',
-     'operations', 'active', 4000.00, 10000.00,
-     'Audit returns process',
-     'Refund rate exceeds the 5% benchmark', 3);
+     4000.00, 10000.00, 3, 'open');
 
   -- ===========================================================================
   -- 15. CFO ALERTS (5 alert keys, all is_triggered = false at seed time)
   -- ===========================================================================
-  INSERT INTO cfo_alerts (id, store_id, alert_key, is_triggered, severity)
+  INSERT INTO cfo_alerts (id, store_id, alert_type, severity, title, is_read)
   VALUES
-    ('80000000-0000-0000-0000-000000000001', sid, 'low_runway',          false, 'danger'),
-    ('80000000-0000-0000-0000-000000000002', sid, 'high_discount_dep',   false, 'warn'),
-    ('80000000-0000-0000-0000-000000000003', sid, 'falling_repeat_rate', false, 'warn'),
-    ('80000000-0000-0000-0000-000000000004', sid, 'rising_cac',          false, 'info'),
-    ('80000000-0000-0000-0000-000000000005', sid, 'high_refund_rate',    false, 'warn');
+    ('80000000-0000-0000-0000-000000000001', sid, 'low_runway',          'critical', 'Low Cash Runway',         false),
+    ('80000000-0000-0000-0000-000000000002', sid, 'high_discount_dep',   'warning',  'High Discount Dependency', false),
+    ('80000000-0000-0000-0000-000000000003', sid, 'falling_repeat_rate', 'warning',  'Falling Repeat Rate',      false),
+    ('80000000-0000-0000-0000-000000000004', sid, 'rising_cac',          'info',     'Rising Customer Acq. Cost',false),
+    ('80000000-0000-0000-0000-000000000005', sid, 'high_refund_rate',    'warning',  'High Refund Rate',         false);
 
 END $$;
 

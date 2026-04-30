@@ -68,6 +68,9 @@ Supports manual entry and Xero/QuickBooks nominal code mapping.
 **Design note:** `external_account_code` is vendor-neutral by name. The source integration
 (`'xero'`, `'quickbooks'`, etc.) is recorded on `overhead_entries.source`, not here.
 
+No dedicated indexes beyond the PK and UNIQUE constraint. The PK and unique on
+`(store_id, name)` cover all expected access patterns at Phase 2 data volumes.
+
 ---
 
 ### `overhead_entries`
@@ -82,8 +85,10 @@ Supports both budget and actual tracking in a single table.
 | `category_id` | `uuid NOT NULL → overhead_categories(id)` | |
 | `period_start` | `date NOT NULL` | First day of the period (e.g. `2026-04-01`) |
 | `period_end` | `date NOT NULL` | Last day of the period (e.g. `2026-04-30`) |
-| `amount` | `numeric(14,2) NOT NULL` | Overhead amount in store currency |
+| `amount` | `numeric(14,2) NOT NULL` | Overhead amount in `currency_code` |
+| `currency_code` | `text NOT NULL DEFAULT 'GBP'` | ISO 4217 currency for `amount`. Should match `stores.currency_code`. |
 | `entry_type` | `text NOT NULL DEFAULT 'actual'` | `'actual' \| 'budget' \| 'forecast'` |
+| `is_recurring` | `boolean NOT NULL DEFAULT true` | `true` = predictable, repeating monthly cost. `false` = exceptional or one-off (e.g. legal settlement, one-time equipment purchase). |
 | `source` | `text NOT NULL DEFAULT 'manual'` | `'manual' \| 'xero' \| 'quickbooks' \| 'csv_import'` |
 | `external_ref` | `text` | Xero journal line ID, QuickBooks expense ID, or CSV import batch ref. Null for manual entries. |
 | `notes` | `text` | Free-text annotation |
@@ -95,36 +100,83 @@ Supports both budget and actual tracking in a single table.
 actual entries (e.g. payroll split across two runs), sum before inserting or use
 `ON CONFLICT DO UPDATE SET amount = excluded.amount`.
 
-**Design note:** `entry_type` enables the same table to answer both
-"what did we actually spend?" and "what did we budget?" without a join between
-two separate tables. The UNIQUE constraint enforces one canonical row per
-category/period/type.
+**Recommended indexes:**
+
+```sql
+CREATE INDEX idx_overhead_entries_store_period_type
+  ON overhead_entries (store_id, period_start, entry_type);
+
+CREATE INDEX idx_overhead_entries_store_category_period
+  ON overhead_entries (store_id, category_id, period_start);
+```
+
+The first index serves `monthly_overhead_total()` (which always filters by
+`store_id`, `period_start`, and `entry_type`). The second serves category-level
+breakdown queries on the Cash Control and Profit Engine pages.
+
+**Design notes:**
+
+- `entry_type` enables the same table to answer both "what did we actually spend?"
+  and "what did we budget?" without a join between two separate tables. The UNIQUE
+  constraint enforces one canonical row per category/period/type.
+- `currency_code` is stored per-entry rather than derived from `stores.currency_code`
+  to support future multi-currency stores (e.g. a UK store that pays a US SaaS
+  subscription in USD) without a schema migration. Phase 2 seeds all entries as
+  `'GBP'`.
+- `is_recurring` allows the CFO alert engine to separate predictable fixed-cost
+  baseline from exceptional one-off spend. When computing `cash_runway_months()`,
+  the RPC can optionally filter to `is_recurring = true` to exclude atypical months
+  from the denominator. Future alerting can also flag months where exceptional costs
+  cause unusual variance relative to the `is_recurring` baseline.
 
 ---
 
 ### `cash_balance_snapshots`
 
 Point-in-time cash balance per store. One row per date per account. Multiple accounts
-(e.g. current account + Stripe reserve) are supported via `account_name`.
+(e.g. current account + Stripe reserve) are supported.
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | `uuid PK DEFAULT gen_random_uuid()` | |
 | `store_id` | `uuid NOT NULL → stores(id)` | Multi-tenant key |
 | `snapshot_date` | `date NOT NULL` | End-of-day date the balance was captured |
-| `cash_balance` | `numeric(14,2) NOT NULL` | Balance in store currency |
-| `account_name` | `text NOT NULL DEFAULT 'main'` | e.g. `'main'`, `'stripe_reserve'`, `'savings'`. Allows multi-account aggregation. |
+| `cash_balance` | `numeric(14,2) NOT NULL` | Balance in `currency_code` |
+| `account_key` | `text NOT NULL DEFAULT 'main'` | Machine-stable identifier for the account. Used in the UNIQUE constraint and all query/RPC logic. Treat as a slug — it should not change after creation. Examples: `'main'`, `'stripe_reserve'`, `'savings'`. |
+| `account_display_name` | `text NOT NULL DEFAULT 'Main Account'` | Human-readable label shown in the UI. Can be renamed freely without breaking logic. Examples: `'Main Business Account'`, `'Stripe Reserve'`, `'Tax Savings Pot'`. |
+| `currency_code` | `text NOT NULL DEFAULT 'GBP'` | ISO 4217 currency for `cash_balance`. Enables future EUR/USD account balances without a migration. |
 | `source` | `text NOT NULL DEFAULT 'manual'` | `'manual' \| 'xero' \| 'quickbooks' \| 'open_banking' \| 'csv_import'` |
 | `external_ref` | `text` | Source system account or transaction ID |
 | `notes` | `text` | |
 | `created_at` | `timestamptz NOT NULL DEFAULT now()` | |
 
-**Unique constraint:** `(store_id, snapshot_date, account_name)`
+**Unique constraint:** `(store_id, snapshot_date, account_key)`
 
-**Design note:** `cash_runway_months()` will aggregate all accounts for a store
-(`SUM(cash_balance) WHERE store_id = ... AND snapshot_date = (latest date)`) to
-get total available cash. The `account_name` field does not need normalisation at
-Phase 2 — it is a display label, not a foreign key.
+**Recommended index:**
+
+```sql
+CREATE INDEX idx_cash_balance_snapshots_store_date
+  ON cash_balance_snapshots (store_id, snapshot_date DESC);
+```
+
+This index supports the `v_current_cash_balance` view and `cash_runway_months()`,
+both of which fetch the latest snapshot date per store using `MAX(snapshot_date)`
+or `DISTINCT ON (store_id) ORDER BY snapshot_date DESC`.
+
+**Design notes:**
+
+- **`account_key` vs `account_display_name`:** `account_key` is the stable
+  machine-readable identifier used in UNIQUE constraints, RPC filters, and
+  application logic. `account_display_name` is the presentation label. Separating
+  them means a merchant can rename "Main Account" to "Lloyds Current Account" in
+  the UI without breaking any data or query logic.
+- `cash_runway_months()` aggregates `SUM(cash_balance)` across all `account_key`
+  values for a store at the latest `snapshot_date`. All accounts are summed
+  regardless of key — there is no account exclusion at Phase 2.
+- **`currency_code`** is stored per row to support future scenarios where a store
+  holds cash in multiple currencies (e.g. GBP operating account + USD reserve for
+  supplier payments). Phase 2 seeds all accounts as `'GBP'`. Multi-currency
+  aggregation in `cash_runway_months()` is deferred to Phase 3.
 
 ---
 
@@ -138,9 +190,10 @@ Cash Conversion Cycle display on the Cash Control page.
 | `id` | `uuid PK DEFAULT gen_random_uuid()` | |
 | `store_id` | `uuid NOT NULL → stores(id)` | Multi-tenant key |
 | `snapshot_date` | `date NOT NULL` | |
-| `inventory_value` | `numeric(14,2)` | Inventory at cost. Null if not available. |
-| `accounts_receivable` | `numeric(14,2)` | Outstanding AR. Typically zero for D2C Shopify. |
-| `accounts_payable` | `numeric(14,2)` | Outstanding AP. From Xero AP ageing when available. |
+| `inventory_value` | `numeric(14,2)` | Inventory at cost in `currency_code`. Null if not available. |
+| `accounts_receivable` | `numeric(14,2)` | Outstanding AR in `currency_code`. Typically zero for D2C Shopify. |
+| `accounts_payable` | `numeric(14,2)` | Outstanding AP in `currency_code`. From Xero AP ageing when available. |
+| `currency_code` | `text NOT NULL DEFAULT 'GBP'` | ISO 4217 currency for all monetary columns (`inventory_value`, `accounts_receivable`, `accounts_payable`). |
 | `inventory_days` | `numeric(8,2)` | Calculated or imported. `inventory_value / (annual_cogs / 365)` |
 | `supplier_days` | `numeric(8,2)` | Average days to pay suppliers |
 | `receivable_days` | `numeric(8,2)` | Average days to collect AR (typically ~0 for D2C) |
@@ -150,16 +203,31 @@ Cash Conversion Cycle display on the Cash Control page.
 
 **Unique constraint:** `(store_id, snapshot_date)`
 
-**Design note:** The Cash Conversion Cycle (CCC) is not stored directly — it is
-computed as `inventory_days - supplier_days + receivable_days` inside a view or
-in the RPC. Storing it would create a derived-data consistency risk.
+**Recommended index:**
+
+```sql
+CREATE INDEX idx_working_capital_snapshots_store_date
+  ON working_capital_snapshots (store_id, snapshot_date DESC);
+```
+
+Supports `v_working_capital_current` (which uses `DISTINCT ON (store_id) ORDER BY
+snapshot_date DESC`) and any range query over WC history on the Cash Control page.
+
+**Design notes:**
+
+- The Cash Conversion Cycle (CCC) is not stored directly — it is computed as
+  `inventory_days - supplier_days + receivable_days` inside `v_working_capital_current`.
+  Storing it would create a derived-data consistency risk.
+- `currency_code` is stored per snapshot rather than derived from `stores.currency_code`
+  to support future scenarios where inventory is valued in a different currency
+  (e.g. stock purchased in USD, store currency GBP). Phase 2 seeds as `'GBP'`.
 
 ---
 
 ### `budget_lines`
 
-Monthly metric targets. One row per metric per period. Enables the actual vs budget
-variance view on the Cash Control and Profit Engine pages.
+Metric targets per period. One row per metric per scope per period. Enables the
+actual vs budget variance view on the Cash Control and Profit Engine pages.
 
 | Column | Type | Notes |
 |---|---|---|
@@ -167,13 +235,56 @@ variance view on the Cash Control and Profit Engine pages.
 | `store_id` | `uuid NOT NULL → stores(id)` | Multi-tenant key |
 | `period_start` | `date NOT NULL` | First day of the period |
 | `period_end` | `date NOT NULL` | Last day of the period |
-| `metric_key` | `text NOT NULL` | Canonical metric name. See allowed values below. |
-| `budgeted_value` | `numeric(14,2) NOT NULL` | Budget target in metric units (£ or ratio) |
+| `metric_key` | `text NOT NULL` | Canonical metric name. See allowed values and CHECK constraint below. |
+| `budgeted_value` | `numeric(14,2) NOT NULL` | Budget target in metric units (£ for monetary metrics; ratio [0,1] for percentage metrics) |
+| `currency_code` | `text NOT NULL DEFAULT 'GBP'` | ISO 4217 currency for monetary `budgeted_value` fields. Ratio metrics (e.g. `contribution_margin_pct`) are currency-agnostic; the column is still required for schema consistency. |
+| `period_granularity` | `text NOT NULL DEFAULT 'month'` | Granularity of the budget period. Phase 2 uses `'month'` only. `'week'`, `'quarter'`, `'year'` unlock without schema changes. |
+| `metric_scope` | `text NOT NULL DEFAULT 'store'` | Dimension at which the budget applies. Phase 2 uses `'store'` only. Sub-store scopes will require a future `scope_ref text` column to identify which specific channel/campaign/SKU. |
 | `notes` | `text` | |
 | `created_at` | `timestamptz NOT NULL DEFAULT now()` | |
 | `updated_at` | `timestamptz NOT NULL DEFAULT now()` | |
 
-**Unique constraint:** `(store_id, period_start, metric_key)`
+**Unique constraint:** `(store_id, period_start, metric_key, metric_scope)`
+
+The scope is included in the UNIQUE constraint to allow separate budget rows for
+the same metric at different scopes — e.g. a `'monthly_revenue'` budget at
+`'store'` scope AND at `'channel'` scope for the same period. Phase 2 seeds
+`'store'` scope only.
+
+**Recommended index:**
+
+```sql
+CREATE INDEX idx_budget_lines_store_period_metric
+  ON budget_lines (store_id, period_start, metric_key);
+```
+
+Supports `budget_variance_summary()` which always filters by `store_id` and
+`period_start` and joins on `metric_key`.
+
+**CHECK constraints:**
+
+```sql
+CONSTRAINT chk_budget_lines_metric_key CHECK (
+  metric_key IN (
+    'monthly_revenue',
+    'net_sales',
+    'contribution_margin_pct',
+    'monthly_fixed_costs',
+    'operating_profit',
+    'cash_balance'
+  )
+),
+CONSTRAINT chk_budget_lines_period_granularity CHECK (
+  period_granularity IN ('week', 'month', 'quarter', 'year')
+),
+CONSTRAINT chk_budget_lines_metric_scope CHECK (
+  metric_scope IN ('store', 'channel', 'campaign', 'sku')
+)
+```
+
+`metric_key` CHECK is expanded in a new migration whenever Phase 3 adds new
+canonical metrics to the `METRIC.*` enum. `period_granularity` and `metric_scope`
+CHECK constraints are fixed at Phase 2 — the allowed set is narrow and stable.
 
 **Allowed `metric_key` values (Phase 2 scope):**
 
@@ -187,8 +298,39 @@ variance view on the Cash Control and Profit Engine pages.
 | `'cash_balance'` | £ | Minimum cash balance target |
 
 These keys align directly with the existing `METRIC.*` enum in `src/lib/metrics.ts`.
-When new Phase 3 metrics are added to that enum, new `metric_key` values are introduced
-by documenting them in this table comment — not by changing the table schema.
+
+**Design notes:**
+
+- **`period_granularity`:** Stored explicitly rather than inferred from
+  `period_start/period_end` because inferred granularity is ambiguous at boundaries
+  (e.g. a 7-day range could be a week or partial month). Having the field explicit
+  also allows weekly and quarterly budget reporting to be enabled in the frontend
+  without any schema change.
+- **`metric_scope`:** Allows the same metric to carry multiple budget rows at
+  different granularities — one store-level target and, in future, per-channel or
+  per-SKU targets. Phase 2 inserts only `'store'` scope. When `'channel'`,
+  `'campaign'`, or `'sku'` scopes are introduced in Phase 3, a `scope_ref text`
+  column will be added to carry the specific identifier (e.g. a channel slug or
+  SKU code).
+- **`currency_code`:** Stored per budget line rather than derived from the store for
+  the same reason as `overhead_entries` and `cash_balance_snapshots` — future
+  multi-currency budgets (e.g. USD ad spend budget alongside GBP P&L budget) should
+  not require a migration.
+
+---
+
+## 2a. Phase 2 column refinements — rationale
+
+The following columns were added after the initial schema design to future-proof the
+tables before any migrations are generated.
+
+| Column | Tables | Reason |
+|---|---|---|
+| `currency_code` | `overhead_entries`, `cash_balance_snapshots`, `working_capital_snapshots`, `budget_lines` | Storing the currency at row level costs one column per table but avoids a migration when multi-currency support is needed. Phase 1 `stores.currency_code` is a store-level default; Phase 2 row-level `currency_code` allows individual entries (e.g. a USD SaaS subscription, EUR stock payable) to carry the correct currency without touching the store setting. All Phase 2 seed rows default to `'GBP'`. |
+| `is_recurring` | `overhead_entries` | Distinguishes predictable monthly overheads from exceptional one-off costs. The `cash_runway_months()` RPC can optionally filter to `is_recurring = true` to avoid a single anomalous month (e.g. a large legal fee) inflating the fixed-cost denominator and producing an artificially short runway reading. Future CFO alerting can also generate "exceptional cost spike" alerts for `is_recurring = false` entries that exceed a threshold. |
+| `period_granularity` | `budget_lines` | Phase 2 uses monthly budgets only, but weekly cadence budgets (useful for marketing spend) and quarterly targets (useful for P&L board reporting) are a natural next step. Storing the granularity explicitly prevents the alternative — inferring it from `period_start/period_end` date arithmetic — which is ambiguous and fragile at period boundaries. |
+| `metric_scope` | `budget_lines` | Enables the same metric to carry a store-level budget AND, in future, sub-store budgets by channel, campaign, or SKU — all in the same table and within the same query. Without this field, adding channel-level budgeting later would require either a new table or a nullable `scope` column added via `ALTER TABLE`, both more disruptive than including it upfront. |
+| `account_key` + `account_display_name` | `cash_balance_snapshots` | Separates stable machine logic from mutable UI labels. `account_key` is used in UNIQUE constraints, RPC filters, and any multi-account aggregation logic — it should never change. `account_display_name` is used only for presentation and can be renamed without touching any query logic. The original `account_name` served both roles simultaneously, which made it fragile: renaming "Main Account" to "Lloyds Business Current" would silently create a new row rather than updating the display label. |
 
 ---
 
@@ -198,9 +340,9 @@ by documenting them in this table comment — not by changing the table schema.
 |---|---|---|
 | `overhead_categories` | `store_id → stores(id) CASCADE` | `(store_id, name)` |
 | `overhead_entries` | `store_id → stores(id) CASCADE`; `category_id → overhead_categories(id) RESTRICT` | `(store_id, category_id, period_start, entry_type)` |
-| `cash_balance_snapshots` | `store_id → stores(id) CASCADE` | `(store_id, snapshot_date, account_name)` |
+| `cash_balance_snapshots` | `store_id → stores(id) CASCADE` | `(store_id, snapshot_date, account_key)` |
 | `working_capital_snapshots` | `store_id → stores(id) CASCADE` | `(store_id, snapshot_date)` |
-| `budget_lines` | `store_id → stores(id) CASCADE` | `(store_id, period_start, metric_key)` |
+| `budget_lines` | `store_id → stores(id) CASCADE` | `(store_id, period_start, metric_key, metric_scope)` |
 
 **`overhead_categories → overhead_entries` FK uses `RESTRICT` (not CASCADE)**
 because accidentally deleting a category that has entries would silently remove
@@ -244,8 +386,8 @@ frontend-only change using existing Phase 1 SQL functions.
 
 ### `v_current_cash_balance`
 
-Returns the latest `cash_balance_snapshots` row per store (aggregated across all
-accounts), used by `cash_runway_months()`.
+Returns the latest `cash_balance_snapshots` rows per store (aggregated across all
+accounts at the most recent `snapshot_date`), used by `cash_runway_months()`.
 
 ```sql
 CREATE OR REPLACE VIEW public.v_current_cash_balance AS
@@ -281,6 +423,7 @@ SELECT
   oe.period_start,
   oe.period_end,
   oe.entry_type,
+  oe.is_recurring,
   SUM(oe.amount)    AS total_amount,
   COUNT(*)          AS entry_count
 FROM public.overhead_entries oe
@@ -291,8 +434,12 @@ GROUP BY
   oc.name,
   oe.period_start,
   oe.period_end,
-  oe.entry_type;
+  oe.entry_type,
+  oe.is_recurring;
 ```
+
+Note: `is_recurring` is included in the GROUP BY so callers can distinguish the
+recurring-cost total from exceptional-cost total without a second query.
 
 ---
 
@@ -309,6 +456,7 @@ SELECT DISTINCT ON (store_id)
   inventory_value,
   accounts_receivable,
   accounts_payable,
+  currency_code,
   inventory_days,
   supplier_days,
   receivable_days,
@@ -333,16 +481,16 @@ Returns total overhead spend for the given store, period, and entry type.
 
 ```
 Parameters:
-  p_store_id   uuid
-  p_date_from  date
-  p_date_to    date
-  p_entry_type text DEFAULT 'actual'
+  p_store_id    uuid
+  p_date_from   date
+  p_date_to     date
+  p_entry_type  text DEFAULT 'actual'
 
 Returns: numeric   (£ total, 0 if no rows)
 
 Formula:
   SUM(amount) FROM overhead_entries
-  WHERE store_id = p_store_id
+  WHERE store_id    = p_store_id
     AND period_start >= p_date_from
     AND period_end   <= p_date_to
     AND entry_type   = p_entry_type
@@ -350,6 +498,10 @@ Formula:
       SELECT id FROM overhead_categories
       WHERE store_id = p_store_id AND is_active = true
     )
+
+Note: No filter on is_recurring at Phase 2 — the full actual total is used.
+Future enhancement: add a p_recurring_only boolean parameter to allow
+cash_runway_months() to exclude exceptional costs from the denominator.
 ```
 
 Powers: `np` tile denominator, Cash Control breakdown, Profit Engine waterfall.
@@ -368,7 +520,7 @@ Returns: numeric   (months, NULL if no cash snapshot exists)
 
 Formula:
   total_cash    = SUM(cash_balance) FROM cash_balance_snapshots
-                  WHERE store_id = p_store_id
+                  WHERE store_id    = p_store_id
                     AND snapshot_date = MAX(snapshot_date for this store)
 
   monthly_fixed = monthly_overhead_total(p_store_id,
@@ -427,6 +579,8 @@ Parameters:
 
 Returns: TABLE(
   metric_key        text,
+  metric_scope      text,
+  period_granularity text,
   budgeted_value    numeric,
   actual_value      numeric,
   variance_abs      numeric,   -- actual - budgeted
@@ -435,8 +589,10 @@ Returns: TABLE(
 ```
 
 This function reads from `budget_lines` for budgeted values and calls the
-relevant Phase 1 and Phase 2 RPCs for actual values. It is the most complex
-function in Phase 2 and should be implemented last.
+relevant Phase 1 and Phase 2 RPCs for actual values. `metric_scope` and
+`period_granularity` are passed through from `budget_lines` to allow the caller
+to filter the result set. It is the most complex function in Phase 2 and should
+be implemented last.
 
 ---
 
@@ -467,7 +623,9 @@ in `cash-snapshot.ts`.
 Seed 3 months of data (February, March, April 2026) for each of 6 categories,
 in both `entry_type = 'actual'` and `entry_type = 'budget'`.
 
-The actual amounts can vary slightly from budget to generate meaningful variance:
+All seed rows: `currency_code = 'GBP'`, `is_recurring = true`, `source = 'manual'`.
+
+The actual amounts vary slightly from budget to generate meaningful variance:
 
 | Month | Total actual | Total budget | Variance |
 |---|---|---|---|
@@ -483,30 +641,31 @@ visually interesting from day one.
 
 ### `cash_balance_snapshots` — 3 rows (month-end snapshots)
 
-| `snapshot_date` | `cash_balance` | `account_name` |
-|---|---|---|
-| 2026-02-28 | £172,000 | `main` |
-| 2026-03-31 | £178,000 | `main` |
-| 2026-04-30 | £186,000 | `main` |
+| `snapshot_date` | `cash_balance` | `account_key` | `account_display_name` | `currency_code` |
+|---|---|---|---|---|
+| 2026-02-28 | £172,000 | `main` | `Main Business Account` | `GBP` |
+| 2026-03-31 | £178,000 | `main` | `Main Business Account` | `GBP` |
+| 2026-04-30 | £186,000 | `main` | `Main Business Account` | `GBP` |
 
 The April 30 balance of `£186,000` matches the `CASH_BALANCE` constant in
-`cash-snapshot.ts`. The declining pattern (Feb → Mar → Apr recovering) creates a
-realistic trajectory for the Cash Control page.
+`cash-snapshot.ts`. The rising trajectory (Feb → Mar → Apr) creates a realistic
+progression for the Cash Control page.
 
 ---
 
 ### `working_capital_snapshots` — 1 row (current month)
 
-| Column | Value | Source |
+| Column | Value | Notes |
 |---|---|---|
 | `snapshot_date` | 2026-04-30 | |
-| `inventory_value` | £486,000 | derived from inventory_days × implied daily COGS |
+| `inventory_value` | £486,000 | Derived from `inventory_days × implied daily COGS` |
 | `accounts_receivable` | £0 | D2C — no AR (paid at checkout) |
-| `accounts_payable` | £127,000 | approx. 42 supplier days |
-| `inventory_days` | 82 | matches `INVENTORY_DAYS` constant |
-| `supplier_days` | 42 | matches `SUPPLIER_DAYS` constant |
+| `accounts_payable` | £127,000 | Approx. 42 supplier days |
+| `currency_code` | `GBP` | |
+| `inventory_days` | 82 | Matches `INVENTORY_DAYS` constant |
+| `supplier_days` | 42 | Matches `SUPPLIER_DAYS` constant |
 | `receivable_days` | 0 | D2C default |
-| `source` | `'manual'` | |
+| `source` | `manual` | |
 
 Cash Conversion Cycle = 82 − 42 + 0 = **40 days** (slightly lower than the
 `CASH_CONVERSION_CYCLE = 47` constant, which may include a receivables buffer).
@@ -515,11 +674,14 @@ Cash Conversion Cycle = 82 − 42 + 0 = **40 days** (slightly lower than the
 
 ### `budget_lines` — 6 rows (April 2026 targets)
 
+All seed rows: `period_granularity = 'month'`, `metric_scope = 'store'`,
+`currency_code = 'GBP'`.
+
 | `metric_key` | `budgeted_value` | Notes |
 |---|---|---|
 | `'monthly_revenue'` | 130,000.00 | Target gross revenue |
 | `'net_sales'` | 108,000.00 | After discounts and refunds |
-| `'contribution_margin_pct'` | 0.40 | 40% target |
+| `'contribution_margin_pct'` | 0.40 | 40% target (ratio, not %) |
 | `'monthly_fixed_costs'` | 120,000.00 | Overhead budget |
 | `'operating_profit'` | 12,000.00 | 108k × 0.40 − 120k (approx.) |
 | `'cash_balance'` | 175,000.00 | Minimum cash floor |
@@ -557,6 +719,7 @@ accounting integration before they are production-ready:
 | EBITDA vs accounting profit reconciliation | Requires depreciation, amortisation, and interest data from Xero P&L — not modelled in Phase 2 |
 | Acquisition Efficiency / Meta CAC (`ae` tile) | Requires Meta Ads API spend ingestion and customer acquisition source attribution — Phase 3 |
 | Shopify inventory value (automated) | `inventory_value` in `working_capital_snapshots` seeded manually; Shopify Inventory API + COGS from `product_variants.cost` needed for automation |
+| Multi-currency cash runway | `cash_runway_months()` sums all accounts without FX conversion; GBP-only at Phase 2 |
 
 ---
 
@@ -564,18 +727,18 @@ accounting integration before they are production-ready:
 
 ### Phase 2a — Fixed costs and cash (unlocks `cr` and `np` tiles)
 
-1. **Migration: `overhead_categories`** — no FK beyond `stores`, safe to add first
-2. **Migration: `overhead_entries`** — FK to `overhead_categories`; add index on `(store_id, period_start, entry_type)`
-3. **Migration: `cash_balance_snapshots`** — no FK beyond `stores`; add index on `(store_id, snapshot_date)`
-4. **Seed migration** — insert Bloom & Co. rows into all three tables
+1. **Migration: `overhead_categories`** — no FK beyond `stores`
+2. **Migration: `overhead_entries`** — FK to `overhead_categories`; create both indexes (`store_id, period_start, entry_type`) and (`store_id, category_id, period_start`)
+3. **Migration: `cash_balance_snapshots`** — no FK beyond `stores`; create index on (`store_id, snapshot_date DESC`)
+4. **Seed migration** — insert Bloom & Co. rows into all three tables with `currency_code = 'GBP'` and `is_recurring = true` on all `overhead_entries` rows
 5. **Views: `v_monthly_overhead_summary`, `v_current_cash_balance`**
 6. **RPCs: `monthly_overhead_total()`, `cash_runway_months()`, `operating_profit_monthly()`**
 7. **Frontend: wire `cr` and `np` tiles** — remove `CASH_RUNWAY` and `"£56,300"` constants
 
 ### Phase 2b — Working capital and budget variance
 
-8. **Migration: `working_capital_snapshots`** — no FK beyond `stores`
-9. **Migration: `budget_lines`** — no FK beyond `stores`
+8. **Migration: `working_capital_snapshots`** — no FK beyond `stores`; create index on (`store_id, snapshot_date DESC`)
+9. **Migration: `budget_lines`** — no FK beyond `stores`; create index on (`store_id, period_start, metric_key`); seed `period_granularity = 'month'`, `metric_scope = 'store'`, `currency_code = 'GBP'`
 10. **Seed migration** — insert Bloom & Co. rows
 11. **View: `v_working_capital_current`**
 12. **RPC: `budget_variance_summary()`**
@@ -583,7 +746,7 @@ accounting integration before they are production-ready:
 
 ### Phase 2c — Prior-period deltas for Phase 1 tiles (no schema changes)
 
-14. **Frontend only** — call Phase 1 RPCs with prior-month date range to generate `change` strings dynamically; remove all 11 static `change` string constants from `dashboard.tsx`
+14. **Frontend only** — call Phase 1 RPCs with prior-month date range to generate `change` strings dynamically; remove all static `change` string constants from `dashboard.tsx`
 
 ---
 
@@ -611,8 +774,7 @@ add a fixed cost to `store_cost_assumptions` or a variable rate to `overhead_ent
 
 **Recommendation:** Add Phase 2 threshold columns to `store_settings` via `ALTER TABLE`
 rather than creating a new settings table. `store_settings` is already the designated
-home for per-store configuration. Keep it as a single wide table rather than
-fragmenting settings across multiple tables.
+home for per-store configuration.
 
 **Phase 2 columns to add to `store_settings`:**
 - `overhead_variance_warn_pct numeric(6,2)` — alert when actual overheads exceed budget by X%
@@ -623,30 +785,32 @@ fragmenting settings across multiple tables.
 
 ### Risk 3 — `budget_lines.metric_key` divergence from `METRIC.*` enum
 
-**Issue:** `metric_key` is a free-text column. If new canonical metric names are added
-to `src/lib/metrics.ts` without updating the allowed-values documentation in the
-migration comment, the column becomes undocumented.
+**Issue:** `metric_key` is a text column. If new canonical metric names are added
+to `src/lib/metrics.ts` without updating the `CHECK` constraint, the constraint
+silently rejects the new value.
 
-**Mitigation:** Add a `CHECK` constraint to the migration listing the Phase 2 allowed
-values, and expand the `CHECK` constraint in a new migration when Phase 3 metrics
-are added. This enforces the allowed set at the DB level.
-
-```sql
-CONSTRAINT chk_budget_lines_metric_key CHECK (
-  metric_key IN (
-    'monthly_revenue',
-    'net_sales',
-    'contribution_margin_pct',
-    'monthly_fixed_costs',
-    'operating_profit',
-    'cash_balance'
-  )
-)
-```
+**Mitigation:** The `CHECK` constraint is the canonical gate. When a Phase 3 metric
+is added, a new migration must extend the constraint. Document this requirement in
+the migration comment.
 
 ---
 
-### Risk 4 — `overhead_entries` period range vs RPC date parameters
+### Risk 4 — `budget_lines.metric_scope = 'channel' | 'campaign' | 'sku'` requires `scope_ref`
+
+**Issue:** The CHECK constraint allows `'channel'`, `'campaign'`, and `'sku'` scope
+values but there is no `scope_ref` column to identify *which* channel/campaign/SKU.
+Without `scope_ref`, two rows with `metric_key = 'monthly_revenue'` and
+`metric_scope = 'channel'` for the same period would violate the UNIQUE constraint.
+
+**Mitigation:** Phase 2 seeds `'store'` scope only. The `CHECK` constraint allows
+future values from day one, but the UNIQUE constraint `(store_id, period_start,
+metric_key, metric_scope)` means only one `'channel'` row per metric per period is
+permitted until `scope_ref` is added in Phase 3. Document this explicitly in the
+migration comment.
+
+---
+
+### Risk 5 — `overhead_entries` period range vs RPC date parameters
 
 **Issue:** Phase 1 RPCs use `p_date_from` / `p_date_to` as `date` parameters.
 `overhead_entries` uses `period_start` / `period_end`. A mismatch between a
@@ -655,12 +819,11 @@ cause an entry to be missed.
 
 **Mitigation:** The Phase 2 RPC `monthly_overhead_total()` must use
 `period_start >= p_date_from AND period_end <= p_date_to` (period fully contained
-within the query range), not a partial-overlap join. Document this in the migration
-comment. Seed data must use exact calendar month bounds to avoid edge cases.
+within the query range). Seed data must use exact calendar month bounds.
 
 ---
 
-### Risk 5 — No conflict on table or column names
+### Risk 6 — No collision on new table or column names
 
 A full audit of Phase 1 table and column names confirms no collisions:
 
@@ -671,10 +834,14 @@ A full audit of Phase 1 table and column names confirms no collisions:
 | `cash_balance_snapshots` | None |
 | `working_capital_snapshots` | None |
 | `budget_lines` | None |
-| Column `amount` on `overhead_entries` | Phase 1 `refunds.amount` exists — different table, no collision |
-| Column `period_start` / `period_end` | Not used in Phase 1 — safe to introduce |
-| Column `entry_type` | Not used in Phase 1 — safe to introduce |
-| Column `source` | Not used in Phase 1 — safe to introduce |
+| `currency_code` (new column) | Phase 1 `stores.currency_code` exists — same concept, no collision |
+| `is_recurring` | Not used in Phase 1 — safe to introduce |
+| `account_key` | Not used in Phase 1 — safe to introduce |
+| `account_display_name` | Not used in Phase 1 — safe to introduce |
+| `period_granularity` | Not used in Phase 1 — safe to introduce |
+| `metric_scope` | Not used in Phase 1 — safe to introduce |
+| `period_start` / `period_end` | Not used in Phase 1 — safe to introduce |
+| `entry_type` | Not used in Phase 1 — safe to introduce |
 
 ---
 
@@ -692,8 +859,10 @@ store_cost_assumptions                         overhead_categories
 Used by:                                         Other Overheads
   contribution_margin_pct()            
   → powers cm tile (Phase 1, live)       overhead_entries
-                                           amount   per category per month
-                                           entry_type  'actual' | 'budget'
+                                           amount         per category per month
+                                           currency_code  ISO 4217 (default GBP)
+                                           entry_type     'actual' | 'budget'
+                                           is_recurring   true | false
 
                                          Used by:
                                            monthly_overhead_total()

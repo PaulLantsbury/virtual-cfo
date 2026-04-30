@@ -482,8 +482,22 @@ All three functions use: `LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_pa
 `STABLE` is appropriate because all three functions do not modify the database and
 return the same result for the same inputs within a transaction.
 
-`SECURITY DEFINER` allows the anon/service-role key to call these functions
-without needing direct table access — consistent with all Phase 1 RPCs.
+`SECURITY DEFINER` is used for two reasons:
+
+1. **No RLS policies on Phase 2a tables.** The three new tables are not given
+   explicit RLS policies in these migrations. Running as `SECURITY DEFINER`
+   (the DB owner / service role) means the functions can access the tables
+   without requiring per-role grants. This is the same pattern used by
+   `contribution_margin_pct()` (migration `20260429000003`).
+
+2. **Call-stack consistency.** `operating_profit_monthly()` calls
+   `contribution_margin_pct()`, which is itself `SECURITY DEFINER`. Using
+   `SECURITY DEFINER` throughout Phase 2a keeps the call stack uniform.
+
+Note: the nine basic Phase 1 metric functions in `20260429000001` use
+`SECURITY INVOKER` (the PostgreSQL default). `SECURITY DEFINER` is therefore not
+universal across Phase 1 — it is the pattern established specifically by
+`contribution_margin_pct` and carried forward here.
 
 ---
 

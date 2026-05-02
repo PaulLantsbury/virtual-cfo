@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import { TrendingUp, Zap, Lock, Tag, Target, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -49,7 +51,7 @@ const EFFORT_COLORS: Record<string, string> = {
   High:   "bg-rose-50/70 dark:bg-rose-950/10 text-rose-700 dark:text-rose-400 border-rose-200/50 dark:border-rose-700/25",
 };
 
-const OPPORTUNITIES = SHARED_OPPORTUNITIES.map((opp) => {
+/*const OPPORTUNITIES = SHARED_OPPORTUNITIES.map((opp) => {
   const midpoint   = Math.round((opp.monthlyImpactLow + opp.monthlyImpactHigh) / 2);
   const impactLevel: ImpactLevel =
     opp.confidence === "High" && opp.effort === "Low" ? "high"
@@ -73,7 +75,7 @@ const OPPORTUNITIES = SHARED_OPPORTUNITIES.map((opp) => {
                         ? `£${(opp.monthlyImpactLow / 1000).toFixed(0)}k–£${(opp.monthlyImpactHigh / 1000).toFixed(0)}k cash`
                         : `£${(opp.monthlyImpactLow / 1000).toFixed(0)}k–£${(opp.monthlyImpactHigh / 1000).toFixed(0)}k/mo`,
   };
-});
+});*/
 
 const PRIORITY_NOTE =
   "Start with reducing discount depth and reallocating Meta spend. Together, these two changes represent the highest-confidence, lowest-effort opportunities this month — and both require no additional investment, only a pricing policy change and a budget reallocation.";
@@ -86,11 +88,51 @@ const IMPACT_CONFIG: Record<ImpactLevel, { label: string; classes: string }> = {
   "quick-win": { label: "Quick win",    classes: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300" },
 };
 
-const maxUplift = Math.max(...OPPORTUNITIES.map((o) => o.uplift));
+//const maxUplift = Math.max(...OPPORTUNITIES.map((o) => o.uplift));
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Opportunities() {
+  const [opportunities, setOpportunities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchOpportunities() {
+      const { data, error } = await supabase.rpc("opportunity_breakdown", {
+        p_store_id: "10000000-0000-0000-0000-000000000001",
+      });
+
+      if (error) {
+        console.error("Error fetching opportunities:", error);
+      } else {
+        setOpportunities(data || []);
+      }
+
+      setLoading(false);
+    }
+
+    fetchOpportunities();
+  }, []);
+
+  const mappedOpportunities = opportunities.map((o) => ({
+    ...o,
+    label: o.title,
+    description: o.category,
+    uplift: o.impact_mid ?? 0,
+    impact: "medium" as ImpactLevel,
+    effort: "Low",
+    confidence: "High",
+    timing: "Immediate",
+    implementationType: "No additional investment required",
+    timeToImpact: "Immediate impact (0–30 days)",
+    capitalFree: true,
+    sources: [],
+    annualImpact: (o.impact_mid ?? 0) * 12,
+    impactType: "monthly_contribution",
+    impactRangeLabel: `£${(Number(o.impact_low) / 1000).toFixed(0)}k–£${(Number(o.impact_high) / 1000).toFixed(0)}k/mo`,
+  }));
+
+  const maxUplift = Math.max(...mappedOpportunities.map((o) => o.uplift), 1);
   const showHeadline     = canAccess("opportunities_headline_value");
   const showUpliftValues = canAccess("opportunities_uplift_values");
   const showExecPriority = canAccess("opportunities_execution_priority");
@@ -158,7 +200,7 @@ export default function Opportunities() {
                 <div className="flex items-center gap-2 mt-2">
                   <Lock className="w-3.5 h-3.5 text-emerald-600/60 dark:text-emerald-500/60 shrink-0" />
                   <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 leading-snug">
-                    {OPPORTUNITIES.length} profit opportunities identified — upgrade to see quantified recovery estimates
+                    {OPPORTUNITIES.length} profit opportunities identified — upgrade to see quantified recovery estimate{mappedOpportunities.length} profit opportunities identified — upgrade to see quantified recovery estimates
                   </p>
                 </div>
               </>
@@ -209,7 +251,7 @@ export default function Opportunities() {
         </div>
 
         <div className="divide-y divide-border/40">
-          {OPPORTUNITIES.map((opp, idx) => {
+          {mappedOpportunities.map((opp, idx) => {
             const { label: impactLabel, classes: impactClasses } = IMPACT_CONFIG[opp.impact];
             const barPct = Math.round((opp.uplift / maxUplift) * 100);
 
@@ -454,7 +496,7 @@ export default function Opportunities() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {OPPORTUNITIES.slice(0, 2).map((opp) => (
+              {mappedOpportunities.slice(0, 2).map((opp) => (
                 <div
                   key={opp.id}
                   className="flex items-center gap-3 rounded-xl bg-card border border-border/50 px-4 py-3.5 shadow-sm"

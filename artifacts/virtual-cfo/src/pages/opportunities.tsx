@@ -200,7 +200,7 @@ export default function Opportunities() {
                 <div className="flex items-center gap-2 mt-2">
                   <Lock className="w-3.5 h-3.5 text-emerald-600/60 dark:text-emerald-500/60 shrink-0" />
                   <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 leading-snug">
-                    {OPPORTUNITIES.length} profit opportunities identified — upgrade to see quantified recovery estimate{mappedOpportunities.length} profit opportunities identified — upgrade to see quantified recovery estimates
+                    {mappedOpportunities.length} profit opportunities identified — upgrade to see quantified recovery estimates
                   </p>
                 </div>
               </>
@@ -252,7 +252,7 @@ export default function Opportunities() {
 
         <div className="divide-y divide-border/40">
           {mappedOpportunities.map((opp, idx) => {
-            const { label: impactLabel, classes: impactClasses } = IMPACT_CONFIG[opp.impact];
+            const { label: impactLabel, classes: impactClasses } = IMPACT_CONFIG[opp.impact as ImpactLevel];
             const barPct = Math.round((opp.uplift / maxUplift) * 100);
 
             return showRowDetail ? (
@@ -313,7 +313,7 @@ export default function Opportunities() {
                       <div className="mt-1.5">
                         <span className="text-[11px] text-muted-foreground/50">
                           See analysis:{" "}
-                          {opp.sources.map((src, i) => (
+                          {opp.sources.map((src: { label: string; href: string }, i: number) => (
                             <span key={src.href}>
                               {i > 0 && <span className="text-muted-foreground/30">, </span>}
                               <Link

@@ -114,23 +114,61 @@ export default function Opportunities() {
     fetchOpportunities();
   }, []);
 
-  const mappedOpportunities = opportunities.map((o) => ({
-    ...o,
-    label: o.title,
-    description: o.category,
-    uplift: o.impact_mid ?? 0,
-    impact: "medium" as ImpactLevel,
-    effort: "Low",
-    confidence: "High",
-    timing: "Immediate",
-    implementationType: "No additional investment required",
-    timeToImpact: "Immediate impact (0–30 days)",
-    capitalFree: true,
-    sources: [],
-    annualImpact: (o.impact_mid ?? 0) * 12,
-    impactType: "monthly_contribution",
-    impactRangeLabel: `£${(Number(o.impact_low) / 1000).toFixed(0)}k–£${(Number(o.impact_high) / 1000).toFixed(0)}k/mo`,
-  }));
+  const mappedOpportunities = opportunities.map((o) => {
+    // ── Derive impact level from RPC fields with defensive fallbacks ──────────
+    // Primary: confidence + effort from DB. Fallback: "medium" if either is null.
+    const conf   = (o.confidence ?? "Medium") as string;
+    const eff    = (o.effort     ?? "Medium") as string;
+    const impact: ImpactLevel =
+      conf === "High" && eff === "Low" ? "high"
+      : eff === "Low"                  ? "quick-win"
+      : "medium";
+
+    // ── Derive timeToImpact label from RPC timing field ──────────────────────
+    // Fallback to "Immediate impact (0–30 days)" if timing is null.
+    const timing = (o.timing ?? "Immediate") as string;
+    const timeToImpact =
+      timing === "Immediate"                                         ? "Immediate impact (0–30 days)"
+      : timing === "1–2 weeks" || timing === "2–4 weeks" || timing === "30 days"
+                                                                     ? "Short-term impact (1–2 months)"
+      : "Structural impact (2–3 months)";
+
+    // ── Source link — from linked_page / linked_page_label RPC fields ────────
+    // Fallback to empty array (hides "See analysis:" row in Pro view) if null.
+    const sources: { label: string; href: string }[] =
+      o.linked_page && o.linked_page_label
+        ? [{ label: o.linked_page_label as string, href: o.linked_page as string }]
+        : [];
+
+    // ── Impact range label — cash vs monthly contribution ────────────────────
+    const impType = (o.impact_type ?? "monthly_contribution") as string;
+    const impactRangeLabel =
+      impType === "cash_improvement"
+        ? `£${(Number(o.impact_low) / 1000).toFixed(0)}k–£${(Number(o.impact_high) / 1000).toFixed(0)}k cash`
+        : `£${(Number(o.impact_low) / 1000).toFixed(0)}k–£${(Number(o.impact_high) / 1000).toFixed(0)}k/mo`;
+
+    const uplift = Number(o.impact_mid ?? 0);
+
+    return {
+      ...o,
+      label:              o.title                       as string,
+      // description: use recommended_action from DB when available; fall back
+      // to the stored description column, then category as last resort.
+      description:        (o.recommended_action ?? o.description ?? o.category ?? "") as string,
+      uplift,
+      impact,
+      effort:             eff,
+      confidence:         conf,
+      timing,
+      implementationType: (o.implementation_type ?? "No additional investment required") as string,
+      timeToImpact,
+      capitalFree:        eff === "Low",
+      sources,
+      annualImpact:       uplift * 12,
+      impactType:         impType,
+      impactRangeLabel,
+    };
+  });
 
   const maxUplift = Math.max(...mappedOpportunities.map((o) => o.uplift), 1);
   const showHeadline     = canAccess("opportunities_headline_value");

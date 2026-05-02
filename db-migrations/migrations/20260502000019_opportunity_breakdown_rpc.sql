@@ -58,7 +58,7 @@ WHERE id = '70000000-0000-0000-0000-000000000001';
 UPDATE public.opportunities
 SET
   confidence         = 'Medium',
-  effort             = 'Medium',
+  effort             = 'Low',
   timing             = '1–2 weeks',
   implementation_type = 'Requires operational change',
   recommended_action = 'Implement a post-purchase email sequence to drive '

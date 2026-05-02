@@ -1,4 +1,4 @@
-modules = ["nodejs-24", "python-3.11"]
+modules = ["nodejs-24", "python-3.11", "postgresql-16"]
 
 [[artifacts]]
 id = "artifacts/api-server"
@@ -30,3 +30,6 @@ timeoutMs = 20000
 [userenv.shared]
 VITE_SUPABASE_URL = "https://futkktdebdygsdrcknpr.supabase.co"
 VITE_SUPABASE_ANON_KEY = "sb_publishable_zkobcxnjTBfUW4lcnXAcCA_CXhEEUZp"
+
+[nix]
+channel = "stable-25_05"

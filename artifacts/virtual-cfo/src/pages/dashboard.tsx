@@ -18,6 +18,7 @@ import { TimingBadge } from "@/components/TimingBadge";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
 import { MONTHLY_CM_PCT, MONTHLY_REVENUE, MONTHLY_OPERATING_PROFIT, RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
+import { supabase } from "@/lib/supabase";
 import { CASH_RUNWAY } from "@/lib/data/cash-snapshot";
 import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 
@@ -403,6 +404,38 @@ export default function Dashboard() {
       });
   }, []);
 
+  // ── Opportunity breakdown: recoverable contribution headline ─────────────────
+  // Fetches opportunity_breakdown(p_store_id) to compute recoverableLow / recoverableHigh
+  // for the headline panel by summing impact_low and impact_high across all rows.
+  // Independent of phase1Metrics — a failure here does not affect any other tile.
+  // Falls back to RECOVERABLE_LOW / RECOVERABLE_HIGH from business-snapshot.ts
+  // while loading (null) or if the RPC returns an error.
+  const [oppBreakdown, setOppBreakdown] = useState<{ lo: number; hi: number } | null>(null);
+
+  useEffect(() => {
+    // supabase.rpc() returns PromiseLike, not Promise — wrap to get .catch().
+    Promise.resolve(
+      supabase.rpc("opportunity_breakdown", { p_store_id: PHASE1_STORE_ID }),
+    )
+      .then(({ data, error }) => {
+        if (error || !Array.isArray(data)) return; // leave null → snapshot fallback
+        const lo = data.reduce((sum: number, row: Record<string, unknown>) => sum + (Number(row.impact_low) || 0), 0);
+        const hi = data.reduce((sum: number, row: Record<string, unknown>) => sum + (Number(row.impact_high) || 0), 0);
+        setOppBreakdown({ lo, hi });
+      })
+      .catch(() => {
+        // Network or RPC error: leave oppBreakdown null so the headline falls
+        // back to RECOVERABLE_LOW / RECOVERABLE_HIGH rather than breaking.
+      });
+  }, []);
+
+  // Headline recoverable contribution range for the green opportunity panel.
+  // oppBreakdown null = still loading → safe fallback to snapshot constants.
+  // oppBreakdown resolved = use live summed RPC values.
+  const rcHeadlineLo = oppBreakdown !== null ? oppBreakdown.lo : RECOVERABLE_LOW;
+  const rcHeadlineHi = oppBreakdown !== null ? oppBreakdown.hi : RECOVERABLE_HIGH;
+  const rcHeadlineStr = `£${(rcHeadlineLo / 1_000).toFixed(0)}k–£${(rcHeadlineHi / 1_000).toFixed(0)}k`;
+
   const liveKpiCards = KPI_CARDS.map((card) => {
     // ── Net Sales tile — wired to Phase 1 Supabase function ──────────────────
     // @canonical METRIC.NET_SALES / tile id "ns"
@@ -728,7 +761,7 @@ export default function Dashboard() {
         {!isPro && (
           <div className="px-6 py-2.5 bg-amber-50/40 dark:bg-amber-950/10 border-b border-amber-100/60 dark:border-amber-900/15">
             <p className="text-xs text-amber-700/70 dark:text-amber-400/60 leading-relaxed">
-              We've identified £18k–£42k monthly improvement potential. Unlock the full recovery roadmap below.
+              We've identified {rcHeadlineStr} monthly improvement potential. Unlock the full recovery roadmap below.
             </p>
           </div>
         )}
@@ -813,14 +846,13 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
               <div className="flex-1">
                 {/*
-                  DEV-ONLY — "£18k–£42k" is hardcoded in this JSX body.
-                  The rc KPI tile above correctly reads from phase1Metrics.data.recoverableLow/High
-                  (recoverable_contribution_range() RPC), but this panel has not yet been
-                  wired to the same live values.  Before Phase 2: replace with a dynamic
-                  expression using the resolved lo/hi values from the rc wiring block.
+                  Live value from opportunity_breakdown() RPC — recoverableLow / recoverableHigh
+                  are the summed impact_low / impact_high across all non-archived opportunity rows.
+                  Falls back to RECOVERABLE_LOW / RECOVERABLE_HIGH (business-snapshot.ts) while
+                  loading or if the RPC fails.  See oppBreakdown state and rcHeadlineStr derivation.
                 */}
                 <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
-                  £18k–£42k
+                  {rcHeadlineStr}
                   <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
                 </p>
                 <p className="text-sm text-foreground font-medium mb-1">
@@ -860,12 +892,12 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row sm:items-start gap-4">
               <div className="flex-1">
                 {/*
-                  DEV-ONLY — "£18k–£42k" is hardcoded in this JSX body (same issue as Pro
-                  layout above).  Before Phase 2: wire to phase1Metrics.data.recoverableLow/High
-                  from the recoverable_contribution_range() Supabase RPC.
+                  Live value from opportunity_breakdown() RPC — same rcHeadlineStr as Pro layout.
+                  Falls back to RECOVERABLE_LOW / RECOVERABLE_HIGH (business-snapshot.ts) while
+                  loading or if the RPC fails.  See oppBreakdown state and rcHeadlineStr derivation.
                 */}
                 <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
-                  £18k–£42k
+                  {rcHeadlineStr}
                   <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
                 </p>
                 <p className="text-sm text-foreground font-medium mb-1">
@@ -918,7 +950,7 @@ export default function Dashboard() {
           {isPro ? (
             <div className="space-y-4">
               <p className="text-xs text-indigo-300/70 leading-snug mb-1">
-                These are the key drivers behind the £18k–£42k opportunity identified above. Address them in order for the fastest contribution recovery.
+                These are the key drivers behind the {rcHeadlineStr} opportunity identified above. Address them in order for the fastest contribution recovery.
               </p>
               {CFO_INSIGHT.weeklyPriorities.map((priority, i) => (
                 <div

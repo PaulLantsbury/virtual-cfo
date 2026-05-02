@@ -170,6 +170,13 @@ export default function Opportunities() {
     };
   });
 
+  const capitalFreeLow  = mappedOpportunities.length === 0
+    ? CAPITAL_FREE_LOW
+    : opportunities.filter((o) => o.effort === "Low").reduce((sum, o) => sum + Number(o.impact_low), 0);
+  const capitalFreeHigh = mappedOpportunities.length === 0
+    ? CAPITAL_FREE_HIGH
+    : opportunities.filter((o) => o.effort === "Low").reduce((sum, o) => sum + Number(o.impact_high), 0);
+
   const maxUplift = Math.max(...mappedOpportunities.map((o) => o.uplift), 1);
   const showHeadline     = canAccess("opportunities_headline_value");
   const showUpliftValues = canAccess("opportunities_uplift_values");
@@ -252,7 +259,7 @@ export default function Opportunities() {
             <Zap className="w-3.5 h-3.5 text-[#22D3EE] shrink-0" />
             <p className="text-xs text-emerald-800/70 dark:text-emerald-400/80 leading-snug">
               <span className="font-semibold">
-                Estimated capital-free uplift: £{(CAPITAL_FREE_LOW / 1000).toFixed(0)}k–£{(CAPITAL_FREE_HIGH / 1000).toFixed(0)}k
+                Estimated capital-free uplift: £{(capitalFreeLow / 1000).toFixed(0)}k–£{(capitalFreeHigh / 1000).toFixed(0)}k
               </span>
               {" "}— from opportunities requiring no new budget spend
             </p>

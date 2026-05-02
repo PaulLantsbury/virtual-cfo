@@ -19,12 +19,7 @@ run = "pnpm --filter @workspace/virtual-cfo run dev"
 
 [services.production]
 build = [ "pnpm", "--filter", "@workspace/virtual-cfo", "run", "build" ]
-publicDir = "artifacts/virtual-cfo/dist/public"
-serve = "static"
-
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+run = ["pnpm", "--filter", "@workspace/virtual-cfo", "run", "serve"]
 
 [services.env]
 PORT = "19234"

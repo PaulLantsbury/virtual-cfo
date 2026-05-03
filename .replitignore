@@ -6,4 +6,3 @@
 
 # Migration SQL files are already applied to production — exclude from deploy bundle.
 db-migrations/
-supabase/

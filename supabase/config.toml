@@ -1,0 +1,9 @@
+project_id = "virtualcfo"
+
+[db.migrations]
+enabled = false
+schema_paths = []
+
+[db.seed]
+enabled = false
+sql_paths = []

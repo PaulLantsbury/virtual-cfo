@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown, Lock, SlidersHorizontal, Shield, Zap } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -16,17 +16,13 @@ import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { MONTHLY_CM_PCT } from "@/lib/data/business-snapshot";
 import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
 import { CHANNEL_CM_PCT } from "@/lib/data/channel-metrics";
-import { getPhase1Metrics, type Phase1MetricsResponse } from "@/lib/analytics/phase1Metrics";
+import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 
 // ── Phase 1 metrics config ────────────────────────────────────────────────────
 // DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx.
 // Must be replaced with the authenticated session's store_id before multi-tenant use.
-const MA_STORE_ID  = "10000000-0000-0000-0000-000000000001";
-const _maNow       = new Date();
-const _maPad       = (n: number) => String(n).padStart(2, "0");
-const MA_DATE_FROM = `${_maNow.getFullYear()}-${_maPad(_maNow.getMonth() + 1)}-01`;
-const MA_DATE_TO   = new Date(_maNow.getFullYear(), _maNow.getMonth() + 1, 0)
-  .toISOString().slice(0, 10);
+// Date range is resolved dynamically by useLatestDataPeriod() inside the component.
+const MA_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true  },
@@ -326,17 +322,10 @@ export default function MarginAnalysis() {
   const [showAllOpportunities, setShowAllOpportunities] = useState(false);
 
   // ── Phase 1 data fetch ────────────────────────────────────────────────────
-  // DEV-ONLY store ID + current-month date range — mirrors dashboard.tsx pattern.
-  // A failure in the fetch leaves phase1 null so all values fall back to static
-  // snapshots — no tile goes blank.
-  const [phase1, setPhase1] = useState<Phase1MetricsResponse | null>(null);
-  useEffect(() => {
-    getPhase1Metrics(MA_STORE_ID, MA_DATE_FROM, MA_DATE_TO)
-      .then(setPhase1)
-      .catch(() => {
-        // Network or RPC error — leave phase1 null; static fallbacks apply.
-      });
-  }, []);
+  // Walks back from the current month to find the most recent month with data.
+  // A network failure leaves phase1 null; all derived values fall back to
+  // the static snapshot constants below.
+  const { phase1 } = useLatestDataPeriod(MA_STORE_ID);
 
   // ── Live-derived metric values (Phase 1 → fallback to static snapshots) ────
   // DEV-ONLY FALLBACK — static March 2026 snapshot values are used while phase1

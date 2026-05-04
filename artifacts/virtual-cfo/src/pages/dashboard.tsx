@@ -1,5 +1,5 @@
 import { getCommerceMetrics } from "@/lib/analytics/commerceMetrics";
-import { getPhase1Metrics, type Phase1MetricsResponse } from "@/lib/analytics/phase1Metrics";
+import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { getPhase2aMetrics, type Phase2aMetricsResponse } from "@/lib/analytics/phase2aMetrics";
 import { useEffect, useState } from "react";
 import {
@@ -34,13 +34,10 @@ import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 // Not safe for production multi-tenant deployment.
 const PHASE1_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
-// Date range: current calendar month (inclusive both ends).
-// Recomputed once at module load; does not reactively update mid-session.
-const _now            = new Date();
-const _pad            = (n: number) => String(n).padStart(2, "0");
-const PHASE1_DATE_FROM = `${_now.getFullYear()}-${_pad(_now.getMonth() + 1)}-01`;
-const PHASE1_DATE_TO   = new Date(_now.getFullYear(), _now.getMonth() + 1, 0)
-  .toISOString().slice(0, 10);
+// Date range is now resolved dynamically by useLatestDataPeriod() inside the
+// component — it walks back from the current month until it finds a period
+// with order data (up to 3 months). activeDateFrom / activeDateTo are used
+// by both the Phase 1 and Phase 2a fetches so both cover the same period.
 
 type KpiStatus = "warning" | "positive" | "danger" | "neutral";
 
@@ -371,23 +368,17 @@ const HEALTH_MODULES = [
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<any>(null);
 
-  // ── Phase 1 metrics: Net Sales tile (METRIC.NET_SALES / tile id "ns") ────────
-  // Fetches the canonical net_sales() Supabase function result for the current
-  // calendar month.  Loaded independently of the main commerceMetrics query so
-  // that a failure in either source does not block the other.
-  const [phase1Metrics, setPhase1Metrics] = useState<Phase1MetricsResponse | null>(null);
+  // ── Phase 1: walk back from current month to the most recent month with data ──
+  // activeDateFrom / activeDateTo are forwarded to Phase 2a so both fetches
+  // cover the same resolved period.
+  const {
+    phase1: phase1Metrics,
+    dateFrom: activeDateFrom,
+    dateTo:   activeDateTo,
+  } = useLatestDataPeriod(PHASE1_STORE_ID);
 
   useEffect(() => {
     getCommerceMetrics().then(setMetrics);
-  }, []);
-
-  useEffect(() => {
-    getPhase1Metrics(PHASE1_STORE_ID, PHASE1_DATE_FROM, PHASE1_DATE_TO)
-      .then(setPhase1Metrics)
-      .catch(() => {
-        // Network or RPC error: leave phase1Metrics null so the tile falls
-        // back to the commerceMetrics value rather than breaking.
-      });
   }, []);
 
   // ── Phase 2a metrics: Cash Runway tile (METRIC.CASH_RUNWAY_MONTHS / tile id "cr") ──
@@ -397,13 +388,16 @@ export default function Dashboard() {
   const [phase2aMetrics, setPhase2aMetrics] = useState<Phase2aMetricsResponse | null>(null);
 
   useEffect(() => {
-    getPhase2aMetrics(PHASE1_STORE_ID, PHASE1_DATE_FROM, PHASE1_DATE_TO)
+    // Wait until useLatestDataPeriod has resolved the active period before
+    // fetching Phase 2a — both phases must cover the same month.
+    if (!activeDateFrom || !activeDateTo) return;
+    getPhase2aMetrics(PHASE1_STORE_ID, activeDateFrom, activeDateTo)
       .then(setPhase2aMetrics)
       .catch(() => {
         // Network or RPC error: leave phase2aMetrics null so affected tiles
         // fall back to their snapshot constants rather than breaking.
       });
-  }, []);
+  }, [activeDateFrom, activeDateTo]);
 
   // ── Opportunity breakdown: recoverable contribution headline ─────────────────
   // Fetches opportunity_breakdown(p_store_id) to compute recoverableLow / recoverableHigh

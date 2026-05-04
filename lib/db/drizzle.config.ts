@@ -11,4 +11,8 @@ export default defineConfig({
   dbCredentials: {
     url: process.env.DATABASE_URL,
   },
+  // Scope drizzle-kit to only the tables declared in the Drizzle schema.
+  // The remaining tables are managed exclusively by raw SQL migrations in
+  // db-migrations/migrations/ and must not be touched by drizzle-kit push.
+  tablesFilter: ["store_cost_assumptions"],
 });

@@ -27,7 +27,14 @@ import {
   CAC_BY_CHANNEL,
   PAYBACK_BY_CHANNEL,
 } from "@/lib/data/channel-metrics";
-import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
+import { CAC_PAYBACK, CAC_PAYBACK_PREV, DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
+import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+
+// ── Phase 1 metrics config ────────────────────────────────────────────────────
+// DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx and margin-analysis.tsx.
+// Must be replaced with the authenticated session's store_id before multi-tenant use.
+// Date range is resolved dynamically by useLatestDataPeriod() inside the component.
+const ME_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 // BLENDED_CAC, BLENDED_ROAS, CAC_BY_CHANNEL, PAYBACK_BY_CHANNEL, CHANNEL_CM_PCT
@@ -472,6 +479,42 @@ const TIMELINE_FRAMING: Record<string, {
 export default function MarketingEfficiency() {
   const { periodBadge, periodPhrase, timeline } = useTimeline();
   const framing = TIMELINE_FRAMING[timeline] ?? TIMELINE_FRAMING["30d"];
+
+  // ── Phase 1: live discount dependency and repeat purchase rate ────────────
+  // Walks back from the current month to find the most recent month with data.
+  // Only these two fields are used here — all other ME metrics require ad
+  // platform data (Meta/Google Ads API) and remain static for now.
+  const { phase1: mktPhase1 } = useLatestDataPeriod(ME_STORE_ID);
+
+  // Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
+  const liveDiscountDep = mktPhase1
+    ? (mktPhase1.data.discountDependency * 100).toFixed(1)
+    : DISCOUNT_DEP.toFixed(1);
+
+  // Live repeat purchase rate % (1 d.p.) — fallback to static REPEAT_RATE.
+  const liveRepeatRate = mktPhase1
+    ? (mktPhase1.data.repeatPurchaseRate * 100).toFixed(1)
+    : REPEAT_RATE.toFixed(1);
+
+  // Patch the two Phase-1-adjacent driver cause strings with live values.
+  // driver, impact, direction, and category remain untouched — only cause text
+  // is updated. ME_DRIVERS_TOTAL and ME_LARGEST_DRIVER continue to use the
+  // original module-level array (impact values are not live yet).
+  const liveMeDrivers = ME_DRIVERS.map((d) => {
+    if (d.driver === "Discount-led traffic mix") {
+      return {
+        ...d,
+        cause: `Discount dependency at ${liveDiscountDep}% — higher discount depth shifted order mix toward low-margin SKUs`,
+      };
+    }
+    if (d.driver === "Lower repeat-customer share") {
+      return {
+        ...d,
+        cause: `Repeat purchase rate at ${liveRepeatRate}% — declining repeat share increases reliance on expensive new customer acquisition`,
+      };
+    }
+    return d;
+  });
 
   // ── Budget Reallocation Simulator state ──────────────────────────────────
   const [metaToEmail,    setMetaToEmail]    = useState(0);
@@ -1682,7 +1725,7 @@ export default function MarketingEfficiency() {
 
           {/* Grouped driver rows */}
           {ME_DRIVER_GROUPS.map((group) => {
-            const groupDrivers = ME_DRIVERS
+            const groupDrivers = liveMeDrivers
               .filter((d) => d.category === group.key)
               .sort((a, b) => a.impact - b.impact);
             if (!groupDrivers.length) return null;

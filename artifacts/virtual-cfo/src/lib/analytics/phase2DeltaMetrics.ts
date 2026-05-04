@@ -149,6 +149,79 @@ export function formatDeltaPp(delta: number | null | undefined): string {
   return `${arrow} ${abs.toFixed(1)}pp vs last month`;
 }
 
+// ── Trailing 12-month CM average types ───────────────────────────────────────
+
+/**
+ * One row returned by trailing_12m_cm_avg().
+ * The RPC averages the 12 calendar months immediately BEFORE the anchor
+ * date (T-1 through T-12), excluding months where gross_revenue = 0.
+ *
+ * cm_pct_12m_avg is a [0,1] ratio — multiply by 100 for display as %.
+ * null when no months with live order data were found in the window.
+ * months_included reflects how many non-zero months were averaged (0–12).
+ */
+export type Trailing12mRow = {
+  /** [0,1] ratio — multiply × 100 for display. null when no live months found. */
+  cm_pct_12m_avg:  number | null;
+  /** Number of non-zero-revenue months included in the average (0–12) */
+  months_included: number;
+};
+
+export type Trailing12mError = {
+  fn:      string;
+  message: string;
+};
+
+export type Trailing12mResponse = {
+  /**
+   * null when:
+   *   - The RPC returned 0 rows
+   *   - The RPC call itself failed (error recorded in errors[])
+   */
+  data:   Trailing12mRow | null;
+  errors: Trailing12mError[];
+};
+
+/**
+ * Calls trailing_12m_cm_avg() and returns the first row.
+ *
+ * The RPC averages CM% for the 12 months immediately BEFORE the anchor
+ * (T-1 through T-12, where T = p_date_from), skipping months with zero
+ * gross revenue.  months_included in the result tells callers how many
+ * months contributed to the average.
+ *
+ * @param storeId  UUID of the store — matches orders.store_id.
+ * @param dateFrom First day of the CURRENT period (e.g. "2026-04-01").
+ *                 Used as the anchor month T.  The RPC looks back T-1..T-12.
+ */
+export async function getTrailing12mCmAvg(
+  storeId:  string,
+  dateFrom: string,
+): Promise<Trailing12mResponse> {
+  const errors: Trailing12mError[] = [];
+
+  const { data, error } = await supabase.rpc("trailing_12m_cm_avg", {
+    p_store_id:  storeId,
+    p_date_from: dateFrom,
+  });
+
+  if (error) {
+    errors.push({ fn: "trailing_12m_cm_avg", message: error.message });
+    return { data: null, errors };
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return { data: null, errors };
+
+  return {
+    errors,
+    data: {
+      cm_pct_12m_avg:  toNumNullable(row.cm_pct_12m_avg),
+      months_included: toNum(row.months_included),
+    },
+  };
+}
+
 // ── Rolling 3-month averages types ───────────────────────────────────────────
 
 /**

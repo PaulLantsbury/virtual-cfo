@@ -38,20 +38,28 @@ import { useState, useEffect } from "react";
 import {
   getPhase2Deltas,
   getRolling3mAverages,
+  getTrailing12mCmAvg,
   type Phase2DeltaRow,
   type Rolling3mRow,
+  type Trailing12mRow,
 } from "./phase2DeltaMetrics";
 
 export type Phase2DeltasState = {
   /** null while loading or if the RPC failed / returned no rows */
-  deltas:  Phase2DeltaRow | null;
+  deltas:      Phase2DeltaRow | null;
   /**
    * Rolling 3-month averages — null while loading or if rolling_3m_averages()
    * failed / returned no rows.  Fetched in parallel with deltas.
    */
-  trends:  Rolling3mRow | null;
-  /** true until both fetch attempts settle (success or failure) */
-  loading: boolean;
+  trends:      Rolling3mRow | null;
+  /**
+   * Trailing 12-month CM% average — null while loading or if
+   * trailing_12m_cm_avg() failed / returned no rows.
+   * Fetched in parallel with deltas and trends.
+   */
+  trailing12m: Trailing12mRow | null;
+  /** true until all three fetch attempts settle (success or failure) */
+  loading:     boolean;
 };
 
 /**
@@ -68,9 +76,10 @@ export function usePhase2Deltas(
   dateFrom: string,
   dateTo:   string,
 ): Phase2DeltasState {
-  const [deltas,  setDeltas]  = useState<Phase2DeltaRow | null>(null);
-  const [trends,  setTrends]  = useState<Rolling3mRow | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [deltas,      setDeltas]      = useState<Phase2DeltaRow | null>(null);
+  const [trends,      setTrends]      = useState<Rolling3mRow | null>(null);
+  const [trailing12m, setTrailing12m] = useState<Trailing12mRow | null>(null);
+  const [loading,     setLoading]     = useState(true);
 
   useEffect(() => {
     // Guard: both dates must be present before fetching.
@@ -82,13 +91,15 @@ export function usePhase2Deltas(
     setLoading(true);
     setDeltas(null);
     setTrends(null);
+    setTrailing12m(null);
 
-    // Both RPCs are independent — fire in parallel for a single round-trip wait.
+    // All three RPCs are independent — fire in parallel for a single round-trip wait.
     Promise.all([
       getPhase2Deltas(storeId, dateFrom, dateTo),
       getRolling3mAverages(storeId, dateFrom),
+      getTrailing12mCmAvg(storeId, dateFrom),
     ])
-      .then(([deltaResponse, trendsResponse]) => {
+      .then(([deltaResponse, trendsResponse, trailing12mResponse]) => {
         if (cancelled) return;
         if (deltaResponse.errors.length > 0) {
           console.warn(
@@ -102,13 +113,20 @@ export function usePhase2Deltas(
             trendsResponse.errors,
           );
         }
+        if (trailing12mResponse.errors.length > 0) {
+          console.warn(
+            "[Phase2Deltas] trailing_12m_cm_avg RPC error — 12m avg will use static fallback:",
+            trailing12mResponse.errors,
+          );
+        }
         setDeltas(deltaResponse.data);
         setTrends(trendsResponse.data);
+        setTrailing12m(trailing12mResponse.data);
         setLoading(false);
       })
       .catch(() => {
         // Unhandled rejection (e.g. network offline).
-        // Leave deltas/trends null so callers show static sentinels / "—".
+        // Leave all null so callers show static sentinels / "—".
         if (!cancelled) setLoading(false);
       });
 
@@ -117,5 +135,5 @@ export function usePhase2Deltas(
     };
   }, [storeId, dateFrom, dateTo]);
 
-  return { deltas, trends, loading };
+  return { deltas, trends, trailing12m, loading };
 }

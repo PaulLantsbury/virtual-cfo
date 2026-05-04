@@ -68,8 +68,16 @@ const BRIDGE_ROWS: Array<{ label: string; total: number; perOrder: number; type:
 const CONTRIBUTION_PER_ORDER_PREV_M  = 38.20;  // last month — static snapshot
 const CONTRIBUTION_PER_ORDER_LY      = 40.50;  // same month last year — static snapshot
 
-/** Contribution Margin — YoY baseline from TREND_DATA[0] */
-const CM_LY = 48.2;
+/**
+ * Trailing 12-month average CM% — derived from TREND_DATA as a static fallback.
+ * Used only when the trailing_12m_cm_avg() Supabase RPC is unavailable (loading,
+ * network failure, or no live months in the DB window).  When the RPC resolves
+ * successfully the live value replaces this.  Not used as a primary data source.
+ */
+const CM_12M_AVG_FALLBACK = +(
+  TREND_DATA.slice(0, -1).reduce((sum, d) => sum + d.margin, 0) /
+  (TREND_DATA.length - 1)
+).toFixed(1);
 
 /** Contribution Profit — prior periods (estimated from historical CM × revenue) */
 const CM_VALUE_PREV_M = 57_125;  // 45.8% of prior month revenue — static snapshot
@@ -330,14 +338,16 @@ export default function MarginAnalysis() {
   // the static snapshot constants below.
   const { phase1, dateFrom: maDateFrom, dateTo: maDateTo, periodLabel: maPeriodLabel, loading: maPeriodLoading } = useLatestDataPeriod(MA_STORE_ID);
 
-  // ── Phase 2: month-on-month deltas + rolling 3m averages ─────────────────
-  // Both RPCs fire in parallel inside the hook. Used for:
+  // ── Phase 2: month-on-month deltas + rolling 3m averages + trailing 12m avg
+  // All three RPCs fire in parallel inside the hook. Used for:
   //   - CM% change vs last month (replaces static CM_PREV comparison) [deltas]
   //   - Contribution profit prior-period value (replaces CM_VALUE_PREV_M) [deltas]
   //   - Contribution per order prior-period value (replaces CONTRIBUTION_PER_ORDER_PREV_M) [deltas]
   //   - 3-month rolling average CM% for trend context line [trends]
-  // A failure leaves maDeltas / maTrends null; affected rows fall back to static snapshots.
-  const { deltas: maDeltas, trends: maTrends } = usePhase2Deltas(MA_STORE_ID, maDateFrom, maDateTo);
+  //   - Trailing 12-month average CM% for "vs 12-month avg" VarLine [trailing12m]
+  // A failure leaves maDeltas / maTrends / maTrailing12m null; affected rows
+  // fall back to static snapshots or TREND_DATA-derived values.
+  const { deltas: maDeltas, trends: maTrends, trailing12m: maTrailing12m } = usePhase2Deltas(MA_STORE_ID, maDateFrom, maDateTo);
 
   // ── Live-derived metric values (Phase 1 → fallback to static snapshots) ────
   // DEV-ONLY FALLBACK — static March 2026 snapshot values are used while phase1
@@ -413,6 +423,34 @@ export default function MarginAnalysis() {
   // How many non-zero-revenue months are in the average (1, 2, or 3).
   // 0 when maTrends is null / RPC did not return the field.
   const cmTrendMonths: number = maTrends?.months_included ?? 0;
+
+  // Live trailing 12-month CM% average — from trailing_12m_cm_avg() RPC.
+  // cm_pct_12m_avg is [0,1] — multiply × 100 for display %.
+  // Priority:
+  //   1. Live RPC with ≥ 1 non-zero month       → use live average
+  //   2. RPC pending (maTrailing12m === null)    → use CM_12M_AVG_FALLBACK (TREND_DATA)
+  //   3. RPC settled, 0 live months found        → use CM_12M_AVG_FALLBACK (TREND_DATA)
+  //   4. RPC settled, cm_pct_12m_avg is null     → use CM_12M_AVG_FALLBACK (TREND_DATA)
+  const liveTrailing12mPct: number =
+    maTrailing12m != null &&
+    maTrailing12m.cm_pct_12m_avg != null &&
+    maTrailing12m.months_included > 0
+      ? +(maTrailing12m.cm_pct_12m_avg * 100).toFixed(1)
+      : CM_12M_AVG_FALLBACK;
+
+  // CM% gap vs trailing average — positive = above avg (favourable).
+  const cmVs12mAvg: number = +(CM_PCT - liveTrailing12mPct).toFixed(1);
+  const cmVs12mSentiment = deltaToSentiment(cmVs12mAvg, DELTA_POLARITY.cm);
+
+  // Label reflects how many months are actually in the average so the UI is
+  // never misleading: "vs 2-month avg" when only 2 months exist in the DB,
+  // "vs 12-month avg" when fully populated. Falls back to "12" when the RPC
+  // has not yet resolved (null) — matches the CM_12M_AVG_FALLBACK window.
+  const cmTrailing12mMonths: number =
+    maTrailing12m != null && maTrailing12m.months_included > 0
+      ? maTrailing12m.months_included
+      : TREND_DATA.slice(0, -1).length;
+  const cmVs12mLabel = `vs ${cmTrailing12mMonths}-month avg`;
 
   // Contribution Profit prior-month value — live from Phase 2, fallback to snapshot.
   // Formula: gross_revenue_prv × cm_pct_prv ≈ contribution_profit_prv
@@ -1368,7 +1406,11 @@ export default function MarginAnalysis() {
               value={liveCmChangePp !== null ? `${liveCmChangePp >= 0 ? "↑" : "↓"} ${Math.abs(liveCmChangePp).toFixed(1)}pp` : "—"}
               favorable={cmSentiment === "positive"}
             />
-            <VarLine label="vs 12-month avg" value={`↓ ${Math.abs(CM_PCT - CM_LY).toFixed(1)}pp`} favorable={false} />
+            <VarLine
+              label={cmVs12mLabel}
+              value={`${cmVs12mAvg >= 0 ? "↑" : "↓"} ${Math.abs(cmVs12mAvg).toFixed(1)}pp`}
+              favorable={cmVs12mSentiment === "positive"}
+            />
           </div>
           {(() => {
             const bm = getBenchmark(CM_PCT);

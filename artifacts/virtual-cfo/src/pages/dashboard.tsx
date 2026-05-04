@@ -4,6 +4,7 @@ import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 import { getPhase2aMetrics, type Phase2aMetricsResponse } from "@/lib/analytics/phase2aMetrics";
 import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
 import { formatDeltaPct, formatDeltaPp } from "@/lib/analytics/phase2DeltaMetrics";
+import { type DeltaSentiment, DELTA_POLARITY, deltaToSentiment } from "@/lib/analytics/deltaSentiment";
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight, ArrowDownRight, Minus,
@@ -44,16 +45,8 @@ const PHASE1_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 type KpiStatus = "warning" | "positive" | "danger" | "neutral";
 
-/**
- * Sentiment of a month-on-month delta badge — independent of the tile's
- * overall health status (KpiStatus).
- *   "positive" — the delta is favourable for this metric   → green badge
- *   "negative" — the delta is unfavourable                 → red badge
- *   "neutral"  — delta is exactly zero                     → muted badge
- *   null       — no prior period data (shows "—")          → muted badge
- *   undefined  — loading / tile not yet wired              → fall back to KpiStatus colour
- */
-type DeltaSentiment = "positive" | "negative" | "neutral";
+// DeltaSentiment, DELTA_POLARITY, and deltaToSentiment imported from
+// @/lib/analytics/deltaSentiment — shared with Margin Analysis and Growth Quality.
 
 const CFO_INSIGHT = {
   // Weekly action priorities — user-facing text only. Underlying upside values unchanged.
@@ -114,36 +107,7 @@ function formatOpProfit(v: number): string {
   return `£${abs.toLocaleString("en-GB")}`;
 }
 
-/**
- * "Good direction" for each KPI tile.
- *   "up-is-good"   — a positive delta is a good signal (Revenue, AOV, RPR, CM, Net Profit, Net Sales)
- *   "down-is-good" — a negative delta is a good signal (Discount Dependency, Refund Rate)
- * Tiles not listed here (rc, cr, ae) have no Phase 2 delta wiring.
- */
-const DELTA_POLARITY = {
-  mr:  "up-is-good",
-  ns:  "up-is-good",
-  aov: "up-is-good",
-  rpr: "up-is-good",
-  cm:  "up-is-good",
-  np:  "up-is-good",
-  dd:  "down-is-good",
-  rr:  "down-is-good",
-} as const satisfies Record<string, "up-is-good" | "down-is-good">;
-
-/**
- * Converts a raw delta number + polarity into a DeltaSentiment.
- * Returns null when delta is null (no prior period data — caller shows "—").
- */
-function deltaToSentiment(
-  delta: number | null | undefined,
-  polarity: "up-is-good" | "down-is-good",
-): DeltaSentiment | null {
-  if (delta === null || delta === undefined) return null;
-  if (delta === 0) return "neutral";
-  const isGood = polarity === "up-is-good" ? delta > 0 : delta < 0;
-  return isGood ? "positive" : "negative";
-}
+// DELTA_POLARITY and deltaToSentiment imported from @/lib/analytics/deltaSentiment above.
 
 /** Status derived from sign of an operating profit value. */
 function opProfitStatus(v: number): KpiStatus {

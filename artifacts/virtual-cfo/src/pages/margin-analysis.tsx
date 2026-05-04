@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown, Lock, SlidersHorizontal, Shield, Zap } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown, Lock, SlidersHorizontal, Shield, Zap } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -19,6 +19,7 @@ import { CHANNEL_CM_PCT } from "@/lib/data/channel-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
+import { deltaToSentiment, DELTA_POLARITY } from "@/lib/analytics/deltaSentiment";
 
 // ── Phase 1 metrics config ────────────────────────────────────────────────────
 // DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx.
@@ -50,14 +51,14 @@ const CM_PREV = 45.8; // prior-month snapshot — no live prior-period RPC yet
 
 const BENCHMARK_TARGET = { low: 45, high: 55 };
 
-const BRIDGE_ROWS = [
+const BRIDGE_ROWS: Array<{ label: string; total: number; perOrder: number; type: "revenue" | "deduction"; trend: "stable" | "worsening" | "improving" }> = [
   { label: "Revenue",          total: 124500, perOrder: 68.40, type: "revenue",   trend: "stable"    },
   { label: "Discounts",        total:  -8715, perOrder: -8.10, type: "deduction", trend: "worsening" },
   { label: "Payment fees",     total:  -2490, perOrder: -1.90, type: "deduction", trend: "stable"    },
   { label: "Shipping costs",   total: -15562, perOrder: -4.80, type: "deduction", trend: "worsening" },
   { label: "Fulfilment costs", total: -17430, perOrder: -6.40, type: "deduction", trend: "stable"    },
   { label: "Marketing spend",  total: -27390, perOrder:-12.20, type: "deduction", trend: "worsening" },
-] as const;
+];
 
 // ─── KPI metrics & variance data ─────────────────────────────────────────────
 // @dynamic All values replace with live-computed deltas (current − period_value)
@@ -427,19 +428,35 @@ export default function MarginAnalysis() {
       (maDeltas.gross_revenue_prv / maDeltas.aov_prv)
     : CONTRIBUTION_PER_ORDER_PREV_M;
 
+  // Discount dependency delta pp — live from Phase 2, fallback to static snapshot comparison.
+  // down-is-good: a negative value means dependency fell (favourable).
+  const liveDiscDepChangePp: number | null = maDeltas
+    ? (maDeltas.discount_dep_delta_pp ?? null)
+    : +(AVG_DISCOUNT_PCT - AVG_DISCOUNT_PREV_M).toFixed(1);
+
+  // Pre-computed sentiments — avoids repeated inline deltaToSentiment calls in JSX.
+  const cmSentiment   = deltaToSentiment(liveCmChangePp,   DELTA_POLARITY.cm);
+
   // Simulator baseline revenue — live gross revenue (fallback: 124,500 via liveGrossRevenue)
   const SIM_REVENUE = liveGrossRevenue;
 
   // Bridge rows — rows 0 (Revenue) and 1 (Discounts) use live Phase 1 values;
   // rows 2–5 stay static (no RPCs cover payment fees, shipping, fulfilment, or marketing).
   const _discountDep = phase1?.data.discountDependency ?? 0.07;
+  // Discounts row trend — derived from live discount dep delta (down-is-good: falling dep = improving).
+  // null data = no prior period to compare → neutral/stable (not worsening).
+  const _discountTrend: "stable" | "worsening" | "improving" =
+    liveDiscDepChangePp === null ? "stable"
+    : deltaToSentiment(liveDiscDepChangePp, DELTA_POLARITY.dd) === "positive" ? "improving"
+    : deltaToSentiment(liveDiscDepChangePp, DELTA_POLARITY.dd) === "negative" ? "worsening"
+    : "stable";
   const liveBridgeRows = [
-    { label: "Revenue",          total: Math.round(liveGrossRevenue),                       perOrder: +liveAov.toFixed(2),                         type: "revenue"   as const, trend: "stable"    as const },
-    { label: "Discounts",        total: -Math.round(liveGrossRevenue * _discountDep),        perOrder: -(+(liveAov * _discountDep).toFixed(2)),      type: "deduction" as const, trend: "worsening" as const },
-    { label: "Payment fees",     total:  -2490, perOrder: -1.90, type: "deduction" as const, trend: "stable"    as const },
-    { label: "Shipping costs",   total: -15562, perOrder: -4.80, type: "deduction" as const, trend: "worsening" as const },
-    { label: "Fulfilment costs", total: -17430, perOrder: -6.40, type: "deduction" as const, trend: "stable"    as const },
-    { label: "Marketing spend",  total: -27390, perOrder:-12.20, type: "deduction" as const, trend: "worsening" as const },
+    { label: "Revenue",          total: Math.round(liveGrossRevenue),                       perOrder: +liveAov.toFixed(2),                         type: "revenue"   as const, trend: "stable"       as const },
+    { label: "Discounts",        total: -Math.round(liveGrossRevenue * _discountDep),        perOrder: -(+(liveAov * _discountDep).toFixed(2)),      type: "deduction" as const, trend: _discountTrend },
+    { label: "Payment fees",     total:  -2490, perOrder: -1.90, type: "deduction" as const, trend: "stable"       as const },
+    { label: "Shipping costs",   total: -15562, perOrder: -4.80, type: "deduction" as const, trend: "worsening"    as const },
+    { label: "Fulfilment costs", total: -17430, perOrder: -6.40, type: "deduction" as const, trend: "stable"       as const },
+    { label: "Marketing spend",  total: -27390, perOrder:-12.20, type: "deduction" as const, trend: "worsening"    as const },
   ];
 
   // Monthly impact for change drivers (order volume × per-order impact)
@@ -583,9 +600,9 @@ export default function MarginAnalysis() {
                 {liveCmChangePp !== null ? (
                   <span className={cn(
                     "text-sm font-semibold",
-                    liveCmChangePp >= 0
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-destructive",
+                    cmSentiment === "positive" ? "text-emerald-600 dark:text-emerald-400"
+                    : cmSentiment === "neutral"  ? "text-muted-foreground"
+                    : "text-destructive",
                   )}>
                     {liveCmChangePp >= 0 ? "↑" : "↓"} {Math.abs(liveCmChangePp).toFixed(1)}pp
                   </span>
@@ -1346,7 +1363,11 @@ export default function MarginAnalysis() {
           <p className="text-sm font-medium text-muted-foreground mb-1">Contribution Margin</p>
           <p className="text-3xl font-display font-bold text-foreground mb-2">{CM_PCT}%</p>
           <div className="space-y-0.5 mb-3">
-            <VarLine label="vs last month" value={`↓ ${Math.abs(CM_CHANGE)}pp`} favorable={false} />
+            <VarLine
+              label="vs last month"
+              value={liveCmChangePp !== null ? `${liveCmChangePp >= 0 ? "↑" : "↓"} ${Math.abs(liveCmChangePp).toFixed(1)}pp` : "—"}
+              favorable={cmSentiment === "positive"}
+            />
             <VarLine label="vs 12-month avg" value={`↓ ${Math.abs(CM_PCT - CM_LY).toFixed(1)}pp`} favorable={false} />
           </div>
           {(() => {
@@ -1763,6 +1784,8 @@ export default function MarginAnalysis() {
                     <td className="py-3 pl-4 text-right">
                       {row.trend === "worsening" ? (
                         <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">↑ cost</span>
+                      ) : row.trend === "improving" ? (
+                        <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 whitespace-nowrap">↓ cost</span>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
@@ -1851,6 +1874,10 @@ export default function MarginAnalysis() {
                         <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
                           ↑ cost
                         </span>
+                      ) : row.trend === "improving" ? (
+                        <span className="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 whitespace-nowrap">
+                          ↓ cost
+                        </span>
                       ) : (
                         <span className="text-xs text-muted-foreground">—</span>
                       )}
@@ -1874,10 +1901,19 @@ export default function MarginAnalysis() {
                   £{CONTRIBUTION_PER_ORDER.toFixed(2)}
                 </td>
                 <td className="py-3.5 pl-4 text-right">
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
-                    <ArrowDownRight className="w-2.5 h-2.5" />
-                    ↓ margin
-                  </span>
+                  {cmSentiment === "positive" ? (
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 whitespace-nowrap">
+                      <ArrowUpRight className="w-2.5 h-2.5" />
+                      ↑ margin
+                    </span>
+                  ) : cmSentiment === "negative" ? (
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive whitespace-nowrap">
+                      <ArrowDownRight className="w-2.5 h-2.5" />
+                      ↓ margin
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">—</span>
+                  )}
                 </td>
               </tr>
             </tfoot>

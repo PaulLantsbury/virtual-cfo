@@ -27,6 +27,7 @@ import {
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
+import { deltaToSentiment, DELTA_POLARITY } from "@/lib/analytics/deltaSentiment";
 
 // ─── Store ID ─────────────────────────────────────────────────────────────────
 // Dev store UUID — matches Dashboard, Margin Analysis, and Marketing Efficiency.
@@ -454,8 +455,19 @@ export default function GrowthQuality() {
           <p className="text-sm font-medium text-muted-foreground mb-1">Repeat Purchase Rate</p>
           <p className="text-4xl font-display font-bold text-foreground">{liveRepeatRate}%</p>
           <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">
-              <ArrowUpRight className="w-3 h-3" />
+            <span className={cn(
+              "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
+              deltaToSentiment(liveRprChangePp, DELTA_POLARITY.rpr) === "positive"
+                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                : deltaToSentiment(liveRprChangePp, DELTA_POLARITY.rpr) === "negative"
+                ? "bg-destructive/10 text-destructive"
+                : "bg-secondary text-muted-foreground"
+            )}>
+              {liveRprChangePp !== null && liveRprChangePp > 0
+                ? <ArrowUpRight className="w-3 h-3" />
+                : liveRprChangePp !== null && liveRprChangePp < 0
+                ? <ArrowDownRight className="w-3 h-3" />
+                : <Minus className="w-3 h-3" />}
               {liveRprChangePp !== null
                 ? `${liveRprChangePp >= 0 ? "+" : ""}${Math.abs(liveRprChangePp).toFixed(1)}pp vs last month`
                 : "— vs last month"}
@@ -471,8 +483,19 @@ export default function GrowthQuality() {
           <p className="text-sm font-medium text-muted-foreground mb-1">Discount Dependency</p>
           <p className="text-4xl font-display font-bold text-foreground">{liveDiscountDep}%</p>
           <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
-              <ArrowUpRight className="w-3 h-3" />
+            <span className={cn(
+              "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
+              deltaToSentiment(liveDiscDepChangePp, DELTA_POLARITY.dd) === "positive"
+                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                : deltaToSentiment(liveDiscDepChangePp, DELTA_POLARITY.dd) === "negative"
+                ? "bg-destructive/10 text-destructive"
+                : "bg-secondary text-muted-foreground"
+            )}>
+              {liveDiscDepChangePp !== null && liveDiscDepChangePp > 0
+                ? <ArrowUpRight className="w-3 h-3" />
+                : liveDiscDepChangePp !== null && liveDiscDepChangePp < 0
+                ? <ArrowDownRight className="w-3 h-3" />
+                : <Minus className="w-3 h-3" />}
               {liveDiscDepChangePp !== null
                 ? `${liveDiscDepChangePp >= 0 ? "+" : ""}${Math.abs(liveDiscDepChangePp).toFixed(1)}pp vs last month`
                 : "— vs last month"}

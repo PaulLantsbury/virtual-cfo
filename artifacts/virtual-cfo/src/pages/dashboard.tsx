@@ -44,6 +44,17 @@ const PHASE1_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 type KpiStatus = "warning" | "positive" | "danger" | "neutral";
 
+/**
+ * Sentiment of a month-on-month delta badge — independent of the tile's
+ * overall health status (KpiStatus).
+ *   "positive" — the delta is favourable for this metric   → green badge
+ *   "negative" — the delta is unfavourable                 → red badge
+ *   "neutral"  — delta is exactly zero                     → muted badge
+ *   null       — no prior period data (shows "—")          → muted badge
+ *   undefined  — loading / tile not yet wired              → fall back to KpiStatus colour
+ */
+type DeltaSentiment = "positive" | "negative" | "neutral";
+
 const CFO_INSIGHT = {
   // Weekly action priorities — user-facing text only. Underlying upside values unchanged.
   weeklyPriorities: [
@@ -103,6 +114,37 @@ function formatOpProfit(v: number): string {
   return `£${abs.toLocaleString("en-GB")}`;
 }
 
+/**
+ * "Good direction" for each KPI tile.
+ *   "up-is-good"   — a positive delta is a good signal (Revenue, AOV, RPR, CM, Net Profit, Net Sales)
+ *   "down-is-good" — a negative delta is a good signal (Discount Dependency, Refund Rate)
+ * Tiles not listed here (rc, cr, ae) have no Phase 2 delta wiring.
+ */
+const DELTA_POLARITY = {
+  mr:  "up-is-good",
+  ns:  "up-is-good",
+  aov: "up-is-good",
+  rpr: "up-is-good",
+  cm:  "up-is-good",
+  np:  "up-is-good",
+  dd:  "down-is-good",
+  rr:  "down-is-good",
+} as const satisfies Record<string, "up-is-good" | "down-is-good">;
+
+/**
+ * Converts a raw delta number + polarity into a DeltaSentiment.
+ * Returns null when delta is null (no prior period data — caller shows "—").
+ */
+function deltaToSentiment(
+  delta: number | null | undefined,
+  polarity: "up-is-good" | "down-is-good",
+): DeltaSentiment | null {
+  if (delta === null || delta === undefined) return null;
+  if (delta === 0) return "neutral";
+  const isGood = polarity === "up-is-good" ? delta > 0 : delta < 0;
+  return isGood ? "positive" : "negative";
+}
+
 /** Status derived from sign of an operating profit value. */
 function opProfitStatus(v: number): KpiStatus {
   if (v < 0) return "danger";
@@ -131,7 +173,16 @@ function opProfitStatus(v: number): KpiStatus {
 //
 //   change strings — ALL static for every tile.  No prior-period SQL functions
 //                    exist yet.  Replace in Phase 2 with computed ±X% deltas.
-const KPI_CARDS: { id: string; title: string; value: string; change: string; status: KpiStatus; text: string }[] = [
+const KPI_CARDS: {
+  id: string;
+  title: string;
+  value: string;
+  change: string;
+  status: KpiStatus;
+  text: string;
+  /** Set by liveKpiCards when a live Phase 2 delta is available. Undefined until then. */
+  changeSentiment?: DeltaSentiment | null;
+}[] = [
   {
     // value: Tier 3 loading sentinel (MONTHLY_CM_PCT snapshot = 42.3%) until
     //        liveKpiCards wiring block resolves contribution_margin_pct() RPC (Tier 1)
@@ -467,6 +518,9 @@ export default function Dashboard() {
         change: !phase2DeltasLoading
           ? formatDeltaPct(phase2Deltas?.net_sales_delta_pct ?? null)
           : card.change,
+        changeSentiment: !phase2DeltasLoading
+          ? deltaToSentiment(phase2Deltas?.net_sales_delta_pct ?? null, DELTA_POLARITY.ns)
+          : undefined,
       };
     }
 
@@ -491,6 +545,9 @@ export default function Dashboard() {
         change: !phase2DeltasLoading
           ? formatDeltaPct(phase2Deltas?.gross_revenue_delta_pct ?? null)
           : card.change,
+        changeSentiment: !phase2DeltasLoading
+          ? deltaToSentiment(phase2Deltas?.gross_revenue_delta_pct ?? null, DELTA_POLARITY.mr)
+          : undefined,
       };
     }
 
@@ -517,6 +574,9 @@ export default function Dashboard() {
         change: !phase2DeltasLoading
           ? formatDeltaPct(phase2Deltas?.aov_delta_pct ?? null)
           : card.change,
+        changeSentiment: !phase2DeltasLoading
+          ? deltaToSentiment(phase2Deltas?.aov_delta_pct ?? null, DELTA_POLARITY.aov)
+          : undefined,
       };
     }
 
@@ -543,6 +603,10 @@ export default function Dashboard() {
         change: !phase2DeltasLoading
           ? formatDeltaPp(phase2Deltas?.refund_rate_delta_pp ?? null)
           : card.change,
+        // down-is-good: a falling refund rate is a positive signal
+        changeSentiment: !phase2DeltasLoading
+          ? deltaToSentiment(phase2Deltas?.refund_rate_delta_pp ?? null, DELTA_POLARITY.rr)
+          : undefined,
       };
     }
 
@@ -569,6 +633,10 @@ export default function Dashboard() {
         change: !phase2DeltasLoading
           ? formatDeltaPp(phase2Deltas?.discount_dep_delta_pp ?? null)
           : card.change,
+        // down-is-good: falling discount dependency is a positive signal
+        changeSentiment: !phase2DeltasLoading
+          ? deltaToSentiment(phase2Deltas?.discount_dep_delta_pp ?? null, DELTA_POLARITY.dd)
+          : undefined,
       };
     }
 
@@ -597,6 +665,9 @@ export default function Dashboard() {
         change: !phase2DeltasLoading
           ? formatDeltaPp(phase2Deltas?.rpr_delta_pp ?? null)
           : card.change,
+        changeSentiment: !phase2DeltasLoading
+          ? deltaToSentiment(phase2Deltas?.rpr_delta_pp ?? null, DELTA_POLARITY.rpr)
+          : undefined,
       };
     }
 
@@ -631,6 +702,9 @@ export default function Dashboard() {
         change: !phase2DeltasLoading
           ? formatDeltaPp(phase2Deltas?.cm_pct_delta_pp ?? null)
           : card.change,
+        changeSentiment: !phase2DeltasLoading
+          ? deltaToSentiment(phase2Deltas?.cm_pct_delta_pp ?? null, DELTA_POLARITY.cm)
+          : undefined,
       };
     }
 
@@ -758,6 +832,9 @@ export default function Dashboard() {
         change: !phase2DeltasLoading
           ? formatDeltaPct(phase2Deltas?.op_profit_delta_pct ?? null)
           : card.change,
+        changeSentiment: !phase2DeltasLoading
+          ? deltaToSentiment(phase2Deltas?.op_profit_delta_pct ?? null, DELTA_POLARITY.np)
+          : undefined,
       };
     }
 
@@ -1114,14 +1191,29 @@ export default function Dashboard() {
                     </p>
                     <span className={cn(
                       "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold mb-2",
-                      kpi.status === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
+                      // changeSentiment takes precedence when a live delta is available.
+                      // undefined  → loading / unported tile → fall back to KpiStatus colour.
+                      // null       → no prior-period data ("—") → muted.
+                      kpi.changeSentiment === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
+                      : kpi.changeSentiment === "negative" ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
+                      : kpi.changeSentiment === "neutral" || kpi.changeSentiment === null
+                        ? "bg-secondary text-muted-foreground"
+                      // undefined: fall back to overall tile health colour
+                      : kpi.status === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
                       : kpi.status === "warning"  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
                       : kpi.status === "danger"   ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
                       : "bg-secondary text-muted-foreground"
                     )}>
-                      {kpi.status === "positive" && <ArrowUpRight className="w-3 h-3" />}
-                      {kpi.status === "danger"   && <ArrowDownRight className="w-3 h-3" />}
-                      {kpi.status === "warning"  && <Minus className="w-3 h-3" />}
+                      {/* Icon driven by sentiment when available, otherwise by status */}
+                      {kpi.changeSentiment === "positive" ? <ArrowUpRight  className="w-3 h-3" />
+                      : kpi.changeSentiment === "negative" ? <ArrowDownRight className="w-3 h-3" />
+                      : kpi.changeSentiment === "neutral"  ? <Minus          className="w-3 h-3" />
+                      : kpi.changeSentiment === null        ? null
+                      // undefined: status-based fallback
+                      : kpi.status === "positive" ? <ArrowUpRight  className="w-3 h-3" />
+                      : kpi.status === "danger"   ? <ArrowDownRight className="w-3 h-3" />
+                      : kpi.status === "warning"  ? <Minus          className="w-3 h-3" />
+                      : null}
                       {kpi.change}
                     </span>
                     <p className="text-xs text-muted-foreground/80 leading-snug border-t border-border/50 pt-2">{kpi.text}</p>

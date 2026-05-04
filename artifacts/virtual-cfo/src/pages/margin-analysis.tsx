@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowDownRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown, Lock, SlidersHorizontal, Shield, Zap } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -16,6 +16,17 @@ import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { MONTHLY_CM_PCT } from "@/lib/data/business-snapshot";
 import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
 import { CHANNEL_CM_PCT } from "@/lib/data/channel-metrics";
+import { getPhase1Metrics, type Phase1MetricsResponse } from "@/lib/analytics/phase1Metrics";
+
+// ── Phase 1 metrics config ────────────────────────────────────────────────────
+// DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx.
+// Must be replaced with the authenticated session's store_id before multi-tenant use.
+const MA_STORE_ID  = "10000000-0000-0000-0000-000000000001";
+const _maNow       = new Date();
+const _maPad       = (n: number) => String(n).padStart(2, "0");
+const MA_DATE_FROM = `${_maNow.getFullYear()}-${_maPad(_maNow.getMonth() + 1)}-01`;
+const MA_DATE_TO   = new Date(_maNow.getFullYear(), _maNow.getMonth() + 1, 0)
+  .toISOString().slice(0, 10);
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true  },
@@ -33,10 +44,9 @@ const TREND_DATA = [
   { month: "Mar '26", margin: 42.3, highlighted: true  },
 ];
 
-const CM_VALUE = 52913;
-const CM_PCT   = MONTHLY_CM_PCT; // imported from business-snapshot (42.3)
-const CM_PREV  = 45.8;
-const CM_CHANGE = +(CM_PCT - CM_PREV).toFixed(1);
+// CM_VALUE, CM_PCT, CM_CHANGE — moved inside component; computed from Phase 1 RPC
+// with fallback to static snapshot values. See MarginAnalysis() component body.
+const CM_PREV = 45.8; // prior-month snapshot — no live prior-period RPC yet
 
 // CAC_PAYBACK and CAC_PAYBACK_PREV imported from growth-metrics (1.4, 1.1)
 
@@ -54,28 +64,28 @@ const BRIDGE_ROWS = [
 // ─── KPI metrics & variance data ─────────────────────────────────────────────
 // @dynamic All values replace with live-computed deltas (current − period_value)
 
-/** Contribution per order */
-const CONTRIBUTION_PER_ORDER         = 35.00;
-const CONTRIBUTION_PER_ORDER_PREV_M  = 38.20;  // last month
-const CONTRIBUTION_PER_ORDER_LY      = 40.50;  // same month last year (UNIT_ECON_HISTORY[0])
+// CONTRIBUTION_PER_ORDER — moved inside component; derived from live CM_VALUE / order count.
+// Prior-period variants remain static (no live prior-period RPCs exist yet).
+const CONTRIBUTION_PER_ORDER_PREV_M  = 38.20;  // last month — static snapshot
+const CONTRIBUTION_PER_ORDER_LY      = 40.50;  // same month last year — static snapshot
 
 /** Contribution Margin — YoY baseline from TREND_DATA[0] */
 const CM_LY = 48.2;
 
 /** Contribution Profit — prior periods (estimated from historical CM × revenue) */
-const CM_VALUE_PREV_M = 57_125;  // 45.8% of prior month revenue
-const CM_VALUE_LY     = 56_972;  // 48.2% of last-year revenue
+const CM_VALUE_PREV_M = 57_125;  // 45.8% of prior month revenue — static snapshot
+const CM_VALUE_LY     = 56_972;  // 48.2% of last-year revenue — static snapshot
 
 /** CAC Payback — year-ago baseline */
 const CAC_PAYBACK_LY = 0.9;
 
-/** Average Discount % — @dynamic computed from Shopify order discount data */
-const AVG_DISCOUNT_PCT    = 7.0;
+// AVG_DISCOUNT_PCT — moved inside component; live from discount_dependency() RPC × 100.
+// Prior-period variants remain static (no live prior-period RPCs exist yet).
 const AVG_DISCOUNT_PREV_M = 5.2;
 const AVG_DISCOUNT_LY     = 4.8;
 
-/** Returns % — @dynamic computed from Shopify returns data */
-const RETURNS_PCT    = 2.1;
+// RETURNS_PCT — moved inside component; live from refund_rate() RPC × 100.
+// Prior-period variants remain static (no live prior-period RPCs exist yet).
 const RETURNS_PREV_M = 1.8;
 const RETURNS_LY     = 1.4;
 
@@ -178,41 +188,7 @@ const RECOVERY_GHOST_LABELS: Record<string, string> = {
 const VISIBLE_SCENARIO_COUNT = 3;
 const RECOVERY_TOTAL_PP   = +RECOVERY_SCENARIOS.reduce((s, r) => s + r.ppGain,    0).toFixed(1);
 const RECOVERY_TOTAL_CASH =  RECOVERY_SCENARIOS.reduce((s, r) => s + r.cashImpact, 0);
-const RECOVERY_TARGET_CM  = +(CM_PCT + RECOVERY_TOTAL_PP).toFixed(1);
-
-/**
- * @dynamic Thresholds and trajectory can be computed from rolling CM data when live.
- */
-const RISK_MONITOR = {
-  currentCm: CM_PCT,
-  thresholds: [
-    {
-      pct: 40,
-      label: "Warning",
-      monthsAtCurrentRate: 2,
-      color: "amber" as const,
-      implications: [
-        "Paid acquisition becomes unprofitable on current channel mix",
-        "CAC payback period would exceed 2 orders",
-        "Growth efficiency declines — scaling costs outpace contribution",
-      ],
-    },
-    {
-      pct: 35,
-      label: "Critical",
-      monthsAtCurrentRate: 6,
-      color: "red" as const,
-      implications: [
-        "Business covers fixed costs but generates minimal surplus",
-        "New customer investment is no longer viable",
-        "Structural cost restructuring becomes necessary",
-      ],
-    },
-  ],
-  monthlyDeclineRate: 1.1,
-  trajectoryNote:
-    "At the current average decline rate of ~1.1pp/month, contribution margin could reach 40% within 2 months without corrective action.",
-} as const;
+// RECOVERY_TARGET_CM and RISK_MONITOR moved inside component — both reference live CM_PCT.
 
 function getBenchmark(pct: number) {
   if (pct >= BENCHMARK_TARGET.low) {
@@ -274,17 +250,13 @@ const CHANGE_DRIVERS_TOTAL = +CHANGE_DRIVERS
   .reduce((s, d) => s + d.impactPerOrder, 0)
   .toFixed(2);
 
-/** @dynamic Derived from Shopify order count for the period (≈ revenue ÷ AOV) */
-const MONTHLY_ORDER_VOLUME = 2000;
-
-/** @dynamic = CHANGE_DRIVERS_TOTAL × MONTHLY_ORDER_VOLUME, rounded to nearest £100 */
-const CHANGE_DRIVERS_MONTHLY_IMPACT =
-  Math.round((CHANGE_DRIVERS_TOTAL * MONTHLY_ORDER_VOLUME) / 100) * 100;
+// MONTHLY_ORDER_VOLUME — moved inside component; derived from live grossRevenue / averageOrderValue.
+// CHANGE_DRIVERS_MONTHLY_IMPACT — moved inside component; references live MONTHLY_ORDER_VOLUME.
 
 // ─── Simulator & Sensitivity ─────────────────────────────────────────────────
 
-const SIM_REVENUE = BRIDGE_ROWS[0].total; // 124,500
-const SIM_ORDERS  = 1_512;
+// SIM_REVENUE — moved inside component; uses live gross revenue.
+const SIM_ORDERS = 1_512;
 
 /**
  * @dynamic Each lever's impact is derived from the real cost share:
@@ -352,6 +324,122 @@ function SectionHeading({ title, subtitle, support }: { title: string; subtitle?
 export default function MarginAnalysis() {
   const { selectedLabel, periodPhrase } = useTimeline();
   const [showAllOpportunities, setShowAllOpportunities] = useState(false);
+
+  // ── Phase 1 data fetch ────────────────────────────────────────────────────
+  // DEV-ONLY store ID + current-month date range — mirrors dashboard.tsx pattern.
+  // A failure in the fetch leaves phase1 null so all values fall back to static
+  // snapshots — no tile goes blank.
+  const [phase1, setPhase1] = useState<Phase1MetricsResponse | null>(null);
+  useEffect(() => {
+    getPhase1Metrics(MA_STORE_ID, MA_DATE_FROM, MA_DATE_TO)
+      .then(setPhase1)
+      .catch(() => {
+        // Network or RPC error — leave phase1 null; static fallbacks apply.
+      });
+  }, []);
+
+  // ── Live-derived metric values (Phase 1 → fallback to static snapshots) ────
+  // DEV-ONLY FALLBACK — static March 2026 snapshot values are used while phase1
+  // is null (loading) or if an individual RPC call fails. Pattern mirrors dashboard.tsx.
+
+  // Gross revenue — primary: gross_revenue() RPC; fallback: March 2026 snapshot
+  const liveGrossRevenue = phase1?.data.grossRevenue ?? 124_500;
+
+  // Average order value — primary: average_order_value() RPC; fallback: March 2026 snapshot
+  const liveAov = phase1?.data.averageOrderValue ?? 68.40;
+
+  // Contribution margin % — primary: contribution_margin_pct() RPC [0,1] × 100
+  // fallback: MONTHLY_CM_PCT (42.3 from business-snapshot.ts)
+  const CM_PCT = phase1?.data.contributionMarginPct != null
+    ? +(phase1.data.contributionMarginPct * 100).toFixed(1)
+    : MONTHLY_CM_PCT;
+
+  // Discount dependency % — primary: discount_dependency() RPC [0,1] × 100
+  // fallback: 7.0 (March 2026 snapshot)
+  const AVG_DISCOUNT_PCT = phase1?.data.discountDependency != null
+    ? +(phase1.data.discountDependency * 100).toFixed(1)
+    : 7.0;
+
+  // Refund rate % — primary: refund_rate() RPC [0,1] × 100
+  // fallback: 2.1 (March 2026 snapshot)
+  const RETURNS_PCT = phase1?.data.refundRate != null
+    ? +(phase1.data.refundRate * 100).toFixed(1)
+    : 2.1;
+
+  // Derived: contribution profit £ — grossRevenue × contributionMarginPct
+  // fallback: 52,913 (March 2026 snapshot)
+  const CM_VALUE = phase1?.data.contributionMarginPct != null
+    ? Math.round(liveGrossRevenue * phase1.data.contributionMarginPct)
+    : 52_913;
+
+  // Derived: order count — grossRevenue / averageOrderValue (rounded)
+  // fallback: 2,000 (March 2026 snapshot)
+  const MONTHLY_ORDER_VOLUME = liveAov > 0
+    ? Math.round(liveGrossRevenue / liveAov)
+    : 2_000;
+
+  // Derived: contribution per order — CM_VALUE / order count
+  // fallback: 35.00 (March 2026 snapshot)
+  const CONTRIBUTION_PER_ORDER = MONTHLY_ORDER_VOLUME > 0
+    ? +(CM_VALUE / MONTHLY_ORDER_VOLUME).toFixed(2)
+    : 35.00;
+
+  // Period-over-period delta — no prior-period RPC yet; stays static relative to CM_PREV
+  const CM_CHANGE = +(CM_PCT - CM_PREV).toFixed(1);
+
+  // Simulator baseline revenue — live gross revenue (fallback: 124,500 via liveGrossRevenue)
+  const SIM_REVENUE = liveGrossRevenue;
+
+  // Bridge rows — rows 0 (Revenue) and 1 (Discounts) use live Phase 1 values;
+  // rows 2–5 stay static (no RPCs cover payment fees, shipping, fulfilment, or marketing).
+  const _discountDep = phase1?.data.discountDependency ?? 0.07;
+  const liveBridgeRows = [
+    { label: "Revenue",          total: Math.round(liveGrossRevenue),                       perOrder: +liveAov.toFixed(2),                         type: "revenue"   as const, trend: "stable"    as const },
+    { label: "Discounts",        total: -Math.round(liveGrossRevenue * _discountDep),        perOrder: -(+(liveAov * _discountDep).toFixed(2)),      type: "deduction" as const, trend: "worsening" as const },
+    { label: "Payment fees",     total:  -2490, perOrder: -1.90, type: "deduction" as const, trend: "stable"    as const },
+    { label: "Shipping costs",   total: -15562, perOrder: -4.80, type: "deduction" as const, trend: "worsening" as const },
+    { label: "Fulfilment costs", total: -17430, perOrder: -6.40, type: "deduction" as const, trend: "stable"    as const },
+    { label: "Marketing spend",  total: -27390, perOrder:-12.20, type: "deduction" as const, trend: "worsening" as const },
+  ];
+
+  // Monthly impact for change drivers (order volume × per-order impact)
+  const CHANGE_DRIVERS_MONTHLY_IMPACT =
+    Math.round((CHANGE_DRIVERS_TOTAL * MONTHLY_ORDER_VOLUME) / 100) * 100;
+
+  // Target CM after all recovery scenarios applied
+  const RECOVERY_TARGET_CM = +(CM_PCT + RECOVERY_TOTAL_PP).toFixed(1);
+
+  // Risk monitor — currentCm uses live CM_PCT; thresholds and narrative stay static
+  const RISK_MONITOR = {
+    currentCm: CM_PCT,
+    thresholds: [
+      {
+        pct: 40,
+        label: "Warning",
+        monthsAtCurrentRate: 2,
+        color: "amber" as const,
+        implications: [
+          "Paid acquisition becomes unprofitable on current channel mix",
+          "CAC payback period would exceed 2 orders",
+          "Growth efficiency declines — scaling costs outpace contribution",
+        ],
+      },
+      {
+        pct: 35,
+        label: "Critical",
+        monthsAtCurrentRate: 6,
+        color: "red" as const,
+        implications: [
+          "Business covers fixed costs but generates minimal surplus",
+          "New customer investment is no longer viable",
+          "Structural cost restructuring becomes necessary",
+        ],
+      },
+    ],
+    monthlyDeclineRate: 1.1,
+    trajectoryNote:
+      "At the current average decline rate of ~1.1pp/month, contribution margin could reach 40% within 2 months without corrective action.",
+  };
 
   // ── Simulator state ──────────────────────────────────────────────────────
   const [simMetaCac,  setSimMetaCac]  = useState(0);
@@ -1631,8 +1719,8 @@ export default function MarginAnalysis() {
               </tr>
             </thead>
             <tbody>
-              {BRIDGE_ROWS.map((row) => {
-                const revenueTotal = BRIDGE_ROWS[0].total;
+              {liveBridgeRows.map((row) => {
+                const revenueTotal = liveBridgeRows[0].total;
                 const isRevenue   = row.type === "revenue";
                 const totalStr    = isRevenue
                   ? `£${row.total.toLocaleString()}`

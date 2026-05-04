@@ -25,6 +25,7 @@ import {
   GQ_SCORE_PREV,
 } from "@/lib/data/growth-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 
 // ─── Store ID ─────────────────────────────────────────────────────────────────
@@ -279,19 +280,36 @@ export default function GrowthQuality() {
   // Only these two KPI headlines are wired — all other GQ metrics (GQ_SCORE,
   // CAC_PAYBACK, SCORE grades, composition chart, driver impacts) remain static
   // pending ad-platform integration and a prior-period RPC.
-  const { phase1: gqPhase1, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
+  const { phase1: gqPhase1, dateFrom: gqDateFrom, dateTo: gqDateTo, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
+
+  // ── Phase 2: month-on-month deltas ────────────────────────────────────────
+  // Fires after useLatestDataPeriod resolves. Used for:
+  //   - Repeat purchase rate change badge (replaces static REPEAT_RATE_CHANGE)
+  //   - Discount dependency change badge (replaces static DISCOUNT_DEP_CHANGE)
+  // A failure leaves gqDeltas null; badges fall back to static snapshots.
+  const { deltas: gqDeltas, loading: gqDeltasLoading } = usePhase2Deltas(GQ_STORE_ID, gqDateFrom, gqDateTo);
 
   // Live repeat purchase rate % (1 d.p.) — fallback to static REPEAT_RATE.
-  // NOTE: REPEAT_RATE_CHANGE badge stays static — no prior-period RPC available.
   const liveRepeatRate = gqPhase1
     ? (gqPhase1.data.repeatPurchaseRate * 100).toFixed(1)
     : REPEAT_RATE.toFixed(1);
 
   // Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
-  // NOTE: DISCOUNT_DEP_CHANGE badge stays static — no prior-period RPC available.
   const liveDiscountDep = gqPhase1
     ? (gqPhase1.data.discountDependency * 100).toFixed(1)
     : DISCOUNT_DEP.toFixed(1);
+
+  // Raw delta numbers for change badges.
+  // During loading → static snapshot fallback value.
+  // After load     → live pp value, or null (no prior period data → show "—").
+  // Kept as numbers so the existing badge structure (icon, color class) is preserved
+  // and only the text content changes — null triggers the "—" sentinel.
+  const liveRprChangePp     = !gqDeltasLoading
+    ? (gqDeltas?.rpr_delta_pp ?? null)
+    : REPEAT_RATE_CHANGE;
+  const liveDiscDepChangePp = !gqDeltasLoading
+    ? (gqDeltas?.discount_dep_delta_pp ?? null)
+    : DISCOUNT_DEP_CHANGE;
 
   // Patch the "Discount reliance" score explanation with the live value.
   // All other fields (status, grade, score, direction) remain untouched.
@@ -438,7 +456,9 @@ export default function GrowthQuality() {
           <div className="flex items-center gap-2 mt-3 text-xs">
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">
               <ArrowUpRight className="w-3 h-3" />
-              +{REPEAT_RATE_CHANGE}pp vs last month
+              {liveRprChangePp !== null
+                ? `${liveRprChangePp >= 0 ? "+" : ""}${Math.abs(liveRprChangePp).toFixed(1)}pp vs last month`
+                : "— vs last month"}
             </span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
@@ -453,7 +473,9 @@ export default function GrowthQuality() {
           <div className="flex items-center gap-2 mt-3 text-xs">
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
               <ArrowUpRight className="w-3 h-3" />
-              Up {DISCOUNT_DEP_CHANGE}pp vs last month
+              {liveDiscDepChangePp !== null
+                ? `${liveDiscDepChangePp >= 0 ? "+" : ""}${Math.abs(liveDiscDepChangePp).toFixed(1)}pp vs last month`
+                : "— vs last month"}
             </span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">

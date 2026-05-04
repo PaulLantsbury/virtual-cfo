@@ -2,6 +2,8 @@ import { getCommerceMetrics } from "@/lib/analytics/commerceMetrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 import { getPhase2aMetrics, type Phase2aMetricsResponse } from "@/lib/analytics/phase2aMetrics";
+import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
+import { formatDeltaPct, formatDeltaPp } from "@/lib/analytics/phase2DeltaMetrics";
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight, ArrowDownRight, Minus,
@@ -434,6 +436,15 @@ export default function Dashboard() {
   const rcHeadlineHi = oppBreakdown !== null ? oppBreakdown.hi : RECOVERABLE_HIGH;
   const rcHeadlineStr = `£${(rcHeadlineLo / 1_000).toFixed(0)}k–£${(rcHeadlineHi / 1_000).toFixed(0)}k`;
 
+  // ── Phase 2: month-on-month delta metrics ────────────────────────────────
+  // Fires after useLatestDataPeriod resolves — same period gate as Phase 2a.
+  // A failure here leaves phase2Deltas null; all delta badge strings fall back
+  // to card.change static sentinel (shown while loading) or "—" (after load,
+  // no prior-period data).  Phase 1 and Phase 2a tiles are unaffected.
+  const { deltas: phase2Deltas, loading: phase2DeltasLoading } = usePhase2Deltas(
+    PHASE1_STORE_ID, activeDateFrom, activeDateTo,
+  );
+
   const liveKpiCards = KPI_CARDS.map((card) => {
     // ── Net Sales tile — wired to Phase 1 Supabase function ──────────────────
     // @canonical METRIC.NET_SALES / tile id "ns"
@@ -451,7 +462,11 @@ export default function Dashboard() {
       if (nsValue == null) return card;   // static fallback while both loading
       return {
         ...card,
-        value: `£${Math.round(nsValue).toLocaleString("en-GB")}`,
+        value:  `£${Math.round(nsValue).toLocaleString("en-GB")}`,
+        // Phase 2: live net_sales_delta_pct; "—" when prior period has no data
+        change: !phase2DeltasLoading
+          ? formatDeltaPct(phase2Deltas?.net_sales_delta_pct ?? null)
+          : card.change,
       };
     }
 
@@ -471,7 +486,11 @@ export default function Dashboard() {
       if (mrValue == null) return card;        // static fallback while both loading
       return {
         ...card,
-        value: `£${Math.round(mrValue).toLocaleString("en-GB")}`,
+        value:  `£${Math.round(mrValue).toLocaleString("en-GB")}`,
+        // Phase 2: live gross_revenue_delta_pct; "—" when prior period has no data
+        change: !phase2DeltasLoading
+          ? formatDeltaPct(phase2Deltas?.gross_revenue_delta_pct ?? null)
+          : card.change,
       };
     }
 
@@ -493,7 +512,11 @@ export default function Dashboard() {
       if (aovValue == null) return card;            // static fallback while both loading
       return {
         ...card,
-        value: `£${aovValue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value:  `£${aovValue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        // Phase 2: live aov_delta_pct; "—" when prior period has no data
+        change: !phase2DeltasLoading
+          ? formatDeltaPct(phase2Deltas?.aov_delta_pct ?? null)
+          : card.change,
       };
     }
 
@@ -514,7 +537,12 @@ export default function Dashboard() {
       if (rrValue == null) return card;     // static fallback while both loading
       return {
         ...card,
-        value: `${Math.round(rrValue * 100)}%`,
+        value:  `${Math.round(rrValue * 100)}%`,
+        // Phase 2: live refund_rate_delta_pp (already pp — do NOT multiply by 100)
+        // "—" when prior period has no data
+        change: !phase2DeltasLoading
+          ? formatDeltaPp(phase2Deltas?.refund_rate_delta_pp ?? null)
+          : card.change,
       };
     }
 
@@ -535,7 +563,12 @@ export default function Dashboard() {
       if (ddValue == null) return card;             // static fallback while both loading
       return {
         ...card,
-        value: `${Math.round(ddValue * 100)}%`,
+        value:  `${Math.round(ddValue * 100)}%`,
+        // Phase 2: live discount_dep_delta_pp (already pp — do NOT multiply by 100)
+        // "—" when prior period has no data
+        change: !phase2DeltasLoading
+          ? formatDeltaPp(phase2Deltas?.discount_dep_delta_pp ?? null)
+          : card.change,
       };
     }
 
@@ -558,7 +591,12 @@ export default function Dashboard() {
       if (rprValue == null) return card;            // static fallback while both loading
       return {
         ...card,
-        value: `${Math.round(rprValue * 100)}%`,
+        value:  `${Math.round(rprValue * 100)}%`,
+        // Phase 2: live rpr_delta_pp (already pp — do NOT multiply by 100)
+        // "—" when prior period has no data
+        change: !phase2DeltasLoading
+          ? formatDeltaPp(phase2Deltas?.rpr_delta_pp ?? null)
+          : card.change,
       };
     }
 
@@ -587,7 +625,12 @@ export default function Dashboard() {
       if (cmValue == null) return card;                 // static fallback while both loading
       return {
         ...card,
-        value: `${Math.round(cmValue * 100)}%`,
+        value:  `${Math.round(cmValue * 100)}%`,
+        // Phase 2: live cm_pct_delta_pp (already pp — do NOT multiply by 100)
+        // "—" when prior period has no data
+        change: !phase2DeltasLoading
+          ? formatDeltaPp(phase2Deltas?.cm_pct_delta_pp ?? null)
+          : card.change,
       };
     }
 
@@ -709,8 +752,12 @@ export default function Dashboard() {
         ...card,
         value:  formatOpProfit(npValue),
         status: opProfitStatus(npValue),
-        // change: intentionally empty — no prior-period operating_profit_monthly() delta yet (Phase 2).
-        change: "",
+        // Phase 2: live op_profit_delta_pct; "—" when prior period has no data.
+        // Note: op_profit can be negative in both current and prior — a % change on a
+        // negative base value is valid (e.g. loss widened = negative delta %).
+        change: !phase2DeltasLoading
+          ? formatDeltaPct(phase2Deltas?.op_profit_delta_pct ?? null)
+          : card.change,
       };
     }
 

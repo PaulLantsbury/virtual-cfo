@@ -18,6 +18,7 @@ import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
 import { CHANNEL_CM_PCT } from "@/lib/data/channel-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
+import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
 
 // ── Phase 1 metrics config ────────────────────────────────────────────────────
 // DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx.
@@ -326,7 +327,15 @@ export default function MarginAnalysis() {
   // Walks back from the current month to find the most recent month with data.
   // A network failure leaves phase1 null; all derived values fall back to
   // the static snapshot constants below.
-  const { phase1, periodLabel: maPeriodLabel, loading: maPeriodLoading } = useLatestDataPeriod(MA_STORE_ID);
+  const { phase1, dateFrom: maDateFrom, dateTo: maDateTo, periodLabel: maPeriodLabel, loading: maPeriodLoading } = useLatestDataPeriod(MA_STORE_ID);
+
+  // ── Phase 2: month-on-month deltas ────────────────────────────────────────
+  // Fires after useLatestDataPeriod resolves. Used for:
+  //   - CM% change vs last month (replaces static CM_PREV comparison)
+  //   - Contribution profit prior-period value (replaces CM_VALUE_PREV_M)
+  //   - Contribution per order prior-period value (replaces CONTRIBUTION_PER_ORDER_PREV_M)
+  // A failure leaves maDeltas null; all affected rows fall back to static snapshots.
+  const { deltas: maDeltas } = usePhase2Deltas(MA_STORE_ID, maDateFrom, maDateTo);
 
   // ── Live-derived metric values (Phase 1 → fallback to static snapshots) ────
   // DEV-ONLY FALLBACK — static March 2026 snapshot values are used while phase1
@@ -377,8 +386,29 @@ export default function MarginAnalysis() {
     ? +(CM_VALUE / MONTHLY_ORDER_VOLUME).toFixed(2)
     : 35.00;
 
-  // Period-over-period delta — no prior-period RPC yet; stays static relative to CM_PREV
+  // CM% delta vs last month — live from Phase 2 RPC; falls back to static comparison.
+  // null = RPC succeeded but prior period had no data ("—" shown in UI).
+  // non-null during loading = static snapshot used as sentinel (CM_PCT − CM_PREV).
+  const liveCmChangePp: number | null = maDeltas
+    ? (maDeltas.cm_pct_delta_pp ?? null)
+    : +(CM_PCT - CM_PREV).toFixed(1);
+
+  // Keep CM_CHANGE for any remaining static references (RISK_MONITOR, etc.)
   const CM_CHANGE = +(CM_PCT - CM_PREV).toFixed(1);
+
+  // Contribution Profit prior-month value — live from Phase 2, fallback to snapshot.
+  // Formula: gross_revenue_prv × cm_pct_prv ≈ contribution_profit_prv
+  const liveContribPrv = maDeltas && maDeltas.gross_revenue_prv > 0
+    ? Math.round(maDeltas.gross_revenue_prv * maDeltas.cm_pct_prv)
+    : CM_VALUE_PREV_M;
+
+  // Contribution per Order prior-month value — live from Phase 2, fallback to snapshot.
+  // Formula: gross_revenue_prv × cm_pct_prv / (gross_revenue_prv / aov_prv)
+  //        = contribution_profit_prv / order_count_prv
+  const liveContribPerOrderPrv = maDeltas && maDeltas.gross_revenue_prv > 0 && maDeltas.aov_prv > 0
+    ? (maDeltas.gross_revenue_prv * maDeltas.cm_pct_prv) /
+      (maDeltas.gross_revenue_prv / maDeltas.aov_prv)
+    : CONTRIBUTION_PER_ORDER_PREV_M;
 
   // Simulator baseline revenue — live gross revenue (fallback: 124,500 via liveGrossRevenue)
   const SIM_REVENUE = liveGrossRevenue;
@@ -533,9 +563,18 @@ export default function MarginAnalysis() {
                 {CM_PCT}%
               </p>
               <div className="flex items-center gap-1.5 mb-3">
-                <span className="text-sm font-semibold text-destructive">
-                  ↓ {Math.abs(CM_CHANGE)}pp
-                </span>
+                {liveCmChangePp !== null ? (
+                  <span className={cn(
+                    "text-sm font-semibold",
+                    liveCmChangePp >= 0
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-destructive",
+                  )}>
+                    {liveCmChangePp >= 0 ? "↑" : "↓"} {Math.abs(liveCmChangePp).toFixed(1)}pp
+                  </span>
+                ) : (
+                  <span className="text-sm font-semibold text-muted-foreground">—</span>
+                )}
                 <span className="text-xs text-muted-foreground">vs last month</span>
               </div>
 
@@ -1300,7 +1339,18 @@ export default function MarginAnalysis() {
           <p className="text-sm font-medium text-muted-foreground mb-1">Contribution Profit</p>
           <p className="text-3xl font-display font-bold text-foreground mb-2">{fmt(CM_VALUE)}</p>
           <div className="space-y-0.5 mb-2">
-            <VarLine label="vs last month" value={`↓ £${(CM_VALUE_PREV_M - CM_VALUE).toLocaleString()}`} favorable={false} />
+            {/* Phase 2: prior-period contribution profit from month_on_month_delta */}
+            {(() => {
+              const diff = CM_VALUE - liveContribPrv;
+              const favorable = diff >= 0;
+              return (
+                <VarLine
+                  label="vs last month"
+                  value={`${favorable ? "+" : "↓ "}£${Math.abs(diff).toLocaleString()}`}
+                  favorable={favorable}
+                />
+              );
+            })()}
             <VarLine label="vs 12-month avg" value={`↓ £${(CM_VALUE_LY - CM_VALUE).toLocaleString()}`} favorable={false} />
           </div>
           <p className="text-xs text-muted-foreground">Revenue minus variable costs</p>
@@ -1357,7 +1407,18 @@ export default function MarginAnalysis() {
             £{CONTRIBUTION_PER_ORDER.toFixed(2)}
           </p>
           <div className="space-y-0.5 mb-2">
-            <VarLine label="vs last month" value={`↓ £${(CONTRIBUTION_PER_ORDER_PREV_M - CONTRIBUTION_PER_ORDER).toFixed(2)}`} favorable={false} />
+            {/* Phase 2: prior-period contribution per order from month_on_month_delta */}
+            {(() => {
+              const diff = CONTRIBUTION_PER_ORDER - liveContribPerOrderPrv;
+              const favorable = diff >= 0;
+              return (
+                <VarLine
+                  label="vs last month"
+                  value={`${favorable ? "+" : "↓ "}£${Math.abs(diff).toFixed(2)}`}
+                  favorable={favorable}
+                />
+              );
+            })()}
             <VarLine label="vs 12-month avg" value={`↓ £${(CONTRIBUTION_PER_ORDER_LY - CONTRIBUTION_PER_ORDER).toFixed(2)}`} favorable={false} />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Contribution available after variable costs per order</p>

@@ -29,6 +29,7 @@ import {
 } from "@/lib/data/channel-metrics";
 import { CAC_PAYBACK, CAC_PAYBACK_PREV, DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 
 // ── Phase 1 metrics config ────────────────────────────────────────────────────
 // DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx and margin-analysis.tsx.
@@ -484,7 +485,7 @@ export default function MarketingEfficiency() {
   // Walks back from the current month to find the most recent month with data.
   // Only these two fields are used here — all other ME metrics require ad
   // platform data (Meta/Google Ads API) and remain static for now.
-  const { phase1: mktPhase1 } = useLatestDataPeriod(ME_STORE_ID);
+  const { phase1: mktPhase1, periodLabel: mePeriodLabel, loading: mePeriodLoading } = useLatestDataPeriod(ME_STORE_ID);
 
   // Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
   const liveDiscountDep = mktPhase1
@@ -547,6 +548,7 @@ export default function MarketingEfficiency() {
           <p className="text-muted-foreground mt-1">
             Understand which acquisition channels create profitable customers and where budget should be reallocated.
           </p>
+          <DataPeriodLabel periodLabel={mePeriodLabel} loading={mePeriodLoading} />
         </div>
         <TimelineSelector />
       </div>

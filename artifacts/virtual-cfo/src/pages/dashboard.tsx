@@ -1,5 +1,6 @@
 import { getCommerceMetrics } from "@/lib/analytics/commerceMetrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 import { getPhase2aMetrics, type Phase2aMetricsResponse } from "@/lib/analytics/phase2aMetrics";
 import { useEffect, useState } from "react";
 import {
@@ -374,7 +375,9 @@ export default function Dashboard() {
   const {
     phase1: phase1Metrics,
     dateFrom: activeDateFrom,
-    dateTo:   activeDateTo,
+    dateTo:        activeDateTo,
+    periodLabel:   activePeriodLabel,
+    loading:       periodLoading,
   } = useLatestDataPeriod(PHASE1_STORE_ID);
 
   useEffect(() => {
@@ -724,6 +727,7 @@ export default function Dashboard() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Business Control Centre</h1>
         <p className="text-muted-foreground mt-1 text-sm">See what is happening, how much profit and cash is at risk, and where to act first.</p>
+        <DataPeriodLabel periodLabel={activePeriodLabel} loading={periodLoading} />
       </div>
 
       {/* ══ BUSINESS HEALTH VERDICT HERO ════════════════════════════════════ */}

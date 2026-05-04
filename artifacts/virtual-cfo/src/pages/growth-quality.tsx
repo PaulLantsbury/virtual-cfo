@@ -25,6 +25,7 @@ import {
   GQ_SCORE_PREV,
 } from "@/lib/data/growth-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 
 // ─── Store ID ─────────────────────────────────────────────────────────────────
 // Dev store UUID — matches Dashboard, Margin Analysis, and Marketing Efficiency.
@@ -278,7 +279,7 @@ export default function GrowthQuality() {
   // Only these two KPI headlines are wired — all other GQ metrics (GQ_SCORE,
   // CAC_PAYBACK, SCORE grades, composition chart, driver impacts) remain static
   // pending ad-platform integration and a prior-period RPC.
-  const { phase1: gqPhase1 } = useLatestDataPeriod(GQ_STORE_ID);
+  const { phase1: gqPhase1, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
 
   // Live repeat purchase rate % (1 d.p.) — fallback to static REPEAT_RATE.
   // NOTE: REPEAT_RATE_CHANGE badge stays static — no prior-period RPC available.
@@ -316,6 +317,7 @@ export default function GrowthQuality() {
           <p className="text-muted-foreground mt-1">
             Identify whether revenue growth is healthy and self-sustaining — or fragile and dependent on discounting and paid spend.
           </p>
+          <DataPeriodLabel periodLabel={gqPeriodLabel} loading={gqPeriodLoading} />
         </div>
         <TimelineSelector />
       </div>

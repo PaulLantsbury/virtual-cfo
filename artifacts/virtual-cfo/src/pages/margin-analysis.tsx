@@ -17,6 +17,7 @@ import { MONTHLY_CM_PCT } from "@/lib/data/business-snapshot";
 import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
 import { CHANNEL_CM_PCT } from "@/lib/data/channel-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 
 // ── Phase 1 metrics config ────────────────────────────────────────────────────
 // DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx.
@@ -325,7 +326,7 @@ export default function MarginAnalysis() {
   // Walks back from the current month to find the most recent month with data.
   // A network failure leaves phase1 null; all derived values fall back to
   // the static snapshot constants below.
-  const { phase1 } = useLatestDataPeriod(MA_STORE_ID);
+  const { phase1, periodLabel: maPeriodLabel, loading: maPeriodLoading } = useLatestDataPeriod(MA_STORE_ID);
 
   // ── Live-derived metric values (Phase 1 → fallback to static snapshots) ────
   // DEV-ONLY FALLBACK — static March 2026 snapshot values are used while phase1
@@ -490,6 +491,7 @@ export default function MarginAnalysis() {
           <p className="text-muted-foreground mt-1">
             Understand current profit performance, the biggest upside opportunities, and what is driving change.
           </p>
+          <DataPeriodLabel periodLabel={maPeriodLabel} loading={maPeriodLoading} />
         </div>
 
         <TimelineSelector />

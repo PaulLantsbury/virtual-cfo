@@ -467,9 +467,9 @@ export default function Dashboard() {
     // Source (static):   KPI_CARDS "mr" card.value while both still loading
     if (card.id === "mr") {
       const mrValue =
-        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "gross_revenue")
+        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "gross_revenue") && phase1Metrics.data.grossRevenue > 0
           ? phase1Metrics.data.grossRevenue   // canonical — phase1 SQL function
-          : metrics?.totalRevenue;             // DEV-ONLY fallback — commerceMetrics all-time, no date filter
+          : metrics?.totalRevenue;             // DEV-ONLY fallback — commerceMetrics all-time, no date filter; also used when RPC returns 0 (no orders in period)
       if (mrValue == null) return card;        // static fallback while both loading
       return {
         ...card,
@@ -489,9 +489,9 @@ export default function Dashboard() {
     // Source (static):   KPI_CARDS "aov" card.value ("£0") while both still loading
     if (card.id === "aov") {
       const aovValue =
-        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "average_order_value")
+        phase1Metrics !== null && !phase1Metrics.errors.some(e => e.fn === "average_order_value") && phase1Metrics.data.averageOrderValue > 0
           ? phase1Metrics.data.averageOrderValue   // canonical — phase1 SQL function
-          : metrics?.averageOrderValue;             // DEV-ONLY fallback — commerceMetrics all-time; formula differs (see data dict §A.6)
+          : metrics?.averageOrderValue;             // DEV-ONLY fallback — commerceMetrics all-time; formula differs (see data dict §A.6); also used when RPC returns 0 (no orders in period)
       if (aovValue == null) return card;            // static fallback while both loading
       return {
         ...card,

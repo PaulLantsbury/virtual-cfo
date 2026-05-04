@@ -342,11 +342,14 @@ export default function MarginAnalysis() {
   // DEV-ONLY FALLBACK — static March 2026 snapshot values are used while phase1
   // is null (loading) or if an individual RPC call fails. Pattern mirrors dashboard.tsx.
 
-  // Gross revenue — primary: gross_revenue() RPC; fallback: March 2026 snapshot
-  const liveGrossRevenue = phase1?.data.grossRevenue ?? 124_500;
+  // Gross revenue — primary: gross_revenue() RPC; fallback: March 2026 snapshot.
+  // Uses || (not ??) so that a 0 returned by the RPC (no orders in the period)
+  // also triggers the static fallback — prevents the bridge table showing £0 revenue.
+  const liveGrossRevenue = phase1?.data.grossRevenue || 124_500;
 
-  // Average order value — primary: average_order_value() RPC; fallback: March 2026 snapshot
-  const liveAov = phase1?.data.averageOrderValue ?? 68.40;
+  // Average order value — primary: average_order_value() RPC; fallback: March 2026 snapshot.
+  // Same 0-guard rationale as liveGrossRevenue.
+  const liveAov = phase1?.data.averageOrderValue || 68.40;
 
   // Contribution margin % — primary: contribution_margin_pct() RPC [0,1] × 100
   // fallback: MONTHLY_CM_PCT (42.3 from business-snapshot.ts)

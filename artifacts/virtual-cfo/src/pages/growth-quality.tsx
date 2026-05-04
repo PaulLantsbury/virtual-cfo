@@ -24,6 +24,11 @@ import {
   GQ_SCORE,
   GQ_SCORE_PREV,
 } from "@/lib/data/growth-metrics";
+import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+
+// ─── Store ID ─────────────────────────────────────────────────────────────────
+// Dev store UUID — matches Dashboard, Margin Analysis, and Marketing Efficiency.
+const GQ_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 // ─── Data constants ──────────────────────────────────────────────────────────
 // REPEAT_RATE, DISCOUNT_DEP, CAC_PAYBACK, GQ_SCORE imported from
@@ -268,6 +273,38 @@ const STATUS_CONFIG: Record<ScoreStatus, { label: string; bar: string; badge: st
 export default function GrowthQuality() {
   useTimeline();
 
+  // ── Phase 1: live repeat rate and discount dependency ─────────────────────
+  // Walks back from the current month to find the most recent month with data.
+  // Only these two KPI headlines are wired — all other GQ metrics (GQ_SCORE,
+  // CAC_PAYBACK, SCORE grades, composition chart, driver impacts) remain static
+  // pending ad-platform integration and a prior-period RPC.
+  const { phase1: gqPhase1 } = useLatestDataPeriod(GQ_STORE_ID);
+
+  // Live repeat purchase rate % (1 d.p.) — fallback to static REPEAT_RATE.
+  // NOTE: REPEAT_RATE_CHANGE badge stays static — no prior-period RPC available.
+  const liveRepeatRate = gqPhase1
+    ? (gqPhase1.data.repeatPurchaseRate * 100).toFixed(1)
+    : REPEAT_RATE.toFixed(1);
+
+  // Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
+  // NOTE: DISCOUNT_DEP_CHANGE badge stays static — no prior-period RPC available.
+  const liveDiscountDep = gqPhase1
+    ? (gqPhase1.data.discountDependency * 100).toFixed(1)
+    : DISCOUNT_DEP.toFixed(1);
+
+  // Patch the "Discount reliance" score explanation with the live value.
+  // All other fields (status, grade, score, direction) remain untouched.
+  // "Contribution quality" explanation (42.3% CM) is explicitly excluded —
+  // Phase 1 contributionMarginPct (88.85%) uses a different metric basis.
+  const liveScoreComponents = SCORE_COMPONENTS.map((c) =>
+    c.label === "Discount reliance"
+      ? {
+          ...c,
+          explanation: `${liveDiscountDep}% of orders include a discount code — well above the healthy benchmark of <25%.`,
+        }
+      : c
+  );
+
   return (
     <AppLayout>
       {/* Page header */}
@@ -395,7 +432,7 @@ export default function GrowthQuality() {
         {/* Repeat Purchase Rate */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Repeat Purchase Rate</p>
-          <p className="text-4xl font-display font-bold text-foreground">{REPEAT_RATE}%</p>
+          <p className="text-4xl font-display font-bold text-foreground">{liveRepeatRate}%</p>
           <div className="flex items-center gap-2 mt-3 text-xs">
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold">
               <ArrowUpRight className="w-3 h-3" />
@@ -410,7 +447,7 @@ export default function GrowthQuality() {
         {/* Discount Dependency */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Discount Dependency</p>
-          <p className="text-4xl font-display font-bold text-foreground">{DISCOUNT_DEP}%</p>
+          <p className="text-4xl font-display font-bold text-foreground">{liveDiscountDep}%</p>
           <div className="flex items-center gap-2 mt-3 text-xs">
             <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
               <ArrowUpRight className="w-3 h-3" />
@@ -468,7 +505,7 @@ export default function GrowthQuality() {
             },
           ] as const
         ).map(({ dir, icon, labelCls, heading }, gi) => {
-          const items = SCORE_COMPONENTS.filter((c) => c.direction === dir);
+          const items = liveScoreComponents.filter((c) => c.direction === dir);
           if (!items.length) return null;
           return (
             <div key={dir} className={gi > 0 ? "mt-6 pt-6 border-t border-border/50" : ""}>

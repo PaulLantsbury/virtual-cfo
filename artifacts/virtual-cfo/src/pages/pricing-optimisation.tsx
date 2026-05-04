@@ -25,6 +25,7 @@ import {
   BASE_CONTRIBUTION,
   AVG_DISCOUNT_PCT,
 } from "@/lib/data/pricing-metrics";
+import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/analytics/deltaSentiment";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 // Imported from src/lib/data/pricing-metrics.ts — the central source of truth
@@ -36,6 +37,17 @@ import {
 // ORDERS           = 16,000
 // BASE_CONTRIBUTION= 198,000
 // AVG_DISCOUNT_PCT = 18
+
+// ─── KPI delta values (period-on-period) ──────────────────────────────────────
+// Positive = increased vs prior period; negative = decreased.
+// @dynamic Replace with live period-over-period differences from Shopify data.
+const KPI_DELTA_ASP                = -1.20;   // ASP fell £1.20 vs prior period
+const KPI_DELTA_AVG_DISCOUNT       =  3;      // Average discount rose 3pp
+const KPI_DELTA_FULL_PRICE_RATIO   = -6;      // Full-price ratio fell 6pp
+const KPI_DELTA_CONTRIB_PER_ORDER  = -2.10;   // Contribution per order fell £2.10
+const KPI_DELTA_DISCOUNT_COST      = 14_000;  // Discount cost rose £14k
+const KPI_DELTA_RETURNS_IMPACT     =  5_000;  // Returns impact rose £5k
+const KPI_DELTA_RECOVERABLE_CONTRIB = 11_000; // Recoverable contribution rose £11k (more wasted)
 
 const BASE_NET_REVENUE  = GROSS_REVENUE - DISCOUNT_COST;   // 356,000
 const BASE_NET_RETAINED = BASE_NET_REVENUE - RETURNS_IMPACT; // 338,000
@@ -128,11 +140,11 @@ function InlineCfoInsight({ text }: { text: string }) {
 
 interface KpiCardProps {
   label: string; value: string; delta: string;
-  positive: boolean; neutral?: boolean;
+  sentiment: DeltaSentiment | null;
   deltaLabel?: string; insight: string;
 }
-function KpiCard({ label, value, delta, positive, neutral, deltaLabel = "vs prior period", insight }: KpiCardProps) {
-  const DeltaIcon = neutral ? Zap : positive ? ArrowUpRight : ArrowDownRight;
+function KpiCard({ label, value, delta, sentiment, deltaLabel = "vs prior period", insight }: KpiCardProps) {
+  const DeltaIcon = sentiment === null || sentiment === "neutral" ? Zap : sentiment === "positive" ? ArrowUpRight : ArrowDownRight;
   return (
     <div className="bg-card rounded-2xl border border-border/50 shadow-sm px-5 py-4 flex flex-col gap-1.5">
       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
@@ -140,9 +152,9 @@ function KpiCard({ label, value, delta, positive, neutral, deltaLabel = "vs prio
       <div className="flex items-center gap-1.5">
         <span className={cn(
           "inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-full",
-          neutral ? "bg-secondary text-muted-foreground" :
-          positive ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" :
-                     "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
+          sentiment === "positive" ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400" :
+          sentiment === "negative" ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400" :
+                                     "bg-secondary text-muted-foreground",
         )}>
           <DeltaIcon className="w-3 h-3" />
           {delta}
@@ -334,14 +346,14 @@ export default function PricingOptimisation() {
 
       {/* ── 5. KPI Strip (8 cards, 4-column) ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="Average Selling Price"     value="£42.60"     delta="-£1.20"    positive={false} insight="Average realised price per order after discounts." />
-        <KpiCard label="Average Discount"          value="18%"         delta="+3pp"     positive={false} insight="Average discount given across orders." />
-        <KpiCard label="Full-Price Order Ratio"    value="46%"         delta="-6pp"     positive={false} insight="Orders completed without discount." />
-        <KpiCard label="Contribution per Order"    value="£12.40"      delta="-£2.10"   positive={false} insight="Profit before overheads generated per order." />
-        <KpiCard label="Discount Cost"             value="£64,000"     delta="+£14,000" positive={false} insight="Revenue given away through promotions and discount codes." />
-        <KpiCard label="Returns Impact"            value="£18,000"     delta="+£5,000"  positive={false} insight="Contribution lost through returned orders." />
-        <KpiCard label="Pricing Power Index"       value="Moderate"    delta="Stable"   positive={false} neutral={true} insight="Based on discount reliance, full-price mix and contribution stability." />
-        <KpiCard label="Recoverable Contribution"  value="£52,000"     delta="+£11,000" positive={false} insight="Estimated monthly contribution recoverable through pricing improvements." />
+        <KpiCard label="Average Selling Price"     value="£42.60"     delta="-£1.20"    sentiment={deltaToSentiment(KPI_DELTA_ASP,                DELTA_POLARITY.asp)}                insight="Average realised price per order after discounts." />
+        <KpiCard label="Average Discount"          value="18%"         delta="+3pp"     sentiment={deltaToSentiment(KPI_DELTA_AVG_DISCOUNT,        DELTA_POLARITY.avgDiscount)}        insight="Average discount given across orders." />
+        <KpiCard label="Full-Price Order Ratio"    value="46%"         delta="-6pp"     sentiment={deltaToSentiment(KPI_DELTA_FULL_PRICE_RATIO,    DELTA_POLARITY.fullPriceRatio)}     insight="Orders completed without discount." />
+        <KpiCard label="Contribution per Order"    value="£12.40"      delta="-£2.10"   sentiment={deltaToSentiment(KPI_DELTA_CONTRIB_PER_ORDER,   DELTA_POLARITY.cpPerOrder)}         insight="Profit before overheads generated per order." />
+        <KpiCard label="Discount Cost"             value="£64,000"     delta="+£14,000" sentiment={deltaToSentiment(KPI_DELTA_DISCOUNT_COST,       DELTA_POLARITY.discountCost)}       insight="Revenue given away through promotions and discount codes." />
+        <KpiCard label="Returns Impact"            value="£18,000"     delta="+£5,000"  sentiment={deltaToSentiment(KPI_DELTA_RETURNS_IMPACT,      DELTA_POLARITY.returnsImpact)}      insight="Contribution lost through returned orders." />
+        <KpiCard label="Pricing Power Index"       value="Moderate"    delta="Stable"   sentiment="neutral"                                                                            insight="Based on discount reliance, full-price mix and contribution stability." />
+        <KpiCard label="Recoverable Contribution"  value="£52,000"     delta="+£11,000" sentiment={deltaToSentiment(KPI_DELTA_RECOVERABLE_CONTRIB, DELTA_POLARITY.recoverableContrib)} insight="Estimated monthly contribution recoverable through pricing improvements." />
       </div>
 
       {/* ── 5b. Discount Increase Impact micro-card — always visible ── */}

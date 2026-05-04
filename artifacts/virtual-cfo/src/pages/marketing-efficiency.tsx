@@ -30,6 +30,7 @@ import {
 import { CAC_PAYBACK, CAC_PAYBACK_PREV, DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
+import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/analytics/deltaSentiment";
 
 // ── Phase 1 metrics config ────────────────────────────────────────────────────
 // DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx and margin-analysis.tsx.
@@ -373,11 +374,13 @@ const ME_LARGEST_DRIVER = ME_DRIVERS.reduce((a, b) =>
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function VarLine({ label, value, favorable }: { label: string; value: string; favorable: boolean }) {
+function VarLine({ label, value, sentiment }: { label: string; value: string; sentiment: DeltaSentiment | null }) {
   return (
     <div className={cn(
       "flex items-center gap-1 text-xs leading-none",
-      favorable ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+      sentiment === "positive" ? "text-emerald-600 dark:text-emerald-400" :
+      sentiment === "negative" ? "text-destructive" :
+      "text-muted-foreground",
     )}>
       <span className="font-semibold">{value}</span>
       <span className="text-muted-foreground font-normal">{label}</span>
@@ -1194,12 +1197,12 @@ export default function MarketingEfficiency() {
             <VarLine
               label="vs last month"
               value={`↓ £${Math.abs(MKT_CP_CHANGE_MOM).toLocaleString()}`}
-              favorable={MKT_CP_CHANGE_MOM > 0}
+              sentiment={deltaToSentiment(MKT_CP_CHANGE_MOM, DELTA_POLARITY.mktCp)}
             />
             <VarLine
               label="vs 12-month avg"
               value={`↑ £${MKT_CP_CHANGE_LY.toLocaleString()}`}
-              favorable={MKT_CP_CHANGE_LY > 0}
+              sentiment={deltaToSentiment(MKT_CP_CHANGE_LY, DELTA_POLARITY.mktCp)}
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Revenue remaining after all marketing costs</p>
@@ -1213,12 +1216,12 @@ export default function MarketingEfficiency() {
             <VarLine
               label="vs last month"
               value={`↑ £${BLENDED_CAC_CHANGE.toFixed(2)}`}
-              favorable={BLENDED_CAC_CHANGE < 0}
+              sentiment={deltaToSentiment(BLENDED_CAC_CHANGE, DELTA_POLARITY.blendedCac)}
             />
             <VarLine
               label="vs 12-month avg"
               value={`↑ £${BLENDED_CAC_CHANGE_LY.toFixed(2)}`}
-              favorable={BLENDED_CAC_CHANGE_LY < 0}
+              sentiment={deltaToSentiment(BLENDED_CAC_CHANGE_LY, DELTA_POLARITY.blendedCac)}
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Average cost to acquire one customer across all channels</p>
@@ -1232,12 +1235,12 @@ export default function MarketingEfficiency() {
             <VarLine
               label="vs last month"
               value={`↓ ${Math.abs(BLENDED_ROAS_CHANGE_MOM).toFixed(1)}×`}
-              favorable={BLENDED_ROAS_CHANGE_MOM > 0}
+              sentiment={deltaToSentiment(BLENDED_ROAS_CHANGE_MOM, DELTA_POLARITY.blendedRoas)}
             />
             <VarLine
               label="vs 12-month avg"
               value={`↓ ${Math.abs(BLENDED_ROAS_CHANGE_LY).toFixed(1)}×`}
-              favorable={BLENDED_ROAS_CHANGE_LY > 0}
+              sentiment={deltaToSentiment(BLENDED_ROAS_CHANGE_LY, DELTA_POLARITY.blendedRoas)}
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Revenue returned per £1 of blended marketing spend</p>
@@ -1253,12 +1256,12 @@ export default function MarketingEfficiency() {
             <VarLine
               label="vs last month"
               value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(1)} orders`}
-              favorable={CAC_PAYBACK < CAC_PAYBACK_PREV}
+              sentiment={deltaToSentiment(CAC_PAYBACK - CAC_PAYBACK_PREV, DELTA_POLARITY.cacPayback)}
             />
             <VarLine
               label="vs 12-month avg"
               value={`↑ ${(CAC_PAYBACK - CAC_PAYBACK_LY).toFixed(1)} orders`}
-              favorable={CAC_PAYBACK < CAC_PAYBACK_LY}
+              sentiment={deltaToSentiment(CAC_PAYBACK - CAC_PAYBACK_LY, DELTA_POLARITY.cacPayback)}
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover the cost of acquiring each new customer</p>
@@ -1272,12 +1275,12 @@ export default function MarketingEfficiency() {
             <VarLine
               label="vs last month"
               value={`↓ ${Math.abs(MKT_CM_CHANGE).toFixed(1)}pp`}
-              favorable={MKT_CM_CHANGE > 0}
+              sentiment={deltaToSentiment(MKT_CM_CHANGE, DELTA_POLARITY.mktCm)}
             />
             <VarLine
               label="vs 12-month avg"
               value={`↓ ${Math.abs(MKT_CM_CHANGE_LY).toFixed(1)}pp`}
-              favorable={MKT_CM_CHANGE_LY > 0}
+              sentiment={deltaToSentiment(MKT_CM_CHANGE_LY, DELTA_POLARITY.mktCm)}
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Blended contribution margin after all marketing costs</p>
@@ -1293,12 +1296,12 @@ export default function MarketingEfficiency() {
             <VarLine
               label="vs last month"
               value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_MOM).toFixed(2)}`}
-              favorable={MKT_CP_PER_ORDER_CHANGE_MOM > 0}
+              sentiment={deltaToSentiment(MKT_CP_PER_ORDER_CHANGE_MOM, DELTA_POLARITY.cpPerOrder)}
             />
             <VarLine
               label="vs 12-month avg"
               value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_LY).toFixed(2)}`}
-              favorable={MKT_CP_PER_ORDER_CHANGE_LY > 0}
+              sentiment={deltaToSentiment(MKT_CP_PER_ORDER_CHANGE_LY, DELTA_POLARITY.cpPerOrder)}
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Contribution profit generated per order after marketing cost</p>
@@ -1314,12 +1317,12 @@ export default function MarketingEfficiency() {
             <VarLine
               label="vs last month"
               value={`${CP_PER_SPEND_CHANGE_MOM < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_MOM).toFixed(2)}`}
-              favorable={CP_PER_SPEND_CHANGE_MOM > 0}
+              sentiment={deltaToSentiment(CP_PER_SPEND_CHANGE_MOM, DELTA_POLARITY.cpPerSpend)}
             />
             <VarLine
               label="vs 12-month avg"
               value={`${CP_PER_SPEND_CHANGE_LY < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_LY).toFixed(2)}`}
-              favorable={CP_PER_SPEND_CHANGE_LY > 0}
+              sentiment={deltaToSentiment(CP_PER_SPEND_CHANGE_LY, DELTA_POLARITY.cpPerSpend)}
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Contribution generated for every £1 of marketing spend</p>

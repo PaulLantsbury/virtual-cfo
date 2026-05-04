@@ -149,6 +149,88 @@ export function formatDeltaPp(delta: number | null | undefined): string {
   return `${arrow} ${abs.toFixed(1)}pp vs last month`;
 }
 
+// ── Rolling 3-month averages types ───────────────────────────────────────────
+
+/**
+ * One row returned by rolling_3m_averages().
+ * The RPC averages months T, T−1, T−2 (where T = p_date_from), excluding
+ * months with zero gross revenue via a WHERE gross_revenue > 0 guard.
+ *
+ * cm_pct_3m_avg is a [0,1] ratio — multiply by 100 to display as a %.
+ * months_included reflects how many non-zero months were averaged (1–3).
+ */
+export type Rolling3mRow = {
+  /** [0,1] ratio — multiply × 100 for display */
+  cm_pct_3m_avg:           number;
+  gross_revenue_3m_avg:    number;
+  net_sales_3m_avg:        number;
+  fixed_overhead_3m_avg:   number;
+  operating_profit_3m_avg: number;
+  runway_3m_avg:           number | null;
+  /** Number of non-zero-revenue months included in the average (1–3) */
+  months_included:         number;
+};
+
+export type Rolling3mError = {
+  fn: string;
+  message: string;
+};
+
+export type Rolling3mResponse = {
+  /**
+   * null when:
+   *   - The RPC returned 0 rows (no months with data in the window)
+   *   - The RPC call itself failed (error recorded in errors[])
+   */
+  data:   Rolling3mRow | null;
+  errors: Rolling3mError[];
+};
+
+/**
+ * Calls rolling_3m_averages() and returns the first row.
+ *
+ * The RPC averages the T, T−1, T−2 months starting from p_date_from,
+ * skipping months with zero gross revenue.  months_included in the result
+ * tells callers how many months were averaged (1, 2 or 3).
+ *
+ * @param storeId  UUID of the store — matches orders.store_id.
+ * @param dateFrom First day of the current period (e.g. "2026-04-01").
+ *                 Used as the anchor month T.  Only one date is required —
+ *                 the RPC derives the prior two months from this internally.
+ */
+export async function getRolling3mAverages(
+  storeId:  string,
+  dateFrom: string,
+): Promise<Rolling3mResponse> {
+  const errors: Rolling3mError[] = [];
+
+  const { data, error } = await supabase.rpc("rolling_3m_averages", {
+    p_store_id:  storeId,
+    p_date_from: dateFrom,
+  });
+
+  if (error) {
+    errors.push({ fn: "rolling_3m_averages", message: error.message });
+    return { data: null, errors };
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return { data: null, errors };
+
+  return {
+    errors,
+    data: {
+      cm_pct_3m_avg:           toNum(row.cm_pct_3m_avg),
+      gross_revenue_3m_avg:    toNum(row.gross_revenue_3m_avg),
+      net_sales_3m_avg:        toNum(row.net_sales_3m_avg),
+      fixed_overhead_3m_avg:   toNum(row.fixed_overhead_3m_avg),
+      operating_profit_3m_avg: toNum(row.operating_profit_3m_avg),
+      runway_3m_avg:           toNumNullable(row.runway_3m_avg),
+      months_included:         toNum(row.months_included),
+    },
+  };
+}
+
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
 function toNum(v: unknown): number {

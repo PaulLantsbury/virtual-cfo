@@ -35,12 +35,22 @@
  */
 
 import { useState, useEffect } from "react";
-import { getPhase2Deltas, type Phase2DeltaRow } from "./phase2DeltaMetrics";
+import {
+  getPhase2Deltas,
+  getRolling3mAverages,
+  type Phase2DeltaRow,
+  type Rolling3mRow,
+} from "./phase2DeltaMetrics";
 
 export type Phase2DeltasState = {
   /** null while loading or if the RPC failed / returned no rows */
   deltas:  Phase2DeltaRow | null;
-  /** true until the first fetch attempt settles (success or failure) */
+  /**
+   * Rolling 3-month averages — null while loading or if rolling_3m_averages()
+   * failed / returned no rows.  Fetched in parallel with deltas.
+   */
+  trends:  Rolling3mRow | null;
+  /** true until both fetch attempts settle (success or failure) */
   loading: boolean;
 };
 
@@ -59,6 +69,7 @@ export function usePhase2Deltas(
   dateTo:   string,
 ): Phase2DeltasState {
   const [deltas,  setDeltas]  = useState<Phase2DeltaRow | null>(null);
+  const [trends,  setTrends]  = useState<Rolling3mRow | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,22 +81,34 @@ export function usePhase2Deltas(
     let cancelled = false;
     setLoading(true);
     setDeltas(null);
+    setTrends(null);
 
-    getPhase2Deltas(storeId, dateFrom, dateTo)
-      .then((response) => {
+    // Both RPCs are independent — fire in parallel for a single round-trip wait.
+    Promise.all([
+      getPhase2Deltas(storeId, dateFrom, dateTo),
+      getRolling3mAverages(storeId, dateFrom),
+    ])
+      .then(([deltaResponse, trendsResponse]) => {
         if (cancelled) return;
-        if (response.errors.length > 0) {
+        if (deltaResponse.errors.length > 0) {
           console.warn(
             "[Phase2Deltas] RPC error — delta badges will show '—':",
-            response.errors,
+            deltaResponse.errors,
           );
         }
-        setDeltas(response.data);
+        if (trendsResponse.errors.length > 0) {
+          console.warn(
+            "[Phase2Deltas] rolling_3m_averages RPC error — trend context will show '—':",
+            trendsResponse.errors,
+          );
+        }
+        setDeltas(deltaResponse.data);
+        setTrends(trendsResponse.data);
         setLoading(false);
       })
       .catch(() => {
         // Unhandled rejection (e.g. network offline).
-        // Leave deltas null so callers show static sentinels / "—".
+        // Leave deltas/trends null so callers show static sentinels / "—".
         if (!cancelled) setLoading(false);
       });
 
@@ -94,5 +117,5 @@ export function usePhase2Deltas(
     };
   }, [storeId, dateFrom, dateTo]);
 
-  return { deltas, loading };
+  return { deltas, trends, loading };
 }

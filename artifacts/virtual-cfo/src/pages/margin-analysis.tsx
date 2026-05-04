@@ -329,13 +329,14 @@ export default function MarginAnalysis() {
   // the static snapshot constants below.
   const { phase1, dateFrom: maDateFrom, dateTo: maDateTo, periodLabel: maPeriodLabel, loading: maPeriodLoading } = useLatestDataPeriod(MA_STORE_ID);
 
-  // ── Phase 2: month-on-month deltas ────────────────────────────────────────
-  // Fires after useLatestDataPeriod resolves. Used for:
-  //   - CM% change vs last month (replaces static CM_PREV comparison)
-  //   - Contribution profit prior-period value (replaces CM_VALUE_PREV_M)
-  //   - Contribution per order prior-period value (replaces CONTRIBUTION_PER_ORDER_PREV_M)
-  // A failure leaves maDeltas null; all affected rows fall back to static snapshots.
-  const { deltas: maDeltas } = usePhase2Deltas(MA_STORE_ID, maDateFrom, maDateTo);
+  // ── Phase 2: month-on-month deltas + rolling 3m averages ─────────────────
+  // Both RPCs fire in parallel inside the hook. Used for:
+  //   - CM% change vs last month (replaces static CM_PREV comparison) [deltas]
+  //   - Contribution profit prior-period value (replaces CM_VALUE_PREV_M) [deltas]
+  //   - Contribution per order prior-period value (replaces CONTRIBUTION_PER_ORDER_PREV_M) [deltas]
+  //   - 3-month rolling average CM% for trend context line [trends]
+  // A failure leaves maDeltas / maTrends null; affected rows fall back to static snapshots.
+  const { deltas: maDeltas, trends: maTrends } = usePhase2Deltas(MA_STORE_ID, maDateFrom, maDateTo);
 
   // ── Live-derived metric values (Phase 1 → fallback to static snapshots) ────
   // DEV-ONLY FALLBACK — static March 2026 snapshot values are used while phase1
@@ -395,6 +396,22 @@ export default function MarginAnalysis() {
 
   // Keep CM_CHANGE for any remaining static references (RISK_MONITOR, etc.)
   const CM_CHANGE = +(CM_PCT - CM_PREV).toFixed(1);
+
+  // ── Rolling 3m trend context (Phase 2c) ─────────────────────────────────
+  // cm_pct_3m_avg is [0,1] — multiply × 100 to get display %.
+  // null until maTrends resolves; also null if the RPC fails or returns no rows.
+  const cmTrendAvgPct: number | null =
+    maTrends != null && maTrends.cm_pct_3m_avg > 0
+      ? +(maTrends.cm_pct_3m_avg * 100).toFixed(1)
+      : null;
+  // vsTrend in pp: positive = current CM above the rolling avg (good).
+  const cmVsTrend: number | null =
+    cmTrendAvgPct !== null
+      ? +(CM_PCT - cmTrendAvgPct).toFixed(1)
+      : null;
+  // How many non-zero-revenue months are in the average (1, 2, or 3).
+  // 0 when maTrends is null / RPC did not return the field.
+  const cmTrendMonths: number = maTrends?.months_included ?? 0;
 
   // Contribution Profit prior-month value — live from Phase 2, fallback to snapshot.
   // Formula: gross_revenue_prv × cm_pct_prv ≈ contribution_profit_prv
@@ -562,7 +579,7 @@ export default function MarginAnalysis() {
               <p className="text-4xl sm:text-5xl font-display font-bold text-foreground leading-none mb-2">
                 {CM_PCT}%
               </p>
-              <div className="flex items-center gap-1.5 mb-3">
+              <div className="flex items-center gap-1.5 mb-1">
                 {liveCmChangePp !== null ? (
                   <span className={cn(
                     "text-sm font-semibold",
@@ -577,6 +594,25 @@ export default function MarginAnalysis() {
                 )}
                 <span className="text-xs text-muted-foreground">vs last month</span>
               </div>
+
+              {/* Phase 2c — rolling trend context */}
+              <p className="text-xs text-muted-foreground mb-3">
+                {cmTrendAvgPct !== null && cmVsTrend !== null && cmTrendMonths > 0 ? (
+                  <>
+                    {cmTrendMonths === 3 ? "3-mo avg" : `${cmTrendMonths}-mo avg`}:{" "}
+                    {cmTrendAvgPct.toFixed(1)}%{"   "}
+                    <span className={cn(
+                      cmVsTrend >  0.1 ? "text-emerald-600 dark:text-emerald-400"
+                      : cmVsTrend < -0.1 ? "text-destructive"
+                      : "",
+                    )}>
+                      {cmVsTrend >  0.1 ? "↑ above trend"
+                      : cmVsTrend < -0.1 ? "↓ below trend"
+                      : "in line with trend"}
+                    </span>
+                  </>
+                ) : "—"}
+              </p>
 
               {/* @dynamic gaps recompute from CM_PCT vs BENCHMARK_TARGET */}
               <div className="pt-3 border-t border-primary/10 space-y-1.5">

@@ -21,7 +21,8 @@ import { MONTHLY_CM_PCT, MONTHLY_REVENUE, MONTHLY_OPERATING_PROFIT, RECOVERABLE_
 import { supabase } from "@/lib/supabase";
 import { CASH_RUNWAY } from "@/lib/data/cash-snapshot";
 import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
-
+// Treat 0 as "no data" (e.g. current month has no orders yet)
+// so we fall back to snapshot/computed metrics instead of showing £0
 // ─── Data constants ───────────────────────────────────────────────────────────
 // Live KPI overrides from Supabase-backed commerce metrics.
 // Any KPI not listed here continues to use the mock snapshot value.

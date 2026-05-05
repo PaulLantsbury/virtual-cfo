@@ -56,7 +56,7 @@ const CFO_INSIGHT = {
       // DEV-ONLY — "38%" is the DISCOUNT_DEP snapshot constant, not the live discountDependency
       // value from the Supabase discount_dependency() RPC.  Replace with an interpolated
       // live value once prior-period delta strings are computed in Phase 2.
-      why: "Discount dependency is at 38% and rising, eroding contribution margin and weakening growth quality scores.",
+      why: "Discount dependency at 38% and rising. Eroding contribution margin and weakening growth quality.",
       // DEV-ONLY FALLBACK — impact range uses RECOVERABLE_LOW/HIGH snapshot constants as
       // fallback until phase1Metrics resolves.  Will automatically reflect live RPC values
       // once the rc tile wiring propagates here; see rc wiring block in liveKpiCards.
@@ -66,12 +66,12 @@ const CFO_INSIGHT = {
       action: "Reallocate inefficient Meta spend",
       // DEV-ONLY — "14%" is a hardcoded snapshot figure.  Primary source: meta_cac_trend()
       // Supabase RPC (Phase 3, Meta Ads API integration).  Replace before production.
-      why: "Meta CAC is up 14% while email and organic channels deliver significantly higher contribution margins.",
+      why: "Meta CAC up 14%. Email and organic channels deliver materially higher contribution per order.",
       impact: "Improves blended acquisition efficiency and reduces CAC payback period",
     },
     {
       action: "Address fulfilment cost leakage",
-      why: "Variable costs are compressing contribution margin below target, reducing the value of each order shipped.",
+      why: "Variable costs compressing contribution below target. Net value per order is declining.",
       impact: "Largest single lever in the identified monthly opportunity",
     },
   ],
@@ -192,7 +192,7 @@ const KPI_CARDS: {
     value: RECOVERABLE_TILE_VALUE,
     change: RECOVERABLE_TILE_CHANGE,
     status: RECOVERABLE_LOW > 0 || RECOVERABLE_HIGH > 0 ? "positive" : "neutral",
-    text: "Immediate margin recovery available from pricing, marketing and fulfilment improvements.",
+    text: "Contribution recoverable across margin, marketing and fulfilment.",
   },
   {
     // DEV-ONLY — NO LIVE WIRING.  value and change are fully mock (Phase 1 only).
@@ -202,7 +202,7 @@ const KPI_CARDS: {
     // change: "Moderate" is a static qualitative label.
     //         Replace with computed "±X.X months vs last month" once Xero is connected.
     id: "cr",   title: "Cash Runway",              value: `${CASH_RUNWAY} months`,        change: "Moderate",                            status: "warning",
-    text: "Cash remains positive, but runway is tightening.",
+    text: "Positive. Runway shortening — action needed.",
   },
   {
     // value: Tier 3 loading sentinel (DISCOUNT_DEP snapshot = 38%) until liveKpiCards
@@ -211,7 +211,7 @@ const KPI_CARDS: {
     // change: DEV-ONLY static string — no prior-period discount_dependency() RPC yet.
     //         Replace with computed "±X% vs last month" in Phase 2.
     id: "dd",   title: "Discount Dependency",      value: `${DISCOUNT_DEP}%`,             change: "↑ 11% vs last month",                status: "danger",
-    text: "Growth remains dependent on discounting.",
+    text: "Discounting sustaining growth at an unsustainable rate.",
   },
   {
     // DEV-ONLY — NO LIVE WIRING.  value and change are fully mock (Phase 1 only).
@@ -222,7 +222,7 @@ const KPI_CARDS: {
     // change: "↓ efficiency" is a hardcoded qualitative direction label.
     //         Replace with computed "±X% vs last month" once meta_cac_trend() exists.
     id: "ae",   title: "Acquisition Efficiency",   value: "Meta CAC +14%",                change: "↓ efficiency",                       status: "danger",
-    text: "Customer acquisition costs are rising faster than contribution.",
+    text: "CAC rising faster than contribution per order.",
   },
   {
     // value: Tier 3 loading sentinel (REPEAT_RATE snapshot = 28%) until liveKpiCards
@@ -231,7 +231,7 @@ const KPI_CARDS: {
     // change: DEV-ONLY static string — no prior-period repeat_purchase_rate() RPC yet.
     //         Replace with computed "±X.X% vs last month" in Phase 2.
     id: "rpr",  title: "Repeat Purchase Rate",     value: `${REPEAT_RATE}%`,              change: "↑ 4.2% vs last month",               status: "positive",
-    text: "More customers are returning, strengthening retention.",
+    text: "Retention strengthening. Repeat rate trending up.",
   },
   {
     // value: Tier 3 loading sentinel (MONTHLY_REVENUE snapshot = £124,500) until
@@ -240,7 +240,7 @@ const KPI_CARDS: {
     // change: DEV-ONLY static string — no prior-period gross_revenue() RPC yet.
     //         Replace with computed "±X.X% vs last month" in Phase 2.
     id: "mr",   title: "Monthly Revenue",          value: `£${MONTHLY_REVENUE.toLocaleString("en-GB")}`, change: "↑ 12.4% vs last month", status: "positive",
-    text: "Revenue is growing, but margin quality is weakening.",
+    text: "Revenue growing. Margin quality declining.",
   },
   {
     // value: Tier 3 loading sentinel — MONTHLY_OPERATING_PROFIT snapshot = −£10,184.
@@ -253,7 +253,7 @@ const KPI_CARDS: {
     value:  formatOpProfit(MONTHLY_OPERATING_PROFIT),
     change: "",
     status: opProfitStatus(MONTHLY_OPERATING_PROFIT),
-    text: "Profit after fixed costs.",
+    text: "Net operating profit after fixed overheads.",
   },
   {
     // value: Tier 3 loading sentinel — "£0" shown while phase1Metrics and commerceMetrics
@@ -265,7 +265,7 @@ const KPI_CARDS: {
     value: "£0",
     change: "",
     status: "positive",
-    text: "Average value per order.",
+    text: "Average revenue per order placed.",
   },
   {
     // value: Tier 3 loading sentinel — "0%" shown while phase1Metrics and commerceMetrics
@@ -277,41 +277,41 @@ const KPI_CARDS: {
     value: "0%",
     change: "",
     status: "warning",
-    text: "Proportion of sales refunded to customers.",
+    text: "Refunds as a proportion of gross revenue.",
   },
 ];
 
 const TOP_DRIVERS: Driver[] = [
   {
     id: "1",
-    text: "Margin declined due to higher fulfilment and shipping costs.",
-    proDetail: "Fulfilment cost rose 12% per order, reducing contribution by £3.2k vs last month.",
+    text: "Fulfilment costs rose 12% per order, compressing contribution margin.",
+    proDetail: "Fulfilment cost per order up 12%. Contribution impact: −£3.2k vs last month.",
     trend: "worsening",
     href: "/margin-analysis",
   },
   {
     id: "2",
-    text: "Repeat purchase rate improved, supporting retention.",
+    text: "Repeat rate improved month-on-month.",
     trend: "improving",
     href: "/growth-quality",
   },
   {
     id: "3",
-    text: "Marketing efficiency declined as CAC increased and ROAS weakened.",
-    proDetail: "Meta CAC rose 14% to £28 per customer while ROAS fell from 3.1x to 2.7x.",
+    text: "Meta CAC up 14%. ROAS fell from 3.1x to 2.7x.",
+    proDetail: "Meta CAC now £28 per customer (+14% MoM). ROAS declined from 3.1x to 2.7x.",
     trend: "worsening",
     href: "/marketing-efficiency",
   },
   {
     id: "4",
-    text: "Discount usage is increasing faster than revenue growth.",
-    proDetail: "Discounted orders grew 8% while revenue grew 5.2%, reducing margin by £4.2k per month.",
+    text: "Discounting growing faster than revenue.",
+    proDetail: "Discount-attached orders +8% vs revenue +5.2%. Margin drag: −£4.2k per month.",
     trend: "worsening",
     href: "/margin-analysis",
   },
   {
     id: "5",
-    text: "Average order value is stable.",
+    text: "AOV stable. No material movement.",
     trend: "neutral",
   },
 ];
@@ -320,7 +320,7 @@ const PRIORITY_ACTIONS = [
   {
     title:  "Reduce fulfilment cost leakage",
     impact: "+£6.8k contribution",
-    reason: "Fulfilment and shipping costs are the largest source of margin pressure this month.",
+    reason: "Largest single source of margin compression this month.",
     badge:  "High impact",
     color:  "red",
     timing: "2–4 weeks" as const,
@@ -328,7 +328,7 @@ const PRIORITY_ACTIONS = [
   {
     title:  "Tighten discount exposure",
     impact: "+£4.2k contribution",
-    reason: "Discounting is increasing faster than revenue and eroding margin.",
+    reason: "Discount-attached orders up 8% against revenue growth of 5.2%.",
     badge:  "High impact",
     color:  "red",
     timing: "Immediate" as const,
@@ -336,7 +336,7 @@ const PRIORITY_ACTIONS = [
   {
     title:  "Reallocate inefficient marketing spend",
     impact: "+£3.1k contribution",
-    reason: "Customer acquisition costs are rising while returns from paid channels are weakening.",
+    reason: "Meta CAC up 14%. ROAS declined from 3.1x to 2.7x.",
     badge:  "Medium impact",
     color:  "orange",
     timing: "1–2 weeks" as const,
@@ -349,7 +349,7 @@ const HEALTH_MODULES = [
     id:       "profit",
     title:    "Profit Quality / Margin Analysis",
     headline: "£20.4k margin recovery identified",
-    subtitle: "See where contribution margin is being eroded and how to recover it.",
+    subtitle: "Identify where contribution is being lost and quantify the recovery.",
     cta:      "Analyse margin",
     href:     "/margin-analysis",
   },
@@ -357,7 +357,7 @@ const HEALTH_MODULES = [
     id:       "pricing",
     title:    "Pricing Optimisation",
     headline: "£52k recoverable contribution",
-    subtitle: "Identify discount leakage and pricing opportunities.",
+    subtitle: "Quantify discount leakage and model pricing improvements.",
     cta:      "Improve pricing",
     href:     "/pricing-optimisation",
   },
@@ -365,7 +365,7 @@ const HEALTH_MODULES = [
     id:       "growth",
     title:    "Growth Quality",
     headline: "38% discount dependency",
-    subtitle: "Understand whether growth is healthy or reliant on promotions and paid spend.",
+    subtitle: "Assess whether growth is profitable or dependent on discounting and paid acquisition.",
     cta:      "Analyse growth",
     href:     "/growth-quality",
   },
@@ -373,7 +373,7 @@ const HEALTH_MODULES = [
     id:       "acquisition",
     title:    "Marketing / Acquisition Efficiency",
     headline: "Meta CAC +14%",
-    subtitle: "Diagnose which channels are creating profitable customers.",
+    subtitle: "Identify which channels generate profitable customers and at what cost.",
     cta:      "Diagnose acquisition",
     href:     "/marketing-efficiency",
   },
@@ -381,7 +381,7 @@ const HEALTH_MODULES = [
     id:       "cash",
     title:    "Cash Control",
     headline: "£64k cash headroom opportunity",
-    subtitle: "See where cash is trapped, how much runway you have, and what actions protect liquidity.",
+    subtitle: "Quantify cash headroom, runway position and liquidity protection actions.",
     cta:      "Review cash position",
     href:     "/cash-control",
   },
@@ -389,7 +389,7 @@ const HEALTH_MODULES = [
     id:       "scenario",
     title:    "Scenario Lab / Opportunities",
     headline: "£18k–£42k contribution upside",
-    subtitle: "See the highest-impact improvement actions and model the combined impact.",
+    subtitle: "Model the combined impact of the priority improvement actions.",
     cta:      "Model opportunity",
     href:     "/scenario-lab",
   },
@@ -942,11 +942,11 @@ export default function Dashboard() {
         <div className="px-6 py-4">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5">
             {[
-              { area: "Profitability",          label: "Healthy",               text: "Profit remains positive.",                         style: "green" },
-              { area: "Margin Quality",          label: "Weakening",             text: "Contribution margin is below target and falling.",  style: "amber" },
-              { area: "Cash Runway",             label: "Runway tightening",     text: "Cash remains positive, but runway is tightening.",  style: "amber" },
-              { area: "Acquisition Efficiency",  label: "At risk",               text: "Meta CAC is rising and ROAS is weakening.",         style: "red"   },
-              { area: "Retention",               label: "Retention strengthening", text: "Repeat purchase rate is improving.",              style: "green" },
+              { area: "Profitability",          label: "Healthy",               text: "Profitable. Margin pressure building.",                 style: "green" },
+              { area: "Margin Quality",          label: "Weakening",             text: "Below target. Deteriorating month-on-month.",           style: "amber" },
+              { area: "Cash Runway",             label: "Runway tightening",     text: "Positive. Runway shortening — monitor closely.",        style: "amber" },
+              { area: "Acquisition Efficiency",  label: "At risk",               text: "CAC rising. ROAS weakening.",                           style: "red"   },
+              { area: "Retention",               label: "Retention strengthening", text: "Repeat rate improving month-on-month.",               style: "green" },
             ].map(({ area, label, text, style }) => (
               <div key={area} className={cn(
                 "rounded-xl p-3 border flex flex-col gap-1.5",
@@ -1028,9 +1028,9 @@ export default function Dashboard() {
                   <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
                 </p>
                 <p className="text-sm text-foreground font-medium mb-1">
-                  The data has identified a recoverable contribution opportunity in your current margin, marketing and fulfilment performance.
+                  Analysis has identified recoverable contribution across margin, marketing and fulfilment.
                 </p>
-                <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
+                <p className="text-xs text-muted-foreground mb-3 leading-snug">Principal recovery achievable within 30–60 days.</p>
                 <div className="flex items-center gap-3 flex-wrap mb-2">
                   {/*
                     DEV-ONLY — "£12k within 30 days" and "£30k within 90 days" are
@@ -1073,9 +1073,9 @@ export default function Dashboard() {
                   <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
                 </p>
                 <p className="text-sm text-foreground font-medium mb-1">
-                  The data has identified a recoverable contribution opportunity in your current margin, marketing and fulfilment performance.
+                  Analysis has identified recoverable contribution across margin, marketing and fulfilment.
                 </p>
-                <p className="text-xs text-muted-foreground mb-3 leading-snug">Most recoverable within 30–60 days.</p>
+                <p className="text-xs text-muted-foreground mb-3 leading-snug">Principal recovery achievable within 30–60 days.</p>
                 <div className="flex items-center gap-3 flex-wrap mb-4">
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary text-muted-foreground/40 border border-border/40 blur-[2px] select-none pointer-events-none">
                     <Lock className="w-3 h-3" /> £12k within 30 days
@@ -1122,7 +1122,7 @@ export default function Dashboard() {
           {isPro ? (
             <div className="space-y-4">
               <p className="text-xs text-indigo-300/70 leading-snug mb-1">
-                These are the key drivers behind the {rcHeadlineStr} opportunity identified above. Address them in order for the fastest contribution recovery.
+                Key drivers behind the {rcHeadlineStr} opportunity. Address in priority order for fastest contribution recovery.
               </p>
               {CFO_INSIGHT.weeklyPriorities.map((priority, i) => (
                 <div
@@ -1147,7 +1147,7 @@ export default function Dashboard() {
           ) : (
             <div>
               <p className="text-sm font-medium text-foreground leading-relaxed mb-3">
-                Your three highest-impact actions for this week have been identified.
+                Three high-impact actions identified for this week.
               </p>
               <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
                 <Lock className="w-3.5 h-3.5" /> Unlock this week's action plan <ChevronRight className="w-4 h-4" />

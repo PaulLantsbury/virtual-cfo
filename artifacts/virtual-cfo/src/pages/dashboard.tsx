@@ -153,10 +153,11 @@ const KPI_CARDS: {
    * undefined = trends not yet resolved (loading).
    */
   trendLine?: {
-    /** e.g. "3-mo avg: £60.45" */
-    avg: string;
-    /** e.g. "↑ above trend" | "↓ below trend" | "≈ in line" */
-    direction: string;
+    /**
+     * Narrative insight sentence combining MoM change and rolling 3m trend comparison.
+     * e.g. "AOV fell 6.0% this month but is still £2.28 above your recent trend"
+     */
+    text: string;
     sentiment: "positive" | "negative" | null;
   } | null;
 }[] = [
@@ -546,26 +547,32 @@ export default function Dashboard() {
       if (aovValue == null) return card;            // static fallback while both loading
 
       // Phase 2c: rolling 3m trend context for AOV.
-      // Uses absolute £ delta (not %) — threshold ±£0.50 for neutral zone.
-      // Only shown once phase2Trends has resolved (same Promise.all gate as deltas).
+      // Narrative combines MoM % change and absolute £ delta vs 3m trend.
+      // Shown once phase2Trends resolves (same Promise.all gate as deltas).
       const aovTrendLine: typeof card.trendLine =
         !phase2DeltasLoading && phase2Trends != null
           ? (() => {
-              const avg   = phase2Trends.aov_3m_avg;
-              const delta = aovValue - avg;
+              const avg        = phase2Trends.aov_3m_avg;
+              const trendDelta = aovValue - avg;
               const sentiment: "positive" | "negative" | null =
-                delta >  0.5 ? "positive"
-                : delta < -0.5 ? "negative"
+                trendDelta >  0.5 ? "positive"
+                : trendDelta < -0.5 ? "negative"
                 : null;
-              const direction =
-                delta >  0.5 ? "↑ above trend"
-                : delta < -0.5 ? "↓ below trend"
-                : "≈ in line";
-              return {
-                avg: `3-mo avg: £${avg.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                direction,
-                sentiment,
-              };
+              // Only include MoM direction when prior period has data.
+              const momPct = phase2Deltas?.aov_delta_pct ?? null;
+              let text: string;
+              if (momPct !== null) {
+                const momDir   = momPct < 0 ? "fell" : "rose";
+                const trendAbs = `£${Math.abs(trendDelta).toFixed(2)}`;
+                const trendDir = trendDelta >= 0 ? "above" : "below";
+                const conjunct = (momPct > 0) === (trendDelta > 0) ? "and is" : "but is still";
+                text = `AOV ${momDir} ${Math.abs(momPct).toFixed(1)}% this month ${conjunct} ${trendAbs} ${trendDir} your recent trend`;
+              } else {
+                const trendAbs = `£${Math.abs(trendDelta).toFixed(2)}`;
+                const trendDir = trendDelta >= 0 ? "above" : "below";
+                text = `Currently ${trendAbs} ${trendDir} your recent trend`;
+              }
+              return { text, sentiment };
             })()
           : undefined;
 
@@ -826,27 +833,39 @@ export default function Dashboard() {
       if (npValue === null) return card;  // static sentinel while still loading
 
       // Phase 2c: rolling 3m trend context for Operating Profit.
-      // Uses absolute £ delta only — percentage is misleading when both values are negative.
-      // "improving" = current loss is smaller than average (less negative = better).
-      // Threshold ±£2,000 for neutral zone to avoid noise on a £60–90k loss figure.
+      // Narrative combines absolute MoM £ change and absolute £ delta vs 3m trend.
+      // Uses absolute £ only — % is misleading when both values are negative.
+      // Threshold ±£2,000 neutral zone to avoid noise on a £60–90k loss figure.
       const npTrendLine: typeof card.trendLine =
         !phase2DeltasLoading && phase2Trends != null
           ? (() => {
-              const avg   = phase2Trends.operating_profit_3m_avg;
-              const delta = npValue - avg;
+              const avg        = phase2Trends.operating_profit_3m_avg;
+              const trendDelta = npValue - avg;
               const sentiment: "positive" | "negative" | null =
-                delta >  2000 ? "positive"
-                : delta < -2000 ? "negative"
+                trendDelta >  2000 ? "positive"
+                : trendDelta < -2000 ? "negative"
                 : null;
-              const direction =
-                delta >  2000 ? "↑ improving"
-                : delta < -2000 ? "↓ worsening"
-                : "≈ in line";
-              return {
-                avg: `3-mo avg: ${formatOpProfit(avg)}`,
-                direction,
-                sentiment,
+              // Format £ as "£X.Xk" — always one decimal place for readability.
+              const fmtK = (v: number) => {
+                const k = Math.abs(v) / 1000;
+                return `£${k.toFixed(1)}k`;
               };
+              // Gate on op_profit_delta_pct being non-null — confirms prior period had data.
+              const momAbsChange =
+                phase2Deltas != null && phase2Deltas.op_profit_delta_pct !== null
+                  ? phase2Deltas.op_profit_cur - phase2Deltas.op_profit_prv
+                  : null;
+              let text: string;
+              if (momAbsChange !== null) {
+                const momDir   = momAbsChange >= 0 ? "improved" : "worsened";
+                const trendDir = trendDelta  >= 0 ? "better"   : "worse";
+                const conjunct = (momAbsChange >= 0) === (trendDelta >= 0) ? "and is" : "but is still";
+                text = `Profit ${momDir} by ${fmtK(momAbsChange)} this month ${conjunct} ${fmtK(trendDelta)} ${trendDir} than your recent trend`;
+              } else {
+                const trendDir = trendDelta >= 0 ? "better" : "worse";
+                text = `Currently ${fmtK(trendDelta)} ${trendDir} than your recent trend`;
+              }
+              return { text, sentiment };
             })()
           : undefined;
 
@@ -1248,13 +1267,7 @@ export default function Dashboard() {
                     {/* Phase 2c — rolling 3m trend context (AOV and Net Profit only) */}
                     {kpi.trendLine != null && (
                       <p className="text-xs text-muted-foreground mb-2">
-                        {kpi.trendLine.avg}{" · "}
-                        <span className={cn(
-                          kpi.trendLine.sentiment === "positive" && "text-emerald-600 dark:text-emerald-400",
-                          kpi.trendLine.sentiment === "negative" && "text-destructive",
-                        )}>
-                          {kpi.trendLine.direction}
-                        </span>
+                        {kpi.trendLine.text}
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground/80 leading-snug border-t border-border/50 pt-2">{kpi.text}</p>

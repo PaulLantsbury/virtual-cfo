@@ -424,6 +424,19 @@ export default function MarginAnalysis() {
   // 0 when maTrends is null / RPC did not return the field.
   const cmTrendMonths: number = maTrends?.months_included ?? 0;
 
+  // Narrative insight: combines MoM pp change with rolling 3m trend comparison.
+  // "—" while trends are loading or when there is insufficient history.
+  const cmInsightText: string =
+    cmVsTrend !== null && cmTrendMonths > 0 && liveCmChangePp !== null
+      ? (() => {
+          const momDir   = liveCmChangePp < 0 ? "fell" : "rose";
+          const trendAbs = Math.abs(cmVsTrend).toFixed(1);
+          const trendDir = cmVsTrend >= 0 ? "above" : "below";
+          const conjunct = (liveCmChangePp > 0) === (cmVsTrend > 0) ? "and remains" : "but remains";
+          return `Margin ${momDir} ${Math.abs(liveCmChangePp).toFixed(1)}pp this month ${conjunct} ${trendAbs}pp ${trendDir} your recent average`;
+        })()
+      : "—";
+
   // Live trailing 12-month CM% average — from trailing_12m_cm_avg() RPC.
   // cm_pct_12m_avg is [0,1] — multiply × 100 for display %.
   // Priority:
@@ -652,21 +665,7 @@ export default function MarginAnalysis() {
 
               {/* Phase 2c — rolling trend context */}
               <p className="text-xs text-muted-foreground mb-3">
-                {cmTrendAvgPct !== null && cmVsTrend !== null && cmTrendMonths > 0 ? (
-                  <>
-                    {cmTrendMonths === 3 ? "3-mo avg" : `${cmTrendMonths}-mo avg`}:{" "}
-                    {cmTrendAvgPct.toFixed(1)}%{"   "}
-                    <span className={cn(
-                      cmVsTrend >  0.1 ? "text-emerald-600 dark:text-emerald-400"
-                      : cmVsTrend < -0.1 ? "text-destructive"
-                      : "",
-                    )}>
-                      {cmVsTrend >  0.1 ? "↑ above trend"
-                      : cmVsTrend < -0.1 ? "↓ below trend"
-                      : "in line with trend"}
-                    </span>
-                  </>
-                ) : "—"}
+                {cmInsightText}
               </p>
 
               {/* @dynamic gaps recompute from CM_PCT vs BENCHMARK_TARGET */}

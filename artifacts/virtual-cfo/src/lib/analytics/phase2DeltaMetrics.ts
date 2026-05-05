@@ -237,6 +237,8 @@ export type Rolling3mRow = {
   cm_pct_3m_avg:           number;
   gross_revenue_3m_avg:    number;
   net_sales_3m_avg:        number;
+  /** Rolling 3-month average order value in £ (net_sales / order_count across the window) */
+  aov_3m_avg:              number;
   fixed_overhead_3m_avg:   number;
   operating_profit_3m_avg: number;
   runway_3m_avg:           number | null;
@@ -296,6 +298,7 @@ export async function getRolling3mAverages(
       cm_pct_3m_avg:           toNum(row.cm_pct_3m_avg),
       gross_revenue_3m_avg:    toNum(row.gross_revenue_3m_avg),
       net_sales_3m_avg:        toNum(row.net_sales_3m_avg),
+      aov_3m_avg:              toNum(row.aov_3m_avg),
       fixed_overhead_3m_avg:   toNum(row.fixed_overhead_3m_avg),
       operating_profit_3m_avg: toNum(row.operating_profit_3m_avg),
       runway_3m_avg:           toNumNullable(row.runway_3m_avg),

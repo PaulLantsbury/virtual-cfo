@@ -146,6 +146,19 @@ const KPI_CARDS: {
   text: string;
   /** Set by liveKpiCards when a live Phase 2 delta is available. Undefined until then. */
   changeSentiment?: DeltaSentiment | null;
+  /**
+   * Phase 2c rolling 3-month trend context line.
+   * Only set for tiles that have a rolling_3m_averages counterpart.
+   * null  = trends resolved but not enough data to show a line.
+   * undefined = trends not yet resolved (loading).
+   */
+  trendLine?: {
+    /** e.g. "3-mo avg: £60.45" */
+    avg: string;
+    /** e.g. "↑ above trend" | "↓ below trend" | "≈ in line" */
+    direction: string;
+    sentiment: "positive" | "negative" | null;
+  } | null;
 }[] = [
   {
     // value: Tier 3 loading sentinel (MONTHLY_CM_PCT snapshot = 42.3%) until
@@ -456,7 +469,7 @@ export default function Dashboard() {
   // A failure here leaves phase2Deltas null; all delta badge strings fall back
   // to card.change static sentinel (shown while loading) or "—" (after load,
   // no prior-period data).  Phase 1 and Phase 2a tiles are unaffected.
-  const { deltas: phase2Deltas, loading: phase2DeltasLoading } = usePhase2Deltas(
+  const { deltas: phase2Deltas, trends: phase2Trends, loading: phase2DeltasLoading } = usePhase2Deltas(
     PHASE1_STORE_ID, activeDateFrom, activeDateTo,
   );
 
@@ -531,6 +544,31 @@ export default function Dashboard() {
           ? phase1Metrics.data.averageOrderValue   // canonical — phase1 SQL function
           : metrics?.averageOrderValue;             // DEV-ONLY fallback — commerceMetrics all-time; formula differs (see data dict §A.6); also used when RPC returns 0 (no orders in period)
       if (aovValue == null) return card;            // static fallback while both loading
+
+      // Phase 2c: rolling 3m trend context for AOV.
+      // Uses absolute £ delta (not %) — threshold ±£0.50 for neutral zone.
+      // Only shown once phase2Trends has resolved (same Promise.all gate as deltas).
+      const aovTrendLine: typeof card.trendLine =
+        !phase2DeltasLoading && phase2Trends != null
+          ? (() => {
+              const avg   = phase2Trends.aov_3m_avg;
+              const delta = aovValue - avg;
+              const sentiment: "positive" | "negative" | null =
+                delta >  0.5 ? "positive"
+                : delta < -0.5 ? "negative"
+                : null;
+              const direction =
+                delta >  0.5 ? "↑ above trend"
+                : delta < -0.5 ? "↓ below trend"
+                : "≈ in line";
+              return {
+                avg: `3-mo avg: £${avg.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                direction,
+                sentiment,
+              };
+            })()
+          : undefined;
+
       return {
         ...card,
         value:  `£${aovValue.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
@@ -541,6 +579,7 @@ export default function Dashboard() {
         changeSentiment: !phase2DeltasLoading
           ? deltaToSentiment(phase2Deltas?.aov_delta_pct ?? null, DELTA_POLARITY.aov)
           : undefined,
+        trendLine: aovTrendLine,
       };
     }
 
@@ -786,6 +825,31 @@ export default function Dashboard() {
       const npValue = npLive ?? (npResolved ? MONTHLY_OPERATING_PROFIT : null);
       if (npValue === null) return card;  // static sentinel while still loading
 
+      // Phase 2c: rolling 3m trend context for Operating Profit.
+      // Uses absolute £ delta only — percentage is misleading when both values are negative.
+      // "improving" = current loss is smaller than average (less negative = better).
+      // Threshold ±£2,000 for neutral zone to avoid noise on a £60–90k loss figure.
+      const npTrendLine: typeof card.trendLine =
+        !phase2DeltasLoading && phase2Trends != null
+          ? (() => {
+              const avg   = phase2Trends.operating_profit_3m_avg;
+              const delta = npValue - avg;
+              const sentiment: "positive" | "negative" | null =
+                delta >  2000 ? "positive"
+                : delta < -2000 ? "negative"
+                : null;
+              const direction =
+                delta >  2000 ? "↑ improving"
+                : delta < -2000 ? "↓ worsening"
+                : "≈ in line";
+              return {
+                avg: `3-mo avg: ${formatOpProfit(avg)}`,
+                direction,
+                sentiment,
+              };
+            })()
+          : undefined;
+
       return {
         ...card,
         value:  formatOpProfit(npValue),
@@ -799,6 +863,7 @@ export default function Dashboard() {
         changeSentiment: !phase2DeltasLoading
           ? deltaToSentiment(phase2Deltas?.op_profit_delta_pct ?? null, DELTA_POLARITY.np)
           : undefined,
+        trendLine: npTrendLine,
       };
     }
 
@@ -1180,6 +1245,18 @@ export default function Dashboard() {
                       : null}
                       {kpi.change}
                     </span>
+                    {/* Phase 2c — rolling 3m trend context (AOV and Net Profit only) */}
+                    {kpi.trendLine != null && (
+                      <p className="text-xs text-muted-foreground mb-2">
+                        {kpi.trendLine.avg}{" · "}
+                        <span className={cn(
+                          kpi.trendLine.sentiment === "positive" && "text-emerald-600 dark:text-emerald-400",
+                          kpi.trendLine.sentiment === "negative" && "text-destructive",
+                        )}>
+                          {kpi.trendLine.direction}
+                        </span>
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground/80 leading-snug border-t border-border/50 pt-2">{kpi.text}</p>
                   </div>
                 ))}

@@ -1,0 +1,136 @@
+Please apply a dashboard copy refinement pass.
+
+Scope:
+- Dashboard page only.
+- Copy/text changes only.
+- Do not change calculations, data hooks, RPCs, styling, layout, colours, or component structure.
+- Do not touch other pages.
+
+Goal:
+Make the dashboard language more human, concise, and CFO-grade.
+
+Apply these exact copy changes:
+
+1. Header subtitle
+Replace:
+"See what is happening, how much profit and cash is at risk, and where to act first."
+With:
+"See what changed this month, what it means for profit and cash, and where to act."
+
+2. Overall Business Health summary
+Replace:
+"The business is profitable, but margin quality, acquisition efficiency and cash runway are weakening."
+With:
+"The business remains profitable, but margin quality and acquisition efficiency are deteriorating, increasing pressure on cash."
+
+3. Warning line
+Replace current warning sentence with:
+"Contribution is down £9.4k vs last month, driven by higher fulfilment costs, weaker marketing efficiency and increased discounting."
+
+4. KPI tile descriptions
+Replace:
+"Average revenue generated per order."
+With:
+"Average value per order."
+
+Replace:
+"Retention is strengthening as more customers place second orders."
+With:
+"More customers are returning, strengthening retention."
+
+Replace:
+"High reliance on promotions to sustain growth."
+With:
+"Growth remains dependent on discounting."
+
+Replace:
+"Share of gross sales refunded to customers."
+With:
+"Proportion of sales refunded to customers."
+
+Replace:
+"Operating profit after fixed overheads."
+With:
+"Profit after fixed costs."
+
+Replace:
+"Meta CAC is rising faster than contribution per order."
+With:
+"Customer acquisition costs are rising faster than contribution."
+
+5. Trend insight lines
+Where the dashboard now generates the AOV trend sentence, make the wording:
+"AOV fell 6.0% this month but remains £2.29 above trend."
+Use the live calculated values, not hardcoded numbers.
+
+Where the dashboard now generates the Net Profit trend sentence, make the wording:
+"Profit improved by £3.8k this month and is £17.0k above trend."
+Use the live calculated values, not hardcoded numbers.
+
+6. "What changed and why it matters" section
+Change section heading to:
+"What changed this month"
+
+Replace the section subtitle with:
+"The biggest movements behind this month's financial performance."
+
+Use these item wordings:
+
+Margin:
+"Margin declined due to higher fulfilment and shipping costs."
+"Fulfilment cost rose 12% per order, reducing contribution by £3.2k vs last month."
+
+Repeat rate:
+"Repeat purchase rate improved, supporting retention."
+
+Marketing:
+"Marketing efficiency declined as CAC increased and ROAS weakened."
+"Meta CAC rose 14% to £28 per customer while ROAS fell from 3.1x to 2.7x."
+
+Discounting:
+"Discount usage is increasing faster than revenue growth."
+"Discounted orders grew 8% while revenue grew 5.2%, reducing margin by £4.2k per month."
+
+AOV:
+"Average order value is stable."
+
+7. Priority Actions intro
+Replace:
+"The highest-impact actions your CFO would focus on first."
+With:
+"Focus on the highest-impact actions first."
+
+8. Priority Action cards
+Fulfilment card:
+Title: "Reduce fulfilment cost leakage"
+Impact: "+£6.8k contribution"
+Description: "Fulfilment and shipping costs are the largest source of margin pressure this month."
+
+Discount card:
+Title: "Tighten discount exposure"
+Impact: "+£4.2k contribution"
+Description: "Discounting is increasing faster than revenue and eroding margin."
+
+Marketing card:
+Title: "Reallocate inefficient marketing spend"
+Impact: "+£3.1k contribution"
+Description: "Customer acquisition costs are rising while returns from paid channels are weakening."
+
+9. Expected Impact intro
+Replace:
+"If the recommended priorities are implemented, the model indicates a 60–90 day improvement across contribution, cash and margin."
+With:
+"If these actions are implemented, performance should improve over the next 60–90 days."
+
+Important:
+- Preserve all live data bindings.
+- Do not hardcode dynamic values where live calculations already exist.
+- Keep all badges, values, icons, and links unchanged.
+- If exact old strings differ slightly, search for the closest matching copy and update only the intended dashboard text.
+
+After changes:
+1. Run typecheck.
+2. Run frontend build with workflow env vars.
+3. Screenshot the Dashboard.
+4. Report files changed and diff summary.
+5. Do not commit until I review.

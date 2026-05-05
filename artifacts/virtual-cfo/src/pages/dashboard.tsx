@@ -211,7 +211,7 @@ const KPI_CARDS: {
     // change: DEV-ONLY static string — no prior-period discount_dependency() RPC yet.
     //         Replace with computed "±X% vs last month" in Phase 2.
     id: "dd",   title: "Discount Dependency",      value: `${DISCOUNT_DEP}%`,             change: "↑ 11% vs last month",                status: "danger",
-    text: "High reliance on promotions to sustain growth.",
+    text: "Growth remains dependent on discounting.",
   },
   {
     // DEV-ONLY — NO LIVE WIRING.  value and change are fully mock (Phase 1 only).
@@ -222,7 +222,7 @@ const KPI_CARDS: {
     // change: "↓ efficiency" is a hardcoded qualitative direction label.
     //         Replace with computed "±X% vs last month" once meta_cac_trend() exists.
     id: "ae",   title: "Acquisition Efficiency",   value: "Meta CAC +14%",                change: "↓ efficiency",                       status: "danger",
-    text: "Meta CAC is rising faster than contribution per order.",
+    text: "Customer acquisition costs are rising faster than contribution.",
   },
   {
     // value: Tier 3 loading sentinel (REPEAT_RATE snapshot = 28%) until liveKpiCards
@@ -231,7 +231,7 @@ const KPI_CARDS: {
     // change: DEV-ONLY static string — no prior-period repeat_purchase_rate() RPC yet.
     //         Replace with computed "±X.X% vs last month" in Phase 2.
     id: "rpr",  title: "Repeat Purchase Rate",     value: `${REPEAT_RATE}%`,              change: "↑ 4.2% vs last month",               status: "positive",
-    text: "Retention is strengthening as more customers place second orders.",
+    text: "More customers are returning, strengthening retention.",
   },
   {
     // value: Tier 3 loading sentinel (MONTHLY_REVENUE snapshot = £124,500) until
@@ -253,7 +253,7 @@ const KPI_CARDS: {
     value:  formatOpProfit(MONTHLY_OPERATING_PROFIT),
     change: "",
     status: opProfitStatus(MONTHLY_OPERATING_PROFIT),
-    text: "Operating profit after fixed overheads.",
+    text: "Profit after fixed costs.",
   },
   {
     // value: Tier 3 loading sentinel — "£0" shown while phase1Metrics and commerceMetrics
@@ -265,7 +265,7 @@ const KPI_CARDS: {
     value: "£0",
     change: "",
     status: "positive",
-    text: "Average revenue generated per order.",
+    text: "Average value per order.",
   },
   {
     // value: Tier 3 loading sentinel — "0%" shown while phase1Metrics and commerceMetrics
@@ -277,41 +277,41 @@ const KPI_CARDS: {
     value: "0%",
     change: "",
     status: "warning",
-    text: "Share of gross sales refunded to customers.",
+    text: "Proportion of sales refunded to customers.",
   },
 ];
 
 const TOP_DRIVERS: Driver[] = [
   {
     id: "1",
-    text: "Margin down due to increased shipping and fulfilment costs",
-    proDetail: "Fulfilment cost rose 12% per order. Estimated contribution impact: –£3.2k vs prior period.",
+    text: "Margin declined due to higher fulfilment and shipping costs.",
+    proDetail: "Fulfilment cost rose 12% per order, reducing contribution by £3.2k vs last month.",
     trend: "worsening",
     href: "/margin-analysis",
   },
   {
     id: "2",
-    text: "Repeat purchase rate improving month-on-month",
+    text: "Repeat purchase rate improved, supporting retention.",
     trend: "improving",
     href: "/growth-quality",
   },
   {
     id: "3",
-    text: "Ad spend efficiency declining — higher CAC with lower ROAS",
-    proDetail: "Meta CAC up 14% MoM — now £28 per customer vs £24. ROAS fell from 3.1x to 2.7x.",
+    text: "Marketing efficiency declined as CAC increased and ROAS weakened.",
+    proDetail: "Meta CAC rose 14% to £28 per customer while ROAS fell from 3.1x to 2.7x.",
     trend: "worsening",
     href: "/marketing-efficiency",
   },
   {
     id: "4",
-    text: "Discount usage rising faster than revenue growth",
-    proDetail: "Discount-attached orders grew 8%; total revenue grew 5.2%. Estimated margin drag: –£4.2k per month.",
+    text: "Discount usage is increasing faster than revenue growth.",
+    proDetail: "Discounted orders grew 8% while revenue grew 5.2%, reducing margin by £4.2k per month.",
     trend: "worsening",
     href: "/margin-analysis",
   },
   {
     id: "5",
-    text: "Average order value holding steady",
+    text: "Average order value is stable.",
     trend: "neutral",
   },
 ];
@@ -320,7 +320,7 @@ const PRIORITY_ACTIONS = [
   {
     title:  "Reduce fulfilment cost leakage",
     impact: "+£6.8k contribution",
-    reason: "Fulfilment and shipping costs are the largest margin drag this month.",
+    reason: "Fulfilment and shipping costs are the largest source of margin pressure this month.",
     badge:  "High impact",
     color:  "red",
     timing: "2–4 weeks" as const,
@@ -328,15 +328,15 @@ const PRIORITY_ACTIONS = [
   {
     title:  "Tighten discount exposure",
     impact: "+£4.2k contribution",
-    reason: "Discount usage is rising faster than revenue growth.",
+    reason: "Discounting is increasing faster than revenue and eroding margin.",
     badge:  "High impact",
     color:  "red",
     timing: "Immediate" as const,
   },
   {
-    title:  "Reallocate inefficient Meta spend",
+    title:  "Reallocate inefficient marketing spend",
     impact: "+£3.1k contribution",
-    reason: "Meta CAC has increased while ROAS has weakened.",
+    reason: "Customer acquisition costs are rising while returns from paid channels are weakening.",
     badge:  "Medium impact",
     color:  "orange",
     timing: "1–2 weeks" as const,
@@ -562,23 +562,15 @@ export default function Dashboard() {
               const momPct = phase2Deltas?.aov_delta_pct ?? null;
               let text: string;
               if (momPct !== null) {
-                const momDir   = momPct < 0 ? "fell" : "rose";
                 const trendAbs = `£${Math.abs(trendDelta).toFixed(2)}`;
                 const trendDir = trendDelta >= 0 ? "above" : "below";
-                // Same direction → consistent signal; opposite → one-month blip vs trend.
-                const soWhat = trendDelta >= 0
-                  ? "suggesting customers are spending more per order than usual"
-                  : "suggesting order values are slipping below your normal run rate";
                 text = momPct < 0
-                  ? `Average order value fell ${Math.abs(momPct).toFixed(1)}% this month but is still ${trendAbs} ${trendDir} your recent trend — ${soWhat}`
-                  : `Average order value rose ${Math.abs(momPct).toFixed(1)}% this month and is ${trendAbs} ${trendDir} your recent trend — ${soWhat}`;
+                  ? `AOV fell ${Math.abs(momPct).toFixed(1)}% this month but remains ${trendAbs} ${trendDir} trend`
+                  : `AOV rose ${Math.abs(momPct).toFixed(1)}% this month and is ${trendAbs} ${trendDir} trend`;
               } else {
                 const trendAbs = `£${Math.abs(trendDelta).toFixed(2)}`;
                 const trendDir = trendDelta >= 0 ? "above" : "below";
-                const soWhat = trendDelta >= 0
-                  ? "customers are spending more per order than your recent average"
-                  : "order values are running below your recent average";
-                text = `Average order value is ${trendAbs} ${trendDir} your recent trend — ${soWhat}`;
+                text = `AOV is ${trendAbs} ${trendDir} trend`;
               }
               return { text, sentiment };
             })()
@@ -865,20 +857,14 @@ export default function Dashboard() {
                   : null;
               let text: string;
               if (momAbsChange !== null) {
-                // trendDelta > 0 = current month less of a loss than the rolling avg (good).
-                const trendDir = trendDelta >= 0 ? "better" : "worse";
-                const soWhat = trendDelta >= 0
-                  ? "overhead is being absorbed better than your recent average"
-                  : "fixed costs are taking a larger slice than your recent average";
+                // trendDelta > 0 = current month is less of a loss than the rolling avg (good).
+                const trendDir = trendDelta >= 0 ? "above" : "below";
                 text = momAbsChange >= 0
-                  ? `Operating profit improved by ${fmtK(momAbsChange)} this month and is ${fmtK(trendDelta)} ${trendDir} than your recent trend — ${soWhat}`
-                  : `Operating profit worsened by ${fmtK(momAbsChange)} this month but is still ${fmtK(trendDelta)} ${trendDir} than your recent trend — ${soWhat}`;
+                  ? `Profit improved by ${fmtK(momAbsChange)} this month and is ${fmtK(trendDelta)} ${trendDir} trend`
+                  : `Profit worsened by ${fmtK(momAbsChange)} this month but is ${fmtK(trendDelta)} ${trendDir} trend`;
               } else {
-                const trendDir = trendDelta >= 0 ? "better" : "worse";
-                const soWhat = trendDelta >= 0
-                  ? "overhead is being absorbed better than your recent average"
-                  : "fixed costs are taking a larger slice than your recent average";
-                text = `Operating profit is ${fmtK(trendDelta)} ${trendDir} than your recent trend — ${soWhat}`;
+                const trendDir = trendDelta >= 0 ? "above" : "below";
+                text = `Profit is ${fmtK(trendDelta)} ${trendDir} trend`;
               }
               return { text, sentiment };
             })()
@@ -913,7 +899,7 @@ export default function Dashboard() {
       {/* ══ PAGE HEADER ═══════════════════════════════════════════════════════ */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Business Control Centre</h1>
-        <p className="text-muted-foreground mt-1 text-sm">See what is happening, how much profit and cash is at risk, and where to act first.</p>
+        <p className="text-muted-foreground mt-1 text-sm">See what changed this month, what it means for profit and cash, and where to act.</p>
         <DataPeriodLabel periodLabel={activePeriodLabel} loading={periodLoading} />
       </div>
 
@@ -931,7 +917,7 @@ export default function Dashboard() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed sm:max-w-sm">
-            The business is profitable, but margin quality, acquisition efficiency and cash runway are weakening.
+            The business remains profitable, but margin quality and acquisition efficiency are deteriorating, increasing pressure on cash.
           </p>
         </div>
 
@@ -939,7 +925,7 @@ export default function Dashboard() {
         <div className="flex items-start gap-2.5 px-6 py-3 bg-amber-50/70 dark:bg-amber-950/15 border-b border-amber-100 dark:border-amber-900/20">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
           <p className="text-xs font-medium text-amber-800 dark:text-amber-300 leading-relaxed">
-            This month's performance reduced contribution by approximately £9.4k vs last month, driven by fulfilment cost inflation, Meta CAC deterioration and increased discounting.
+            Contribution is down £9.4k vs last month, driven by higher fulfilment costs, weaker marketing efficiency and increased discounting.
           </p>
         </div>
 
@@ -1190,7 +1176,7 @@ export default function Dashboard() {
         </div>
         <div className="px-6 py-5">
           <p className="text-sm text-foreground leading-relaxed mb-5">
-            If the recommended priorities are implemented, the model indicates a 60–90 day improvement across contribution, cash and margin.
+            If these actions are implemented, performance should improve over the next 60–90 days.
           </p>
           {/*
             DEV-ONLY — all four projection values below are hardcoded snapshot figures.
@@ -1298,7 +1284,7 @@ export default function Dashboard() {
       <div className="mb-8">
         <div className="mb-5">
           <h3 className="font-bold text-xl text-foreground">Priority actions this month</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">The highest-impact actions your CFO would focus on first.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Focus on the highest-impact actions first.</p>
           <div className="h-px bg-border/60 mt-3" />
         </div>
 
@@ -1419,7 +1405,7 @@ export default function Dashboard() {
       <TopDrivers
         drivers={TOP_DRIVERS}
         isPro={hasDriverDetail}
-        title="What changed and why it matters"
+        title="What changed this month"
         subtitle="The biggest movements behind this month's financial performance."
       />
 

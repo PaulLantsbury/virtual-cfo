@@ -429,11 +429,15 @@ export default function MarginAnalysis() {
   const cmInsightText: string =
     cmVsTrend !== null && cmTrendMonths > 0 && liveCmChangePp !== null
       ? (() => {
-          const momDir   = liveCmChangePp < 0 ? "fell" : "rose";
           const trendAbs = Math.abs(cmVsTrend).toFixed(1);
           const trendDir = cmVsTrend >= 0 ? "above" : "below";
-          const conjunct = (liveCmChangePp > 0) === (cmVsTrend > 0) ? "and remains" : "but remains";
-          return `Margin ${momDir} ${Math.abs(liveCmChangePp).toFixed(1)}pp this month ${conjunct} ${trendAbs}pp ${trendDir} your recent average`;
+          // So-what: what does the trend position mean for the business?
+          const soWhat = cmVsTrend >= 0
+            ? "costs are being managed well relative to your recent run rate"
+            : "cost pressure is running higher than your recent average — worth investigating";
+          return liveCmChangePp < 0
+            ? `Contribution margin fell ${Math.abs(liveCmChangePp).toFixed(1)}pp this month but remains ${trendAbs}pp ${trendDir} your recent average — ${soWhat}`
+            : `Contribution margin rose ${Math.abs(liveCmChangePp).toFixed(1)}pp this month and remains ${trendAbs}pp ${trendDir} your recent average — ${soWhat}`;
         })()
       : "—";
 

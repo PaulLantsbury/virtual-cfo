@@ -565,12 +565,20 @@ export default function Dashboard() {
                 const momDir   = momPct < 0 ? "fell" : "rose";
                 const trendAbs = `£${Math.abs(trendDelta).toFixed(2)}`;
                 const trendDir = trendDelta >= 0 ? "above" : "below";
-                const conjunct = (momPct > 0) === (trendDelta > 0) ? "and is" : "but is still";
-                text = `AOV ${momDir} ${Math.abs(momPct).toFixed(1)}% this month ${conjunct} ${trendAbs} ${trendDir} your recent trend`;
+                // Same direction → consistent signal; opposite → one-month blip vs trend.
+                const soWhat = trendDelta >= 0
+                  ? "suggesting customers are spending more per order than usual"
+                  : "suggesting order values are slipping below your normal run rate";
+                text = momPct < 0
+                  ? `Average order value fell ${Math.abs(momPct).toFixed(1)}% this month but is still ${trendAbs} ${trendDir} your recent trend — ${soWhat}`
+                  : `Average order value rose ${Math.abs(momPct).toFixed(1)}% this month and is ${trendAbs} ${trendDir} your recent trend — ${soWhat}`;
               } else {
                 const trendAbs = `£${Math.abs(trendDelta).toFixed(2)}`;
                 const trendDir = trendDelta >= 0 ? "above" : "below";
-                text = `Currently ${trendAbs} ${trendDir} your recent trend`;
+                const soWhat = trendDelta >= 0
+                  ? "customers are spending more per order than your recent average"
+                  : "order values are running below your recent average";
+                text = `Average order value is ${trendAbs} ${trendDir} your recent trend — ${soWhat}`;
               }
               return { text, sentiment };
             })()
@@ -857,13 +865,20 @@ export default function Dashboard() {
                   : null;
               let text: string;
               if (momAbsChange !== null) {
-                const momDir   = momAbsChange >= 0 ? "improved" : "worsened";
-                const trendDir = trendDelta  >= 0 ? "better"   : "worse";
-                const conjunct = (momAbsChange >= 0) === (trendDelta >= 0) ? "and is" : "but is still";
-                text = `Profit ${momDir} by ${fmtK(momAbsChange)} this month ${conjunct} ${fmtK(trendDelta)} ${trendDir} than your recent trend`;
+                // trendDelta > 0 = current month less of a loss than the rolling avg (good).
+                const trendDir = trendDelta >= 0 ? "better" : "worse";
+                const soWhat = trendDelta >= 0
+                  ? "overhead is being absorbed better than your recent average"
+                  : "fixed costs are taking a larger slice than your recent average";
+                text = momAbsChange >= 0
+                  ? `Operating profit improved by ${fmtK(momAbsChange)} this month and is ${fmtK(trendDelta)} ${trendDir} than your recent trend — ${soWhat}`
+                  : `Operating profit worsened by ${fmtK(momAbsChange)} this month but is still ${fmtK(trendDelta)} ${trendDir} than your recent trend — ${soWhat}`;
               } else {
                 const trendDir = trendDelta >= 0 ? "better" : "worse";
-                text = `Currently ${fmtK(trendDelta)} ${trendDir} than your recent trend`;
+                const soWhat = trendDelta >= 0
+                  ? "overhead is being absorbed better than your recent average"
+                  : "fixed costs are taking a larger slice than your recent average";
+                text = `Operating profit is ${fmtK(trendDelta)} ${trendDir} than your recent trend — ${soWhat}`;
               }
               return { text, sentiment };
             })()

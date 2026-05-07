@@ -8,6 +8,7 @@
     "validate:phase1-metrics": "tsx ./src/validatePhase1Metrics.ts",
     "validate:phase2a": "tsx ./src/validatePhase2a.ts",
     "validate:phase3": "tsx ./src/validatePhase3Marketing.ts",
+    "validate:phase3:cloud": "tsx ./src/validatePhase3MarketingCloud.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

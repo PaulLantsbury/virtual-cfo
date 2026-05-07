@@ -92,13 +92,6 @@ const PRICING_DRIVER_DATA = [
   { driver: "Product mix improvement",impact:  12_000, explanation: "Higher-margin products partially offset pressure" },
 ];
 
-// ─── Pricing sensitivity ranking ─────────────────────────────────────────────
-const RANKING_DATA = [
-  { label: "Average discount",        impact: 38_000 },
-  { label: "Full-price order ratio",  impact: 26_000 },
-  { label: "Returns rate",            impact: 18_000 },
-  { label: "Shipping subsidy",        impact: 11_000 },
-];
 
 // ─── Pricing power trend data ─────────────────────────────────────────────────
 const TREND_DATA = [
@@ -259,6 +252,36 @@ export default function PricingOptimisation() {
         : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400";
 
   const SimIcon = projContribution < 150_000 ? AlertTriangle : contribDelta >= 0 ? TrendingUp : TrendingDown;
+
+  const slidersActive = discountChange !== 0 || fullPriceChange !== 0 || convChange !== 0 || returnsChange !== 0 || shippingChange !== 0;
+
+  const rankingItems = [
+    {
+      label:    "Average discount",
+      impact:   discountChange  !== 0 ? Math.abs(discountEffect)   : 38_000,
+      positive: discountChange  === 0 ? true : discountEffect  >= 0,
+    },
+    {
+      label:    "Full-price order ratio",
+      impact:   fullPriceChange !== 0 ? Math.abs(fullPriceEffect)  : 26_000,
+      positive: fullPriceChange === 0 ? true : fullPriceEffect >= 0,
+    },
+    {
+      label:    "Returns rate",
+      impact:   returnsChange   !== 0 ? Math.abs(returnsEffect)    : 18_000,
+      positive: returnsChange   === 0 ? true : returnsEffect   >= 0,
+    },
+    {
+      label:    "Conversion rate",
+      impact:   convChange      !== 0 ? Math.abs(convEffect)        : 14_000,
+      positive: convChange      === 0 ? true : convEffect       >= 0,
+    },
+    {
+      label:    "Shipping subsidy",
+      impact:   shippingChange  !== 0 ? Math.abs(shippingEffect)   : 11_000,
+      positive: shippingChange  === 0 ? true : shippingEffect  >= 0,
+    },
+  ].sort((a, b) => b.impact - a.impact);
 
   return (
     <AppLayout>
@@ -791,47 +814,40 @@ export default function PricingOptimisation() {
         )}
       </div>
 
-      {/* ── 12. Pricing Sensitivity Ranking ── */}
+      {/* ── 12. Pricing Sensitivity Ranking — always visible, updates with sliders ── */}
       <div className="mb-6 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <ListOrdered className="w-4 h-4 text-primary shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-foreground">Pricing Sensitivity Ranking</p>
-              <p className="text-xs text-muted-foreground mt-0.5">What affects your contribution most?</p>
-            </div>
+        <div className="px-5 py-4 border-b border-border/50 flex items-center gap-2.5">
+          <ListOrdered className="w-4 h-4 text-primary shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-foreground">Pricing Sensitivity Ranking</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {slidersActive
+                ? "Ranked by current simulator impact — move sliders to see how the order changes."
+                : "Ranked by maximum recoverable contribution. Move sliders above to model your scenario."}
+            </p>
           </div>
-          {!isPro && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
         </div>
         <div className="px-5 py-4">
-          {isPro ? (
-            <ol className="space-y-2">
-              {RANKING_DATA.map((item, i) => (
-                <li key={item.label} className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary shrink-0">{i + 1}</span>
-                  <span className="text-sm text-foreground flex-1">{item.label}</span>
-                  <PeriodImpact value={item.impact} className="items-end shrink-0" />
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <>
-              <ol className="space-y-2 mb-4">
-                {RANKING_DATA.map((item, i) => (
-                  <li key={item.label} className="flex items-center gap-3">
-                    <span className="w-5 h-5 rounded-full bg-secondary flex items-center justify-center text-[11px] font-bold text-muted-foreground shrink-0">{i + 1}</span>
-                    <span className="text-sm text-foreground">{item.label}</span>
-                    <span className="ml-auto text-xs text-muted-foreground/50 tabular-nums">£—,———</span>
-                  </li>
-                ))}
-              </ol>
-              <a href="/upgrade" className="flex items-center gap-3 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-4 py-3 hover:border-indigo-300 transition-colors">
-                <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                <span className="text-xs text-indigo-800 dark:text-indigo-200 flex-1">Upgrade to Pro to see the £ impact of each pricing lever.</span>
-                <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade to Pro</span>
-              </a>
-            </>
-          )}
+          <ol className="space-y-3">
+            {rankingItems.map((item, i) => (
+              <li key={item.label} className="flex items-center gap-3">
+                <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary shrink-0">
+                  {i + 1}
+                </span>
+                <span className="text-sm text-foreground flex-1">{item.label}</span>
+                <PeriodImpact
+                  value={item.impact}
+                  positive={item.positive}
+                  className="items-end shrink-0"
+                />
+              </li>
+            ))}
+          </ol>
+          <p className="text-[11px] text-muted-foreground/60 mt-3 leading-snug">
+            {slidersActive
+              ? "Values show the contribution movement from your current slider settings. Positive = contribution improves."
+              : "Values show estimated 30-day contribution recovery per lever at current baseline."}
+          </p>
         </div>
       </div>
 

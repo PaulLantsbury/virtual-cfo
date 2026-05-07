@@ -60,6 +60,7 @@ export type FeatureName =
   | "cash_cost_pressure"              // Cash Control — Cash Cost Pressure analysis section
   | "cash_simulator"                  // Cash Control — Cash Sensitivity Simulator + Ranking
   | "cash_recommendations"            // Cash Control — This Month's Cash Priorities section
+  | "pricing_sensitivity_ranking"      // Pricing — Sensitivity Ranking (always visible, free + pro)
   | "pricing_simulator"               // Pricing — Pricing Sensitivity Simulator + Ranking £ impacts
   | "pricing_driver_table"            // Pricing — What Changed Contribution driver table + chart
   | "pricing_trade_off"               // Pricing — Price vs Volume Trade-off Analysis
@@ -114,6 +115,7 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   cash_cost_pressure:               ["pro"],
   cash_simulator:                   ["pro"],
   cash_recommendations:             ["pro"],
+  pricing_sensitivity_ranking:      ["free", "pro"],
   pricing_simulator:                ["pro"],
   pricing_driver_table:             ["pro"],
   pricing_trade_off:                ["pro"],

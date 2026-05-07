@@ -115,7 +115,7 @@ const FEATURE_ACCESS: Record<FeatureName, UserPlan[]> = {
   cash_cost_pressure:               ["pro"],
   cash_simulator:                   ["pro"],
   cash_recommendations:             ["pro"],
-  pricing_sensitivity_ranking:      ["free", "pro"],
+  pricing_sensitivity_ranking:      ["pro"],
   pricing_simulator:                ["pro"],
   pricing_driver_table:             ["pro"],
   pricing_trade_off:                ["pro"],

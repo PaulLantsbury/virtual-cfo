@@ -814,41 +814,80 @@ export default function PricingOptimisation() {
         )}
       </div>
 
-      {/* ── 12. Pricing Sensitivity Ranking — always visible, updates with sliders ── */}
+      {/* ── 12. Pricing Sensitivity Ranking — Pro gated ── */}
       <div className="mb-6 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/50 flex items-center gap-2.5">
-          <ListOrdered className="w-4 h-4 text-primary shrink-0" />
-          <div>
-            <p className="text-sm font-semibold text-foreground">Pricing Sensitivity Ranking</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+        <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <ListOrdered className="w-4 h-4 text-primary shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Pricing Sensitivity Ranking</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {canAccess("pricing_sensitivity_ranking") && slidersActive
+                  ? "Ranked by current simulator impact — re-sorted as sliders move."
+                  : "What affects your contribution most?"}
+              </p>
+            </div>
+          </div>
+          {!canAccess("pricing_sensitivity_ranking") && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>
+          )}
+        </div>
+
+        {canAccess("pricing_sensitivity_ranking") ? (
+          /* ── Pro: live ranked list ── */
+          <div className="px-5 py-4">
+            <ol className="space-y-3">
+              {rankingItems.map((item, i) => (
+                <li key={item.label} className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary shrink-0">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm text-foreground flex-1">{item.label}</span>
+                  <PeriodImpact
+                    value={item.impact}
+                    positive={item.positive}
+                    className="items-end shrink-0"
+                  />
+                </li>
+              ))}
+            </ol>
+            <p className="text-[11px] text-muted-foreground/60 mt-3 leading-snug">
               {slidersActive
-                ? "Ranked by current simulator impact — move sliders to see how the order changes."
-                : "Ranked by maximum recoverable contribution. Move sliders above to model your scenario."}
+                ? "Showing impact of current simulator settings. Positive = contribution improves."
+                : "Showing maximum recoverable contribution per lever at baseline."}
             </p>
           </div>
-        </div>
-        <div className="px-5 py-4">
-          <ol className="space-y-3">
-            {rankingItems.map((item, i) => (
-              <li key={item.label} className="flex items-center gap-3">
-                <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary shrink-0">
-                  {i + 1}
-                </span>
-                <span className="text-sm text-foreground flex-1">{item.label}</span>
-                <PeriodImpact
-                  value={item.impact}
-                  positive={item.positive}
-                  className="items-end shrink-0"
-                />
-              </li>
-            ))}
-          </ol>
-          <p className="text-[11px] text-muted-foreground/60 mt-3 leading-snug">
-            {slidersActive
-              ? "Values show the contribution movement from your current slider settings. Positive = contribution improves."
-              : "Values show estimated 30-day contribution recovery per lever at current baseline."}
-          </p>
-        </div>
+        ) : (
+          /* ── Free: blurred preview + upgrade CTA ── */
+          <div className="px-5 py-4">
+            <div className="relative mb-4">
+              <ol className="space-y-3 blur-[3px] opacity-40 pointer-events-none select-none" aria-hidden>
+                {[
+                  { label: "Average discount",       v1: "+£38,000", v2: "+£456,000" },
+                  { label: "Full-price order ratio",  v1: "+£26,000", v2: "+£312,000" },
+                  { label: "Returns rate",            v1: "+£18,000", v2: "+£216,000" },
+                  { label: "Conversion rate",         v1: "+£14,000", v2: "+£168,000" },
+                  { label: "Shipping subsidy",        v1: "+£11,000", v2: "+£132,000" },
+                ].map((item, i) => (
+                  <li key={item.label} className="flex items-center gap-3">
+                    <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary shrink-0">{i + 1}</span>
+                    <span className="text-sm text-foreground flex-1">{item.label}</span>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="font-bold text-sm text-emerald-600">{item.v1} <span className="font-normal text-[11px] text-muted-foreground">(30 days)</span></span>
+                      <span className="text-[10px] text-muted-foreground/80">{item.v2} (annualised)</span>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent rounded-b-xl" />
+            </div>
+            <a href="/upgrade" className="flex items-center gap-3 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-4 py-3 hover:border-indigo-300 transition-colors">
+              <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <span className="text-xs text-indigo-800 dark:text-indigo-200 flex-1">Upgrade to Pro to see which pricing lever creates the biggest £ impact — updates live as you move sliders.</span>
+              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade →</span>
+            </a>
+          </div>
+        )}
       </div>
 
       {/* ── 13. What Changed Contribution This Month? — Pro gated ── */}

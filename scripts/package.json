@@ -7,6 +7,7 @@
     "hello": "tsx ./src/hello.ts",
     "validate:phase1-metrics": "tsx ./src/validatePhase1Metrics.ts",
     "validate:phase2a": "tsx ./src/validatePhase2a.ts",
+    "validate:phase3": "tsx ./src/validatePhase3Marketing.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

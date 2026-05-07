@@ -1172,8 +1172,8 @@ export default function MarginAnalysis() {
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
                   CM uplift
                 </span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-20 text-right">
-                  £ uplift
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-32 text-right">
+                  £ impact
                 </span>
               </div>
             ) : (
@@ -1234,7 +1234,7 @@ export default function MarginAnalysis() {
                       <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
                         +{s.ppGain.toFixed(1)}pp
                       </span>
-                      <div className="text-right w-24">
+                      <div className="text-right w-32">
                         <PeriodImpact value={s.cashImpact} className="items-end" />
                       </div>
                     </div>
@@ -1269,7 +1269,7 @@ export default function MarginAnalysis() {
                   <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
                     +{RECOVERY_TOTAL_PP}pp
                   </span>
-                  <div className="text-right w-24">
+                  <div className="text-right w-32">
                     <PeriodImpact value={RECOVERY_TOTAL_CASH} valueClassName="text-base" className="items-end" />
                   </div>
                 </div>

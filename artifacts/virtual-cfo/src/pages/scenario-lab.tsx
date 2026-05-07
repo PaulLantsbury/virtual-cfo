@@ -442,20 +442,22 @@ export default function ScenarioLab() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
-              { label: "Profit impact",    value: "+£42,000 (30 days)", color: "emerald" },
-              { label: "Cash impact",      value: "+£64,000",    color: "emerald" },
-              { label: "Runway impact",    value: "+0.8 months", color: "emerald" },
-              { label: "Margin impact",    value: "+4.2pp",      color: "emerald" },
-              { label: "Scenario quality", value: "Strong",      color: "indigo"  },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="flex flex-col items-center text-center bg-secondary/40 rounded-xl p-4 gap-1">
+              { label: "Profit impact",    value: "+£42,000",   subLabel: "30-day impact", annualised: "+£504,000 (annualised)", color: "emerald" },
+              { label: "Cash impact",      value: "+£64,000",   subLabel: "30-day impact", annualised: "+£768,000 (annualised)", color: "emerald" },
+              { label: "Runway impact",    value: "+0.8 months", subLabel: undefined,       annualised: undefined,               color: "emerald" },
+              { label: "Margin impact",    value: "+4.2pp",      subLabel: undefined,       annualised: undefined,               color: "emerald" },
+              { label: "Scenario quality", value: "Strong",      subLabel: undefined,       annualised: undefined,               color: "indigo"  },
+            ].map(({ label, value, subLabel, annualised, color }) => (
+              <div key={label} className="flex flex-col items-center text-center bg-secondary/40 rounded-xl p-4 gap-0.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
                 <p className={cn(
-                  "text-lg font-bold",
+                  "text-lg font-bold leading-tight",
                   color === "emerald" ? "text-emerald-600 dark:text-emerald-400" : "text-primary"
                 )}>
                   {value}
                 </p>
+                {subLabel   && <p className="text-[10px] text-muted-foreground/70">{subLabel}</p>}
+                {annualised && <p className="text-[10px] text-muted-foreground/60 tabular-nums">{annualised}</p>}
               </div>
             ))}
           </div>
@@ -1068,11 +1070,11 @@ export default function ScenarioLab() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: TrendingUp,   color: "emerald", label: "Profit uplift",    value: "+£42,000 (30 days)", note: "+£504,000 (annualised)", text: "Contribution improves through better margin and marketing efficiency." },
-              { icon: Shield,       color: "blue",    label: "Cash uplift",      value: "+£64,000 (30 days)", note: "+£768,000 (annualised)", text: "Cash improves because working capital drag reduces." },
+              { icon: TrendingUp,   color: "emerald", label: "Profit uplift",    value: "+£42,000", period: "30-day impact", note: "+£504,000 (annualised)", text: "Contribution improves through better margin and marketing efficiency." },
+              { icon: Shield,       color: "blue",    label: "Cash uplift",      value: "+£64,000", period: "30-day impact", note: "+£768,000 (annualised)", text: "Cash improves because working capital drag reduces." },
               { icon: Zap,          color: "indigo",  label: "Runway extension", value: "+0.8 months",        note: undefined,    text: "Cash cover improves from 3.4 to 4.2 months." },
               { icon: CheckCircle,  color: "green",   label: "Risk movement",    value: "Lower",              note: undefined,    text: "Scenario reduces both margin risk and cash risk." },
-            ].map(({ icon: Icon, color, label, value, note, text }) => (
+            ].map(({ icon: Icon, color, label, value, period, note, text }) => (
               <div key={label} className="bg-secondary/40 rounded-xl p-4 space-y-2">
                 <div className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center",
@@ -1090,8 +1092,9 @@ export default function ScenarioLab() {
                   )} />
                 </div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-                <p className="text-base font-bold text-foreground">{value}</p>
-                {note && <p className="text-[10px] text-muted-foreground/70 tabular-nums -mt-1">{note}</p>}
+                <p className="text-base font-bold text-foreground leading-tight">{value}</p>
+                {period && <p className="text-[10px] text-muted-foreground/70 -mt-1">{period}</p>}
+                {note   && <p className="text-[10px] text-muted-foreground/70 tabular-nums">{note}</p>}
                 <p className="text-xs text-muted-foreground leading-snug">{text}</p>
               </div>
             ))}

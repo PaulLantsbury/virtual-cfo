@@ -653,11 +653,11 @@ export default function PricingOptimisation() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: "Scenario",            value: "Reduce discount 3pp", color: "indigo", highlight: false },
-                { label: "Contribution Gain",   value: "+£38,000",            color: "emerald", highlight: true  },
-                { label: "Revenue Risk",        value: "(£12,000)",           color: "red",    highlight: true  },
-                { label: "Net Improvement",     value: "+£26,000",            color: "emerald", highlight: true  },
-              ].map(({ label, value, color, highlight }) => (
+                { label: "Scenario",          value: "Reduce discount 3pp", color: "indigo",  highlight: false, sub: undefined,    annualised: undefined           },
+                { label: "Contribution Gain", value: "+£38,000",            color: "emerald", highlight: true,  sub: "(30 days)",  annualised: "+£456,000 (annualised)" },
+                { label: "Revenue Risk",      value: "(£12,000)",           color: "red",     highlight: true,  sub: "(30 days)",  annualised: undefined           },
+                { label: "Net Improvement",   value: "+£26,000",            color: "emerald", highlight: true,  sub: "(30 days)",  annualised: undefined           },
+              ].map(({ label, value, color, highlight, sub, annualised }) => (
                 <div key={label} className={cn(
                   "rounded-2xl border p-5",
                   highlight && color === "emerald" ? "border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/15" :
@@ -666,11 +666,13 @@ export default function PricingOptimisation() {
                 )}>
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{label}</p>
                   <p className={cn(
-                    "text-xl font-display font-bold",
+                    "text-xl font-display font-bold leading-none",
                     color === "emerald" ? "text-emerald-600 dark:text-emerald-400" :
                     color === "red"     ? "text-red-600 dark:text-red-400" :
                                           "text-foreground",
                   )}>{value}</p>
+                  {sub       && <p className="text-[11px] text-muted-foreground mt-1">{sub}</p>}
+                  {annualised && <p className="text-[10px] text-muted-foreground/70 tabular-nums mt-0.5">{annualised}</p>}
                 </div>
               ))}
             </div>

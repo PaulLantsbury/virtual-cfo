@@ -1,7 +1,7 @@
 # Data Source Status Map
 
 Internal reference tracking which metrics are wired to live Supabase RPCs, seeded RPCs,
-or static mock files. Updated after Phase 5 (Opportunities live orchestration wiring).
+or static mock files. Updated after Phase 6 (Growth Quality live wiring + Opportunities → Scenario Lab workflow).
 
 **Status key**
 
@@ -9,6 +9,7 @@ or static mock files. Updated after Phase 5 (Opportunities live orchestration wi
 |---|---|
 | **Seeded RPC** | Supabase function exists and is called in code; data is synthetic dev seed (not real customer data) |
 | **Static Mock** | Hardcoded constant in `src/lib/data/*.ts`; no DB call |
+| **Live Workflow** | Cross-page orchestration or frontend state coordination that is fully functional but not backed by a DB or RPC call |
 | **Partial** | Some metrics on this page/section are Seeded RPC; others remain Static Mock |
 | **Planned** | No wiring yet; blocked on an external integration (Shopify, Xero, Meta Ads API) or a future phase |
 
@@ -95,16 +96,23 @@ or static mock files. Updated after Phase 5 (Opportunities live orchestration wi
 
 ## 4. Growth Quality (`/growth-quality`)
 
+> **Phase 6 complete. Substantially live.** CAC payback, composite quality score, weighted
+> score model, score direction badge, score composition bars, and channel mix quality scoring
+> all derive from live RPC data. Only driver £ narratives and LTV/cohort charts remain static.
+
 | Metric / Component | Current Source | Status | Notes / Next action |
 |---|---|---|---|
 | Repeat Purchase Rate | `repeat_purchase_rate()` Phase 1 RPC | **Seeded RPC** | Falls back to `REPEAT_RATE` snapshot. |
 | Repeat Rate MoM delta (pp) | Phase 2 delta RPC (`usePhase2Deltas`) | **Seeded RPC** | `gqDeltas` — fires after period resolves. |
 | Discount Dependency | `discount_dependency()` Phase 1 RPC | **Seeded RPC** | Falls back to `DISCOUNT_DEP` snapshot. Score explanation text patched live. |
 | Discount Dep MoM delta (pp) | Phase 2 delta RPC (`usePhase2Deltas`) | **Seeded RPC** | `gqDeltas`. |
-| CAC Payback | Static snapshot `CAC_PAYBACK = 1.4` from `growth-metrics.ts` | **Static Mock** | No live CAC payback RPC yet. Wire from `cac_trend_by_channel` (Phase 3 data exists). |
-| CAC Payback MoM change | Static snapshot `CAC_PAYBACK_PREV` | **Static Mock** | Same as above. |
-| Growth Quality Score (composite) | Derived from fixed `SCORE_COMPONENTS[]` weights | **Static Mock** | Score gates are hardcoded; should recompute from live repeat rate + discount dep. |
-| Score composition chart | Static `SCORE_COMPONENTS[]` array | **Static Mock** | Next action: recompute live score from `liveRepeatRate` and `liveDiscountDep`. |
+| CAC Payback (current period) | `cac_trend_by_channel` Phase 3 RPC via `getMarketingChannelMetrics()` | **Seeded RPC** | Blended `cacPaybackMonths` derived across all channels. Previously static (`CAC_PAYBACK = 1.4` from `growth-metrics.ts`). |
+| CAC Payback MoM change | Derived from current vs prior-period `cac_trend_by_channel` fetch | **Seeded RPC** | Delta computed in component; falls back to static `CAC_PAYBACK_PREV` if prior-period data absent. |
+| Growth Quality Score (composite) | Live weighted model from Phase 1 + Phase 3 RPC inputs | **Seeded RPC** | Weights: repeat rate 35%, discount dep 30%, CAC payback 25%, channel mix 10%. Recomputes on every RPC resolve. Previously fixed `SCORE_COMPONENTS[]` with hardcoded gates. |
+| Score direction badge | Derived from live score vs prior-period score | **Seeded RPC** | "Improving" / "Stable" / "Declining" badge; renders only after both current and prior-period data resolve — no flash on load. |
+| Score composition bars | Derived live from Phase 1 + Phase 3 component inputs | **Seeded RPC** | Each bar width computed from live metric vs benchmark. Previously static `SCORE_COMPONENTS[]` array. |
+| Channel mix quality scoring | `channel_metrics_monthly` Phase 3 RPC via `getMarketingChannelMetrics()` | **Seeded RPC** | Scores each channel's CM% and CAC payback against benchmarks; 10% weight in composite score. |
+| Loading-state stabilisation | Component-level loading guards across all contributing RPCs | **Seeded RPC** | Score renders only after Phase 1, Phase 2 delta, and Phase 3 channel data all resolve — eliminates stale/zero score flicker. |
 | Driver impact (£ values) | Static `GROWTH_DRIVERS[]` array | **Static Mock** | Requires revenue × repeat-rate modelling from live data. |
 | LTV / cohort chart | Static mock arrays | **Static Mock** | Requires order-level cohort data from Shopify. |
 
@@ -150,6 +158,28 @@ or static mock files. Updated after Phase 5 (Opportunities live orchestration wi
 
 ## 8. Scenario Lab (`/scenario-lab`)
 
+> **Base inputs remain static.** However, the Opportunities → Scenario Lab intelligence
+> workflow is now live: users can click "Model this scenario" on supported opportunity cards
+> and land on Scenario Lab with relevant sliders pre-configured via URL preset param.
+
+### Opportunities → Scenario Lab workflow
+
+| Metric / Component | Current Source | Status | Notes / Next action |
+|---|---|---|---|
+| Opportunity preset loading | `?preset=<id>` query param read once on mount via `useEffect(fn, [])` | **Live Workflow** | Supported presets: `reduce-discount-depth`, `reallocate-meta-spend`, `improve-fullprice-ratio`. Param stripped from URL via `history.replaceState` after reading — no re-apply on refresh. No infinite loop risk (empty dep array). |
+| Slider pre-population | `OPPORTUNITY_PRESETS` record in `scenario-lab.tsx` — each starts from `ZERO_STATE` | **Live Workflow** | Only levers directly relevant to the opportunity are set; all others read zero, making the recommendation–model connection explicit. Switches `activeTab` to the relevant section (Margin or Marketing). |
+| Recommendation banner | `loadedPresetLabel` React state + dismissible UI | **Live Workflow** | Indigo banner appears at page top: "Recommended scenario loaded from Opportunities: '{name}' · Relevant sliders pre-populated below". Dismissed via × button (`setLoadedPresetLabel(null)`). |
+
+### Preset → slider mappings
+
+| Preset ID | Opportunity | Sliders set |
+|---|---|---|
+| `reduce-discount-depth` | Reduce average discount depth | `discountChange: −4`, `aovChange: +2`, `returnsChange: −1` |
+| `reallocate-meta-spend` | Reallocate inefficient Meta spend | `metaSpendChange: −15`, `emailMixUplift: +12`, `blendedCacChange: −10`, `marketingSpendChange: −8` |
+| `improve-fullprice-ratio` | Improve full-price order ratio | `discountChange: −3`, `aovChange: +3`, `revenueChange: +2` |
+
+### Base inputs and simulator (still static)
+
 | Metric / Component | Current Source | Status | Notes / Next action |
 |---|---|---|---|
 | All base inputs (revenue, CPO, EBITDA, cash, runway) | `pricing-metrics.ts`, `business-snapshot.ts`, `cash-snapshot.ts` static constants | **Static Mock** | No RPC wiring. Base revenue could use `gross_revenue()` Phase 1; base EBITDA from `operating_profit_monthly()` Phase 2a. |
@@ -163,8 +193,9 @@ or static mock files. Updated after Phase 5 (Opportunities live orchestration wi
 > **Status: Live Orchestration Layer with Seeded Intelligence.**
 > All opportunity cards, prioritisation, phased plan, header totals, and uplift figures are
 > derived live from the `opportunity_breakdown` RPC. Marketing intelligence from
-> `channel_opportunities_active` enriches relevant cards. The only remaining static elements
-> are plan-gated UI labels and the free-tier blurred ranges.
+> `channel_opportunities_active` enriches relevant cards. Three cards link directly to
+> pre-configured Scenario Lab simulations via the "Model this scenario" workflow.
+> The only remaining static elements are plan-gated UI labels and free-tier blurred ranges.
 
 ### API proxy architecture
 
@@ -255,18 +286,19 @@ via `useLatestDataPeriod()`. Phase 2a is called from `phase2aMetrics.ts`.
 |---|---|---|---|
 | **Dashboard** | Partial | 8 KPI tile values (Phase 1 + 2a RPCs), transactions table | All KPI change strings, cash runway, Meta CAC, charts |
 | **Margin Analysis** | Partial | CM%, gross revenue, AOV, discount %, returns %, trailing 12m avg, MoM deltas | Prior-period values, channel CM% chart, trend chart, drivers |
-| **Marketing Efficiency** | Partial | Blended CAC, CAC by channel, channel CM%, contribution profit, revenue share, CAC payback, opportunity uplift | ROAS, CAC trend chart, CPO, driver narrative |
-| **Growth Quality** | Partial | Repeat rate, discount dependency, MoM deltas for both | CAC payback, quality score, driver £ values, LTV chart |
+| **Marketing Efficiency** | Partially Live | Blended CAC, CAC by channel, channel CM%, contribution profit, revenue share, CAC payback, opportunity uplift | ROAS, CAC trend chart, CPO, driver narrative |
+| **Growth Quality** | Substantially Live | Repeat rate, discount dep, MoM deltas, CAC payback, composite quality score, weighted score model, direction badge, composition bars, channel mix scoring — all from live RPCs | Driver £ values, LTV / cohort chart |
 | **Pricing Optimisation** | Static Mock | — | Everything |
 | **Profit Engine** | Static Mock | — | Everything |
 | **Cash Control** | Static Mock | — | Everything (cash runway RPC exists but not wired here) |
-| **Scenario Lab** | Static Mock | — | Everything |
-| **Profit Opportunities** | Mostly Live | Opportunity cards, prioritisation ordering, Do Now / Next Wave classification, rationale, execution priority badge, period label, recoverable contribution header totals, total estimated uplift, Phase 3 marketing intelligence enrichment — all from live RPC | Plan-gated UI labels; free-tier blurred ranges |
+| **Scenario Lab** | Partially Connected | Opportunities → Scenario Lab workflow: URL preset loading, slider pre-population, recommendation banner for 3 supported presets | All base inputs (revenue, EBITDA, CPO, cash, runway) remain static |
+| **Profit Opportunities** | Live Orchestration Layer | Opportunity cards, prioritisation ordering, Do Now / Next Wave, rationale, execution priority badge, period label, recoverable contribution header totals, total estimated uplift, Phase 3 marketing intelligence enrichment, "Model this scenario" deep-link to Scenario Lab — all from live RPC or live workflow | Plan-gated UI labels; free-tier blurred ranges |
 
 ### Top priorities for next wiring phases
-1. **Growth Quality** — CAC payback can come from `cac_trend_by_channel` (Phase 3, data already seeded); quality score should recompute from live repeat rate + discount dep
-2. **Marketing Efficiency** — CAC trend chart can use `cac_trend_by_channel` data already fetched but not yet passed to the Recharts component
-3. **All pages** — prior-period KPI change strings need prior-period SQL functions (no `_prev` RPCs exist yet for most metrics)
-4. **Cash Control / Profit Engine** — blocked on Xero integration; no internal data path exists
-5. **Pricing Optimisation** — top tiles could be partially seeded from Phase 1 `gross_revenue()` + `discount_dependency()` without new RPCs
-6. **Opportunities — Supabase DDL access** — `opportunity_breakdown` is `SECURITY INVOKER`; cannot change to `SECURITY DEFINER` without direct psql access (Replit runner IPs are blocked by Supabase network policy). Current server-side proxy workaround is stable. Migration file `db-migrations/migrations/20260507000003_seed_opportunities.sql` documents the DDL fix ready to apply when access is available.
+1. **Marketing Efficiency** — CAC trend chart can use `cac_trend_by_channel` data already fetched but not yet passed to the Recharts component; opportunity narrative text could generate from scored `channel_opportunities_active` rows
+2. **Scenario Lab base inputs** — wire `BASE_REVENUE` from `gross_revenue()` Phase 1 and `BASE_EBITDA` from `operating_profit_monthly()` Phase 2a so scenarios model from current reality rather than static snapshots
+3. **All pages** — prior-period KPI change strings need prior-period SQL functions (no `_prev` RPCs exist for most metrics yet)
+4. **Scenario Lab presets** — extend "Model this scenario" to the remaining 2 opportunity cards (Reduce shipping cost per order → `shippingChange`; Reduce inventory days → `inventoryDaysChange`)
+5. **Cash Control / Profit Engine** — blocked on Xero integration; no internal data path exists
+6. **Pricing Optimisation** — top tiles could be partially seeded from Phase 1 `gross_revenue()` + `discount_dependency()` without new RPCs
+7. **Opportunities — Supabase DDL access** — `opportunity_breakdown` is `SECURITY INVOKER`; cannot change to `SECURITY DEFINER` without direct psql access (Replit runner IPs blocked by Supabase network policy). Server-side proxy workaround is stable. Migration file `db-migrations/migrations/20260507000003_seed_opportunities.sql` documents the DDL fix ready to apply when access is available.

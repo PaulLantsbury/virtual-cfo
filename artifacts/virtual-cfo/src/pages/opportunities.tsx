@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import {
   getMarketingChannelMetrics,
@@ -108,17 +107,16 @@ export default function Opportunities() {
 
   useEffect(() => {
     async function fetchOpportunities() {
-      const { data, error } = await supabase.rpc("opportunity_breakdown", {
-        p_store_id: STORE_ID,
-      });
-
-      if (error) {
-        console.error("Error fetching opportunities:", error);
-      } else {
-        setOpportunities(data || []);
+      try {
+        const res = await fetch(`/api/opportunities?store_id=${STORE_ID}`);
+        if (!res.ok) throw new Error(`API ${res.status}`);
+        const data: any[] = await res.json();
+        setOpportunities(data);
+      } catch (err) {
+        console.error("Error fetching opportunities:", err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
     fetchOpportunities();
@@ -243,11 +241,37 @@ export default function Opportunities() {
     Math.max(sortedOpportunities.length - 1, 1),
   );
 
-  // ── Live header values (Phase 1) ─────────────────────────────────────────────
-  // recoverableLow/High sum ALL active opportunities from the opportunity_breakdown
-  // table — the same table that feeds these cards, so totals reconcile with the list.
-  const liveTotalLow  = phase1 && phase1.data.recoverableLow  > 0 ? phase1.data.recoverableLow  : TOTAL_LOW;
-  const liveTotalHigh = phase1 && phase1.data.recoverableHigh > 0 ? phase1.data.recoverableHigh : TOTAL_HIGH;
+  // ── Live header values ────────────────────────────────────────────────────────
+  // Header "monthly contribution" total: sum impact_low/high from
+  // monthly_contribution cards only — excludes cash_improvement (opp-d is a
+  // one-off working-capital release, not a recurring monthly figure).
+  // Falls back to Phase 1 recoverableLow/High (now also monthly_contribution-only
+  // after migration 20260507000003) then to static constants.
+  const liveContribOpps = mappedOpportunities.filter(
+    (o) => o.impactType === "monthly_contribution",
+  );
+  const liveTotalLow =
+    liveContribOpps.length > 0
+      ? liveContribOpps.reduce((s, o) => s + Number((o as any).impact_low ?? 0), 0)
+      : phase1 && phase1.data.recoverableLow > 0
+        ? phase1.data.recoverableLow
+        : TOTAL_LOW;
+  const liveTotalHigh =
+    liveContribOpps.length > 0
+      ? liveContribOpps.reduce((s, o) => s + Number((o as any).impact_high ?? 0), 0)
+      : phase1 && phase1.data.recoverableHigh > 0
+        ? phase1.data.recoverableHigh
+        : TOTAL_HIGH;
+
+  // "Total estimated uplift" bottom row includes ALL types (monthly + cash release).
+  const liveAllLow =
+    mappedOpportunities.length > 0
+      ? mappedOpportunities.reduce((s, o) => s + Number((o as any).impact_low ?? 0), 0)
+      : liveTotalLow;
+  const liveAllHigh =
+    mappedOpportunities.length > 0
+      ? mappedOpportunities.reduce((s, o) => s + Number((o as any).impact_high ?? 0), 0)
+      : liveTotalHigh;
 
   // Dynamic header bullets: highest-confidence and fastest-timing ranked items.
   const highestConfOpp = sortedOpportunities.find((o) => o.confidence === "High");
@@ -618,7 +642,7 @@ export default function Opportunities() {
           <div className="px-6 py-4 bg-emerald-50/60 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 flex items-center justify-between">
             <span className="text-sm font-semibold text-foreground">Total estimated uplift</span>
             <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-              £{(liveTotalLow / 1_000).toFixed(0)}k–£{(liveTotalHigh / 1_000).toFixed(0)}k
+              £{(liveAllLow / 1_000).toFixed(0)}k–£{(liveAllHigh / 1_000).toFixed(0)}k
             </span>
           </div>
         ) : (

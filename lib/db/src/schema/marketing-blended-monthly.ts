@@ -1,12 +1,15 @@
 import {
   pgTable,
   uuid,
+  text,
   date,
   numeric,
   integer,
   timestamp,
   unique,
+  check,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 /**
  * Cross-channel blended marketing metrics per period.
@@ -23,6 +26,11 @@ import {
  *   blended_roas = total_attributed_revenue / total_spend  (pure media efficiency)
  *   blended_mer  = total_attributed_revenue / (total_spend + overhead_content_spend)
  *                 (full marketing efficiency including overhead)
+ *
+ * MATERIALISATION NOTE:
+ *   Cross-channel rollup derived from marketing_channel_monthly_snapshots.
+ *   Treat as a read-optimised cache, not ground truth. When rollup logic changes,
+ *   recalculate with calculation_version = 'v2'; old rows are preserved.
  *
  * Managed by raw SQL migrations in db-migrations/migrations/.
  * drizzle-kit push is scoped to store_cost_assumptions only (see drizzle.config.ts).
@@ -59,11 +67,19 @@ export const marketingBlendedMonthly = pgTable(
     totalContributionProfit:          numeric("total_contribution_profit", { precision: 12, scale: 2 }).default("0").notNull(),
     totalAttributedNetSales:          numeric("total_attributed_net_sales", { precision: 12, scale: 2 }).default("0").notNull(),
 
+    /**
+     * Version of the blending/rollup formula. Mirrors the source channel snapshot version.
+     * Increment (v1 → v2) when recalculating with updated logic; old rows are preserved.
+     */
+    calculationVersion: text("calculation_version").default("v1").notNull(),
+
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
   },
   (t) => [
     unique("mbm_unique").on(t.storeId, t.periodStart),
+    check("mbm_calc_version_check",
+      sql`${t.calculationVersion} ~ '^v[0-9]+$'`),
   ],
 );
 

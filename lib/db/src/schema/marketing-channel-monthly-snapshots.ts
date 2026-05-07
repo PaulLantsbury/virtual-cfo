@@ -28,6 +28,12 @@ import { sql } from "drizzle-orm";
  * CAC VALUES (stored as pre-computed; match channel-metrics.ts mock values):
  *   Meta April £18.40 (+14% MoM), Google £11.20 (+6%), Email £4.80 (−2%), Organic £2.10 (stable)
  *
+ * MATERIALISATION NOTE:
+ *   This table is a pre-computed snapshot derived from marketing_channel_daily_metrics.
+ *   The raw daily table is the canonical source; all derived fields here (contribution_profit,
+ *   cac, roas, etc.) are analytical calculations. When formulas change, increment
+ *   calculation_version (v1 → v2) rather than overwriting rows. Old versions are preserved.
+ *
  * Managed by raw SQL migrations in db-migrations/migrations/.
  * drizzle-kit push is scoped to store_cost_assumptions only (see drizzle.config.ts).
  */
@@ -80,6 +86,12 @@ export const marketingChannelMonthlySnapshots = pgTable(
 
     /** 'live' | 'estimated' | 'stale' */
     dataFreshness: text("data_freshness").default("estimated").notNull(),
+    /**
+     * Version of the contribution/attribution formula used to compute derived fields.
+     * Increment (v1 → v2) when recalculating with updated logic; old rows are preserved.
+     * Convention: 'v{integer}' — e.g. 'v1', 'v2'.
+     */
+    calculationVersion: text("calculation_version").default("v1").notNull(),
 
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
@@ -90,6 +102,8 @@ export const marketingChannelMonthlySnapshots = pgTable(
       sql`${t.channel} IN ('meta','google_shopping','email','organic','direct','other')`),
     check("mcms_freshness_check",
       sql`${t.dataFreshness} IN ('live','estimated','stale')`),
+    check("mcms_calc_version_check",
+      sql`${t.calculationVersion} ~ '^v[0-9]+$'`),
   ],
 );
 

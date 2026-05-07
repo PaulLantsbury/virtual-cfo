@@ -26,6 +26,11 @@ import { sql } from "drizzle-orm";
  *   Email: £4.90 → £4.80 (−2%) — matches "−2%"
  *   Organic: £2.10 → £2.10 (0%) — matches "Stable"
  *
+ * MATERIALISATION NOTE:
+ *   Pre-computed trailing averages and MoM deltas stored for query performance.
+ *   Raw source: marketing_channel_monthly_snapshots. When CAC attribution changes,
+ *   recalculate with calculation_version = 'v2'; old rows are preserved.
+ *
  * Managed by raw SQL migrations in db-migrations/migrations/.
  * drizzle-kit push is scoped to store_cost_assumptions only (see drizzle.config.ts).
  */
@@ -54,12 +59,20 @@ export const cacTrendSnapshots = pgTable(
     attributedNewCustomers:  integer("attributed_new_customers").default(0).notNull(),
     spend:                   numeric("spend", { precision: 12, scale: 2 }).default("0").notNull(),
 
+    /**
+     * Version of the CAC calculation formula used to produce this snapshot.
+     * Increment when attribution logic changes; old rows are preserved.
+     */
+    calculationVersion: text("calculation_version").default("v1").notNull(),
+
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
   },
   (t) => [
     unique("cts_unique").on(t.storeId, t.channel, t.snapshotDate),
     check("cts_channel_check",
       sql`${t.channel} IN ('meta','google_shopping','email','organic','direct','other')`),
+    check("cts_calc_version_check",
+      sql`${t.calculationVersion} ~ '^v[0-9]+$'`),
   ],
 );
 

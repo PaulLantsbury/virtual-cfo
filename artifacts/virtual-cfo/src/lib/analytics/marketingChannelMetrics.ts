@@ -97,6 +97,8 @@ export type ChannelMonthlyMetrics = {
   opportunityScore:        number;
   /** 'live' | 'estimated' | 'stale' */
   dataFreshness:           string;
+  /** Formula version used to compute derived fields (e.g. 'v1'). */
+  calculationVersion:      string;
 };
 
 /**
@@ -126,6 +128,8 @@ export type BlendedMarketingPerformance = {
   blendedContributionMarginPct:   number | null;
   totalContributionProfit:        number;
   totalAttributedNetSales:        number;
+  /** Formula version used to compute blended derived fields (e.g. 'v1'). */
+  calculationVersion:             string;
 };
 
 /**
@@ -145,6 +149,8 @@ export type ChannelOpportunity = {
   rationale:           string | null;
   /** 'active' | 'dismissed' | 'implemented' | 'monitoring' */
   status:              string;
+  /** Scoring formula version (e.g. 'v1'). */
+  calculationVersion:  string;
 };
 
 /**
@@ -161,6 +167,8 @@ export type CacTrendPoint = {
   momChangePct:            number | null;
   attributedNewCustomers:  number;
   spend:                   number;
+  /** CAC calculation formula version (e.g. 'v1'). */
+  calculationVersion:      string;
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -291,6 +299,7 @@ function toChannelMonthlyMetrics(row: Record<string, unknown>): ChannelMonthlyMe
     cacPaybackOrders:        toNumberOrNull(row.cac_payback_orders),
     opportunityScore:        toNumber(row.opportunity_score),
     dataFreshness:           String(row.data_freshness ?? "estimated"),
+    calculationVersion:      String(row.calculation_version ?? "v1"),
   };
 }
 
@@ -309,6 +318,7 @@ function toBlendedPerformance(row: Record<string, unknown>): BlendedMarketingPer
     blendedContributionMarginPct: toNumberOrNull(row.blended_contribution_margin_pct),
     totalContributionProfit:      toNumber(row.total_contribution_profit),
     totalAttributedNetSales:      toNumber(row.total_attributed_net_sales),
+    calculationVersion:           String(row.calculation_version ?? "v1"),
   };
 }
 
@@ -324,6 +334,7 @@ function toChannelOpportunity(row: Record<string, unknown>): ChannelOpportunity 
                            ? String(row.rationale)
                            : null,
     status:              String(row.status ?? "active"),
+    calculationVersion:  String(row.calculation_version ?? "v1"),
   };
 }
 
@@ -337,6 +348,7 @@ function toCacTrendPoint(row: Record<string, unknown>): CacTrendPoint {
     momChangePct:           toNumberOrNull(row.mom_change_pct),
     attributedNewCustomers: toNumber(row.attributed_new_customers),
     spend:                  toNumber(row.spend),
+    calculationVersion:     String(row.calculation_version ?? "v1"),
   };
 }
 

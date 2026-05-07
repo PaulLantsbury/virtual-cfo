@@ -17,6 +17,7 @@ import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { PeriodImpact } from "@/components/PeriodImpact";
 import { GROSS_REVENUE as BASE_REVENUE, BASE_CONTRIBUTION, CONTRIBUTION_PER_ORDER as BASE_CPO } from "@/lib/data/pricing-metrics";
 import { BASE_EBITDA } from "@/lib/data/business-snapshot";
 import { CASH_BALANCE as BASE_CASH, CASH_RUNWAY as BASE_RUNWAY, WORKING_CAPITAL_DRAG as BASE_WORKING_CAPITAL } from "@/lib/data/cash-snapshot";
@@ -441,7 +442,7 @@ export default function ScenarioLab() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {[
-              { label: "Profit impact",    value: "+£42,000/mo", color: "emerald" },
+              { label: "Profit impact",    value: "+£42,000 (30 days)", color: "emerald" },
               { label: "Cash impact",      value: "+£64,000",    color: "emerald" },
               { label: "Runway impact",    value: "+0.8 months", color: "emerald" },
               { label: "Margin impact",    value: "+4.2pp",      color: "emerald" },
@@ -509,13 +510,14 @@ export default function ScenarioLab() {
 
         {/* ══ 5. SCENARIO IMPACT ══════════════════════════════════════════════ */}
         <SectionHeading title="Scenario Impact" />
+        <p className="text-[10px] text-muted-foreground -mt-2 mb-3">All £ values shown for the selected 30-day period. Annualised estimates shown beneath each figure.</p>
 
         {/* Row 1 — always visible */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <OutputCard label="Revenue"      base={fmtK(BASE_REVENUE)}      scenario={fmtK(out.revenue)}      delta={fmtDelta(out.revenueDelta)}      positive={out.revenueDelta >= 0}      />
-          <OutputCard label="Contribution" base={fmtK(BASE_CONTRIBUTION)}  scenario={fmtK(out.contribution)}  delta={fmtDelta(out.contributionDelta)}  positive={out.contributionDelta >= 0} />
-          <OutputCard label="EBITDA"       base={fmtK(BASE_EBITDA)}        scenario={fmtK(out.ebitda)}        delta={fmtDelta(out.ebitdaDelta)}        positive={out.ebitdaDelta >= 0}       />
-          <OutputCard label="Cash Balance" base={fmtK(BASE_CASH)}          scenario={fmtK(out.cash)}          delta={fmtDelta(out.cashDelta)}          positive={out.cashDelta >= 0}         />
+          <OutputCard label="Revenue"      base={fmtK(BASE_REVENUE)}      scenario={fmtK(out.revenue)}      delta={fmtDelta(out.revenueDelta)}      positive={out.revenueDelta >= 0}      note={fmtDelta(out.revenueDelta * 12) + " ann."} />
+          <OutputCard label="Contribution" base={fmtK(BASE_CONTRIBUTION)}  scenario={fmtK(out.contribution)}  delta={fmtDelta(out.contributionDelta)}  positive={out.contributionDelta >= 0} note={fmtDelta(out.contributionDelta * 12) + " ann."} />
+          <OutputCard label="EBITDA"       base={fmtK(BASE_EBITDA)}        scenario={fmtK(out.ebitda)}        delta={fmtDelta(out.ebitdaDelta)}        positive={out.ebitdaDelta >= 0}       note={fmtDelta(out.ebitdaDelta * 12) + " ann."} />
+          <OutputCard label="Cash Balance" base={fmtK(BASE_CASH)}          scenario={fmtK(out.cash)}          delta={fmtDelta(out.cashDelta)}          positive={out.cashDelta >= 0}         note={fmtDelta(out.cashDelta * 12) + " ann."} />
         </div>
 
         {/* Row 2 — Pro */}
@@ -1017,16 +1019,24 @@ export default function ScenarioLab() {
               { label: "Fixed cost / overhead",    value:   5_000, type: "gain"    },
               { label: "Scenario contribution",    value: 240_000, type: "result"  },
             ].map(({ label, value, type }) => (
-              <div key={label} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+              <div key={label} className="flex items-start justify-between py-1.5 border-b border-border/30 last:border-0">
                 <span className="text-sm text-foreground">{label}</span>
-                <span className={cn(
-                  "text-sm font-semibold tabular-nums",
-                  type === "result" ? "text-primary font-bold"
-                  : type === "gain"  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-foreground"
-                )}>
-                  {type === "gain" ? `+£${(value/1000).toFixed(1)}k` : `£${(value/1000).toFixed(0)}k`}
-                </span>
+                <div className="text-right">
+                  <span className={cn(
+                    "text-sm font-semibold tabular-nums block",
+                    type === "result" ? "text-primary font-bold"
+                    : type === "gain"  ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-foreground"
+                  )}>
+                    {type === "gain" ? `+£${(value/1000).toFixed(1)}k` : `£${(value/1000).toFixed(0)}k`}
+                    {type !== "gain" && <span className="font-normal text-[10px] text-muted-foreground ml-1">{type === "base" || type === "result" ? "(30 days)" : ""}</span>}
+                  </span>
+                  {type === "gain" && (
+                    <span className="text-[10px] text-muted-foreground tabular-nums">
+                      +£{((value * 12)/1000).toFixed(0)}k ann.
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -1058,11 +1068,11 @@ export default function ScenarioLab() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: TrendingUp,   color: "emerald", label: "Profit uplift",    value: "+£42,000/month", text: "Contribution improves through better margin and marketing efficiency." },
-              { icon: Shield,       color: "blue",    label: "Cash uplift",      value: "+£64,000",       text: "Cash improves because working capital drag reduces." },
-              { icon: Zap,          color: "indigo",  label: "Runway extension", value: "+0.8 months",    text: "Cash cover improves from 3.4 to 4.2 months." },
-              { icon: CheckCircle,  color: "green",   label: "Risk movement",    value: "Lower",          text: "Scenario reduces both margin risk and cash risk." },
-            ].map(({ icon: Icon, color, label, value, text }) => (
+              { icon: TrendingUp,   color: "emerald", label: "Profit uplift",    value: "+£42,000 (30 days)", note: "+£504k ann.", text: "Contribution improves through better margin and marketing efficiency." },
+              { icon: Shield,       color: "blue",    label: "Cash uplift",      value: "+£64,000 (30 days)", note: "+£768k ann.", text: "Cash improves because working capital drag reduces." },
+              { icon: Zap,          color: "indigo",  label: "Runway extension", value: "+0.8 months",        note: undefined,    text: "Cash cover improves from 3.4 to 4.2 months." },
+              { icon: CheckCircle,  color: "green",   label: "Risk movement",    value: "Lower",              note: undefined,    text: "Scenario reduces both margin risk and cash risk." },
+            ].map(({ icon: Icon, color, label, value, note, text }) => (
               <div key={label} className="bg-secondary/40 rounded-xl p-4 space-y-2">
                 <div className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center",
@@ -1081,6 +1091,7 @@ export default function ScenarioLab() {
                 </div>
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
                 <p className="text-base font-bold text-foreground">{value}</p>
+                {note && <p className="text-[10px] text-muted-foreground/70 tabular-nums -mt-1">{note}</p>}
                 <p className="text-xs text-muted-foreground leading-snug">{text}</p>
               </div>
             ))}

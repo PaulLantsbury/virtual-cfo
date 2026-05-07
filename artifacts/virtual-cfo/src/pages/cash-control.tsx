@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { PeriodImpact } from "@/components/PeriodImpact";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import {
   CASH_BALANCE,
@@ -789,14 +790,7 @@ export default function CashControl() {
                 <li key={item.label} className="flex items-center gap-3">
                   <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary shrink-0">{i + 1}</span>
                   <span className="text-sm text-foreground flex-1">{item.label}</span>
-                  <span className={cn(
-                    "text-xs font-bold tabular-nums px-2 py-0.5 rounded-lg",
-                    i === 0 ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20" :
-                    i === 1 ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20" :
-                              "text-muted-foreground bg-secondary",
-                  )}>
-                    £{item.impact.toLocaleString()} potential cash impact
-                  </span>
+                  <PeriodImpact value={item.impact} className="items-end shrink-0" />
                 </li>
               ))}
             </ol>
@@ -850,23 +844,27 @@ export default function CashControl() {
                 <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>
                 <div className="space-y-2">
                   {[
-                    { label: "Projected Cash Balance",         value: fmt(projCashBalance),                                                        highlight: true  },
-                    { label: "Projected Runway",               value: `${projRunway.toFixed(1)} months`,                                           highlight: true  },
-                    { label: "Projected Working Capital Drag", value: fmt(projWCDrag),                                                             highlight: false },
-                    { label: "Cash Movement vs Base",          value: (projCashDelta >= 0 ? "+" : "") + fmt(Math.abs(projCashDelta)),              highlight: true  },
-                    { label: "Cash Risk Level",                value: projRunway < 2 ? "High" : projRunway < 3 ? "Moderate" : "Low",              highlight: false },
-                  ].map(({ label, value, highlight }) => (
+                    { label: "Projected Cash Balance",         value: fmt(projCashBalance),                                               highlight: true,  isPeriod: false },
+                    { label: "Projected Runway",               value: `${projRunway.toFixed(1)} months`,                                  highlight: true,  isPeriod: false },
+                    { label: "Projected Working Capital Drag", value: fmt(projWCDrag),                                                    highlight: false, isPeriod: false },
+                    { label: "Cash Movement vs Base",          value: "",                                                                 highlight: true,  isPeriod: true  },
+                    { label: "Cash Risk Level",                value: projRunway < 2 ? "High" : projRunway < 3 ? "Moderate" : "Low",     highlight: false, isPeriod: false },
+                  ].map(({ label, value, highlight, isPeriod }) => (
                     <div key={label} className={cn("flex items-center justify-between px-4 py-2.5 rounded-xl",
                       highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30",
                     )}>
                       <span className={cn("text-xs", highlight ? "font-semibold text-foreground" : "text-muted-foreground")}>{label}</span>
-                      <span className={cn("text-sm font-bold tabular-nums",
-                        highlight
-                          ? projCashBalance < 50_000 ? "text-red-600 dark:text-red-400"
-                            : runwayDelta >= 0 ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-amber-600 dark:text-amber-400"
-                          : "text-foreground",
-                      )}>{value}</span>
+                      {isPeriod ? (
+                        <PeriodImpact value={projCashDelta} className="items-end" />
+                      ) : (
+                        <span className={cn("text-sm font-bold tabular-nums",
+                          highlight
+                            ? projCashBalance < 50_000 ? "text-red-600 dark:text-red-400"
+                              : runwayDelta >= 0 ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-amber-600 dark:text-amber-400"
+                            : "text-foreground",
+                        )}>{value}</span>
+                      )}
                     </div>
                   ))}
                 </div>

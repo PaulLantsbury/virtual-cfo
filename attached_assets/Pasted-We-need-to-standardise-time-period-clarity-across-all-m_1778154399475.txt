@@ -1,0 +1,100 @@
+We need to standardise time-period clarity across all modellers and scenario outputs.
+
+Objective:
+All key £ impact numbers must clearly show:
+1. the selected period impact first
+2. the annualised impact second
+
+Use this display format consistently:
+
++£8,956 (30 days)
++£109,095 (annualised)
+
+The first line should be the primary/bolder value.
+The annualised line should be secondary/smaller/lighter.
+
+Default period = 30 days.
+
+Apply this to key decision numbers only:
+- Movement / uplift
+- Contribution impact
+- Profit impact
+- Recoverable contribution
+- Scenario impact
+- Sensitivity rankings / lever rankings
+- Scenario bridge line items where appropriate
+
+Do NOT apply this to:
+- percentage metrics such as CM%, margin %, conversion %
+- unit economics such as CAC, CPO, contribution per order
+- runway in months
+- static base values unless needed for clarity
+
+Pages / components to update:
+1. Margin Recovery Modeller
+2. Marketing Budget Reallocation Simulator
+3. Pricing Sensitivity Simulator
+4. Profit Sensitivity Simulator
+5. Cash Sensitivity Simulator
+6. Scenario Lab
+7. Scenario Contribution Bridge
+8. Scenario Impact cards
+9. Any sensitivity / ranking cards showing £ uplift
+
+Specific rules:
+
+Margin Recovery Modeller:
+- Movement should show:
+  +£X (30 days)
+  +£Y (annualised)
+- Margin Sensitivity Ranking should show:
+  +£X (30 days)
+  +£Y (annualised)
+
+Marketing Budget Reallocation:
+- Replace “Recoverable contribution next month” with:
+  “Projected contribution uplift”
+- Show:
+  +£X (30 days)
+  +£Y (annualised)
+- Make sure confidence text refers to the 30-day period.
+
+Pricing Sensitivity:
+- Label projected revenue/contribution as 30-day outputs where relevant.
+- Any contribution movement or fastest lever value should show both 30-day and annualised impact.
+
+Profit Sensitivity:
+- Profit movement should show both 30-day and annualised impact.
+- Do not annualise percentage margin.
+
+Cash Sensitivity:
+- Label cash movement as:
+  +£X (30 days)
+- Only show annualised if it is clearly meaningful. Do not annualise runway.
+
+Scenario Lab:
+- Make it clear the selected period is 30 days.
+- Profit impact should show:
+  +£X (30 days)
+  +£Y (annualised)
+- Cash impact should show:
+  +£X (30 days)
+- Runway remains in months.
+- Scenario contribution bridge should clearly state:
+  “All values shown for selected 30-day period”
+  and annualised values should only appear where helpful, not everywhere.
+
+Important:
+- Keep the UI clean.
+- Do not add lots of duplicated explanatory text.
+- Prefer small secondary text beneath the main value.
+- Keep visual hierarchy consistent across all cards.
+- Reuse helper functions/components if possible rather than hardcoding formatting repeatedly.
+
+Before making code changes:
+1. Identify the relevant files/components.
+2. Summarise exactly what you plan to change.
+3. Then implement.
+4. Run typecheck/build validation.
+5. Show screenshots or describe visual changes.
+6. Do not apply unrelated refactors.

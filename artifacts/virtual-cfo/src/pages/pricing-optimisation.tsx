@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { PeriodImpact } from "@/components/PeriodImpact";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import {
@@ -699,23 +700,27 @@ export default function PricingOptimisation() {
                 <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>
                 <div className="space-y-2">
                   {[
-                    { label: "Projected Revenue",             value: `£${Math.round(projRevenue).toLocaleString()}`,           highlight: true  },
-                    { label: "Projected Contribution",        value: fmt(projContribution),                                    highlight: true  },
-                    { label: "Contribution Movement vs Base", value: (contribDelta >= 0 ? "+" : "") + fmt(Math.abs(contribDelta)), highlight: true  },
-                    { label: "Projected Contribution Margin", value: `${projContribMargin.toFixed(1)}%`,                       highlight: false },
-                    { label: "Pricing Risk Level",            value: pricingRisk,                                              highlight: false },
-                  ].map(({ label, value, highlight }) => (
+                    { label: "Projected Revenue",             value: `£${Math.round(projRevenue).toLocaleString()}`, highlight: true,  isPeriod: false },
+                    { label: "Projected Contribution",        value: fmt(projContribution),                           highlight: true,  isPeriod: false },
+                    { label: "Contribution Movement vs Base", value: "",                                              highlight: true,  isPeriod: true  },
+                    { label: "Projected Contribution Margin", value: `${projContribMargin.toFixed(1)}%`,              highlight: false, isPeriod: false },
+                    { label: "Pricing Risk Level",            value: pricingRisk,                                     highlight: false, isPeriod: false },
+                  ].map(({ label, value, highlight, isPeriod }) => (
                     <div key={label} className={cn("flex items-center justify-between px-4 py-2.5 rounded-xl",
                       highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30",
                     )}>
                       <span className={cn("text-xs", highlight ? "font-semibold text-foreground" : "text-muted-foreground")}>{label}</span>
-                      <span className={cn("text-sm font-bold tabular-nums",
-                        highlight
-                          ? projContribution < 150_000 ? "text-red-600 dark:text-red-400"
-                            : contribDelta >= 0 ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-amber-600 dark:text-amber-400"
-                          : "text-foreground",
-                      )}>{value}</span>
+                      {isPeriod ? (
+                        <PeriodImpact value={contribDelta} className="items-end" />
+                      ) : (
+                        <span className={cn("text-sm font-bold tabular-nums",
+                          highlight
+                            ? projContribution < 150_000 ? "text-red-600 dark:text-red-400"
+                              : contribDelta >= 0 ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-amber-600 dark:text-amber-400"
+                            : "text-foreground",
+                        )}>{value}</span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -805,14 +810,7 @@ export default function PricingOptimisation() {
                 <li key={item.label} className="flex items-center gap-3">
                   <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-[11px] font-bold text-primary shrink-0">{i + 1}</span>
                   <span className="text-sm text-foreground flex-1">{item.label}</span>
-                  <span className={cn(
-                    "text-xs font-bold tabular-nums px-2 py-0.5 rounded-lg",
-                    i === 0 ? "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20" :
-                    i === 1 ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20" :
-                              "text-muted-foreground bg-secondary",
-                  )}>
-                    £{item.impact.toLocaleString()} potential contribution impact
-                  </span>
+                  <PeriodImpact value={item.impact} className="items-end shrink-0" />
                 </li>
               ))}
             </ol>

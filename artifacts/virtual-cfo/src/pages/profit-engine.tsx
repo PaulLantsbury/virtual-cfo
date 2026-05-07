@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { PeriodImpact } from "@/components/PeriodImpact";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import {
@@ -930,13 +931,13 @@ export default function ProfitEngine() {
               <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>
               <div className="space-y-2">
                 {[
-                  { label: "Projected Revenue",                     value: fmt(adjRevenue),                                                                                  highlight: false },
-                  { label: "Projected Gross Profit Before Overheads", value: fmt(projContrib),                                                                                highlight: false },
-                  { label: "Projected Overheads",                   value: fmt(projFixed),                                                                                   highlight: false },
-                  { label: "Projected Profit",                      value: fmt(projEBITDA),                                                                                  highlight: true  },
-                  { label: "Profit Movement vs Base",               value: (ebitdaMovement >= 0 ? "+" : "") + fmt(Math.abs(ebitdaMovement)) + (ebitdaMovement >= 0 ? "" : " ↓"), highlight: true },
-                  { label: "Projected Profit Margin",               value: fmtPct(projEBITDAMargin),                                                                         highlight: false },
-                ].map(({ label, value, highlight }) => (
+                  { label: "Projected Revenue",                      value: fmt(adjRevenue),          highlight: false, isPeriod: false },
+                  { label: "Projected Gross Profit Before Overheads", value: fmt(projContrib),         highlight: false, isPeriod: false },
+                  { label: "Projected Overheads",                    value: fmt(projFixed),            highlight: false, isPeriod: false },
+                  { label: "Projected Profit",                       value: fmt(projEBITDA),           highlight: true,  isPeriod: false },
+                  { label: "Profit Movement vs Base",                value: "",                        highlight: true,  isPeriod: true  },
+                  { label: "Projected Profit Margin",                value: fmtPct(projEBITDAMargin),  highlight: false, isPeriod: false },
+                ].map(({ label, value, highlight, isPeriod }) => (
                   <div
                     key={label}
                     className={cn(
@@ -947,18 +948,22 @@ export default function ProfitEngine() {
                     <span className={cn("text-xs", highlight ? "font-semibold text-foreground" : "text-muted-foreground")}>
                       {label}
                     </span>
-                    <span className={cn(
-                      "text-sm font-bold tabular-nums",
-                      highlight
-                        ? projEBITDA < 0
-                          ? "text-red-600 dark:text-red-400"
-                          : ebitdaMovement >= 0
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-amber-600 dark:text-amber-400"
-                        : "text-foreground",
-                    )}>
-                      {value}
-                    </span>
+                    {isPeriod ? (
+                      <PeriodImpact value={ebitdaMovement} className="items-end" />
+                    ) : (
+                      <span className={cn(
+                        "text-sm font-bold tabular-nums",
+                        highlight
+                          ? projEBITDA < 0
+                            ? "text-red-600 dark:text-red-400"
+                            : ebitdaMovement >= 0
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-amber-600 dark:text-amber-400"
+                          : "text-foreground",
+                      )}>
+                        {value}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

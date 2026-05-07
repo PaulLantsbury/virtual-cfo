@@ -13,6 +13,7 @@ import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { PeriodImpact } from "@/components/PeriodImpact";
 import { MONTHLY_CM_PCT } from "@/lib/data/business-snapshot";
 import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
 import { CHANNEL_CM_PCT } from "@/lib/data/channel-metrics";
@@ -983,15 +984,7 @@ export default function MarginAnalysis() {
               </div>
               <div className="bg-card rounded-xl p-4 border border-border/50">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Movement</p>
-                <p className={cn(
-                  "text-2xl font-bold font-display leading-none mb-1",
-                  simTotalContrib > 0 ? "text-emerald-600 dark:text-emerald-400"
-                  : simTotalContrib < 0 ? "text-destructive"
-                  : "text-muted-foreground"
-                )}>
-                  {simTotalContrib >= 0 ? "+" : ""}£{Math.abs(simTotalContrib).toLocaleString()}
-                </p>
-                <p className="text-xs text-muted-foreground">vs base — this month</p>
+                <PeriodImpact value={simTotalContrib} valueClassName="text-2xl font-display mb-1" />
               </div>
               <div className="bg-card rounded-xl p-4 border border-border/50">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Proj. CPO</p>
@@ -1107,9 +1100,7 @@ export default function MarginAnalysis() {
                       )}
                     </p>
                     {canAccess("margin_sensitivity_ranking") ? (
-                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums ml-4 shrink-0">
-                        +£{item.impact.toLocaleString()}
-                      </span>
+                      <PeriodImpact value={item.impact} className="ml-4 shrink-0 items-end" />
                     ) : (
                       <span className="text-sm font-bold text-foreground/20 tabular-nums ml-4 shrink-0 select-none">
                         +£ —,———
@@ -1243,13 +1234,8 @@ export default function MarginAnalysis() {
                       <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
                         +{s.ppGain.toFixed(1)}pp
                       </span>
-                      <div className="text-right w-20">
-                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                          £{s.cashImpact.toLocaleString()}
-                        </p>
-                        <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
-                          next month
-                        </p>
+                      <div className="text-right w-24">
+                        <PeriodImpact value={s.cashImpact} className="items-end" />
                       </div>
                     </div>
                   </div>
@@ -1283,13 +1269,8 @@ export default function MarginAnalysis() {
                   <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
                     +{RECOVERY_TOTAL_PP}pp
                   </span>
-                  <div className="text-right w-20">
-                    <p className="text-base font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                      ≈ £{RECOVERY_TOTAL_CASH.toLocaleString()}
-                    </p>
-                    <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-none">
-                      next month
-                    </p>
+                  <div className="text-right w-24">
+                    <PeriodImpact value={RECOVERY_TOTAL_CASH} valueClassName="text-base" className="items-end" />
                   </div>
                 </div>
               </div>

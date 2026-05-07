@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+import { PeriodImpact } from "@/components/PeriodImpact";
 import {
   BLENDED_CAC,
   BLENDED_CAC_PREV,
@@ -623,14 +624,15 @@ export default function MarketingEfficiency() {
               </div>
             </div>
 
-            {/* 2 — Recoverable Contribution Next Month */}
+            {/* 2 — Estimated Contribution Uplift */}
             <div className="pl-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Recoverable Contribution Next Month
+                Estimated Contribution Uplift
               </p>
-              <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-2">
+              <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-1">
                 £{ESTIMATED_CONTRIBUTION.toLocaleString()}
               </p>
+              <p className="text-[11px] text-muted-foreground mb-1.5">(30 days) · £{(ESTIMATED_CONTRIBUTION * 12).toLocaleString()} ann.</p>
               <p className="text-xs text-muted-foreground leading-snug max-w-[26ch]">
                 Based on {framing.baselineNote}
               </p>
@@ -790,12 +792,15 @@ export default function MarketingEfficiency() {
           {isPro ? (
             <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/20 px-5 py-4 mb-5">
               <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3">
-                Recoverable contribution next month
+                Projected contribution uplift
               </p>
               <div className="flex flex-wrap items-end gap-x-8 gap-y-2 mb-3">
-                <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none tabular-nums">
-                  £{simContribution.toLocaleString()}
-                </p>
+                <div>
+                  <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none tabular-nums mb-1">
+                    £{simContribution.toLocaleString()}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">(30 days) · £{(simContribution * 12).toLocaleString()} ann.</p>
+                </div>
                 <div className="pb-0.5">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600/70 dark:text-emerald-400/60 mb-0.5">
                     Equivalent to
@@ -824,7 +829,7 @@ export default function MarketingEfficiency() {
             <div className="relative rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/30 px-5 py-4 mb-5 overflow-hidden">
               <div className="blur-sm select-none pointer-events-none" aria-hidden="true">
                 <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-3">
-                  Recoverable contribution next month
+                  Projected contribution uplift
                 </p>
                 <p className="text-4xl font-display font-bold text-emerald-700 leading-none tabular-nums mb-2">
                   £18,200
@@ -856,12 +861,11 @@ export default function MarketingEfficiency() {
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                   Contribution uplift
                 </p>
-                <p className={cn(
-                  "text-2xl font-display font-bold leading-none tabular-nums",
-                  simContribution > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"
-                )}>
-                  {simContribution > 0 ? `+£${simContribution.toLocaleString()}` : "—"}
-                </p>
+                {simContribution > 0 ? (
+                  <PeriodImpact value={simContribution} valueClassName="text-2xl font-display" />
+                ) : (
+                  <p className="text-2xl font-display font-bold leading-none tabular-nums text-foreground">—</p>
+                )}
               </div>
               <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
@@ -1045,12 +1049,7 @@ export default function MarketingEfficiency() {
                         +{o.ppGain.toFixed(1)}pp
                       </span>
                       <div className="text-right w-28">
-                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                          £{o.cashImpact.toLocaleString()}
-                        </p>
-                        <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-snug">
-                          {framing.impactBasis}
-                        </p>
+                        <PeriodImpact value={o.cashImpact} className="items-end" />
                       </div>
                     </div>
                   </div>
@@ -1067,12 +1066,7 @@ export default function MarketingEfficiency() {
                     +{ME_TOTAL_PP}pp
                   </span>
                   <div className="text-right w-28">
-                    <p className="text-base font-bold text-emerald-700 dark:text-emerald-300 tabular-nums leading-none">
-                      ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
-                    </p>
-                    <p className="text-[10px] text-emerald-600/60 dark:text-emerald-400/50 mt-1 leading-snug">
-                      {framing.impactBasis}
-                    </p>
+                    <PeriodImpact value={ESTIMATED_CONTRIBUTION} valueClassName="text-base" className="items-end" />
                   </div>
                 </div>
               </div>

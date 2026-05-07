@@ -300,7 +300,7 @@ async function main(): Promise<void> {
   {
     const { status, rows } = await rpc("cac_trend_by_channel", {
       p_store_id:    STORE_ID,
-      p_as_of_date:  "2026-04-30",
+      p_up_to_date:  "2026-04-30",
       p_months_back: 6,
     });
 

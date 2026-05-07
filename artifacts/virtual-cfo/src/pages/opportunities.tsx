@@ -108,7 +108,7 @@ export default function Opportunities() {
   useEffect(() => {
     async function fetchOpportunities() {
       try {
-        const res = await fetch(`/api/opportunities?store_id=${STORE_ID}`);
+        const res = await fetch(`/api/opportunities`);
         if (!res.ok) throw new Error(`API ${res.status}`);
         const data: any[] = await res.json();
         setOpportunities(data);

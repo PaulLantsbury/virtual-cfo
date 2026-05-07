@@ -301,19 +301,26 @@ export default function GrowthQuality() {
   // ── Phase 3: marketing channel metrics (CAC payback + channel CM quality) ─
   // Fires once gqDateFrom / gqDateTo resolve. On failure leaves arrays empty
   // and blended null — all live values fall back to static constants.
-  const [gqChannels,  setGqChannels]  = useState<ChannelMonthlyMetrics[]>([]);
-  const [gqBlendedCm, setGqBlendedCm] = useState<number | null>(null);
-  const [gqCacTrend,  setGqCacTrend]  = useState<CacTrendPoint[]>([]);
+  // gqPhase3Loading stays true until the RPC resolves or fails, preventing
+  // the composite score from rendering with a mixed live/static input set.
+  const [gqChannels,    setGqChannels]    = useState<ChannelMonthlyMetrics[]>([]);
+  const [gqBlendedCm,   setGqBlendedCm]   = useState<number | null>(null);
+  const [gqCacTrend,    setGqCacTrend]    = useState<CacTrendPoint[]>([]);
+  const [gqPhase3Loading, setGqPhase3Loading] = useState(true);
 
   useEffect(() => {
     if (!gqDateFrom || !gqDateTo) return;
     let cancelled = false;
+    setGqPhase3Loading(true);
     getMarketingChannelMetrics(GQ_STORE_ID, gqDateFrom, gqDateTo).then(({ channels, blended, cacTrend }) => {
       if (cancelled) return;
       setGqChannels(channels);
       setGqBlendedCm(blended?.blendedContributionMarginPct ?? null);
       setGqCacTrend(cacTrend);
-    }).catch(() => { /* leave state at defaults — static fallbacks apply */ });
+      setGqPhase3Loading(false);
+    }).catch(() => {
+      if (!cancelled) setGqPhase3Loading(false);
+    });
     return () => { cancelled = true; };
   }, [gqDateFrom, gqDateTo]);
 
@@ -474,6 +481,13 @@ export default function GrowthQuality() {
     const prev = gradeToOrdinal(liveGqGradePrev);
     return curr > prev ? "up" : curr < prev ? "down" : "stable";
   })();
+
+  // True only when every input to the composite score has settled.
+  // Phase 1 (repeat rate, discount dep) and Phase 3 (CAC payback, blended CM)
+  // load independently; mixing live + static values produces transient grades
+  // that differ from the fully-resolved value (e.g. "A" flash before "B+").
+  // The score tile suppresses its grade and direction badge until this is true.
+  const gqScoreReady = gqPhase1 !== null && !gqPhase3Loading;
 
   // ── Live Score Components ──────────────────────────────────────────────────
   // All 5 components now derive their score, status, grade, and explanation
@@ -639,27 +653,33 @@ export default function GrowthQuality() {
         {/* Growth Quality Score */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Growth Quality Score</p>
-          <p className="text-4xl font-display font-bold text-foreground">{liveGqGrade}</p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className={cn(
-              "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
-              liveGqScoreDir === "up"
-                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                : liveGqScoreDir === "down"
-                ? "bg-destructive/10 text-destructive"
-                : "bg-secondary text-muted-foreground",
-            )}>
-              {liveGqScoreDir === "up"
-                ? <ArrowUpRight className="w-3 h-3" />
-                : liveGqScoreDir === "down"
-                ? <ArrowDownRight className="w-3 h-3" />
-                : <Minus className="w-3 h-3" />}
-              {liveGqScoreDir === "up"
-                ? `Up from ${liveGqGradePrev}`
-                : liveGqScoreDir === "down"
-                ? `Down from ${liveGqGradePrev}`
-                : `Stable vs ${liveGqGradePrev}`}
-            </span>
+          <p className="text-4xl font-display font-bold text-foreground">
+            {gqScoreReady ? liveGqGrade : "—"}
+          </p>
+          <div className="flex items-center gap-2 mt-3 text-xs min-h-[22px]">
+            {gqScoreReady ? (
+              <span className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
+                liveGqScoreDir === "up"
+                  ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                  : liveGqScoreDir === "down"
+                  ? "bg-destructive/10 text-destructive"
+                  : "bg-secondary text-muted-foreground",
+              )}>
+                {liveGqScoreDir === "up"
+                  ? <ArrowUpRight className="w-3 h-3" />
+                  : liveGqScoreDir === "down"
+                  ? <ArrowDownRight className="w-3 h-3" />
+                  : <Minus className="w-3 h-3" />}
+                {liveGqScoreDir === "up"
+                  ? `Up from ${liveGqGradePrev}`
+                  : liveGqScoreDir === "down"
+                  ? `Down from ${liveGqGradePrev}`
+                  : `Stable vs ${liveGqGradePrev}`}
+              </span>
+            ) : (
+              <span className="text-muted-foreground/40">Calculating…</span>
+            )}
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
             Composite score across retention, discount reliance, and channel efficiency
@@ -729,30 +749,35 @@ export default function GrowthQuality() {
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback</p>
           <p className="text-4xl font-display font-bold text-foreground">
-            {liveCacPayback.toFixed(1)}{" "}
-            <span className="text-lg font-medium text-muted-foreground">orders</span>
+            {gqPhase3Loading ? "—" : <>{liveCacPayback.toFixed(1)}{" "}<span className="text-lg font-medium text-muted-foreground">orders</span></>}
           </p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className={cn(
-              "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
-              liveCacPaybackChange > 0
-                ? "bg-destructive/10 text-destructive"
-                : liveCacPaybackChange < 0
-                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                : "bg-secondary text-muted-foreground",
-            )}>
-              {liveCacPaybackChange > 0
-                ? <ArrowUpRight className="w-3 h-3" />
-                : liveCacPaybackChange < 0
-                ? <ArrowDownRight className="w-3 h-3" />
-                : <Minus className="w-3 h-3" />}
-              {liveCacPaybackChange !== 0
-                ? `${liveCacPaybackChange > 0 ? "+" : ""}${liveCacPaybackChange.toFixed(2)} orders vs last month`
-                : "Stable vs last month"}
-            </span>
+          <div className="flex items-center gap-2 mt-3 text-xs min-h-[22px]">
+            {gqPhase3Loading ? (
+              <span className="text-muted-foreground/40">Calculating…</span>
+            ) : (
+              <span className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
+                liveCacPaybackChange > 0
+                  ? "bg-destructive/10 text-destructive"
+                  : liveCacPaybackChange < 0
+                  ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                  : "bg-secondary text-muted-foreground",
+              )}>
+                {liveCacPaybackChange > 0
+                  ? <ArrowUpRight className="w-3 h-3" />
+                  : liveCacPaybackChange < 0
+                  ? <ArrowDownRight className="w-3 h-3" />
+                  : <Minus className="w-3 h-3" />}
+                {liveCacPaybackChange !== 0
+                  ? `${liveCacPaybackChange > 0 ? "+" : ""}${liveCacPaybackChange.toFixed(2)} orders vs last month`
+                  : "Stable vs last month"}
+              </span>
+            )}
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Below 1.2 orders is healthy — {liveCacPayback.toFixed(1)} {liveCacPayback <= 1.2 ? "is within the healthy range" : "signals acquisition cost pressure"}
+            {gqPhase3Loading
+              ? "Below 1.2 orders is healthy"
+              : <>Below 1.2 orders is healthy — {liveCacPayback.toFixed(1)} {liveCacPayback <= 1.2 ? "is within the healthy range" : "signals acquisition cost pressure"}</>}
           </p>
         </div>
       </div>

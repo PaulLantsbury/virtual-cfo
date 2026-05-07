@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import {
+  getMarketingChannelMetrics,
+  type ChannelOpportunity,
+  type BlendedMarketingPerformance,
+} from "@/lib/analytics/marketingChannelMetrics";
 import { TrendingUp, Zap, Lock, Tag, Target, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -15,11 +21,15 @@ import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
+/** Seed store UUID — shared by all Phase 1, Phase 3, and opportunity_breakdown calls. */
+const STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 /**
- * Monthly contribution opportunity range (excludes opp-d which is a
- * one-off cash release, not a recurring contribution improvement).
- * Imported from business-snapshot.ts — shared with Dashboard CFO_INSIGHT.upside.
- * @future Recompute as sum of monthly contribution uplifts ± uncertainty.
+ * Static fallback totals — used while Phase 1 RPC is loading or on failure.
+ * Live values come from phase1.data.recoverableLow / recoverableHigh which
+ * sum SUM(impact_low) / SUM(impact_high) from all active opportunities in DB.
+ * These match the recoverable_contribution_range() RPC static snapshot values.
+ * @dev-only DEV-ONLY FALLBACK — do not promote to production default.
  */
 const TOTAL_LOW  = RECOVERABLE_LOW;
 const TOTAL_HIGH = RECOVERABLE_HIGH;
@@ -99,7 +109,7 @@ export default function Opportunities() {
   useEffect(() => {
     async function fetchOpportunities() {
       const { data, error } = await supabase.rpc("opportunity_breakdown", {
-        p_store_id: "10000000-0000-0000-0000-000000000001",
+        p_store_id: STORE_ID,
       });
 
       if (error) {
@@ -113,6 +123,33 @@ export default function Opportunities() {
 
     fetchOpportunities();
   }, []);
+
+  // ── Phase 1 — period label + recoverable range (no extra fetch) ─────────────
+  const {
+    phase1,
+    dateFrom,
+    dateTo,
+    periodLabel,
+  } = useLatestDataPeriod(STORE_ID);
+
+  // ── Phase 3 — channel opportunities for rationale enrichment ─────────────────
+  // Used for: (a) live "why this matters" rationale on Marketing cards, (b) blended
+  // CM/CAC signals. NOT merged as separate cards — opportunity_breakdown is authoritative.
+  const [channelOpps, setChannelOpps] = useState<ChannelOpportunity[]>([]);
+  const [blendedMets, setBlendedMets] = useState<BlendedMarketingPerformance | null>(null);
+
+  useEffect(() => {
+    if (!dateFrom || !dateTo) return;
+    let cancelled = false;
+    getMarketingChannelMetrics(STORE_ID, dateFrom, dateTo)
+      .then(({ opportunities: opps, blended }) => {
+        if (cancelled) return;
+        setChannelOpps(opps);
+        setBlendedMets(blended);
+      })
+      .catch(() => { /* static fallbacks apply — state stays as initialized */ });
+    return () => { cancelled = true; };
+  }, [dateFrom, dateTo]);
 
   const mappedOpportunities = opportunities.map((o) => {
     // ── Derive impact level from RPC fields with defensive fallbacks ──────────
@@ -178,6 +215,88 @@ export default function Opportunities() {
     : opportunities.filter((o) => o.effort === "Low").reduce((sum, o) => sum + Number(o.impact_high), 0);
 
   const maxUplift = Math.max(...mappedOpportunities.map((o) => o.uplift), 1);
+
+  // ── Intelligent ranking ──────────────────────────────────────────────────────
+  // Composite score: confidence (35%) + effort (25%) + timing (20%) + uplift (20%).
+  // Sorting is deterministic as soon as opportunity_breakdown resolves.
+  const rankOpp = (opp: (typeof mappedOpportunities)[number]): number => {
+    const conf = opp.confidence === "High" ? 100 : opp.confidence === "Medium" ? 60 : 30;
+    const eff  = opp.effort === "Low"      ? 100 : opp.effort === "Medium"      ? 60 : 20;
+    const tim  =
+      opp.timing === "Immediate"                                                    ? 100
+      : (opp.timing === "1–2 weeks" || opp.timing === "2–4 weeks" || opp.timing === "30 days") ? 70
+      : opp.timing === "1–3 months"                                                 ? 40
+      : 20;
+    const upl = maxUplift > 0 ? (opp.uplift / maxUplift) * 100 : 0;
+    return conf * 0.35 + eff * 0.25 + tim * 0.20 + upl * 0.20;
+  };
+
+  const sortedOpportunities = [...mappedOpportunities].sort(
+    (a, b) => rankOpp(b) - rankOpp(a),
+  );
+
+  // "Do now" / "Next wave" section boundary.
+  // Uses count of High-confidence + Low-effort ("high" impact) items, minimum 2
+  // to preserve the existing 2-item "Do now" section when few top-tier items exist.
+  const doNowCount = Math.min(
+    Math.max(sortedOpportunities.filter((o) => o.impact === "high").length, 2),
+    Math.max(sortedOpportunities.length - 1, 1),
+  );
+
+  // ── Live header values (Phase 1) ─────────────────────────────────────────────
+  // recoverableLow/High sum ALL active opportunities from the opportunity_breakdown
+  // table — the same table that feeds these cards, so totals reconcile with the list.
+  const liveTotalLow  = phase1 && phase1.data.recoverableLow  > 0 ? phase1.data.recoverableLow  : TOTAL_LOW;
+  const liveTotalHigh = phase1 && phase1.data.recoverableHigh > 0 ? phase1.data.recoverableHigh : TOTAL_HIGH;
+
+  // Dynamic header bullets: highest-confidence and fastest-timing ranked items.
+  const highestConfOpp = sortedOpportunities.find((o) => o.confidence === "High");
+  const fastestOpp     = sortedOpportunities.find((o) => o.timing === "Immediate");
+
+  // Dynamic execution priority note — references live top-2 ranked items.
+  const livePriorityNote =
+    sortedOpportunities.length >= 2
+      ? `Start with "${sortedOpportunities[0].label}" and "${sortedOpportunities[1].label}". ` +
+        `Together, these represent the highest-confidence, lowest-effort opportunities this month` +
+        (sortedOpportunities[0].capitalFree && sortedOpportunities[1].capitalFree
+          ? " — both require no additional investment."
+          : ".")
+      : PRIORITY_NOTE;
+
+  // ── Live "why this matters" rationale ─────────────────────────────────────────
+  // Derives a concise data-driven sentence from Phase 1 / Phase 3 live signals.
+  // Shown in Pro row only, below the description. Returns null when no live signal
+  // maps to the card's category (rationale is always additive — never blocking).
+  const liveRationale = (opp: (typeof mappedOpportunities)[number]): string | null => {
+    const category = opp.category as string;
+    if (category === "Marketing") {
+      const best = channelOpps.find((co) => co.rationale !== null);
+      if (best?.rationale) return best.rationale;
+      if (blendedMets) {
+        const cm  = blendedMets.blendedContributionMarginPct;
+        const cac = blendedMets.blendedCac;
+        if (cm !== null && cac !== null)
+          return `Blended marketing CM ${(cm * 100).toFixed(1)}%, blended CAC £${cac.toFixed(0)}.`;
+        if (cm !== null)
+          return `Blended marketing contribution margin at ${(cm * 100).toFixed(1)}%.`;
+      }
+      return null;
+    }
+    if (category === "Margin" || category === "Pricing") {
+      const cm = phase1?.data.contributionMarginPct;
+      if (cm != null)
+        return `Live contribution margin ${(cm * 100).toFixed(1)}% — margin recovery is high leverage.`;
+      return null;
+    }
+    if (category === "Retention") {
+      if (!phase1) return null;
+      const rpr = (phase1.data.repeatPurchaseRate * 100).toFixed(1);
+      const dd  = (phase1.data.discountDependency  * 100).toFixed(1);
+      return `Repeat rate ${rpr}%, discount dependency ${dd}% of revenue.`;
+    }
+    return null;
+  };
+
   const showHeadline     = canAccess("opportunities_headline_value");
   const showUpliftValues = canAccess("opportunities_uplift_values");
   const showExecPriority = canAccess("opportunities_execution_priority");
@@ -196,7 +315,7 @@ export default function Opportunities() {
           </p>
         </div>
         <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">
-          March 2026
+          {periodLabel}
         </span>
       </div>
 
@@ -215,7 +334,7 @@ export default function Opportunities() {
               /* Pro: full £ value */
               <>
                 <p className="text-5xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
-                  £{(TOTAL_LOW / 1000).toFixed(0)}k–£{(TOTAL_HIGH / 1000).toFixed(0)}k/month
+                  £{(liveTotalLow / 1000).toFixed(0)}k–£{(liveTotalHigh / 1000).toFixed(0)}k/month
                 </p>
                 <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 mt-2 leading-snug">
                   Recoverable contribution identified across pricing, marketing, margin and cash.
@@ -224,11 +343,11 @@ export default function Opportunities() {
                 <div className="flex flex-wrap gap-3 mt-3">
                   <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-800/70 dark:text-emerald-300/80">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                    Highest confidence: Reduce average discount depth
+                    Highest confidence: {highestConfOpp?.label ?? "Reduce average discount depth"}
                   </span>
                   <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-800/70 dark:text-emerald-300/80">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
-                    Fastest: Reduce discount depth — Immediate
+                    Fastest: {fastestOpp?.label ?? "Reduce discount depth"} — Immediate
                   </span>
                 </div>
               </>
@@ -240,12 +359,12 @@ export default function Opportunities() {
                   style={{ filter: "blur(8px)" }}
                   aria-hidden="true"
                 >
-                  £{(TOTAL_LOW / 1000).toFixed(0)}k–£{(TOTAL_HIGH / 1000).toFixed(0)}k
+                  £{(liveTotalLow / 1000).toFixed(0)}k–£{(liveTotalHigh / 1000).toFixed(0)}k
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <Lock className="w-3.5 h-3.5 text-emerald-600/60 dark:text-emerald-500/60 shrink-0" />
                   <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 leading-snug">
-                    {mappedOpportunities.length} profit opportunities identified — upgrade to see quantified recovery estimates
+                    {sortedOpportunities.length} profit opportunities identified — upgrade to see quantified recovery estimates
                   </p>
                 </div>
               </>
@@ -280,7 +399,7 @@ export default function Opportunities() {
               Execution priority this month
             </p>
             <p className="text-sm font-medium text-foreground leading-relaxed">
-              {PRIORITY_NOTE}
+              {livePriorityNote}
             </p>
           </div>
         </div>
@@ -296,7 +415,7 @@ export default function Opportunities() {
         </div>
 
         <div className="divide-y divide-border/40">
-          {mappedOpportunities.map((opp, idx) => {
+          {sortedOpportunities.map((opp, idx) => {
             const { label: impactLabel, classes: impactClasses } = IMPACT_CONFIG[opp.impact as ImpactLevel];
             const barPct = Math.round((opp.uplift / maxUplift) * 100);
 
@@ -309,7 +428,7 @@ export default function Opportunities() {
                     <div className="flex-1 h-px bg-border/60" />
                   </div>
                 )}
-                {idx === 2 && (
+                {idx === doNowCount && (
                   <div className="flex items-center gap-3 mb-4">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">Next wave</span>
                     <div className="flex-1 h-px bg-border/60" />
@@ -334,6 +453,10 @@ export default function Opportunities() {
                       </div>
                       <p className="font-semibold text-foreground text-sm leading-snug">{opp.label}</p>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{opp.description}</p>
+                      {/* Live "why this matters" rationale — Phase 1 + Phase 3 signals */}
+                      {(() => { const r = liveRationale(opp); return r ? (
+                        <p className="text-[11px] text-muted-foreground/50 mt-1.5 leading-snug italic">{r}</p>
+                      ) : null; })()}
                       {/* Badge row: timing, confidence, effort */}
                       <div className="flex items-center gap-2 mt-2.5 flex-wrap">
                         <TimingBadge timing={opp.timing} />
@@ -425,7 +548,7 @@ export default function Opportunities() {
                     <div className="flex-1 h-px bg-border/60" />
                   </div>
                 )}
-                {idx === 2 && (
+                {idx === doNowCount && (
                   <div className="flex items-center gap-3 mb-3">
                     <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">Next wave</span>
                     <div className="flex-1 h-px bg-border/60" />
@@ -495,7 +618,7 @@ export default function Opportunities() {
           <div className="px-6 py-4 bg-emerald-50/60 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 flex items-center justify-between">
             <span className="text-sm font-semibold text-foreground">Total estimated uplift</span>
             <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-              £{(TOTAL_LOW / 1_000).toFixed(0)}k–£{(TOTAL_HIGH / 1_000).toFixed(0)}k
+              £{(liveTotalLow / 1_000).toFixed(0)}k–£{(liveTotalHigh / 1_000).toFixed(0)}k
             </span>
           </div>
         ) : (

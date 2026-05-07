@@ -1,0 +1,98 @@
+We are now starting the next Phase 4 wiring step:
+Opportunities page live intelligence wiring.
+
+Objective:
+Turn the Opportunities page into the live orchestration/action layer powered by the existing Supabase opportunity engine and marketing intelligence RPCs.
+
+Target page:
+artifacts/virtual-cfo/src/pages/opportunities.tsx
+
+Current state:
+The page is partially live already:
+- opportunity cards use opportunity_breakdown RPC
+- impact level/timing/link logic already derived from RPC fields
+
+But several key areas still use static/mock values.
+
+Goals:
+Replace remaining static/mock opportunity logic with live intelligence-driven values where possible.
+
+Priority tasks:
+
+1. Replace static recoverable contribution header values
+Current:
+- RECOVERABLE_LOW
+- RECOVERABLE_HIGH
+from business-snapshot.ts
+
+Replace with:
+- live recoverable_contribution_range() Phase 1 RPC
+OR
+- live totalOpportunityUplift(channel_opportunities_active()) if more appropriate
+
+Please explain which source is more correct and why before implementing.
+
+2. Integrate Phase 3 marketing intelligence opportunities
+Use:
+- channel_opportunities_active()
+- totalOpportunityUplift()
+- opportunity scores
+- confidence
+- status
+- uplift ranges
+
+Where appropriate:
+- merge or enrich the existing opportunity cards
+- avoid duplicate/conflicting opportunities
+- preserve existing UX hierarchy
+
+3. Improve prioritisation ordering
+Current ordering is simplistic.
+
+Introduce a more intelligent ranking using:
+- confidence
+- estimated uplift
+- timing
+- effort
+- opportunity score
+- growth quality context where relevant
+
+Please explain the ranking logic before implementing.
+
+4. Add clearer “why this matters” logic
+Where possible, derive concise live rationale text from:
+- CAC deterioration
+- low contribution margin
+- discount dependency
+- poor CAC payback
+- growth quality score
+- channel mix quality
+
+Keep copy concise and operational.
+
+5. Preserve:
+- current design
+- phased execution structure
+- action-oriented UX
+- recommendation card hierarchy
+
+6. Add safe fallback behaviour:
+- if marketing intelligence RPCs fail, existing opportunity cards still render
+- no blank/NaN/undefined states
+- no duplicate opportunity totals
+- no console/runtime errors
+
+7. Validate:
+- TypeScript clean
+- browser clean
+- opportunity totals reconcile
+- ranking order behaves sensibly
+- live seeded opportunity values appear
+- header values match live RPC outputs
+
+8. Before coding:
+- explain the proposed orchestration/ranking model
+- identify exact files to change
+- explain how existing opportunity_breakdown RPC and Phase 3 opportunity engine will coexist
+
+Do not perform unrelated refactors.

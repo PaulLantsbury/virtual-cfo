@@ -5,7 +5,7 @@ import {
   type ChannelOpportunity,
   type BlendedMarketingPerformance,
 } from "@/lib/analytics/marketingChannelMetrics";
-import { TrendingUp, Zap, Lock, Tag, Target, ArrowRight } from "lucide-react";
+import { TrendingUp, Zap, Lock, Tag, Target, ArrowRight, FlaskConical } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
@@ -85,6 +85,16 @@ const EFFORT_COLORS: Record<string, string> = {
                         : `£${(opp.monthlyImpactLow / 1000).toFixed(0)}k–£${(opp.monthlyImpactHigh / 1000).toFixed(0)}k/mo`,
   };
 });*/
+
+/**
+ * Maps opportunity card titles to Scenario Lab preset IDs.
+ * Only the 3 supported opportunities get a "Model this scenario" button.
+ */
+const TITLE_TO_PRESET: Record<string, string> = {
+  "Reduce average discount depth":   "reduce-discount-depth",
+  "Reallocate inefficient Meta spend": "reallocate-meta-spend",
+  "Improve full-price order ratio":  "improve-fullprice-ratio",
+};
 
 const PRIORITY_NOTE =
   "Start with reducing discount depth and reallocating Meta spend. Together, these two changes represent the highest-confidence, lowest-effort opportunities this month — and both require no additional investment, only a pricing policy change and a budget reallocation.";
@@ -561,6 +571,17 @@ export default function Opportunities() {
                   <div className="mt-3">
                     <AiCfoInlineButtons pageId="opportunities" />
                   </div>
+                  {TITLE_TO_PRESET[opp.label] && (
+                    <div className="mt-2.5">
+                      <a
+                        href={`/scenario-lab?preset=${TITLE_TO_PRESET[opp.label]}`}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                      >
+                        <FlaskConical className="w-3.5 h-3.5" />
+                        Model this scenario →
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (

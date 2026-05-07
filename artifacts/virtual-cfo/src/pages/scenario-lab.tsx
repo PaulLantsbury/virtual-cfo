@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sparkles, TrendingUp, AlertTriangle, Info,
   Zap, Shield, CheckCircle, ArrowUpRight, Lock,
   RefreshCw, Save, Layers, Target, ChevronRight,
-  ChevronDown,
+  ChevronDown, FlaskConical, X,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
@@ -61,7 +61,7 @@ interface ScenarioState {
   fulfilmentChange: number;
 }
 
-type PlanId = "balanced" | "margin" | "cash";
+type PlanId = "balanced" | "margin" | "cash" | "custom";
 
 // ─── Plan presets ─────────────────────────────────────────────────────────────
 const BALANCED_GROWTH: ScenarioState = {
@@ -100,12 +100,58 @@ const PLAN_LABELS: Record<PlanId, string> = {
   balanced: "Balanced Growth Plan",
   margin:   "Margin Recovery Plan",
   cash:     "Cash Protection Plan",
+  custom:   "Custom",
 };
 
 const PLAN_PRESETS: Record<PlanId, ScenarioState> = {
   balanced: BALANCED_GROWTH,
   margin:   MARGIN_RECOVERY,
   cash:     CASH_PROTECTION,
+  custom:   ZERO_STATE,
+};
+
+// ─── Opportunity presets (from Profit Opportunities page) ─────────────────────
+// Each preset loads when the user clicks "Model this scenario" on an opportunity
+// card. Values start from ZERO_STATE so only relevant levers are set, making
+// the connection between the recommendation and the slider change explicit.
+interface OpportunityPreset {
+  label: string;
+  state: ScenarioState;
+  focusTab: "growth" | "margin" | "marketing" | "cash" | "overheads";
+}
+
+const OPPORTUNITY_PRESETS: Record<string, OpportunityPreset> = {
+  "reduce-discount-depth": {
+    label:    "Reduce average discount depth",
+    focusTab: "margin",
+    state: {
+      ...ZERO_STATE,
+      discountChange: -4,
+      aovChange:       2,
+      returnsChange:  -1,
+    },
+  },
+  "reallocate-meta-spend": {
+    label:    "Reallocate inefficient Meta spend",
+    focusTab: "marketing",
+    state: {
+      ...ZERO_STATE,
+      metaSpendChange:     -15,
+      emailMixUplift:       12,
+      blendedCacChange:    -10,
+      marketingSpendChange: -8,
+    },
+  },
+  "improve-fullprice-ratio": {
+    label:    "Improve full-price order ratio",
+    focusTab: "margin",
+    state: {
+      ...ZERO_STATE,
+      discountChange: -3,
+      aovChange:       3,
+      revenueChange:   2,
+    },
+  },
 };
 
 // ─── Calculation engine ───────────────────────────────────────────────────────
@@ -316,6 +362,25 @@ export default function ScenarioLab() {
   const [activePlan,  setActivePlan]  = useState<PlanId>("balanced");
   const [importedOpen, setImportedOpen] = useState(false);
   const [checkedActions, setCheckedActions] = useState<Set<number>>(new Set());
+  const [loadedPresetLabel, setLoadedPresetLabel] = useState<string | null>(null);
+
+  // Detect ?preset= param on first mount only — applies the opportunity preset,
+  // switches to the relevant slider tab, then strips the param from the URL so
+  // a page refresh does not re-apply it. Empty dep array guarantees one execution.
+  useEffect(() => {
+    const params   = new URLSearchParams(window.location.search);
+    const presetId = params.get("preset");
+    if (presetId && presetId in OPPORTUNITY_PRESETS) {
+      const { label, state, focusTab } = OPPORTUNITY_PRESETS[presetId];
+      setScenario(state);
+      setActivePlan("custom");
+      setActiveTab(focusTab);
+      setLoadedPresetLabel(label);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("preset");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const out = computeOutputs(scenario);
 
@@ -363,6 +428,29 @@ export default function ScenarioLab() {
             <span className="text-xs text-muted-foreground">{timelineLabel} · vs previous period</span>
           </div>
         </div>
+
+        {/* ══ OPPORTUNITY PRESET BANNER ════════════════════════════════════════ */}
+        {loadedPresetLabel && (
+          <div className="flex items-center justify-between gap-4 px-5 py-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-700/50">
+            <div className="flex items-center gap-3 min-w-0">
+              <FlaskConical className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <p className="text-sm font-medium text-indigo-900 dark:text-indigo-200 leading-snug">
+                Recommended scenario loaded from Opportunities:{" "}
+                <span className="font-semibold">"{loadedPresetLabel}"</span>
+                <span className="ml-2 text-indigo-600/70 dark:text-indigo-400/70 font-normal text-xs">
+                  · Relevant sliders pre-populated below
+                </span>
+              </p>
+            </div>
+            <button
+              onClick={() => setLoadedPresetLabel(null)}
+              aria-label="Dismiss"
+              className="shrink-0 p-1 rounded-lg text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* ══ 2. CFO INSIGHT CARD ═════════════════════════════════════════════ */}
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">

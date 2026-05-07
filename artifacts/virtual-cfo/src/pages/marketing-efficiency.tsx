@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sparkles, TrendingUp, AlertTriangle, Lock, SlidersHorizontal, Info, Zap, Shield } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -28,6 +28,16 @@ import {
   CAC_BY_CHANNEL,
   PAYBACK_BY_CHANNEL,
 } from "@/lib/data/channel-metrics";
+import {
+  getMarketingChannelMetrics,
+  findChannel,
+  getCacTrendForChannel,
+  totalOpportunityUplift,
+  type ChannelMonthlyMetrics,
+  type BlendedMarketingPerformance,
+  type ChannelOpportunity,
+  type CacTrendPoint,
+} from "@/lib/analytics/marketingChannelMetrics";
 import { CAC_PAYBACK, CAC_PAYBACK_PREV, DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
@@ -489,7 +499,7 @@ export default function MarketingEfficiency() {
   // Walks back from the current month to find the most recent month with data.
   // Only these two fields are used here — all other ME metrics require ad
   // platform data (Meta/Google Ads API) and remain static for now.
-  const { phase1: mktPhase1, periodLabel: mePeriodLabel, loading: mePeriodLoading } = useLatestDataPeriod(ME_STORE_ID);
+  const { phase1: mktPhase1, periodLabel: mePeriodLabel, loading: mePeriodLoading, dateFrom, dateTo } = useLatestDataPeriod(ME_STORE_ID);
 
   // Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
   const liveDiscountDep = mktPhase1
@@ -520,6 +530,152 @@ export default function MarketingEfficiency() {
     }
     return d;
   });
+
+  // ── Phase 3: live marketing channel metrics ────────────────────────────────
+  // Calls four Supabase RPCs in parallel via getMarketingChannelMetrics().
+  // Individual RPC failures are isolated — other fields remain intact.
+  // All values fall back to static channel-metrics.ts constants if unavailable.
+  const [liveChannels,      setLiveChannels]      = useState<ChannelMonthlyMetrics[]>([]);
+  const [liveBlended,       setLiveBlended]       = useState<BlendedMarketingPerformance | null>(null);
+  const [liveBlendedPrev,   setLiveBlendedPrev]   = useState<BlendedMarketingPerformance | null>(null);
+  const [liveOpportunities, setLiveOpportunities] = useState<ChannelOpportunity[]>([]);
+  const [liveCacTrend,      setLiveCacTrend]      = useState<CacTrendPoint[]>([]);
+
+  useEffect(() => {
+    if (mePeriodLoading) return;
+    let cancelled = false;
+    // Derive prior-period date range (one calendar month back) for blended CAC MoM.
+    const d = new Date(dateFrom);
+    d.setMonth(d.getMonth() - 1);
+    const prevMo   = d.getMonth() + 1;
+    const prevYr   = d.getFullYear();
+    const prevFrom = `${prevYr}-${String(prevMo).padStart(2, "0")}-01`;
+    const prevTo   = new Date(prevYr, prevMo, 0).toISOString().slice(0, 10);
+    (async () => {
+      const [curr, prev] = await Promise.all([
+        getMarketingChannelMetrics(ME_STORE_ID, dateFrom, dateTo),
+        getMarketingChannelMetrics(ME_STORE_ID, prevFrom, prevTo),
+      ]);
+      if (cancelled) return;
+      setLiveChannels(curr.channels);
+      setLiveBlended(curr.blended);
+      setLiveBlendedPrev(prev.blended);
+      setLiveOpportunities(curr.opportunities);
+      setLiveCacTrend(curr.cacTrend);
+    })();
+    return () => { cancelled = true; };
+  }, [mePeriodLoading, dateFrom, dateTo]);
+
+  // ── Live computed values (Phase 3 — with static fallbacks) ─────────────────
+  // Blended CAC: current and prior period from RPC.
+  const liveBlendedCac     = liveBlended?.blendedCac     ?? BLENDED_CAC;
+  const liveBlendedCacPrev = liveBlendedPrev?.blendedCac ?? BLENDED_CAC_PREV;
+  const liveBlendedCacChange   = +(liveBlendedCac - liveBlendedCacPrev).toFixed(2);
+  const liveBlendedCacChangeLy = +(liveBlendedCac - BLENDED_CAC_LY).toFixed(2);
+
+  // Opportunity uplift total from active scored opportunities.
+  const liveUplift = totalOpportunityUplift(liveOpportunities);
+  const liveEstimatedContribution = liveUplift.high > 0
+    ? Math.round(liveUplift.high)
+    : ESTIMATED_CONTRIBUTION;
+
+  // DB slug → UI display name.
+  const SLUG_TO_NAME: Record<string, string> = {
+    meta: "Meta", google_shopping: "Google Shopping", email: "Email", organic: "Organic",
+  };
+
+  // Efficiency band: strong < 70% of blended · watch < 120% · weak ≥ 120%.
+  const getCacEfficiency = (cac: number, blended: number): EfficiencyRating =>
+    cac < blended * 0.7 ? "strong" :
+    cac < blended * 1.2 ? "watch"  : "weak";
+
+  // Live CAC by channel — falls back to full static array if RPC returns no rows.
+  const liveCacByChannel: typeof CAC_BY_CHANNEL = (() => {
+    if (!liveChannels.length) return CAC_BY_CHANNEL;
+    const blCac = liveBlendedCac;
+    return (["meta", "google_shopping", "email", "organic"] as const).flatMap((slug) => {
+      const ch = findChannel(liveChannels, slug);
+      if (!ch || ch.cac === null) {
+        return CAC_BY_CHANNEL.filter((r) => r.channel === SLUG_TO_NAME[slug]);
+      }
+      const pts    = getCacTrendForChannel(liveCacTrend, slug);
+      const latest = pts[pts.length - 1] ?? null;
+      const mom    = latest?.momChangePct ?? null;
+      const changeLabel =
+        mom === null || mom === 0 ? "Stable" :
+        mom > 0 ? `+${Math.round(mom * 100)}%` : `−${Math.round(Math.abs(mom) * 100)}%`;
+      const change =
+        mom === null || mom === 0 ? null :
+        (mom > 0 ? Math.round(mom * 100) : -Math.round(Math.abs(mom) * 100));
+      return [{ channel: SLUG_TO_NAME[slug] ?? slug, cac: ch.cac, change, changeLabel, efficiency: getCacEfficiency(ch.cac, blCac) }];
+    });
+  })();
+
+  // Live contribution margin % and attributed net sales per channel.
+  const liveChannelCm: { channel: string; cm: number; revenue: number }[] = (() => {
+    if (!liveChannels.length) return CHANNEL_CM;
+    const get = (slug: string, fallbackCm: number, fallbackRev: number) => {
+      const ch = findChannel(liveChannels, slug);
+      return { cm: ch ? ch.contributionMarginPct * 100 : fallbackCm, revenue: ch ? ch.attributedNetSales : fallbackRev };
+    };
+    return [
+      { channel: "Email",           ...get("email",           CHANNEL_CM_PCT.email,          CHANNEL_CM[0].revenue) },
+      { channel: "Organic",         ...get("organic",         CHANNEL_CM_PCT.organic,        CHANNEL_CM[1].revenue) },
+      { channel: "Google Shopping", ...get("google_shopping", CHANNEL_CM_PCT.googleShopping, CHANNEL_CM[2].revenue) },
+      { channel: "Meta",            ...get("meta",            CHANNEL_CM_PCT.meta,           CHANNEL_CM[3].revenue) },
+    ];
+  })();
+
+  // Live contribution profit per channel.
+  const liveChannelCp: { channel: string; cp: number }[] = (() => {
+    if (!liveChannels.length) return CHANNEL_CP;
+    return [
+      { channel: "Email",           cp: findChannel(liveChannels, "email")?.contributionProfit           ?? CHANNEL_CP[0].cp },
+      { channel: "Organic",         cp: findChannel(liveChannels, "organic")?.contributionProfit         ?? CHANNEL_CP[1].cp },
+      { channel: "Google Shopping", cp: findChannel(liveChannels, "google_shopping")?.contributionProfit ?? CHANNEL_CP[2].cp },
+      { channel: "Meta",            cp: findChannel(liveChannels, "meta")?.contributionProfit            ?? CHANNEL_CP[3].cp },
+    ];
+  })();
+
+  // Live CAC payback by channel from cac_payback_orders RPC field.
+  const livePaybackByChannel: { channel: string; payback: number }[] = (() => {
+    if (!liveChannels.length) return PAYBACK_BY_CHANNEL;
+    return (["email", "organic", "google_shopping", "meta"] as const).map((slug) => {
+      const ch       = findChannel(liveChannels, slug);
+      const fallback = PAYBACK_BY_CHANNEL.find((p) => p.channel === SLUG_TO_NAME[slug])?.payback ?? 1.0;
+      return { channel: SLUG_TO_NAME[slug] ?? slug, payback: ch?.cacPaybackOrders ?? fallback };
+    });
+  })();
+
+  // Derived totals used in charts and share table.
+  const liveTotalAttributedCp   = liveChannelCp.reduce((s, c) => s + c.cp, 0);
+  const liveTotalChannelRevenue = liveChannelCm.reduce((s, c) => s + c.revenue, 0);
+  const liveMaxCp = liveTotalAttributedCp > 0 ? Math.max(...liveChannelCp.map((c) => c.cp)) : maxCp;
+  const liveMinCp = liveTotalAttributedCp > 0 ? Math.min(...liveChannelCp.map((c) => c.cp)) : minCp;
+
+  // Revenue share vs contribution share (drives the channel share chart).
+  const liveChannelShare = (() => {
+    if (!liveTotalAttributedCp || !liveTotalChannelRevenue) return CHANNEL_SHARE;
+    return liveChannelCm.map((c) => {
+      const cp       = liveChannelCp.find((p) => p.channel === c.channel)!.cp;
+      const revShare = Math.round((c.revenue / liveTotalChannelRevenue) * 100);
+      const cpShare  = Math.round((cp / liveTotalAttributedCp) * 100);
+      return { channel: c.channel, revShare, cpShare, delta: cpShare - revShare };
+    });
+  })();
+
+  // Best/worst CP channels — used in §4 interpretation text (dynamic with live data).
+  const liveCpSortedDesc   = [...liveChannelCp].sort((a, b) => b.cp - a.cp);
+  const liveBestCpChannel  = liveCpSortedDesc[0]?.channel  ?? "Email";
+  const liveWorstCpChannel = liveCpSortedDesc[liveCpSortedDesc.length - 1]?.channel ?? "Meta";
+  const liveBestCpAmt      = liveCpSortedDesc[0]?.cp ?? 0;
+  const liveWorstCpAmt     = liveCpSortedDesc[liveCpSortedDesc.length - 1]?.cp ?? 0;
+  const liveBestCpShare    = liveTotalAttributedCp > 0
+    ? Math.round(liveBestCpAmt / liveTotalAttributedCp * 100)
+    : 0;
+  const liveBestCpRevShare = liveTotalChannelRevenue > 0
+    ? Math.round((liveChannelCm.find((c) => c.channel === liveBestCpChannel)?.revenue ?? 0) / liveTotalChannelRevenue * 100)
+    : 0;
 
   // ── Budget Reallocation Simulator state ──────────────────────────────────
   const [metaToEmail,    setMetaToEmail]    = useState(0);
@@ -630,9 +786,9 @@ export default function MarketingEfficiency() {
                 Estimated Contribution Uplift
               </p>
               <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-1">
-                £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+                £{liveEstimatedContribution.toLocaleString()}
               </p>
-              <p className="text-[11px] text-muted-foreground mb-1.5">(30 days) · £{(ESTIMATED_CONTRIBUTION * 12).toLocaleString()} (annualised)</p>
+              <p className="text-[11px] text-muted-foreground mb-1.5">(30 days) · £{(liveEstimatedContribution * 12).toLocaleString()} (annualised)</p>
               <p className="text-xs text-muted-foreground leading-snug max-w-[26ch]">
                 Based on {framing.baselineNote}
               </p>
@@ -647,7 +803,7 @@ export default function MarketingEfficiency() {
             </p>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
               If 15–25% of paid acquisition spend is reallocated toward higher-margin channels such as Email and Organic, recoverable contribution is approximately{" "}
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{ESTIMATED_CONTRIBUTION.toLocaleString()}</span>{" "}
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{liveEstimatedContribution.toLocaleString()}</span>{" "}
               {framing.upliftPhrase}.
             </p>
           </div>
@@ -969,7 +1125,7 @@ export default function MarketingEfficiency() {
           <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80">
             Combined impact — {framing.rowLabel}:
             <span className="font-bold text-emerald-700 dark:text-emerald-300 ml-1.5 tabular-nums">
-              ≈ £{ESTIMATED_CONTRIBUTION.toLocaleString()}
+              ≈ £{liveEstimatedContribution.toLocaleString()}
             </span>
             <span className="ml-2 text-emerald-600/70 dark:text-emerald-400/60">
               (+{ME_TOTAL_PP.toFixed(1)}pp contribution margin)
@@ -1205,17 +1361,17 @@ export default function MarketingEfficiency() {
         {/* 2 — Blended CAC */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Blended CAC</p>
-          <p className="text-3xl font-display font-bold text-foreground mb-2">£{BLENDED_CAC.toFixed(2)}</p>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">£{liveBlendedCac.toFixed(2)}</p>
           <div className="space-y-0.5 mb-2">
             <VarLine
               label="vs last month"
-              value={`↑ £${BLENDED_CAC_CHANGE.toFixed(2)}`}
-              sentiment={deltaToSentiment(BLENDED_CAC_CHANGE, DELTA_POLARITY.blendedCac)}
+              value={`↑ £${Math.abs(liveBlendedCacChange).toFixed(2)}`}
+              sentiment={deltaToSentiment(liveBlendedCacChange, DELTA_POLARITY.blendedCac)}
             />
             <VarLine
               label="vs 12-month avg"
-              value={`↑ £${BLENDED_CAC_CHANGE_LY.toFixed(2)}`}
-              sentiment={deltaToSentiment(BLENDED_CAC_CHANGE_LY, DELTA_POLARITY.blendedCac)}
+              value={`↑ £${Math.abs(liveBlendedCacChangeLy).toFixed(2)}`}
+              sentiment={deltaToSentiment(liveBlendedCacChangeLy, DELTA_POLARITY.blendedCac)}
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Average cost to acquire one customer across all channels</p>
@@ -1358,7 +1514,7 @@ export default function MarketingEfficiency() {
               <span className="w-2.5 h-2.5 rounded-sm bg-primary/60 inline-block" />Other
             </span>
             <span className="font-semibold text-foreground">
-              Total: £{totalAttributedCp.toLocaleString()}
+              Total: £{liveTotalAttributedCp.toLocaleString()}
             </span>
           </div>
         </div>
@@ -1374,7 +1530,7 @@ export default function MarketingEfficiency() {
         <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              data={[...CHANNEL_CP].sort((a, b) => b.cp - a.cp)}
+              data={[...liveChannelCp].sort((a, b) => b.cp - a.cp)}
               layout="vertical"
               margin={{ top: 0, right: 90, left: 10, bottom: 0 }}
             >
@@ -1399,10 +1555,10 @@ export default function MarketingEfficiency() {
                 label={{ position: "right", formatter: (v: number) => `£${v.toLocaleString()}`,
                   fill: "hsl(var(--foreground))", fontSize: 13, fontWeight: 700 }}
               >
-                {[...CHANNEL_CP].sort((a, b) => b.cp - a.cp).map((entry) => (
+                {[...liveChannelCp].sort((a, b) => b.cp - a.cp).map((entry) => (
                   <Cell key={entry.channel}
-                    fill={entry.cp === maxCp ? "#22c55e" : entry.cp === minCp ? "#ef4444" : "hsl(var(--primary))"}
-                    opacity={entry.cp === maxCp || entry.cp === minCp ? 1 : 0.6}
+                    fill={entry.cp === liveMaxCp ? "#22c55e" : entry.cp === liveMinCp ? "#ef4444" : "hsl(var(--primary))"}
+                    opacity={entry.cp === liveMaxCp || entry.cp === liveMinCp ? 1 : 0.6}
                   />
                 ))}
               </Bar>
@@ -1411,17 +1567,17 @@ export default function MarketingEfficiency() {
         </div>
 
         <p className="mt-4 pt-4 border-t border-border/40 text-sm text-muted-foreground leading-relaxed">
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Email</span> generates{" "}
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400">{liveBestCpChannel}</span> generates{" "}
           <span className="font-semibold text-foreground">
-            {Math.round((CHANNEL_CP.find((c) => c.channel === "Email")!.cp / totalAttributedCp) * 100)}%
+            {liveBestCpShare}%
           </span>{" "}
           of attributed contribution on{" "}
           <span className="font-semibold text-foreground">
-            {Math.round((CHANNEL_CM.find((c) => c.channel === "Email")!.revenue / totalChannelRevenue) * 100)}%
+            {liveBestCpRevShare}%
           </span>{" "}
           of revenue — the most efficient channel in the mix.{" "}
-          <span className="font-semibold text-red-500">Meta</span>'s £2,100 contribution on the largest
-          paid spend signals misallocated budget and is the primary reallocation candidate.
+          <span className="font-semibold text-red-500">{liveWorstCpChannel}</span>'s £{liveWorstCpAmt.toLocaleString()} contribution
+          signals the primary budget reallocation candidate.
         </p>
 
       </div>
@@ -1548,7 +1704,7 @@ export default function MarketingEfficiency() {
 
         {/* Channel rows */}
         <div className="space-y-1">
-          {CHANNEL_SHARE.map((row) => {
+          {liveChannelShare.map((row) => {
             const positive = row.delta >= 0;
             const cpColor = positive
               ? "bg-emerald-500"
@@ -1817,7 +1973,7 @@ export default function MarketingEfficiency() {
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">
               Blended avg:{" "}
-              <span className="font-semibold text-foreground tabular-nums">£{BLENDED_CAC.toFixed(2)}</span>
+              <span className="font-semibold text-foreground tabular-nums">£{liveBlendedCac.toFixed(2)}</span>
             </span>
             <span className="text-xs text-muted-foreground border-l border-border/50 pl-3">vs last month</span>
           </div>
@@ -1837,17 +1993,16 @@ export default function MarketingEfficiency() {
             <span className="text-xs font-semibold text-muted-foreground">Blended Average</span>
           </div>
           <span className="text-sm font-bold text-muted-foreground tabular-nums text-right">
-            £{BLENDED_CAC.toFixed(2)}
+            £{liveBlendedCac.toFixed(2)}
           </span>
           <span className="text-xs text-muted-foreground/50 text-right">—</span>
           <span className="text-xs text-muted-foreground/50 text-right">—</span>
         </div>
 
         <div className="divide-y divide-border/40">
-          {CAC_BY_CHANNEL.map((row) => {
+          {liveCacByChannel.map((row) => {
             const cfg = EFFICIENCY_CONFIG[row.efficiency];
-            /** @dynamic diff = row.cac − BLENDED_CAC (live) */
-            const cacDiff = +(row.cac - BLENDED_CAC).toFixed(2);
+            const cacDiff = +(row.cac - liveBlendedCac).toFixed(2);
             const absCacDiff = Math.abs(cacDiff).toFixed(2);
             const cacDiffLabel = cacDiff > 0
               ? `+£${absCacDiff} vs blended avg`
@@ -1892,7 +2047,14 @@ export default function MarketingEfficiency() {
 
         <div className="px-6 py-3 border-t border-border/40 bg-secondary/10">
           <p className="text-xs text-muted-foreground leading-snug">
-            Meta CAC has risen {CAC_BY_CHANNEL[0].changeLabel} month-on-month and now exceeds the blended average by £{(CAC_BY_CHANNEL[0].cac - BLENDED_CAC).toFixed(2)} per order.
+            {(() => {
+              const metaRow = liveCacByChannel.find((r) => r.channel === "Meta");
+              if (!metaRow) return null;
+              const diff = +(metaRow.cac - liveBlendedCac).toFixed(2);
+              const trend = metaRow.changeLabel === "Stable" ? "remained stable" : `risen ${metaRow.changeLabel}`;
+              const aboveNote = diff > 0 ? ` and now exceeds the blended average by £${diff.toFixed(2)} per order` : "";
+              return `Meta CAC has ${trend} month-on-month${aboveNote}.`;
+            })()}{" "}
             Email and Organic remain well below the blended average.
           </p>
         </div>
@@ -1937,7 +2099,7 @@ export default function MarketingEfficiency() {
           <div className="space-y-4">
             {(() => {
               const ghostWidths = ["20%", "28%", "45%", "72%"];
-              return [...PAYBACK_BY_CHANNEL]
+              return [...livePaybackByChannel]
                 .sort((a, b) => a.payback - b.payback)
                 .map((row, i) => {
                   const overThreshold = row.payback > PAYBACK_THRESHOLD;
@@ -1998,7 +2160,7 @@ export default function MarketingEfficiency() {
 
         {/* ── Chart rows — real data, blurred for free users ── */}
         <div className="space-y-4">
-          {[...PAYBACK_BY_CHANNEL].sort((a, b) => a.payback - b.payback).map((row) => {
+          {[...livePaybackByChannel].sort((a, b) => a.payback - b.payback).map((row) => {
             const band = getPaybackBand(row.payback);
             const barPct = Math.min((row.payback / 3) * 100, 100);
             /** @dynamic diff = row.payback − CAC_PAYBACK (live) */

@@ -1,0 +1,68 @@
+We are now starting Phase 4: Wire Marketing Efficiency to live Supabase RPC data.
+
+Objective:
+Replace static/mock channel metrics on the Marketing Efficiency page with the new Phase 3 marketing intelligence RPC data.
+
+Use:
+artifacts/virtual-cfo/src/lib/analytics/marketingChannelMetrics.ts
+
+Specifically wire:
+- channel_metrics_monthly()
+- blended_marketing_performance()
+- channel_opportunities_active()
+- cac_trend_by_channel()
+
+Target page:
+artifacts/virtual-cfo/src/pages/marketing-efficiency.tsx
+
+Current mock source likely:
+channel-metrics.ts
+
+Please do this carefully:
+
+1. Review the current Marketing Efficiency page and identify every place using static channel metrics / mock marketing data.
+
+2. Map those UI fields to the live RPC data:
+   - Meta CAC
+   - Google Shopping CAC
+   - Email CAC
+   - Organic CAC
+   - CAC MoM change
+   - channel contribution margin %
+   - blended CAC
+   - blended CAC previous period
+   - recoverable contribution opportunity range
+   - opportunity score/ranking
+   - budget reallocation simulator inputs where relevant
+
+3. Use the existing getMarketingChannelMetrics() helper rather than calling Supabase directly from the page where possible.
+
+4. Preserve the existing page design and layout.
+   Do not redesign the page.
+   Do not add new UI polish unless needed to display live values.
+
+5. Add safe loading/error/fallback behaviour:
+   - If RPC data loads, use live data.
+   - If one RPC fails, use available live data from the others.
+   - If all RPCs fail, fall back to existing mock data and show no broken UI.
+   - No NaN, undefined, blank values, or console errors.
+
+6. Confirm the page is still using the selected active store ID / same store convention as the rest of the app.
+
+7. Validate:
+   - TypeScript passes
+   - page renders cleanly
+   - no console errors
+   - live values match the seeded cloud metrics:
+     Meta CAC £18.40
+     Google Shopping CAC £11.20
+     Email CAC £4.80
+     Organic CAC £2.10
+     Blended CAC £12.20
+     Total opportunity uplift £10,961–£24,920
+
+8. Before making code changes:
+   - explain the mapping from old mock fields to new RPC fields
+   - identify the exact files to change
+
+Do not apply unrelated refactors.

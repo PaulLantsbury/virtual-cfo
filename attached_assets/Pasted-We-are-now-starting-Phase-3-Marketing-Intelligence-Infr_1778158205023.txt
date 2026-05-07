@@ -1,0 +1,82 @@
+We are now starting Phase 3: Marketing Intelligence Infrastructure.
+
+Objective:
+Build the reusable Supabase data layer and analytics structure needed for real marketing intelligence and opportunity analysis.
+
+IMPORTANT:
+We are NOT building visual polish or final dashboards yet.
+We are building the underlying data model and calculation framework that powers:
+- Marketing Efficiency
+- Budget Reallocation
+- CAC analysis
+- Recoverable contribution logic
+- Channel opportunity scoring
+- Future AI CFO recommendations
+
+Please do the following:
+
+1. Review the existing Supabase schema and current analytics structure.
+
+2. Design a scalable marketing intelligence schema for ecommerce businesses.
+
+The schema should support:
+- Meta
+- Google Ads
+- Email
+- Organic
+- Other future channels
+
+3. Create/recommend tables for:
+- marketing_channel_daily_metrics
+- marketing_campaign_metrics
+- attribution summaries
+- channel contribution analysis
+- recoverable contribution opportunities
+- CAC trend snapshots
+- blended performance metrics
+
+4. Include fields for:
+- spend
+- clicks
+- impressions
+- sessions
+- attributed orders
+- attributed revenue
+- contribution revenue
+- contribution profit
+- contribution margin
+- CAC
+- blended CAC
+- MER
+- ROAS
+- returns impact
+- discount impact
+- shipping subsidy impact
+
+5. Design the structure so:
+- calculations can run historically by day/week/month
+- trends can be analysed
+- opportunity scoring can be generated
+- AI recommendation logic can sit on top later
+
+6. Reuse existing conventions/patterns from the current project where appropriate.
+
+7. Before creating migrations:
+- explain the proposed architecture clearly
+- explain how data will flow from integrations into Supabase
+- explain how contribution-first logic will work
+- explain how recoverable contribution opportunity logic will eventually be calculated
+
+8. Then:
+- generate the migration plan
+- create the schema/migrations
+- wire in seed/demo data where helpful
+- validate locally
+
+9. Do NOT yet build:
+- live Meta OAuth
+- Google OAuth
+- final UI polish
+- production ingestion jobs
+
+Focus only on the foundational marketing intelligence layer.

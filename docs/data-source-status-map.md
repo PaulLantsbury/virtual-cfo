@@ -1,7 +1,7 @@
 # Data Source Status Map
 
 Internal reference tracking which metrics are wired to live Supabase RPCs, seeded RPCs,
-or static mock files. Updated after Phase 4 (Marketing Efficiency live wiring).
+or static mock files. Updated after Phase 5 (Opportunities live orchestration wiring).
 
 **Status key**
 
@@ -160,14 +160,46 @@ or static mock files. Updated after Phase 4 (Marketing Efficiency live wiring).
 
 ## 9. Profit Opportunities (`/opportunities`)
 
+> **Status: Live Orchestration Layer with Seeded Intelligence.**
+> All opportunity cards, prioritisation, phased plan, header totals, and uplift figures are
+> derived live from the `opportunity_breakdown` RPC. Marketing intelligence from
+> `channel_opportunities_active` enriches relevant cards. The only remaining static elements
+> are plan-gated UI labels and the free-tier blurred ranges.
+
+### API proxy architecture
+
+`GET /api/opportunities` (Express route in `artifacts/api-server/src/routes/opportunities.ts`)
+proxies the Supabase `opportunity_breakdown` RPC **server-side** using `SUPABASE_SERVICE_ROLE_KEY`.
+
+- The demo store UUID (`10000000-0000-0000-0000-000000000001`) is hardcoded as a module-level
+  constant in the route — it is **never derived from the request** (`req.query`, `req.body`, etc.).
+  This prevents any client-supplied tenant access (IDOR).
+- Using the service role key server-side bypasses the anon/RLS empty-result issue that arises
+  because `opportunity_breakdown` is a `SECURITY INVOKER` function: when called with the anon
+  key directly from the browser the function runs as `anon`, RLS finds no matching SELECT policy,
+  and returns `[]` silently. The server-side proxy avoids this entirely.
+
+### Data source architecture
+
+| RPC / source | Role |
+|---|---|
+| `opportunity_breakdown` | **Orchestration / action UX source.** Creates and ranks the opportunity cards shown on the page. One row = one card. |
+| `channel_opportunities_active` | **Intelligence enrichment layer.** Called by `getMarketingChannelMetrics()` on the Marketing Efficiency page; its `totalOpportunityUplift()` figure surfaces in the hero metric there. On the Opportunities page, relevant rows enrich Pricing / Marketing cards with channel-level context without creating additional cards. |
+
+### Metric / component status
+
 | Metric / Component | Current Source | Status | Notes / Next action |
 |---|---|---|---|
-| Opportunity cards (ranked list) | `opportunity_breakdown()` Supabase RPC | **Seeded RPC** | Seeded rows in `opportunity_breakdown` table. Falls back to `SHARED_OPPORTUNITIES` from `mock-data.ts` if RPC returns empty. |
-| Opportunity impact level | Derived from RPC `confidence` + `effort` fields | **Seeded RPC** | High confidence + Low effort → "high impact"; otherwise graduated. |
-| Time-to-impact label | Derived from RPC `timing` field | **Seeded RPC** | `"immediate"` → "This month"; `"short_term"` → "30–60 days"; etc. |
-| Source page link | From RPC `linked_page` / `linked_page_label` fields | **Seeded RPC** | Links to relevant CFO page per opportunity. |
-| Recoverable contribution range (header) | Static `RECOVERABLE_LOW` / `RECOVERABLE_HIGH` from `business-snapshot.ts` | **Static Mock** | Should use `recoverable_contribution_range()` Phase 1 RPC (already called on Dashboard). |
-| Phased execution plan ("Do now / Next wave") | Derived from opportunity `timing` field | **Seeded RPC** | Classification logic in component from RPC data. |
+| Opportunity cards (ranked list) | `GET /api/opportunities` → `opportunity_breakdown` Supabase RPC (service role, server-side proxy) | **Seeded RPC** | 5 canonical rows seeded. Store ID fixed server-side — no client-supplied tenant parameter. |
+| Recoverable contribution header (low / high) | Computed live from `monthly_contribution` opportunity cards returned by RPC | **Seeded RPC** | Sums only cards where `impact_type = 'monthly_contribution'`; excludes `cash_improvement` rows. Previously static (`RECOVERABLE_LOW` / `RECOVERABLE_HIGH`). |
+| Prioritisation ordering | Derived live from RPC `confidence` + `effort` fields | **Seeded RPC** | High confidence + low effort ranked first across all returned rows. |
+| "Do now" vs "Next wave" classification | Derived live from RPC `timing` field | **Seeded RPC** | `immediate` / `short_term` → Do Now; `medium_term` / `long_term` → Next Wave. |
+| Opportunity rationale / description | From RPC `recommended_action` field | **Seeded RPC** | Displayed as card body text. |
+| Execution priority note (badge) | Derived live from RPC `confidence` + `effort` fields | **Seeded RPC** | Rendered as coloured badge per card (High / Medium priority). |
+| Period label ("This month", "30–60 days", etc.) | Derived live from RPC `timing` field | **Seeded RPC** | Live label mapped from seeded timing value per card. |
+| Total estimated uplift (bottom row) | Computed live from all opportunity cards (all `impact_type` values) | **Seeded RPC** | Includes `cash_improvement` rows (e.g. £40k–60k inventory release). Separate sum from the header total. |
+| Source page link | From RPC `linked_page` / `linked_page_label` fields | **Seeded RPC** | Links to the relevant CFO page per opportunity. |
+| Phase 3 marketing intelligence enrichment | `channel_opportunities_active` Phase 3 RPC via `getMarketingChannelMetrics()` | **Seeded RPC** | Enriches Pricing / Marketing opportunity cards with channel-level context. Does not create additional cards or change card count. |
 
 ---
 
@@ -229,7 +261,7 @@ via `useLatestDataPeriod()`. Phase 2a is called from `phase2aMetrics.ts`.
 | **Profit Engine** | Static Mock | — | Everything |
 | **Cash Control** | Static Mock | — | Everything (cash runway RPC exists but not wired here) |
 | **Scenario Lab** | Static Mock | — | Everything |
-| **Profit Opportunities** | Partial | Opportunity cards, impact levels, timing, links | Recoverable contribution range header |
+| **Profit Opportunities** | Mostly Live | Opportunity cards, prioritisation ordering, Do Now / Next Wave classification, rationale, execution priority badge, period label, recoverable contribution header totals, total estimated uplift, Phase 3 marketing intelligence enrichment — all from live RPC | Plan-gated UI labels; free-tier blurred ranges |
 
 ### Top priorities for next wiring phases
 1. **Growth Quality** — CAC payback can come from `cac_trend_by_channel` (Phase 3, data already seeded); quality score should recompute from live repeat rate + discount dep
@@ -237,3 +269,4 @@ via `useLatestDataPeriod()`. Phase 2a is called from `phase2aMetrics.ts`.
 3. **All pages** — prior-period KPI change strings need prior-period SQL functions (no `_prev` RPCs exist yet for most metrics)
 4. **Cash Control / Profit Engine** — blocked on Xero integration; no internal data path exists
 5. **Pricing Optimisation** — top tiles could be partially seeded from Phase 1 `gross_revenue()` + `discount_dependency()` without new RPCs
+6. **Opportunities — Supabase DDL access** — `opportunity_breakdown` is `SECURITY INVOKER`; cannot change to `SECURITY DEFINER` without direct psql access (Replit runner IPs are blocked by Supabase network policy). Current server-side proxy workaround is stable. Migration file `db-migrations/migrations/20260507000003_seed_opportunities.sql` documents the DDL fix ready to apply when access is available.

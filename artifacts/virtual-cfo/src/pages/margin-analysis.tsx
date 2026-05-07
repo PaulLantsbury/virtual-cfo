@@ -1167,16 +1167,7 @@ export default function MarginAnalysis() {
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Top opportunities driving this estimate
             </p>
-            {canAccess("opportunity_breakdown") ? (
-              <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
-                  CM uplift
-                </span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-32 text-right">
-                  £ impact
-                </span>
-              </div>
-            ) : (
+            {canAccess("opportunity_breakdown") ? null : (
               <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">
                 PRO — Unlock opportunity breakdown
               </span>
@@ -1230,13 +1221,17 @@ export default function MarginAnalysis() {
                         <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{s.detail}</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-5 shrink-0 ml-4">
-                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                        +{s.ppGain.toFixed(1)}pp
+                    <div className="flex flex-col items-end text-right shrink-0 ml-4 gap-0.5">
+                      <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 tabular-nums leading-tight">
+                        +£{s.cashImpact.toLocaleString()}
                       </span>
-                      <div className="text-right w-32">
-                        <PeriodImpact value={s.cashImpact} className="items-end" />
-                      </div>
+                      <span className="text-[10px] text-muted-foreground/70">30-day impact</span>
+                      <span className="text-[10px] text-muted-foreground/60 tabular-nums">
+                        +£{Math.round(s.cashImpact * 12).toLocaleString()} annualised
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/50 tabular-nums mt-0.5">
+                        +{s.ppGain.toFixed(1)}pp CM uplift
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -1261,17 +1256,26 @@ export default function MarginAnalysis() {
               )}
 
               {/* Combined impact footer */}
-              <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
-                <p className="text-sm font-semibold text-foreground">
-                  Combined impact next month if implemented now
-                </p>
-                <div className="flex items-start gap-5 shrink-0 ml-4">
-                  <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                    +{RECOVERY_TOTAL_PP}pp
+              <div className="flex items-center justify-between px-6 py-5 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Combined impact next month if implemented now
+                  </p>
+                  <p className="text-xs text-muted-foreground/70 mt-0.5">
+                    Across {visibleScenarios.length} {visibleScenarios.length === 1 ? "opportunity" : "opportunities"} shown
+                  </p>
+                </div>
+                <div className="flex flex-col items-end text-right shrink-0 ml-4 gap-0.5">
+                  <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400 tabular-nums leading-tight">
+                    +£{RECOVERY_TOTAL_CASH.toLocaleString()}
                   </span>
-                  <div className="text-right w-32">
-                    <PeriodImpact value={RECOVERY_TOTAL_CASH} valueClassName="text-base" className="items-end" />
-                  </div>
+                  <span className="text-[10px] text-muted-foreground/70">30-day impact</span>
+                  <span className="text-[10px] text-muted-foreground/60 tabular-nums">
+                    +£{Math.round(RECOVERY_TOTAL_CASH * 12).toLocaleString()} annualised
+                  </span>
+                  <span className="text-[10px] text-muted-foreground/50 tabular-nums mt-0.5">
+                    +{RECOVERY_TOTAL_PP}pp CM uplift
+                  </span>
                 </div>
               </div>
             </>

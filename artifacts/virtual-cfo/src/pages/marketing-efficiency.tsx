@@ -632,7 +632,7 @@ export default function MarketingEfficiency() {
               <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-1">
                 £{ESTIMATED_CONTRIBUTION.toLocaleString()}
               </p>
-              <p className="text-[11px] text-muted-foreground mb-1.5">(30 days) · £{(ESTIMATED_CONTRIBUTION * 12).toLocaleString()} ann.</p>
+              <p className="text-[11px] text-muted-foreground mb-1.5">(30 days) · £{(ESTIMATED_CONTRIBUTION * 12).toLocaleString()} (annualised)</p>
               <p className="text-xs text-muted-foreground leading-snug max-w-[26ch]">
                 Based on {framing.baselineNote}
               </p>
@@ -799,7 +799,7 @@ export default function MarketingEfficiency() {
                   <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none tabular-nums mb-1">
                     £{simContribution.toLocaleString()}
                   </p>
-                  <p className="text-[11px] text-muted-foreground">(30 days) · £{(simContribution * 12).toLocaleString()} ann.</p>
+                  <p className="text-[11px] text-muted-foreground">(30 days) · £{(simContribution * 12).toLocaleString()} (annualised)</p>
                 </div>
                 <div className="pb-0.5">
                   <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600/70 dark:text-emerald-400/60 mb-0.5">

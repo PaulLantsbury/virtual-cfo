@@ -36,7 +36,7 @@ export function PeriodImpact({
       </span>
       {showAnnual && rounded !== 0 && (
         <span className="text-[10px] text-muted-foreground/80 tabular-nums leading-none">
-          {sign}£{annualisedAbs.toLocaleString()} ann.
+          {sign}£{annualisedAbs.toLocaleString()} (annualised)
         </span>
       )}
     </div>

@@ -514,10 +514,10 @@ export default function ScenarioLab() {
 
         {/* Row 1 — always visible */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <OutputCard label="Revenue"      base={fmtK(BASE_REVENUE)}      scenario={fmtK(out.revenue)}      delta={fmtDelta(out.revenueDelta)}      positive={out.revenueDelta >= 0}      note={fmtDelta(out.revenueDelta * 12) + " ann."} />
-          <OutputCard label="Contribution" base={fmtK(BASE_CONTRIBUTION)}  scenario={fmtK(out.contribution)}  delta={fmtDelta(out.contributionDelta)}  positive={out.contributionDelta >= 0} note={fmtDelta(out.contributionDelta * 12) + " ann."} />
-          <OutputCard label="EBITDA"       base={fmtK(BASE_EBITDA)}        scenario={fmtK(out.ebitda)}        delta={fmtDelta(out.ebitdaDelta)}        positive={out.ebitdaDelta >= 0}       note={fmtDelta(out.ebitdaDelta * 12) + " ann."} />
-          <OutputCard label="Cash Balance" base={fmtK(BASE_CASH)}          scenario={fmtK(out.cash)}          delta={fmtDelta(out.cashDelta)}          positive={out.cashDelta >= 0}         note={fmtDelta(out.cashDelta * 12) + " ann."} />
+          <OutputCard label="Revenue"      base={fmtK(BASE_REVENUE)}      scenario={fmtK(out.revenue)}      delta={fmtDelta(out.revenueDelta)}      positive={out.revenueDelta >= 0}      note={fmtDelta(out.revenueDelta * 12) + " (annualised)"} />
+          <OutputCard label="Contribution" base={fmtK(BASE_CONTRIBUTION)}  scenario={fmtK(out.contribution)}  delta={fmtDelta(out.contributionDelta)}  positive={out.contributionDelta >= 0} note={fmtDelta(out.contributionDelta * 12) + " (annualised)"} />
+          <OutputCard label="EBITDA"       base={fmtK(BASE_EBITDA)}        scenario={fmtK(out.ebitda)}        delta={fmtDelta(out.ebitdaDelta)}        positive={out.ebitdaDelta >= 0}       note={fmtDelta(out.ebitdaDelta * 12) + " (annualised)"} />
+          <OutputCard label="Cash Balance" base={fmtK(BASE_CASH)}          scenario={fmtK(out.cash)}          delta={fmtDelta(out.cashDelta)}          positive={out.cashDelta >= 0}         note={fmtDelta(out.cashDelta * 12) + " (annualised)"} />
         </div>
 
         {/* Row 2 — Pro */}
@@ -1033,7 +1033,7 @@ export default function ScenarioLab() {
                   </span>
                   {type === "gain" && (
                     <span className="text-[10px] text-muted-foreground tabular-nums">
-                      +£{((value * 12)/1000).toFixed(0)}k ann.
+                      +£{((value * 12)/1000).toFixed(0)}k (annualised)
                     </span>
                   )}
                 </div>
@@ -1068,8 +1068,8 @@ export default function ScenarioLab() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: TrendingUp,   color: "emerald", label: "Profit uplift",    value: "+£42,000 (30 days)", note: "+£504k ann.", text: "Contribution improves through better margin and marketing efficiency." },
-              { icon: Shield,       color: "blue",    label: "Cash uplift",      value: "+£64,000 (30 days)", note: "+£768k ann.", text: "Cash improves because working capital drag reduces." },
+              { icon: TrendingUp,   color: "emerald", label: "Profit uplift",    value: "+£42,000 (30 days)", note: "+£504,000 (annualised)", text: "Contribution improves through better margin and marketing efficiency." },
+              { icon: Shield,       color: "blue",    label: "Cash uplift",      value: "+£64,000 (30 days)", note: "+£768,000 (annualised)", text: "Cash improves because working capital drag reduces." },
               { icon: Zap,          color: "indigo",  label: "Runway extension", value: "+0.8 months",        note: undefined,    text: "Cash cover improves from 3.4 to 4.2 months." },
               { icon: CheckCircle,  color: "green",   label: "Risk movement",    value: "Lower",              note: undefined,    text: "Scenario reduces both margin risk and cash risk." },
             ].map(({ icon: Icon, color, label, value, note, text }) => (

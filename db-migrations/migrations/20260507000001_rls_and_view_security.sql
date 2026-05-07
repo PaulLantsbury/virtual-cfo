@@ -4,19 +4,15 @@
 -- PURPOSE
 -- -------
 -- Resolves Supabase Security Advisor lint errors:
---   • "RLS Disabled in Public Tables" — 4 tables were missing RLS
+--   • "RLS Disabled in Public Tables" — tables were missing RLS
 --   • "Security Definer View" — 5 views lacked an explicit security_invoker flag
 --
 -- WHAT THIS DOES
 -- ──────────────
--- 1. Enables RLS on 4 tables that were missing it:
---      cash_balance_snapshots, overhead_categories,
---      overhead_entries, store_cost_assumptions
---    This matches the pattern already applied to the other 13 tables.
+-- 1. Enables RLS on all 11 flagged tables. All ALTER TABLE statements are
+--    idempotent — enabling RLS on a table that already has it is a no-op.
 --
--- 2. Sets security_invoker = true on 5 views:
---      v_monthly_metrics, v_current_cost_assumptions,
---      v_current_cash_balance, v_monthly_overhead_summary, v_month_on_month
+-- 2. Sets security_invoker = true on 5 views.
 --
 -- WHY NO POLICIES ARE ADDED
 -- ─────────────────────────
@@ -25,7 +21,6 @@
 -- Those functions execute as the postgres owner, which bypasses RLS
 -- regardless of policies. Direct table access from the anon or authenticated
 -- role is intentionally blocked (zero permissive policies = deny-by-default).
--- This is the consistent pattern across all 17 tables in this schema.
 -- The service_role key bypasses RLS entirely at the driver level, so any
 -- server-side write operations are unaffected.
 --
@@ -34,16 +29,30 @@
 -- • No INSERT / UPDATE / DELETE policies → no public write path is opened.
 -- • No SELECT policies → direct table reads from anon remain denied.
 -- • All app queries go through SECURITY DEFINER RPCs → zero regression.
--- • All statements are idempotent — safe to re-run on production.
+-- • All statements are idempotent — safe to re-run on any environment.
+--
+-- KNOWN PRE-EXISTING POLICY (not introduced by this migration)
+-- ─────────────────────────────────────────────────────────────
+-- Table: orders
+-- Policy: "Allow temporary read access to orders"  cmd=SELECT  roles={anon}  USING=true
+-- This pre-dates this migration. It grants anon unrestricted SELECT on orders
+-- with no store-scoping. It should be reviewed and dropped separately.
 --
 -- =============================================================================
 
--- ── 1. Enable RLS on the 4 tables currently missing it ───────────────────────
+-- ── 1. Enable RLS on all flagged public tables ────────────────────────────────
 
 ALTER TABLE public.cash_balance_snapshots  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cfo_alerts              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.discount_codes          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.discounts               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.opportunities           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.overhead_categories     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.overhead_entries        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.refund_line_items       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.store_cost_assumptions  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.store_settings          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stores                  ENABLE ROW LEVEL SECURITY;
 
 -- ── 2. Fix views: set explicit SECURITY INVOKER ───────────────────────────────
 -- When security_invoker = true, a view executes with the privileges of the

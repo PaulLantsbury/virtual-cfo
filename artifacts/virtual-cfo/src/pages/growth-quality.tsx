@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Minus, ArrowRight } from "lucide-react";
 import {
   BarChart, Bar,
@@ -28,6 +29,13 @@ import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 import { deltaToSentiment, DELTA_POLARITY } from "@/lib/analytics/deltaSentiment";
+import {
+  getMarketingChannelMetrics,
+  findChannel,
+  getCacTrendForChannel,
+  type ChannelMonthlyMetrics,
+  type CacTrendPoint,
+} from "@/lib/analytics/marketingChannelMetrics";
 
 // ─── Store ID ─────────────────────────────────────────────────────────────────
 // Dev store UUID — matches Dashboard, Margin Analysis, and Marketing Efficiency.
@@ -38,7 +46,7 @@ const GQ_STORE_ID = "10000000-0000-0000-0000-000000000001";
 // src/lib/data/growth-metrics.ts — the central source of truth for growth metrics.
 // REPEAT_RATE resolved to 28% (was 27% here; Dashboard and BENCHMARKS both use 28%).
 
-const GQ_SCORE_DIR    = "down" as const;
+// GQ_SCORE_DIR is now live-computed inside the component as liveGqScoreDir.
 
 const REPEAT_RATE_CHANGE  = +(REPEAT_RATE  - REPEAT_RATE_PREV).toFixed(1);
 const DISCOUNT_DEP_CHANGE = +(DISCOUNT_DEP - DISCOUNT_DEP_PREV).toFixed(1);
@@ -290,21 +298,48 @@ export default function GrowthQuality() {
   // A failure leaves gqDeltas null; badges fall back to static snapshots.
   const { deltas: gqDeltas, loading: gqDeltasLoading } = usePhase2Deltas(GQ_STORE_ID, gqDateFrom, gqDateTo);
 
-  // Live repeat purchase rate % (1 d.p.) — fallback to static REPEAT_RATE.
+  // ── Phase 3: marketing channel metrics (CAC payback + channel CM quality) ─
+  // Fires once gqDateFrom / gqDateTo resolve. On failure leaves arrays empty
+  // and blended null — all live values fall back to static constants.
+  const [gqChannels,  setGqChannels]  = useState<ChannelMonthlyMetrics[]>([]);
+  const [gqBlendedCm, setGqBlendedCm] = useState<number | null>(null);
+  const [gqCacTrend,  setGqCacTrend]  = useState<CacTrendPoint[]>([]);
+
+  useEffect(() => {
+    if (!gqDateFrom || !gqDateTo) return;
+    let cancelled = false;
+    getMarketingChannelMetrics(GQ_STORE_ID, gqDateFrom, gqDateTo).then(({ channels, blended, cacTrend }) => {
+      if (cancelled) return;
+      setGqChannels(channels);
+      setGqBlendedCm(blended?.blendedContributionMarginPct ?? null);
+      setGqCacTrend(cacTrend);
+    }).catch(() => { /* leave state at defaults — static fallbacks apply */ });
+    return () => { cancelled = true; };
+  }, [gqDateFrom, gqDateTo]);
+
+  // ── Live repeat purchase rate % (1 d.p.) — fallback to static REPEAT_RATE.
   const liveRepeatRate = gqPhase1
     ? (gqPhase1.data.repeatPurchaseRate * 100).toFixed(1)
     : REPEAT_RATE.toFixed(1);
 
-  // Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
+  // Raw numeric repeat rate — used in score formula.
+  const liveRepeatRateNum = gqPhase1
+    ? gqPhase1.data.repeatPurchaseRate * 100
+    : REPEAT_RATE;
+
+  // ── Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
   const liveDiscountDep = gqPhase1
     ? (gqPhase1.data.discountDependency * 100).toFixed(1)
     : DISCOUNT_DEP.toFixed(1);
 
-  // Raw delta numbers for change badges.
+  // Raw numeric discount dep — used in score formula.
+  const liveDiscountDepNum = gqPhase1
+    ? gqPhase1.data.discountDependency * 100
+    : DISCOUNT_DEP;
+
+  // ── Raw delta numbers for change badges.
   // During loading → static snapshot fallback value.
   // After load     → live pp value, or null (no prior period data → show "—").
-  // Kept as numbers so the existing badge structure (icon, color class) is preserved
-  // and only the text content changes — null triggers the "—" sentinel.
   const liveRprChangePp     = !gqDeltasLoading
     ? (gqDeltas?.rpr_delta_pp ?? null)
     : REPEAT_RATE_CHANGE;
@@ -312,18 +347,187 @@ export default function GrowthQuality() {
     ? (gqDeltas?.discount_dep_delta_pp ?? null)
     : DISCOUNT_DEP_CHANGE;
 
-  // Patch the "Discount reliance" score explanation with the live value.
-  // All other fields (status, grade, score, direction) remain untouched.
-  // "Contribution quality" explanation (42.3% CM) is explicitly excluded —
-  // Phase 1 contributionMarginPct (88.85%) uses a different metric basis.
-  const liveScoreComponents = SCORE_COMPONENTS.map((c) =>
-    c.label === "Discount reliance"
-      ? {
-          ...c,
-          explanation: `${liveDiscountDep}% of orders include a discount code — well above the healthy benchmark of <25%.`,
-        }
-      : c
+  // ── Live CAC Payback ───────────────────────────────────────────────────────
+  // Weighted average of cacPaybackOrders per channel, weighted by attributedOrders.
+  // Falls back to static CAC_PAYBACK if Phase 3 data has not loaded or all channels
+  // lack payback data (e.g. 0 attributed orders).
+  const liveCacPayback: number = (() => {
+    const valid = gqChannels.filter(
+      (c) => c.cacPaybackOrders !== null && c.attributedOrders > 0,
+    );
+    if (valid.length === 0) return CAC_PAYBACK;
+    const totalOrders  = valid.reduce((s, c) => s + c.attributedOrders, 0);
+    const weightedSum  = valid.reduce((s, c) => s + (c.cacPaybackOrders! * c.attributedOrders), 0);
+    return totalOrders > 0 ? +(weightedSum / totalOrders).toFixed(2) : CAC_PAYBACK;
+  })();
+
+  // ── CAC payback change vs prior period ────────────────────────────────────
+  // Derived from the weighted blended MoM CAC % change in the trend data.
+  // Payback is proportional to CAC, so a +14% CAC rise ≈ +14% payback rise.
+  // Falls back to static CAC_PAYBACK_CHANGE if trend data is empty or no MoM
+  // data exists (first seeded period has momChangePct = null).
+  const liveCacPaybackChange: number = (() => {
+    const withMom = gqCacTrend.filter(
+      (p) => p.momChangePct !== null && p.attributedNewCustomers > 0,
+    );
+    if (withMom.length === 0) return +(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(2);
+    const totalNew     = withMom.reduce((s, p) => s + p.attributedNewCustomers, 0);
+    const weightedPct  = withMom.reduce((s, p) => s + (p.momChangePct! * p.attributedNewCustomers), 0);
+    const blendedMomPct = totalNew > 0 ? weightedPct / totalNew : 0;
+    // Convert proportional CAC change to payback change in orders.
+    return +(liveCacPayback * blendedMomPct).toFixed(2);
+  })();
+
+  // ── Growth Quality Score: 4-component weighted model ──────────────────────
+  //
+  // Each sub-score is normalised to 0–100, then combined:
+  //   repeatScore    = clamp(repeatRatePct / 35 × 100, 0, 100)
+  //   discountScore  = clamp((1 − max(0, discountDepPct − 15) / 35) × 100, 0, 100)
+  //   cacScore       = clamp((2.0 − cacPayback) / 1.2 × 100, 0, 100)
+  //   blendedCmScore = clamp((blendedCmPct × 100 − 25) / 30 × 100, 0, 100)
+  //   composite      = repeatScore × 0.30 + discountScore × 0.25
+  //                  + cacScore × 0.25   + blendedCmScore × 0.20
+  //
+  // Benchmarks:
+  //   repeatScore:    35% repeat rate = 100;  0% = 0
+  //   discountScore:  ≤15% dep = 100;         ≥50% = 0
+  //   cacScore:       ≤0.8 payback = 100;     ≥2.0 = 0
+  //   blendedCmScore: ≥55% CM = 100;          ≤25% = 0
+
+  function clamp(v: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, v)); }
+
+  const repeatScore    = clamp((liveRepeatRateNum / 35) * 100, 0, 100);
+  const discountScore  = clamp((1 - Math.max(0, liveDiscountDepNum - 15) / 35) * 100, 0, 100);
+  const cacScore       = clamp(((2.0 - liveCacPayback) / 1.2) * 100, 0, 100);
+  const blendedCmPctNum = gqBlendedCm !== null ? gqBlendedCm * 100 : 38.6; // 38.6 = seeded fallback
+  const blendedCmScore  = clamp(((blendedCmPctNum - 25) / 30) * 100, 0, 100);
+
+  // Channel mix quality: % of attributed net sales from high-CM channels (email + organic).
+  // Used for the 5th score display component only — not in the composite.
+  const emailRevenue    = findChannel(gqChannels, "email")?.attributedNetSales   ?? 0;
+  const organicRevenue  = findChannel(gqChannels, "organic")?.attributedNetSales ?? 0;
+  const totalRevenue    = gqChannels.reduce((s, c) => s + c.attributedNetSales, 0);
+  const highCmShare     = totalRevenue > 0 ? (emailRevenue + organicRevenue) / totalRevenue : 0.30;
+  const channelMixScore = clamp((highCmShare / 0.50) * 100, 0, 100);
+
+  const compositeScore = Math.round(
+    repeatScore   * 0.30 +
+    discountScore * 0.25 +
+    cacScore      * 0.25 +
+    blendedCmScore * 0.20,
   );
+
+  // Convert numeric score to a letter grade.
+  function scoreToGrade(s: number): string {
+    if (s >= 88) return "A";
+    if (s >= 80) return "A–";
+    if (s >= 72) return "B+";
+    if (s >= 64) return "B";
+    if (s >= 57) return "B–";
+    if (s >= 50) return "C+";
+    if (s >= 43) return "C";
+    if (s >= 36) return "C–";
+    if (s >= 29) return "D+";
+    if (s >= 22) return "D";
+    return "D–";
+  }
+
+  // Convert a letter grade to an ordinal for direction comparison.
+  function gradeToOrdinal(g: string): number {
+    const order = ["D–","D","D+","C–","C","C+","B–","B","B+","A–","A","A+"];
+    const idx = order.indexOf(g);
+    return idx >= 0 ? idx : 0;
+  }
+
+  // Component-level sub-scores → status and grade labels.
+  function scoreToStatus(s: number): ScoreStatus {
+    if (s >= 65) return "strong";
+    if (s >= 40) return "watch";
+    if (s >= 25) return "weak";
+    return "weak";
+  }
+
+  function scoreToStatusWithDeclining(s: number, prevScore: number): ScoreStatus {
+    if (s >= 65) return "strong";
+    if (s >= 40) return s < prevScore ? "declining" : "watch";
+    return "weak";
+  }
+
+  function componentGrade(s: number): string {
+    if (s >= 88) return "A";
+    if (s >= 78) return "A–";
+    if (s >= 68) return "B+";
+    if (s >= 58) return "B";
+    if (s >= 50) return "B–";
+    if (s >= 42) return "C+";
+    if (s >= 34) return "C";
+    if (s >= 26) return "C–";
+    if (s >= 18) return "D+";
+    if (s >= 10) return "D";
+    return "D–";
+  }
+
+  const liveGqGrade     = scoreToGrade(compositeScore);
+  const liveGqGradePrev = GQ_SCORE_PREV; // prior period: no live prior-period score RPC yet
+  const liveGqScoreDir: "up" | "down" | "stable" = (() => {
+    const curr = gradeToOrdinal(liveGqGrade);
+    const prev = gradeToOrdinal(liveGqGradePrev);
+    return curr > prev ? "up" : curr < prev ? "down" : "stable";
+  })();
+
+  // ── Live Score Components ──────────────────────────────────────────────────
+  // All 5 components now derive their score, status, grade, and explanation
+  // from live metric values. Direction ("strengthening" / "weakening") is also
+  // live-computed from the sub-score vs a healthy benchmark threshold.
+  const liveScoreComponents: {
+    label:      string;
+    status:     ScoreStatus;
+    grade:      string;
+    explanation: string;
+    score:      number;
+    direction:  "strengthening" | "weakening";
+  }[] = [
+    {
+      label:      "Retention quality",
+      status:     scoreToStatus(repeatScore),
+      grade:      componentGrade(repeatScore),
+      explanation: `Repeat purchase rate at ${liveRepeatRateNum.toFixed(1)}% — ${liveRepeatRateNum >= 30 ? "above" : "approaching"} the 30% retention-led threshold.`,
+      score:      Math.round(repeatScore),
+      direction:  repeatScore >= 65 ? "strengthening" : "weakening",
+    },
+    {
+      label:      "Discount reliance",
+      status:     discountScore >= 65 ? "strong" : discountScore >= 40 ? "watch" : "weak",
+      grade:      componentGrade(discountScore),
+      explanation: `${liveDiscountDepNum.toFixed(1)}% of orders include a discount code — ${liveDiscountDepNum <= 25 ? "within" : "well above"} the healthy benchmark of <25%.`,
+      score:      Math.round(discountScore),
+      direction:  discountScore >= 65 ? "strengthening" : "weakening",
+    },
+    {
+      label:      "CAC efficiency",
+      status:     scoreToStatusWithDeclining(cacScore, 55),
+      grade:      componentGrade(cacScore),
+      explanation: `CAC payback at ${liveCacPayback.toFixed(1)} orders. ${liveCacPayback <= 1.2 ? "Within the healthy range." : liveCacPayback <= 1.8 ? "Above the 1.2-order healthy threshold — monitor paid channel efficiency." : "Elevated — paid acquisition cost is compressing contribution per new customer."}`,
+      score:      Math.round(cacScore),
+      direction:  cacScore >= 60 ? "strengthening" : "weakening",
+    },
+    {
+      label:      "Contribution quality",
+      status:     scoreToStatusWithDeclining(blendedCmScore, 52),
+      grade:      componentGrade(blendedCmScore),
+      explanation: `Blended marketing contribution margin at ${blendedCmPctNum.toFixed(1)}% — ${blendedCmPctNum >= 45 ? "within" : "below"} the 45–55% target range.`,
+      score:      Math.round(blendedCmScore),
+      direction:  blendedCmScore >= 55 ? "strengthening" : "weakening",
+    },
+    {
+      label:      "Channel mix quality",
+      status:     channelMixScore >= 65 ? "strong" : channelMixScore >= 40 ? "mixed" : "weak",
+      grade:      componentGrade(channelMixScore),
+      explanation: `High-margin channels (email + organic) represent ${(highCmShare * 100).toFixed(0)}% of attributed revenue — ${highCmShare >= 0.50 ? "a healthy owned-channel mix" : "lower than the 50% target, raising blended CAC"}.`,
+      score:      Math.round(channelMixScore),
+      direction:  channelMixScore >= 55 ? "strengthening" : "weakening",
+    },
+  ];
 
   return (
     <AppLayout>
@@ -435,11 +639,26 @@ export default function GrowthQuality() {
         {/* Growth Quality Score */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Growth Quality Score</p>
-          <p className="text-4xl font-display font-bold text-foreground">{GQ_SCORE}</p>
+          <p className="text-4xl font-display font-bold text-foreground">{liveGqGrade}</p>
           <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
-              <ArrowDownRight className="w-3 h-3" />
-              Down from {GQ_SCORE_PREV}
+            <span className={cn(
+              "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
+              liveGqScoreDir === "up"
+                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                : liveGqScoreDir === "down"
+                ? "bg-destructive/10 text-destructive"
+                : "bg-secondary text-muted-foreground",
+            )}>
+              {liveGqScoreDir === "up"
+                ? <ArrowUpRight className="w-3 h-3" />
+                : liveGqScoreDir === "down"
+                ? <ArrowDownRight className="w-3 h-3" />
+                : <Minus className="w-3 h-3" />}
+              {liveGqScoreDir === "up"
+                ? `Up from ${liveGqGradePrev}`
+                : liveGqScoreDir === "down"
+                ? `Down from ${liveGqGradePrev}`
+                : `Stable vs ${liveGqGradePrev}`}
             </span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
@@ -510,17 +729,30 @@ export default function GrowthQuality() {
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback</p>
           <p className="text-4xl font-display font-bold text-foreground">
-            {CAC_PAYBACK}{" "}
+            {liveCacPayback.toFixed(1)}{" "}
             <span className="text-lg font-medium text-muted-foreground">orders</span>
           </p>
           <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 text-destructive font-semibold">
-              <ArrowUpRight className="w-3 h-3" />
-              ↑ {CAC_PAYBACK_CHANGE} orders vs last month
+            <span className={cn(
+              "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
+              liveCacPaybackChange > 0
+                ? "bg-destructive/10 text-destructive"
+                : liveCacPaybackChange < 0
+                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                : "bg-secondary text-muted-foreground",
+            )}>
+              {liveCacPaybackChange > 0
+                ? <ArrowUpRight className="w-3 h-3" />
+                : liveCacPaybackChange < 0
+                ? <ArrowDownRight className="w-3 h-3" />
+                : <Minus className="w-3 h-3" />}
+              {liveCacPaybackChange !== 0
+                ? `${liveCacPaybackChange > 0 ? "+" : ""}${liveCacPaybackChange.toFixed(2)} orders vs last month`
+                : "Stable vs last month"}
             </span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Below 1.2 orders is healthy — 1.4 signals acquisition cost pressure
+            Below 1.2 orders is healthy — {liveCacPayback.toFixed(1)} {liveCacPayback <= 1.2 ? "is within the healthy range" : "signals acquisition cost pressure"}
           </p>
         </div>
       </div>

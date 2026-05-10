@@ -59,12 +59,12 @@ const CAC_PAYBACK_CHANGE  = +(CAC_PAYBACK  - CAC_PAYBACK_PREV).toFixed(1);
  */
 const CFO_INSIGHT = {
   /** @ai-commentary Opening diagnostic sentence — replace with AI-generated headline when live */
-  headline: "Growth remains positive, but quality has weakened for the third consecutive period and is becoming increasingly promotion-led rather than retention-led.",
+  headline: "Growth is being bought, not earned. Discount dependency at 38% and rising Meta CAC are compressing contribution — this is the third consecutive month of quality decline.",
   /** @ai-commentary Replace with dynamically identified primary drivers when live */
   drivers: [
-    "higher discount reliance",
-    "weaker paid acquisition efficiency",
-    "declining organic and email mix",
+    "discount dependency at 38% — 13pp above the 25% target",
+    "Meta CAC up 14% — new customers cost more to acquire than one order earns back",
+    "email and organic share declining — blended acquisition cost rising as cheaper channels shrink",
   ],
 } as const;
 
@@ -137,34 +137,34 @@ const KEY_DRIVERS: {
   impact:    string;
 }[] = [
   {
-    text:      "Repeat purchase rate improved +2.4pp month-on-month",
+    text:      "Repeat rate up 2.4pp — more customers returning without being paid for",
     freeLabel: "Retention signal improved",
     dir:       "positive",
-    impact:    "Increased growth quality score by +0.3 grade points — retention is now the sole positive signal.",
+    impact:    "Retention improving — the one positive signal in this month's growth quality score.",
   },
   {
-    text:      "Discount depth increased 1.8pp vs prior month",
+    text:      "Discount depth up 1.8pp — contribution compressed on every discounted order",
     freeLabel: "Discount pressure increased",
     dir:       "negative",
-    impact:    "Reduced contribution by approximately £4.2k equivalent at current order volume.",
+    impact:    "Approximately £4.2k contribution drag at current order volume.",
   },
   {
-    text:      "Meta CAC increased 14% — paid channel efficiency declining",
+    text:      "Meta CAC up 14% — new customers now cost more to acquire than one order recovers",
     freeLabel: "Paid acquisition efficiency weakened",
     dir:       "negative",
-    impact:    "Weakened growth efficiency by approximately £3.1k in margin-adjusted acquisition cost.",
+    impact:    "Approximately £3.1k more in new customer acquisition cost per month vs the prior period.",
   },
   {
-    text:      "Organic and email mix declined as a proportion of total revenue",
+    text:      "Email and organic share shrinking — blended CAC rising as the cheapest channels decline",
     freeLabel: "Channel mix quality weakened",
     dir:       "negative",
-    impact:    "Raised blended CAC and reduced channel mix quality — the second consecutive month of decline.",
+    impact:    "Blended CAC rising — second consecutive month of channel mix deterioration.",
   },
   {
-    text:      "Email-driven orders maintained the highest contribution margin",
+    text:      "Email-driven orders still the most profitable — holding the floor on contribution quality",
     freeLabel: "Owned-channel contribution remained strongest",
     dir:       "positive",
-    impact:    "Supported contribution quality and partially offset the impact of rising discount dependency.",
+    impact:    "Offsets some of the discount dependency drag — email profitability is what's keeping the score from falling further.",
   },
 ];
 
@@ -180,9 +180,9 @@ const GROWTH_TYPE = {
   label:     "Promotion-led growth",
   risk:      "medium" as "low" | "medium" | "high",
   riskLabel: "Medium risk",
-  signal:    "Growth is increasingly dependent on discounting and paid acquisition rather than repeat-led demand.",
+  signal:    "Revenue is growing, but the margin it generates is shrinking. Discounts and paid spend are doing the work that repeat customers should be doing.",
   /** @dynamic Derived from comparing current classification to prior period classification */
-  priorPeriod: "Shifted from more balanced growth in the prior period",
+  priorPeriod: "Mix was more balanced last month — this is a deteriorating trend, not a one-off",
 } as const;
 
 /**
@@ -210,17 +210,17 @@ const COMPOSITION_LEGEND = [
 const RECOMMENDATIONS: Recommendation[] = [
   {
     id: "gq1",
-    text: "Reduce discount usage on returning customers to lower dependency below 30%.",
+    text: "Stop discounting returning customers — they'd buy anyway. Cut dependency from 38% toward the 25% target.",
     impact: "high",
   },
   {
     id: "gq2",
-    text: "Shift budget away from lowest-margin paid channels toward SEO and email.",
+    text: "Shift budget away from lowest-margin paid channels toward organic search and email.",
     impact: "high",
   },
   {
     id: "gq3",
-    text: "Strengthen post-purchase email flows to lift the repeat purchase rate above 30%.",
+    text: "Build a post-purchase email sequence to bring customers back at zero acquisition cost — target repeat rate above 30%.",
     impact: "medium",
   },
   {
@@ -230,7 +230,7 @@ const RECOMMENDATIONS: Recommendation[] = [
   },
   {
     id: "gq5",
-    text: "Set up discount effectiveness tracking to identify low-ROI promotional codes.",
+    text: "Audit which discount codes generate repeat purchases vs one-time buyers — retire those that just compress margin.",
     impact: "quick-win",
   },
 ];
@@ -248,13 +248,13 @@ const RECOVERABLE_UPSIDE = {
   cashHigh: 28_000,
   /** @ai-commentary Replace with AI-generated narrative when live */
   supporting:
-    "If discount dependency and paid acquisition efficiency return closer to healthy levels, an estimated £12k–£28k of contribution could be recovered per month.",
+    "Reducing discount depth to target and improving Meta CAC efficiency unlocks an estimated £12k–£28k of contribution per month — without needing more revenue.",
   levers: [
     {
       id: "rv1",
       label: "Reduce discount dependency",
       description:
-        "Returning discount depth from 38% toward the 25% target restores contribution margin on existing order volume without requiring more customers.",
+        "Cut discount depth from 38% toward the 25% target — margin recovers on orders already coming in, with no extra volume needed.",
       upliftLow:  6_000,
       upliftHigh: 14_000,
     },
@@ -262,7 +262,7 @@ const RECOVERABLE_UPSIDE = {
       id: "rv2",
       label: "Restore paid acquisition efficiency",
       description:
-        "Bringing Meta CAC back toward prior-period levels reduces the acquisition cost drag and improves the contribution earned from each new customer.",
+        "Reduce Meta CAC to prior-period levels — every new customer becomes meaningfully more profitable at current acquisition volume.",
       upliftLow:  6_000,
       upliftHigh: 14_000,
     },
@@ -505,7 +505,7 @@ export default function GrowthQuality() {
       label:      "Retention quality",
       status:     scoreToStatus(repeatScore),
       grade:      componentGrade(repeatScore),
-      explanation: `Repeat purchase rate at ${liveRepeatRateNum.toFixed(1)}% — ${liveRepeatRateNum >= 30 ? "above" : "approaching"} the 30% retention-led threshold.`,
+      explanation: `Repeat rate at ${liveRepeatRateNum.toFixed(1)}% — ${liveRepeatRateNum >= 30 ? "above the 30% level where retention carries the business" : "approaching the 30% level where customers return without paid re-acquisition"}.`,
       score:      Math.round(repeatScore),
       direction:  repeatScore >= 65 ? "strengthening" : "weakening",
     },
@@ -513,7 +513,7 @@ export default function GrowthQuality() {
       label:      "Discount reliance",
       status:     discountScore >= 65 ? "strong" : discountScore >= 40 ? "watch" : "weak",
       grade:      componentGrade(discountScore),
-      explanation: `${liveDiscountDepNum.toFixed(1)}% of orders include a discount code — ${liveDiscountDepNum <= 25 ? "within" : "well above"} the healthy benchmark of <25%.`,
+      explanation: `${liveDiscountDepNum.toFixed(1)}% of orders use a discount code — ${liveDiscountDepNum <= 25 ? "within the 25% target" : "above the 25% target; discounts are driving orders that should return without them"}.`,
       score:      Math.round(discountScore),
       direction:  discountScore >= 65 ? "strengthening" : "weakening",
     },
@@ -521,7 +521,7 @@ export default function GrowthQuality() {
       label:      "CAC efficiency",
       status:     scoreToStatusWithDeclining(cacScore, 55),
       grade:      componentGrade(cacScore),
-      explanation: `CAC payback at ${liveCacPayback.toFixed(1)} orders. ${liveCacPayback <= 1.2 ? "Within the healthy range." : liveCacPayback <= 1.8 ? "Above the 1.2-order healthy threshold — monitor paid channel efficiency." : "Elevated — paid acquisition cost is compressing contribution per new customer."}`,
+      explanation: `CAC payback at ${liveCacPayback.toFixed(1)} orders. ${liveCacPayback <= 1.2 ? "Within target — new customers cover their acquisition cost within one order." : liveCacPayback <= 1.8 ? "Above the 1.2-order target — paid acquisition is costing more than one order earns back." : "Elevated — new customers require more than one order to cover their acquisition cost."}`,
       score:      Math.round(cacScore),
       direction:  cacScore >= 60 ? "strengthening" : "weakening",
     },
@@ -529,7 +529,7 @@ export default function GrowthQuality() {
       label:      "Contribution quality",
       status:     scoreToStatusWithDeclining(blendedCmScore, 52),
       grade:      componentGrade(blendedCmScore),
-      explanation: `Blended marketing contribution margin at ${blendedCmPctNum.toFixed(1)}% — ${blendedCmPctNum >= 45 ? "within" : "below"} the 45–55% target range.`,
+      explanation: `Blended contribution margin at ${blendedCmPctNum.toFixed(1)}% — ${blendedCmPctNum >= 45 ? "within the 45–55% target range" : "below the 45–55% target; paid channels are diluting overall profitability"}.`,
       score:      Math.round(blendedCmScore),
       direction:  blendedCmScore >= 55 ? "strengthening" : "weakening",
     },
@@ -537,7 +537,7 @@ export default function GrowthQuality() {
       label:      "Channel mix quality",
       status:     channelMixScore >= 65 ? "strong" : channelMixScore >= 40 ? "mixed" : "weak",
       grade:      componentGrade(channelMixScore),
-      explanation: `High-margin channels (email + organic) represent ${(highCmShare * 100).toFixed(0)}% of attributed revenue — ${highCmShare >= 0.50 ? "a healthy owned-channel mix" : "lower than the 50% target, raising blended CAC"}.`,
+      explanation: `Email and organic represent ${(highCmShare * 100).toFixed(0)}% of revenue — ${highCmShare >= 0.50 ? "a healthy owned-channel balance" : "below the 50% target; as this share falls, blended CAC rises"}.`,
       score:      Math.round(channelMixScore),
       direction:  channelMixScore >= 55 ? "strengthening" : "weakening",
     },
@@ -552,7 +552,7 @@ export default function GrowthQuality() {
             Growth Quality Analysis
           </h1>
           <p className="text-muted-foreground mt-1">
-            Identify whether revenue growth is healthy and self-sustaining — or fragile and dependent on discounting and paid spend.
+            Assess whether revenue growth is generating lasting profit — or being bought through discounts and paid spend.
           </p>
           <DataPeriodLabel periodLabel={gqPeriodLabel} loading={gqPeriodLoading} />
         </div>
@@ -682,7 +682,7 @@ export default function GrowthQuality() {
             )}
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Composite score across retention, discount reliance, and channel efficiency
+            A–/B+ = growth is generating profit sustainably. Below B– = revenue is outpacing margin quality.
           </p>
           <p className="mt-1.5 text-xs text-muted-foreground/50 leading-snug">
             Healthy range: A– to B+
@@ -713,7 +713,7 @@ export default function GrowthQuality() {
             </span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Target: above 30% for retention-led growth — currently improving
+            Above 30% means customers return without paid re-acquisition. Currently improving — the one positive signal.
           </p>
         </div>
 
@@ -741,7 +741,7 @@ export default function GrowthQuality() {
             </span>
           </div>
           <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Orders using a discount code — target below 25%
+            Orders using a discount code — target below 25%. Above this, discounts are driving demand that should be self-sustaining.
           </p>
         </div>
 
@@ -789,7 +789,7 @@ export default function GrowthQuality() {
             Where growth quality is strengthening vs weakening
           </h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Five components scored by signal strength — from retention quality and channel mix to discount dependency and acquisition efficiency.
+            What's holding growth quality up — and what's pulling it down.
           </p>
         </div>
 
@@ -871,7 +871,7 @@ export default function GrowthQuality() {
       {/* ── Growth Composition Trend — Pro only ── */}
       <PremiumBlurPreview
         title="Growth Composition Trend"
-        subtitle="Whether growth is shifting toward healthy repeat channels or becoming increasingly dependent on paid spend and discounting."
+        subtitle="How the mix of repeat, paid, and discount-led growth has shifted over the last six months."
         badgeText="PRO — Unlock composition"
         ctaTitle="Unlock growth composition breakdown"
         ctaDescription="See whether growth is becoming more or less healthy over time — and which channel types are driving the shift."
@@ -981,7 +981,7 @@ export default function GrowthQuality() {
               <span className="font-semibold text-amber-600 dark:text-amber-400">
                 {COMPOSITION_DATA[COMPOSITION_DATA.length - 1].discount}%
               </span>.{" "}
-              This suggests more growth is being bought rather than retained — weakening long-term quality.
+              More revenue is now being bought than earned — and the gap is widening.
             </p>
           </div>
         </div>
@@ -990,7 +990,7 @@ export default function GrowthQuality() {
       {/* ── Key Growth Drivers — Pro only (with impact lines) ── */}
       <PremiumBlurPreview
         title="Key Growth Drivers This Month"
-        subtitle={`What shifted this month and whether it moved growth toward healthier or more fragile territory.`}
+        subtitle="Which changes this month improved or weakened growth quality — and the contribution impact of each."
         badgeText="PRO — Unlock driver impact"
         ctaTitle="Unlock driver impact analysis"
         ctaDescription="See which specific changes this month improved or weakened growth quality — with quantified impact on contribution and acquisition efficiency."
@@ -1063,10 +1063,10 @@ export default function GrowthQuality() {
       {/* ── Recoverable Growth Quality — Pro only ── */}
       <PremiumBlurPreview
         title="Recoverable Growth Quality"
-        subtitle="Estimated contribution recoverable by restoring healthier retention mix and acquisition efficiency."
+        subtitle="Estimated contribution available if discount dependency and CAC efficiency return to target levels."
         badgeText="PRO — Unlock upside estimate"
         ctaTitle="Unlock recoverable growth quality"
-        ctaDescription="See the estimated contribution available if discount dependency and CAC efficiency return to healthier levels."
+        ctaDescription="See the estimated monthly contribution unlock from reducing discount depth and improving Meta CAC efficiency."
         isPro={canAccess("recoverable_growth_quality")}
         className="mb-8"
         ghostContent={
@@ -1180,7 +1180,7 @@ export default function GrowthQuality() {
       )}
 
       <DataBenchmarkAssumptions
-        benchmarkNote="Repeat purchase rate is 28%, within the typical healthy range for this stage."
+        benchmarkNote="Repeat purchase rate benchmark: 30%+ indicates healthy self-sustaining retention. Below 30% means paid acquisition is doing the work customers should be doing for free."
         dataQualityNote="Growth quality depends on accurate customer, order and discount tagging."
         className="mb-2"
       />

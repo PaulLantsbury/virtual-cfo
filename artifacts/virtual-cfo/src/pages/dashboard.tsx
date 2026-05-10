@@ -1161,22 +1161,22 @@ export default function Dashboard() {
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3.5 bg-secondary/60 border-b border-border/40">
           <Sparkles className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Expected impact if implemented</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Projected impact if implemented</span>
           <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
             <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border/50">
-              Expected within 60–90 days
+              Projected within 60–90 days
             </span>
             <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border/50">
               Confidence: Medium-High
             </span>
             <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
-              Balanced Growth Plan
+              Modelled plan
             </span>
           </div>
         </div>
         <div className="px-6 py-5">
           <p className="text-sm text-foreground leading-relaxed mb-5">
-            If these actions are implemented, performance should improve over the next 60–90 days.
+            Scenario estimates if the recommended actions are implemented over the next 60–90 days.
           </p>
           {/*
             DEV-ONLY — all four projection values below are hardcoded snapshot figures.
@@ -1189,10 +1189,10 @@ export default function Dashboard() {
           */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             {[
-              { label: "Contribution / month", value: "+£42k",       color: "emerald" },
-              { label: "Cash improvement",     value: "+£64k",       color: "emerald" },
-              { label: "Runway extension",     value: "+0.8 months", color: "emerald" },
-              { label: "Margin improvement",   value: "+4.2pp",      color: "emerald" },
+              { label: "Projected contribution / month", value: "+£42k",       color: "emerald" },
+              { label: "Projected cash improvement",     value: "+£64k",       color: "emerald" },
+              { label: "Projected runway extension",     value: "+0.8 months", color: "emerald" },
+              { label: "Projected margin improvement",   value: "+4.2pp",      color: "emerald" },
             ].map(({ label, value, color }) => (
               <div key={label} className="bg-secondary/40 rounded-xl p-3 text-center">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{label}</p>

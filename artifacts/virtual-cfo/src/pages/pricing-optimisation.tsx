@@ -80,7 +80,7 @@ const LEAKAGE_COLORS = ["#ef4444", "#f97316", "#f59e0b", "#84cc16"];
 
 // ─── Pricing movement driver data (static — no attribution RPC in Phase 1/2) ─
 const PRICING_DRIVER_DATA = [
-  { driver: "ASP change",             impact: -8_000,  explanation: "Average selling price fell this month" },
+  { driver: "ASP change",             impact: -8_000,  explanation: "Average selling price fell in the pricing snapshot" },
   { driver: "Discount increase",      impact: -14_000, explanation: "Higher discounting reduced retained revenue" },
   { driver: "Full-price mix",         impact: -9_000,  explanation: "Fewer orders converted at full price" },
   { driver: "Returns movement",       impact: -5_000,  explanation: "Returns increased contribution leakage" },
@@ -433,7 +433,7 @@ export default function PricingOptimisation() {
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Pricing & Discount Optimisation</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            See how pricing, discounting and returns affect contribution — and how much profit you could recover without increasing traffic.
+            Understand how live pricing signals, discounting and modelled scenarios affect retained contribution.
           </p>
           <DataPeriodLabel periodLabel={pricingPeriodLabel} loading={pricingPeriodLoading} />
         </div>
@@ -443,7 +443,7 @@ export default function PricingOptimisation() {
       {/* ── 1. Top CFO Insight ── */}
       {/* @dynamic Narrative text is static — update when live driver attribution is available */}
       <div className="mb-6">
-        <CfoInsightCard text="Discounting is currently the largest drag on margin. Reducing the average discount by 3pp would increase contribution by approximately £38k per month without requiring additional traffic." />
+        <CfoInsightCard text="Discounting is the largest pricing pressure in the current snapshot. A 3pp reduction in average discount is modelled to improve contribution by approximately £38k before any volume impact." />
       </div>
 
       <AiCfoAskCard pageId="pricing" />
@@ -455,13 +455,13 @@ export default function PricingOptimisation() {
         </div>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#F59E0B]">Pricing Power Level</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#F59E0B]">Pricing Power Signal</p>
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#F59E0B]/20 text-[#F59E0B]">
               Moderate
             </span>
           </div>
           <p className="text-sm text-[#A9B8D3] leading-relaxed">
-            Pricing power is stable, but promotional reliance is increasing and could weaken margin if it continues.
+            Pricing power is stable, but rising promotional reliance is putting contribution quality under pressure.
           </p>
         </div>
       </div>
@@ -472,7 +472,7 @@ export default function PricingOptimisation() {
         <div>
           <p className="text-xs font-semibold text-[#22D3EE] mb-0.5">Recoverable Contribution Opportunity</p>
           <p className="text-sm text-cyan-300/80 leading-relaxed">
-            Approximately £52k of monthly contribution could be recovered through better discount control, improved full-price sales and lower returns.
+            Approximately £52k of contribution is recoverable in the current pricing model through tighter discount control, stronger full-price mix and lower returns.
           </p>
         </div>
       </div>
@@ -484,12 +484,12 @@ export default function PricingOptimisation() {
           <div className="flex-1">
             <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
               <div className="flex items-center gap-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#34D399]">High confidence</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#34D399]">Higher-confidence lever</p>
                 <span className="text-sm font-bold text-[#34D399]">£38,000</span>
               </div>
-              <ConfidenceBadge level="High" helper="Based on direct Shopify and cost data." />
+              <ConfidenceBadge level="High" helper="Based on pricing-period discount and contribution assumptions." />
             </div>
-            <p className="text-xs text-emerald-300/80 leading-relaxed">Recoverable by reducing average discount by 3pp with limited conversion risk.</p>
+            <p className="text-xs text-emerald-300/80 leading-relaxed">Modelled from reducing average discount by 3pp before any significant conversion change.</p>
           </div>
         </div>
         <div className="sc-amber flex items-start gap-3 px-5 py-4 rounded-2xl">
@@ -593,7 +593,7 @@ export default function PricingOptimisation() {
           value="£52,000"
           delta="+£11,000"
           sentiment={deltaToSentiment(KPI_DELTA_RECOVERABLE_CONTRIB, DELTA_POLARITY.recoverableContrib)}
-          insight="Estimated monthly contribution recoverable through pricing improvements."
+          insight="Modelled contribution recoverable through pricing improvements."
         />
       </div>
 
@@ -608,7 +608,7 @@ export default function PricingOptimisation() {
               £{liveDiscountIncrease.toLocaleString("en-GB")}
             </span>
           </div>
-          <p className="text-xs text-orange-300/80 leading-relaxed">The increase in discounting vs the prior period reduced contribution by approximately £{Math.round(liveDiscountIncrease / 1_000)}k this month.</p>
+          <p className="text-xs text-orange-300/80 leading-relaxed">The increase in discounting vs the prior period reduced contribution by approximately £{Math.round(liveDiscountIncrease / 1_000)}k in the selected period.</p>
         </div>
       </div>
 
@@ -631,7 +631,7 @@ export default function PricingOptimisation() {
               {[
                 "Model pricing and discount scenarios",
                 "See which pricing lever has the biggest £ impact",
-                "Understand what moved contribution this month",
+                "Understand what moved contribution in the selected period",
                 "Get priority pricing actions",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2.5">
@@ -670,7 +670,7 @@ export default function PricingOptimisation() {
             ))}
           </ul>
           <p className="text-sm text-foreground font-medium">
-            Together, these changes could increase contribution by approximately £42k per month.
+            Together, these scenario changes could increase contribution by approximately £42k.
           </p>
         </div>
       </div>
@@ -679,11 +679,11 @@ export default function PricingOptimisation() {
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50">
           <h3 className="font-semibold text-lg text-foreground">Discount Impact Analysis</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">See how gross sales reduce through discounts and returns before becoming realised revenue.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Live trading data showing how gross sales reduce through discounts and returns before becoming retained revenue.</p>
         </div>
         <div className="px-6 pt-5 pb-2">
           {/* @dynamic: "15%" is static — update when live ratio is templated into narrative */}
-          <InlineCfoInsight text="Discounts reduced realised revenue by 15% this month. This is the largest single pricing-related margin leakage." />
+          <InlineCfoInsight text="Discounts reduced realised revenue by 15% in this pricing snapshot, making them the largest pricing-related leakage." />
         </div>
 
         {/* Data quality note */}
@@ -764,10 +764,10 @@ export default function PricingOptimisation() {
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50">
           <h3 className="font-semibold text-lg text-foreground">Contribution Leakage Detector</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Shows where contribution is disappearing before it reaches profit.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Shows where retained contribution is lost before overheads.</p>
         </div>
         <div className="px-6 pt-5 pb-2">
-          <InlineCfoInsight text="Discounting accounts for 71% of contribution leakage this month, making it the highest-priority margin lever." />
+          <InlineCfoInsight text="Discounting is the largest leakage source in the selected period and should be the first control point." />
         </div>
         {/* Leakage inline tiles — Discounts and Returns are LIVE */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-6 pt-4 pb-2">
@@ -775,7 +775,7 @@ export default function PricingOptimisation() {
             {
               label: "Discount Leakage",
               value: `£${Math.round(liveDiscountCostDisplay).toLocaleString("en-GB")}`,
-              text: "Largest contributor to margin leakage this month.",
+              text: "Largest contributor to margin leakage in the selected period.",
               color: "red",
             },
             {
@@ -837,7 +837,7 @@ export default function PricingOptimisation() {
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50">
           <h3 className="font-semibold text-lg text-foreground">Discount Dependence Risk</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Shows how reliant the business is on promotions to generate sales.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Shows how much demand is being supported by promotions.</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-6 py-5">
           {[
@@ -850,7 +850,7 @@ export default function PricingOptimisation() {
             {
               label: "Promotion Frequency",
               value: "High",
-              text: "Promotions were active on 19 days this month.",
+              text: "Promotions were active on 19 days in the selected period.",
               color: "red",
             },
             {
@@ -876,7 +876,7 @@ export default function PricingOptimisation() {
           ))}
         </div>
         <div className="px-6 pb-5">
-          <InlineCfoInsight text="Discount reliance is increasing. If this continues, customers may be trained to wait for promotions, making future full-price conversion harder." />
+          <InlineCfoInsight text="Discount reliance is rising. If sustained, customers may delay purchases until promotions return." />
         </div>
       </div>
 
@@ -885,7 +885,7 @@ export default function PricingOptimisation() {
         <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
           <div>
             <h3 className="font-semibold text-lg text-foreground">Price vs Volume Trade-off</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Estimate whether reducing discounts improves contribution even if sales volume falls.</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Scenario model showing whether lower discounting still improves contribution after allowing for volume risk.</p>
           </div>
           {!isPro && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
         </div>
@@ -920,7 +920,7 @@ export default function PricingOptimisation() {
               ))}
             </div>
             <p className="text-sm text-muted-foreground mt-4 italic">
-              Contribution improves because the margin gained from lower discounting outweighs the expected volume risk.
+              Scenario view, not a live forecast.
             </p>
           </div>
         ) : (
@@ -931,7 +931,7 @@ export default function PricingOptimisation() {
               ))}
             </div>
             <UpgradeCta
-              title="Upgrade to Pro to estimate how conversion would change if discounts fall"
+              title="Upgrade to Pro to model conversion risk from lower discounting"
               description="See whether reducing discounts improves contribution even after accounting for volume impact."
             />
           </div>
@@ -950,8 +950,8 @@ export default function PricingOptimisation() {
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
           <div>
-            <h3 className="font-semibold text-lg text-foreground">Pricing Sensitivity Simulator</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Test how changes in discounts, full-price orders and returns affect contribution.</p>
+            <h3 className="font-semibold text-lg text-foreground">Pricing Scenario Model</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">Model how changes in discounts, full-price mix, conversion, returns and shipping subsidy affect contribution.</p>
           </div>
           {!isPro && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
         </div>
@@ -973,14 +973,14 @@ export default function PricingOptimisation() {
 
               {/* Outputs */}
               <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>
+                <h4 className="text-sm font-semibold text-foreground">Modelled Scenario Outputs</h4>
                 <div className="space-y-2">
                   {[
-                    { label: "Projected Revenue",             value: `£${Math.round(projRevenue).toLocaleString()}`, highlight: true,  isPeriod: false },
-                    { label: "Projected Contribution",        value: fmt(projContribution),                           highlight: true,  isPeriod: false },
-                    { label: "Contribution Movement vs Base", value: "",                                              highlight: true,  isPeriod: true  },
-                    { label: "Projected Contribution Margin", value: `${projContribMargin.toFixed(1)}%`,              highlight: false, isPeriod: false },
-                    { label: "Pricing Risk Level",            value: pricingRisk,                                     highlight: false, isPeriod: false },
+                    { label: "Scenario Revenue",              value: `£${Math.round(projRevenue).toLocaleString()}`, highlight: true,  isPeriod: false },
+                    { label: "Scenario Contribution",         value: fmt(projContribution),                           highlight: true,  isPeriod: false },
+                    { label: "Contribution vs Base",          value: "",                                              highlight: true,  isPeriod: true  },
+                    { label: "Scenario Contribution Margin",  value: `${projContribMargin.toFixed(1)}%`,              highlight: false, isPeriod: false },
+                    { label: "Scenario Risk Level",           value: pricingRisk,                                     highlight: false, isPeriod: false },
                   ].map(({ label, value, highlight, isPeriod }) => (
                     <div key={label} className={cn("flex items-center justify-between px-4 py-2.5 rounded-xl",
                       highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30",
@@ -1006,7 +1006,7 @@ export default function PricingOptimisation() {
                   <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-0.5">Fastest lever to improve contribution</p>
-                    <p className="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed">Reducing average discount by 3pp would increase contribution by approximately £38k.</p>
+                    <p className="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed">Reducing average discount by 3pp is modelled to improve contribution by approximately £38k.</p>
                   </div>
                 </div>
 
@@ -1030,7 +1030,7 @@ export default function PricingOptimisation() {
                     onClick={() => { setDiscountChange(0); setFullPriceChange(0); setConvChange(0); setReturnsChange(0); setShippingChange(0); }}
                     className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline mt-1"
                   >
-                    Reset to base case
+                    Reset scenario
                   </button>
                 )}
               </div>
@@ -1060,8 +1060,8 @@ export default function PricingOptimisation() {
               </div>
             </div>
             <UpgradeCta
-              title="Model pricing and discount scenarios to find your fastest margin lever"
-              description="Test how changes to discounts, full-price mix, conversion and shipping subsidy affect contribution before you commit."
+              title="Model pricing and discount scenarios"
+              description="Assess how discounts, full-price mix, conversion and shipping subsidy affect contribution before changing pricing."
             />
           </div>
         )}
@@ -1076,8 +1076,8 @@ export default function PricingOptimisation() {
               <p className="text-sm font-semibold text-foreground">Pricing Sensitivity Ranking</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {canAccess("pricing_sensitivity_ranking") && slidersActive
-                  ? "Ranked by current simulator impact — re-sorted as sliders move."
-                  : "What affects your contribution most?"}
+                  ? "Ranked by current scenario impact — re-sorted as sliders move."
+                  : "Levers ranked by modelled contribution impact."}
               </p>
             </div>
           </div>
@@ -1136,7 +1136,7 @@ export default function PricingOptimisation() {
             </div>
             <a href="/upgrade" className="flex items-center gap-3 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-4 py-3 hover:border-indigo-300 transition-colors">
               <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-              <span className="text-xs text-indigo-800 dark:text-indigo-200 flex-1">Upgrade to Pro to see which pricing lever creates the biggest £ impact — updates live as you move sliders.</span>
+              <span className="text-xs text-indigo-800 dark:text-indigo-200 flex-1">Upgrade to Pro to see which pricing lever creates the biggest modelled £ impact as sliders move.</span>
               <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0">Upgrade →</span>
             </a>
           </div>
@@ -1147,8 +1147,8 @@ export default function PricingOptimisation() {
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
           <div>
-            <h3 className="font-semibold text-lg text-foreground">What Changed Contribution This Month?</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Contribution fell by £24k this month. Here are the main pricing drivers.</p>
+            <h3 className="font-semibold text-lg text-foreground">What Moved Contribution In The Pricing Snapshot?</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">Contribution fell by £24k in the current pricing snapshot. These are the main pricing drivers.</p>
           </div>
           {!canAccess("pricing_driver_table") && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
         </div>
@@ -1230,7 +1230,7 @@ export default function PricingOptimisation() {
               </table>
             </div>
             <UpgradeCta
-              title="Upgrade to Pro to see exactly what moved contribution this month"
+              title="Upgrade to Pro to see exactly what moved contribution in the pricing snapshot"
               description="See every pricing driver with £ impact and a plain-English explanation of what happened."
             />
           </div>
@@ -1242,14 +1242,14 @@ export default function PricingOptimisation() {
         <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
           <div>
             <h3 className="font-semibold text-lg text-foreground">Pricing Power Trend</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Shows whether the business is becoming more or less reliant on discounting.</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Static trend view showing whether the business is becoming more dependent on discounting over time.</p>
           </div>
           {!canAccess("pricing_trend_chart") && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
         </div>
 
         {canAccess("pricing_trend_chart") ? (
           <div className="px-6 py-5">
-            <InlineCfoInsight text="Pricing power is weakening because discounting is rising while full-price order ratio and contribution per order are falling." />
+            <InlineCfoInsight text="Pricing power is weakening as discounting rises while full-price mix and contribution per order fall." />
             <div className="mt-5 h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={TREND_DATA} margin={{ top: 4, right: 48, left: 0, bottom: 0 }}>
@@ -1307,7 +1307,7 @@ export default function PricingOptimisation() {
         <div className="mb-4 flex items-center gap-2.5 px-5 py-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15">
           <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
           <p className="text-sm text-indigo-800 dark:text-indigo-300">
-            <span className="font-semibold">One pricing action could increase contribution this month.</span>{" "}
+            <span className="font-semibold">One pricing action could increase contribution in this scenario.</span>{" "}
             Upgrade to Pro to see the full recommendations.
           </p>
         </div>
@@ -1317,8 +1317,8 @@ export default function PricingOptimisation() {
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
           <div>
-            <h3 className="font-semibold text-lg text-foreground">This Month's Pricing Priorities</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Three priority actions your CFO would give you based on this month's pricing data.</p>
+            <h3 className="font-semibold text-lg text-foreground">Pricing Priorities</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">Priority actions based on the current pricing signals and scenario assumptions.</p>
           </div>
           {!isProRec && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
         </div>
@@ -1331,7 +1331,7 @@ export default function PricingOptimisation() {
                 <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">What Improved</p>
               </div>
               <p className="text-sm text-emerald-700/85 dark:text-emerald-400/85 leading-relaxed">
-                Product mix improved this month, adding £12k of contribution and partly offsetting discount pressure.
+                Product mix improved in the current snapshot, adding £12k of contribution and partly offsetting discount pressure.
               </p>
             </div>
             <div className="rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 p-5">
@@ -1349,7 +1349,7 @@ export default function PricingOptimisation() {
                 <p className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-300">Recommended Action</p>
               </div>
               <p className="text-sm text-indigo-700/85 dark:text-indigo-400/85 leading-relaxed">
-                Reduce blanket discounting, test smaller targeted offers and protect full-price conversion before increasing promotional frequency.
+                Reduce blanket discounting, use targeted offers where needed, and protect full-price conversion before increasing promotional frequency.
               </p>
             </div>
           </div>
@@ -1361,7 +1361,7 @@ export default function PricingOptimisation() {
               ))}
             </div>
             <UpgradeCta
-              title="Unlock this month's Pricing Priorities"
+              title="Unlock Pricing Priorities"
               description="Get three high-priority pricing actions — what improved, what to watch, and what to do next."
             />
           </div>

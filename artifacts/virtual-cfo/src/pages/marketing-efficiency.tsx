@@ -721,7 +721,7 @@ export default function MarketingEfficiency() {
       <div className="mb-2">
         <h2 className="text-xl font-bold text-foreground">Marketing Efficiency Summary</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          {periodBadge} · Current efficiency diagnosis and financial exposure
+          {periodBadge} · Current efficiency diagnosis with modelled reallocation upside
         </p>
       </div>
 
@@ -783,7 +783,7 @@ export default function MarketingEfficiency() {
             {/* 2 — Estimated Contribution Uplift */}
             <div className="pl-6">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Estimated Contribution Uplift
+                Modelled Contribution Uplift
               </p>
               <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-1">
                 £{liveEstimatedContribution.toLocaleString()}
@@ -802,7 +802,7 @@ export default function MarketingEfficiency() {
               Marketing efficiency has weakened due to rising Meta CAC and increased reliance on lower-contribution paid acquisition.
             </p>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              If 15–25% of paid acquisition spend is reallocated toward higher-margin channels such as Email and Organic, recoverable contribution is approximately{" "}
+              If 15–25% of paid acquisition spend is reallocated toward higher-margin channels such as Email and Organic, modelled recoverable contribution is approximately{" "}
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{liveEstimatedContribution.toLocaleString()}</span>{" "}
               {framing.upliftPhrase}.
             </p>
@@ -1329,7 +1329,7 @@ export default function MarketingEfficiency() {
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-4">
-        <h2 className="text-xl font-bold text-foreground">Actual Performance</h2>
+        <h2 className="text-xl font-bold text-foreground">Selected-Period Performance</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
           Key marketing efficiency metrics · {periodBadge}
         </p>
@@ -1488,7 +1488,7 @@ export default function MarketingEfficiency() {
       <div className="mb-4">
         <h2 className="text-xl font-bold text-foreground">Allocation Diagnostics</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Where budget is currently creating — or destroying — contribution value.
+          Channel-level contribution view, using live attribution where available.
         </p>
       </div>
 
@@ -1523,7 +1523,7 @@ export default function MarketingEfficiency() {
         <div className="flex items-start gap-2 px-3.5 py-2.5 mb-5 rounded-lg bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-700/30">
           <AlertTriangle className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-700/90 dark:text-amber-400/80 leading-snug">
-            <span className="font-semibold">£{ALLOC_LOSS_CP.toLocaleString()}</span> of contribution profit is currently being lost due to sub-optimal channel allocation.
+            <span className="font-semibold">£{ALLOC_LOSS_CP.toLocaleString()}</span> of contribution profit is modelled as recoverable through improved channel allocation.
           </p>
         </div>
 

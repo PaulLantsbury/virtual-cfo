@@ -105,16 +105,16 @@ const RETURNS_LY     = 1.4;
  */
 const CFO_INSIGHT = {
   /** @ai-commentary Replace with AI-generated headline based on live margin data */
-  headline: "Profit margin below target — £20,400 in estimated additional contribution next month",
+  headline: "Margin is 2.7pp below target — £20,400 recoverable next month across three levers",
   /** @ai-commentary Replace with dynamically generated status: "warning" | "critical" | "healthy" */
   status: "warning" as "warning" | "critical" | "healthy",
   summary:
     "Contribution margin is currently 42.3%, below the target range of 45–55%.",
   /** @ai-commentary Sorted by magnitude descending from live driver analysis */
   primaryDrivers: [
-    "Meta CAC increased £3.40 per order",
-    "Shipping costs increased £2.10 per order",
-    "Discount depth increased 1.8 percentage points",
+    "Meta CAC up £3.40/order — paid acquisition eroding blended margin",
+    "Shipping up £2.10/order — carrier costs worsening month-on-month",
+    "Discount depth +1.8pp — compounding margin drag across all channels",
   ],
   /** @ai-commentary Single clearest action to move the margin needle fastest */
   fastestLever:
@@ -147,7 +147,7 @@ const RECOVERY_SCENARIOS = [
   {
     shortLabel:  "Reallocate Meta spend",
     action:      "Reduce Meta CAC by 10%",
-    detail:      "Reallocate budget toward Email (CM 58.6%) and Organic (CM 52.3%)",
+    detail:      "Shift budget toward Email and Organic — both generate materially higher contribution per order",
     ppGain:      1.4,
     newCm:       43.7,
     /** @dynamic cashImpact = round(ppGain × monthlyRevenue / 100) */
@@ -201,7 +201,7 @@ const RECOVERY_TOTAL_CASH =  RECOVERY_SCENARIOS.reduce((s, r) => s + r.cashImpac
 function getBenchmark(pct: number) {
   if (pct >= BENCHMARK_TARGET.low) {
     if (pct >= 50) return { label: "Healthy — within target range", color: "green" as const };
-    return { label: `Watch — lower end of target (${BENCHMARK_TARGET.low}–${BENCHMARK_TARGET.high}%)`, color: "amber" as const };
+    return { label: "On target — low end of range", color: "amber" as const };
   }
   return { label: `Below target range (${BENCHMARK_TARGET.low}–${BENCHMARK_TARGET.high}%)`, color: "red" as const };
 }
@@ -435,7 +435,7 @@ export default function MarginAnalysis() {
           // So-what: what does the trend position mean for the business?
           const soWhat = cmVsTrend >= 0
             ? "costs are being managed well relative to your recent run rate"
-            : "cost pressure is running higher than your recent average — worth investigating";
+            : "cost pressure is running above your recent average — this needs attention";
           return liveCmChangePp < 0
             ? `Contribution margin fell ${Math.abs(liveCmChangePp).toFixed(1)}pp this month but remains ${trendAbs}pp ${trendDir} your recent average — ${soWhat}`
             : `Contribution margin rose ${Math.abs(liveCmChangePp).toFixed(1)}pp this month and remains ${trendAbs}pp ${trendDir} your recent average — ${soWhat}`;
@@ -551,7 +551,7 @@ export default function MarginAnalysis() {
     ],
     monthlyDeclineRate: 1.1,
     trajectoryNote:
-      "At the current average decline rate of ~1.1pp/month, contribution margin could reach 40% within 2 months without corrective action.",
+      "Margin declining ~1.1pp/month. At this rate, the 40% warning threshold is approximately 2 months away.",
   };
 
   // ── Simulator state ──────────────────────────────────────────────────────
@@ -590,10 +590,10 @@ export default function MarginAnalysis() {
   ].filter(c => c.value > 0).sort((a, b) => b.value - a.value)[0];
 
   const simInsight = simTotalContrib <= 0
-    ? "Adjust the sliders to see which margin lever creates the strongest recovery."
+    ? "Move any slider to model your margin recovery in real time."
     : simLargestContrib
-      ? `Most efficient improvement in this scenario comes from ${simLargestContrib.label}.`
-      : "Most efficient improvement comes from reducing Meta CAC and improving channel mix.";
+      ? `${simLargestContrib.label.charAt(0).toUpperCase() + simLargestContrib.label.slice(1)} drives the biggest gain in this scenario — prioritise this lever.`
+      : "Reducing Meta CAC and rebalancing channel mix drives the strongest recovery here.";
 
   const visibleScenarios = showAllOpportunities
     ? RECOVERY_SCENARIOS
@@ -609,7 +609,7 @@ export default function MarginAnalysis() {
             Margin Analysis
           </h1>
           <p className="text-muted-foreground mt-1">
-            Understand current profit performance, the biggest upside opportunities, and what is driving change.
+            Profit margin health, cost structure breakdown, and the fastest recovery levers — updated with live trading data.
           </p>
           <DataPeriodLabel periodLabel={maPeriodLabel} loading={maPeriodLoading} />
         </div>
@@ -799,7 +799,7 @@ export default function MarginAnalysis() {
             Margin benchmark
           </p>
           <p className="text-sm text-amber-900 dark:text-amber-200 leading-snug">
-            Typical healthy DTC contribution margin range: 45–60%. Current position: {CM_PCT}%, below target range.
+            Healthy DTC margin runs 45–60%. At {CM_PCT}%, you're below the floor — the gap is costing real contribution every month.
           </p>
         </div>
         <div className="flex items-center gap-4 shrink-0 flex-wrap">
@@ -825,7 +825,7 @@ export default function MarginAnalysis() {
       ══════════════════════════════════════════════════════════════════════ */}
       <SectionHeading
         title="Margin Recovery Modeller"
-        subtitle="Adjust cost and pricing levers to model the real-time impact on contribution margin."
+        subtitle="Model how Meta CAC, shipping, discounts, returns, and payment fees affect contribution margin — instantly."
       />
 
       {isPro ? (
@@ -1553,7 +1553,7 @@ export default function MarginAnalysis() {
         subtitle="What changed vs last month and the per-order margin impact."
         badgeText="PRO — Unlock margin drivers"
         ctaTitle="Unlock attributed margin driver breakdown"
-        ctaDescription="See exactly what changed this period and how much each factor impacted your margin per order."
+        ctaDescription="See which costs moved and the precise per-order margin impact of each — so you know exactly where to act."
         isPro={canAccess("driver_breakdown")}
         className="overflow-hidden mb-10"
         ghostContent={
@@ -2057,7 +2057,7 @@ export default function MarginAnalysis() {
                   Meta has the widest revenue share (£41,800) but the lowest contribution margin at 34.2%. The 24pp spread between Meta and Email is the primary driver of channel mix underperformance — reflected in the estimated additional contribution quantified above.
                 </p>
                 <p className="text-xs text-muted-foreground/60 mt-2 leading-snug italic">
-                  If Meta improved to Organic-level margin (52.3%), estimated contribution would increase materially at the current revenue mix — without increasing total spend.
+                  If Meta reached Organic-level margin, blended contribution would improve materially at the current revenue mix — without increasing total spend.
                 </p>
               </div>
             </div>

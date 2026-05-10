@@ -92,7 +92,7 @@ const SCORE_COMPONENTS: {
     label: "Discount reliance",
     status: "weak",
     grade: "D+",
-    explanation: "38% of orders include a discount code — well above the healthy benchmark of <25%.",
+    explanation: "38% of orders use a discount code — 13pp above the 25% target, compressing margin on more than a third of all orders.",
     score: 32,
     direction: "weakening",
   },
@@ -100,7 +100,7 @@ const SCORE_COMPONENTS: {
     label: "CAC efficiency",
     status: "watch",
     grade: "C+",
-    explanation: "CAC payback rose to 1.4 orders. Meta CPM increases are reducing paid channel efficiency.",
+    explanation: "CAC payback at 1.4 orders — above the 1.2-order target. Rising Meta costs mean new customers cost more to acquire than one order earns back.",
     score: 55,
     direction: "weakening",
   },
@@ -116,7 +116,7 @@ const SCORE_COMPONENTS: {
     label: "Channel mix quality",
     status: "mixed",
     grade: "C",
-    explanation: "Paid mix is increasing while organic and email proportions decline — raising blended CAC.",
+    explanation: "Paid acquisition share rising while email and organic share decline — blended CAC rising as a result.",
     score: 48,
     direction: "weakening",
   },
@@ -140,7 +140,7 @@ const KEY_DRIVERS: {
     text:      "Repeat rate up 2.4pp — more customers returning without being paid for",
     freeLabel: "Retention signal improved",
     dir:       "positive",
-    impact:    "Retention improving — the one positive signal in this month's growth quality score.",
+    impact:    "The only component moving in the right direction this period — repeat rate up while all others weakened.",
   },
   {
     text:      "Discount depth up 1.8pp — contribution compressed on every discounted order",
@@ -164,7 +164,7 @@ const KEY_DRIVERS: {
     text:      "Email-driven orders still the most profitable — holding the floor on contribution quality",
     freeLabel: "Owned-channel contribution remained strongest",
     dir:       "positive",
-    impact:    "Offsets some of the discount dependency drag — email profitability is what's keeping the score from falling further.",
+    impact:    "Partially offsets the discount and CAC pressure — without email's contribution margin, the overall score would be materially lower.",
   },
 ];
 
@@ -215,7 +215,7 @@ const RECOMMENDATIONS: Recommendation[] = [
   },
   {
     id: "gq2",
-    text: "Shift budget away from lowest-margin paid channels toward organic search and email.",
+    text: "Reallocate Meta budget toward email and organic — each conversion costs a fraction of the current Meta CAC.",
     impact: "high",
   },
   {
@@ -1159,13 +1159,13 @@ export default function GrowthQuality() {
         <ActionRecommendations
           recommendations={RECOMMENDATIONS}
           title="What to do next"
-          subtitle="Practical actions to improve growth quality and profitable acquisition"
+          subtitle="Actions to reduce discount dependency, improve CAC efficiency, and build sustainable repeat growth"
           defaultExpanded
         />
       ) : (
         <PremiumBlurPreview
           title="What to do next"
-          subtitle="Practical actions to improve growth quality and profitable acquisition"
+          subtitle="Actions to reduce discount dependency, improve CAC efficiency, and build sustainable repeat growth"
           badgeText="PRO — Unlock action plan"
           ctaTitle="Unlock growth quality action plan"
           ctaDescription="See the specific actions that improve retention, reduce discount dependency, and strengthen profitable growth."

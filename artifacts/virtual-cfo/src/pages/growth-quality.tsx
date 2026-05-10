@@ -220,17 +220,17 @@ const RECOMMENDATIONS: Recommendation[] = [
   },
   {
     id: "gq3",
-    text: "Launch a post-purchase email sequence — repeat buyers acquired at zero CAC. Target: repeat rate above 30%.",
+    text: "Launch a post-purchase email sequence to drive repeat purchases at zero acquisition cost. Target: repeat rate above 30%.",
     impact: "medium",
   },
   {
     id: "gq4",
-    text: "Concentrate paid acquisition on high-margin products — the first SKU a new customer buys sets their CAC payback.",
+    text: "Concentrate paid acquisition on high-margin products — the first product a new customer buys determines their CAC payback.",
     impact: "medium",
   },
   {
     id: "gq5",
-    text: "Audit active discount codes — keep those that drive repeat purchases, cut those that only reduce first-order margin.",
+    text: "Audit active discount codes — keep those that drive repeat purchases, retire those that only reduce first-order margin.",
     impact: "quick-win",
   },
 ];

@@ -18,6 +18,7 @@ import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { PeriodImpact } from "@/components/PeriodImpact";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 import {
   GROSS_REVENUE,
   DISCOUNT_COST,
@@ -27,12 +28,25 @@ import {
   AVG_DISCOUNT_PCT,
 } from "@/lib/data/pricing-metrics";
 import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/analytics/deltaSentiment";
+import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
+
+// ─── Data period config ────────────────────────────────────────────────────────
+// DEV-ONLY: hardcoded seed store UUID — matches dashboard.tsx, margin-analysis.tsx, etc.
+// Replace with authenticated session store_id before multi-tenant use.
+const PO_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 // Imported from src/lib/data/pricing-metrics.ts — the central source of truth
-// for pricing period metrics. Replace that file with live Shopify data feeds.
+// for the scenario/model layer.  The simulator is anchored to these constants.
 //
-// GROSS_REVENUE    = 420,000
+// IMPORTANT: Do NOT replace these with live monthly values — the simulator
+// coefficients (discountEffect, convEffect, etc.) are calibrated against this
+// scenario basis.  Live display values (liveGrossRevenue, liveDiscountCost, …)
+// are computed separately inside the component and used only for the KPI strip,
+// revenue bridge and leakage chart.
+//
+// GROSS_REVENUE    = 420,000  (scenario basis)
 // DISCOUNT_COST    = 64,000
 // RETURNS_IMPACT   = 18,000
 // ORDERS           = 16,000
@@ -40,50 +54,31 @@ import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/ana
 // AVG_DISCOUNT_PCT = 18
 
 // ─── KPI delta values (period-on-period) ──────────────────────────────────────
-// Positive = increased vs prior period; negative = decreased.
+// Static fallbacks — shown when Phase 2 delta RPC has not yet resolved or
+// when prior period has no data.
 // @dynamic Replace with live period-over-period differences from Shopify data.
-const KPI_DELTA_ASP                = -1.20;   // ASP fell £1.20 vs prior period
-const KPI_DELTA_AVG_DISCOUNT       =  3;      // Average discount rose 3pp
-const KPI_DELTA_FULL_PRICE_RATIO   = -6;      // Full-price ratio fell 6pp
-const KPI_DELTA_CONTRIB_PER_ORDER  = -2.10;   // Contribution per order fell £2.10
-const KPI_DELTA_DISCOUNT_COST      = 14_000;  // Discount cost rose £14k
-const KPI_DELTA_RETURNS_IMPACT     =  5_000;  // Returns impact rose £5k
-const KPI_DELTA_RECOVERABLE_CONTRIB = 11_000; // Recoverable contribution rose £11k (more wasted)
+const KPI_DELTA_ASP                = -1.20;
+const KPI_DELTA_AVG_DISCOUNT       =  3;
+const KPI_DELTA_FULL_PRICE_RATIO   = -6;
+const KPI_DELTA_CONTRIB_PER_ORDER  = -2.10;
+const KPI_DELTA_DISCOUNT_COST      = 14_000;
+const KPI_DELTA_RETURNS_IMPACT     =  5_000;
+const KPI_DELTA_RECOVERABLE_CONTRIB = 11_000;
 
+// ─── Simulator scenario baseline — module-level so simulator can read them ─────
+// These drive the simulator maths.  They are NOT live values.
 const BASE_NET_REVENUE  = GROSS_REVENUE - DISCOUNT_COST;   // 356,000
 const BASE_NET_RETAINED = BASE_NET_REVENUE - RETURNS_IMPACT; // 338,000
 
-// ─── Revenue bridge data ──────────────────────────────────────────────────────
-const REV_BRIDGE = [
-  { name: "Gross Revenue", invisible: 0,                value: GROSS_REVENUE,     type: "base"     },
-  { name: "Discounts",     invisible: BASE_NET_REVENUE,  value: DISCOUNT_COST,     type: "negative" },
-  { name: "Net Revenue",   invisible: 0,                value: BASE_NET_REVENUE,  type: "result"   },
-  { name: "Returns",       invisible: BASE_NET_RETAINED, value: RETURNS_IMPACT,    type: "negative" },
-  { name: "Net Retained",  invisible: 0,                value: BASE_NET_RETAINED, type: "result"   },
-];
+// ─── Revenue bridge colour map ─────────────────────────────────────────────────
 const REV_BRIDGE_COLOR: Record<string, string> = {
   base: "#6366f1", negative: "#ef4444", result: "#6366f1",
 };
 
-// ─── Contribution leakage data ────────────────────────────────────────────────
-const LEAKAGE_DATA = [
-  { name: "Discounts",        value: DISCOUNT_COST   },
-  { name: "Returns",          value: RETURNS_IMPACT  },
-  { name: "Shipping subsidy", value: 11_000 }, // page-specific — not shared
-  { name: "Payment fees",     value: 9_000  }, // page-specific — not shared
-];
+// ─── Contribution leakage colours ─────────────────────────────────────────────
 const LEAKAGE_COLORS = ["#ef4444", "#f97316", "#f59e0b", "#84cc16"];
 
-// ─── Revenue bridge table ─────────────────────────────────────────────────────
-const REV_BRIDGE_TABLE = [
-  { step: "Gross revenue",        amount:  GROSS_REVENUE,      meaning: "Sales before discounts and returns",                       positive: true,  isResult: false },
-  { step: "Discounts applied",    amount: -DISCOUNT_COST,      meaning: "Revenue given away through promotions and discount codes", positive: false, isResult: false },
-  { step: "Net realised revenue", amount:  BASE_NET_REVENUE,   meaning: "Revenue retained after discounts",                        positive: true,  isResult: true  },
-  { step: "Returns impact",       amount: -RETURNS_IMPACT,     meaning: "Revenue and contribution lost through returned orders",    positive: false, isResult: false },
-  { step: "Net retained revenue", amount:  BASE_NET_RETAINED,  meaning: "Revenue retained after discounts and returns",            positive: true,  isResult: true  },
-];
-
-// ─── Pricing movement driver data ─────────────────────────────────────────────
+// ─── Pricing movement driver data (static — no attribution RPC in Phase 1/2) ─
 const PRICING_DRIVER_DATA = [
   { driver: "ASP change",             impact: -8_000,  explanation: "Average selling price fell this month" },
   { driver: "Discount increase",      impact: -14_000, explanation: "Higher discounting reduced retained revenue" },
@@ -92,8 +87,7 @@ const PRICING_DRIVER_DATA = [
   { driver: "Product mix improvement",impact:  12_000, explanation: "Higher-margin products partially offset pressure" },
 ];
 
-
-// ─── Pricing power trend data ─────────────────────────────────────────────────
+// ─── Pricing power trend data (static — no monthly-history RPC) ────────────
 const TREND_DATA = [
   { period: "Jan", discount: 13, fullPrice: 58, contrib: 15.10 },
   { period: "Feb", discount: 14, fullPrice: 56, contrib: 14.80 },
@@ -175,9 +169,12 @@ function UpgradeCta({ title, description }: { title: string; description: string
   );
 }
 
+// RevBridgeTooltip reads type/value from payload[0].payload (the data row
+// passed by Recharts) rather than looking up the module-level REV_BRIDGE array,
+// so it works correctly now that the bridge is computed inside the component.
 function RevBridgeTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
-  const row = REV_BRIDGE.find(d => d.name === label);
+  const row = payload[0]?.payload as { name: string; type: string; value: number } | undefined;
   if (!row) return null;
   const isNeg = row.type === "negative";
   return (
@@ -215,6 +212,151 @@ function LeakageTooltip({ active, payload, label }: any) {
 
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function PricingOptimisation() {
+  // ── Phase 1 live data (current calendar month) ────────────────────────────
+  // Resolves to the most recent month with order data.
+  const {
+    phase1:      pricingPhase1,
+    dateFrom:    pricingDateFrom,
+    dateTo:      pricingDateTo,
+    periodLabel: pricingPeriodLabel,
+    loading:     pricingPeriodLoading,
+  } = useLatestDataPeriod(PO_STORE_ID);
+
+  // ── Phase 2 MoM deltas ────────────────────────────────────────────────────
+  const {
+    deltas:  phase2Deltas,
+    loading: phase2DeltasLoading,
+  } = usePhase2Deltas(PO_STORE_ID, pricingDateFrom, pricingDateTo);
+
+  // ── Live display values — DISPLAY ONLY, never fed into simulator math ─────
+  //
+  // Naming convention: live* = current-month value from Phase 1/2 RPCs.
+  // The simulator block below uses the imported static constants (GROSS_REVENUE,
+  // BASE_CONTRIBUTION, BASE_NET_REVENUE) which remain on a different scenario
+  // basis.  Do not replace those with these live* variables.
+
+  // Phase 1 raw fields (ratios are [0,1])
+  const liveGrossRevenue    = (pricingPhase1 !== null && !pricingPhase1.errors.some(e => e.fn === "gross_revenue")      && pricingPhase1.data.grossRevenue > 0)
+    ? pricingPhase1.data.grossRevenue      : null;
+  const liveDiscountDepRatio = (pricingPhase1 !== null && !pricingPhase1.errors.some(e => e.fn === "discount_dependency"))
+    ? pricingPhase1.data.discountDependency : null;
+  const liveRefundRateRatio  = (pricingPhase1 !== null && !pricingPhase1.errors.some(e => e.fn === "refund_rate"))
+    ? pricingPhase1.data.refundRate         : null;
+  const liveCmPctRatio       = (pricingPhase1 !== null && !pricingPhase1.errors.some(e => e.fn === "contribution_margin_pct") && pricingPhase1.data.contributionMarginPct !== null)
+    ? pricingPhase1.data.contributionMarginPct : null;
+  const liveNetSales         = (pricingPhase1 !== null && !pricingPhase1.errors.some(e => e.fn === "net_sales"))
+    ? pricingPhase1.data.netSales : null;
+
+  // Derived live display values (with static fallbacks for pre-load / RPC error)
+  const liveGrossRevenueDisplay  = liveGrossRevenue    ?? GROSS_REVENUE;
+  const liveDiscountCostDisplay  = (liveDiscountDepRatio !== null && liveGrossRevenue !== null)
+    ? liveDiscountDepRatio * liveGrossRevenue : DISCOUNT_COST;
+  const liveReturnsImpactDisplay = (liveRefundRateRatio !== null && liveGrossRevenue !== null)
+    ? liveRefundRateRatio  * liveGrossRevenue : RETURNS_IMPACT;
+  const liveNetRevenueDisplay    = liveGrossRevenueDisplay - liveDiscountCostDisplay;
+  const liveNetRetainedDisplay   = liveNetRevenueDisplay  - liveReturnsImpactDisplay;
+  const liveAvgDiscountPctDisplay = liveDiscountDepRatio !== null
+    ? liveDiscountDepRatio * 100 : AVG_DISCOUNT_PCT;
+
+  // Live base contribution — display only (KPI context, NOT simulator)
+  // Formula: cm_pct × net_sales  (same as Phase 1 cost model output)
+  const liveBaseContributionDisplay = (liveCmPctRatio !== null && liveNetSales !== null && liveNetSales > 0)
+    ? liveCmPctRatio * liveNetSales : null;
+
+  // ── Phase 2 delta-derived live badge values ───────────────────────────────
+  //
+  // Badge format matches existing pricing page style: "+3pp", "+£14,000".
+  // Local helpers avoid "↑ X.Xpp vs last month" suffix (that's in deltaLabel).
+
+  const fmtPp = (v: number | null, fallback: string): string => {
+    if (v === null || !Number.isFinite(v)) return fallback;
+    return `${v >= 0 ? "+" : ""}${Math.abs(v).toFixed(1)}pp`;
+  };
+  const fmtGbp = (v: number | null, fallback: string): string => {
+    if (v === null || !Number.isFinite(v)) return fallback;
+    return `${v >= 0 ? "+" : "−"}£${Math.round(Math.abs(v)).toLocaleString("en-GB")}`;
+  };
+
+  // Avg Discount % — direct from discount_dep_delta_pp
+  const liveAvgDiscountDeltaStr = !phase2DeltasLoading
+    ? fmtPp(phase2Deltas?.discount_dep_delta_pp ?? null, `+${KPI_DELTA_AVG_DISCOUNT}pp`)
+    : `+${KPI_DELTA_AVG_DISCOUNT}pp`;
+  const liveAvgDiscountSentiment = !phase2DeltasLoading
+    ? deltaToSentiment(phase2Deltas?.discount_dep_delta_pp ?? null, DELTA_POLARITY.avgDiscount)
+    : deltaToSentiment(KPI_DELTA_AVG_DISCOUNT, DELTA_POLARITY.avgDiscount);
+
+  // Discount Cost £ — derived from _cur/_prv raw fields in Phase2DeltaRow
+  // formula: (discount_dep_cur × gross_revenue_cur) − (discount_dep_prv × gross_revenue_prv)
+  const liveDiscountCostDeltaNum: number | null = (() => {
+    if (phase2DeltasLoading || phase2Deltas === null) return null;
+    const cur = phase2Deltas.discount_dep_cur * phase2Deltas.gross_revenue_cur;
+    const prv = phase2Deltas.discount_dep_prv * phase2Deltas.gross_revenue_prv;
+    const delta = cur - prv;
+    // Treat as null when prior period had no revenue (prv = 0) to avoid spurious +100%
+    return phase2Deltas.gross_revenue_prv > 0 ? delta : null;
+  })();
+  const liveDiscountCostDeltaStr = !phase2DeltasLoading
+    ? fmtGbp(liveDiscountCostDeltaNum, `+£${KPI_DELTA_DISCOUNT_COST.toLocaleString("en-GB")}`)
+    : `+£${KPI_DELTA_DISCOUNT_COST.toLocaleString("en-GB")}`;
+  const liveDiscountCostSentiment = !phase2DeltasLoading
+    ? deltaToSentiment(liveDiscountCostDeltaNum, DELTA_POLARITY.discountCost)
+    : deltaToSentiment(KPI_DELTA_DISCOUNT_COST, DELTA_POLARITY.discountCost);
+
+  // Returns Impact £ — derived from _cur/_prv raw fields
+  // formula: (refund_rate_cur × gross_revenue_cur) − (refund_rate_prv × gross_revenue_prv)
+  const liveReturnsImpactDeltaNum: number | null = (() => {
+    if (phase2DeltasLoading || phase2Deltas === null) return null;
+    const cur = phase2Deltas.refund_rate_cur * phase2Deltas.gross_revenue_cur;
+    const prv = phase2Deltas.refund_rate_prv * phase2Deltas.gross_revenue_prv;
+    const delta = cur - prv;
+    return phase2Deltas.gross_revenue_prv > 0 ? delta : null;
+  })();
+  const liveReturnsImpactDeltaStr = !phase2DeltasLoading
+    ? fmtGbp(liveReturnsImpactDeltaNum, `+£${KPI_DELTA_RETURNS_IMPACT.toLocaleString("en-GB")}`)
+    : `+£${KPI_DELTA_RETURNS_IMPACT.toLocaleString("en-GB")}`;
+  const liveReturnsImpactSentiment = !phase2DeltasLoading
+    ? deltaToSentiment(liveReturnsImpactDeltaNum, DELTA_POLARITY.returnsImpact)
+    : deltaToSentiment(KPI_DELTA_RETURNS_IMPACT, DELTA_POLARITY.returnsImpact);
+
+  // Margin lost to discount increase (micro-card) — same delta as Discount Cost
+  const liveDiscountIncrease = liveDiscountCostDeltaNum !== null
+    ? Math.abs(Math.round(liveDiscountCostDeltaNum))
+    : KPI_DELTA_DISCOUNT_COST;
+
+  // ── Live Revenue Bridge (display layer — replaces module-level static array) ─
+  // These are used by the bridge chart and table only.  The simulator reads
+  // BASE_NET_REVENUE / BASE_NET_RETAINED from the module-level constants above.
+  const liveRevBridge = [
+    { name: "Gross Revenue", invisible: 0,                          value: Math.round(liveGrossRevenueDisplay),  type: "base"     },
+    { name: "Discounts",     invisible: Math.round(liveNetRevenueDisplay),  value: Math.round(liveDiscountCostDisplay),  type: "negative" },
+    { name: "Net Revenue",   invisible: 0,                          value: Math.round(liveNetRevenueDisplay),   type: "result"   },
+    { name: "Returns",       invisible: Math.round(liveNetRetainedDisplay), value: Math.round(liveReturnsImpactDisplay), type: "negative" },
+    { name: "Net Retained",  invisible: 0,                          value: Math.round(liveNetRetainedDisplay),  type: "result"   },
+  ];
+
+  const liveRevBridgeTable = [
+    { step: "Gross revenue",        amount:  Math.round(liveGrossRevenueDisplay),  meaning: "Sales before discounts and returns",                       positive: true,  isResult: false },
+    { step: "Discounts applied",    amount: -Math.round(liveDiscountCostDisplay),  meaning: "Revenue given away through promotions and discount codes", positive: false, isResult: false },
+    { step: "Net realised revenue", amount:  Math.round(liveNetRevenueDisplay),    meaning: "Revenue retained after discounts",                        positive: true,  isResult: true  },
+    { step: "Returns impact",       amount: -Math.round(liveReturnsImpactDisplay), meaning: "Revenue and contribution lost through returned orders",    positive: false, isResult: false },
+    { step: "Net retained revenue", amount:  Math.round(liveNetRetainedDisplay),   meaning: "Revenue retained after discounts and returns",            positive: true,  isResult: true  },
+  ];
+
+  // ── Live Leakage Data (display layer) ─────────────────────────────────────
+  // Discounts and Returns rows are live; Shipping subsidy and Payment fees
+  // remain static (no RPC for these cost lines in Phase 1/2).
+  const liveLeakageData = [
+    { name: "Discounts",        value: Math.round(liveDiscountCostDisplay)  },
+    { name: "Returns",          value: Math.round(liveReturnsImpactDisplay) },
+    { name: "Shipping subsidy", value: 11_000 },
+    { name: "Payment fees",     value: 9_000  },
+  ];
+
+  // ── Simulator state ───────────────────────────────────────────────────────
+  // !! SIMULATOR GUARD: The five slider states and all maths below reference
+  // the imported static constants (BASE_CONTRIBUTION, BASE_NET_REVENUE,
+  // GROSS_REVENUE) from pricing-metrics.ts — NOT the live display values above.
+  // The scenario model is intentionally anchored to the static scenario basis.
   const [discountChange,  setDiscountChange]  = useState(0);
   const [fullPriceChange, setFullPriceChange] = useState(0);
   const [convChange,      setConvChange]      = useState(0);
@@ -224,7 +366,7 @@ export default function PricingOptimisation() {
   const isPro    = canAccess("pricing_simulator");
   const isProRec = canAccess("pricing_recommendations");
 
-  // ── Simulator math ──────────────────────────────────────────────────────────
+  // ── Simulator math (uses static scenario constants — unchanged) ─────────────
   const discountEffect  = -discountChange * 12_500;
   const fullPriceEffect = fullPriceChange * 1_300;
   const convEffect      = (convChange / 100) * BASE_NET_REVENUE * 0.38;
@@ -235,6 +377,7 @@ export default function PricingOptimisation() {
   const projRevenue      = BASE_NET_REVENUE - (discountChange / 100) * GROSS_REVENUE + (convChange / 100) * BASE_NET_REVENUE;
   const projContribMargin = projRevenue > 0 ? ((projContribution / projRevenue) * 100) : 0;
   const contribDelta     = projContribution - BASE_CONTRIBUTION;
+  // Risk thresholds calibrated to the 420k scenario basis — do not change.
   const pricingRisk      = projContribution < 150_000 ? "High" : projContribution < 198_000 ? "Moderate" : "Low";
 
   const simText =
@@ -292,11 +435,13 @@ export default function PricingOptimisation() {
           <p className="text-sm text-muted-foreground mt-1">
             See how pricing, discounting and returns affect contribution — and how much profit you could recover without increasing traffic.
           </p>
+          <DataPeriodLabel periodLabel={pricingPeriodLabel} loading={pricingPeriodLoading} />
         </div>
         <TimelineSelector />
       </div>
 
       {/* ── 1. Top CFO Insight ── */}
+      {/* @dynamic Narrative text is static — update when live driver attribution is available */}
       <div className="mb-6">
         <CfoInsightCard text="Discounting is currently the largest drag on margin. Reducing the average discount by 3pp would increase contribution by approximately £38k per month without requiring additional traffic." />
       </div>
@@ -369,26 +514,101 @@ export default function PricingOptimisation() {
       </div>
 
       {/* ── 5. KPI Strip (8 cards, 4-column) ── */}
+      {/*
+        Cards with live data (Phase 1 + Phase 2 delta RPC):
+          • Average Discount   — value: discount_dependency() × 100
+                                 delta: discount_dep_delta_pp
+          • Discount Cost      — value: discount_dependency × gross_revenue
+                                 delta: derived from _cur/_prv raw fields
+          • Returns Impact     — value: refund_rate × gross_revenue
+                                 delta: derived from _cur/_prv raw fields
+        Cards that remain static (SF):
+          • Average Selling Price  — AOV ≠ ASP; substitution would mislabel metric
+          • Full-Price Order Ratio — no RPC
+          • Contribution per Order — depends on order count (no reliable count RPC)
+          • Pricing Power Index    — qualitative composite
+          • Recoverable Contrib    — scenario aggregate, different concept from
+                                     recoverable_contribution_range() RPC
+      */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <KpiCard label="Average Selling Price"     value="£42.60"     delta="-£1.20"    sentiment={deltaToSentiment(KPI_DELTA_ASP,                DELTA_POLARITY.asp)}                insight="Average realised price per order after discounts." />
-        <KpiCard label="Average Discount"          value="18%"         delta="+3pp"     sentiment={deltaToSentiment(KPI_DELTA_AVG_DISCOUNT,        DELTA_POLARITY.avgDiscount)}        insight="Average discount given across orders." />
-        <KpiCard label="Full-Price Order Ratio"    value="46%"         delta="-6pp"     sentiment={deltaToSentiment(KPI_DELTA_FULL_PRICE_RATIO,    DELTA_POLARITY.fullPriceRatio)}     insight="Orders completed without discount." />
-        <KpiCard label="Contribution per Order"    value="£12.40"      delta="-£2.10"   sentiment={deltaToSentiment(KPI_DELTA_CONTRIB_PER_ORDER,   DELTA_POLARITY.cpPerOrder)}         insight="Profit before overheads generated per order." />
-        <KpiCard label="Discount Cost"             value="£64,000"     delta="+£14,000" sentiment={deltaToSentiment(KPI_DELTA_DISCOUNT_COST,       DELTA_POLARITY.discountCost)}       insight="Revenue given away through promotions and discount codes." />
-        <KpiCard label="Returns Impact"            value="£18,000"     delta="+£5,000"  sentiment={deltaToSentiment(KPI_DELTA_RETURNS_IMPACT,      DELTA_POLARITY.returnsImpact)}      insight="Contribution lost through returned orders." />
-        <KpiCard label="Pricing Power Index"       value="Moderate"    delta="Stable"   sentiment="neutral"                                                                            insight="Based on discount reliance, full-price mix and contribution stability." />
-        <KpiCard label="Recoverable Contribution"  value="£52,000"     delta="+£11,000" sentiment={deltaToSentiment(KPI_DELTA_RECOVERABLE_CONTRIB, DELTA_POLARITY.recoverableContrib)} insight="Estimated monthly contribution recoverable through pricing improvements." />
+        {/* SF — ASP: AOV ≠ ASP, substitution would mislabel */}
+        <KpiCard
+          label="Average Selling Price"
+          value="£42.60"
+          delta="-£1.20"
+          sentiment={deltaToSentiment(KPI_DELTA_ASP, DELTA_POLARITY.asp)}
+          insight="Average realised price per order after discounts."
+        />
+        {/* LIVE — Avg Discount % from discount_dependency() RPC */}
+        <KpiCard
+          label="Average Discount"
+          value={`${Math.round(liveAvgDiscountPctDisplay)}%`}
+          delta={liveAvgDiscountDeltaStr}
+          sentiment={liveAvgDiscountSentiment}
+          insight="Average discount given across orders."
+        />
+        {/* SF — Full-Price Ratio: no RPC */}
+        <KpiCard
+          label="Full-Price Order Ratio"
+          value="46%"
+          delta="-6pp"
+          sentiment={deltaToSentiment(KPI_DELTA_FULL_PRICE_RATIO, DELTA_POLARITY.fullPriceRatio)}
+          insight="Orders completed without discount."
+        />
+        {/* SF — CPO: depends on order count (no reliable RPC) */}
+        <KpiCard
+          label="Contribution per Order"
+          value="£12.40"
+          delta="-£2.10"
+          sentiment={deltaToSentiment(KPI_DELTA_CONTRIB_PER_ORDER, DELTA_POLARITY.cpPerOrder)}
+          insight="Profit before overheads generated per order."
+        />
+        {/* LIVE — Discount Cost from discount_dependency × gross_revenue */}
+        <KpiCard
+          label="Discount Cost"
+          value={`£${Math.round(liveDiscountCostDisplay).toLocaleString("en-GB")}`}
+          delta={liveDiscountCostDeltaStr}
+          sentiment={liveDiscountCostSentiment}
+          insight="Revenue given away through promotions and discount codes."
+        />
+        {/* LIVE — Returns Impact from refund_rate × gross_revenue */}
+        <KpiCard
+          label="Returns Impact"
+          value={`£${Math.round(liveReturnsImpactDisplay).toLocaleString("en-GB")}`}
+          delta={liveReturnsImpactDeltaStr}
+          sentiment={liveReturnsImpactSentiment}
+          insight="Contribution lost through returned orders."
+        />
+        {/* SF — Pricing Power Index: qualitative composite */}
+        <KpiCard
+          label="Pricing Power Index"
+          value="Moderate"
+          delta="Stable"
+          sentiment="neutral"
+          insight="Based on discount reliance, full-price mix and contribution stability."
+        />
+        {/* SF — Recoverable Contribution: scenario aggregate, not opportunity-engine RPC */}
+        <KpiCard
+          label="Recoverable Contribution"
+          value="£52,000"
+          delta="+£11,000"
+          sentiment={deltaToSentiment(KPI_DELTA_RECOVERABLE_CONTRIB, DELTA_POLARITY.recoverableContrib)}
+          insight="Estimated monthly contribution recoverable through pricing improvements."
+        />
       </div>
 
-      {/* ── 5b. Discount Increase Impact micro-card — always visible ── */}
+      {/* ── 5b. Discount Increase Impact micro-card ── */}
+      {/* LIVE — uses same derived delta as Discount Cost KPI card */}
       <div className="sc-orange flex items-start gap-3 px-5 py-4 rounded-2xl mb-6">
         <AlertTriangle className="w-4 h-4 text-[#FB923C] shrink-0 mt-0.5" />
         <div className="flex-1">
           <div className="flex items-center gap-3 flex-wrap mb-1">
             <p className="text-xs font-bold uppercase tracking-wider text-[#FB923C]">Margin lost to discount increase</p>
-            <span className="text-lg font-display font-bold text-[#FB923C]">£14,000</span>
+            <span className="text-lg font-display font-bold text-[#FB923C]">
+              £{liveDiscountIncrease.toLocaleString("en-GB")}
+            </span>
           </div>
-          <p className="text-xs text-orange-300/80 leading-relaxed">The increase in discounting vs the prior period reduced contribution by approximately £14k this month.</p>
+          <p className="text-xs text-orange-300/80 leading-relaxed">The increase in discounting vs the prior period reduced contribution by approximately £{Math.round(liveDiscountIncrease / 1_000)}k this month.</p>
         </div>
       </div>
 
@@ -462,6 +682,7 @@ export default function PricingOptimisation() {
           <p className="text-sm text-muted-foreground mt-0.5">See how gross sales reduce through discounts and returns before becoming realised revenue.</p>
         </div>
         <div className="px-6 pt-5 pb-2">
+          {/* @dynamic: "15%" is static — update when live ratio is templated into narrative */}
           <InlineCfoInsight text="Discounts reduced realised revenue by 15% this month. This is the largest single pricing-related margin leakage." />
         </div>
 
@@ -481,12 +702,12 @@ export default function PricingOptimisation() {
           </div>
         </div>
 
-        {/* Bridge waterfall chart — always visible */}
+        {/* Bridge waterfall chart — LIVE (liveRevBridge computed from Phase 1 RPCs) */}
         <div className="px-6 pt-4 pb-2">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Revenue Bridge: Gross to Net Retained</h4>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={REV_BRIDGE} margin={{ top: 4, right: 24, left: 0, bottom: 0 }} barSize={40}>
+              <BarChart data={liveRevBridge} margin={{ top: 4, right: 24, left: 0, bottom: 0 }} barSize={40}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
                 <YAxis tickFormatter={(v) => `£${(v / 1_000).toFixed(0)}k`}
@@ -494,7 +715,7 @@ export default function PricingOptimisation() {
                 <Tooltip content={<RevBridgeTooltip />} />
                 <Bar dataKey="invisible" stackId="a" fill="transparent" />
                 <Bar dataKey="value" stackId="a" radius={[4, 4, 0, 0]}>
-                  {REV_BRIDGE.map((entry) => (
+                  {liveRevBridge.map((entry) => (
                     <Cell key={entry.name} fill={REV_BRIDGE_COLOR[entry.type]} fillOpacity={0.85} />
                   ))}
                 </Bar>
@@ -503,7 +724,7 @@ export default function PricingOptimisation() {
           </div>
         </div>
 
-        {/* Bridge table — always visible per spec (chart + table in section 7, no explicit lock) */}
+        {/* Bridge table — LIVE */}
         <div className="overflow-x-auto px-0 pb-4 mt-2">
           <table className="w-full text-sm">
             <thead>
@@ -514,7 +735,7 @@ export default function PricingOptimisation() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40">
-              {REV_BRIDGE_TABLE.map((row) => (
+              {liveRevBridgeTable.map((row) => (
                 <tr key={row.step} className={cn(
                   "transition-colors",
                   row.isResult
@@ -548,12 +769,33 @@ export default function PricingOptimisation() {
         <div className="px-6 pt-5 pb-2">
           <InlineCfoInsight text="Discounting accounts for 71% of contribution leakage this month, making it the highest-priority margin lever." />
         </div>
+        {/* Leakage inline tiles — Discounts and Returns are LIVE */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-6 pt-4 pb-2">
           {[
-            { label: "Discount Leakage",     value: "£64,000", text: "Largest contributor to margin leakage this month.",        color: "red"    },
-            { label: "Returns Leakage",       value: "£18,000", text: "Returned orders reduced net retained revenue and contribution.", color: "orange" },
-            { label: "Shipping Subsidy",      value: "£11,000", text: "Free or subsidised shipping reduced contribution.",        color: "amber"  },
-            { label: "Payment Fee Leakage",   value: "£9,000",  text: "Payment processing costs reduced contribution.",           color: "yellow" },
+            {
+              label: "Discount Leakage",
+              value: `£${Math.round(liveDiscountCostDisplay).toLocaleString("en-GB")}`,
+              text: "Largest contributor to margin leakage this month.",
+              color: "red",
+            },
+            {
+              label: "Returns Leakage",
+              value: `£${Math.round(liveReturnsImpactDisplay).toLocaleString("en-GB")}`,
+              text: "Returned orders reduced net retained revenue and contribution.",
+              color: "orange",
+            },
+            {
+              label: "Shipping Subsidy",
+              value: "£11,000",
+              text: "Free or subsidised shipping reduced contribution.",
+              color: "amber",
+            },
+            {
+              label: "Payment Fee Leakage",
+              value: "£9,000",
+              text: "Payment processing costs reduced contribution.",
+              color: "yellow",
+            },
           ].map(({ label, value, text, color }) => (
             <div key={label} className={cn(
               "rounded-2xl border p-4",
@@ -568,11 +810,12 @@ export default function PricingOptimisation() {
             </div>
           ))}
         </div>
+        {/* Leakage bar chart — Discounts/Returns rows are LIVE; Shipping/Payment are SF */}
         <div className="px-6 pb-6 pt-4">
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Leakage by Category</h4>
           <div className="h-44">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={LEAKAGE_DATA} layout="vertical" margin={{ top: 0, right: 48, left: 0, bottom: 0 }} barSize={24}>
+              <BarChart data={liveLeakageData} layout="vertical" margin={{ top: 0, right: 48, left: 0, bottom: 0 }} barSize={24}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
                 <XAxis type="number" tickFormatter={(v) => `£${(v / 1_000).toFixed(0)}k`}
                   tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
@@ -580,7 +823,7 @@ export default function PricingOptimisation() {
                   tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
                 <Tooltip content={<LeakageTooltip />} />
                 <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                  {LEAKAGE_DATA.map((_, i) => (
+                  {liveLeakageData.map((_, i) => (
                     <Cell key={i} fill={LEAKAGE_COLORS[i]} fillOpacity={0.85} />
                   ))}
                 </Bar>
@@ -696,6 +939,14 @@ export default function PricingOptimisation() {
       </div>
 
       {/* ── 11. Pricing Sensitivity Simulator — Pro gated ── */}
+      {/*
+        SIMULATOR GUARD: All projected values below (projContribution, projRevenue,
+        projContribMargin, pricingRisk) are computed from the static scenario constants
+        (BASE_CONTRIBUTION = 198k, BASE_NET_REVENUE = 356k, GROSS_REVENUE = 420k).
+        The simulator is intentionally NOT connected to the live monthly data shown
+        in the KPI strip above — it operates as a modelling tool on a reference
+        scenario basis.  Do not pass live* values into the simulator maths.
+      */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
           <div>
@@ -1118,8 +1369,8 @@ export default function PricingOptimisation() {
       </div>
 
       <DataBenchmarkAssumptions
-        benchmarkNote="Discount dependency is 38%, above the preferred range of 15–25%."
-        dataQualityNote="Discount analysis assumes discounts are recorded using Shopify discount codes or compare-at pricing. Manual price changes may understate discount impact."
+        benchmarkNote="Discount dependency is measured as total discount value divided by gross revenue (value-based ratio). Shipping subsidy and payment fee leakage figures are static estimates — not yet connected to live cost data."
+        dataQualityNote="Discount analysis assumes discounts are recorded using Shopify discount codes or compare-at pricing. Manual price changes may understate discount impact. Returns Impact shows revenue refunded via Shopify; fulfilment cost on returns is not included in the live figure."
         className="mb-2"
       />
 

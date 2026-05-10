@@ -210,27 +210,27 @@ const COMPOSITION_LEGEND = [
 const RECOMMENDATIONS: Recommendation[] = [
   {
     id: "gq1",
-    text: "Stop discounting returning customers — they'd buy anyway. Cut dependency from 38% toward the 25% target.",
+    text: "Remove discounts from returning customer journeys — they already converted once without one. Cut dependency from 38% toward the 25% target.",
     impact: "high",
   },
   {
     id: "gq2",
-    text: "Reallocate Meta budget toward email and organic — each conversion costs a fraction of the current Meta CAC.",
+    text: "Shift Meta budget toward email and organic — CAC on owned channels is near-zero vs Meta's current rate.",
     impact: "high",
   },
   {
     id: "gq3",
-    text: "Build a post-purchase email sequence to bring customers back at zero acquisition cost — target repeat rate above 30%.",
+    text: "Deploy a post-purchase email sequence to recover repeat buyers at zero acquisition cost — target: repeat rate above 30%.",
     impact: "medium",
   },
   {
     id: "gq4",
-    text: "Focus acquisition campaigns on products with the highest contribution margin.",
+    text: "Concentrate acquisition spend on high-margin products — which product a new customer first buys determines how quickly they cover their acquisition cost.",
     impact: "medium",
   },
   {
     id: "gq5",
-    text: "Audit which discount codes generate repeat purchases vs one-time buyers — retire those that just compress margin.",
+    text: "Run a discount code audit — identify which codes build repeat behaviour and retire those that only reduce first-order margin.",
     impact: "quick-win",
   },
 ];

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import {
   ArrowUpRight, ArrowDownRight, Minus,
   Sparkles, TrendingUp, AlertTriangle, ArrowRight,
-  ChevronRight, Lock,
+  ChevronRight, Lock, Info,
 } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -20,7 +20,7 @@ import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions"
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
-import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MONTHLY_CM_PCT, MONTHLY_REVENUE, MONTHLY_OPERATING_PROFIT, RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
 import { supabase } from "@/lib/supabase";
 import { CASH_RUNWAY } from "@/lib/data/cash-snapshot";
@@ -47,36 +47,6 @@ type KpiStatus = "warning" | "positive" | "danger" | "neutral";
 
 // DeltaSentiment, DELTA_POLARITY, and deltaToSentiment imported from
 // @/lib/analytics/deltaSentiment — shared with Margin Analysis and Growth Quality.
-
-const CFO_INSIGHT = {
-  // Weekly action priorities — user-facing text only. Underlying upside values unchanged.
-  weeklyPriorities: [
-    {
-      action: "Reduce discount leakage",
-      // DEV-ONLY — "38%" is the DISCOUNT_DEP snapshot constant, not the live discountDependency
-      // value from the Supabase discount_dependency() RPC.  Replace with an interpolated
-      // live value once prior-period delta strings are computed in Phase 2.
-      why: "Discount dependency at 38% and rising. Eroding contribution margin and weakening growth quality.",
-      // DEV-ONLY FALLBACK — impact range uses RECOVERABLE_LOW/HIGH snapshot constants as
-      // fallback until phase1Metrics resolves.  Will automatically reflect live RPC values
-      // once the rc tile wiring propagates here; see rc wiring block in liveKpiCards.
-      impact: `£${(RECOVERABLE_LOW / 1_000).toFixed(0)}k–£${(RECOVERABLE_HIGH / 1_000).toFixed(0)}k / month recoverable`,
-    },
-    {
-      action: "Reallocate inefficient Meta spend",
-      // DEV-ONLY — "14%" is a hardcoded snapshot figure.  Primary source: meta_cac_trend()
-      // Supabase RPC (Phase 3, Meta Ads API integration).  Replace before production.
-      why: "Meta CAC up 14%. Email and organic channels deliver materially higher contribution per order.",
-      impact: "Improves blended acquisition efficiency and reduces CAC payback period",
-    },
-    {
-      action: "Address fulfilment cost leakage",
-      why: "Variable costs compressing contribution below target. Net value per order is declining.",
-      impact: "Largest single lever in the identified monthly opportunity",
-    },
-  ],
-  upside: { cashLow: RECOVERABLE_LOW, cashHigh: RECOVERABLE_HIGH },
-};
 
 // DEV-ONLY FALLBACK — RECOVERABLE_TILE_VALUE and RECOVERABLE_TILE_CHANGE are computed
 // from the RECOVERABLE_LOW / RECOVERABLE_HIGH snapshot constants (business-snapshot.ts).
@@ -188,7 +158,7 @@ const KPI_CARDS: {
     //   sentinel.  Overridden by recoverable_contribution_range() RPC in liveKpiCards.
     //   The snapshot constants also serve as the Tier 2 DEV-ONLY fallback if the RPC fails.
     id: "rc",
-    title: "Recoverable Contribution",
+    title: "Money to Win Back",
     value: RECOVERABLE_TILE_VALUE,
     change: RECOVERABLE_TILE_CHANGE,
     status: RECOVERABLE_LOW > 0 || RECOVERABLE_HIGH > 0 ? "positive" : "neutral",
@@ -280,6 +250,53 @@ const KPI_CARDS: {
     text: "Refunds as a proportion of gross revenue.",
   },
 ];
+
+const KPI_EXPLANATIONS: Record<string, { means: string; matters: string }> = {
+  cm: {
+    means: "How much profit is left from each sale after variable costs.",
+    matters: "If this falls, growth can look healthy while cash quietly gets tighter.",
+  },
+  ns: {
+    means: "Sales after discounts, refunds and tax have been taken out.",
+    matters: "This is the money your business actually keeps from orders before costs.",
+  },
+  rc: {
+    means: "The monthly profit you may be able to recover from known weak spots.",
+    matters: "It shows where action could turn into cash, not just better reporting.",
+  },
+  cr: {
+    means: "How long your current cash could cover normal running costs.",
+    matters: "Shorter runway means less room to absorb mistakes or slow months.",
+  },
+  dd: {
+    means: "How much revenue is being given away through discounts.",
+    matters: "Heavy discounting can grow sales while shrinking the profit you keep.",
+  },
+  ae: {
+    means: "Whether paid marketing is getting more or less expensive.",
+    matters: "Rising acquisition costs can make new revenue less valuable.",
+  },
+  rpr: {
+    means: "How many customers are coming back to buy again.",
+    matters: "Repeat customers usually make growth cheaper and more resilient.",
+  },
+  mr: {
+    means: "Gross sales for the month before discounts and refunds.",
+    matters: "Useful directionally, but it only tells part of the profit story.",
+  },
+  np: {
+    means: "Estimated profit after fixed overheads.",
+    matters: "This shows whether the business is actually converting sales into profit.",
+  },
+  aov: {
+    means: "The average value of each order.",
+    matters: "Higher order values can improve profit if costs stay controlled.",
+  },
+  rr: {
+    means: "How much revenue is being lost to refunds.",
+    matters: "Refunds reduce sales quality and can add handling costs too.",
+  },
+};
 
 const TOP_DRIVERS: Driver[] = [
   {
@@ -897,343 +914,262 @@ export default function Dashboard() {
     <AppLayout>
 
       {/* ══ PAGE HEADER ═══════════════════════════════════════════════════════ */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Business Control Centre</h1>
-        <p className="text-muted-foreground mt-1 text-sm">See what changed this month, what it means for profit and cash, and where to act.</p>
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Weekly CFO Briefing</h1>
+        <p className="text-muted-foreground mt-1 text-sm">A plain-English view of what changed, what matters and where to act this week.</p>
         <DataPeriodLabel periodLabel={activePeriodLabel} loading={periodLoading} />
       </div>
 
-      {/* ══ BUSINESS HEALTH VERDICT HERO ════════════════════════════════════ */}
-      <div className="bg-card rounded-2xl shadow-sm border border-amber-200/70 dark:border-amber-800/30 mb-5 overflow-hidden">
-        {/* Overall verdict row */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 pt-5 pb-4 border-b border-amber-100 dark:border-amber-900/30">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="flex items-center justify-center w-11 h-11 rounded-full bg-amber-400 dark:bg-amber-500 shadow-md shadow-amber-400/30 shrink-0">
-              <span className="text-white font-black text-sm">!</span>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Overall Business Health</p>
-              <p className="text-xl font-black text-amber-700 dark:text-amber-400 tracking-tight">AMBER — Moderate Risk</p>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground leading-relaxed sm:max-w-sm">
-            The business remains profitable, but margin quality and acquisition efficiency are deteriorating, increasing pressure on cash.
-          </p>
-        </div>
-
-        {/* Inline £9.4k context strip */}
-        <div className="flex items-start gap-2.5 px-6 py-3 bg-amber-50/70 dark:bg-amber-950/15 border-b border-amber-100 dark:border-amber-900/20">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-          <p className="text-xs font-medium text-amber-800 dark:text-amber-300 leading-relaxed">
-            Contribution is down £9.4k vs last month, driven by higher fulfilment costs, weaker marketing efficiency and increased discounting.
-          </p>
-        </div>
-
-        {/* Free-only upgrade hint */}
-        {!isPro && (
-          <div className="px-6 py-2.5 bg-amber-50/40 dark:bg-amber-950/10 border-b border-amber-100/60 dark:border-amber-900/15">
-            <p className="text-xs text-amber-700/70 dark:text-amber-400/60 leading-relaxed">
-              We've identified {rcHeadlineStr} monthly improvement potential. Unlock the full recovery roadmap below.
-            </p>
-          </div>
-        )}
-
-        {/* Traffic-light scorecard */}
-        <div className="px-6 py-4">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 mb-5">
-            {[
-              { area: "Profitability",          label: "Healthy",               text: "Profitable. Margin pressure building.",                 style: "green" },
-              { area: "Margin Quality",          label: "Weakening",             text: "Below target. Deteriorating month-on-month.",           style: "amber" },
-              { area: "Cash Runway",             label: "Runway tightening",     text: "Positive. Runway shortening — monitor closely.",        style: "amber" },
-              { area: "Acquisition Efficiency",  label: "At risk",               text: "CAC rising. ROAS weakening.",                           style: "red"   },
-              { area: "Retention",               label: "Retention strengthening", text: "Repeat rate improving month-on-month.",               style: "green" },
-            ].map(({ area, label, text, style }) => (
-              <div key={area} className={cn(
-                "rounded-xl p-3 border flex flex-col gap-1.5",
-                style === "green" ? "bg-emerald-50 dark:bg-emerald-950/15 border-emerald-200/60 dark:border-emerald-800/30"
-                : style === "amber" ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200/60 dark:border-amber-700/30"
-                : "bg-rose-50 dark:bg-rose-950/15 border-rose-200/60 dark:border-rose-700/30"
-              )}>
-                <div className="flex items-center gap-1.5">
-                  <span className={cn(
-                    "w-2 h-2 rounded-full shrink-0",
-                    style === "green" ? "bg-emerald-500"
-                    : style === "amber" ? "bg-amber-400"
-                    : "bg-rose-500"
-                  )} />
-                  <span className={cn(
-                    "text-[11px] font-bold",
-                    style === "green" ? "text-emerald-700 dark:text-emerald-400"
-                    : style === "amber" ? "text-amber-700 dark:text-amber-400"
-                    : "text-rose-700 dark:text-rose-400"
-                  )}>{label}</span>
+      {/* ══ WEEKLY CFO BRIEFING ══════════════════════════════════════════════ */}
+      <section className="bg-card rounded-2xl shadow-sm border border-amber-200/70 dark:border-amber-800/30 mb-5 overflow-hidden">
+        <div className="px-6 py-6 border-b border-amber-100 dark:border-amber-900/30">
+          <div className="flex flex-col lg:flex-row lg:items-start gap-5">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-11 h-11 rounded-full bg-amber-400 dark:bg-amber-500 shadow-md shadow-amber-400/30 shrink-0">
+                  <AlertTriangle className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-[10px] font-semibold text-muted-foreground">{area}</p>
-                <p className="text-[10px] text-muted-foreground/70 leading-tight">{text}</p>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">This week's read</p>
+                  <p className="text-xl font-black text-amber-700 dark:text-amber-400 tracking-tight">Stable, but profit is getting squeezed</p>
+                </div>
               </div>
-            ))}
-          </div>
 
-          {/* Health position bar */}
-          <div className="flex items-center gap-0 rounded-xl overflow-hidden border border-border/40">
-            {[
-              { pos: "Strong",        active: false, done: true  },
-              { pos: "Stable",        active: false, done: true  },
-              { pos: "Moderate Risk", active: true,  done: false },
-              { pos: "High Risk",     active: false, done: false },
-              { pos: "Critical",      active: false, done: false },
-            ].map(({ pos, active, done }) => (
-              <div key={pos} className={cn(
-                "flex-1 text-center py-2 text-[10px] font-bold border-r border-border/30 last:border-0 transition-colors",
-                active  ? "bg-amber-400 dark:bg-amber-500 text-white"
-                : done  ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-500"
-                : "bg-secondary/40 text-muted-foreground/50"
-              )}>
-                {pos}
+              <div className="space-y-3 text-sm sm:text-base text-foreground/85 leading-relaxed max-w-4xl">
+                <p>
+                  Sales are still moving in the right direction, but you are keeping less profit from each sale because fulfilment costs, discounting and Meta spend increased faster than revenue.
+                </p>
+                <p>
+                  This week, focus on the controllable leaks first: reduce over-discounting, review fulfilment costs and pause weaker paid campaigns. The current opportunity is worth around <span className="font-bold text-emerald-700 dark:text-emerald-400">{rcHeadlineStr} per month</span> if the main fixes are acted on.
+                </p>
               </div>
-            ))}
-          </div>
+            </div>
 
-          {/* AI CFO inline actions */}
-          <div className="mt-4 pt-3 border-t border-border/30 flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide">Ask your AI CFO:</span>
-            <AiCfoInlineButtons pageId="dashboard" />
+            <div className="lg:w-72 rounded-xl border border-amber-200/60 dark:border-amber-800/30 bg-amber-50/70 dark:bg-amber-950/15 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-2">Why it matters</p>
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-200 leading-snug">
+                Contribution is down £9.4k vs last month. If this keeps drifting, growth will feel busy but leave less cash behind.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+        <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/40">
+          {[
+            { label: "Business health", value: "Moderate risk", tone: "amber", text: "Healthy enough to act calmly, but not a month to ignore." },
+            { label: "This week's focus", value: "3 fixes", tone: "primary", text: "Discounts, fulfilment and paid spend." },
+            { label: "Money at stake", value: `${rcHeadlineStr}/month`, tone: "emerald", text: "Estimated upside tied to the actions below." },
+          ].map(({ label, value, tone, text }) => (
+            <div key={label} className="px-6 py-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
+              <p className={cn(
+                "text-lg font-display font-bold mb-1",
+                tone === "amber" ? "text-amber-700 dark:text-amber-400"
+                : tone === "emerald" ? "text-emerald-700 dark:text-emerald-400"
+                : "text-foreground"
+              )}>
+                {value}
+              </p>
+              <p className="text-xs text-muted-foreground leading-snug">{text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <AiCfoAskCard pageId="dashboard" />
+      {/* ══ WHAT CHANGED ═════════════════════════════════════════════════════ */}
+      <TopDrivers
+        drivers={TOP_DRIVERS.slice(0, 5)}
+        isPro={hasDriverDetail}
+        title="What changed"
+        subtitle="The biggest movements behind this week's briefing."
+      />
 
-      {/* ══ RECOVERABLE CONTRIBUTION OPPORTUNITY ════════════════════════════ */}
-      <div className="bg-card rounded-2xl shadow-sm border border-emerald-200/70 dark:border-emerald-800/40 mb-5 overflow-hidden">
+      <AiCfoAskCard pageId="dashboard" className="mb-8" />
+
+      {/* ══ THIS WEEK'S FOCUS ═══════════════════════════════════════════════ */}
+      <section className="sc-purple rounded-2xl shadow-sm mb-5 overflow-hidden">
+        <div className="sc-purple-header flex flex-col sm:flex-row sm:items-center gap-2.5 px-6 py-3.5">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">This week's focus</span>
+          </div>
+          <span className="text-xs text-indigo-300/60 sm:ml-auto">Prioritised by likely profit impact</span>
+        </div>
+        <div className="px-6 py-5">
+          <div className="grid lg:grid-cols-3 gap-4">
+            {PRIORITY_ACTIONS.map((action, i) => {
+              const actionCopy = [
+                {
+                  title: "Review courier mix and shipping thresholds",
+                  reason: "Fulfilment is the biggest drag this month. Check courier rates, free-shipping thresholds and packaging cost per order.",
+                },
+                {
+                  title: "Reduce over-discounting on repeat customers",
+                  reason: "Returning customers already know the brand. Blanket discounts here are likely giving away profit you could keep.",
+                },
+                {
+                  title: "Pause weak-performing Meta campaigns",
+                  reason: "Meta is getting more expensive. Shift budget away from campaigns that are not producing profitable orders.",
+                },
+              ][i];
+              const locked = !isPro && i > 0;
+
+              return (
+                <div
+                  key={action.title}
+                  className={cn(
+                    "rounded-xl border p-4 relative overflow-hidden",
+                    locked ? "border-indigo-800/20 bg-indigo-950/20" : "border-indigo-800/30 bg-indigo-950/30"
+                  )}
+                >
+                  {locked && (
+                    <div className="absolute inset-0 bg-indigo-950/55 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/80 border border-border/50">
+                        <Lock className="w-3 h-3 text-muted-foreground/60" />
+                        <span className="text-[11px] font-semibold text-muted-foreground/60">Pro only</span>
+                      </div>
+                    </div>
+                  )}
+                  <div className={cn(locked && "blur-[2px] opacity-50")}>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-200 border border-indigo-500/20">
+                        Priority {i + 1}
+                      </span>
+                      <TimingBadge timing={action.timing} />
+                    </div>
+                    <p className="text-sm font-semibold text-foreground mb-2 leading-snug">{actionCopy.title}</p>
+                    <p className="text-xs text-foreground/75 leading-snug mb-3">{actionCopy.reason}</p>
+                    <p className="text-xs font-bold text-emerald-400">{action.impact}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-5">
+            <Link href={isPro ? "/profit-opportunities" : "/upgrade"} className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+              {isPro ? "View full action plan" : "Unlock full prioritised action plan"}
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+            <Link href="/scenario-lab" className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-300 hover:text-indigo-200 transition-colors">
+              Model the impact <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ══ MONEY YOU CAN WIN BACK ══════════════════════════════════════════ */}
+      <section className="bg-card rounded-2xl shadow-sm border border-emerald-200/70 dark:border-emerald-800/40 mb-8 overflow-hidden">
         <div className="flex items-center gap-2.5 px-6 py-3 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-200/60 dark:border-emerald-800/30">
           <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-            {isPro ? "Recoverable contribution available immediately" : "Recoverable contribution identified"}
+          <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Money you can win back</span>
+          <span className="ml-auto hidden sm:inline-flex text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
+            Tied to this week's actions
           </span>
         </div>
         <div className="px-6 py-5">
-          {isPro ? (
-            /* ── Pro layout ─────────────────────────────────────────────────── */
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-              <div className="flex-1">
-                {/*
-                  Live value from opportunity_breakdown() RPC — recoverableLow / recoverableHigh
-                  are the summed impact_low / impact_high across all non-archived opportunity rows.
-                  Falls back to RECOVERABLE_LOW / RECOVERABLE_HIGH (business-snapshot.ts) while
-                  loading or if the RPC fails.  See oppBreakdown state and rcHeadlineStr derivation.
-                */}
-                <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
-                  {rcHeadlineStr}
-                  <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
-                </p>
-                <p className="text-sm text-foreground font-medium mb-1">
-                  Analysis has identified recoverable contribution across margin, marketing and fulfilment.
-                </p>
-                <p className="text-xs text-muted-foreground mb-3 leading-snug">Principal recovery achievable within 30–60 days.</p>
-                <div className="flex items-center gap-3 flex-wrap mb-2">
-                  {/*
-                    DEV-ONLY — "£12k within 30 days" and "£30k within 90 days" are
-                    hardcoded horizon sub-ranges from the opportunity-engine snapshot.
-                    Replace with computed values once the opportunities table tracks a
-                    horizon or deadline field per opportunity row.
-                  */}
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/30">
-                    £12k within 30 days
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-500 border border-emerald-200/40 dark:border-emerald-800/30">
-                    £30k within 90 days
-                  </span>
-                </div>
-                <ConfidenceBadge
-                  level="Medium-High"
-                  helper="Based on 90-day trading data, discount history and channel performance trends."
-                />
-                <div className="mt-3 flex items-center gap-2 flex-wrap">
-                  <AiCfoInlineButtons pageId="dashboard" />
-                </div>
-              </div>
-              <div className="shrink-0 sm:pt-2">
-                <Link href="/profit-opportunities" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
-                  See action plan <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          ) : (
-            /* ── Free layout: show headline value, gate the detail ─────────── */
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-              <div className="flex-1">
-                {/*
-                  Live value from opportunity_breakdown() RPC — same rcHeadlineStr as Pro layout.
-                  Falls back to RECOVERABLE_LOW / RECOVERABLE_HIGH (business-snapshot.ts) while
-                  loading or if the RPC fails.  See oppBreakdown state and rcHeadlineStr derivation.
-                */}
-                <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
-                  {rcHeadlineStr}
-                  <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
-                </p>
-                <p className="text-sm text-foreground font-medium mb-1">
-                  Analysis has identified recoverable contribution across margin, marketing and fulfilment.
-                </p>
-                <p className="text-xs text-muted-foreground mb-3 leading-snug">Principal recovery achievable within 30–60 days.</p>
-                <div className="flex items-center gap-3 flex-wrap mb-4">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary text-muted-foreground/40 border border-border/40 blur-[2px] select-none pointer-events-none">
-                    <Lock className="w-3 h-3" /> £12k within 30 days
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-secondary text-muted-foreground/40 border border-border/40 blur-[2px] select-none pointer-events-none">
-                    <Lock className="w-3 h-3" /> £30k within 90 days
-                  </span>
-                </div>
-                <div className="mb-1">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Opportunity sources identified</p>
-                  <ul className="space-y-1.5">
-                    {[
-                      "Fulfilment cost optimisation",
-                      "Discount discipline improvements",
-                      "Channel reallocation potential",
-                      "Pricing leakage recovery",
-                    ].map(src => (
-                      <li key={src} className="flex items-center gap-2 text-xs text-muted-foreground/50 select-none">
-                        <Lock className="w-3 h-3 shrink-0 text-muted-foreground/30" />
-                        <span className="blur-[2px]">{src}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              <div className="shrink-0 sm:pt-2">
-                <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-                  <Lock className="w-3.5 h-3.5" /> Unlock the full opportunity breakdown
-                  <ChevronRight className="w-4 h-4" />
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ══ WHAT TO FOCUS ON THIS WEEK ══════════════════════════════════════ */}
-      <div className="sc-purple rounded-2xl shadow-sm mb-5 overflow-hidden">
-        <div className="sc-purple-header flex items-center gap-2.5 px-6 py-3.5">
-          <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">What to focus on this week</span>
-        </div>
-        <div className="px-6 py-5">
-          {isPro ? (
-            <div className="space-y-4">
-              <p className="text-xs text-indigo-300/70 leading-snug mb-1">
-                Key drivers behind the {rcHeadlineStr} opportunity. Address in priority order for fastest contribution recovery.
+          <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+            <div className="flex-1">
+              {/*
+                Live value from opportunity_breakdown() RPC — recoverableLow / recoverableHigh
+                are the summed impact_low / impact_high across all non-archived opportunity rows.
+                Falls back to RECOVERABLE_LOW / RECOVERABLE_HIGH (business-snapshot.ts) while
+                loading or if the RPC fails.  See oppBreakdown state and rcHeadlineStr derivation.
+              */}
+              <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
+                {rcHeadlineStr}
+                <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
               </p>
-              {CFO_INSIGHT.weeklyPriorities.map((priority, i) => (
-                <div
-                  key={i}
-                  className="grid sm:grid-cols-[1fr_1.5fr_1fr] gap-x-6 gap-y-1.5 border-b border-indigo-800/30 last:border-0 pb-4 last:pb-0"
-                >
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-400/60 mb-1">Action</p>
-                    <p className="text-sm font-semibold text-foreground leading-snug">{priority.action}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-400/60 mb-1">Why it matters</p>
-                    <p className="text-sm text-foreground/80 leading-snug">{priority.why}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-400/60 mb-1">Estimated impact</p>
-                    <p className="text-sm font-medium text-emerald-400 leading-snug">{priority.impact}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>
-              <p className="text-sm font-medium text-foreground leading-relaxed mb-3">
-                Three high-impact actions identified for this week.
+              <p className="text-sm text-foreground font-medium mb-2">
+                This is the estimated monthly upside from fixing the main profit leaks already highlighted above.
               </p>
-              <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-                <Lock className="w-3.5 h-3.5" /> Unlock this week's action plan <ChevronRight className="w-4 h-4" />
-              </a>
+              <p className="text-xs text-muted-foreground mb-3 leading-snug">
+                Most of the recovery should be reachable within 30-60 days if the actions are followed through.
+              </p>
+              <ConfidenceBadge
+                level="Medium-High"
+                helper="Based on 90-day trading data, discount history and channel performance trends."
+              />
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* ══ EXPECTED IMPACT IF IMPLEMENTED ══════════════════════════════════ */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
-        <div className="flex items-center gap-2.5 px-6 py-3.5 bg-secondary/60 border-b border-border/40">
-          <Sparkles className="w-4 h-4 text-primary shrink-0" />
-          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Projected impact if implemented</span>
-          <div className="ml-auto flex items-center gap-2 flex-wrap justify-end">
-            <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border/50">
-              Projected within 60–90 days
-            </span>
-            <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border/50">
-              Confidence: Medium-High
-            </span>
-            <span className="inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
-              Modelled plan
-            </span>
+            <div className="lg:w-[30rem]">
+              {/*
+                DEV-ONLY — all four projection values below are hardcoded snapshot figures.
+                Primary sources (Phase 2):
+                  "+£42k" contribution  → recoverableHigh from recoverable_contribution_range() RPC
+                  "+£64k" cash          → Xero cash balance improvement model (not yet built)
+                  "+0.8 months" runway  → computed (cash improvement / monthly_fixed_costs)
+                  "+4.2pp" margin       → target_cm_pct − current contribution_margin_pct() RPC
+                Do not ship these literal values to production — they will not match real store data.
+              */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {[
+                  { label: "Monthly profit upside", value: "+£42k" },
+                  { label: "Cash improvement", value: "+£64k" },
+                  { label: "Runway extension", value: "+0.8 months" },
+                  { label: "Margin improvement", value: "+4.2pp" },
+                ].map(({ label, value }) => (
+                  <div key={label} className="bg-emerald-50/70 dark:bg-emerald-950/20 rounded-xl p-3 border border-emerald-200/50 dark:border-emerald-800/25">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-400/70 mb-1">{label}</p>
+                    <p className="text-base font-bold text-emerald-700 dark:text-emerald-400">{value}</p>
+                  </div>
+                ))}
+              </div>
+              <Link href={isPro ? "/profit-opportunities" : "/upgrade"} className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
+                {isPro ? "See the full breakdown" : "Unlock the full opportunity breakdown"}
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </div>
-        <div className="px-6 py-5">
-          <p className="text-sm text-foreground leading-relaxed mb-5">
-            Scenario estimates if the recommended actions are implemented over the next 60–90 days.
-          </p>
-          {/*
-            DEV-ONLY — all four projection values below are hardcoded snapshot figures.
-            Primary sources (Phase 2):
-              "+£42k" contribution  → recoverableHigh from recoverable_contribution_range() RPC
-              "+£64k" cash          → Xero cash balance improvement model (not yet built)
-              "+0.8 months" runway  → computed (cash improvement / monthly_fixed_costs)
-              "+4.2pp" margin       → target_cm_pct − current contribution_margin_pct() RPC
-            Do not ship these literal values to production — they will not match real store data.
-          */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-            {[
-              { label: "Projected contribution / month", value: "+£42k",       color: "emerald" },
-              { label: "Projected cash improvement",     value: "+£64k",       color: "emerald" },
-              { label: "Projected runway extension",     value: "+0.8 months", color: "emerald" },
-              { label: "Projected margin improvement",   value: "+4.2pp",      color: "emerald" },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="bg-secondary/40 rounded-xl p-3 text-center">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
-                <p className={cn("text-base font-bold", color === "emerald" ? "text-emerald-600 dark:text-emerald-400" : "text-primary")}>
-                  {value}
-                </p>
-              </div>
-            ))}
-          </div>
-          <Link href="/scenario-lab" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-            Model this plan <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </div>
+      </section>
 
       {/* ══ KPI GRID ═════════════════════════════════════════════════════════ */}
       {/* Three diagnostic rows: health → quality → efficiency               */}
-      <div className="mb-8 space-y-6">
+      <section className="mb-8 rounded-2xl border border-border/40 bg-card/60 p-5 shadow-sm">
+        <div className="mb-5">
+          <h3 className="font-bold text-lg text-foreground">Key numbers behind the briefing</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">Supporting evidence for the story above. Use these when you want the detail.</p>
+        </div>
+        <div className="space-y-5">
         {([
-          { label: "Business health summary",            ids: ["ns","cm","rc","cr"], cols: "lg:grid-cols-4" },
-          { label: "Revenue quality diagnostics",         ids: ["mr","aov","rpr","dd"], cols: "lg:grid-cols-4" },
-          { label: "Efficiency and profit leakage",       ids: ["ae","rr","np"],       cols: "lg:grid-cols-3" },
+          { label: "Profit and cash",       ids: ["ns","cm","rc","cr"], cols: "lg:grid-cols-4" },
+          { label: "Sales quality",         ids: ["mr","aov","rpr","dd"], cols: "lg:grid-cols-4" },
+          { label: "Marketing and leakage", ids: ["ae","rr","np"],       cols: "lg:grid-cols-3" },
         ] as { label: string; ids: string[]; cols: string }[]).map(({ label, ids, cols }) => {
           const row = ids.map(id => liveKpiCards.find(c => c.id === id)!);
           return (
             <div key={label}>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mb-3">{label}</p>
-              <div className={cn("grid grid-cols-2 gap-4", cols)}>
+              <div className={cn("grid grid-cols-2 gap-3", cols)}>
                 {row.map(kpi => (
                   <div
                     key={kpi.id}
                     className={cn(
-                      "bg-card rounded-2xl p-5 shadow-sm border",
+                      "bg-background/60 dark:bg-slate-950/35 rounded-xl p-4 border",
                       kpi.id === "rc"
                         ? "border-emerald-300/60 dark:border-emerald-700/50"
                         : "border-border/50"
                     )}
                   >
-                    <p className="text-sm font-medium text-muted-foreground mb-1">{kpi.title}</p>
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <p className="text-sm font-medium text-muted-foreground">{kpi.title}</p>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label={`What ${kpi.title} means`}
+                            className="mt-0.5 rounded-full text-muted-foreground/45 hover:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          >
+                            <Info className="w-3.5 h-3.5" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs bg-slate-950 text-white">
+                          <p className="font-semibold mb-1">{KPI_EXPLANATIONS[kpi.id]?.means}</p>
+                          <p className="text-white/75">{KPI_EXPLANATIONS[kpi.id]?.matters}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <p className={cn(
-                      "text-2xl font-display font-bold mb-2",
+                      "text-xl font-display font-bold mb-2",
                       kpi.id === "rc" ? "text-emerald-700 dark:text-emerald-400" : "text-foreground"
                     )}>
                       {kpi.value}
@@ -1278,136 +1214,8 @@ export default function Dashboard() {
             </div>
           );
         })}
-      </div>
-
-      {/* ══ PRIORITY ACTIONS THIS MONTH ══════════════════════════════════════ */}
-      <div className="mb-8">
-        <div className="mb-5">
-          <h3 className="font-bold text-xl text-foreground">Priority actions this month</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Focus on the highest-impact actions first.</p>
-          <div className="h-px bg-border/60 mt-3" />
         </div>
-
-        {isPro ? (
-          /* ── Pro: all 3 actions, fully unlocked ─────────────────────────── */
-          <>
-            <div className="grid sm:grid-cols-3 gap-4 mb-4">
-              {PRIORITY_ACTIONS.map(action => (
-                <div key={action.title} className={cn(
-                  "bg-card rounded-2xl p-5 shadow-sm border",
-                  action.color === "red"    ? "border-rose-200/60 dark:border-rose-800/30"
-                  : action.color === "orange" ? "border-orange-200/60 dark:border-orange-800/30"
-                  : "border-border/50"
-                )}>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className={cn(
-                      "text-[11px] font-bold px-2.5 py-1 rounded-full",
-                      action.color === "red"    ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
-                      : action.color === "orange" ? "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
-                      : "bg-secondary text-muted-foreground"
-                    )}>
-                      {action.badge}
-                    </span>
-                    <TimingBadge timing={action.timing} />
-                  </div>
-                  <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
-                  <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">{action.impact}</p>
-                  <p className="text-xs text-muted-foreground leading-snug mb-4">{action.reason}</p>
-                  <div className="flex items-center gap-3 pt-3 border-t border-border/40">
-                    <Link href="/scenario-lab" className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
-                      Model impact <ArrowRight className="w-3 h-3" />
-                    </Link>
-                    <span className="inline-flex items-center text-xs font-medium text-muted-foreground/50 cursor-default select-none border border-border/40 rounded-md px-2 py-0.5">
-                      Mark as done
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Link href="/profit-opportunities" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-              View full action plan <ArrowRight className="w-4 h-4" />
-            </Link>
-          </>
-        ) : (
-          /* ── Free: action 1 visible, actions 2+3 locked ─────────────────── */
-          <>
-            <div className="grid sm:grid-cols-3 gap-4 mb-4">
-              {/* Action 1 — fully visible */}
-              {(() => {
-                const action = PRIORITY_ACTIONS[0];
-                return (
-                  <div className="bg-card rounded-2xl p-5 shadow-sm border border-rose-200/60 dark:border-rose-800/30">
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400">
-                        {action.badge}
-                      </span>
-                      <TimingBadge timing={action.timing} />
-                    </div>
-                    <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
-                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-2">{action.impact}</p>
-                    <p className="text-xs text-muted-foreground leading-snug mb-4">{action.reason}</p>
-                    <div className="flex items-center gap-3 pt-3 border-t border-border/40">
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary/50 cursor-default select-none">
-                        Model impact <ArrowRight className="w-3 h-3" />
-                      </span>
-                      <span className="inline-flex items-center text-xs font-medium text-muted-foreground/50 cursor-default select-none border border-border/40 rounded-md px-2 py-0.5">
-                        Mark as done
-                      </span>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Actions 2 & 3 — blurred/locked */}
-              {PRIORITY_ACTIONS.slice(1).map(action => (
-                <div key={action.title} className={cn(
-                  "bg-card rounded-2xl p-5 shadow-sm border relative select-none pointer-events-none",
-                  action.color === "red"    ? "border-rose-200/30 dark:border-rose-800/15"
-                  : "border-orange-200/30 dark:border-orange-800/15"
-                )}>
-                  <div className="absolute inset-0 rounded-2xl bg-card/60 backdrop-blur-[3px] z-10 flex items-center justify-center">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/80 border border-border/50">
-                      <Lock className="w-3 h-3 text-muted-foreground/60" />
-                      <span className="text-[11px] font-semibold text-muted-foreground/60">Pro only</span>
-                    </div>
-                  </div>
-                  <div className="blur-[3px] opacity-50">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={cn(
-                        "text-[11px] font-bold px-2.5 py-1 rounded-full",
-                        action.color === "red"    ? "bg-rose-100 text-rose-700"
-                        : "bg-orange-100 text-orange-600"
-                      )}>
-                        {action.badge}
-                      </span>
-                    </div>
-                    <p className="text-sm font-semibold text-foreground mb-1.5 leading-snug">{action.title}</p>
-                    <p className="text-xs font-bold text-emerald-600 mb-2">{action.impact}</p>
-                    <p className="text-xs text-muted-foreground leading-snug">{action.reason}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <p className="text-sm text-muted-foreground">
-                2 more priority actions available on Pro.
-              </p>
-              <a href="/upgrade" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors whitespace-nowrap">
-                <Lock className="w-3.5 h-3.5" /> Unlock full prioritised action plan <ChevronRight className="w-4 h-4" />
-              </a>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* ══ WHAT CHANGED AND WHY IT MATTERS ══════════════════════════════════ */}
-      <TopDrivers
-        drivers={TOP_DRIVERS}
-        isPro={hasDriverDetail}
-        title="What changed this month"
-        subtitle="The biggest movements behind this month's financial performance."
-      />
+      </section>
 
       {/* ══ FREE UPGRADE PROMPT ═══════════════════════════════════════════════ */}
       {!isPro && (
@@ -1424,11 +1232,11 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ══ EXPLORE THE DETAILED ENGINES ═════════════════════════════════════ */}
+      {/* ══ GO DEEPER ════════════════════════════════════════════════════════ */}
       <div className="mb-8">
         <div className="mb-5">
-          <h3 className="font-bold text-xl text-foreground">Explore the detailed engines</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Go deeper on the areas driving profit, cash and growth quality.</p>
+          <h3 className="font-bold text-lg text-foreground">Go deeper</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">Open a focused view when you want to investigate one area in more detail.</p>
           <div className="h-px bg-border/60 mt-3" />
         </div>
 
@@ -1437,10 +1245,10 @@ export default function Dashboard() {
             <Link
               key={mod.id}
               href={mod.href}
-              className="bg-card rounded-2xl p-5 border border-border/50 hover:border-primary/30 hover:shadow-md transition-all group block"
+              className="bg-card/70 rounded-xl p-4 border border-border/40 hover:border-primary/30 hover:shadow-sm transition-all group block"
             >
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{mod.title}</p>
-              <p className="text-base font-bold text-foreground mb-1.5 leading-snug">{mod.headline}</p>
+              <p className="text-sm font-bold text-foreground mb-1.5 leading-snug">{mod.headline}</p>
               <p className="text-xs text-muted-foreground leading-snug mb-4">{mod.subtitle}</p>
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:gap-2 transition-all">
                 {mod.cta} <ArrowRight className="w-3.5 h-3.5" />

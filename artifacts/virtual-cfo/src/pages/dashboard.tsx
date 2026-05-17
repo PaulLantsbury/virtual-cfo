@@ -14,12 +14,11 @@ import {
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
-import { TopDrivers, type Driver } from "@/components/TopDrivers";
+import { type Driver } from "@/components/TopDrivers";
 import { canAccess } from "@/lib/plan";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
-import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MONTHLY_CM_PCT, MONTHLY_REVENUE, MONTHLY_OPERATING_PROFIT, RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
 import { supabase } from "@/lib/supabase";
@@ -84,6 +83,18 @@ function opProfitStatus(v: number): KpiStatus {
   if (v < 0) return "danger";
   if (v > 0) return "positive";
   return "neutral";
+}
+
+function getSafeKpiDisplay(kpi: { value: string; change: string }) {
+  const value = kpi.value.trim();
+  const looksBroken = value === "" || value.includes("NaN") || value.includes("Infinity");
+  const looksLikeLoadingZero = (value === "£0" || value === "0%") && kpi.change.trim() === "";
+
+  if (looksBroken || looksLikeLoadingZero) {
+    return { value: "Awaiting live data", unavailable: true };
+  }
+
+  return { value, unavailable: false };
 }
 
 // Tile IDs (id field below) are the internal short codes for each KPI card.
@@ -914,16 +925,16 @@ export default function Dashboard() {
     <AppLayout>
 
       {/* ══ PAGE HEADER ═══════════════════════════════════════════════════════ */}
-      <div className="mb-4">
+      <div className="mb-5">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Weekly CFO Briefing</h1>
-        <p className="text-muted-foreground mt-1 text-sm">A plain-English view of what changed, what matters and where to act this week.</p>
+        <p className="text-muted-foreground mt-1 text-sm">What changed, what to do first, and where the money is hiding.</p>
         <DataPeriodLabel periodLabel={activePeriodLabel} loading={periodLoading} />
       </div>
 
       {/* ══ WEEKLY CFO BRIEFING ══════════════════════════════════════════════ */}
-      <section className="bg-card rounded-2xl shadow-sm border border-amber-200/70 dark:border-amber-800/30 mb-5 overflow-hidden">
-        <div className="px-6 py-6 border-b border-amber-100 dark:border-amber-900/30">
-          <div className="flex flex-col lg:flex-row lg:items-start gap-5">
+      <section className="bg-card rounded-2xl shadow-sm border border-amber-200/60 dark:border-amber-800/25 mb-8 overflow-hidden">
+        <div className="px-6 py-7 border-b border-amber-100/80 dark:border-amber-900/25">
+          <div className="flex flex-col lg:flex-row lg:items-start gap-6">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center justify-center w-11 h-11 rounded-full bg-amber-400 dark:bg-amber-500 shadow-md shadow-amber-400/30 shrink-0">
@@ -931,33 +942,33 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">This week's read</p>
-                  <p className="text-xl font-black text-amber-700 dark:text-amber-400 tracking-tight">Stable, but profit is getting squeezed</p>
+                  <p className="text-xl font-black text-amber-700 dark:text-amber-400 tracking-tight">Healthy, but drifting</p>
                 </div>
               </div>
 
               <div className="space-y-3 text-sm sm:text-base text-foreground/85 leading-relaxed max-w-4xl">
                 <p>
-                  Sales are still moving in the right direction, but you are keeping less profit from each sale because fulfilment costs, discounting and Meta spend increased faster than revenue.
+                  Sales are still moving in the right direction, but the business is keeping less profit from each order. Fulfilment inflation, heavier discounting and rising Meta costs are absorbing more of the revenue before it turns into cash.
                 </p>
                 <p>
-                  This week, focus on the controllable leaks first: reduce over-discounting, review fulfilment costs and pause weaker paid campaigns. The current opportunity is worth around <span className="font-bold text-emerald-700 dark:text-emerald-400">{rcHeadlineStr} per month</span> if the main fixes are acted on.
+                  Start with the leaks you can control this week: shipping economics, repeat-customer discounts and weak paid campaigns. The current opportunity is worth around <span className="font-bold text-emerald-700 dark:text-emerald-400">{rcHeadlineStr} per month</span> if the main fixes are acted on.
                 </p>
               </div>
             </div>
 
-            <div className="lg:w-72 rounded-xl border border-amber-200/60 dark:border-amber-800/30 bg-amber-50/70 dark:bg-amber-950/15 p-4">
+            <div className="lg:w-80 rounded-xl border border-amber-200/50 dark:border-amber-800/25 bg-amber-50/60 dark:bg-amber-950/10 p-4">
               <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-2">Why it matters</p>
               <p className="text-sm font-medium text-amber-900 dark:text-amber-200 leading-snug">
-                Contribution is down £9.4k vs last month. If this keeps drifting, growth will feel busy but leave less cash behind.
+                You generated roughly £9.4k less contribution than last month. If this keeps drifting, growth will feel busy but leave less cash behind.
               </p>
             </div>
           </div>
         </div>
-        <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/40">
+        <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/30 bg-secondary/15">
           {[
-            { label: "Business health", value: "Moderate risk", tone: "amber", text: "Healthy enough to act calmly, but not a month to ignore." },
-            { label: "This week's focus", value: "3 fixes", tone: "primary", text: "Discounts, fulfilment and paid spend." },
-            { label: "Money at stake", value: `${rcHeadlineStr}/month`, tone: "emerald", text: "Estimated upside tied to the actions below." },
+            { label: "Business health", value: "Profitability tightening", tone: "amber", text: "Still manageable, but the trend needs attention." },
+            { label: "Do first", value: "Fix the leaks", tone: "primary", text: "Fulfilment, discounting and weak paid spend." },
+            { label: "Money at stake", value: `${rcHeadlineStr}/month`, tone: "emerald", text: "Estimated upside tied to this week's actions." },
           ].map(({ label, value, tone, text }) => (
             <div key={label} className="px-6 py-4">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
@@ -975,27 +986,22 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ══ WHAT CHANGED ═════════════════════════════════════════════════════ */}
-      <TopDrivers
-        drivers={TOP_DRIVERS.slice(0, 5)}
-        isPro={hasDriverDetail}
-        title="What changed"
-        subtitle="The biggest movements behind this week's briefing."
-      />
-
-      <AiCfoAskCard pageId="dashboard" className="mb-8" />
-
       {/* ══ THIS WEEK'S FOCUS ═══════════════════════════════════════════════ */}
-      <section className="sc-purple rounded-2xl shadow-sm mb-5 overflow-hidden">
-        <div className="sc-purple-header flex flex-col sm:flex-row sm:items-center gap-2.5 px-6 py-3.5">
+      <section className="sc-purple rounded-2xl shadow-sm mb-7 overflow-hidden">
+        <div className="sc-purple-header flex flex-col sm:flex-row sm:items-center gap-2.5 px-6 py-4">
           <div className="flex items-center gap-2.5">
             <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
             <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">This week's focus</span>
           </div>
-          <span className="text-xs text-indigo-300/60 sm:ml-auto">Prioritised by likely profit impact</span>
+          <span className="text-xs text-indigo-300/60 sm:ml-auto">Do these first</span>
         </div>
-        <div className="px-6 py-5">
-          <div className="grid lg:grid-cols-3 gap-4">
+        <div className="px-6 py-6">
+          <div className="max-w-3xl mb-5">
+            <p className="text-sm text-foreground/85 leading-relaxed">
+              The fastest path is not more reporting. It is three practical controls that protect profit this week before the drift becomes normal.
+            </p>
+          </div>
+          <div className="divide-y divide-indigo-800/35">
             {PRIORITY_ACTIONS.map((action, i) => {
               const actionCopy = [
                 {
@@ -1017,34 +1023,37 @@ export default function Dashboard() {
                 <div
                   key={action.title}
                   className={cn(
-                    "rounded-xl border p-4 relative overflow-hidden",
-                    locked ? "border-indigo-800/20 bg-indigo-950/20" : "border-indigo-800/30 bg-indigo-950/30"
+                    "relative overflow-hidden py-5 first:pt-0 last:pb-0",
+                    locked && "min-h-28"
                   )}
                 >
                   {locked && (
-                    <div className="absolute inset-0 bg-indigo-950/55 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/80 border border-border/50">
+                    <div className="absolute inset-0 bg-indigo-950/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/80 border border-border/40">
                         <Lock className="w-3 h-3 text-muted-foreground/60" />
                         <span className="text-[11px] font-semibold text-muted-foreground/60">Pro only</span>
                       </div>
                     </div>
                   )}
-                  <div className={cn(locked && "blur-[2px] opacity-50")}>
-                    <div className="flex items-center justify-between gap-3 mb-3">
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-200 border border-indigo-500/20">
-                        Priority {i + 1}
-                      </span>
+                  <div className={cn("grid lg:grid-cols-[9rem_1fr_12rem] gap-3 lg:gap-6 items-start", locked && "blur-[2px] opacity-50")}>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/60 mb-2">Priority {i + 1}</p>
                       <TimingBadge timing={action.timing} />
                     </div>
-                    <p className="text-sm font-semibold text-foreground mb-2 leading-snug">{actionCopy.title}</p>
-                    <p className="text-xs text-foreground/75 leading-snug mb-3">{actionCopy.reason}</p>
-                    <p className="text-xs font-bold text-emerald-400">{action.impact}</p>
+                    <div>
+                      <p className="text-base font-semibold text-foreground mb-1.5 leading-snug">{actionCopy.title}</p>
+                      <p className="text-sm text-foreground/70 leading-relaxed">{actionCopy.reason}</p>
+                    </div>
+                    <div className="lg:text-right">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/50 mb-1">Likely impact</p>
+                      <p className="text-sm font-bold text-emerald-400">{action.impact}</p>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-6 pt-5 border-t border-indigo-800/35">
             <Link href={isPro ? "/profit-opportunities" : "/upgrade"} className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
               {isPro ? "View full action plan" : "Unlock full prioritised action plan"}
               <ChevronRight className="w-4 h-4" />
@@ -1057,16 +1066,13 @@ export default function Dashboard() {
       </section>
 
       {/* ══ MONEY YOU CAN WIN BACK ══════════════════════════════════════════ */}
-      <section className="bg-card rounded-2xl shadow-sm border border-emerald-200/70 dark:border-emerald-800/40 mb-8 overflow-hidden">
-        <div className="flex items-center gap-2.5 px-6 py-3 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-200/60 dark:border-emerald-800/30">
+      <section className="bg-card rounded-2xl shadow-sm border border-emerald-200/50 dark:border-emerald-800/25 mb-7 overflow-hidden">
+        <div className="flex items-center gap-2.5 px-6 py-3 bg-emerald-50/60 dark:bg-emerald-950/15 border-b border-emerald-200/40 dark:border-emerald-800/20">
           <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Money you can win back</span>
-          <span className="ml-auto hidden sm:inline-flex text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
-            Tied to this week's actions
-          </span>
         </div>
         <div className="px-6 py-5">
-          <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-start gap-5">
             <div className="flex-1">
               {/*
                 Live value from opportunity_breakdown() RPC — recoverableLow / recoverableHigh
@@ -1074,14 +1080,14 @@ export default function Dashboard() {
                 Falls back to RECOVERABLE_LOW / RECOVERABLE_HIGH (business-snapshot.ts) while
                 loading or if the RPC fails.  See oppBreakdown state and rcHeadlineStr derivation.
               */}
-              <p className="text-4xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
+              <p className="text-3xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
                 {rcHeadlineStr}
-                <span className="text-lg font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
+                <span className="text-base font-bold text-emerald-600/70 dark:text-emerald-500/70 ml-1">/ month</span>
               </p>
-              <p className="text-sm text-foreground font-medium mb-2">
+              <p className="text-sm text-foreground font-medium mb-2 max-w-2xl">
                 This is the estimated monthly upside from fixing the main profit leaks already highlighted above.
               </p>
-              <p className="text-xs text-muted-foreground mb-3 leading-snug">
+              <p className="text-xs text-muted-foreground mb-2.5 leading-snug max-w-2xl">
                 Most of the recovery should be reachable within 30-60 days if the actions are followed through.
               </p>
               <ConfidenceBadge
@@ -1090,7 +1096,7 @@ export default function Dashboard() {
               />
             </div>
 
-            <div className="lg:w-[30rem]">
+            <div className="lg:w-80">
               {/*
                 DEV-ONLY — all four projection values below are hardcoded snapshot figures.
                 Primary sources (Phase 2):
@@ -1100,16 +1106,14 @@ export default function Dashboard() {
                   "+4.2pp" margin       → target_cm_pct − current contribution_margin_pct() RPC
                 Do not ship these literal values to production — they will not match real store data.
               */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="space-y-3 mb-3.5">
                 {[
                   { label: "Monthly profit upside", value: "+£42k" },
-                  { label: "Cash improvement", value: "+£64k" },
-                  { label: "Runway extension", value: "+0.8 months" },
-                  { label: "Margin improvement", value: "+4.2pp" },
+                  { label: "Likely cash improvement", value: "+£64k" },
                 ].map(({ label, value }) => (
-                  <div key={label} className="bg-emerald-50/70 dark:bg-emerald-950/20 rounded-xl p-3 border border-emerald-200/50 dark:border-emerald-800/25">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-400/70 mb-1">{label}</p>
-                    <p className="text-base font-bold text-emerald-700 dark:text-emerald-400">{value}</p>
+                  <div key={label} className="flex items-baseline justify-between gap-4 border-t border-emerald-200/40 dark:border-emerald-800/20 pt-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700/65 dark:text-emerald-400/65">{label}</p>
+                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">{value}</p>
                   </div>
                 ))}
               </div>
@@ -1122,11 +1126,50 @@ export default function Dashboard() {
         </div>
       </section>
 
+      {/* ══ WHAT CHANGED ═════════════════════════════════════════════════════ */}
+      <section className="mb-7">
+        <div className="mb-3">
+          <h3 className="font-bold text-lg text-foreground">What changed</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">The movements behind the briefing, in plain English.</p>
+        </div>
+        <div className="divide-y divide-border/35 border-y border-border/35">
+          {TOP_DRIVERS.slice(0, 3).map((driver) => {
+            const trendLabel =
+              driver.trend === "improving" ? "Improving"
+              : driver.trend === "worsening" ? "Needs attention"
+              : "Stable";
+            const trendClasses =
+              driver.trend === "improving" ? "text-emerald-600 dark:text-emerald-400"
+              : driver.trend === "worsening" ? "text-amber-700 dark:text-amber-400"
+              : "text-muted-foreground";
+            const content = (
+              <div className="grid sm:grid-cols-[8.5rem_1fr] gap-1.5 sm:gap-4 py-3">
+                <p className={cn("text-[10px] font-bold uppercase tracking-wider", trendClasses)}>{trendLabel}</p>
+                <div>
+                  <p className="text-sm text-foreground leading-snug">{driver.text}</p>
+                  {hasDriverDetail && driver.proDetail && (
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{driver.proDetail}</p>
+                  )}
+                </div>
+              </div>
+            );
+
+            return driver.href ? (
+              <Link key={driver.id} href={driver.href} className="block hover:bg-secondary/25 transition-colors">
+                {content}
+              </Link>
+            ) : (
+              <div key={driver.id}>{content}</div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* ══ KPI GRID ═════════════════════════════════════════════════════════ */}
       {/* Three diagnostic rows: health → quality → efficiency               */}
       <section className="mb-8 rounded-2xl border border-border/40 bg-card/60 p-5 shadow-sm">
         <div className="mb-5">
-          <h3 className="font-bold text-lg text-foreground">Key numbers behind the briefing</h3>
+          <h3 className="font-bold text-lg text-foreground">Key Numbers Behind The Briefing</h3>
           <p className="text-sm text-muted-foreground mt-0.5">Supporting evidence for the story above. Use these when you want the detail.</p>
         </div>
         <div className="space-y-5">
@@ -1140,76 +1183,84 @@ export default function Dashboard() {
             <div key={label}>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mb-3">{label}</p>
               <div className={cn("grid grid-cols-2 gap-3", cols)}>
-                {row.map(kpi => (
-                  <div
-                    key={kpi.id}
-                    className={cn(
-                      "bg-background/60 dark:bg-slate-950/35 rounded-xl p-4 border",
-                      kpi.id === "rc"
-                        ? "border-emerald-300/60 dark:border-emerald-700/50"
-                        : "border-border/50"
-                    )}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <p className="text-sm font-medium text-muted-foreground">{kpi.title}</p>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            aria-label={`What ${kpi.title} means`}
-                            className="mt-0.5 rounded-full text-muted-foreground/45 hover:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                          >
-                            <Info className="w-3.5 h-3.5" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs bg-slate-950 text-white">
-                          <p className="font-semibold mb-1">{KPI_EXPLANATIONS[kpi.id]?.means}</p>
-                          <p className="text-white/75">{KPI_EXPLANATIONS[kpi.id]?.matters}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <p className={cn(
-                      "text-xl font-display font-bold mb-2",
-                      kpi.id === "rc" ? "text-emerald-700 dark:text-emerald-400" : "text-foreground"
-                    )}>
-                      {kpi.value}
-                    </p>
-                    <span className={cn(
-                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold mb-2",
-                      // changeSentiment takes precedence when a live delta is available.
-                      // undefined  → loading / unported tile → fall back to KpiStatus colour.
-                      // null       → no prior-period data ("—") → muted.
-                      kpi.changeSentiment === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
-                      : kpi.changeSentiment === "negative" ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
-                      : kpi.changeSentiment === "neutral" || kpi.changeSentiment === null
-                        ? "bg-secondary text-muted-foreground"
-                      // undefined: fall back to overall tile health colour
-                      : kpi.status === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
-                      : kpi.status === "warning"  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
-                      : kpi.status === "danger"   ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
-                      : "bg-secondary text-muted-foreground"
-                    )}>
-                      {/* Icon driven by sentiment when available, otherwise by status */}
-                      {kpi.changeSentiment === "positive" ? <ArrowUpRight  className="w-3 h-3" />
-                      : kpi.changeSentiment === "negative" ? <ArrowDownRight className="w-3 h-3" />
-                      : kpi.changeSentiment === "neutral"  ? <Minus          className="w-3 h-3" />
-                      : kpi.changeSentiment === null        ? null
-                      // undefined: status-based fallback
-                      : kpi.status === "positive" ? <ArrowUpRight  className="w-3 h-3" />
-                      : kpi.status === "danger"   ? <ArrowDownRight className="w-3 h-3" />
-                      : kpi.status === "warning"  ? <Minus          className="w-3 h-3" />
-                      : null}
-                      {kpi.change}
-                    </span>
-                    {/* Phase 2c — rolling 3m trend context (AOV and Net Profit only) */}
-                    {kpi.trendLine != null && (
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {kpi.trendLine.text}
+                {row.map(kpi => {
+                  const safeDisplay = getSafeKpiDisplay(kpi);
+
+                  return (
+                    <div
+                      key={kpi.id}
+                      className={cn(
+                        "bg-background/60 dark:bg-slate-950/35 rounded-xl p-4 border",
+                        kpi.id === "rc"
+                          ? "border-emerald-300/60 dark:border-emerald-700/50"
+                          : "border-border/50"
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="text-sm font-medium text-muted-foreground">{kpi.title}</p>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              aria-label={`What ${kpi.title} means`}
+                              className="mt-0.5 rounded-full text-muted-foreground/45 hover:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            >
+                              <Info className="w-3.5 h-3.5" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs bg-slate-950 text-white">
+                            <p className="font-semibold mb-1">{KPI_EXPLANATIONS[kpi.id]?.means}</p>
+                            <p className="text-white/75">{KPI_EXPLANATIONS[kpi.id]?.matters}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <p className={cn(
+                        "font-display font-bold mb-2",
+                        safeDisplay.unavailable
+                          ? "text-sm text-muted-foreground"
+                          : cn("text-xl", kpi.id === "rc" ? "text-emerald-700 dark:text-emerald-400" : "text-foreground")
+                      )}>
+                        {safeDisplay.value}
                       </p>
-                    )}
-                    <p className="text-xs text-muted-foreground/80 leading-snug border-t border-border/50 pt-2">{kpi.text}</p>
-                  </div>
-                ))}
+                      {!safeDisplay.unavailable && (
+                        <span className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold mb-2",
+                          // changeSentiment takes precedence when a live delta is available.
+                          // undefined  → loading / unported tile → fall back to KpiStatus colour.
+                          // null       → no prior-period data ("—") → muted.
+                          kpi.changeSentiment === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
+                          : kpi.changeSentiment === "negative" ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
+                          : kpi.changeSentiment === "neutral" || kpi.changeSentiment === null
+                            ? "bg-secondary text-muted-foreground"
+                          // undefined: fall back to overall tile health colour
+                          : kpi.status === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
+                          : kpi.status === "warning"  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
+                          : kpi.status === "danger"   ? "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"
+                          : "bg-secondary text-muted-foreground"
+                        )}>
+                          {/* Icon driven by sentiment when available, otherwise by status */}
+                          {kpi.changeSentiment === "positive" ? <ArrowUpRight  className="w-3 h-3" />
+                          : kpi.changeSentiment === "negative" ? <ArrowDownRight className="w-3 h-3" />
+                          : kpi.changeSentiment === "neutral"  ? <Minus          className="w-3 h-3" />
+                          : kpi.changeSentiment === null        ? null
+                          // undefined: status-based fallback
+                          : kpi.status === "positive" ? <ArrowUpRight  className="w-3 h-3" />
+                          : kpi.status === "danger"   ? <ArrowDownRight className="w-3 h-3" />
+                          : kpi.status === "warning"  ? <Minus          className="w-3 h-3" />
+                          : null}
+                          {kpi.change}
+                        </span>
+                      )}
+                      {/* Phase 2c — rolling 3m trend context (AOV and Net Profit only) */}
+                      {kpi.trendLine != null && !safeDisplay.unavailable && (
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {kpi.trendLine.text}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground/80 leading-snug border-t border-border/50 pt-2">{safeDisplay.unavailable ? "Available after the next successful data sync." : kpi.text}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );
@@ -1217,35 +1268,20 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ══ FREE UPGRADE PROMPT ═══════════════════════════════════════════════ */}
-      {!isPro && (
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-6 py-5 rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/30 mb-8">
-          <div className="flex-1">
-            <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-1">Upgrade to Pro to unlock the full CFO action plan</p>
-            <p className="text-xs text-indigo-700/80 dark:text-indigo-400/80 leading-snug">
-              Unlock scenario modelling, detailed opportunity breakdown, quantified action impact and monthly CFO report.
-            </p>
-          </div>
-          <a href="/upgrade" className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-md shadow-indigo-500/20">
-            Upgrade to Pro <ChevronRight className="w-4 h-4" />
-          </a>
-        </div>
-      )}
-
       {/* ══ GO DEEPER ════════════════════════════════════════════════════════ */}
       <div className="mb-8">
         <div className="mb-5">
           <h3 className="font-bold text-lg text-foreground">Go deeper</h3>
           <p className="text-sm text-muted-foreground mt-0.5">Open a focused view when you want to investigate one area in more detail.</p>
-          <div className="h-px bg-border/60 mt-3" />
+          <div className="h-px bg-border/40 mt-3" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5">
           {HEALTH_MODULES.map(mod => (
             <Link
               key={mod.id}
               href={mod.href}
-              className="bg-card/70 rounded-xl p-4 border border-border/40 hover:border-primary/30 hover:shadow-sm transition-all group block"
+              className="border-t border-border/40 pt-4 transition-colors group block hover:border-primary/30"
             >
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{mod.title}</p>
               <p className="text-sm font-bold text-foreground mb-1.5 leading-snug">{mod.headline}</p>

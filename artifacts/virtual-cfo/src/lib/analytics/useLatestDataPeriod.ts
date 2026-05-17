@@ -76,7 +76,8 @@ function getPeriod(monthsBack: number): {
   const month = d.getMonth() + 1; // getMonth() is 0-indexed
   const dateFrom = `${year}-${pad(month)}-01`;
   // Last day: day 0 of the following month = last day of this month
-  const dateTo = new Date(year, month, 0).toISOString().slice(0, 10);
+  const lastDay = new Date(year, month, 0).getDate();
+  const dateTo = `${year}-${pad(month)}-${pad(lastDay)}`;
   const label = d.toLocaleString("en-GB", { month: "short", year: "numeric" });
   return { dateFrom, dateTo, label };
 }

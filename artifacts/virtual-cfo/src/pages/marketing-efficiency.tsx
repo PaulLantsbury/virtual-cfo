@@ -4,7 +4,6 @@ import { Slider } from "@/components/ui/slider";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
-import { TimelineSelector } from "@/components/TimelineSelector";
 import { cn } from "@/lib/utils";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
@@ -516,7 +515,7 @@ export default function MarketingEfficiency() {
     <AppLayout>
 
       {/* ── Page header ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Marketing Efficiency
@@ -531,7 +530,6 @@ export default function MarketingEfficiency() {
             dateTo={dateTo}
           />
         </div>
-        <TimelineSelector />
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
@@ -546,7 +544,7 @@ export default function MarketingEfficiency() {
             CFO Channel Verdict
           </span>
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-destructive/15 text-destructive whitespace-nowrap">
-            Budget shift recommended
+            {isPro ? "Budget shift recommended" : "Opportunity identified"}
           </span>
         </div>
 
@@ -605,7 +603,7 @@ export default function MarketingEfficiency() {
               <p className="text-sm text-foreground leading-snug">
                 {isPro
                   ? "Tighten Meta spend first, then move budget toward owned and organic demand."
-                  : "Prioritise fixing inefficient paid acquisition before adding more budget."}
+                  : "A prioritised recovery plan has been identified."}
               </p>
             </div>
             <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">

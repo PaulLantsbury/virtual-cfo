@@ -432,6 +432,15 @@ const FREE_HEALTH_MODULE_CTAS: Record<(typeof HEALTH_MODULES)[number]["id"], str
   scenario:    "Unlock scenario modelling",
 };
 
+const FREE_HEALTH_MODULE_HEADLINES: Record<(typeof HEALTH_MODULES)[number]["id"], string> = {
+  profit:      "Margin recovery opportunity identified",
+  pricing:     "Pricing leakage detected",
+  growth:      "Growth quality concern detected",
+  acquisition: "Acquisition efficiency issue detected",
+  cash:        "Cash headroom opportunity identified",
+  scenario:    "Improvement scenarios available",
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
@@ -1335,7 +1344,7 @@ export default function Dashboard() {
               className="border-t border-border/40 pt-4 transition-colors group block hover:border-primary/30"
             >
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{mod.title}</p>
-              <p className="text-sm font-bold text-foreground mb-1.5 leading-snug">{mod.headline}</p>
+              <p className="text-sm font-bold text-foreground mb-1.5 leading-snug">{hasFullActionPlan ? mod.headline : FREE_HEALTH_MODULE_HEADLINES[mod.id]}</p>
               <p className="text-xs text-muted-foreground leading-snug mb-4">{mod.subtitle}</p>
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:gap-2 transition-all">
                 {hasFullActionPlan ? mod.cta : FREE_HEALTH_MODULE_CTAS[mod.id]} <ArrowRight className="w-3.5 h-3.5" />

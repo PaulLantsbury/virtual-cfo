@@ -165,6 +165,34 @@ const ME_OPPORTUNITIES: {
 /** @dynamic Sum of ppGain across ME_OPPORTUNITIES */
 const ME_TOTAL_PP = +ME_OPPORTUNITIES.reduce((s, o) => s + o.ppGain, 0).toFixed(1);
 
+const ACTION_GUIDANCE = [
+  {
+    why: "Meta CAC is now above the blended average, while Email and Organic generate stronger contribution per order.",
+    steps: [
+      "Pause the weakest Meta ad sets",
+      "Protect campaigns with clear repeat-purchase intent",
+      "Move 15% of Meta spend toward Email and Organic",
+      "Review CAC payback weekly",
+    ],
+  },
+  {
+    why: "Existing customers are already warm, so lifecycle activity can recover contribution without relying on more paid acquisition.",
+    steps: [
+      "Prioritise abandoned browse, post-purchase and win-back flows",
+      "Segment repeat customers from first-time buyer campaigns",
+      "Measure repeat purchase contribution, not email revenue alone",
+    ],
+  },
+  {
+    why: "Some paid revenue is growing with weak contribution, so budget should follow products and campaigns with stronger margin quality.",
+    steps: [
+      "Identify SKUs with above-average contribution margin",
+      "Shift paid acquisition toward those SKUs and campaigns",
+      "Reduce spend where revenue grows but contribution per order stays weak",
+    ],
+  },
+] as const;
+
 /**
  * Attribution of the last-30-day change in marketing contribution profit.
  * @dynamic Generated from period-over-period channel and cost analysis.
@@ -601,64 +629,83 @@ export default function MarketingEfficiency() {
       </div>
 
       {isPro ? (
-        <div className="rounded-2xl border border-border/60 shadow-sm mb-8 overflow-hidden bg-card">
-          <div className="divide-y divide-border/40">
-            {ME_OPPORTUNITIES.map((o, i) => (
-              <details key={o.shortLabel} className="group open:bg-secondary/10">
-                <summary className="list-none cursor-pointer px-6 py-4 hover:bg-secondary/20 transition-colors">
-                  <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">
+        <div className="space-y-4 mb-8">
+          {ME_OPPORTUNITIES.map((o, i) => {
+            const guidance = ACTION_GUIDANCE[i] ?? ACTION_GUIDANCE[0];
+            return (
+              <details
+                key={o.shortLabel}
+                open={i === 0}
+                className={cn(
+                  "group rounded-2xl border bg-card shadow-sm overflow-hidden",
+                  i === 0 ? "border-emerald-300 dark:border-emerald-700/60" : "border-border/60"
+                )}
+              >
+                <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
+                  <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-5 items-start">
                     <div className="flex items-start gap-3 min-w-0">
-                      <span className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                      <span className={cn(
+                        "flex items-center justify-center w-8 h-8 rounded-full shrink-0 text-xs font-bold",
+                        i === 0
+                          ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"
+                          : "bg-secondary text-muted-foreground"
+                      )}>
                         {i + 1}
                       </span>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
-                        <p className="text-xs text-muted-foreground mt-1 leading-snug">{o.detail}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-base font-bold text-foreground">{o.shortLabel}</p>
+                          {i === 0 && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                              Start Monday
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1 leading-snug">{o.detail}</p>
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                        £{o.cashImpact.toLocaleString()}
-                      </span>
-                      <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
-                        {o.confidence === "high" ? "High confidence" : "Medium confidence"}
-                      </span>
-                      <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
-                        {o.effort === "low" ? "Low effort" : "Medium effort"}
-                      </span>
-                      <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/25 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
-                        Next 30 days
-                      </span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto_auto_auto_auto] gap-2 lg:justify-end">
+                      <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-700/40 px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Recovery</p>
+                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums">+£{o.cashImpact.toLocaleString()}/mo</p>
+                      </div>
+                      <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Confidence</p>
+                        <p className="text-sm font-semibold text-foreground">{o.confidence === "high" ? "High" : "Medium"}</p>
+                      </div>
+                      <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Effort</p>
+                        <p className="text-sm font-semibold text-foreground">{o.effort === "low" ? "Low" : "Medium"}</p>
+                      </div>
+                      <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Timing</p>
+                        <p className="text-sm font-semibold text-foreground">30 days</p>
+                      </div>
                     </div>
                   </div>
                 </summary>
-                <div className="px-16 pb-4 -mt-1">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">How to start</p>
-                  <ul className="space-y-1.5 text-sm text-muted-foreground">
-                    {i === 0 && (
-                      <>
-                        <li>Pause the weakest Meta ad sets and protect campaigns with clear repeat-purchase intent.</li>
-                        <li>Move 15-25% of spend toward Email, Organic and lifecycle activity before increasing total budget.</li>
-                        <li>Review CAC payback weekly while the shift is live.</li>
-                      </>
-                    )}
-                    {i === 1 && (
-                      <>
-                        <li>Prioritise abandoned browse, post-purchase and win-back flows for existing customer demand.</li>
-                        <li>Measure repeat purchase contribution rather than email revenue alone.</li>
-                      </>
-                    )}
-                    {i === 2 && (
-                      <>
-                        <li>Focus paid acquisition on SKUs and campaigns with above-average contribution margin.</li>
-                        <li>Reduce spend where revenue is growing but contribution per order is weak.</li>
-                      </>
-                    )}
-                  </ul>
+                <div className="px-6 pb-5 -mt-1">
+                  <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-4 pl-11">
+                    <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Why this matters</p>
+                      <p className="text-sm text-foreground leading-relaxed">{guidance.why}</p>
+                    </div>
+                    <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">How to start</p>
+                      <ul className="space-y-1.5 text-sm text-foreground">
+                        {guidance.steps.map((step) => (
+                          <li key={step} className="flex items-start gap-2">
+                            <span className="mt-2 h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            <span className="leading-snug">{step}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </details>
-            ))}
-          </div>
+            );
+          })}
         </div>
       ) : (
         <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5">
@@ -670,7 +717,7 @@ export default function MarketingEfficiency() {
               <div>
                 <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Marketing Recovery Plan</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  3 prioritised actions identified. Upgrade to view the action plan, recommended budget moves and implementation steps.
+                  3 prioritised actions identified worth approximately £{liveEstimatedContribution.toLocaleString()} contribution recovery. Upgrade to view the action plan, recommended budget moves and implementation steps.
                 </p>
               </div>
             </div>

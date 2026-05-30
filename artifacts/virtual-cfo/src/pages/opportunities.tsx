@@ -389,7 +389,7 @@ export default function Opportunities() {
             </h2>
             <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">
               {topAction
-                ? `Contribution margin is currently below the healthy range, but the main issue is controllable leakage rather than weak demand. The fastest recovery comes from reducing repeat-customer discounting, tightening fulfilment costs and reallocating inefficient Meta spend. Together, the first actions could recover ${showHeadline ? `£${(liveTotalLow / 1000).toFixed(0)}k–£${(liveTotalHigh / 1000).toFixed(0)}k per month` : "meaningful monthly contribution"} without requiring new budget.`
+                ? `Contribution margin is below the healthy range, but the primary issues are discount leakage, rising acquisition costs and fulfilment pressure. Together, the actions below represent approximately ${showHeadline ? `£${(liveTotalLow / 1000).toFixed(0)}k–£${(liveTotalHigh / 1000).toFixed(0)}k per month` : "meaningful monthly contribution"} of recoverable contribution without requiring additional marketing spend.`
                 : loading
                   ? "Loading the current recovery plan."
                   : "No active execution actions were found for this period."}
@@ -455,7 +455,7 @@ export default function Opportunities() {
               <div key={opp.id} className={cn(
                 "rounded-xl border border-border/60 bg-background px-4 py-4 transition-colors",
                 idx === 0 && "border-emerald-300/60 bg-emerald-50/50 dark:border-emerald-800/50 dark:bg-emerald-950/10",
-                isExpanded && "ring-1 ring-primary/25",
+                isExpanded && "border-primary/40 bg-primary/[0.035] shadow-sm ring-1 ring-primary/20 dark:bg-primary/[0.08]",
               )}>
                 <button
                   type="button"
@@ -670,7 +670,7 @@ export default function Opportunities() {
             <div>
               <h3 className="font-semibold text-lg text-foreground">Cash release projects</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Valuable working-capital actions, kept separate from monthly contribution recovery.
+                These actions do not materially improve monthly contribution, but they can release trapped cash and strengthen runway.
                 {showUpliftValues && ` All identified value including cash release is £${(liveAllLow / 1000).toFixed(0)}k–£${(liveAllHigh / 1000).toFixed(0)}k.`}
               </p>
             </div>

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import {
   ArrowUpRight, ArrowDownRight, Minus,
   Sparkles, TrendingUp, AlertTriangle, ArrowRight,
-  ChevronRight, Lock, Info,
+  ChevronRight, Info,
 } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -1034,6 +1034,32 @@ export default function Dashboard() {
               const locked = !hasFullActionPlan;
               const freePrimary = i === 0;
 
+              if (locked && !freePrimary) {
+                return (
+                  <div key={action.title} className="py-5 first:pt-0 last:pb-0">
+                    <div className="grid lg:grid-cols-[9rem_1fr_12rem] gap-3 lg:gap-6 items-start">
+                      <div>
+                        <span className="inline-flex items-center rounded-full border border-indigo-300/15 bg-indigo-950/20 px-2.5 py-1 text-[11px] font-semibold text-indigo-200/60">
+                          Identified
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-base font-semibold text-foreground mb-1.5 leading-snug">
+                          Additional recovery opportunities identified
+                        </p>
+                        <p className="text-sm text-foreground/70 leading-relaxed">
+                          Upgrade to see the full prioritised action plan and implementation detail.
+                        </p>
+                      </div>
+                      <div className="lg:text-right">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/50 mb-1">Likely impact</p>
+                        <p className="text-sm font-bold text-indigo-200/60">Available on Pro</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div
                   key={action.title}
@@ -1042,32 +1068,22 @@ export default function Dashboard() {
                     locked && !freePrimary && "min-h-24"
                   )}
                 >
-                  {locked && !freePrimary && (
-                    <div className="absolute inset-0 bg-indigo-950/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/80 border border-border/40">
-                        <Lock className="w-3 h-3 text-muted-foreground/60" />
-                        <span className="text-[11px] font-semibold text-muted-foreground/60">Pro only</span>
-                      </div>
-                    </div>
-                  )}
                   <div className={cn("grid lg:grid-cols-[9rem_1fr_12rem] gap-3 lg:gap-6 items-start", locked && !freePrimary && "blur-[2px] opacity-50")}>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/60 mb-2">Priority {i + 1}</p>
                       {hasFullActionPlan ? (
-                        <TimingBadge timing={action.timing} />
+                        <>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/60 mb-2">Priority {i + 1}</p>
+                          <TimingBadge timing={action.timing} />
+                        </>
                       ) : freePrimary ? (
                         <span className="inline-flex items-center rounded-full border border-indigo-300/25 bg-indigo-950/25 px-2.5 py-1 text-[11px] font-semibold text-indigo-200/80">
                           Identified
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full border border-indigo-300/15 bg-indigo-950/20 px-2.5 py-1 text-[11px] font-semibold text-indigo-200/50">
-                          Locked
-                        </span>
-                      )}
+                      ) : null}
                     </div>
                     <div>
                       <p className="text-base font-semibold text-foreground mb-1.5 leading-snug">
-                        {hasFullActionPlan ? actionCopy.title : freePrimary ? "Highest-priority recovery opportunity identified" : `Priority ${i + 1} locked`}
+                        {hasFullActionPlan ? actionCopy.title : "Highest-priority recovery opportunity identified"}
                       </p>
                       <p className="text-sm text-foreground/70 leading-relaxed">
                         {hasFullActionPlan
@@ -1079,8 +1095,8 @@ export default function Dashboard() {
                     </div>
                     <div className="lg:text-right">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/50 mb-1">Likely impact</p>
-                      <p className={cn("text-sm font-bold", hasFullActionPlan || freePrimary ? "text-emerald-400" : "text-indigo-200/40")}>
-                        {hasFullActionPlan || freePrimary ? action.impact : "Locked"}
+                      <p className="text-sm font-bold text-emerald-400">
+                        {action.impact}
                       </p>
                     </div>
                   </div>

@@ -602,12 +602,6 @@ export default function MarketingEfficiency() {
   const liveWorstCpChannel = liveCpSortedDesc[liveCpSortedDesc.length - 1]?.channel ?? "Meta";
   const liveBestCpAmt      = liveCpSortedDesc[0]?.cp ?? 0;
   const liveWorstCpAmt     = liveCpSortedDesc[liveCpSortedDesc.length - 1]?.cp ?? 0;
-  const liveBestCpShare    = liveTotalAttributedCp > 0
-    ? Math.round(liveBestCpAmt / liveTotalAttributedCp * 100)
-    : 0;
-  const liveBestCpRevShare = liveTotalChannelRevenue > 0
-    ? Math.round((liveChannelCm.find((c) => c.channel === liveBestCpChannel)?.revenue ?? 0) / liveTotalChannelRevenue * 100)
-    : 0;
 
   // ── Budget Reallocation Simulator state ──────────────────────────────────
   const [metaToEmail,    setMetaToEmail]    = useState(0);
@@ -1160,17 +1154,31 @@ export default function MarketingEfficiency() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          §7  KEY NUMBERS BEHIND THE VERDICT
-          KPI support kept below the decision surface
-      ══════════════════════════════════════════════════════════════════════ */}
+      <details className="rounded-2xl border border-border/60 bg-card shadow-sm mb-8 overflow-hidden">
+        <summary className="list-none cursor-pointer px-6 py-4 hover:bg-secondary/20 transition-colors">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Detailed metrics, charts and driver diagnostics behind the recommendation.
+              </p>
+            </div>
+            <span className="text-sm font-semibold text-muted-foreground shrink-0">View details ▼</span>
+          </div>
+        </summary>
 
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-foreground">Key Numbers Behind The Verdict</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          The core metrics supporting the channel allocation recommendation.
-        </p>
-      </div>
+        <div className="px-6 pb-6">
+          {/* ══════════════════════════════════════════════════════════════════════
+              KEY NUMBERS BEHIND THE VERDICT
+              KPI support kept below the decision surface
+          ══════════════════════════════════════════════════════════════════════ */}
+
+          <div className="mb-4 pt-2">
+            <h3 className="text-lg font-bold text-foreground">Key Numbers Behind The Verdict</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              The core metrics supporting the channel allocation recommendation.
+            </p>
+          </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-6">
 
@@ -1410,20 +1418,6 @@ export default function MarketingEfficiency() {
           </ResponsiveContainer>
         </div>
 
-        <p className="mt-4 pt-4 border-t border-border/40 text-sm text-muted-foreground leading-relaxed">
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">{liveBestCpChannel}</span> generates{" "}
-          <span className="font-semibold text-foreground">
-            {liveBestCpShare}%
-          </span>{" "}
-          of attributed contribution on{" "}
-          <span className="font-semibold text-foreground">
-            {liveBestCpRevShare}%
-          </span>{" "}
-          of revenue — the most efficient channel in the mix.{" "}
-          <span className="font-semibold text-red-500">{liveWorstCpChannel}</span>'s £{liveWorstCpAmt.toLocaleString()} contribution
-          signals the primary budget reallocation candidate.
-        </p>
-
       </div>
 
       {/* Contribution per Order by Channel — sub-section of Allocation Diagnostics */}
@@ -1496,19 +1490,6 @@ export default function MarketingEfficiency() {
             );
           })}
         </div>
-
-        {/* Interpretation note */}
-        <p className="mt-5 pt-4 border-t border-border/40 text-sm text-muted-foreground leading-relaxed">
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Email</span>{" "}
-          generates <span className="font-semibold text-foreground">£{(maxCpo).toFixed(2)}</span> per
-          order — <span className="font-semibold text-foreground">
-            {((maxCpo / minCpo)).toFixed(1)}×
-          </span>{" "}
-          more contribution per order than{" "}
-          <span className="font-semibold text-red-500">Meta</span> (£{minCpo.toFixed(2)}).
-          Shifting volume toward higher-CPO channels directly improves blended contribution margin without
-          increasing revenue.
-        </p>
 
         {/* Differentiator note vs CAC Payback */}
         <div className="flex items-start gap-2 mt-3 px-3 py-2.5 rounded-lg bg-secondary/50 border border-border/40">
@@ -1602,18 +1583,6 @@ export default function MarketingEfficiency() {
             );
           })}
         </div>
-
-        {/* Interpretation note */}
-        <p className="mt-5 pt-4 border-t border-border/40 text-sm text-muted-foreground leading-relaxed">
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Email</span> and{" "}
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Organic</span> both
-          return more contribution than their revenue share suggests — they punch above their weight and
-          should be protected and grown.{" "}
-          <span className="font-semibold text-red-500">Google Shopping</span> and{" "}
-          <span className="font-semibold text-red-500">Meta</span> consume a disproportionate share of
-          revenue while returning significantly less contribution — a clear signal of over-investment
-          relative to profitability.
-        </p>
 
       </div>
 
@@ -1889,19 +1858,6 @@ export default function MarketingEfficiency() {
           })}
         </div>
 
-        <div className="px-6 py-3 border-t border-border/40 bg-secondary/10">
-          <p className="text-xs text-muted-foreground leading-snug">
-            {(() => {
-              const metaRow = liveCacByChannel.find((r) => r.channel === "Meta");
-              if (!metaRow) return null;
-              const diff = +(metaRow.cac - liveBlendedCac).toFixed(2);
-              const trend = metaRow.changeLabel === "Stable" ? "remained stable" : `risen ${metaRow.changeLabel}`;
-              const aboveNote = diff > 0 ? ` and now exceeds the blended average by £${diff.toFixed(2)} per order` : "";
-              return `Meta CAC has ${trend} month-on-month${aboveNote}.`;
-            })()}{" "}
-            Email and Organic remain well below the blended average.
-          </p>
-        </div>
       </div>
 
       {/* ── Attribution Confidence Note — visible Free + Pro ── */}
@@ -2087,14 +2043,6 @@ export default function MarketingEfficiency() {
           </div>
         </div>
 
-        {/* Interpretation */}
-        <p className="mt-4 text-xs text-muted-foreground leading-relaxed border-t border-border/40 pt-3">
-          <span className="font-semibold text-destructive">Meta</span> requires 2.1 orders to recover acquisition cost,
-          placing it in the risk zone.{" "}
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Email</span> and{" "}
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">Organic</span> recover spend fastest,
-          making them safer channels to scale when cash efficiency matters.
-        </p>
       </PremiumBlurPreview>
 
       {/* Marketing Efficiency Trend */}
@@ -2158,13 +2106,11 @@ export default function MarketingEfficiency() {
           </ResponsiveContainer>
         </div>
 
-        <p className="text-xs text-muted-foreground mt-3 leading-snug">
-          Marketing efficiency has declined over the last 3 months due to rising paid acquisition costs.
-          CAC increased from £9.20 in September to £12.20 in March — a 33% increase in 6 months.
-        </p>
       </div>
 
-      </div>{/* end Supporting Channel Analysis group */}
+          </div>{/* end Supporting Channel Analysis group */}
+        </div>
+      </details>
 
       {/*
        * ══════════════════════════════════════════════════════════════════════

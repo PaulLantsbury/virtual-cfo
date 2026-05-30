@@ -6,16 +6,12 @@ import {
   type BlendedMarketingPerformance,
 } from "@/lib/analytics/marketingChannelMetrics";
 import { ChevronDown, FlaskConical, Lock, Target } from "lucide-react";
-import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/plan";
 import { RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
-import { ConfidenceBadge } from "@/components/ConfidenceBadge";
-import { TimingBadge } from "@/components/TimingBadge";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
-import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
@@ -42,12 +38,6 @@ const CAPITAL_FREE_LOW  = 18_000;
 const CAPITAL_FREE_HIGH = 26_000;
 
 type ImpactLevel = "high" | "medium" | "quick-win";
-
-const EFFORT_COLORS: Record<string, string> = {
-  Low:    "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border-emerald-200/50 dark:border-emerald-800/25",
-  Medium: "bg-secondary text-muted-foreground border-border/50",
-  High:   "bg-rose-50/70 dark:bg-rose-950/10 text-rose-700 dark:text-rose-400 border-rose-200/50 dark:border-rose-700/25",
-};
 
 /**
  * Maps opportunity card titles to Scenario Lab preset IDs.
@@ -124,14 +114,6 @@ const OPPORTUNITY_GUIDANCE: Record<string, {
       "Review full-price order ratio weekly during the test.",
     ],
   },
-};
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const IMPACT_CONFIG: Record<ImpactLevel, { label: string; classes: string }> = {
-  "high":      { label: "High impact",  classes: "bg-destructive/10 text-destructive" },
-  "medium":    { label: "Medium impact", classes: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
-  "quick-win": { label: "Quick win",    classes: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300" },
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -307,11 +289,6 @@ export default function Opportunities() {
   const cashReleaseProjects = sortedOpportunities.filter((o) => o.impactType === "cash_improvement");
   const visibleQueue = monthlyQueue.slice(0, 3);
   const topAction = visibleQueue[0] ?? sortedOpportunities[0];
-  const expandedOpportunity = visibleQueue.find((o) => o.id === expandedOppId);
-  const selectedOpportunity = expandedOpportunity ?? topAction;
-  const selectedGuidance = selectedOpportunity
-    ? OPPORTUNITY_GUIDANCE[selectedOpportunity.label]
-    : null;
 
   // ── Live "why this matters" rationale ─────────────────────────────────────────
   // Derives a concise data-driven sentence from Phase 1 / Phase 3 live signals.
@@ -472,6 +449,7 @@ export default function Opportunities() {
             {visibleQueue.map((opp, idx) => {
               const isExpanded = expandedOppId ? expandedOppId === opp.id : idx === 0;
               const guidance = OPPORTUNITY_GUIDANCE[opp.label];
+              const liveSignal = liveRationale(opp);
 
               return (
                 <div key={opp.id} className={cn(
@@ -524,31 +502,52 @@ export default function Opportunities() {
                   </button>
 
                   {isExpanded && (
-                    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-4 mt-4 pt-4 border-t border-border/50">
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">Why this matters</p>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{guidance?.shortWhy ?? opp.description}</p>
+                    <div className="space-y-4 mt-4 pt-4 border-t border-border/50">
+                      <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-4">
+                        <div className="rounded-xl border border-emerald-200/70 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 px-4 py-3">
+                          <p className="text-xs font-bold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-300/70 mb-1">Expected recovery</p>
+                          <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">{opp.impactRangeLabel}</p>
+                        </div>
+                        <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-3">
+                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">How to start</p>
+                          <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1.5">
+                            {(guidance?.implementation ?? [opp.description]).slice(0, 4).map((step) => (
+                              <li key={step} className="flex gap-2 text-sm text-foreground leading-relaxed">
+                                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                                <span>{step}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">How to implement</p>
-                        <ul className="space-y-1.5">
-                          {(guidance?.implementation ?? [opp.description]).slice(0, 3).map((step) => (
-                            <li key={step} className="flex gap-2 text-sm text-muted-foreground leading-relaxed">
-                              <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                              <span>{step}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="flex lg:justify-end">
+
+                      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-start">
+                        <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-3">
+                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">Evidence</p>
+                          <div className="flex flex-wrap gap-2">
+                            {getEvidence(opp).slice(0, 3).map((item) => (
+                              <span key={item} className="rounded-full border border-border/60 bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                                {item}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                         {TITLE_TO_PRESET[opp.label] && (
                           <a
                             href={`/scenario-lab?preset=${TITLE_TO_PRESET[opp.label]}`}
-                            className="inline-flex items-center gap-1.5 h-fit rounded-full border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/25 px-3 py-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/25 px-3 py-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                           >
                             <FlaskConical className="w-3.5 h-3.5" />
                             Model scenario
                           </a>
+                        )}
+                      </div>
+
+                      <div className="rounded-xl border border-border/40 bg-background/60 px-4 py-3">
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-1">Why this matters</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{guidance?.shortWhy ?? opp.description}</p>
+                        {liveSignal && (
+                          <p className="text-xs text-muted-foreground/60 mt-1 leading-snug italic">{liveSignal}</p>
                         )}
                       </div>
                     </div>
@@ -589,7 +588,7 @@ export default function Opportunities() {
       )}
 
       {/* ── How to execute this ── */}
-      {!hasRecoveryPlan ? (
+      {!hasRecoveryPlan && (
         <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-start gap-3">
@@ -606,125 +605,6 @@ export default function Opportunities() {
             <a href="/upgrade" className="text-sm font-semibold text-indigo-600 dark:text-indigo-300 hover:underline shrink-0">
               Upgrade to Pro →
             </a>
-          </div>
-        </div>
-      ) : selectedOpportunity && (
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
-          <div className="px-6 py-5 border-b border-border/50">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/50 mb-1">
-              How to execute this
-            </p>
-            <h3 className="font-semibold text-lg text-foreground">{selectedOpportunity.label}</h3>
-          </div>
-
-          <div className="px-6 py-5 space-y-5">
-              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-5">
-                <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">Why this matters</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {selectedGuidance?.shortWhy ?? selectedOpportunity.description}
-                  </p>
-                  {(() => { const r = liveRationale(selectedOpportunity); return r ? (
-                    <p className="text-xs text-muted-foreground/60 mt-2 leading-snug italic">{r}</p>
-                  ) : null; })()}
-                </div>
-
-                <div className="rounded-xl border border-emerald-200/70 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 px-4 py-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-300/70 mb-2">Expected impact</p>
-                  {showUpliftValues && (
-                    <>
-                      <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{selectedOpportunity.impactRangeLabel}</p>
-                      {selectedOpportunity.annualImpact > 0 && (
-                        <p className="text-xs text-emerald-800/60 dark:text-emerald-300/60 mt-1">
-                          Approx. £{(selectedOpportunity.annualImpact / 1000).toFixed(0)}k/year
-                        </p>
-                      )}
-                    </>
-                  )}
-                  {!showUpliftValues && (
-                    <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 blur-sm select-none">
-                      £00k-£00k/mo
-                    </p>
-                  )}
-                  <div className="flex items-center gap-2 mt-3 flex-wrap">
-                    <TimingBadge timing={selectedOpportunity.timing} />
-                    <ConfidenceBadge
-                      level={selectedOpportunity.confidence}
-                      helper={
-                        selectedOpportunity.confidence === "High"
-                          ? "Based on direct Shopify and cost data."
-                          : selectedOpportunity.confidence === "Medium"
-                            ? "Based on channel-level attribution and recent trend data."
-                            : "Requires more complete mapping or longer trading history."
-                      }
-                    />
-                    <span className={cn(
-                      "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border",
-                      EFFORT_COLORS[selectedOpportunity.effort],
-                    )}>
-                      Effort: {selectedOpportunity.effort}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                <div className="rounded-xl border border-border/50 px-4 py-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-3">How to implement</p>
-                  <ul className="space-y-2">
-                    {(selectedGuidance?.implementation ?? [selectedOpportunity.description]).map((step) => (
-                      <li key={step} className="flex gap-2 text-sm text-muted-foreground leading-relaxed">
-                        <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                        <span>{step}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="rounded-xl border border-border/50 px-4 py-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-3">Evidence</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {getEvidence(selectedOpportunity).map((item) => (
-                      <div key={item} className="rounded-lg bg-secondary/50 px-3 py-2">
-                        <p className="text-xs font-medium text-muted-foreground">{item}</p>
-                      </div>
-                    ))}
-                  </div>
-                  {selectedOpportunity.evidenceSummary && (
-                    <p className="text-xs text-muted-foreground/60 mt-3 leading-relaxed">{selectedOpportunity.evidenceSummary}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-4 flex-wrap border-t border-border/50 pt-4">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className={cn(
-                    "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold",
-                    IMPACT_CONFIG[selectedOpportunity.impact as ImpactLevel].classes,
-                  )}>
-                    {IMPACT_CONFIG[selectedOpportunity.impact as ImpactLevel].label}
-                  </span>
-                  {selectedOpportunity.sources.map((src: { label: string; href: string }) => (
-                    <Link
-                      key={src.href}
-                      href={src.href}
-                      className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
-                    >
-                      {src.label}
-                    </Link>
-                  ))}
-                  {TITLE_TO_PRESET[selectedOpportunity.label] && (
-                    <a
-                      href={`/scenario-lab?preset=${TITLE_TO_PRESET[selectedOpportunity.label]}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                    >
-                      <FlaskConical className="w-3.5 h-3.5" />
-                      Model this scenario
-                    </a>
-                  )}
-                </div>
-                <AiCfoInlineButtons pageId="opportunities" />
-              </div>
           </div>
         </div>
       )}

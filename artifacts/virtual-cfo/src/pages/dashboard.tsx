@@ -928,7 +928,12 @@ export default function Dashboard() {
       <div className="mb-5">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Weekly CFO Briefing</h1>
         <p className="text-muted-foreground mt-1 text-sm">What changed, what to do first, and where the money is hiding.</p>
-        <DataPeriodLabel periodLabel={activePeriodLabel} loading={periodLoading} />
+        <DataPeriodLabel
+          periodLabel={activePeriodLabel}
+          loading={periodLoading}
+          dateFrom={activeDateFrom}
+          dateTo={activeDateTo}
+        />
       </div>
 
       {/* ══ WEEKLY CFO BRIEFING ══════════════════════════════════════════════ */}
@@ -948,10 +953,10 @@ export default function Dashboard() {
 
               <div className="space-y-3 text-sm sm:text-base text-foreground/85 leading-relaxed max-w-4xl">
                 <p>
-                  Sales are still moving in the right direction, but the business is keeping less profit from each order. Fulfilment inflation, heavier discounting and rising Meta costs are absorbing more of the revenue before it turns into cash.
+                  Demand is still there, but the business is keeping less profit from each order. Fulfilment inflation, heavier discounting and rising Meta costs are absorbing more of the revenue before it turns into cash.
                 </p>
                 <p>
-                  Start with the leaks you can control this week: shipping economics, repeat-customer discounts and weak paid campaigns. The current opportunity is worth around <span className="font-bold text-emerald-700 dark:text-emerald-400">{rcHeadlineStr} per month</span> if the main fixes are acted on.
+                  This week, focus on the leaks you can control: shipping economics, repeat-customer discounts and weak paid campaigns. The current opportunity is worth around <span className="font-bold text-emerald-700 dark:text-emerald-400">{rcHeadlineStr} per month</span> if the main fixes are acted on.
                 </p>
               </div>
             </div>

@@ -435,7 +435,12 @@ export default function PricingOptimisation() {
           <p className="text-sm text-muted-foreground mt-1">
             Understand how live pricing signals, discounting and modelled scenarios affect retained contribution.
           </p>
-          <DataPeriodLabel periodLabel={pricingPeriodLabel} loading={pricingPeriodLoading} />
+          <DataPeriodLabel
+            periodLabel={pricingPeriodLabel}
+            loading={pricingPeriodLoading}
+            dateFrom={pricingDateFrom}
+            dateTo={pricingDateTo}
+          />
         </div>
         <TimelineSelector />
       </div>

@@ -708,7 +708,12 @@ export default function MarketingEfficiency() {
           <p className="text-muted-foreground mt-1">
             Understand which acquisition channels create profitable customers and where budget should be reallocated.
           </p>
-          <DataPeriodLabel periodLabel={mePeriodLabel} loading={mePeriodLoading} />
+          <DataPeriodLabel
+            periodLabel={mePeriodLabel}
+            loading={mePeriodLoading}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+          />
         </div>
         <TimelineSelector />
       </div>

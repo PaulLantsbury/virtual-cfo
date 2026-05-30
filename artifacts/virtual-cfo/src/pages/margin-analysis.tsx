@@ -611,7 +611,12 @@ export default function MarginAnalysis() {
           <p className="text-muted-foreground mt-1">
             Profit margin health, cost structure breakdown, and the fastest recovery levers — updated with live trading data.
           </p>
-          <DataPeriodLabel periodLabel={maPeriodLabel} loading={maPeriodLoading} />
+          <DataPeriodLabel
+            periodLabel={maPeriodLabel}
+            loading={maPeriodLoading}
+            dateFrom={maDateFrom}
+            dateTo={maDateTo}
+          />
         </div>
 
         <TimelineSelector />

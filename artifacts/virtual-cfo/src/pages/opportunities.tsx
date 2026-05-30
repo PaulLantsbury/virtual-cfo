@@ -16,6 +16,7 @@ import { TimingBadge } from "@/components/TimingBadge";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { AiCfoInlineButtons } from "@/components/AiCfoInlineButtons";
+import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 
@@ -163,6 +164,7 @@ export default function Opportunities() {
     dateFrom,
     dateTo,
     periodLabel,
+    loading: periodLoading,
   } = useLatestDataPeriod(STORE_ID);
 
   // ── Phase 3 — channel opportunities for rationale enrichment ─────────────────
@@ -372,9 +374,13 @@ export default function Opportunities() {
             A practical CFO action plan for recovering contribution without adding unnecessary complexity.
           </p>
         </div>
-        <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">
-          {periodLabel}
-        </span>
+        <DataPeriodLabel
+          periodLabel={periodLabel}
+          loading={periodLoading}
+          dateFrom={dateFrom}
+          dateTo={dateTo}
+          className="mt-0"
+        />
       </div>
 
       {/* ── CFO verdict ── */}

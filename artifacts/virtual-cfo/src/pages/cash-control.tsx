@@ -16,6 +16,8 @@ import { canAccess } from "@/lib/plan";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { PeriodImpact } from "@/components/PeriodImpact";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
+import { DataPeriodLabel } from "@/components/DataPeriodLabel";
+import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import {
   CASH_BALANCE,
   CASH_RUNWAY,
@@ -31,6 +33,8 @@ import { ANNUAL_REVENUE } from "@/lib/data/business-snapshot";
 // Values imported from central mock data layer (src/lib/data/cash-snapshot.ts
 // and src/lib/data/business-snapshot.ts). Replace those files with live
 // Xero / Shopify feeds when integrations are connected.
+
+const CASH_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 const NET_CASH_MOVEMENT = 14_000; // unique to Cash Control — not shared elsewhere
 const RUNWAY_DENOM      = Math.round(CASH_BALANCE / CASH_RUNWAY);
@@ -192,6 +196,13 @@ function DriverTooltip({ active, payload, label }: any) {
 
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function CashControl() {
+  const {
+    dateFrom: cashDateFrom,
+    dateTo: cashDateTo,
+    periodLabel: cashPeriodLabel,
+    loading: cashPeriodLoading,
+  } = useLatestDataPeriod(CASH_STORE_ID);
+
   const [revChange,       setRevChange]       = useState(0);
   const [inventoryChange, setInventoryChange] = useState(0);
   const [supplierChange,  setSupplierChange]  = useState(0);
@@ -251,6 +262,12 @@ export default function CashControl() {
           <p className="text-sm text-muted-foreground mt-1">
             See where cash is coming from, where it is getting trapped, and whether growth is creating or consuming cash.
           </p>
+          <DataPeriodLabel
+            periodLabel={cashPeriodLabel}
+            loading={cashPeriodLoading}
+            dateFrom={cashDateFrom}
+            dateTo={cashDateTo}
+          />
         </div>
         <TimelineSelector />
       </div>

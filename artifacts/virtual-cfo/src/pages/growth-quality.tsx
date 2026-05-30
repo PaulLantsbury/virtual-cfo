@@ -554,7 +554,12 @@ export default function GrowthQuality() {
           <p className="text-muted-foreground mt-1">
             Assess whether revenue growth is generating lasting profit — or being bought through discounts and paid spend.
           </p>
-          <DataPeriodLabel periodLabel={gqPeriodLabel} loading={gqPeriodLoading} />
+          <DataPeriodLabel
+            periodLabel={gqPeriodLabel}
+            loading={gqPeriodLoading}
+            dateFrom={gqDateFrom}
+            dateTo={gqDateTo}
+          />
         </div>
         <TimelineSelector />
       </div>

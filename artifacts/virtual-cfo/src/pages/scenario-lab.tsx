@@ -13,11 +13,12 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
-import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { PeriodImpact } from "@/components/PeriodImpact";
+import { DataPeriodLabel } from "@/components/DataPeriodLabel";
+import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { GROSS_REVENUE as BASE_REVENUE, BASE_CONTRIBUTION, CONTRIBUTION_PER_ORDER as BASE_CPO } from "@/lib/data/pricing-metrics";
 import { BASE_EBITDA } from "@/lib/data/business-snapshot";
 import { CASH_BALANCE as BASE_CASH, CASH_RUNWAY as BASE_RUNWAY, WORKING_CAPITAL_DRAG as BASE_WORKING_CAPITAL } from "@/lib/data/cash-snapshot";
@@ -37,6 +38,7 @@ import { CASH_BALANCE as BASE_CASH, CASH_RUNWAY as BASE_RUNWAY, WORKING_CAPITAL_
 // Scenario-lab specific: BASE_CAC_PAYBACK uses 1.6 as a scenario modelling starting
 // point (intentionally higher than the shared CAC_PAYBACK = 1.4 in growth-metrics.ts,
 // which reflects the current actual payback — 1.6 is the conservative scenario base).
+const SCENARIO_STORE_ID = "10000000-0000-0000-0000-000000000001";
 const BASE_CAC_PAYBACK = 1.6;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -350,7 +352,12 @@ const IMPL_ACTIONS = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ScenarioLab() {
-  const { selectedLabel: timelineLabel } = useTimeline();
+  const {
+    dateFrom: scenarioDateFrom,
+    dateTo: scenarioDateTo,
+    periodLabel: scenarioPeriodLabel,
+    loading: scenarioPeriodLoading,
+  } = useLatestDataPeriod(SCENARIO_STORE_ID);
 
   const isPro       = canAccess("scenario_lab_builder");
   const isProPlans  = canAccess("scenario_lab_plans");
@@ -425,7 +432,14 @@ export default function ScenarioLab() {
           </div>
           <div className="flex flex-col items-end gap-1.5 shrink-0 text-right">
             <TimelineSelector />
-            <span className="text-xs text-muted-foreground">{timelineLabel} · vs previous period</span>
+            <DataPeriodLabel
+              periodLabel={scenarioPeriodLabel}
+              loading={scenarioPeriodLoading}
+              dateFrom={scenarioDateFrom}
+              dateTo={scenarioDateTo}
+              variant="based"
+              className="mt-0"
+            />
           </div>
         </div>
 

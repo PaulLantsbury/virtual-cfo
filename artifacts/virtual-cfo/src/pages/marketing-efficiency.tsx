@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
-import { Sparkles, AlertTriangle, Lock, SlidersHorizontal, Info, Zap, Shield } from "lucide-react";
+import { Sparkles, Lock, SlidersHorizontal, Info, Zap, Shield } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell,
-} from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
@@ -53,57 +48,20 @@ const ME_STORE_ID = "10000000-0000-0000-0000-000000000001";
 // CAC_PAYBACK, CAC_PAYBACK_PREV
 //   imported from src/lib/data/growth-metrics.ts
 
-const BLENDED_CAC_CHANGE    = +(BLENDED_CAC - BLENDED_CAC_PREV).toFixed(2);
-const BLENDED_CAC_CHANGE_LY = +(BLENDED_CAC - BLENDED_CAC_LY).toFixed(2);
-
 const BLENDED_ROAS_CHANGE_MOM = +(BLENDED_ROAS - BLENDED_ROAS_PREV).toFixed(1);
 const BLENDED_ROAS_CHANGE_LY  = +(BLENDED_ROAS - BLENDED_ROAS_LY).toFixed(1);
 
 const CAC_PAYBACK_LY = 1.0;    // 12-month average — page-specific, not shared
 
-/** @dynamic */
-const MKT_CM             = 38.6;
-const MKT_CM_PREV        = 41.8;   // last month
-const MKT_CM_LY          = 43.5;   // 12-month average
-const MKT_CM_CHANGE      = +(MKT_CM - MKT_CM_PREV).toFixed(1);
-const MKT_CM_CHANGE_LY   = +(MKT_CM - MKT_CM_LY).toFixed(1);
-
 /**
  * Total contribution profit after all marketing costs for the selected period.
- * @dynamic revenueTotal × (MKT_CM / 100)
+ * @dynamic revenueTotal minus attributed marketing costs
  */
 const MKT_CP             = 38_400;
 const MKT_CP_PREV        = 41_200;  // last month
 const MKT_CP_LY          = 35_400;  // last 12-month average
 const MKT_CP_CHANGE_MOM  = MKT_CP - MKT_CP_PREV;   // -2_800 (unfavourable)
 const MKT_CP_CHANGE_LY   = MKT_CP - MKT_CP_LY;     // +3_000 (favourable)
-
-/** @dynamic MKT_CP / order_count — contribution profit generated per order after all marketing costs */
-const MKT_CP_PER_ORDER           =  9.40;
-const MKT_CP_PER_ORDER_PREV      = 10.50;  // last month
-const MKT_CP_PER_ORDER_LY        = 11.70;  // 12-month average
-const MKT_CP_PER_ORDER_CHANGE_MOM = +(MKT_CP_PER_ORDER - MKT_CP_PER_ORDER_PREV).toFixed(2); // -1.10 (unfavourable)
-const MKT_CP_PER_ORDER_CHANGE_LY  = +(MKT_CP_PER_ORDER - MKT_CP_PER_ORDER_LY).toFixed(2);  // -2.30 (unfavourable)
-
-/**
- * Total marketing spend for the current period across all channels.
- * @dynamic Sourced from advertising platform costs (Meta, Google Shopping) + email tool costs.
- *          Validated against: MKT_CP / TOTAL_MKT_SPEND ≈ CP_PER_SPEND
- */
-const TOTAL_MKT_SPEND      = 17_600; // current period
-const TOTAL_MKT_SPEND_PREV = 16_000; // last month — lower spend, better efficiency
-const TOTAL_MKT_SPEND_LY   = 12_500; // 12-month average — historically more efficient
-
-/**
- * Contribution generated for every £1 of marketing spend.
- * @dynamic MKT_CP / TOTAL_MKT_SPEND
- * Unfavourable direction: higher is better (declining = spending more to earn less contribution).
- */
-const CP_PER_SPEND      = +(MKT_CP      / TOTAL_MKT_SPEND).toFixed(2);            // £2.18
-const CP_PER_SPEND_PREV = +(MKT_CP_PREV / TOTAL_MKT_SPEND_PREV).toFixed(2);      // £2.58
-const CP_PER_SPEND_LY   = +(MKT_CP_LY   / TOTAL_MKT_SPEND_LY).toFixed(2);        // £2.83
-const CP_PER_SPEND_CHANGE_MOM = +(CP_PER_SPEND - CP_PER_SPEND_PREV).toFixed(2);   // -0.40 (unfavourable)
-const CP_PER_SPEND_CHANGE_LY  = +(CP_PER_SPEND - CP_PER_SPEND_LY).toFixed(2);     // -0.65 (unfavourable)
 
 /**
  * Recoverable contribution available if spend is reallocated toward higher-margin channels.
@@ -130,19 +88,6 @@ const CHANNEL_CP = [
   { channel: "Google Shopping", cp:  6_200 },
   { channel: "Meta",            cp:  2_100 },
 ];
-const maxCp = Math.max(...CHANNEL_CP.map((c) => c.cp));
-const minCp = Math.min(...CHANNEL_CP.map((c) => c.cp));
-const totalAttributedCp = CHANNEL_CP.reduce((s, c) => s + c.cp, 0);
-
-/**
- * Estimated contribution profit lost per period due to sub-optimal channel allocation.
- * @dynamic Compute as: (blended CP rate − lowest-performing channel CP rate) × that
- *          channel's revenue × practical reallocation headroom (e.g. 0.9). Where
- *          blended CP rate = totalAttributedCp / totalChannelRevenue and channel CP
- *          rate = channel_cp / channel_revenue. Replace with live values from
- *          ad-platform + Shopify revenue attribution.
- */
-const ALLOC_LOSS_CP = 6_700;
 
 /**
  * Contribution profit generated per order by acquisition channel after marketing cost.
@@ -157,47 +102,10 @@ const CHANNEL_CPO = [
 const maxCpo = Math.max(...CHANNEL_CPO.map((c) => c.cpo));
 const minCpo = Math.min(...CHANNEL_CPO.map((c) => c.cpo));
 
-/**
- * Revenue share vs contribution share per acquisition channel.
- * @dynamic revShare: channel.revenue / totalRevenue; cpShare: channel_cp / totalAttributedCp
- */
-const totalChannelRevenue = CHANNEL_CM.reduce((s, c) => s + c.revenue, 0);
-const CHANNEL_SHARE = CHANNEL_CM.map((c) => {
-  const cp = CHANNEL_CP.find((p) => p.channel === c.channel)!.cp;
-  const revShare = Math.round((c.revenue / totalChannelRevenue) * 100);
-  const cpShare  = Math.round((cp / totalAttributedCp) * 100);
-  return { channel: c.channel, revShare, cpShare, delta: cpShare - revShare };
-});
-
 type EfficiencyRating = "strong" | "watch" | "weak";
 
 // CAC_BY_CHANNEL and PAYBACK_BY_CHANNEL imported from channel-metrics.ts above.
 // EfficiencyRating type kept local for JSX compatibility.
-
-/**
- * Generic channel labels for the CAC Payback FREE ghost preview.
- * Ordered to match PAYBACK_BY_CHANNEL sorted by payback ascending:
- *   Email → Organic → Google Shopping → Meta
- */
-const PAYBACK_CHANNEL_GHOST_NAMES = ["Channel A", "Channel B", "Channel C", "Channel D"] as const;
-
-const PAYBACK_THRESHOLD = 1.5;
-
-/** @dynamic Replace with live monthly efficiency data */
-const TREND_DATA = [
-  { month: "Apr", cac:  8.2, roas: 4.1 },
-  { month: "May", cac:  8.8, roas: 3.9 },
-  { month: "Jun", cac:  9.1, roas: 3.7 },
-  { month: "Jul", cac:  9.4, roas: 3.5 },
-  { month: "Aug", cac:  9.8, roas: 3.6 },
-  { month: "Sep", cac:  9.2, roas: 3.8 },
-  { month: "Oct", cac:  8.9, roas: 3.9 },
-  { month: "Nov", cac:  9.6, roas: 3.5 },
-  { month: "Dec", cac: 10.2, roas: 3.2 },
-  { month: "Jan", cac: 10.8, roas: 3.0 },
-  { month: "Feb", cac: 11.4, roas: 2.9 },
-  { month: "Mar", cac: 12.2, roas: 2.8 },
-];
 
 /**
  * @dynamic Compute from: orderVolume × (ppGain / 100) × revenuePerOrder
@@ -293,28 +201,6 @@ const ME_DRIVERS = [
   },
 ];
 
-/**
- * Maps channel-specific driver names to generic equivalents for the FREE ghost preview.
- * Non-channel drivers (mix, structural) are shown as-is.
- */
-const ME_DRIVER_GHOST_LABELS: Record<string, string> = {
-  "Meta CAC increase": "Paid channel CAC increase",
-};
-
-/** Ordered group definitions for the Key Drivers section */
-const ME_DRIVER_GROUPS = [
-  { key: "acquisition-cost" as const, label: "Acquisition Cost Drivers" },
-  { key: "mix"              as const, label: "Mix Drivers"              },
-  { key: "structural"       as const, label: "Structural Drivers"       },
-];
-
-/** @dynamic Sum of ME_DRIVERS impact values */
-const ME_DRIVERS_TOTAL = ME_DRIVERS.reduce((s, d) => s + d.impact, 0); // −12_600
-/** Driver with the largest absolute impact */
-const ME_LARGEST_DRIVER = ME_DRIVERS.reduce((a, b) =>
-  Math.abs(a.impact) > Math.abs(b.impact) ? a : b
-).driver;
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function VarLine({ label, value, sentiment }: { label: string; value: string; sentiment: DeltaSentiment | null }) {
@@ -375,12 +261,6 @@ function getPaybackBand(payback: number): {
   };
 }
 
-/** Reserved for upcoming Contribution Margin by Channel chart */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const maxCm = Math.max(...CHANNEL_CM.map((c) => c.cm));
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const minCm = Math.min(...CHANNEL_CM.map((c) => c.cm));
-
 // ─── Timeline framing ─────────────────────────────────────────────────────────
 
 const TIMELINE_FRAMING: Record<string, {
@@ -424,7 +304,7 @@ const TIMELINE_FRAMING: Record<string, {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MarketingEfficiency() {
-  const { periodBadge, timeline } = useTimeline();
+  const { timeline } = useTimeline();
   const framing = TIMELINE_FRAMING[timeline] ?? TIMELINE_FRAMING["30d"];
 
   // ── Phase 1: live discount dependency and repeat purchase rate ────────────
@@ -444,9 +324,8 @@ export default function MarketingEfficiency() {
     : REPEAT_RATE.toFixed(1);
 
   // Patch the two Phase-1-adjacent driver cause strings with live values.
-  // driver, impact, direction, and category remain untouched — only cause text
-  // is updated. ME_DRIVERS_TOTAL and ME_LARGEST_DRIVER continue to use the
-  // original module-level array (impact values are not live yet).
+  // Driver, impact, direction, and category remain untouched — only cause text
+  // is updated for the visible commercial driver summary.
   const liveMeDrivers = ME_DRIVERS.map((d) => {
     if (d.driver === "Discount-led traffic mix") {
       return {
@@ -576,23 +455,6 @@ export default function MarketingEfficiency() {
       const ch       = findChannel(liveChannels, slug);
       const fallback = PAYBACK_BY_CHANNEL.find((p) => p.channel === SLUG_TO_NAME[slug])?.payback ?? 1.0;
       return { channel: SLUG_TO_NAME[slug] ?? slug, payback: ch?.cacPaybackOrders ?? fallback };
-    });
-  })();
-
-  // Derived totals used in charts and share table.
-  const liveTotalAttributedCp   = liveChannelCp.reduce((s, c) => s + c.cp, 0);
-  const liveTotalChannelRevenue = liveChannelCm.reduce((s, c) => s + c.revenue, 0);
-  const liveMaxCp = liveTotalAttributedCp > 0 ? Math.max(...liveChannelCp.map((c) => c.cp)) : maxCp;
-  const liveMinCp = liveTotalAttributedCp > 0 ? Math.min(...liveChannelCp.map((c) => c.cp)) : minCp;
-
-  // Revenue share vs contribution share (drives the channel share chart).
-  const liveChannelShare = (() => {
-    if (!liveTotalAttributedCp || !liveTotalChannelRevenue) return CHANNEL_SHARE;
-    return liveChannelCm.map((c) => {
-      const cp       = liveChannelCp.find((p) => p.channel === c.channel)!.cp;
-      const revShare = Math.round((c.revenue / liveTotalChannelRevenue) * 100);
-      const cpShare  = Math.round((cp / liveTotalAttributedCp) * 100);
-      return { channel: c.channel, revShare, cpShare, delta: cpShare - revShare };
     });
   })();
 
@@ -1160,7 +1022,7 @@ export default function MarketingEfficiency() {
             <div>
               <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Detailed metrics, charts and driver diagnostics behind the recommendation.
+                The key proof points behind the budget recommendation.
               </p>
             </div>
             <span className="text-sm font-semibold text-muted-foreground shrink-0">View details ▼</span>
@@ -1180,7 +1042,7 @@ export default function MarketingEfficiency() {
             </p>
           </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-6">
 
         {/* 1 — Marketing Contribution Profit */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
@@ -1262,75 +1124,7 @@ export default function MarketingEfficiency() {
           <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover the cost of acquiring each new customer</p>
         </div>
 
-        <details className="sm:col-span-2 lg:col-span-4 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
-          <summary className="list-none cursor-pointer px-5 py-4 text-sm font-semibold text-foreground hover:bg-secondary/20 transition-colors">
-            Show supporting marketing efficiency metrics
-          </summary>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-5 pb-5">
-            {/* 5 — Marketing Contribution Margin */}
-            <div className="rounded-xl p-5 border border-border/50 bg-secondary/20">
-              <p className="text-sm font-medium text-muted-foreground mb-1">Marketing Contribution Margin</p>
-              <p className="text-3xl font-display font-bold text-foreground mb-2">{MKT_CM}%</p>
-              <div className="space-y-0.5 mb-2">
-                <VarLine
-                  label="vs last month"
-                  value={`↓ ${Math.abs(MKT_CM_CHANGE).toFixed(1)}pp`}
-                  sentiment={deltaToSentiment(MKT_CM_CHANGE, DELTA_POLARITY.mktCm)}
-                />
-                <VarLine
-                  label="vs 12-month avg"
-                  value={`↓ ${Math.abs(MKT_CM_CHANGE_LY).toFixed(1)}pp`}
-                  sentiment={deltaToSentiment(MKT_CM_CHANGE_LY, DELTA_POLARITY.mktCm)}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground leading-snug">Blended contribution margin after all marketing costs</p>
-            </div>
-
-            {/* 6 — Marketing Contribution per Order */}
-            <div className="rounded-xl p-5 border border-border/50 bg-secondary/20">
-              <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per Order</p>
-              <p className="text-3xl font-display font-bold text-foreground mb-2">
-                £{MKT_CP_PER_ORDER.toFixed(2)}
-              </p>
-              <div className="space-y-0.5 mb-2">
-                <VarLine
-                  label="vs last month"
-                  value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_MOM).toFixed(2)}`}
-                  sentiment={deltaToSentiment(MKT_CP_PER_ORDER_CHANGE_MOM, DELTA_POLARITY.cpPerOrder)}
-                />
-                <VarLine
-                  label="vs 12-month avg"
-                  value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_LY).toFixed(2)}`}
-                  sentiment={deltaToSentiment(MKT_CP_PER_ORDER_CHANGE_LY, DELTA_POLARITY.cpPerOrder)}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground leading-snug">Contribution profit generated per order after marketing cost</p>
-            </div>
-
-            {/* 7 — Contribution per £1 of Marketing Spend */}
-            <div className="rounded-xl p-5 border border-border/50 bg-secondary/20">
-              <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per £1 Marketing Spend</p>
-              <p className="text-3xl font-display font-bold text-foreground mb-2">
-                £{CP_PER_SPEND.toFixed(2)}
-              </p>
-              <div className="space-y-0.5 mb-2">
-                <VarLine
-                  label="vs last month"
-                  value={`${CP_PER_SPEND_CHANGE_MOM < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_MOM).toFixed(2)}`}
-                  sentiment={deltaToSentiment(CP_PER_SPEND_CHANGE_MOM, DELTA_POLARITY.cpPerSpend)}
-                />
-                <VarLine
-                  label="vs 12-month avg"
-                  value={`${CP_PER_SPEND_CHANGE_LY < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_LY).toFixed(2)}`}
-                  sentiment={deltaToSentiment(CP_PER_SPEND_CHANGE_LY, DELTA_POLARITY.cpPerSpend)}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground leading-snug">Contribution generated for every £1 of marketing spend</p>
-            </div>
           </div>
-        </details>
-
-      </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
           §8  CHANNEL EVIDENCE
@@ -1344,84 +1138,8 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      {/* Contribution Profit by Channel — sub-section of Allocation Diagnostics */}
-      <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 mb-10">
-
-        {/* Sub-heading row */}
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-5">
-          <div>
-            <h3 className="font-semibold text-base text-foreground">Contribution Profit by Channel (£)</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Which channels generate the most contribution profit after marketing cost
-            </p>
-          </div>
-          <div className="flex items-center gap-5 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500 inline-block" />Highest
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block" />Lowest
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-sm bg-primary/60 inline-block" />Other
-            </span>
-            <span className="font-semibold text-foreground">
-              Total: £{liveTotalAttributedCp.toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-        {/* Diagnostic insight line */}
-        <div className="flex items-start gap-2 px-3.5 py-2.5 mb-5 rounded-lg bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-700/30">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-700/90 dark:text-amber-400/80 leading-snug">
-            <span className="font-semibold">£{ALLOC_LOSS_CP.toLocaleString()}</span> of contribution profit is modelled as recoverable through improved channel allocation.
-          </p>
-        </div>
-
-        <div className="h-[260px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={[...liveChannelCp].sort((a, b) => b.cp - a.cp)}
-              layout="vertical"
-              margin={{ top: 0, right: 90, left: 10, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
-              <XAxis
-                type="number"
-                tickFormatter={(v: number) => `£${(v / 1000).toFixed(0)}k`}
-                axisLine={false} tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-              />
-              <YAxis
-                type="category" dataKey="channel"
-                axisLine={false} tickLine={false}
-                tick={{ fill: "hsl(var(--foreground))", fontSize: 13, fontWeight: 500 }}
-                width={130}
-              />
-              <Tooltip
-                formatter={(v: number) => [`£${v.toLocaleString()}`, "Contribution Profit"]}
-                contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 16px rgb(0 0 0 / .12)" }}
-              />
-              <Bar dataKey="cp" radius={[0, 7, 7, 0]} maxBarSize={44}
-                label={{ position: "right", formatter: (v: number) => `£${v.toLocaleString()}`,
-                  fill: "hsl(var(--foreground))", fontSize: 13, fontWeight: 700 }}
-              >
-                {[...liveChannelCp].sort((a, b) => b.cp - a.cp).map((entry) => (
-                  <Cell key={entry.channel}
-                    fill={entry.cp === liveMaxCp ? "#22c55e" : entry.cp === liveMinCp ? "#ef4444" : "hsl(var(--primary))"}
-                    opacity={entry.cp === liveMaxCp || entry.cp === liveMinCp ? 1 : 0.6}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-      </div>
-
       {/* Contribution per Order by Channel — sub-section of Allocation Diagnostics */}
-      <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 mb-10">
+      <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 mb-4">
 
         {/* Sub-heading row */}
         <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
@@ -1503,278 +1221,6 @@ export default function MarketingEfficiency() {
 
       </div>
 
-      {/* Revenue Share vs Contribution Share — sub-section of Allocation Diagnostics */}
-      <div className="bg-card rounded-2xl border border-border/60 shadow-sm p-6 mb-10">
-
-        {/* Sub-heading */}
-        <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
-          <div>
-            <h3 className="font-semibold text-base text-foreground">Revenue Share vs Contribution Share</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Compare which channels generate revenue versus which channels generate contribution profit
-            </p>
-          </div>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground shrink-0">
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm bg-slate-400/60 inline-block" />Revenue
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" />Contribution ↑
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm bg-red-500 inline-block" />Contribution ↓
-            </span>
-          </div>
-        </div>
-
-        {/* Channel rows */}
-        <div className="space-y-1">
-          {liveChannelShare.map((row) => {
-            const positive = row.delta >= 0;
-            const cpColor = positive
-              ? "bg-emerald-500"
-              : "bg-red-500";
-            const cpTextColor = positive
-              ? "text-emerald-600 dark:text-emerald-400"
-              : "text-red-500 dark:text-red-400";
-            const deltaBg = positive
-              ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-              : "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400";
-            return (
-              <div key={row.channel} className="py-4 border-b border-border/40 last:border-0">
-
-                {/* Channel name + delta badge */}
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-foreground">{row.channel}</span>
-                  <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${deltaBg}`}>
-                    {positive ? "▲" : "▼"} {positive ? "+" : ""}{row.delta}pp
-                  </span>
-                </div>
-
-                {/* Revenue bar */}
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-[11px] text-muted-foreground w-24 shrink-0">Revenue</span>
-                  <div className="flex-1 h-4 bg-secondary/60 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-slate-400/60 rounded-full transition-all"
-                      style={{ width: `${row.revShare}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-bold text-muted-foreground tabular-nums w-8 text-right">
-                    {row.revShare}%
-                  </span>
-                </div>
-
-                {/* Contribution bar */}
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] text-muted-foreground w-24 shrink-0">Contribution</span>
-                  <div className="flex-1 h-4 bg-secondary/60 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${cpColor}`}
-                      style={{ width: `${row.cpShare}%` }}
-                    />
-                  </div>
-                  <span className={`text-xs font-bold tabular-nums w-8 text-right ${cpTextColor}`}>
-                    {row.cpShare}%
-                  </span>
-                </div>
-
-              </div>
-            );
-          })}
-        </div>
-
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════════
-          FULL DRIVER DETAIL
-          Attributed causes supporting the summary above
-      ══════════════════════════════════════════════════════════════════════ */}
-
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-foreground">Full Driver Detail</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          The full contribution impact behind the “Why this is happening” summary.
-        </p>
-      </div>
-
-      {/* Summary block */}
-      <div className="sc-orange flex items-start justify-between mb-4 px-5 py-4 rounded-xl gap-6">
-        <p className="text-sm font-semibold text-foreground mt-0.5">
-          Total marketing efficiency impact — {periodBadge}
-        </p>
-        <div className="text-right shrink-0">
-          <p className="text-xl font-bold tabular-nums leading-none text-destructive">
-            −£{Math.abs(ME_DRIVERS_TOTAL).toLocaleString()}
-          </p>
-          <p className="text-xs font-medium tabular-nums mt-1.5 leading-none text-destructive/70">
-            contribution impact
-          </p>
-        </div>
-      </div>
-
-      <PremiumBlurPreview
-        title="Full Driver Detail"
-        subtitle="What changed vs last month and the contribution impact."
-        badgeText="PRO — Unlock margin drivers"
-        ctaTitle="Unlock attributed driver breakdown"
-        ctaDescription="See exactly which cost or mix changes drove the most contribution impact, with per-driver £ attribution."
-        isPro={canAccess("driver_breakdown")}
-        className="overflow-hidden mb-10"
-        ghostContent={
-          <div className="-mx-6 -mb-6">
-            <div className="flex items-center justify-between px-6 py-3 border-t border-border/50 bg-secondary/20">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                What changed vs last month
-              </p>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Contribution impact
-              </p>
-            </div>
-            {ME_DRIVER_GROUPS.map((group) => {
-              const groupDrivers = ME_DRIVERS
-                .filter((d) => d.category === group.key)
-                .sort((a, b) => a.impact - b.impact);
-              if (!groupDrivers.length) return null;
-              return (
-                <div key={group.key}>
-                  <div className="flex items-center justify-between px-6 py-2 border-y border-border/40 bg-secondary/30">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/70">{group.label}</p>
-                    <p className="text-[11px] font-bold tabular-nums text-foreground/25 dark:text-foreground/20">−£ —,———</p>
-                  </div>
-                  <div className="divide-y divide-border/30">
-                    {groupDrivers.map((row) => (
-                      <div key={row.driver} className="flex items-center justify-between px-6 py-4 gap-6">
-                        <div className="flex items-start gap-3 min-w-0">
-                          <div className={cn(
-                            "w-1 self-stretch rounded-full shrink-0 min-h-[2rem] mt-0.5",
-                            row.driver === ME_LARGEST_DRIVER ? "bg-destructive" : "bg-destructive/25"
-                          )} />
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <span className="text-sm font-semibold text-foreground">{ME_DRIVER_GHOST_LABELS[row.driver] ?? row.driver}</span>
-                              {row.driver === ME_LARGEST_DRIVER && (
-                                <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
-                                  Largest driver
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-foreground/20 dark:text-foreground/15 leading-snug">—— —— —— ——</p>
-                          </div>
-                        </div>
-                        <span className="text-sm font-bold whitespace-nowrap shrink-0 tabular-nums text-foreground/25 dark:text-foreground/20">
-                          −£ —,———
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-            <div className="flex items-center justify-between px-6 py-3.5 border-t border-border/50 bg-secondary/20">
-              <p className="text-xs font-semibold text-foreground">Total attributed impact — {periodBadge}</p>
-              <p className="text-sm font-bold tabular-nums text-foreground/25 dark:text-foreground/20">−£ —,———</p>
-            </div>
-          </div>
-        }
-      >
-        {/* Negative-margin wrapper extends table flush to card edges */}
-        <div className="-mx-6 -mb-6">
-
-          {/* Column headers */}
-          <div className="flex items-center justify-between px-6 py-3 border-t border-border/50 bg-secondary/20">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              What changed vs last month
-            </p>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Contribution impact
-            </p>
-          </div>
-
-          {/* Grouped driver rows */}
-          {ME_DRIVER_GROUPS.map((group) => {
-            const groupDrivers = liveMeDrivers
-              .filter((d) => d.category === group.key)
-              .sort((a, b) => a.impact - b.impact);
-            if (!groupDrivers.length) return null;
-            const groupTotal = groupDrivers.reduce((s, d) => s + d.impact, 0);
-            return (
-              <div key={group.key}>
-                {/* Group heading row */}
-                <div className="flex items-center justify-between px-6 py-2 border-y border-border/40 bg-secondary/30">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/70">
-                    {group.label}
-                  </p>
-                  <p className="text-[11px] font-bold tabular-nums text-destructive/60">
-                    −£{Math.abs(groupTotal).toLocaleString()}
-                  </p>
-                </div>
-                {/* Driver rows within group */}
-                <div className="divide-y divide-border/30">
-                  {groupDrivers.map((row) => {
-                    const isLargest = row.driver === ME_LARGEST_DRIVER;
-                    const impactAbs = Math.abs(row.impact);
-                    return (
-                      <div
-                        key={row.driver}
-                        className="flex items-center justify-between px-6 py-4 gap-6 hover:bg-secondary/20 transition-colors"
-                      >
-                        <div className="flex items-start gap-3 min-w-0">
-                          <div className={cn(
-                            "w-1 self-stretch rounded-full shrink-0 min-h-[2rem] mt-0.5",
-                            isLargest ? "bg-destructive" : "bg-destructive/25"
-                          )} />
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <span className="text-sm font-semibold text-foreground">{row.driver}</span>
-                              {isLargest && (
-                                <span className="inline-flex text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 whitespace-nowrap">
-                                  Largest driver
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-snug">{row.cause}</p>
-                          </div>
-                        </div>
-                        <span className="text-sm font-bold whitespace-nowrap shrink-0 tabular-nums text-destructive">
-                          −£{impactAbs.toLocaleString()}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Total row */}
-          <div className="flex items-center justify-between px-6 py-3.5 border-t border-border/50 bg-secondary/20">
-            <p className="text-xs font-semibold text-foreground">Total attributed impact — {periodBadge}</p>
-            <p className="text-sm font-bold text-destructive tabular-nums">
-              −£{Math.abs(ME_DRIVERS_TOTAL).toLocaleString()}
-            </p>
-          </div>
-
-        </div>
-      </PremiumBlurPreview>
-
-      {/* ══════════════════════════════════════════════════════════════════════
-          SUPPORTING CHANNEL ANALYSIS
-          CAC by channel, payback, contribution margin, and trend evidence
-      ══════════════════════════════════════════════════════════════════════ */}
-
-      {/* ── Section divider ── */}
-      <div className="border-t border-border/50 pt-10 mb-2">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
-          Deep Dive
-        </p>
-        <h2 className="text-xl font-bold text-foreground">Supporting Channel Analysis</h2>
-        <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-          Supporting evidence behind current channel performance and efficiency trends.
-        </p>
-      </div>
-
-      {/* ── Grouped sub-sections ── */}
       <div className="space-y-4">
 
       {/* CAC by Channel */}
@@ -1860,255 +1306,51 @@ export default function MarketingEfficiency() {
 
       </div>
 
-      {/* ── Attribution Confidence Note — visible Free + Pro ── */}
-      <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-secondary/40 border border-border/50">
-        <Info className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Channel-level contribution estimates assume revenue attribution from platform reporting (Meta / Google).
-          Cross-channel attribution differences may slightly affect efficiency comparisons.
-        </p>
-      </div>
-
-      {/* CAC Payback by Channel — Pro gated via PremiumBlurPreview */}
-      <PremiumBlurPreview
-        title="CAC Payback by Channel"
-        subtitle="Orders required to recover acquisition cost using contribution profit per order."
-        description="Payback speed determines how quickly marketing spend returns usable cash. Faster payback reduces growth risk even when contribution per order is similar."
-        badgeText="PRO — Unlock cash recovery diagnostics"
-        headerExtra={
-          <div className="flex items-start gap-3 shrink-0">
-            <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/40 px-3 py-2 text-right">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                Cash recovery risk
-              </p>
-              <p className="text-sm font-bold text-amber-700 dark:text-amber-300 leading-snug mt-0.5">Moderate</p>
-              <p className="text-[10px] text-amber-600/70 dark:text-amber-400/60 leading-snug mt-0.5 max-w-[18ch]">
-                Paid acquisition is becoming less cash-efficient because Meta payback is above the risk threshold.
-              </p>
-            </div>
-            <div className="text-right pt-0.5">
-              <p className="text-xs text-muted-foreground">Blended avg</p>
-              <p className="text-sm font-bold text-foreground tabular-nums">{CAC_PAYBACK} orders</p>
-            </div>
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-3 border-b border-border/50 bg-secondary/20">
+          <div>
+            <h3 className="font-semibold text-base text-foreground">CAC Payback by Channel</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Which channels recover acquisition cost fastest.
+            </p>
           </div>
-        }
-        ctaTitle="Unlock CAC payback by channel"
-        ctaDescription="Identify which channels delay cash recovery and increase working capital pressure."
-        isPro={canAccess("cac_payback")}
-        ghostContent={
-          <div className="space-y-4">
-            {(() => {
-              const ghostWidths = ["20%", "28%", "45%", "72%"];
-              return [...livePaybackByChannel]
-                .sort((a, b) => a.payback - b.payback)
-                .map((row, i) => {
-                  const overThreshold = row.payback > PAYBACK_THRESHOLD;
-                  return (
-                    <div key={row.channel}>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-medium text-foreground">{PAYBACK_CHANNEL_GHOST_NAMES[i] ?? `Channel ${i + 1}`}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-medium tabular-nums text-foreground/25 dark:text-foreground/20">—.— avg</span>
-                          <span className="text-sm font-bold tabular-nums text-foreground/25 dark:text-foreground/20">—.— orders</span>
-                          {overThreshold && (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">
-                              Risk
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="relative w-full" style={{ height: "20px" }}>
-                        <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-slate-400/60 dark:bg-slate-500/60 rounded-sm z-10" style={{ left: "38%" }} />
-                        <div className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-destructive/40 rounded-sm z-10" style={{ left: "55%" }} />
-                        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 bg-secondary rounded-full overflow-hidden">
-                          <div
-                            className={cn("h-2 rounded-full", overThreshold ? "bg-destructive/70" : "bg-emerald-500/70")}
-                            style={{ width: ghostWidths[i] }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                });
-            })()}
-            <div className="mt-5 space-y-1.5">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="inline-block w-6 border-t border-dashed border-slate-400/70 dark:border-slate-500/70 shrink-0" />
-                <span>Blended avg: <span className="font-semibold tabular-nums text-foreground/25 dark:text-foreground/20">—.— orders</span></span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="inline-block w-6 border-t border-dashed border-destructive/60 shrink-0" />
-                <span>Target threshold: <span className="font-semibold tabular-nums text-foreground/25 dark:text-foreground/20">—.— orders</span>. Channels above this reduce short-term cash efficiency.</span>
-              </div>
-            </div>
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">Blended avg</p>
+            <p className="text-sm font-bold text-foreground tabular-nums">{CAC_PAYBACK} orders</p>
           </div>
-        }
-      >
-        {/* ── Threshold band legend ── */}
-        <div className="flex flex-wrap items-center gap-3 mb-5 pb-4 border-b border-border/40">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 mr-1">Payback bands</span>
-          {([
-            { label: "Safe", note: "< 1.2 orders",    cls: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300" },
-            { label: "Monitor", note: "1.2–1.6 orders", cls: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300" },
-            { label: "Risk",  note: "> 1.6 orders",   cls: "bg-destructive/10 text-destructive" },
-          ] as const).map(({ label, note, cls }) => (
-            <span key={label} className={cn("inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full", cls)}>
-              {label} <span className="font-normal opacity-70">{note}</span>
-            </span>
-          ))}
         </div>
 
-        {/* ── Chart rows — real data, blurred for free users ── */}
-        <div className="space-y-4">
-          {[...livePaybackByChannel].sort((a, b) => a.payback - b.payback).map((row) => {
+        <div className="divide-y divide-border/40">
+          {[...livePaybackByChannel].sort((a, b) => a.payback - b.payback).map((row, i) => {
             const band = getPaybackBand(row.payback);
-            const barPct = Math.min((row.payback / 3) * 100, 100);
-            /** @dynamic diff = row.payback − CAC_PAYBACK (live) */
-            const paybackDiff = +(row.payback - CAC_PAYBACK).toFixed(1);
-            const absPaybackDiff = Math.abs(paybackDiff);
-            const paybackDiffLabel =
-              paybackDiff === 0
-                ? "at avg"
-                : `${absPaybackDiff} ${paybackDiff > 0 ? "above" : "below"} avg`;
-            /** @dynamic reference line positions within 0–3 order scale */
-            const blendedPct = (CAC_PAYBACK / 3) * 100;
-            const thresholdPct = (PAYBACK_THRESHOLD / 3) * 100;
-            const barColor =
-              band.label === "Safe"    ? "bg-emerald-500" :
-              band.label === "Monitor" ? "bg-amber-400"   : "bg-destructive";
             return (
-              <div key={row.channel}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm font-medium text-foreground">{row.channel}</span>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "text-[11px] font-medium tabular-nums",
-                        paybackDiff > 0
-                          ? "text-destructive/70"
-                          : "text-emerald-600/70 dark:text-emerald-400/70"
-                      )}
-                    >
-                      {paybackDiffLabel}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-sm font-bold tabular-nums",
-                        band.label === "Risk"    ? "text-destructive" :
-                        band.label === "Monitor" ? "text-amber-600 dark:text-amber-400" :
-                        "text-emerald-600 dark:text-emerald-400"
-                      )}
-                    >
-                      {row.payback} orders
-                    </span>
-                    <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded", band.badgeCls)}>
-                      {band.label}
-                    </span>
-                  </div>
-                </div>
-                {/* Bar track with reference line ticks */}
-                <div className="relative w-full" style={{ height: "20px" }}>
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-slate-400/60 dark:bg-slate-500/60 rounded-sm z-10 pointer-events-none"
-                    style={{ left: `calc(${blendedPct}% - 1px)` }}
-                  />
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-0.5 h-5 bg-destructive/40 rounded-sm z-10 pointer-events-none"
-                    style={{ left: `calc(${thresholdPct}% - 1px)` }}
-                  />
-                  <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className={cn("h-2 rounded-full transition-all", barColor)}
-                      style={{ width: `${barPct}%` }}
-                    />
-                  </div>
+              <div key={row.channel} className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-4 px-6 py-3.5 items-center">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-secondary text-xs font-bold text-muted-foreground">
+                  {i + 1}
+                </span>
+                <span className="text-sm font-medium text-foreground">{row.channel}</span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "text-sm font-bold tabular-nums",
+                      band.label === "Risk"    ? "text-destructive" :
+                      band.label === "Monitor" ? "text-amber-600 dark:text-amber-400" :
+                      "text-emerald-600 dark:text-emerald-400"
+                    )}
+                  >
+                    {row.payback} orders
+                  </span>
+                  <span className={cn("text-[10px] font-semibold px-1.5 py-0.5 rounded", band.badgeCls)}>
+                    {band.label}
+                  </span>
                 </div>
               </div>
             );
           })}
         </div>
-
-        {/* Legend */}
-        <div className="mt-5 space-y-1.5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="inline-block w-6 border-t border-dashed border-slate-400/70 dark:border-slate-500/70 shrink-0" />
-            <span>Blended avg: <span className="font-semibold tabular-nums">{CAC_PAYBACK} orders</span></span>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="inline-block w-6 border-t border-dashed border-destructive/60 shrink-0" />
-            <span>
-              Target threshold: <span className="font-semibold tabular-nums">{PAYBACK_THRESHOLD} orders</span>. Channels above this
-              reduce short-term cash efficiency and increase growth risk.
-            </span>
-          </div>
-        </div>
-
-      </PremiumBlurPreview>
-
-      {/* Marketing Efficiency Trend */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg text-foreground">Marketing Efficiency Trend</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Blended CAC and ROAS over the past 12 months.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-6 mb-4">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-0.5 bg-destructive inline-block rounded" />
-            <span className="text-xs text-muted-foreground">Blended CAC (£)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-0.5 bg-primary inline-block rounded" />
-            <span className="text-xs text-muted-foreground">Blended ROAS (×)</span>
-          </div>
-        </div>
-
-        <div className="h-[240px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={TREND_DATA} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-              <XAxis
-                dataKey="month"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                dy={8}
-              />
-              <YAxis
-                yAxisId="cac"
-                orientation="left"
-                domain={[6, 14]}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                tickFormatter={(v: number) => `£${v}`}
-              />
-              <YAxis
-                yAxisId="roas"
-                orientation="right"
-                domain={[2, 5]}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                tickFormatter={(v: number) => `${v}×`}
-              />
-              <Tooltip
-                contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgb(0 0 0 / .1)" }}
-                formatter={(value: number, name: string) =>
-                  name === "cac" ? [`£${value.toFixed(2)}`, "Blended CAC"] : [`${value}×`, "Blended ROAS"]
-                }
-              />
-              <Line yAxisId="cac" type="monotone" dataKey="cac" stroke="#ef4444" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
-              <Line yAxisId="roas" type="monotone" dataKey="roas" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
       </div>
 
-          </div>{/* end Supporting Channel Analysis group */}
+          </div>
         </div>
       </details>
 

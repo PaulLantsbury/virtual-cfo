@@ -529,7 +529,10 @@ export default function MarketingEfficiency() {
                 Email and Organic are creating the most profitable customers. Meta is now the weakest channel and is pulling blended acquisition efficiency down.
               </p>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                The commercial move is to shift 15–25% of Meta spend toward lifecycle, Email and Organic activity before adding new budget. That gives the business a route to recover approximately{" "}
+                {isPro
+                  ? "The commercial move is to shift 15-25% of Meta spend toward lifecycle, Email and Organic activity before adding new budget."
+                  : "The commercial issue is clear: weaker paid acquisition is absorbing budget that could be working harder elsewhere."}{" "}
+                That gives the business a route to recover approximately{" "}
                 <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{liveEstimatedContribution.toLocaleString()}</span>{" "}
                 {framing.upliftPhrase}.
               </p>
@@ -571,7 +574,11 @@ export default function MarketingEfficiency() {
             </div>
             <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
               <p className="text-xs font-semibold text-muted-foreground mb-1">What to do next</p>
-              <p className="text-sm text-foreground leading-snug">Tighten Meta spend first, then move budget toward owned and organic demand.</p>
+              <p className="text-sm text-foreground leading-snug">
+                {isPro
+                  ? "Tighten Meta spend first, then move budget toward owned and organic demand."
+                  : "Prioritise fixing inefficient paid acquisition before adding more budget."}
+              </p>
             </div>
             <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
               <p className="text-xs font-semibold text-muted-foreground mb-1">Why this matters</p>
@@ -593,65 +600,90 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-border/60 shadow-sm mb-8 overflow-hidden bg-card">
-        <div className="divide-y divide-border/40">
-          {ME_OPPORTUNITIES.map((o, i) => (
-            <details key={o.shortLabel} className="group open:bg-secondary/10">
-              <summary className="list-none cursor-pointer px-6 py-4 hover:bg-secondary/20 transition-colors">
-                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <span className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
-                      <p className="text-xs text-muted-foreground mt-1 leading-snug">{o.detail}</p>
+      {isPro ? (
+        <div className="rounded-2xl border border-border/60 shadow-sm mb-8 overflow-hidden bg-card">
+          <div className="divide-y divide-border/40">
+            {ME_OPPORTUNITIES.map((o, i) => (
+              <details key={o.shortLabel} className="group open:bg-secondary/10">
+                <summary className="list-none cursor-pointer px-6 py-4 hover:bg-secondary/20 transition-colors">
+                  <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <span className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
+                        <p className="text-xs text-muted-foreground mt-1 leading-snug">{o.detail}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                        £{o.cashImpact.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
+                        {o.confidence === "high" ? "High confidence" : "Medium confidence"}
+                      </span>
+                      <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
+                        {o.effort === "low" ? "Low effort" : "Medium effort"}
+                      </span>
+                      <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/25 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
+                        Next 30 days
+                      </span>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
-                      £{o.cashImpact.toLocaleString()}
-                    </span>
-                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
-                      {o.confidence === "high" ? "High confidence" : "Medium confidence"}
-                    </span>
-                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
-                      {o.effort === "low" ? "Low effort" : "Medium effort"}
-                    </span>
-                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/25 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
-                      Next 30 days
-                    </span>
-                  </div>
+                </summary>
+                <div className="px-16 pb-4 -mt-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">How to start</p>
+                  <ul className="space-y-1.5 text-sm text-muted-foreground">
+                    {i === 0 && (
+                      <>
+                        <li>Pause the weakest Meta ad sets and protect campaigns with clear repeat-purchase intent.</li>
+                        <li>Move 15-25% of spend toward Email, Organic and lifecycle activity before increasing total budget.</li>
+                        <li>Review CAC payback weekly while the shift is live.</li>
+                      </>
+                    )}
+                    {i === 1 && (
+                      <>
+                        <li>Prioritise abandoned browse, post-purchase and win-back flows for existing customer demand.</li>
+                        <li>Measure repeat purchase contribution rather than email revenue alone.</li>
+                      </>
+                    )}
+                    {i === 2 && (
+                      <>
+                        <li>Focus paid acquisition on SKUs and campaigns with above-average contribution margin.</li>
+                        <li>Reduce spend where revenue is growing but contribution per order is weak.</li>
+                      </>
+                    )}
+                  </ul>
                 </div>
-              </summary>
-              <div className="px-16 pb-4 -mt-1">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">How to start</p>
-                <ul className="space-y-1.5 text-sm text-muted-foreground">
-                  {i === 0 && (
-                    <>
-                      <li>Pause the weakest Meta ad sets and protect campaigns with clear repeat-purchase intent.</li>
-                      <li>Move 15–25% of spend toward Email, Organic and lifecycle activity before increasing total budget.</li>
-                      <li>Review CAC payback weekly while the shift is live.</li>
-                    </>
-                  )}
-                  {i === 1 && (
-                    <>
-                      <li>Prioritise abandoned browse, post-purchase and win-back flows for existing customer demand.</li>
-                      <li>Measure repeat purchase contribution rather than email revenue alone.</li>
-                    </>
-                  )}
-                  {i === 2 && (
-                    <>
-                      <li>Focus paid acquisition on SKUs and campaigns with above-average contribution margin.</li>
-                      <li>Reduce spend where revenue is growing but contribution per order is weak.</li>
-                    </>
-                  )}
-                </ul>
-              </div>
-            </details>
-          ))}
+              </details>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+                <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Marketing Recovery Plan</p>
+                <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
+                  3 prioritised actions identified. Upgrade to view the action plan, recommended budget moves and implementation steps.
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0 md:text-right">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 mb-1">Estimated contribution recovery</p>
+              <p className="text-2xl font-display font-bold text-indigo-900 dark:text-indigo-100">£{liveEstimatedContribution.toLocaleString()}</p>
+              <a href="/upgrade" className="text-xs font-semibold text-indigo-600 dark:text-indigo-300 hover:underline mt-1 inline-block">
+                Upgrade to Pro →
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════════════
           §3  PROFITABLE CUSTOMER CHANNELS
@@ -770,6 +802,7 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
+      {isPro ? (
       <div className="rounded-2xl border border-border/60 shadow-sm mb-10 overflow-hidden bg-card">
 
         {/* ── Header bar ── */}
@@ -1015,7 +1048,29 @@ export default function MarketingEfficiency() {
 
         </div>
       </div>
+      ) : (
+        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-10 px-6 py-5">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+                <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Budget reallocation model locked</p>
+                <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1 max-w-2xl">
+                  See how shifting spend between Meta, Email, Organic and Google Shopping changes contribution, CAC and margin.
+                </p>
+              </div>
+            </div>
+            <a href="/upgrade" className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 shadow-sm transition-colors shrink-0">
+              <Lock className="w-3.5 h-3.5" />
+              Upgrade to Pro
+            </a>
+          </div>
+        </div>
+      )}
 
+      {isPro ? (
       <details className="rounded-2xl border border-border/60 bg-card shadow-sm mb-8 overflow-hidden">
         <summary className="list-none cursor-pointer px-6 py-4 hover:bg-secondary/20 transition-colors">
           <div className="flex items-center justify-between gap-4">
@@ -1353,6 +1408,26 @@ export default function MarketingEfficiency() {
           </div>
         </div>
       </details>
+      ) : (
+        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+                <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Supporting analysis available on Pro</p>
+                <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
+                  Unlock the detailed channel evidence behind the recommendation, including CAC, payback and contribution-per-order comparisons.
+                </p>
+              </div>
+            </div>
+            <a href="/upgrade" className="text-sm font-semibold text-indigo-600 dark:text-indigo-300 hover:underline shrink-0">
+              Upgrade to Pro →
+            </a>
+          </div>
+        </div>
+      )}
 
       {/*
        * ══════════════════════════════════════════════════════════════════════

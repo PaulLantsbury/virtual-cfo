@@ -5,7 +5,7 @@ import {
   type ChannelOpportunity,
   type BlendedMarketingPerformance,
 } from "@/lib/analytics/marketingChannelMetrics";
-import { ChevronDown, FlaskConical, Lock, Target, TrendingUp } from "lucide-react";
+import { ChevronDown, FlaskConical, Lock, Target } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
@@ -379,21 +379,30 @@ export default function Opportunities() {
 
       {/* ── CFO verdict ── */}
       <div className="sc-purple rounded-2xl px-6 py-6 mb-6">
-        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-widest text-indigo-300/80 mb-2">
-              CFO verdict
+              CFO view
             </p>
             <h2 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
-              Start with {topAction?.label ?? "the highest-confidence action"}.
+              Profit is leaking through controllable decisions, not weak demand.
             </h2>
             <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">
               {topAction
-                ? `${topAction.label} is the first move because it combines near-term profit recovery with ${topAction.confidence.toLowerCase()} confidence, ${topAction.effort.toLowerCase()} effort and ${topAction.timing.toLowerCase()} timing.`
+                ? `Contribution margin is currently below the healthy range, but the main issue is controllable leakage rather than weak demand. The fastest recovery comes from reducing repeat-customer discounting, tightening fulfilment costs and reallocating inefficient Meta spend. Together, the first actions could recover ${showHeadline ? `£${(liveTotalLow / 1000).toFixed(0)}k–£${(liveTotalHigh / 1000).toFixed(0)}k per month` : "meaningful monthly contribution"} without requiring new budget.`
                 : loading
                   ? "Loading the current recovery plan."
                   : "No active execution actions were found for this period."}
             </p>
+            {topAction && (
+              <div className="mt-4 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Start first</p>
+                <p className="text-sm font-semibold text-foreground">{topAction.label}</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  {OPPORTUNITY_GUIDANCE[topAction.label]?.shortWhy ?? topAction.description}
+                </p>
+              </div>
+            )}
             {!showExecPriority && (
               <div className="flex items-center gap-2 mt-3 text-xs text-indigo-200/70">
                 <Lock className="w-3.5 h-3.5 shrink-0" />
@@ -403,26 +412,20 @@ export default function Opportunities() {
           </div>
 
           {topAction && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2 w-full lg:w-[22rem] shrink-0">
-              <div className="rounded-lg border border-indigo-300/15 bg-indigo-950/25 px-3 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/60">Impact</p>
-                {showUpliftValues ? (
-                  <p className="text-sm font-bold text-emerald-300 mt-1">{topAction.impactRangeLabel}</p>
-                ) : (
-                  <p className="text-sm font-bold text-emerald-300 mt-1 blur-sm select-none">£00k-£00k/mo</p>
-                )}
-              </div>
-              <div className="rounded-lg border border-indigo-300/15 bg-indigo-950/25 px-3 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/60">Confidence</p>
-                <p className="text-sm font-semibold text-foreground mt-1">{topAction.confidence}</p>
-              </div>
-              <div className="rounded-lg border border-indigo-300/15 bg-indigo-950/25 px-3 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/60">Effort</p>
-                <p className="text-sm font-semibold text-foreground mt-1">{topAction.effort}</p>
-              </div>
-              <div className="rounded-lg border border-indigo-300/15 bg-indigo-950/25 px-3 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/60">Timing</p>
-                <p className="text-sm font-semibold text-foreground mt-1">{topAction.timing}</p>
+            <div className="w-full lg:w-[19rem] shrink-0 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-4">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70">Recoverable contribution</p>
+              {showHeadline ? (
+                <p className="text-3xl font-display font-bold text-emerald-300 mt-1">
+                  £{(liveTotalLow / 1000).toFixed(0)}k–£{(liveTotalHigh / 1000).toFixed(0)}k
+                </p>
+              ) : (
+                <p className="text-3xl font-display font-bold text-emerald-300 mt-1 blur-sm select-none">£00k-£00k</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Estimated monthly contribution recovery.</p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.confidence} confidence</span>
+                <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.effort} effort</span>
+                <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.timing}</span>
               </div>
             </div>
           )}
@@ -435,6 +438,11 @@ export default function Opportunities() {
           <h3 className="font-semibold text-lg text-foreground">Start here</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
             The first three profit recovery actions to brief into the team.
+          </p>
+          <p className="text-xs text-muted-foreground/70 mt-2 leading-relaxed">
+            <span className="font-semibold text-foreground/70">Why these three? </span>
+            They recover contribution quickly, need little or no new spend, and are within management control.
+            {showHeadline && ` The low-effort actions alone represent £${(capitalFreeLow / 1000).toFixed(0)}k–£${(capitalFreeHigh / 1000).toFixed(0)}k of recoverable upside.`}
           </p>
         </div>
 
@@ -473,7 +481,7 @@ export default function Opportunities() {
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                            {opp.implementationType}
+                            {OPPORTUNITY_GUIDANCE[opp.label]?.shortWhy ?? opp.implementationType}
                           </p>
                         </div>
                       </div>
@@ -484,27 +492,15 @@ export default function Opportunities() {
                       )} />
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      <div className="rounded-lg border border-border/50 bg-card px-3 py-2">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Worth</p>
-                        {showUpliftValues ? (
-                          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{opp.impactRangeLabel}</p>
-                        ) : (
-                          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 blur-sm select-none">£00k-£00k/mo</p>
-                        )}
-                      </div>
-                      <div className="rounded-lg border border-border/50 bg-card px-3 py-2">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Confidence</p>
-                        <p className="text-sm font-semibold text-foreground mt-0.5">{opp.confidence}</p>
-                      </div>
-                      <div className="rounded-lg border border-border/50 bg-card px-3 py-2">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Effort</p>
-                        <p className="text-sm font-semibold text-foreground mt-0.5">{opp.effort}</p>
-                      </div>
-                      <div className="rounded-lg border border-border/50 bg-card px-3 py-2">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Timing</p>
-                        <p className="text-sm font-semibold text-foreground mt-0.5">{opp.timing}</p>
-                      </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {showUpliftValues ? (
+                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{opp.impactRangeLabel}</span>
+                      ) : (
+                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 blur-sm select-none">£00k-£00k/mo</span>
+                      )}
+                      <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.timing}</span>
+                      <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.confidence} confidence</span>
+                      <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.effort} effort</span>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
@@ -522,59 +518,6 @@ export default function Opportunities() {
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* ── What this could recover ── */}
-      <div className="sc-teal rounded-2xl shadow-sm mb-8 overflow-hidden">
-        <div className="px-6 py-5 border-b border-[#2E7C8F]/50 flex items-start gap-4">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#22D3EE]/15 shrink-0">
-            <TrendingUp className="w-5 h-5 text-[#22D3EE]" />
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-1">
-              What this could recover
-            </p>
-            <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 leading-relaxed">
-              Recurring contribution recovery is separated from one-off cash release so the next decision is clear.
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#2E7C8F]/40">
-          <div className="px-6 py-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800/60 dark:text-emerald-300/60">Recoverable contribution</p>
-            {showHeadline ? (
-              <p className="text-3xl font-display font-bold text-emerald-700 dark:text-emerald-300 mt-1">
-                £{(liveTotalLow / 1000).toFixed(0)}k–£{(liveTotalHigh / 1000).toFixed(0)}k/month
-              </p>
-            ) : (
-              <p className="text-3xl font-display font-bold text-emerald-700 dark:text-emerald-300 mt-1 blur-sm select-none">
-                £00k-£00k/month
-              </p>
-            )}
-          </div>
-          <div className="px-6 py-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800/60 dark:text-emerald-300/60">Capital-free uplift</p>
-            {showHeadline ? (
-              <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">
-                £{(capitalFreeLow / 1000).toFixed(0)}k–£{(capitalFreeHigh / 1000).toFixed(0)}k
-              </p>
-            ) : (
-              <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1 blur-sm select-none">£00k-£00k</p>
-            )}
-            <p className="text-xs text-emerald-800/60 dark:text-emerald-300/60 mt-1">Requires no new budget spend.</p>
-          </div>
-          <div className="px-6 py-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800/60 dark:text-emerald-300/60">All identified value</p>
-            {showUpliftValues ? (
-              <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1">
-                £{(liveAllLow / 1_000).toFixed(0)}k–£{(liveAllHigh / 1_000).toFixed(0)}k
-              </p>
-            ) : (
-              <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-1 blur-sm select-none">£00k-£00k</p>
-            )}
-            <p className="text-xs text-emerald-800/60 dark:text-emerald-300/60 mt-1">Includes cash release projects.</p>
-          </div>
         </div>
       </div>
 
@@ -728,6 +671,7 @@ export default function Opportunities() {
               <h3 className="font-semibold text-lg text-foreground">Cash release projects</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
                 Valuable working-capital actions, kept separate from monthly contribution recovery.
+                {showUpliftValues && ` All identified value including cash release is £${(liveAllLow / 1000).toFixed(0)}k–£${(liveAllHigh / 1000).toFixed(0)}k.`}
               </p>
             </div>
           </div>

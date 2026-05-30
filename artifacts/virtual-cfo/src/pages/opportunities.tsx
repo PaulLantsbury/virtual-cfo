@@ -58,6 +58,73 @@ const TITLE_TO_PRESET: Record<string, string> = {
   "Improve full-price order ratio":  "improve-fullprice-ratio",
 };
 
+const OPPORTUNITY_GUIDANCE: Record<string, {
+  shortWhy: string;
+  evidence: string[];
+  implementation: string[];
+}> = {
+  "Reduce average discount depth": {
+    shortWhy: "Repeat customers already have buying intent, so blanket discounts are likely to leak contribution without creating enough incremental demand.",
+    evidence: [
+      "Current average discount: 18%",
+      "Test target: 15%",
+      "Discount dependency: 38%",
+      "Uplift estimate comes from current discount leakage",
+    ],
+    implementation: [
+      "Remove blanket repeat-customer discount codes.",
+      "Limit welcome discounts to first purchase only.",
+      "Test reducing larger campaign discounts by 3 percentage points.",
+      "Keep win-back discounts for inactive customers only.",
+    ],
+  },
+  "Reduce shipping cost per order": {
+    shortWhy: "Shipping cost is rising per order, so every operational saving drops directly into contribution without needing more sales.",
+    evidence: [
+      "Shipping cost per order up 12%",
+      "Target reduction: 10%",
+      "Estimated contribution gain: £3.70 per order",
+      "High-confidence margin lever",
+    ],
+    implementation: [
+      "Review courier rates and surcharge lines.",
+      "Test a minimum order threshold for free shipping.",
+      "Renegotiate rates where current volume supports it.",
+      "Identify SKUs or orders where fulfilment cost is disproportionate.",
+    ],
+  },
+  "Reallocate inefficient Meta spend": {
+    shortWhy: "Meta acquisition is currently expensive relative to owned channels, so moving budget into lifecycle activity should improve contribution quality.",
+    evidence: [
+      "Meta CAC: £28",
+      "Prior Meta CAC: £24",
+      "Email CAC benchmark: £4.80",
+      "Suggested shift: 15% of Meta budget",
+    ],
+    implementation: [
+      "Pause the weakest Meta ad sets.",
+      "Shift 15-25% of spend toward Email and Organic/lifecycle activity.",
+      "Prioritise campaigns aimed at repeat purchase.",
+      "Review CAC payback weekly.",
+    ],
+  },
+  "Improve full-price order ratio": {
+    shortWhy: "Discounted order mix is pulling down realised margin, so tighter promotion rules should recover contribution from customers who would buy anyway.",
+    evidence: [
+      "Discounted orders: 38%",
+      "Medium effort pricing change",
+      "30 day timing",
+      "Uplift estimate based on full-price mix recovery",
+    ],
+    implementation: [
+      "Segment offers by customer lifecycle stage.",
+      "Remove blanket repeat-buyer promotions.",
+      "Reserve larger discounts for reactivation campaigns.",
+      "Review full-price order ratio weekly during the test.",
+    ],
+  },
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const IMPACT_CONFIG: Record<ImpactLevel, { label: string; classes: string }> = {
@@ -158,6 +225,7 @@ export default function Opportunities() {
       // description: use recommended_action from DB when available; fall back
       // to the stored description column, then category as last resort.
       description:        (o.recommended_action ?? o.description ?? o.category ?? "") as string,
+      evidenceSummary:    (o.description ?? "") as string,
       uplift,
       impact,
       effort:             eff,
@@ -239,6 +307,9 @@ export default function Opportunities() {
   const topAction = visibleQueue[0] ?? sortedOpportunities[0];
   const expandedOpportunity = visibleQueue.find((o) => o.id === expandedOppId);
   const selectedOpportunity = expandedOpportunity ?? topAction;
+  const selectedGuidance = selectedOpportunity
+    ? OPPORTUNITY_GUIDANCE[selectedOpportunity.label]
+    : null;
 
   // ── Live "why this matters" rationale ─────────────────────────────────────────
   // Derives a concise data-driven sentence from Phase 1 / Phase 3 live signals.
@@ -274,6 +345,17 @@ export default function Opportunities() {
     return null;
   };
 
+  const getEvidence = (opp: (typeof mappedOpportunities)[number]): string[] => {
+    const guidance = OPPORTUNITY_GUIDANCE[opp.label];
+    const fallback = [
+      opp.evidenceSummary,
+      opp.impactRangeLabel,
+      `${opp.confidence} confidence`,
+    ].filter(Boolean);
+
+    return guidance?.evidence ?? fallback;
+  };
+
   const showHeadline     = canAccess("opportunities_headline_value");
   const showUpliftValues = canAccess("opportunities_uplift_values");
   const showExecPriority = canAccess("opportunities_execution_priority");
@@ -285,9 +367,9 @@ export default function Opportunities() {
       {/* ── Page header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Execution Queue</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Profit Recovery Plan</h1>
           <p className="text-muted-foreground mt-1">
-            The next profit actions to take, ranked by impact, confidence, effort and timing.
+            A practical CFO action plan for recovering contribution without adding unnecessary complexity.
           </p>
         </div>
         <span className="text-sm text-muted-foreground font-medium bg-secondary px-3 py-1.5 rounded-lg">
@@ -303,13 +385,13 @@ export default function Opportunities() {
               CFO verdict
             </p>
             <h2 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
-              Do {topAction?.label ?? "the highest-confidence action"} first.
+              Start with {topAction?.label ?? "the highest-confidence action"}.
             </h2>
             <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">
               {topAction
-                ? `${topAction.label} is the first move because it combines the strongest near-term profit impact with ${topAction.confidence.toLowerCase()} confidence, ${topAction.effort.toLowerCase()} effort and ${topAction.timing.toLowerCase()} timing.`
+                ? `${topAction.label} is the first move because it combines near-term profit recovery with ${topAction.confidence.toLowerCase()} confidence, ${topAction.effort.toLowerCase()} effort and ${topAction.timing.toLowerCase()} timing.`
                 : loading
-                  ? "Loading the current opportunity queue."
+                  ? "Loading the current recovery plan."
                   : "No active execution actions were found for this period."}
             </p>
             {!showExecPriority && (
@@ -347,81 +429,94 @@ export default function Opportunities() {
         </div>
       </div>
 
-      {/* ── Execution queue ── */}
+      {/* ── Start here ── */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50">
-          <h3 className="font-semibold text-lg text-foreground">Execution Queue</h3>
+          <h3 className="font-semibold text-lg text-foreground">Start here</h3>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Top 3 actions to take first. Expand a row for the mechanics and source detail.
+            The first three profit recovery actions to brief into the team.
           </p>
         </div>
 
-        <div className="divide-y divide-border/40">
+        <div className="space-y-3 p-4">
           {visibleQueue.map((opp, idx) => {
             const isExpanded = expandedOppId ? expandedOppId === opp.id : idx === 0;
+            const evidence = getEvidence(opp).slice(0, 2);
 
             return (
               <div key={opp.id} className={cn(
-                "px-6 py-4",
-                idx === 0 && "bg-emerald-50/40 dark:bg-emerald-950/10",
-                isExpanded && "ring-1 ring-inset ring-primary/20",
+                "rounded-xl border border-border/60 bg-background px-4 py-4 transition-colors",
+                idx === 0 && "border-emerald-300/60 bg-emerald-50/50 dark:border-emerald-800/50 dark:bg-emerald-950/10",
+                isExpanded && "ring-1 ring-primary/25",
               )}>
                 <button
                   type="button"
                   onClick={() => setExpandedOppId(isExpanded ? null : opp.id)}
                   className="w-full text-left"
                 >
-                  <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_9rem_7rem_6rem_7rem_1.5rem] gap-3 lg:items-center">
-                    <div className="flex items-start gap-3 min-w-0">
-                      <span className={cn(
-                        "flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0 mt-0.5",
-                        idx === 0 ? "bg-emerald-600 text-white" : "bg-primary/10 text-primary",
-                      )}>
-                        {idx + 1}
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-semibold text-foreground text-sm leading-snug">{opp.label}</p>
-                          {idx === 0 && (
-                            <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-                              Do first
-                            </span>
-                          )}
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 min-w-0">
+                        <span className={cn(
+                          "flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0 mt-0.5",
+                          idx === 0 ? "bg-emerald-600 text-white" : "bg-primary/10 text-primary",
+                        )}>
+                          {idx + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-foreground text-sm leading-snug">{opp.label}</p>
+                            {idx === 0 && (
+                              <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+                                Do first
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                            {opp.implementationType}
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                          {opp.implementationType}
-                        </p>
+                      </div>
+
+                      <ChevronDown className={cn(
+                        "w-4 h-4 text-muted-foreground transition-transform shrink-0 mt-1",
+                        isExpanded && "rotate-180",
+                      )} />
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="rounded-lg border border-border/50 bg-card px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Worth</p>
+                        {showUpliftValues ? (
+                          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">{opp.impactRangeLabel}</p>
+                        ) : (
+                          <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 blur-sm select-none">£00k-£00k/mo</p>
+                        )}
+                      </div>
+                      <div className="rounded-lg border border-border/50 bg-card px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Confidence</p>
+                        <p className="text-sm font-semibold text-foreground mt-0.5">{opp.confidence}</p>
+                      </div>
+                      <div className="rounded-lg border border-border/50 bg-card px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Effort</p>
+                        <p className="text-sm font-semibold text-foreground mt-0.5">{opp.effort}</p>
+                      </div>
+                      <div className="rounded-lg border border-border/50 bg-card px-3 py-2">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Timing</p>
+                        <p className="text-sm font-semibold text-foreground mt-0.5">{opp.timing}</p>
                       </div>
                     </div>
 
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 lg:hidden">Impact</p>
-                      {showUpliftValues ? (
-                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{opp.impactRangeLabel}</p>
-                      ) : (
-                        <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 blur-sm select-none">£00k-£00k/mo</p>
-                      )}
+                    <div className="flex flex-wrap gap-2">
+                      {evidence.map((item) => (
+                        <span
+                          key={item}
+                          className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
+                        >
+                          {item}
+                        </span>
+                      ))}
                     </div>
-
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 lg:hidden">Confidence</p>
-                      <p className="text-xs font-semibold text-foreground">{opp.confidence}</p>
-                    </div>
-
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 lg:hidden">Effort</p>
-                      <p className="text-xs font-semibold text-foreground">{opp.effort}</p>
-                    </div>
-
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 lg:hidden">Timing</p>
-                      <p className="text-xs font-semibold text-foreground">{opp.timing}</p>
-                    </div>
-
-                    <ChevronDown className={cn(
-                      "w-4 h-4 text-muted-foreground transition-transform justify-self-end",
-                      isExpanded && "rotate-180",
-                    )} />
                   </div>
                 </button>
               </div>
@@ -430,7 +525,7 @@ export default function Opportunities() {
         </div>
       </div>
 
-      {/* ── Money available ── */}
+      {/* ── What this could recover ── */}
       <div className="sc-teal rounded-2xl shadow-sm mb-8 overflow-hidden">
         <div className="px-6 py-5 border-b border-[#2E7C8F]/50 flex items-start gap-4">
           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#22D3EE]/15 shrink-0">
@@ -438,10 +533,10 @@ export default function Opportunities() {
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-1">
-              Money available
+              What this could recover
             </p>
             <p className="text-sm text-emerald-700/70 dark:text-emerald-400/80 leading-relaxed">
-              The queue separates recurring contribution recovery from one-off cash release projects.
+              Recurring contribution recovery is separated from one-off cash release so the next decision is clear.
             </p>
           </div>
         </div>
@@ -483,12 +578,12 @@ export default function Opportunities() {
         </div>
       </div>
 
-      {/* ── Expanded opportunity detail ── */}
+      {/* ── How to execute this ── */}
       {selectedOpportunity && (
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
           <div className="px-6 py-5 border-b border-border/50">
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/50 mb-1">
-              Expanded opportunity detail
+              How to execute this
             </p>
             <h3 className="font-semibold text-lg text-foreground">{selectedOpportunity.label}</h3>
           </div>
@@ -511,73 +606,113 @@ export default function Opportunities() {
               </a>
             </div>
           ) : (
-            <div className="px-6 py-5 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_17rem] gap-6">
-              <div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{selectedOpportunity.description}</p>
-                {(() => { const r = liveRationale(selectedOpportunity); return r ? (
-                  <p className="text-xs text-muted-foreground/60 mt-2 leading-snug italic">{r}</p>
-                ) : null; })()}
-                <div className="flex items-center gap-2 mt-4 flex-wrap">
-                  <TimingBadge timing={selectedOpportunity.timing} />
-                  <ConfidenceBadge
-                    level={selectedOpportunity.confidence}
-                    helper={
-                      selectedOpportunity.confidence === "High"
-                        ? "Based on direct Shopify and cost data."
-                        : selectedOpportunity.confidence === "Medium"
-                          ? "Based on channel-level attribution and recent trend data."
-                          : "Requires more complete mapping or longer trading history."
-                    }
-                  />
-                  <span className={cn(
-                    "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border",
-                    EFFORT_COLORS[selectedOpportunity.effort],
-                  )}>
-                    Effort: {selectedOpportunity.effort}
-                  </span>
+            <div className="px-6 py-5 space-y-5">
+              <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_18rem] gap-5">
+                <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">Why this matters</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {selectedGuidance?.shortWhy ?? selectedOpportunity.description}
+                  </p>
+                  {(() => { const r = liveRationale(selectedOpportunity); return r ? (
+                    <p className="text-xs text-muted-foreground/60 mt-2 leading-snug italic">{r}</p>
+                  ) : null; })()}
+                </div>
+
+                <div className="rounded-xl border border-emerald-200/70 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 px-4 py-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-300/70 mb-2">Expected impact</p>
+                  {showUpliftValues && (
+                    <>
+                      <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{selectedOpportunity.impactRangeLabel}</p>
+                      {selectedOpportunity.annualImpact > 0 && (
+                        <p className="text-xs text-emerald-800/60 dark:text-emerald-300/60 mt-1">
+                          Approx. £{(selectedOpportunity.annualImpact / 1000).toFixed(0)}k/year
+                        </p>
+                      )}
+                    </>
+                  )}
+                  {!showUpliftValues && (
+                    <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 blur-sm select-none">
+                      £00k-£00k/mo
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2 mt-3 flex-wrap">
+                    <TimingBadge timing={selectedOpportunity.timing} />
+                    <ConfidenceBadge
+                      level={selectedOpportunity.confidence}
+                      helper={
+                        selectedOpportunity.confidence === "High"
+                          ? "Based on direct Shopify and cost data."
+                          : selectedOpportunity.confidence === "Medium"
+                            ? "Based on channel-level attribution and recent trend data."
+                            : "Requires more complete mapping or longer trading history."
+                      }
+                    />
+                    <span className={cn(
+                      "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border",
+                      EFFORT_COLORS[selectedOpportunity.effort],
+                    )}>
+                      Effort: {selectedOpportunity.effort}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <div className="rounded-xl border border-border/50 px-4 py-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-3">How to implement</p>
+                  <ul className="space-y-2">
+                    {(selectedGuidance?.implementation ?? [selectedOpportunity.description]).map((step) => (
+                      <li key={step} className="flex gap-2 text-sm text-muted-foreground leading-relaxed">
+                        <span className="mt-2 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="rounded-xl border border-border/50 px-4 py-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-3">Evidence</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {getEvidence(selectedOpportunity).map((item) => (
+                      <div key={item} className="rounded-lg bg-secondary/50 px-3 py-2">
+                        <p className="text-xs font-medium text-muted-foreground">{item}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedOpportunity.evidenceSummary && (
+                    <p className="text-xs text-muted-foreground/60 mt-3 leading-relaxed">{selectedOpportunity.evidenceSummary}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 flex-wrap border-t border-border/50 pt-4">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className={cn(
                     "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold",
                     IMPACT_CONFIG[selectedOpportunity.impact as ImpactLevel].classes,
                   )}>
                     {IMPACT_CONFIG[selectedOpportunity.impact as ImpactLevel].label}
                   </span>
+                  {selectedOpportunity.sources.map((src: { label: string; href: string }) => (
+                    <Link
+                      key={src.href}
+                      href={src.href}
+                      className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                    >
+                      {src.label}
+                    </Link>
+                  ))}
+                  {TITLE_TO_PRESET[selectedOpportunity.label] && (
+                    <a
+                      href={`/scenario-lab?preset=${TITLE_TO_PRESET[selectedOpportunity.label]}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                    >
+                      <FlaskConical className="w-3.5 h-3.5" />
+                      Model this scenario
+                    </a>
+                  )}
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                {showUpliftValues && (
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">Expected impact</p>
-                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{selectedOpportunity.impactRangeLabel}</p>
-                    {selectedOpportunity.annualImpact > 0 && (
-                      <p className="text-xs text-muted-foreground/60">Approx. £{(selectedOpportunity.annualImpact / 1000).toFixed(0)}k/year</p>
-                    )}
-                  </div>
-                )}
-                {selectedOpportunity.sources.length > 0 && (
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50 mb-1">Source analysis</p>
-                    {selectedOpportunity.sources.map((src: { label: string; href: string }) => (
-                      <Link
-                        key={src.href}
-                        href={src.href}
-                        className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
-                      >
-                        {src.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
                 <AiCfoInlineButtons pageId="opportunities" />
-                {TITLE_TO_PRESET[selectedOpportunity.label] && (
-                  <a
-                    href={`/scenario-lab?preset=${TITLE_TO_PRESET[selectedOpportunity.label]}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                  >
-                    <FlaskConical className="w-3.5 h-3.5" />
-                    Model this scenario
-                  </a>
-                )}
               </div>
             </div>
           )}
@@ -590,7 +725,7 @@ export default function Opportunities() {
           <div className="px-6 py-5 border-b border-border/50 flex items-center gap-3">
             <Target className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <div>
-              <h3 className="font-semibold text-lg text-foreground">Cash Release Projects</h3>
+              <h3 className="font-semibold text-lg text-foreground">Cash release projects</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
                 Valuable working-capital actions, kept separate from monthly contribution recovery.
               </p>

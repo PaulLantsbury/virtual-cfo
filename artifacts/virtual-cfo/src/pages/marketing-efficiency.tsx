@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import { Sparkles, TrendingUp, AlertTriangle, Lock, SlidersHorizontal, Info, Zap, Shield } from "lucide-react";
+import { Sparkles, AlertTriangle, Lock, SlidersHorizontal, Info, Zap, Shield } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { ActionRecommendations } from "@/components/ActionRecommendations";
-import type { Recommendation } from "@/components/ActionRecommendations";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
@@ -70,9 +68,6 @@ const MKT_CM_LY          = 43.5;   // 12-month average
 const MKT_CM_CHANGE      = +(MKT_CM - MKT_CM_PREV).toFixed(1);
 const MKT_CM_CHANGE_LY   = +(MKT_CM - MKT_CM_LY).toFixed(1);
 
-/** @dynamic Marketing contribution margin target range */
-const MKT_CM_TARGET      = { low: 42, high: 48 } as const;
-
 /**
  * Total contribution profit after all marketing costs for the selected period.
  * @dynamic revenueTotal × (MKT_CM / 100)
@@ -115,21 +110,6 @@ const CP_PER_SPEND_CHANGE_LY  = +(CP_PER_SPEND - CP_PER_SPEND_LY).toFixed(2);   
  * @dynamic Math.round(orderVolume × (cmGainPp / 100) × revenuePerOrder)
  */
 const ESTIMATED_CONTRIBUTION = 18_200;
-/** @dynamic Math.round((ESTIMATED_CONTRIBUTION / MKT_CP) * 100) */
-const OPPORTUNITY_UPLIFT_PCT = Math.round((ESTIMATED_CONTRIBUTION / MKT_CP) * 100);
-
-/**
- * @ai-commentary Replace with live-generated insight.
- */
-const CFO_INSIGHT = {
-  primaryDrivers: [
-    "Meta CAC increased materially — up £3.40 per order vs prior period",
-    "Repeat-customer share declined, increasing reliance on higher-cost new acquisition",
-    "Lifecycle email conversion remains underutilised relative to its contribution potential",
-  ],
-  recoveryLever: "Reallocate 15–25% of paid acquisition spend toward Email and Organic — the two highest-contribution channels by profit margin",
-} as const;
-
 // Channel CM percentages imported from channel-metrics (shared with margin-analysis).
 // Revenue figures remain local — they reflect the marketing-efficiency period basis.
 /** @dynamic Replace with live channel-level margin data from Shopify + ad platforms */
@@ -274,56 +254,8 @@ const ME_OPPORTUNITIES: {
   },
 ];
 
-/**
- * Softer action labels shown in the FREE ghost preview only.
- * Pro users see the precise shortLabel from ME_OPPORTUNITIES.
- */
-const ME_GHOST_LABELS: Record<string, string> = {
-  "Reallocate Meta spend":                                           "Reallocate paid spend",
-  "Increase lifecycle email conversion":                             "Improve retention efficiency",
-  "Improve paid acquisition mix toward higher-contribution products": "Optimise paid acquisition mix",
-};
-
 /** @dynamic Sum of ppGain across ME_OPPORTUNITIES */
 const ME_TOTAL_PP = +ME_OPPORTUNITIES.reduce((s, o) => s + o.ppGain, 0).toFixed(1);
-
-/**
- * Confidence-weighted breakdown of the total estimated opportunity value.
- * @dynamic Derived from ME_OPPORTUNITIES[].confidence and cashImpact
- */
-const ME_CONFIDENCE_TOTALS = {
-  high:   ME_OPPORTUNITIES.filter((o) => o.confidence === "high").reduce((s, o) => s + o.cashImpact, 0),
-  medium: ME_OPPORTUNITIES.filter((o) => o.confidence === "medium").reduce((s, o) => s + o.cashImpact, 0),
-  low:    ME_OPPORTUNITIES.filter((o) => o.confidence === "low").reduce((s, o) => s + o.cashImpact, 0),
-};
-
-const RECOMMENDATIONS: Recommendation[] = [
-  {
-    id: "me1",
-    text: "Reduce spend on lowest-margin paid channels — reallocate 15–20% of Meta budget to email and organic.",
-    impact: "high",
-  },
-  {
-    id: "me2",
-    text: "Increase lifecycle email automation coverage to improve LTV and reduce blended CAC.",
-    impact: "high",
-  },
-  {
-    id: "me3",
-    text: "Improve Meta campaign targeting by narrowing audiences to high-value, repeat-purchase segments.",
-    impact: "medium",
-  },
-  {
-    id: "me4",
-    text: "Focus paid acquisition on products with the highest contribution margin.",
-    impact: "medium",
-  },
-  {
-    id: "me5",
-    text: "Set up channel-level contribution margin tracking to automate future reallocation decisions.",
-    impact: "quick-win",
-  },
-];
 
 /**
  * Attribution of the last-30-day change in marketing contribution profit.
@@ -492,7 +424,7 @@ const TIMELINE_FRAMING: Record<string, {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MarketingEfficiency() {
-  const { periodBadge, periodPhrase, timeline } = useTimeline();
+  const { periodBadge, timeline } = useTimeline();
   const framing = TIMELINE_FRAMING[timeline] ?? TIMELINE_FRAMING["30d"];
 
   // ── Phase 1: live discount dependency and repeat purchase rate ────────────
@@ -706,7 +638,7 @@ export default function MarketingEfficiency() {
             Marketing Efficiency
           </h1>
           <p className="text-muted-foreground mt-1">
-            Understand which acquisition channels create profitable customers and where budget should be reallocated.
+            Which channels are creating profitable customers, and where budget should move next.
           </p>
           <DataPeriodLabel
             periodLabel={mePeriodLabel}
@@ -719,147 +651,266 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §1  MARKETING EFFICIENCY SUMMARY
-          Diagnosis: what is happening and why it matters
+          §1  CFO CHANNEL VERDICT
+          Founder decision briefing before analysis
       ══════════════════════════════════════════════════════════════════════ */}
 
-      <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Marketing Efficiency Summary</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          {periodBadge} · Current efficiency diagnosis with modelled reallocation upside
-        </p>
-      </div>
-
-      <div className="sc-purple rounded-2xl shadow-md mb-10 overflow-hidden">
-
-        {/* ── Header bar ── */}
+      <div className="sc-purple rounded-2xl shadow-md mb-6 overflow-hidden">
         <div className="sc-purple-header flex items-center gap-3 px-6 py-3">
           <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
-            CFO Insight
+            CFO Channel Verdict
           </span>
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-destructive/15 text-destructive whitespace-nowrap">
-            Efficiency declining — action required
+            Budget shift recommended
           </span>
         </div>
 
-        {/* ── Body ── */}
         <div className="px-6 pt-5 pb-6">
-
-          {/* ── Hero metrics ── */}
-          <div className="grid grid-cols-2 mb-5 pb-5 border-b border-primary/15">
-
-            {/* 1 — Current Marketing Contribution Margin */}
-            <div className="pr-6 border-r border-primary/15">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Current Marketing Contribution Margin
+          <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] gap-6 mb-5 pb-5 border-b border-primary/15">
+            <div className="space-y-3">
+              <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">
+                Email and Organic are creating the most profitable customers. Meta is now the weakest channel and is pulling blended acquisition efficiency down.
               </p>
-              <p className="text-4xl sm:text-5xl font-display font-bold text-foreground leading-none mb-2">
-                {MKT_CM}%
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                The commercial move is to shift 15–25% of Meta spend toward lifecycle, Email and Organic activity before adding new budget. That gives the business a route to recover approximately{" "}
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{liveEstimatedContribution.toLocaleString()}</span>{" "}
+                {framing.upliftPhrase}.
               </p>
-              <div className="flex items-center gap-1.5 mb-3">
-                <span className="text-sm font-semibold text-destructive">
-                  ↓ {Math.abs(MKT_CM_CHANGE)}pp
-                </span>
-                <span className="text-xs text-muted-foreground">vs last month</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-emerald-100/80 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Strongest channel</p>
+                <p className="text-xl font-display font-bold text-emerald-900 dark:text-emerald-200">{liveBestCpChannel}</p>
+                <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-1">
+                  £{liveBestCpAmt.toLocaleString()} contribution
+                </p>
               </div>
-
-              {/* @dynamic gaps recompute from MKT_CM vs MKT_CM_TARGET */}
-              <div className="pt-3 border-t border-primary/10 space-y-1.5">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-xs text-muted-foreground">
-                    Gap to lower bound ({MKT_CM_TARGET.low}%)
-                  </span>
-                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 tabular-nums">
-                    +{(MKT_CM_TARGET.low - MKT_CM).toFixed(1)}pp
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-xs text-muted-foreground">
-                    Gap to midpoint ({(MKT_CM_TARGET.low + MKT_CM_TARGET.high) / 2}%)
-                  </span>
-                  <span className="text-xs font-semibold text-muted-foreground tabular-nums">
-                    +{((MKT_CM_TARGET.low + MKT_CM_TARGET.high) / 2 - MKT_CM).toFixed(1)}pp
-                  </span>
+              <div className="rounded-xl bg-red-50/80 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 mb-1">Weakening channel</p>
+                <p className="text-xl font-display font-bold text-red-700 dark:text-red-300">{liveWorstCpChannel}</p>
+                <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">
+                  £{liveWorstCpAmt.toLocaleString()} contribution
+                </p>
+              </div>
+              <div className="col-span-2 rounded-xl bg-secondary/50 border border-border/50 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Recoverable contribution</p>
+                <div className="flex items-end gap-3">
+                  <p className="text-3xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none">
+                    £{liveEstimatedContribution.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground pb-0.5">
+                    {framing.rowLabel} · +{ME_TOTAL_PP.toFixed(1)}pp margin
+                  </p>
                 </div>
               </div>
             </div>
-
-            {/* 2 — Estimated Contribution Uplift */}
-            <div className="pl-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Modelled Contribution Uplift
-              </p>
-              <p className="text-4xl sm:text-5xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none mb-1">
-                £{liveEstimatedContribution.toLocaleString()}
-              </p>
-              <p className="text-[11px] text-muted-foreground mb-1.5">(30 days) · £{(liveEstimatedContribution * 12).toLocaleString()} (annualised)</p>
-              <p className="text-xs text-muted-foreground leading-snug max-w-[26ch]">
-                Based on {framing.baselineNote}
-              </p>
-            </div>
-
           </div>
 
-          {/* ── Headline ── */}
-          <div className="mb-5 pb-5 border-b border-primary/15 space-y-2.5">
-            <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">
-              Marketing efficiency has weakened due to rising Meta CAC and increased reliance on lower-contribution paid acquisition.
-            </p>
-            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-              If 15–25% of paid acquisition spend is reallocated toward higher-margin channels such as Email and Organic, modelled recoverable contribution is approximately{" "}
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{liveEstimatedContribution.toLocaleString()}</span>{" "}
-              {framing.upliftPhrase}.
-            </p>
-          </div>
-
-          {/* ── Two-column detail ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-
-            {/* Primary drivers */}
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                Primary drivers
-              </p>
-              <ul className="space-y-2.5">
-                {CFO_INSIGHT.primaryDrivers.map((driver, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
-                    <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0 mt-[5px]" />
-                    {driver}
-                  </li>
-                ))}
-              </ul>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
+              <p className="text-xs font-semibold text-muted-foreground mb-1">What is happening</p>
+              <p className="text-sm text-foreground leading-snug">Contribution is being diluted by paid acquisition costs rising faster than profitable customer value.</p>
             </div>
-
-            {/* Fastest recovery lever */}
-            <div className="rounded-xl bg-emerald-100/80 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 px-4 py-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-2">
-                Fastest recovery lever identified
-              </p>
-              <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
-                {CFO_INSIGHT.recoveryLever}
-              </p>
-              <p className="text-xs text-emerald-700/60 dark:text-emerald-400/60 mt-3 leading-snug">
-                See budget reallocation opportunity below ↓
-              </p>
+            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
+              <p className="text-xs font-semibold text-muted-foreground mb-1">What to do next</p>
+              <p className="text-sm text-foreground leading-snug">Tighten Meta spend first, then move budget toward owned and organic demand.</p>
             </div>
-
+            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
+              <p className="text-xs font-semibold text-muted-foreground mb-1">Why this matters</p>
+              <p className="text-sm text-foreground leading-snug">The business can recover contribution without increasing total marketing spend.</p>
+            </div>
           </div>
-
         </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          §2  START HERE
+          Top actions before modelling and diagnostics
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-foreground">Start Here</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          The first three budget moves your CFO would make from this channel mix.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-border/60 shadow-sm mb-8 overflow-hidden bg-card">
+        <div className="divide-y divide-border/40">
+          {ME_OPPORTUNITIES.map((o, i) => (
+            <details key={o.shortLabel} className="group open:bg-secondary/10">
+              <summary className="list-none cursor-pointer px-6 py-4 hover:bg-secondary/20 transition-colors">
+                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="flex items-center justify-center w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
+                      <p className="text-xs text-muted-foreground mt-1 leading-snug">{o.detail}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                      £{o.cashImpact.toLocaleString()}
+                    </span>
+                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
+                      {o.confidence === "high" ? "High confidence" : "Medium confidence"}
+                    </span>
+                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
+                      {o.effort === "low" ? "Low effort" : "Medium effort"}
+                    </span>
+                    <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/25 text-emerald-700 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-700/40">
+                      Next 30 days
+                    </span>
+                  </div>
+                </div>
+              </summary>
+              <div className="px-16 pb-4 -mt-1">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">How to start</p>
+                <ul className="space-y-1.5 text-sm text-muted-foreground">
+                  {i === 0 && (
+                    <>
+                      <li>Pause the weakest Meta ad sets and protect campaigns with clear repeat-purchase intent.</li>
+                      <li>Move 15–25% of spend toward Email, Organic and lifecycle activity before increasing total budget.</li>
+                      <li>Review CAC payback weekly while the shift is live.</li>
+                    </>
+                  )}
+                  {i === 1 && (
+                    <>
+                      <li>Prioritise abandoned browse, post-purchase and win-back flows for existing customer demand.</li>
+                      <li>Measure repeat purchase contribution rather than email revenue alone.</li>
+                    </>
+                  )}
+                  {i === 2 && (
+                    <>
+                      <li>Focus paid acquisition on SKUs and campaigns with above-average contribution margin.</li>
+                      <li>Reduce spend where revenue is growing but contribution per order is weak.</li>
+                    </>
+                  )}
+                </ul>
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          §3  PROFITABLE CUSTOMER CHANNELS
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-foreground">Which Channels Create Profitable Customers?</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Channel ranking by contribution profit, with CAC and margin evidence kept compact.
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-border/60 shadow-sm mb-8 overflow-hidden bg-card">
+        <div className="divide-y divide-border/40">
+          {[...liveChannelCp].sort((a, b) => b.cp - a.cp).map((row, i) => {
+            const cm = liveChannelCm.find((c) => c.channel === row.channel)?.cm ?? 0;
+            const cac = liveCacByChannel.find((c) => c.channel === row.channel)?.cac;
+            const isBest = row.channel === liveBestCpChannel;
+            const isWorst = row.channel === liveWorstCpChannel;
+            return (
+              <div key={row.channel} className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-4 px-6 py-4 items-center">
+                <div className="flex items-start gap-3">
+                  <span className={cn(
+                    "flex items-center justify-center w-7 h-7 rounded-full shrink-0 text-xs font-bold",
+                    isBest ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300" :
+                    isWorst ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400" :
+                    "bg-secondary text-muted-foreground"
+                  )}>
+                    {i + 1}
+                  </span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground">{row.channel}</p>
+                      {isBest && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">Protect and grow</span>}
+                      {isWorst && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">Tighten spend</span>}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1 leading-snug">
+                      {isBest
+                        ? "This channel is producing the strongest contribution after marketing cost."
+                        : isWorst
+                        ? "This channel is the clearest candidate for budget reallocation."
+                        : "Keep this channel under review against contribution quality, not revenue alone."}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 md:justify-end text-sm">
+                  <span className="font-bold text-foreground tabular-nums">£{row.cp.toLocaleString()} contribution</span>
+                  <span className="text-muted-foreground tabular-nums">{cm.toFixed(1)}% CM</span>
+                  {cac !== undefined && <span className="text-muted-foreground tabular-nums">£{cac.toFixed(2)} CAC</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          §4  WHAT THIS COULD RECOVER
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 shadow-sm mb-8 px-6 py-5">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div>
+            <h2 className="text-xl font-bold text-foreground">What This Could Recover</h2>
+            <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+              These actions recover contribution by moving existing spend toward channels that already generate better customer economics.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-end gap-6">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Contribution recovery</p>
+              <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">£{liveEstimatedContribution.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground mt-1">{framing.rowLabel} · £{(liveEstimatedContribution * 12).toLocaleString()} annualised</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Margin upside</p>
+              <p className="text-3xl font-display font-bold text-foreground leading-none">+{ME_TOTAL_PP.toFixed(1)}pp</p>
+              <p className="text-xs text-muted-foreground mt-1">from the top actions</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════════════════════
+          §5  WHY THIS IS HAPPENING
+      ══════════════════════════════════════════════════════════════════════ */}
+
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-foreground">Why This Is Happening</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          The main commercial reasons marketing contribution is leaking.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {liveMeDrivers.slice(0, 3).map((driver) => (
+          <div key={driver.driver} className="rounded-2xl border border-border/60 bg-card px-5 py-4 shadow-sm">
+            <p className="text-sm font-semibold text-foreground mb-1">{driver.driver}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed mb-3">{driver.cause}</p>
+            <p className="text-sm font-bold text-destructive tabular-nums">−£{Math.abs(driver.impact).toLocaleString()}</p>
+          </div>
+        ))}
       </div>
 
       <AiCfoAskCard pageId="marketing" />
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §1b  BUDGET REALLOCATION SIMULATOR
+          §6  MODEL THE BUDGET SHIFT
           Interactive channel shift modelling with Pro-gated outputs
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Budget Reallocation Simulator</h2>
+        <h2 className="text-xl font-bold text-foreground">Model The Budget Shift</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Estimate how shifting paid spend toward higher-contribution channels affects contribution profit and CAC.
+          Optional modelling for the recommended move: reduce inefficient paid spend and redirect it toward higher-contribution channels.
         </p>
       </div>
 
@@ -1088,7 +1139,7 @@ export default function MarketingEfficiency() {
             <div className="flex items-center gap-2 mb-2">
               <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                Fastest recovery lever identified
+                Recommended model preset
               </p>
             </div>
             <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
@@ -1110,233 +1161,14 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §2  OPPORTUNITIES
-          Ranked by expected contribution uplift next month
-      ══════════════════════════════════════════════════════════════════════ */}
-
-      <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Top opportunities driving this estimate</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          The main actions behind the recoverable contribution opportunity.
-        </p>
-      </div>
-
-      {/* ── Structured opportunities panel ── */}
-      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 shadow-sm mb-8 overflow-hidden">
-
-        {/* ── Compact reference bar (replaces the large repeated hero) ── */}
-        <div className="flex items-center gap-3 px-6 py-3 bg-emerald-50 dark:bg-emerald-950/20 border-b border-emerald-200/70 dark:border-emerald-800/40">
-          <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80">
-            Combined impact — {framing.rowLabel}:
-            <span className="font-bold text-emerald-700 dark:text-emerald-300 ml-1.5 tabular-nums">
-              ≈ £{liveEstimatedContribution.toLocaleString()}
-            </span>
-            <span className="ml-2 text-emerald-600/70 dark:text-emerald-400/60">
-              (+{ME_TOTAL_PP.toFixed(1)}pp contribution margin)
-            </span>
-          </p>
-          <span className="ml-auto text-[10px] text-emerald-600/60 dark:text-emerald-400/50 whitespace-nowrap shrink-0">
-            See simulator above for full breakdown ↑
-          </span>
-        </div>
-
-        {/* ── Opportunity rows — gated by plan via inline blur pattern ── */}
-        <div className="bg-card">
-
-          {/* Column header — always visible; badge shown when locked */}
-          <div className="flex items-center justify-between px-6 py-3 border-b border-border/50">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Top opportunities driving this estimate
-            </p>
-            {canAccess("opportunity_breakdown") ? (
-              <div className="flex items-center gap-5 shrink-0 ml-4 text-right">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-12 text-right">
-                  CM uplift
-                </span>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground w-28 text-right">
-                  £ uplift
-                </span>
-              </div>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">
-                PRO — Unlock opportunity breakdown
-              </span>
-            )}
-          </div>
-
-          {canAccess("opportunity_breakdown") ? (
-            /* ── PRO: full rows + combined footer ── */
-            <>
-              <div className="divide-y divide-border/40">
-                {ME_OPPORTUNITIES.map((o, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between px-6 py-4 hover:bg-secondary/20 transition-colors gap-4"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/50 shrink-0 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
-                        {i + 1}
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-semibold text-foreground">{o.shortLabel}</p>
-                          <span className={cn(
-                            "inline-flex text-[10px] font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap border",
-                            o.confidence === "high"
-                              ? "bg-secondary text-muted-foreground border-border/60"
-                              : o.confidence === "medium"
-                              ? "bg-blue-50 dark:bg-blue-950/25 text-blue-600 dark:text-blue-400 border-blue-200/60 dark:border-blue-700/40"
-                              : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 border-amber-200/60 dark:border-amber-700/40"
-                          )}>
-                            {o.confidence === "high" ? "High confidence" : o.confidence === "medium" ? "Medium confidence" : "Requires validation"}
-                          </span>
-                          <span className={cn(
-                            "inline-flex text-[10px] font-medium px-1.5 py-0.5 rounded-full whitespace-nowrap",
-                            o.effort === "low"
-                              ? "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
-                              : o.effort === "medium"
-                              ? "bg-orange-50 dark:bg-orange-950/20 text-orange-500 dark:text-orange-400"
-                              : "bg-red-50 dark:bg-red-950/20 text-red-500 dark:text-red-400"
-                          )}>
-                            {o.effort === "low" ? "Low effort" : o.effort === "medium" ? "Medium effort" : "High effort"}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5 leading-snug">{o.detail}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-5 shrink-0 ml-4">
-                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                        +{o.ppGain.toFixed(1)}pp
-                      </span>
-                      <div className="text-right w-28">
-                        <PeriodImpact value={o.cashImpact} className="items-end" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Combined impact footer */}
-              <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
-                <p className="text-sm font-semibold text-foreground">
-                  Combined impact — {framing.combinedLabel}
-                </p>
-                <div className="flex items-start gap-5 shrink-0 ml-4">
-                  <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap tabular-nums w-12 text-right pt-0.5">
-                    +{ME_TOTAL_PP}pp
-                  </span>
-                  <div className="text-right w-28">
-                    <PeriodImpact value={ESTIMATED_CONTRIBUTION} valueClassName="text-base" className="items-end" />
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            /* ── FREE: full rows blurred + gradient + indigo upgrade card ── */
-            <div className="relative">
-
-              {/* Ghost rows — softer labels, dot ratings, muted values */}
-              <div className="pointer-events-none select-none" aria-hidden="true">
-                <div className="divide-y divide-border/40">
-                  {ME_OPPORTUNITIES.map((o, i) => (
-                    <div key={i} className="flex items-center justify-between px-6 py-4 gap-4">
-                      <div className="flex items-center gap-3 min-w-0">
-                        {/* Ranking bullet — muted in free mode so ordering feels less explicit */}
-                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-border/50 dark:bg-slate-700/30 shrink-0 text-[11px] font-medium text-foreground/30">
-                          {i + 1}
-                        </span>
-                        <div className="min-w-0">
-                          {/* Soft action label — generalised vs Pro-specific wording */}
-                          <p className="text-sm font-semibold text-foreground leading-snug">
-                            {ME_GHOST_LABELS[o.shortLabel] ?? o.shortLabel}
-                          </p>
-                          {/* Dot indicators — replace explicit confidence/effort text */}
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="inline-flex items-center gap-[2px] text-[9px]">
-                              <span className="text-foreground/25 mr-0.5">conf</span>
-                              {[0,1,2].map(j => {
-                                const f = o.confidence === "high" ? 3 : o.confidence === "medium" ? 2 : 1;
-                                return <span key={j} className={j < f ? "text-foreground/40" : "text-foreground/15"}>{j < f ? "●" : "○"}</span>;
-                              })}
-                            </span>
-                            <span className="inline-flex items-center gap-[2px] text-[9px]">
-                              <span className="text-foreground/25 mr-0.5">effort</span>
-                              {[0,1,2].map(j => {
-                                const f = o.effort === "low" ? 1 : o.effort === "medium" ? 2 : 3;
-                                return <span key={j} className={j < f ? "text-foreground/40" : "text-foreground/15"}>{j < f ? "●" : "○"}</span>;
-                              })}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Value columns — deeper masking than left-side labels */}
-                      <div className="flex items-start gap-5 shrink-0 ml-4">
-                        <span className="text-sm font-bold whitespace-nowrap tabular-nums w-12 text-right pt-0.5 text-foreground/[0.13]">
-                          +—.—pp
-                        </span>
-                        <div className="text-right w-28">
-                          <p className="text-sm font-bold tabular-nums leading-none text-foreground/[0.13]">
-                            £ —,—
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                {/* Combined footer — value more muted than label */}
-                <div className="flex items-center justify-between px-6 py-4 bg-emerald-50/70 dark:bg-emerald-950/15 border-t border-emerald-200 dark:border-emerald-800/40 gap-4">
-                  <p className="text-sm font-semibold text-foreground">Combined impact — {framing.combinedLabel}</p>
-                  <span className="text-base font-bold tabular-nums text-foreground/[0.13]">
-                    £ —,—
-                  </span>
-                </div>
-              </div>
-
-              {/* Gradient fade */}
-              <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent rounded-b-xl pointer-events-none" />
-
-              {/* Indigo upgrade card */}
-              <div className="relative mx-6 mb-5 mt-4">
-                <a
-                  href="/upgrade"
-                  className="flex items-center justify-between gap-4 rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/90 dark:bg-indigo-950/40 px-5 py-4 shadow-lg shadow-indigo-500/10 dark:shadow-indigo-900/30 hover:border-indigo-300 hover:bg-indigo-100/90 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/45 transition-colors cursor-pointer group"
-                >
-                  <div className="flex items-start gap-3 min-w-0">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0 mt-0.5">
-                      <Lock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
-                        Unlock detailed opportunity breakdown
-                      </p>
-                      <p className="text-xs text-indigo-700/70 dark:text-indigo-400/70 mt-1 leading-snug">
-                        See the estimated £ impact, confidence level, and implementation effort for each action.
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 whitespace-nowrap shrink-0 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
-                    Upgrade →
-                  </span>
-                </a>
-              </div>
-
-            </div>
-          )}
-
-        </div>
-
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════════════
-          §3  ACTUAL PERFORMANCE
-          KPI headline metrics for the selected period
+          §7  KEY NUMBERS BEHIND THE VERDICT
+          KPI support kept below the decision surface
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-4">
-        <h2 className="text-xl font-bold text-foreground">Selected-Period Performance</h2>
+        <h2 className="text-xl font-bold text-foreground">Key Numbers Behind The Verdict</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Key marketing efficiency metrics · {periodBadge}
+          The core metrics supporting the channel allocation recommendation.
         </p>
       </div>
 
@@ -1422,78 +1254,85 @@ export default function MarketingEfficiency() {
           <p className="text-xs text-muted-foreground leading-snug">Orders needed to recover the cost of acquiring each new customer</p>
         </div>
 
-        {/* 5 — Marketing Contribution Margin */}
-        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Marketing Contribution Margin</p>
-          <p className="text-3xl font-display font-bold text-foreground mb-2">{MKT_CM}%</p>
-          <div className="space-y-0.5 mb-2">
-            <VarLine
-              label="vs last month"
-              value={`↓ ${Math.abs(MKT_CM_CHANGE).toFixed(1)}pp`}
-              sentiment={deltaToSentiment(MKT_CM_CHANGE, DELTA_POLARITY.mktCm)}
-            />
-            <VarLine
-              label="vs 12-month avg"
-              value={`↓ ${Math.abs(MKT_CM_CHANGE_LY).toFixed(1)}pp`}
-              sentiment={deltaToSentiment(MKT_CM_CHANGE_LY, DELTA_POLARITY.mktCm)}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground leading-snug">Blended contribution margin after all marketing costs</p>
-        </div>
+        <details className="sm:col-span-2 lg:col-span-4 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
+          <summary className="list-none cursor-pointer px-5 py-4 text-sm font-semibold text-foreground hover:bg-secondary/20 transition-colors">
+            Show supporting marketing efficiency metrics
+          </summary>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-5 pb-5">
+            {/* 5 — Marketing Contribution Margin */}
+            <div className="rounded-xl p-5 border border-border/50 bg-secondary/20">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Marketing Contribution Margin</p>
+              <p className="text-3xl font-display font-bold text-foreground mb-2">{MKT_CM}%</p>
+              <div className="space-y-0.5 mb-2">
+                <VarLine
+                  label="vs last month"
+                  value={`↓ ${Math.abs(MKT_CM_CHANGE).toFixed(1)}pp`}
+                  sentiment={deltaToSentiment(MKT_CM_CHANGE, DELTA_POLARITY.mktCm)}
+                />
+                <VarLine
+                  label="vs 12-month avg"
+                  value={`↓ ${Math.abs(MKT_CM_CHANGE_LY).toFixed(1)}pp`}
+                  sentiment={deltaToSentiment(MKT_CM_CHANGE_LY, DELTA_POLARITY.mktCm)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">Blended contribution margin after all marketing costs</p>
+            </div>
 
-        {/* 6 — Marketing Contribution per Order */}
-        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per Order</p>
-          <p className="text-3xl font-display font-bold text-foreground mb-2">
-            £{MKT_CP_PER_ORDER.toFixed(2)}
-          </p>
-          <div className="space-y-0.5 mb-2">
-            <VarLine
-              label="vs last month"
-              value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_MOM).toFixed(2)}`}
-              sentiment={deltaToSentiment(MKT_CP_PER_ORDER_CHANGE_MOM, DELTA_POLARITY.cpPerOrder)}
-            />
-            <VarLine
-              label="vs 12-month avg"
-              value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_LY).toFixed(2)}`}
-              sentiment={deltaToSentiment(MKT_CP_PER_ORDER_CHANGE_LY, DELTA_POLARITY.cpPerOrder)}
-            />
-          </div>
-          <p className="text-xs text-muted-foreground leading-snug">Contribution profit generated per order after marketing cost</p>
-        </div>
+            {/* 6 — Marketing Contribution per Order */}
+            <div className="rounded-xl p-5 border border-border/50 bg-secondary/20">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per Order</p>
+              <p className="text-3xl font-display font-bold text-foreground mb-2">
+                £{MKT_CP_PER_ORDER.toFixed(2)}
+              </p>
+              <div className="space-y-0.5 mb-2">
+                <VarLine
+                  label="vs last month"
+                  value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_MOM).toFixed(2)}`}
+                  sentiment={deltaToSentiment(MKT_CP_PER_ORDER_CHANGE_MOM, DELTA_POLARITY.cpPerOrder)}
+                />
+                <VarLine
+                  label="vs 12-month avg"
+                  value={`↓ £${Math.abs(MKT_CP_PER_ORDER_CHANGE_LY).toFixed(2)}`}
+                  sentiment={deltaToSentiment(MKT_CP_PER_ORDER_CHANGE_LY, DELTA_POLARITY.cpPerOrder)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">Contribution profit generated per order after marketing cost</p>
+            </div>
 
-        {/* 7 — Contribution per £1 of Marketing Spend */}
-        <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per £1 Marketing Spend</p>
-          <p className="text-3xl font-display font-bold text-foreground mb-2">
-            £{CP_PER_SPEND.toFixed(2)}
-          </p>
-          <div className="space-y-0.5 mb-2">
-            <VarLine
-              label="vs last month"
-              value={`${CP_PER_SPEND_CHANGE_MOM < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_MOM).toFixed(2)}`}
-              sentiment={deltaToSentiment(CP_PER_SPEND_CHANGE_MOM, DELTA_POLARITY.cpPerSpend)}
-            />
-            <VarLine
-              label="vs 12-month avg"
-              value={`${CP_PER_SPEND_CHANGE_LY < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_LY).toFixed(2)}`}
-              sentiment={deltaToSentiment(CP_PER_SPEND_CHANGE_LY, DELTA_POLARITY.cpPerSpend)}
-            />
+            {/* 7 — Contribution per £1 of Marketing Spend */}
+            <div className="rounded-xl p-5 border border-border/50 bg-secondary/20">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Contribution per £1 Marketing Spend</p>
+              <p className="text-3xl font-display font-bold text-foreground mb-2">
+                £{CP_PER_SPEND.toFixed(2)}
+              </p>
+              <div className="space-y-0.5 mb-2">
+                <VarLine
+                  label="vs last month"
+                  value={`${CP_PER_SPEND_CHANGE_MOM < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_MOM).toFixed(2)}`}
+                  sentiment={deltaToSentiment(CP_PER_SPEND_CHANGE_MOM, DELTA_POLARITY.cpPerSpend)}
+                />
+                <VarLine
+                  label="vs 12-month avg"
+                  value={`${CP_PER_SPEND_CHANGE_LY < 0 ? "↓" : "↑"} £${Math.abs(CP_PER_SPEND_CHANGE_LY).toFixed(2)}`}
+                  sentiment={deltaToSentiment(CP_PER_SPEND_CHANGE_LY, DELTA_POLARITY.cpPerSpend)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">Contribution generated for every £1 of marketing spend</p>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground leading-snug">Contribution generated for every £1 of marketing spend</p>
-        </div>
+        </details>
 
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §4  ALLOCATION DIAGNOSTICS
-          Channel-level contribution breakdown and budget allocation analysis
+          §8  CHANNEL EVIDENCE
+          Deeper channel diagnostics after the recommendation
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-4">
-        <h2 className="text-xl font-bold text-foreground">Allocation Diagnostics</h2>
+        <h2 className="text-xl font-bold text-foreground">Channel Evidence</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Channel-level contribution view, using live attribution where available.
+          Deeper channel diagnostics for founders who want to inspect the recommendation.
         </p>
       </div>
 
@@ -1779,14 +1618,14 @@ export default function MarketingEfficiency() {
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §5  KEY DRIVERS
-          Attributed causes: what changed and the £ contribution impact
+          FULL DRIVER DETAIL
+          Attributed causes supporting the summary above
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-4">
-        <h2 className="text-xl font-bold text-foreground">Key Drivers</h2>
+        <h2 className="text-xl font-bold text-foreground">Full Driver Detail</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          What changed over {periodPhrase} and the financial impact on marketing efficiency.
+          The full contribution impact behind the “Why this is happening” summary.
         </p>
       </div>
 
@@ -1806,7 +1645,7 @@ export default function MarketingEfficiency() {
       </div>
 
       <PremiumBlurPreview
-        title="Key Drivers"
+        title="Full Driver Detail"
         subtitle="What changed vs last month and the contribution impact."
         badgeText="PRO — Unlock margin drivers"
         ctaTitle="Unlock attributed driver breakdown"
@@ -1951,7 +1790,7 @@ export default function MarketingEfficiency() {
       </PremiumBlurPreview>
 
       {/* ══════════════════════════════════════════════════════════════════════
-          §6  DETAILED ANALYSIS
+          SUPPORTING CHANNEL ANALYSIS
           CAC by channel, payback, contribution margin, and trend evidence
       ══════════════════════════════════════════════════════════════════════ */}
 
@@ -1960,7 +1799,7 @@ export default function MarketingEfficiency() {
         <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">
           Deep Dive
         </p>
-        <h2 className="text-xl font-bold text-foreground">Detailed Analysis</h2>
+        <h2 className="text-xl font-bold text-foreground">Supporting Channel Analysis</h2>
         <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
           Supporting evidence behind current channel performance and efficiency trends.
         </p>
@@ -2258,30 +2097,6 @@ export default function MarketingEfficiency() {
         </p>
       </PremiumBlurPreview>
 
-      {/*
-       * ── FUTURE SECTION (Pro-only deep-dive) ──────────────────────────────
-       * Repeat vs New Customer Contribution Split
-       * How much contribution is generated by repeat customers vs new
-       * acquisition — and where margin is leaking. Unlocked at Pro tier.
-       *
-       * When built, this should render a side-by-side or stacked bar chart
-       * comparing: repeat customer contribution profit vs new customer
-       * contribution profit, alongside retention rate and LTV signals.
-       * ─────────────────────────────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-dashed border-border/60 p-6 mb-6 opacity-60">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-semibold text-base text-muted-foreground">
-            Repeat vs New Customer Contribution Split
-          </h3>
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded-full bg-primary/10 text-primary/60 border border-primary/20 uppercase tracking-wider whitespace-nowrap">
-            Pro · Coming soon
-          </span>
-        </div>
-        <p className="text-sm text-muted-foreground/70 leading-snug">
-          How much contribution is generated by repeat customers vs new acquisition — and where margin is leaking.
-        </p>
-      </div>
-
       {/* Marketing Efficiency Trend */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
         <div className="mb-5">
@@ -2349,17 +2164,7 @@ export default function MarketingEfficiency() {
         </p>
       </div>
 
-      </div>{/* end Detailed Analysis group */}
-
-      {/* Recommended actions */}
-      <div className="mt-10">
-        <ActionRecommendations
-          recommendations={RECOMMENDATIONS}
-          title="What to do next"
-          subtitle="Practical actions to improve marketing efficiency and contribution margin"
-          defaultExpanded
-        />
-      </div>
+      </div>{/* end Supporting Channel Analysis group */}
 
       {/*
        * ══════════════════════════════════════════════════════════════════════

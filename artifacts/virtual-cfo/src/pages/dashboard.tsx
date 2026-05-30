@@ -423,6 +423,15 @@ const HEALTH_MODULES = [
   },
 ] as const;
 
+const FREE_HEALTH_MODULE_CTAS: Record<(typeof HEALTH_MODULES)[number]["id"], string> = {
+  profit:      "Unlock recovery plan",
+  pricing:     "Unlock pricing opportunities",
+  growth:      "Unlock growth analysis",
+  acquisition: "Unlock acquisition insights",
+  cash:        "Unlock cash opportunities",
+  scenario:    "Unlock scenario modelling",
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
@@ -919,7 +928,7 @@ export default function Dashboard() {
     if (!metrics) return card;
     return card;
   });
-  const isPro           = canAccess("dashboard_recovery_upside");
+  const hasFullActionPlan = canAccess("dashboard_full_action_plan");
   const hasDriverDetail = canAccess("dashboard_driver_detail");
   return (
     <AppLayout>
@@ -1022,17 +1031,18 @@ export default function Dashboard() {
                   reason: "Meta is getting more expensive. Shift budget away from campaigns that are not producing profitable orders.",
                 },
               ][i];
-              const locked = !isPro && i > 0;
+              const locked = !hasFullActionPlan;
+              const freePrimary = i === 0;
 
               return (
                 <div
                   key={action.title}
                   className={cn(
                     "relative overflow-hidden py-5 first:pt-0 last:pb-0",
-                    locked && "min-h-28"
+                    locked && !freePrimary && "min-h-24"
                   )}
                 >
-                  {locked && (
+                  {locked && !freePrimary && (
                     <div className="absolute inset-0 bg-indigo-950/50 backdrop-blur-[2px] z-10 flex items-center justify-center">
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/80 border border-border/40">
                         <Lock className="w-3 h-3 text-muted-foreground/60" />
@@ -1040,18 +1050,38 @@ export default function Dashboard() {
                       </div>
                     </div>
                   )}
-                  <div className={cn("grid lg:grid-cols-[9rem_1fr_12rem] gap-3 lg:gap-6 items-start", locked && "blur-[2px] opacity-50")}>
+                  <div className={cn("grid lg:grid-cols-[9rem_1fr_12rem] gap-3 lg:gap-6 items-start", locked && !freePrimary && "blur-[2px] opacity-50")}>
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/60 mb-2">Priority {i + 1}</p>
-                      <TimingBadge timing={action.timing} />
+                      {hasFullActionPlan ? (
+                        <TimingBadge timing={action.timing} />
+                      ) : freePrimary ? (
+                        <span className="inline-flex items-center rounded-full border border-indigo-300/25 bg-indigo-950/25 px-2.5 py-1 text-[11px] font-semibold text-indigo-200/80">
+                          Identified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full border border-indigo-300/15 bg-indigo-950/20 px-2.5 py-1 text-[11px] font-semibold text-indigo-200/50">
+                          Locked
+                        </span>
+                      )}
                     </div>
                     <div>
-                      <p className="text-base font-semibold text-foreground mb-1.5 leading-snug">{actionCopy.title}</p>
-                      <p className="text-sm text-foreground/70 leading-relaxed">{actionCopy.reason}</p>
+                      <p className="text-base font-semibold text-foreground mb-1.5 leading-snug">
+                        {hasFullActionPlan ? actionCopy.title : freePrimary ? "Highest-priority recovery opportunity identified" : `Priority ${i + 1} locked`}
+                      </p>
+                      <p className="text-sm text-foreground/70 leading-relaxed">
+                        {hasFullActionPlan
+                          ? actionCopy.reason
+                          : freePrimary
+                            ? "A high-confidence profit recovery action has been identified. Upgrade to see the recommendation, implementation steps and owner-ready brief."
+                            : "Unlock the full prioritised action plan to see this recommendation."}
+                      </p>
                     </div>
                     <div className="lg:text-right">
                       <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/50 mb-1">Likely impact</p>
-                      <p className="text-sm font-bold text-emerald-400">{action.impact}</p>
+                      <p className={cn("text-sm font-bold", hasFullActionPlan || freePrimary ? "text-emerald-400" : "text-indigo-200/40")}>
+                        {hasFullActionPlan || freePrimary ? action.impact : "Locked"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1059,12 +1089,12 @@ export default function Dashboard() {
             })}
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-6 pt-5 border-t border-indigo-800/35">
-            <Link href={isPro ? "/profit-opportunities" : "/upgrade"} className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
-              {isPro ? "View full action plan" : "Unlock full prioritised action plan"}
+            <Link href={hasFullActionPlan ? "/profit-opportunities" : "/upgrade"} className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+              {hasFullActionPlan ? "View full action plan" : "Unlock full prioritised action plan"}
               <ChevronRight className="w-4 h-4" />
             </Link>
-            <Link href="/scenario-lab" className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-300 hover:text-indigo-200 transition-colors">
-              Model the impact <ArrowRight className="w-4 h-4" />
+            <Link href={hasFullActionPlan ? "/scenario-lab" : "/upgrade"} className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-300 hover:text-indigo-200 transition-colors">
+              {hasFullActionPlan ? "Model the impact" : "Unlock scenario modelling"} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -1122,8 +1152,8 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-              <Link href={isPro ? "/profit-opportunities" : "/upgrade"} className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
-                {isPro ? "See the full breakdown" : "Unlock the full opportunity breakdown"}
+              <Link href={hasFullActionPlan ? "/profit-opportunities" : "/upgrade"} className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
+                {hasFullActionPlan ? "See the full breakdown" : "Unlock the full opportunity breakdown"}
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
@@ -1285,14 +1315,14 @@ export default function Dashboard() {
           {HEALTH_MODULES.map(mod => (
             <Link
               key={mod.id}
-              href={mod.href}
+              href={hasFullActionPlan ? mod.href : "/upgrade"}
               className="border-t border-border/40 pt-4 transition-colors group block hover:border-primary/30"
             >
               <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{mod.title}</p>
               <p className="text-sm font-bold text-foreground mb-1.5 leading-snug">{mod.headline}</p>
               <p className="text-xs text-muted-foreground leading-snug mb-4">{mod.subtitle}</p>
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:gap-2 transition-all">
-                {mod.cta} <ArrowRight className="w-3.5 h-3.5" />
+                {hasFullActionPlan ? mod.cta : FREE_HEALTH_MODULE_CTAS[mod.id]} <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </Link>
           ))}

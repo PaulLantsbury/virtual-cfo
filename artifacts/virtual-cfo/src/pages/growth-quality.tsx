@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Minus, ArrowRight, Lock } from "lucide-react";
+import { Sparkles, TrendingUp, TrendingDown, Minus, ArrowRight, Lock } from "lucide-react";
 import {
   BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip,
@@ -19,7 +19,6 @@ import {
   DISCOUNT_DEP_PREV,
   CAC_PAYBACK,
   CAC_PAYBACK_PREV,
-  GQ_SCORE_PREV,
 } from "@/lib/data/growth-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
@@ -39,8 +38,6 @@ const GQ_STORE_ID = "10000000-0000-0000-0000-000000000001";
 // REPEAT_RATE, DISCOUNT_DEP, CAC_PAYBACK imported from
 // src/lib/data/growth-metrics.ts — the central source of truth for growth metrics.
 // REPEAT_RATE resolved to 28% (was 27% here; Dashboard and BENCHMARKS both use 28%).
-
-// GQ_SCORE_DIR is now live-computed inside the component as liveGqScoreDir.
 
 const REPEAT_RATE_CHANGE  = +(REPEAT_RATE  - REPEAT_RATE_PREV).toFixed(1);
 const DISCOUNT_DEP_CHANGE = +(DISCOUNT_DEP - DISCOUNT_DEP_PREV).toFixed(1);
@@ -376,13 +373,6 @@ export default function GrowthQuality() {
     return "D–";
   }
 
-  // Convert a letter grade to an ordinal for direction comparison.
-  function gradeToOrdinal(g: string): number {
-    const order = ["D–","D","D+","C–","C","C+","B–","B","B+","A–","A","A+"];
-    const idx = order.indexOf(g);
-    return idx >= 0 ? idx : 0;
-  }
-
   // Component-level sub-scores → status and grade labels.
   function scoreToStatus(s: number): ScoreStatus {
     if (s >= 65) return "strong";
@@ -412,12 +402,6 @@ export default function GrowthQuality() {
   }
 
   const liveGqGrade     = scoreToGrade(compositeScore);
-  const liveGqGradePrev = GQ_SCORE_PREV; // prior period: no live prior-period score RPC yet
-  const liveGqScoreDir: "up" | "down" | "stable" = (() => {
-    const curr = gradeToOrdinal(liveGqGrade);
-    const prev = gradeToOrdinal(liveGqGradePrev);
-    return curr > prev ? "up" : curr < prev ? "down" : "stable";
-  })();
 
   // True only when every input to the composite score has settled.
   // Phase 1 (repeat rate, discount dep) and Phase 3 (CAC payback, blended CM)
@@ -518,59 +502,41 @@ export default function GrowthQuality() {
           </span>
         </div>
 
-        <div className="px-6 pt-5 pb-6">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] gap-6 mb-5 pb-5 border-b border-primary/15">
-            <div className="space-y-3">
+        <div className="px-6 py-5">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-5 pb-4 border-b border-primary/15">
+            <div>
               <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">
                 Growth quality is deteriorating despite revenue growth.
               </p>
-              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                Revenue may still be growing, but more of that growth is being bought through discounts and paid acquisition. Discount dependency at{" "}
-                <span className="font-semibold text-foreground">{liveDiscountDep}%</span>{" "}
-                and CAC payback at{" "}
-                <span className="font-semibold text-foreground">{gqPhase3Loading ? "calculating" : `${liveCacPayback.toFixed(1)} orders`}</span>{" "}
-                are the key pressure points, weakening contribution even when sales look healthy.
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {GROWTH_TYPE.priorPeriod}.
+              <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+                Revenue growth is increasingly being driven by discounting and paid acquisition rather than repeat demand. That weakens contribution even when sales look healthy.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
-              <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Growth type</p>
-                <p className="text-xl font-display font-bold text-foreground">Promotion-led</p>
-                <p className="text-xs text-muted-foreground mt-1">{GROWTH_TYPE.riskLabel}</p>
+                <p className="text-sm font-bold text-foreground">Promotion-led</p>
               </div>
-              <div className="rounded-xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-1">Growth quality</p>
-                <p className="text-xl font-display font-bold text-amber-700 dark:text-amber-300">Weakening</p>
-                <p className="text-xs text-amber-700/70 dark:text-amber-400/70 mt-1">
-                  {weakeningCount} scorecard areas under pressure
-                </p>
+              <div className="rounded-xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 px-3 py-2.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-1">Direction</p>
+                <p className="text-sm font-bold text-amber-700 dark:text-amber-300">Weakening</p>
               </div>
-              <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Recoverable contribution</p>
-                <p className="text-xl font-display font-bold text-emerald-700 dark:text-emerald-300">
-                  £{(RECOVERABLE_UPSIDE.cashLow / 1_000).toFixed(0)}k-£{(RECOVERABLE_UPSIDE.cashHigh / 1_000).toFixed(0)}k/mo
-                </p>
-                <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-1">Medium confidence</p>
+              <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Risk</p>
+                <p className="text-sm font-bold text-foreground">Medium</p>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
-              <p className="text-xs font-semibold text-muted-foreground mb-1">What is happening</p>
-              <p className="text-sm text-foreground leading-snug">Revenue growth is leaning more heavily on promotions and paid acquisition.</p>
-            </div>
-            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
-              <p className="text-xs font-semibold text-muted-foreground mb-1">Where pressure sits</p>
-              <p className="text-sm text-foreground leading-snug">Discount dependency and Meta CAC are pulling contribution quality lower.</p>
-            </div>
-            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
-              <p className="text-xs font-semibold text-muted-foreground mb-1">Commercial meaning</p>
-              <p className="text-sm text-foreground leading-snug">The business can improve growth quality without requiring extra revenue.</p>
+          <div className="pt-4">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Main pressures</p>
+            <div className="flex flex-wrap gap-2">
+              {["Discount dependency above target", "Meta CAC rising", "Owned-channel mix weakening"].map((pressure) => (
+                <span key={pressure} className="rounded-full bg-secondary/30 border border-primary/10 px-3 py-1.5 text-xs font-semibold text-foreground">
+                  {pressure}
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -601,7 +567,7 @@ export default function GrowthQuality() {
           </div>
         </div>
 
-        {isGqPro && (
+        {isGqPro ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5 pt-5 border-t border-emerald-200/70 dark:border-emerald-800/40">
             {RECOVERABLE_UPSIDE.levers.map((lv) => (
               <div key={lv.id} className="flex items-start gap-3 rounded-xl bg-card border border-border/50 px-4 py-3.5 shadow-sm">
@@ -613,6 +579,15 @@ export default function GrowthQuality() {
                 <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
                   +£{lv.upliftLow / 1_000}k-£{lv.upliftHigh / 1_000}k
                 </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5 pt-5 border-t border-emerald-200/70 dark:border-emerald-800/40">
+            {["Discount recovery lever identified", "Acquisition efficiency lever identified"].map((lever) => (
+              <div key={lever} className="flex items-center gap-3 rounded-xl bg-card/70 border border-border/50 px-4 py-3.5 shadow-sm">
+                <Lock className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
+                <p className="text-sm font-semibold text-foreground">{lever}</p>
               </div>
             ))}
           </div>
@@ -664,27 +639,17 @@ export default function GrowthQuality() {
           <div>
             <h2 className="text-xl font-bold text-foreground">Growth Quality Scorecard</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
-              A compact view of whether growth is becoming more profitable or more expensive.
+              Current levels remain usable, but the direction of travel is weakening.
             </p>
           </div>
           <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3 sm:text-right">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Overall score</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Trend</p>
             <div className="flex sm:justify-end items-center gap-2">
-              <p className="text-3xl font-display font-bold text-foreground">{gqScoreReady ? liveGqGrade : "-"}</p>
-              {gqScoreReady && (
-                <span className={cn(
-                  "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold",
-                  liveGqScoreDir === "up"
-                    ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                    : liveGqScoreDir === "down"
-                    ? "bg-destructive/10 text-destructive"
-                    : "bg-secondary text-muted-foreground",
-                )}>
-                  {liveGqScoreDir === "up" ? <ArrowUpRight className="w-3 h-3" /> : liveGqScoreDir === "down" ? <ArrowDownRight className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
-                  {liveGqScoreDir === "up" ? "Strengthening" : liveGqScoreDir === "down" ? "Weakening" : "Stable"}
-                </span>
-              )}
+              <p className="text-3xl font-display font-bold text-amber-700 dark:text-amber-300">Weakening</p>
             </div>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {gqScoreReady ? `Current level ${liveGqGrade}` : "Current level calculating"}
+            </p>
           </div>
         </div>
 
@@ -890,10 +855,6 @@ export default function GrowthQuality() {
               </div>
             </div>
             <div className="shrink-0 md:text-right">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 mb-1">Estimated contribution recovery</p>
-              <p className="text-2xl font-display font-bold text-indigo-900 dark:text-indigo-100">
-                £{(RECOVERABLE_UPSIDE.cashLow / 1_000).toFixed(0)}k-£{(RECOVERABLE_UPSIDE.cashHigh / 1_000).toFixed(0)}k/mo
-              </p>
               <a href="/upgrade" className="text-xs font-semibold text-indigo-600 dark:text-indigo-300 hover:underline mt-1 inline-block">
                 Upgrade to Pro →
               </a>
@@ -905,14 +866,21 @@ export default function GrowthQuality() {
       <AiCfoAskCard pageId="growth" />
 
       {/* ── Supporting Analysis ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <div className="mb-5">
-          <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Detailed diagnostics and full driver context sit below the main CFO briefing.
-          </p>
-        </div>
+      <details className="group bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
+        <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Detailed diagnostics, driver context and benchmark logic.
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
+            <span className="text-xs font-semibold text-primary hidden group-open:inline">Collapse</span>
+          </div>
+        </summary>
 
+        <div className="px-6 pb-6">
         {isGqPro ? (
           <div className="space-y-6">
             <div>
@@ -962,6 +930,13 @@ export default function GrowthQuality() {
                 ))}
               </div>
             </div>
+
+            <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Benchmark logic</p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Healthy growth quality is benchmarked against 30%+ repeat purchase rate, discount dependency below 25%, CAC payback below 1.2 orders, contribution margin in the 45-55% range and a stronger owned-channel mix.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 px-5 py-4 flex items-start gap-3">
@@ -976,7 +951,8 @@ export default function GrowthQuality() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </details>
 
       <DataBenchmarkAssumptions
         benchmarkNote="Repeat purchase rate benchmark: 30%+ indicates healthy self-sustaining retention. Below 30% means paid acquisition is doing the work customers should be doing for free."

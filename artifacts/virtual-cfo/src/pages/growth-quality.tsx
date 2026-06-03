@@ -468,6 +468,55 @@ export default function GrowthQuality() {
   const topGrowthDrivers = [KEY_DRIVERS[1], KEY_DRIVERS[2], KEY_DRIVERS[0]];
   const strengtheningCount = liveScoreComponents.filter((c) => c.direction === "strengthening").length;
   const weakeningCount = liveScoreComponents.filter((c) => c.direction === "weakening").length;
+  const scorecardDisplay: Record<string, {
+    currentLabel: string;
+    currentClass: string;
+    travelLabel: string;
+    travelClass: string;
+    icon: "up" | "down";
+    explanation: string;
+  }> = {
+    "Retention quality": {
+      currentLabel: "Current level strong",
+      currentClass: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300",
+      travelLabel: "Supporting growth",
+      travelClass: "text-emerald-700 dark:text-emerald-400",
+      icon: "up",
+      explanation: `Repeat rate at ${liveRepeatRateNum.toFixed(1)}% — retention is still supporting growth, but it is not enough to offset discount and paid-acquisition pressure.`,
+    },
+    "Discount reliance": {
+      currentLabel: "Monitor",
+      currentClass: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300",
+      travelLabel: "Pressure increasing",
+      travelClass: "text-amber-700 dark:text-amber-400",
+      icon: "down",
+      explanation: `${liveDiscountDepNum.toFixed(1)}% of orders use a discount code — discount pressure is above target and needs active control even if current sales remain healthy.`,
+    },
+    "CAC efficiency": {
+      currentLabel: "Watch",
+      currentClass: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300",
+      travelLabel: "Weakening",
+      travelClass: "text-destructive",
+      icon: "down",
+      explanation: `CAC payback at ${liveCacPayback.toFixed(1)} orders — paid growth is becoming more expensive, so new-customer revenue is carrying less contribution quality.`,
+    },
+    "Contribution quality": {
+      currentLabel: "Watch",
+      currentClass: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300",
+      travelLabel: "Weakening",
+      travelClass: "text-destructive",
+      icon: "down",
+      explanation: `Blended contribution margin at ${blendedCmPctNum.toFixed(1)}% — margin pressure is emerging as discounts and paid channels absorb more of the growth.`,
+    },
+    "Channel mix quality": {
+      currentLabel: "Below target",
+      currentClass: "bg-secondary text-muted-foreground",
+      travelLabel: "Weakening",
+      travelClass: "text-destructive",
+      icon: "down",
+      explanation: `Email and organic represent ${(highCmShare * 100).toFixed(0)}% of revenue — owned-channel mix is below target, which leaves growth more exposed to paid CAC and promotions.`,
+    },
+  };
 
   return (
     <AppLayout>
@@ -656,23 +705,24 @@ export default function GrowthQuality() {
         <div className="divide-y divide-border/40">
           {liveScoreComponents.map((component) => {
             const cfg = STATUS_CONFIG[component.status];
+            const display = scorecardDisplay[component.label];
             return (
               <div key={component.label} className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-3 py-4 first:pt-0 last:pb-0">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-semibold text-foreground">{component.label}</p>
-                    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold", cfg.badge)}>
-                      {cfg.label}
+                    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold", display.currentClass)}>
+                      {display.currentLabel}
                     </span>
                     <span className={cn(
                       "inline-flex items-center gap-1 text-[11px] font-semibold",
-                      component.direction === "strengthening" ? "text-emerald-700 dark:text-emerald-400" : "text-destructive",
+                      display.travelClass,
                     )}>
-                      {component.direction === "strengthening" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {component.direction === "strengthening" ? "Strengthening" : "Weakening"}
+                      {display.icon === "up" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {display.travelLabel}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{component.explanation}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{display.explanation}</p>
                 </div>
                 <div className="lg:text-right">
                   <p className={cn("text-2xl font-display font-bold tabular-nums", cfg.text)}>{component.grade}</p>
@@ -775,10 +825,15 @@ export default function GrowthQuality() {
               open={i === 0}
               className={cn(
                 "group rounded-2xl border bg-card shadow-sm overflow-hidden",
-                i === 0 ? "border-emerald-300 dark:border-emerald-700/60" : "border-border/60",
+                i === 0
+                  ? "border-emerald-300 dark:border-emerald-700/60 bg-emerald-50/50 dark:bg-emerald-950/10 shadow-md"
+                  : "border-border/60",
               )}
             >
-              <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
+              <summary className={cn(
+                "list-none cursor-pointer px-6 py-5 transition-colors",
+                i === 0 ? "hover:bg-emerald-50 dark:hover:bg-emerald-950/20" : "hover:bg-secondary/20",
+              )}>
                 <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-5 items-start">
                   <div className="flex items-start gap-3 min-w-0">
                     <span className={cn(
@@ -793,8 +848,8 @@ export default function GrowthQuality() {
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-base font-bold text-foreground">{action.title}</p>
                         {i === 0 && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
-                            Start first
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white dark:bg-emerald-500 dark:text-emerald-950 uppercase tracking-wider">
+                            START FIRST
                           </span>
                         )}
                       </div>
@@ -865,14 +920,14 @@ export default function GrowthQuality() {
 
       <AiCfoAskCard pageId="growth" />
 
-      {/* ── Supporting Analysis ── */}
+      {/* ── Growth Diagnostics ── */}
       <details className="group bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
         <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
+              <h2 className="text-xl font-bold text-foreground">Growth Diagnostics</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Detailed diagnostics, driver context and benchmark logic.
+                Detailed driver context, KPI movements and benchmark logic.
               </p>
             </div>
             <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>

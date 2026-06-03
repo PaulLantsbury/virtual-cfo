@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
-import { Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Minus, ArrowRight } from "lucide-react";
+import { Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Minus, ArrowRight, Lock } from "lucide-react";
 import {
   BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer,
 } from "recharts";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { ActionRecommendations } from "@/components/ActionRecommendations";
-import type { Recommendation } from "@/components/ActionRecommendations";
-import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
@@ -22,17 +19,14 @@ import {
   DISCOUNT_DEP_PREV,
   CAC_PAYBACK,
   CAC_PAYBACK_PREV,
-  GQ_SCORE,
   GQ_SCORE_PREV,
 } from "@/lib/data/growth-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
-import { deltaToSentiment, DELTA_POLARITY } from "@/lib/analytics/deltaSentiment";
 import {
   getMarketingChannelMetrics,
   findChannel,
-  getCacTrendForChannel,
   type ChannelMonthlyMetrics,
   type CacTrendPoint,
 } from "@/lib/analytics/marketingChannelMetrics";
@@ -42,7 +36,7 @@ import {
 const GQ_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 // ─── Data constants ──────────────────────────────────────────────────────────
-// REPEAT_RATE, DISCOUNT_DEP, CAC_PAYBACK, GQ_SCORE imported from
+// REPEAT_RATE, DISCOUNT_DEP, CAC_PAYBACK imported from
 // src/lib/data/growth-metrics.ts — the central source of truth for growth metrics.
 // REPEAT_RATE resolved to 28% (was 27% here; Dashboard and BENCHMARKS both use 28%).
 
@@ -52,75 +46,7 @@ const REPEAT_RATE_CHANGE  = +(REPEAT_RATE  - REPEAT_RATE_PREV).toFixed(1);
 const DISCOUNT_DEP_CHANGE = +(DISCOUNT_DEP - DISCOUNT_DEP_PREV).toFixed(1);
 const CAC_PAYBACK_CHANGE  = +(CAC_PAYBACK  - CAC_PAYBACK_PREV).toFixed(1);
 
-/**
- * @ai-commentary Replace with AI-generated insight when ready.
- * cashLow / cashHigh:
- *   @dynamic Math.round(orderVolume * (ppLow / 100) * revenuePerOrder)
- */
-const CFO_INSIGHT = {
-  /** @ai-commentary Opening diagnostic sentence — replace with AI-generated headline when live */
-  headline: "Growth is being bought, not earned. Discount dependency at 38% and rising Meta CAC are compressing contribution — this is the third consecutive month of quality decline.",
-  /** @ai-commentary Replace with dynamically identified primary drivers when live */
-  drivers: [
-    "discount dependency at 38% — 13pp above the 25% target",
-    "Meta CAC up 14% — new customers cost more to acquire than one order earns back",
-    "email and organic share declining — blended acquisition cost rising as cheaper channels shrink",
-  ],
-} as const;
-
 type ScoreStatus = "strong" | "watch" | "weak" | "mixed" | "declining";
-
-/** @dynamic Score components computed from underlying metrics when live */
-const SCORE_COMPONENTS: {
-  label: string;
-  status: ScoreStatus;
-  grade: string;
-  explanation: string;
-  score: number;
-  /** Determines which group the component appears in */
-  direction: "strengthening" | "weakening";
-}[] = [
-  {
-    label: "Retention quality",
-    status: "strong",
-    grade: "B+",
-    explanation: "Repeat purchase rate improved 2.4pp — more customers returning without paid re-acquisition.",
-    score: 82,
-    direction: "strengthening",
-  },
-  {
-    label: "Discount reliance",
-    status: "weak",
-    grade: "D+",
-    explanation: "38% of orders use a discount code — 13pp above the 25% target, compressing margin on more than a third of all orders.",
-    score: 32,
-    direction: "weakening",
-  },
-  {
-    label: "CAC efficiency",
-    status: "watch",
-    grade: "C+",
-    explanation: "CAC payback at 1.4 orders — above the 1.2-order target. Rising Meta costs mean new customers cost more to acquire than one order earns back.",
-    score: 55,
-    direction: "weakening",
-  },
-  {
-    label: "Contribution quality",
-    status: "declining",
-    grade: "C+",
-    explanation: "Contribution margin at 42.3% is below the 45–55% target range and declining month-on-month.",
-    score: 52,
-    direction: "weakening",
-  },
-  {
-    label: "Channel mix quality",
-    status: "mixed",
-    grade: "C",
-    explanation: "Paid acquisition share rising while email and organic share decline — blended CAC rising as a result.",
-    score: 48,
-    direction: "weakening",
-  },
-];
 
 /**
  * @ai-commentary Replace with dynamically generated driver list when ready.
@@ -207,33 +133,44 @@ const COMPOSITION_LEGEND = [
   { key: "discount", color: "#f59e0b", label: "Discount-led growth"    },
 ] as const;
 
-const RECOMMENDATIONS: Recommendation[] = [
+const GROWTH_RECOVERY_ACTIONS = [
   {
     id: "gq1",
-    text: "Exclude returning customers from discount campaigns — they already bought without one. Target: dependency below 25%.",
-    impact: "high",
+    title: "Reduce discount dependency",
+    expectedImpact: "£6k-£14k/month",
+    confidence: "High",
+    effort: "Medium",
+    timing: "30 days",
+    why: "Discounted orders are above target, so contribution is being lost on demand that may already exist.",
+    start: "Audit active codes, suppress blanket discounts for returning customers, and keep offers tied to margin-protective thresholds.",
+    link: "/pricing-optimisation",
+    linkLabel: "Model pricing impact",
   },
   {
     id: "gq2",
-    text: "Shift Meta spend to email and organic — owned-channel CAC is near-zero; Meta's is rising.",
-    impact: "high",
+    title: "Improve acquisition quality",
+    expectedImpact: "£6k-£14k/month",
+    confidence: "Medium",
+    effort: "Medium",
+    timing: "30-45 days",
+    why: "Meta CAC is rising, so new-customer growth is costing more before it becomes contribution-positive.",
+    start: "Tighten Meta budget to higher-margin acquisition cohorts and redirect testing budget toward Email, Organic and Google Shopping where contribution is stronger.",
+    link: "/marketing-efficiency",
+    linkLabel: "Review channel efficiency",
   },
   {
     id: "gq3",
-    text: "Launch a post-purchase email sequence to drive repeat purchases at zero acquisition cost. Target: repeat rate above 30%.",
-    impact: "medium",
+    title: "Increase repeat purchase rate",
+    expectedImpact: "Contribution quality lift",
+    confidence: "Medium",
+    effort: "Low",
+    timing: "14-30 days",
+    why: "Retention is the one improving signal; strengthening it reduces reliance on paid acquisition and blanket promotions.",
+    start: "Launch post-purchase email journeys for first-order customers and target repeat rate above 30% before adding more acquisition spend.",
+    link: "/scenario-lab",
+    linkLabel: "Model repeat-rate scenario",
   },
-  {
-    id: "gq4",
-    text: "Concentrate paid acquisition on high-margin products — the first product a new customer buys determines their CAC payback.",
-    impact: "medium",
-  },
-  {
-    id: "gq5",
-    text: "Audit active discount codes — keep those that drive repeat purchases, retire those that only reduce first-order margin.",
-    impact: "quick-win",
-  },
-];
+] as const;
 
 /**
  * Recoverable contribution upside — what could be recaptured if growth mix
@@ -543,6 +480,11 @@ export default function GrowthQuality() {
     },
   ];
 
+  const isGqPro = canAccess("growth_quality_actions");
+  const topGrowthDrivers = [KEY_DRIVERS[1], KEY_DRIVERS[2], KEY_DRIVERS[0]];
+  const strengtheningCount = liveScoreComponents.filter((c) => c.direction === "strengthening").length;
+  const weakeningCount = liveScoreComponents.filter((c) => c.direction === "weakening").length;
+
   return (
     <AppLayout>
       {/* Page header */}
@@ -564,367 +506,228 @@ export default function GrowthQuality() {
         <TimelineSelector />
       </div>
 
-      {/* ── CFO Insight ── */}
-      <div className="sc-purple rounded-2xl shadow-sm mb-8 overflow-hidden">
-        <div className="sc-purple-header flex items-center gap-2.5 px-6 py-3.5">
+      {/* ── CFO Growth Verdict ── */}
+      <div className="sc-purple rounded-2xl shadow-md mb-6 overflow-hidden">
+        <div className="sc-purple-header flex items-center gap-3 px-6 py-3">
           <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
-            CFO Insight
+            CFO Growth Verdict
+          </span>
+          <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 whitespace-nowrap">
+            Quality weakening
           </span>
         </div>
-        <div className="px-6 py-5">
-          {/* Diagnostic narrative — three-part structure */}
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-foreground leading-relaxed">
-              {CFO_INSIGHT.headline}
-            </p>
-            <div>
-              <p className="text-sm font-medium text-foreground mb-1.5">The main pressures are:</p>
-              <ul className="space-y-1">
-                {CFO_INSIGHT.drivers.map((d) => (
-                  <li key={d} className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <span className="mt-[5px] w-1 h-1 rounded-full bg-muted-foreground/50 shrink-0" />
-                    {d}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
 
-        </div>
-      </div>
-
-      <AiCfoAskCard pageId="growth" />
-
-      {/* ── Growth Classification & Risk Signal ── */}
-      <div className={cn(
-        "rounded-2xl border px-6 py-5 mb-8 bg-[#182A4A]",
-        GROWTH_TYPE.risk === "high"
-          ? "border-[#EF4444]/30"
-          : GROWTH_TYPE.risk === "medium"
-          ? "border-[#F59E0B]/30"
-          : "border-[#22C55E]/30"
-      )}>
-        {/* Row 1: classification label + risk badge */}
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div>
-            <p className={cn(
-              "text-[10px] font-bold uppercase tracking-widest mb-1",
-              GROWTH_TYPE.risk === "high"
-                ? "text-destructive/60"
-                : GROWTH_TYPE.risk === "medium"
-                ? "text-[#F59E0B]/70"
-                : "text-[#22C55E]/70"
-            )}>
-              Growth Classification
-            </p>
-            <p className="text-base font-bold text-foreground leading-tight">
-              {GROWTH_TYPE.label}
-            </p>
-          </div>
-          <span className={cn(
-            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border shrink-0",
-            GROWTH_TYPE.risk === "high"
-              ? "bg-destructive/10 text-destructive border-destructive/20"
-              : GROWTH_TYPE.risk === "medium"
-              ? "bg-[#F59E0B]/15 text-[#F59E0B] border-[#F59E0B]/30"
-              : "bg-[#22C55E]/15 text-[#22C55E] border-[#22C55E]/30"
-          )}>
-            <span className={cn(
-              "w-1.5 h-1.5 rounded-full shrink-0",
-              GROWTH_TYPE.risk === "high" ? "bg-destructive" : GROWTH_TYPE.risk === "medium" ? "bg-amber-500" : "bg-emerald-500"
-            )} />
-            {GROWTH_TYPE.riskLabel}
-          </span>
-        </div>
-        {/* Row 2: risk signal */}
-        <p className={cn(
-          "mt-3 pt-3 border-t text-sm leading-relaxed text-[#A9B8D3]",
-          GROWTH_TYPE.risk === "high"
-            ? "border-destructive/20"
-            : GROWTH_TYPE.risk === "medium"
-            ? "border-[#F59E0B]/25"
-            : "border-[#22C55E]/25"
-        )}>
-          {GROWTH_TYPE.signal}
-        </p>
-        <p className="mt-2 text-xs text-muted-foreground/50 leading-snug">
-          {GROWTH_TYPE.priorPeriod}
-        </p>
-      </div>
-
-      {/* ── KPI Strip ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {/* Growth Quality Score */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Growth Quality Score</p>
-          <p className="text-4xl font-display font-bold text-foreground">
-            {gqScoreReady ? liveGqGrade : "—"}
-          </p>
-          <div className="flex items-center gap-2 mt-3 text-xs min-h-[22px]">
-            {gqScoreReady ? (
-              <span className={cn(
-                "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
-                liveGqScoreDir === "up"
-                  ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                  : liveGqScoreDir === "down"
-                  ? "bg-destructive/10 text-destructive"
-                  : "bg-secondary text-muted-foreground",
-              )}>
-                {liveGqScoreDir === "up"
-                  ? <ArrowUpRight className="w-3 h-3" />
-                  : liveGqScoreDir === "down"
-                  ? <ArrowDownRight className="w-3 h-3" />
-                  : <Minus className="w-3 h-3" />}
-                {liveGqScoreDir === "up"
-                  ? `Up from ${liveGqGradePrev}`
-                  : liveGqScoreDir === "down"
-                  ? `Down from ${liveGqGradePrev}`
-                  : `Stable vs ${liveGqGradePrev}`}
-              </span>
-            ) : (
-              <span className="text-muted-foreground/40">Calculating…</span>
-            )}
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            A–/B+ = growth is generating profit sustainably. Below B– = revenue is outpacing margin quality.
-          </p>
-          <p className="mt-1.5 text-xs text-muted-foreground/50 leading-snug">
-            Healthy range: A– to B+
-          </p>
-        </div>
-
-        {/* Repeat Purchase Rate */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Repeat Purchase Rate</p>
-          <p className="text-4xl font-display font-bold text-foreground">{liveRepeatRate}%</p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className={cn(
-              "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
-              deltaToSentiment(liveRprChangePp, DELTA_POLARITY.rpr) === "positive"
-                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                : deltaToSentiment(liveRprChangePp, DELTA_POLARITY.rpr) === "negative"
-                ? "bg-destructive/10 text-destructive"
-                : "bg-secondary text-muted-foreground"
-            )}>
-              {liveRprChangePp !== null && liveRprChangePp > 0
-                ? <ArrowUpRight className="w-3 h-3" />
-                : liveRprChangePp !== null && liveRprChangePp < 0
-                ? <ArrowDownRight className="w-3 h-3" />
-                : <Minus className="w-3 h-3" />}
-              {liveRprChangePp !== null
-                ? `${liveRprChangePp >= 0 ? "+" : ""}${Math.abs(liveRprChangePp).toFixed(1)}pp vs last month`
-                : "— vs last month"}
-            </span>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Above 30% means customers return without paid re-acquisition. Currently improving — the one positive signal.
-          </p>
-        </div>
-
-        {/* Discount Dependency */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">Discount Dependency</p>
-          <p className="text-4xl font-display font-bold text-foreground">{liveDiscountDep}%</p>
-          <div className="flex items-center gap-2 mt-3 text-xs">
-            <span className={cn(
-              "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
-              deltaToSentiment(liveDiscDepChangePp, DELTA_POLARITY.dd) === "positive"
-                ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                : deltaToSentiment(liveDiscDepChangePp, DELTA_POLARITY.dd) === "negative"
-                ? "bg-destructive/10 text-destructive"
-                : "bg-secondary text-muted-foreground"
-            )}>
-              {liveDiscDepChangePp !== null && liveDiscDepChangePp > 0
-                ? <ArrowUpRight className="w-3 h-3" />
-                : liveDiscDepChangePp !== null && liveDiscDepChangePp < 0
-                ? <ArrowDownRight className="w-3 h-3" />
-                : <Minus className="w-3 h-3" />}
-              {liveDiscDepChangePp !== null
-                ? `${liveDiscDepChangePp >= 0 ? "+" : ""}${Math.abs(liveDiscDepChangePp).toFixed(1)}pp vs last month`
-                : "— vs last month"}
-            </span>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            Orders using a discount code — target below 25%. Above this, discounts are driving demand that should be self-sustaining.
-          </p>
-        </div>
-
-        {/* CAC Payback */}
-        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border/50">
-          <p className="text-sm font-medium text-muted-foreground mb-1">CAC Payback</p>
-          <p className="text-4xl font-display font-bold text-foreground">
-            {gqPhase3Loading ? "—" : <>{liveCacPayback.toFixed(1)}{" "}<span className="text-lg font-medium text-muted-foreground">orders</span></>}
-          </p>
-          <div className="flex items-center gap-2 mt-3 text-xs min-h-[22px]">
-            {gqPhase3Loading ? (
-              <span className="text-muted-foreground/40">Calculating…</span>
-            ) : (
-              <span className={cn(
-                "flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold",
-                liveCacPaybackChange > 0
-                  ? "bg-destructive/10 text-destructive"
-                  : liveCacPaybackChange < 0
-                  ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                  : "bg-secondary text-muted-foreground",
-              )}>
-                {liveCacPaybackChange > 0
-                  ? <ArrowUpRight className="w-3 h-3" />
-                  : liveCacPaybackChange < 0
-                  ? <ArrowDownRight className="w-3 h-3" />
-                  : <Minus className="w-3 h-3" />}
-                {liveCacPaybackChange !== 0
-                  ? `${liveCacPaybackChange > 0 ? "+" : ""}${liveCacPaybackChange.toFixed(2)} orders vs last month`
-                  : "Stable vs last month"}
-              </span>
-            )}
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground leading-snug">
-            {gqPhase3Loading
-              ? "Below 1.2 orders is healthy"
-              : <>Below 1.2 orders is healthy — {liveCacPayback.toFixed(1)} {liveCacPayback <= 1.2 ? "is within the healthy range" : "signals acquisition cost pressure"}</>}
-          </p>
-        </div>
-      </div>
-
-      {/* ── Score Breakdown — strengthening vs weakening ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-        <div className="mb-6">
-          <h3 className="font-semibold text-lg text-foreground">
-            Where growth quality is strengthening vs weakening
-          </h3>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            What's holding growth quality up — and what's pulling it down.
-          </p>
-        </div>
-
-        {(
-          [
-            {
-              dir:      "strengthening" as const,
-              icon:     <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />,
-              labelCls: "text-emerald-700 dark:text-emerald-400",
-              heading:  "Strengthening",
-            },
-            {
-              dir:      "weakening" as const,
-              icon:     <TrendingDown className="w-3.5 h-3.5 text-destructive shrink-0" />,
-              labelCls: "text-destructive",
-              heading:  "Under pressure",
-            },
-          ] as const
-        ).map(({ dir, icon, labelCls, heading }, gi) => {
-          const items = liveScoreComponents.filter((c) => c.direction === dir);
-          if (!items.length) return null;
-          return (
-            <div key={dir} className={gi > 0 ? "mt-6 pt-6 border-t border-border/50" : ""}>
-              {/* Group header */}
-              <div className="flex items-center gap-1.5 mb-4">
-                {icon}
-                <span className={cn("text-xs font-semibold uppercase tracking-wider", labelCls)}>
-                  {heading} ({items.length})
-                </span>
-              </div>
-
-              <div className="space-y-4">
-                {items.map((c) => {
-                  const cfg = STATUS_CONFIG[c.status];
-                  return (
-                    <div key={c.label}>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium text-foreground">{c.label}</span>
-                          <span className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold",
-                            cfg.badge,
-                          )}>
-                            {cfg.label}
-                          </span>
-                        </div>
-                        {canAccess("score_component_detail") ? (
-                          <span className={cn("text-sm font-bold tabular-nums", cfg.text)}>{c.grade}</span>
-                        ) : (
-                          <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap">
-                            PRO
-                          </span>
-                        )}
-                      </div>
-                      {/* Bar */}
-                      <div className="w-full h-1.5 bg-secondary rounded-full mb-1.5">
-                        <div
-                          className={cn("h-1.5 rounded-full transition-all", cfg.bar)}
-                          style={{ width: `${c.score}%` }}
-                        />
-                      </div>
-                      {/* Explanation — gated */}
-                      {canAccess("score_component_detail") ? (
-                        <p className="text-xs text-muted-foreground leading-snug">{c.explanation}</p>
-                      ) : (
-                        <p className="text-xs text-muted-foreground/35 leading-snug blur-sm select-none pointer-events-none">
-                          {c.explanation}
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ── Growth Composition Trend — Pro only ── */}
-      <PremiumBlurPreview
-        title="Growth Composition Trend"
-        subtitle="How the mix of repeat, paid, and discount-led growth has shifted over the last six months."
-        badgeText="PRO — Unlock composition"
-        ctaTitle="Unlock growth composition breakdown"
-        ctaDescription="See whether growth is becoming more or less healthy over time — and which channel types are driving the shift."
-        isPro={canAccess("growth_composition_trend")}
-        className="mb-8"
-        ghostContent={
-          <div>
-            {/* Ghost legend */}
-            <div className="flex flex-wrap gap-x-5 gap-y-2 mb-4">
-              {COMPOSITION_LEGEND.map((item) => (
-                <div key={item.key} className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-foreground/[0.08] shrink-0" />
-                  <span className="text-xs text-muted-foreground/60">{item.label}</span>
-                </div>
-              ))}
-            </div>
-            {/* Ghost stacked bars — CSS only, no real data */}
-            <div className="h-[200px] flex items-end gap-2">
-              {[62, 57, 52, 48, 44, 40].map((rh, i) => {
-                const ph = Math.round((100 - rh) * 0.57);
-                const dh = 100 - rh - ph;
-                return (
-                  <div key={i} className="flex-1 flex flex-col justify-end gap-px" style={{ height: "100%" }}>
-                    <div className="w-full rounded-t-sm bg-foreground/[0.06]" style={{ height: `${dh}%` }} />
-                    <div className="w-full bg-foreground/[0.07]" style={{ height: `${ph}%` }} />
-                    <div className="w-full rounded-b-sm bg-foreground/[0.09]" style={{ height: `${rh}%` }} />
-                  </div>
-                );
-              })}
-            </div>
-            {/* Ghost X labels */}
-            <div className="flex gap-2 mt-2.5">
-              {COMPOSITION_DATA.map((d) => (
-                <span key={d.month} className="flex-1 text-center text-[11px] text-muted-foreground/50">{d.month}</span>
-              ))}
-            </div>
-            {/* Ghost takeaway */}
-            <div className="mt-3 pt-3 border-t border-border/40">
-              <p className="text-xs text-foreground/[0.13] leading-snug">
-                —— —— fell from —% to —% over the last — months. —— —— growth now represents —% of total growth.
+        <div className="px-6 pt-5 pb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] gap-6 mb-5 pb-5 border-b border-primary/15">
+            <div className="space-y-3">
+              <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">
+                Growth quality is deteriorating despite revenue growth.
+              </p>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Revenue may still be growing, but more of that growth is being bought through discounts and paid acquisition. Discount dependency at{" "}
+                <span className="font-semibold text-foreground">{liveDiscountDep}%</span>{" "}
+                and CAC payback at{" "}
+                <span className="font-semibold text-foreground">{gqPhase3Loading ? "calculating" : `${liveCacPayback.toFixed(1)} orders`}</span>{" "}
+                are the key pressure points, weakening contribution even when sales look healthy.
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {GROWTH_TYPE.priorPeriod}.
               </p>
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
+              <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Growth type</p>
+                <p className="text-xl font-display font-bold text-foreground">Promotion-led</p>
+                <p className="text-xs text-muted-foreground mt-1">{GROWTH_TYPE.riskLabel}</p>
+              </div>
+              <div className="rounded-xl bg-amber-50/80 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-1">Growth quality</p>
+                <p className="text-xl font-display font-bold text-amber-700 dark:text-amber-300">Weakening</p>
+                <p className="text-xs text-amber-700/70 dark:text-amber-400/70 mt-1">
+                  {weakeningCount} scorecard areas under pressure
+                </p>
+              </div>
+              <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-4 py-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Recoverable contribution</p>
+                <p className="text-xl font-display font-bold text-emerald-700 dark:text-emerald-300">
+                  £{(RECOVERABLE_UPSIDE.cashLow / 1_000).toFixed(0)}k-£{(RECOVERABLE_UPSIDE.cashHigh / 1_000).toFixed(0)}k/mo
+                </p>
+                <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-1">Medium confidence</p>
+              </div>
+            </div>
           </div>
-        }
-      >
-        {/* Pro: real stacked bar chart */}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
+              <p className="text-xs font-semibold text-muted-foreground mb-1">What is happening</p>
+              <p className="text-sm text-foreground leading-snug">Revenue growth is leaning more heavily on promotions and paid acquisition.</p>
+            </div>
+            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
+              <p className="text-xs font-semibold text-muted-foreground mb-1">Where pressure sits</p>
+              <p className="text-sm text-foreground leading-snug">Discount dependency and Meta CAC are pulling contribution quality lower.</p>
+            </div>
+            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
+              <p className="text-xs font-semibold text-muted-foreground mb-1">Commercial meaning</p>
+              <p className="text-sm text-foreground leading-snug">The business can improve growth quality without requiring extra revenue.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Recoverable Growth Quality ── */}
+      <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 shadow-sm mb-8 px-6 py-5">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div>
+            <h2 className="text-xl font-bold text-foreground">Recoverable Growth Quality</h2>
+            <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
+              Growth quality can improve without requiring additional revenue. The opportunity is to recover contribution already being lost to discount dependency and acquisition inefficiency.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-end gap-6">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Estimated recoverable contribution</p>
+              <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
+                £{(RECOVERABLE_UPSIDE.cashLow / 1_000).toFixed(0)}k-£{(RECOVERABLE_UPSIDE.cashHigh / 1_000).toFixed(0)}k
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">per month · medium confidence</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Primary drivers</p>
+              <p className="text-sm font-semibold text-foreground">Discount dependency</p>
+              <p className="text-sm font-semibold text-foreground">Acquisition efficiency</p>
+            </div>
+          </div>
+        </div>
+
+        {isGqPro && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5 pt-5 border-t border-emerald-200/70 dark:border-emerald-800/40">
+            {RECOVERABLE_UPSIDE.levers.map((lv) => (
+              <div key={lv.id} className="flex items-start gap-3 rounded-xl bg-card border border-border/50 px-4 py-3.5 shadow-sm">
+                <ArrowRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground leading-snug">{lv.label}</p>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{lv.description}</p>
+                </div>
+                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
+                  +£{lv.upliftLow / 1_000}k-£{lv.upliftHigh / 1_000}k
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── What Is Driving This? ── */}
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-foreground">What Is Driving This?</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          The three commercial signals most responsible for this month's growth quality.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {topGrowthDrivers.map((driver) => (
+          <div key={driver.text} className="rounded-2xl border border-border/60 bg-card px-5 py-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              <span className={cn(
+                "mt-0.5 flex items-center justify-center w-6 h-6 rounded-full shrink-0",
+                driver.dir === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40" : "bg-destructive/10",
+              )}>
+                {driver.dir === "positive" ? (
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                ) : (
+                  <TrendingDown className="w-3.5 h-3.5 text-destructive" />
+                )}
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-foreground leading-snug">{driver.freeLabel}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                  {driver.text}
+                </p>
+                <p className={cn(
+                  "text-xs font-semibold mt-3",
+                  driver.dir === "positive" ? "text-emerald-700 dark:text-emerald-400" : "text-destructive/80 dark:text-destructive/70",
+                )}>
+                  {isGqPro ? driver.impact : "Contribution impact available in Pro"}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Growth Quality Scorecard ── */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
+          <div>
+            <h2 className="text-xl font-bold text-foreground">Growth Quality Scorecard</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              A compact view of whether growth is becoming more profitable or more expensive.
+            </p>
+          </div>
+          <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3 sm:text-right">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Overall score</p>
+            <div className="flex sm:justify-end items-center gap-2">
+              <p className="text-3xl font-display font-bold text-foreground">{gqScoreReady ? liveGqGrade : "-"}</p>
+              {gqScoreReady && (
+                <span className={cn(
+                  "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold",
+                  liveGqScoreDir === "up"
+                    ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                    : liveGqScoreDir === "down"
+                    ? "bg-destructive/10 text-destructive"
+                    : "bg-secondary text-muted-foreground",
+                )}>
+                  {liveGqScoreDir === "up" ? <ArrowUpRight className="w-3 h-3" /> : liveGqScoreDir === "down" ? <ArrowDownRight className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                  {liveGqScoreDir === "up" ? "Strengthening" : liveGqScoreDir === "down" ? "Weakening" : "Stable"}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="divide-y divide-border/40">
+          {liveScoreComponents.map((component) => {
+            const cfg = STATUS_CONFIG[component.status];
+            return (
+              <div key={component.label} className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-3 py-4 first:pt-0 last:pb-0">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold text-foreground">{component.label}</p>
+                    <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold", cfg.badge)}>
+                      {cfg.label}
+                    </span>
+                    <span className={cn(
+                      "inline-flex items-center gap-1 text-[11px] font-semibold",
+                      component.direction === "strengthening" ? "text-emerald-700 dark:text-emerald-400" : "text-destructive",
+                    )}>
+                      {component.direction === "strengthening" ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                      {component.direction === "strengthening" ? "Strengthening" : "Weakening"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{component.explanation}</p>
+                </div>
+                <div className="lg:text-right">
+                  <p className={cn("text-2xl font-display font-bold tabular-nums", cfg.text)}>{component.grade}</p>
+                  <p className="text-[11px] text-muted-foreground">{component.score}/100</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Growth Composition Trend ── */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+        <div className="mb-5">
+          <h2 className="text-xl font-bold text-foreground">Growth Composition Trend</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Whether growth is becoming repeat-led, paid-led or discount-led.
+          </p>
+        </div>
         <div>
-          {/* Legend */}
           <div className="flex flex-wrap gap-x-5 gap-y-2 mb-5">
             {COMPOSITION_LEGEND.map((item) => (
               <div key={item.key} className="flex items-center gap-1.5">
@@ -976,7 +779,6 @@ export default function GrowthQuality() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          {/* Takeaway */}
           <div className="mt-3 pt-3 border-t border-border/40">
             <p className="text-xs text-muted-foreground leading-snug">
               <span className="font-semibold text-foreground">
@@ -990,199 +792,191 @@ export default function GrowthQuality() {
             </p>
           </div>
         </div>
-      </PremiumBlurPreview>
+      </div>
 
-      {/* ── Key Growth Drivers — Pro only (with impact lines) ── */}
-      <PremiumBlurPreview
-        title="Key Growth Drivers This Month"
-        subtitle="Which changes this month improved or weakened growth quality — and the contribution impact of each."
-        badgeText="PRO — Unlock driver impact"
-        ctaTitle="Unlock driver impact analysis"
-        ctaDescription="See which specific changes this month improved or weakened growth quality — with quantified impact on contribution and acquisition efficiency."
-        isPro={canAccess("driver_impact_detail")}
-        className="mb-8"
-        ghostContent={
-          <ul className="space-y-0">
-            {KEY_DRIVERS.map((d, i) => (
-              <li key={i} className="flex items-start gap-3 py-3 border-b border-border/30 last:border-0">
-                {/* Direction icon — fully visible so pos/neg signal is clear */}
-                <span className={cn(
-                  "mt-0.5 flex items-center justify-center w-5 h-5 rounded-full shrink-0",
-                  d.dir === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40"
-                    : d.dir === "negative" ? "bg-destructive/10"
-                    : "bg-secondary",
-                )}>
-                  {d.dir === "positive" && <TrendingUp  className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />}
-                  {d.dir === "negative" && <TrendingDown className="w-3 h-3 text-destructive" />}
-                  {d.dir === "neutral"  && <Minus        className="w-3 h-3 text-muted-foreground" />}
-                </span>
-                {/* Text content — blurred so structure is preserved but text is unreadable */}
-                <div className="min-w-0 flex-1">
-                  <p
-                    className="text-sm font-medium text-foreground leading-snug select-none pointer-events-none"
-                    style={{ filter: "blur(4px)", opacity: 0.55 }}
-                  >
-                    {d.freeLabel}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground/50 leading-snug select-none pointer-events-none">
-                    → detailed impact available in Pro
-                  </p>
+      {/* ── Growth Recovery Plan / Action Plan ── */}
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-foreground">Growth Recovery Plan</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          The next actions to recover contribution and make growth healthier.
+        </p>
+      </div>
+
+      {isGqPro ? (
+        <div className="space-y-4 mb-8">
+          {GROWTH_RECOVERY_ACTIONS.map((action, i) => (
+            <details
+              key={action.id}
+              open={i === 0}
+              className={cn(
+                "group rounded-2xl border bg-card shadow-sm overflow-hidden",
+                i === 0 ? "border-emerald-300 dark:border-emerald-700/60" : "border-border/60",
+              )}
+            >
+              <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
+                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-5 items-start">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-full shrink-0 text-xs font-bold",
+                      i === 0
+                        ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"
+                        : "bg-secondary text-muted-foreground",
+                    )}>
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-base font-bold text-foreground">{action.title}</p>
+                        {i === 0 && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300">
+                            Start first
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1 leading-snug">{action.why}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto_auto_auto_auto] gap-2 lg:justify-end">
+                    <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-700/40 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Impact</p>
+                      <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums">{action.expectedImpact}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Confidence</p>
+                      <p className="text-sm font-semibold text-foreground">{action.confidence}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Effort</p>
+                      <p className="text-sm font-semibold text-foreground">{action.effort}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Timing</p>
+                      <p className="text-sm font-semibold text-foreground">{action.timing}</p>
+                    </div>
+                  </div>
                 </div>
-              </li>
-            ))}
-          </ul>
-        }
-      >
-        {/* Pro: full rows with impact interpretation */}
-        <ul className="space-y-3">
-          {KEY_DRIVERS.map((d) => (
-            <li key={d.text} className="flex items-start gap-3 py-2 border-b border-border/40 last:border-0">
-              <span className={cn(
-                "mt-0.5 flex items-center justify-center w-5 h-5 rounded-full shrink-0",
-                d.dir === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40"
-                  : d.dir === "negative" ? "bg-destructive/10"
-                  : "bg-secondary",
-              )}>
-                {d.dir === "positive" && <TrendingUp  className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />}
-                {d.dir === "negative" && <TrendingDown className="w-3 h-3 text-destructive" />}
-                {d.dir === "neutral"  && <Minus        className="w-3 h-3 text-muted-foreground" />}
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground leading-snug">{d.text}</p>
-                <p className={cn(
-                  "mt-1 text-xs leading-snug",
-                  d.dir === "positive"
-                    ? "text-emerald-700 dark:text-emerald-400"
-                    : d.dir === "negative"
-                    ? "text-destructive/80 dark:text-destructive/70"
-                    : "text-muted-foreground",
-                )}>
-                  → {d.impact}
-                </p>
+              </summary>
+              <div className="px-6 pb-5 -mt-1">
+                <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-4 pl-11">
+                  <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Why it matters</p>
+                    <p className="text-sm text-foreground leading-relaxed">{action.why}</p>
+                  </div>
+                  <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">How to start</p>
+                    <p className="text-sm text-foreground leading-relaxed">{action.start}</p>
+                    <a href={action.link} className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline mt-3">
+                      {action.linkLabel}
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
               </div>
-            </li>
+            </details>
           ))}
-        </ul>
-      </PremiumBlurPreview>
-
-      {/* ── Recoverable Growth Quality — Pro only ── */}
-      <PremiumBlurPreview
-        title="Recoverable Growth Quality"
-        subtitle="Estimated contribution available if discount dependency and CAC efficiency return to target levels."
-        badgeText="PRO — Unlock upside estimate"
-        ctaTitle="Unlock recoverable growth quality"
-        ctaDescription="See the estimated monthly contribution unlock from reducing discount depth and improving Meta CAC efficiency."
-        isPro={canAccess("recoverable_growth_quality")}
-        className="mb-8"
-        ghostContent={
-          <div>
-            {/* Ghost headline block */}
-            <div className="rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/50 dark:border-emerald-800/30 px-6 py-5 mb-5 flex items-center gap-5">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100/50 dark:bg-emerald-900/30 shrink-0">
-                <TrendingUp className="w-6 h-6 text-emerald-400/50 dark:text-emerald-600/40" />
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+            <div className="flex items-start gap-3">
+              <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+                <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600/40 dark:text-emerald-500/30 mb-1">
-                  Estimated recoverable contribution
-                </p>
-                <p className="text-4xl font-display font-bold text-foreground/[0.10] leading-none select-none">
-                  £——k–£——k
-                </p>
-                <p className="text-xs text-foreground/[0.10] mt-2 select-none">
-                  —— —— —— —— —— —— —— —— ——
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Growth Recovery Plan</p>
+                <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
+                  3 prioritised actions identified to improve contribution quality. Upgrade to view the action plan, implementation steps, confidence scoring and scenario links.
                 </p>
               </div>
             </div>
-            {/* Ghost lever rows — structure preserved, label text blurred */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {RECOVERABLE_UPSIDE.levers.map((lv) => (
-                <div key={lv.id} className="flex items-start gap-3 rounded-xl bg-card border border-border/40 px-4 py-3.5">
-                  <ArrowRight className="w-4 h-4 text-foreground/10 shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className="text-sm font-semibold text-foreground leading-snug select-none pointer-events-none"
-                      style={{ filter: "blur(4px)", opacity: 0.55 }}
-                    >
-                      {lv.label}
-                    </p>
-                    <p className="text-xs text-foreground/[0.13] mt-1 leading-relaxed select-none pointer-events-none">
-                      —— —— —— —— —— ——
-                    </p>
-                  </div>
-                  <span className="text-sm font-bold text-foreground/[0.10] shrink-0 whitespace-nowrap select-none pointer-events-none">
-                    +£——k
-                  </span>
-                </div>
-              ))}
+            <div className="shrink-0 md:text-right">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 mb-1">Estimated contribution recovery</p>
+              <p className="text-2xl font-display font-bold text-indigo-900 dark:text-indigo-100">
+                £{(RECOVERABLE_UPSIDE.cashLow / 1_000).toFixed(0)}k-£{(RECOVERABLE_UPSIDE.cashHigh / 1_000).toFixed(0)}k/mo
+              </p>
+              <a href="/upgrade" className="text-xs font-semibold text-indigo-600 dark:text-indigo-300 hover:underline mt-1 inline-block">
+                Upgrade to Pro →
+              </a>
             </div>
-          </div>
-        }
-      >
-        {/* Pro: full upside block */}
-        <div>
-          {/* Headline */}
-          <div className="sc-teal rounded-xl px-6 py-5 mb-5 flex items-center gap-5">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#22D3EE]/15 shrink-0">
-              <TrendingUp className="w-6 h-6 text-[#22D3EE]" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#22D3EE] mb-1">
-                Estimated recoverable contribution
-              </p>
-              <p className="text-4xl font-display font-bold text-[#22D3EE] leading-none">
-                £{(RECOVERABLE_UPSIDE.cashLow / 1_000).toFixed(0)}k–£{(RECOVERABLE_UPSIDE.cashHigh / 1_000).toFixed(0)}k
-                <span className="text-base font-medium text-cyan-300/70 ml-2">per month</span>
-              </p>
-              <p className="text-xs text-cyan-300/75 mt-2 leading-snug max-w-xl">
-                {RECOVERABLE_UPSIDE.supporting}
-              </p>
-              <p className="text-[11px] text-muted-foreground/40 mt-2">
-                Confidence: Medium
-              </p>
-            </div>
-          </div>
-          {/* Lever breakdown */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {RECOVERABLE_UPSIDE.levers.map((lv) => (
-              <div key={lv.id} className="flex items-start gap-3 rounded-xl bg-card border border-border/50 px-4 py-3.5 shadow-sm">
-                <ArrowRight className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground leading-snug">{lv.label}</p>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{lv.description}</p>
-                </div>
-                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
-                  +£{lv.upliftLow / 1_000}k–£{lv.upliftHigh / 1_000}k
-                </span>
-              </div>
-            ))}
           </div>
         </div>
-      </PremiumBlurPreview>
-
-      {/* ── Recommended Actions — Pro only ── */}
-      {canAccess("growth_quality_actions") ? (
-        <ActionRecommendations
-          recommendations={RECOMMENDATIONS}
-          title="What to do next"
-          subtitle="Actions to reduce discount dependency, improve CAC efficiency, and build sustainable repeat growth"
-          defaultExpanded
-        />
-      ) : (
-        <PremiumBlurPreview
-          title="What to do next"
-          subtitle="Actions to reduce discount dependency, improve CAC efficiency, and build sustainable repeat growth"
-          badgeText="PRO — Unlock action plan"
-          ctaTitle="Unlock growth quality action plan"
-          ctaDescription="See the specific actions that improve retention, reduce discount dependency, and strengthen profitable growth."
-          isPro={false}
-          className="mb-8"
-        >
-          <ActionRecommendations
-            recommendations={RECOMMENDATIONS}
-            defaultExpanded
-          />
-        </PremiumBlurPreview>
       )}
+
+      <AiCfoAskCard pageId="growth" />
+
+      {/* ── Supporting Analysis ── */}
+      <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
+        <div className="mb-5">
+          <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Detailed diagnostics and full driver context sit below the main CFO briefing.
+          </p>
+        </div>
+
+        {isGqPro ? (
+          <div className="space-y-6">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Detailed KPI movements</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                  <p className="text-xs text-muted-foreground mb-1">Repeat purchase rate</p>
+                  <p className="text-2xl font-display font-bold text-foreground">{liveRepeatRate}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">{liveRprChangePp !== null ? `${liveRprChangePp >= 0 ? "+" : ""}${Math.abs(liveRprChangePp).toFixed(1)}pp vs last month` : "- vs last month"}</p>
+                </div>
+                <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                  <p className="text-xs text-muted-foreground mb-1">Discount dependency</p>
+                  <p className="text-2xl font-display font-bold text-foreground">{liveDiscountDep}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">{liveDiscDepChangePp !== null ? `${liveDiscDepChangePp >= 0 ? "+" : ""}${Math.abs(liveDiscDepChangePp).toFixed(1)}pp vs last month` : "- vs last month"}</p>
+                </div>
+                <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                  <p className="text-xs text-muted-foreground mb-1">CAC payback</p>
+                  <p className="text-2xl font-display font-bold text-foreground">{gqPhase3Loading ? "-" : `${liveCacPayback.toFixed(1)} orders`}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{gqPhase3Loading ? "Calculating" : `${liveCacPaybackChange > 0 ? "+" : ""}${liveCacPaybackChange.toFixed(2)} orders vs last month`}</p>
+                </div>
+                <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                  <p className="text-xs text-muted-foreground mb-1">High-CM channel share</p>
+                  <p className="text-2xl font-display font-bold text-foreground">{(highCmShare * 100).toFixed(0)}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">{strengtheningCount} strengthening · {weakeningCount} weakening</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Full driver list</p>
+              <div className="divide-y divide-border/40 rounded-xl border border-border/50 overflow-hidden">
+                {KEY_DRIVERS.map((driver) => (
+                  <div key={driver.text} className="px-4 py-3 flex items-start gap-3">
+                    <span className={cn(
+                      "mt-0.5 flex items-center justify-center w-5 h-5 rounded-full shrink-0",
+                      driver.dir === "positive" ? "bg-emerald-100 dark:bg-emerald-900/40" : driver.dir === "negative" ? "bg-destructive/10" : "bg-secondary",
+                    )}>
+                      {driver.dir === "positive" && <TrendingUp className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />}
+                      {driver.dir === "negative" && <TrendingDown className="w-3 h-3 text-destructive" />}
+                      {driver.dir === "neutral" && <Minus className="w-3 h-3 text-muted-foreground" />}
+                    </span>
+                    <div>
+                      <p className="text-sm font-medium text-foreground leading-snug">{driver.text}</p>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{driver.impact}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 px-5 py-4 flex items-start gap-3">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+              <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Detailed diagnostics are available on Pro</p>
+              <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
+                Unlock the full driver list, detailed KPI movements, benchmark logic and quantified impact commentary.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       <DataBenchmarkAssumptions
         benchmarkNote="Repeat purchase rate benchmark: 30%+ indicates healthy self-sustaining retention. Below 30% means paid acquisition is doing the work customers should be doing for free."

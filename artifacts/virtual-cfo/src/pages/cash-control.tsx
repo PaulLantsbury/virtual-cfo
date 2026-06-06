@@ -93,13 +93,13 @@ const CASH_HEADROOM_OPPORTUNITY = {
       id: "stock",
       label: "Inventory release",
       value: 46_000,
-      explanation: "Stock build is the largest cash trap this period.",
+      explanation: "A primary contributor to the £64k headroom opportunity.",
     },
     {
       id: "supplier",
       label: "Supplier timing",
       value: 31_000,
-      explanation: "Protecting payment timing preserves near-term runway.",
+      explanation: "A primary contributor to the £64k headroom opportunity.",
     },
   ],
 } as const;
@@ -110,21 +110,21 @@ const CASH_TRAP_DRIVERS = [
     freeLabel: "Inventory pressure",
     direction: "negative" as const,
     impact: -46_000,
-    explanation: "Stock is converting back into cash more slowly, so more trading profit is trapped before it reaches the bank.",
+    explanation: "Inventory is taking 82 days to convert back into cash.",
   },
   {
     label: "Supplier timing",
     freeLabel: "Supplier timing pressure",
     direction: "negative" as const,
     impact: -31_000,
-    explanation: "Supplier payments are moving faster than cash recovery, reducing available headroom.",
+    explanation: "Supplier payments are moving faster than cash recovery.",
   },
   {
     label: "Fixed cost pressure",
     freeLabel: "Fixed cost pressure",
     direction: "negative" as const,
     impact: -24_000,
-    explanation: "Recurring cash costs are rising, so the current balance has less room to absorb working-capital delays.",
+    explanation: "Recurring costs have increased 9% versus the prior period.",
   },
 ] as const;
 
@@ -143,7 +143,7 @@ const CASH_RECOVERY_ACTIONS = [
   },
   {
     id: "cash2",
-    title: "Protect supplier terms",
+    title: "Stabilise supplier payment timing",
     expectedImpact: "£20k-£35k",
     confidence: "Medium",
     effort: "Medium",
@@ -336,6 +336,95 @@ export default function CashControl() {
 
   const SimIcon = projRunway < 2 ? AlertTriangle : runwayDelta >= 0 ? TrendingUp : TrendingDown;
 
+  const cashRunwayModel = (
+    <div className="rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden mb-8">
+      <div className="px-6 py-5 border-b border-border/50">
+        <h3 className="font-semibold text-lg text-foreground">Cash Runway Model</h3>
+        <p className="text-sm text-muted-foreground mt-0.5">Test how sales, stock, supplier timing and overhead changes affect your cash runway.</p>
+      </div>
+      <div className="px-6 py-6">
+        <div className="mb-5">
+          <InlineCfoInsight text="Cash is currently most sensitive to inventory days and supplier payment timing. Use this tool before increasing marketing spend, buying stock or adding overheads." />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <SimulatorSlider label="Revenue Change" value={revChange} min={-20} max={30} step={1} unit="%" showSign onChange={setRevChange} positiveIsGood={true} description={`Cash from revenue: ${fmt(CASH_BALANCE + revenueEffect)}`} />
+            <SimulatorSlider label="Inventory Days Change" value={inventoryChange} min={-20} max={30} step={1} unit=" days" showSign onChange={setInventoryChange} positiveIsGood={false} description="Extra inventory days tie up more cash" />
+            <SimulatorSlider label="Supplier Payment Days Change" value={supplierChange} min={-20} max={20} step={1} unit=" days" showSign onChange={setSupplierChange} positiveIsGood={true} description="Paying later preserves cash" />
+            <SimulatorSlider label="Fixed Cost Change" value={fixedCostChange} min={-20} max={20} step={1} unit="%" showSign onChange={setFixedCostChange} positiveIsGood={false} description={`Projected fixed costs: ${fmt(projFixedCosts)}`} />
+            <SimulatorSlider label="Marketing Spend Change" value={marketingChange} min={-30} max={30} step={1} unit="%" showSign onChange={setMarketingChange} positiveIsGood={false} description="Higher marketing spend consumes cash" />
+          </div>
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>
+            <div className="space-y-2">
+              {[
+                { label: "Projected Cash Balance", value: fmt(projCashBalance), highlight: true, isPeriod: false },
+                { label: "Projected Runway", value: `${projRunway.toFixed(1)} months`, highlight: true, isPeriod: false },
+                { label: "Projected Working Capital Drag", value: fmt(projWCDrag), highlight: false, isPeriod: false },
+                { label: "Cash Movement vs Base", value: "", highlight: true, isPeriod: true },
+                { label: "Cash Risk Level", value: projRunway < 2 ? "High" : projRunway < 3 ? "Moderate" : "Low", highlight: false, isPeriod: false },
+              ].map(({ label, value, highlight, isPeriod }) => (
+                <div key={label} className={cn("flex items-center justify-between px-4 py-2.5 rounded-xl", highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30")}>
+                  <span className={cn("text-xs", highlight ? "font-semibold text-foreground" : "text-muted-foreground")}>{label}</span>
+                  {isPeriod ? (
+                    <PeriodImpact value={projCashDelta} className="items-end" />
+                  ) : (
+                    <span className={cn("text-sm font-bold tabular-nums", highlight ? projCashBalance < 50_000 ? "text-red-600 dark:text-red-400" : runwayDelta >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400" : "text-foreground")}>{value}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15 px-4 py-3 flex items-start gap-2.5">
+              <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-0.5">Fastest lever to improve runway</p>
+                <p className="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed">Reducing inventory days by 10 would extend runway by approximately 0.6 months.</p>
+              </div>
+            </div>
+            <div className={cn("rounded-xl border px-4 py-3 flex items-start gap-2.5", simColor)}>
+              <SimIcon className="w-4 h-4 shrink-0 mt-0.5" />
+              <p className="text-xs leading-relaxed font-medium">
+                {simPrimaryText}{" "}
+                <span className="font-normal opacity-85">{simSecondaryText}</span>
+              </p>
+            </div>
+            {(revChange !== 0 || inventoryChange !== 0 || supplierChange !== 0 || fixedCostChange !== 0 || marketingChange !== 0) && (
+              <button
+                onClick={() => { setRevChange(0); setInventoryChange(0); setSupplierChange(0); setFixedCostChange(0); setMarketingChange(0); }}
+                className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline mt-1"
+              >
+                Reset to base case
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const cashRunwayModelTeaser = (
+    <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+        <div className="flex items-start gap-3">
+          <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+            <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Cash runway model available on Pro</p>
+            <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
+              Model what happens if you change stock days, supplier timing, fixed costs or marketing spend.
+            </p>
+          </div>
+        </div>
+        <div className="shrink-0 md:text-right">
+          <a href="/upgrade" className="text-xs font-semibold text-indigo-600 dark:text-indigo-300 hover:underline mt-1 inline-block">
+            Upgrade to Pro →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <AppLayout>
       {/* ── Page header ── */}
@@ -374,7 +463,7 @@ export default function CashControl() {
                 Cash is positive, but working capital is absorbing cash faster than it is being replenished.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-                Current runway is {CASH_RUNWAY.toFixed(1)} months, with inventory build and supplier timing creating the main pressure. Protect cash conversion before increasing growth spend.
+                Runway remains acceptable at {CASH_RUNWAY.toFixed(1)} months, but inventory build and supplier timing are tightening headroom.
               </p>
             </div>
 
@@ -447,6 +536,9 @@ export default function CashControl() {
 
         {isPro ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5 pt-5 border-t border-emerald-200/70 dark:border-emerald-800/40">
+            <p className="sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+              Primary contributors
+            </p>
             {CASH_HEADROOM_OPPORTUNITY.components.map((component) => (
               <div key={component.id} className="flex items-start gap-3 rounded-xl bg-card border border-border/50 px-4 py-3.5 shadow-sm">
                 <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
@@ -608,6 +700,8 @@ export default function CashControl() {
         </div>
       )}
 
+      {isPro ? cashRunwayModel : cashRunwayModelTeaser}
+
       <AiCfoAskCard pageId="cash" />
 
       {/* ── Cash Diagnostics ── */}
@@ -617,7 +711,7 @@ export default function CashControl() {
             <div>
               <h2 className="text-xl font-bold text-foreground">Cash Diagnostics</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Detailed cash bridge, driver movements, sensitivity analysis and runway model.
+                Detailed cash bridge, driver movements and sensitivity analysis.
               </p>
             </div>
             <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
@@ -629,7 +723,7 @@ export default function CashControl() {
           {isPro ? (
             <div className="space-y-8">
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Detailed KPI movements</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Detailed KPI Movements</p>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <KpiCard label="Cash Balance" value="£186,000" delta="+£22,000" positive={true} insight="Cash available today" />
                   <KpiCard label="Cash Runway" value="3.4 months" delta="-0.6 months" positive={false} insight="Months of fixed costs covered by current cash" />
@@ -652,7 +746,7 @@ export default function CashControl() {
 
               <div className="rounded-2xl border border-border/50 overflow-hidden">
                 <div className="px-6 py-5 border-b border-border/50">
-                  <h3 className="font-semibold text-lg text-foreground">What Changed Cash This Month?</h3>
+                  <h3 className="font-semibold text-lg text-foreground">Cash Movement Detail</h3>
                   <p className="text-sm text-muted-foreground mt-0.5">Cash increased by £14k this month. Here are the main reasons.</p>
                 </div>
                 <div className="px-6 pt-5 pb-2">
@@ -787,7 +881,7 @@ export default function CashControl() {
 
                 <div className="rounded-2xl border border-border/50 p-5">
                   <div className="mb-4">
-                    <h3 className="font-semibold text-lg text-foreground">Sensitivity Ranking</h3>
+                    <h3 className="font-semibold text-lg text-foreground">Sensitivity Analysis</h3>
                     <p className="text-sm text-muted-foreground mt-0.5">The levers that affect cash most.</p>
                   </div>
                   <ol className="space-y-2">
@@ -804,70 +898,6 @@ export default function CashControl() {
                     <p className="text-sm text-foreground leading-relaxed">
                       Monthly fixed cash costs are £120,000 and rising 9% vs prior period, reducing resilience if revenue slows.
                     </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border/50 overflow-hidden">
-                <div className="px-6 py-5 border-b border-border/50">
-                  <h3 className="font-semibold text-lg text-foreground">Cash Runway Model</h3>
-                  <p className="text-sm text-muted-foreground mt-0.5">Test how sales, stock, supplier timing and overhead changes affect your cash runway.</p>
-                </div>
-                <div className="px-6 py-6">
-                  <div className="mb-5">
-                    <InlineCfoInsight text="Cash is currently most sensitive to inventory days and supplier payment timing. Use this tool before increasing marketing spend, buying stock or adding overheads." />
-                  </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="space-y-6">
-                      <SimulatorSlider label="Revenue Change" value={revChange} min={-20} max={30} step={1} unit="%" showSign onChange={setRevChange} positiveIsGood={true} description={`Cash from revenue: ${fmt(CASH_BALANCE + revenueEffect)}`} />
-                      <SimulatorSlider label="Inventory Days Change" value={inventoryChange} min={-20} max={30} step={1} unit=" days" showSign onChange={setInventoryChange} positiveIsGood={false} description="Extra inventory days tie up more cash" />
-                      <SimulatorSlider label="Supplier Payment Days Change" value={supplierChange} min={-20} max={20} step={1} unit=" days" showSign onChange={setSupplierChange} positiveIsGood={true} description="Paying later preserves cash" />
-                      <SimulatorSlider label="Fixed Cost Change" value={fixedCostChange} min={-20} max={20} step={1} unit="%" showSign onChange={setFixedCostChange} positiveIsGood={false} description={`Projected fixed costs: ${fmt(projFixedCosts)}`} />
-                      <SimulatorSlider label="Marketing Spend Change" value={marketingChange} min={-30} max={30} step={1} unit="%" showSign onChange={setMarketingChange} positiveIsGood={false} description="Higher marketing spend consumes cash" />
-                    </div>
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>
-                      <div className="space-y-2">
-                        {[
-                          { label: "Projected Cash Balance", value: fmt(projCashBalance), highlight: true, isPeriod: false },
-                          { label: "Projected Runway", value: `${projRunway.toFixed(1)} months`, highlight: true, isPeriod: false },
-                          { label: "Projected Working Capital Drag", value: fmt(projWCDrag), highlight: false, isPeriod: false },
-                          { label: "Cash Movement vs Base", value: "", highlight: true, isPeriod: true },
-                          { label: "Cash Risk Level", value: projRunway < 2 ? "High" : projRunway < 3 ? "Moderate" : "Low", highlight: false, isPeriod: false },
-                        ].map(({ label, value, highlight, isPeriod }) => (
-                          <div key={label} className={cn("flex items-center justify-between px-4 py-2.5 rounded-xl", highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30")}>
-                            <span className={cn("text-xs", highlight ? "font-semibold text-foreground" : "text-muted-foreground")}>{label}</span>
-                            {isPeriod ? (
-                              <PeriodImpact value={projCashDelta} className="items-end" />
-                            ) : (
-                              <span className={cn("text-sm font-bold tabular-nums", highlight ? projCashBalance < 50_000 ? "text-red-600 dark:text-red-400" : runwayDelta >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400" : "text-foreground")}>{value}</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15 px-4 py-3 flex items-start gap-2.5">
-                        <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-0.5">Fastest lever to improve runway</p>
-                          <p className="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed">Reducing inventory days by 10 would extend runway by approximately 0.6 months.</p>
-                        </div>
-                      </div>
-                      <div className={cn("rounded-xl border px-4 py-3 flex items-start gap-2.5", simColor)}>
-                        <SimIcon className="w-4 h-4 shrink-0 mt-0.5" />
-                        <p className="text-xs leading-relaxed font-medium">
-                          {simPrimaryText}{" "}
-                          <span className="font-normal opacity-85">{simSecondaryText}</span>
-                        </p>
-                      </div>
-                      {(revChange !== 0 || inventoryChange !== 0 || supplierChange !== 0 || fixedCostChange !== 0 || marketingChange !== 0) && (
-                        <button
-                          onClick={() => { setRevChange(0); setInventoryChange(0); setSupplierChange(0); setFixedCostChange(0); setMarketingChange(0); }}
-                          className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline mt-1"
-                        >
-                          Reset to base case
-                        </button>
-                      )}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -889,17 +919,6 @@ export default function CashControl() {
                   <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Detailed cash diagnostics are available on Pro</p>
                   <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
                     Unlock the cash bridge, driver values, sensitivity ranking, fixed cost pressure and benchmark logic.
-                  </p>
-                </div>
-              </div>
-              <div className="rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 px-5 py-4 flex items-start gap-3">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
-                  <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Cash runway model available on Pro</p>
-                  <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                    Model what happens if you change stock days, supplier timing, fixed costs or marketing spend.
                   </p>
                 </div>
               </div>

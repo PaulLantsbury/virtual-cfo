@@ -546,9 +546,6 @@ export default function CashControl() {
                   <p className="text-sm font-semibold text-foreground leading-snug">{component.label}</p>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{component.explanation}</p>
                 </div>
-                <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
-                  {fmt(component.value)}
-                </span>
               </div>
             ))}
           </div>
@@ -687,7 +684,7 @@ export default function CashControl() {
               <div>
                 <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Cash Recovery Plan</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  3 cash recovery actions identified. Estimated cash improvement: {fmt(CASH_HEADROOM_OPPORTUNITY.value)}. Upgrade to view the action plan, timing, expected cash impact and implementation steps.
+                  3 cash recovery actions identified. One action alone could materially extend cash runway. Upgrade to view the action plan, timing, expected cash impact and implementation steps.
                 </p>
               </div>
             </div>
@@ -704,12 +701,12 @@ export default function CashControl() {
 
       <AiCfoAskCard pageId="cash" />
 
-      {/* ── Cash Diagnostics ── */}
+      {/* ── Supporting Analysis ── */}
       <details className="group bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
         <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-foreground">Cash Diagnostics</h2>
+              <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
                 Detailed cash bridge, driver movements and sensitivity analysis.
               </p>

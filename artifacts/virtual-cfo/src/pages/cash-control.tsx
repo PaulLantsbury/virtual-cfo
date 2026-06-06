@@ -107,24 +107,24 @@ const CASH_HEADROOM_OPPORTUNITY = {
 const CASH_TRAP_DRIVERS = [
   {
     label: "Inventory build",
-    freeLabel: "Inventory efficiency issue detected",
-    freeExplanation: "Detailed cash impact and operating cause available in Pro.",
+    freeLabel: "Stock is tying up more cash than expected",
+    freeExplanation: "Detailed cash impact, operating cause and recovery action available in Pro.",
     direction: "negative" as const,
     impact: -46_000,
     explanation: "Inventory is taking 82 days to convert back into cash.",
   },
   {
     label: "Supplier timing",
-    freeLabel: "Supplier timing pressure detected",
-    freeExplanation: "Unlock the specific cash driver, timing and impact.",
+    freeLabel: "Cash is leaving faster than it is returning",
+    freeExplanation: "Unlock the specific cash driver, timing impact and recommended action.",
     direction: "negative" as const,
     impact: -31_000,
     explanation: "Supplier payments are moving faster than cash recovery.",
   },
   {
     label: "Fixed cost pressure",
-    freeLabel: "Fixed cost pressure detected",
-    freeExplanation: "Detailed cash impact and operating cause available in Pro.",
+    freeLabel: "Overheads are reducing cash flexibility",
+    freeExplanation: "Detailed cash impact, operating cause and recovery action available in Pro.",
     direction: "negative" as const,
     impact: -24_000,
     explanation: "Recurring costs have increased 9% versus the prior period.",
@@ -543,7 +543,7 @@ export default function CashControl() {
         {isPro ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5 pt-5 border-t border-emerald-200/70 dark:border-emerald-800/40">
             <p className="sm:col-span-2 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-              Primary contributors
+              Key areas to investigate
             </p>
             {CASH_HEADROOM_OPPORTUNITY.components.map((component) => (
               <div key={component.id} className="flex items-start gap-3 rounded-xl bg-card border border-border/50 px-4 py-3.5 shadow-sm">
@@ -587,9 +587,11 @@ export default function CashControl() {
                 <p className="text-xs text-muted-foreground leading-relaxed mt-1">
                   {isPro ? driver.explanation : driver.freeExplanation}
                 </p>
-                <p className="text-xs font-semibold mt-3 text-destructive/80 dark:text-destructive/70">
-                  {isPro ? `${fmt(driver.impact)} cash impact` : "Unlock the specific cash driver, timing and impact."}
-                </p>
+                {isPro && (
+                  <p className="text-xs font-semibold mt-3 text-destructive/80 dark:text-destructive/70">
+                    {fmt(driver.impact)} cash impact
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -692,7 +694,7 @@ export default function CashControl() {
               <div>
                 <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Cash Recovery Plan</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  3 cash recovery actions identified. One action alone could materially extend cash runway. Upgrade to view the action plan, timing, expected cash impact and implementation steps.
+                  A clear route exists to improve cash headroom and extend runway. Upgrade to view the prioritised action plan, timing, expected cash impact and implementation steps.
                 </p>
               </div>
             </div>

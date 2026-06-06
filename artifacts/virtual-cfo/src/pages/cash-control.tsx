@@ -107,21 +107,24 @@ const CASH_HEADROOM_OPPORTUNITY = {
 const CASH_TRAP_DRIVERS = [
   {
     label: "Inventory build",
-    freeLabel: "Inventory pressure",
+    freeLabel: "Inventory efficiency issue detected",
+    freeExplanation: "Detailed cash impact and operating cause available in Pro.",
     direction: "negative" as const,
     impact: -46_000,
     explanation: "Inventory is taking 82 days to convert back into cash.",
   },
   {
     label: "Supplier timing",
-    freeLabel: "Supplier timing pressure",
+    freeLabel: "Supplier timing pressure detected",
+    freeExplanation: "Unlock the specific cash driver, timing and impact.",
     direction: "negative" as const,
     impact: -31_000,
     explanation: "Supplier payments are moving faster than cash recovery.",
   },
   {
     label: "Fixed cost pressure",
-    freeLabel: "Fixed cost pressure",
+    freeLabel: "Fixed cost pressure detected",
+    freeExplanation: "Detailed cash impact and operating cause available in Pro.",
     direction: "negative" as const,
     impact: -24_000,
     explanation: "Recurring costs have increased 9% versus the prior period.",
@@ -526,6 +529,9 @@ export default function CashControl() {
                 {fmt(CASH_HEADROOM_OPPORTUNITY.value)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">{CASH_HEADROOM_OPPORTUNITY.confidence.toLowerCase()} confidence</p>
+              <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mt-1">
+                {isPro ? "Estimated runway extension: approx. 1.1 months" : "Estimated runway extension available in Pro"}
+              </p>
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Primary source</p>
@@ -578,9 +584,11 @@ export default function CashControl() {
                 <p className="text-sm font-semibold text-foreground leading-snug">
                   {isPro ? driver.label : driver.freeLabel}
                 </p>
-                <p className="text-xs text-muted-foreground leading-relaxed mt-1">{driver.explanation}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                  {isPro ? driver.explanation : driver.freeExplanation}
+                </p>
                 <p className="text-xs font-semibold mt-3 text-destructive/80 dark:text-destructive/70">
-                  {isPro ? `${fmt(driver.impact)} cash impact` : "Cash impact available in Pro"}
+                  {isPro ? `${fmt(driver.impact)} cash impact` : "Unlock the specific cash driver, timing and impact."}
                 </p>
               </div>
             </div>

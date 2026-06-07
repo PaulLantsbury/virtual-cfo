@@ -11,7 +11,6 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SimulatorSlider } from "@/components/SimulatorSlider";
 import { cn } from "@/lib/utils";
-import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { PeriodImpact } from "@/components/PeriodImpact";
@@ -366,7 +365,7 @@ export default function PricingOptimisation() {
   return (
     <AppLayout>
       {/* ── Page header ── */}
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-6">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Pricing & Discount Optimisation</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -379,7 +378,6 @@ export default function PricingOptimisation() {
             dateTo={pricingDateTo}
           />
         </div>
-        <TimelineSelector />
       </div>
 
       {/* ── CFO Pricing Verdict ── */}

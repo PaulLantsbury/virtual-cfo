@@ -8,7 +8,7 @@ const navItems = [
   { icon: BarChart2,       label: "Growth Quality",         href: "/growth-quality"         },
   { icon: Megaphone,       label: "Marketing Efficiency",   href: "/marketing-efficiency"   },
   { icon: Tag,             label: "Pricing Optimisation",   href: "/pricing-optimisation"   },
-  { icon: Cpu,             label: "Profit Engine",          href: "/profit-engine"          },
+  { icon: Cpu,             label: "Profit Growth",          href: "/profit-engine"          },
   { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
   { icon: Target,          label: "Profit Opportunities",   href: "/profit-opportunities"   },
   { icon: FlaskConical,    label: "Scenario Lab",           href: "/scenario-lab"           },

@@ -18,7 +18,7 @@ const PAGE_NAMES: Record<PageId, string> = {
   growth:        "Growth Quality",
   marketing:     "Marketing Efficiency",
   pricing:       "Pricing Optimisation",
-  profit:        "Profit Engine",
+  profit:        "Profit Growth",
   cash:          "Cash Control",
   opportunities: "Profit Opportunities",
   scenario:      "Scenario Lab",

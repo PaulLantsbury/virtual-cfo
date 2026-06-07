@@ -122,7 +122,7 @@ export const AI_CFO_RESPONSES: Record<PageId, AiCfoResponse> = {
 
   profit: {
     pageId: "profit",
-    question: "Is my profit position healthy and what is the biggest threat to it?",
+    question: "Is my profit position healthy and what should I fix first?",
     verdict:
       "Profit is positive but increasingly sensitive to overhead growth. The business operates 39% above break-even, but that buffer is narrowing because fixed costs grew 8% whilst revenue grew 11% — meaning operating leverage is lower than expected. The next cost increase cycle could flip contribution to risk territory.",
     evidence: [

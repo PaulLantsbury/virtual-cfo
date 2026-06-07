@@ -1049,7 +1049,7 @@ export default function ScenarioLab() {
                   "Marketing Efficiency: 15% Meta spend reallocated",
                   "Cash Control: inventory days reduced by 12",
                   "Profit Margin: shipping cost reduced by £1.50/order",
-                  "Profit Engine: fixed costs held flat",
+                  "Profit Growth: fixed costs held flat",
                 ].map(chip => (
                   <span key={chip} className={cn(
                     "inline-flex items-center text-xs px-3 py-1.5 rounded-full border font-medium",

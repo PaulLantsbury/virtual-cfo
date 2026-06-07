@@ -1,6 +1,7 @@
 import { getCommerceMetrics } from "@/lib/analytics/commerceMetrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
+import { TimelineSelector } from "@/components/TimelineSelector";
 import { getPhase2aMetrics, type Phase2aMetricsResponse } from "@/lib/analytics/phase2aMetrics";
 import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
 import { formatDeltaPct, formatDeltaPp } from "@/lib/analytics/phase2DeltaMetrics";
@@ -943,15 +944,18 @@ export default function Dashboard() {
     <AppLayout>
 
       {/* ══ PAGE HEADER ═══════════════════════════════════════════════════════ */}
-      <div className="mb-5">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Weekly CFO Briefing</h1>
-        <p className="text-muted-foreground mt-1 text-sm">What changed, what to do first, and where the money is hiding.</p>
-        <DataPeriodLabel
-          periodLabel={activePeriodLabel}
-          loading={periodLoading}
-          dateFrom={activeDateFrom}
-          dateTo={activeDateTo}
-        />
+      <div className="mb-5 flex flex-col sm:flex-row justify-between items-start gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">CFO Briefing</h1>
+          <p className="text-muted-foreground mt-1 text-sm">What changed, what to do first, and where the money is hiding.</p>
+          <DataPeriodLabel
+            periodLabel={activePeriodLabel}
+            loading={periodLoading}
+            dateFrom={activeDateFrom}
+            dateTo={activeDateTo}
+          />
+        </div>
+        <TimelineSelector />
       </div>
 
       {/* ══ WEEKLY CFO BRIEFING ══════════════════════════════════════════════ */}
@@ -964,7 +968,7 @@ export default function Dashboard() {
                   <AlertTriangle className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">This week's read</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">This period's read</p>
                   <p className="text-xl font-black text-amber-700 dark:text-amber-400 tracking-tight">Healthy, but drifting</p>
                 </div>
               </div>
@@ -974,7 +978,7 @@ export default function Dashboard() {
                   Demand is still there, but the business is keeping less profit from each order. Fulfilment inflation, heavier discounting and rising Meta costs are absorbing more of the revenue before it turns into cash.
                 </p>
                 <p>
-                  This week, focus on the leaks you can control: shipping economics, repeat-customer discounts and weak paid campaigns. The current opportunity is worth around <span className="font-bold text-emerald-700 dark:text-emerald-400">{rcHeadlineStr} per month</span> if the main fixes are acted on.
+                  Focus on the leaks you can control: shipping economics, repeat-customer discounts and weak paid campaigns. The current opportunity is worth around <span className="font-bold text-emerald-700 dark:text-emerald-400">{rcHeadlineStr}</span> if the main fixes are acted on.
                 </p>
               </div>
             </div>
@@ -991,7 +995,7 @@ export default function Dashboard() {
           {[
             { label: "Business health", value: "Profitability tightening", tone: "amber", text: "Still manageable, but the trend needs attention." },
             { label: "Do first", value: "Fix the leaks", tone: "primary", text: "Fulfilment, discounting and weak paid spend." },
-            { label: "Money at stake", value: `${rcHeadlineStr}/month`, tone: "emerald", text: "Estimated upside tied to this week's actions." },
+            { label: "Money at stake", value: rcHeadlineStr, tone: "emerald", text: "Estimated upside tied to the recommended actions." },
           ].map(({ label, value, tone, text }) => (
             <div key={label} className="px-6 py-4">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
@@ -1014,14 +1018,14 @@ export default function Dashboard() {
         <div className="sc-purple-header flex flex-col sm:flex-row sm:items-center gap-2.5 px-6 py-4">
           <div className="flex items-center gap-2.5">
             <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">This week's focus</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">Current focus</span>
           </div>
           <span className="text-xs text-indigo-300/60 sm:ml-auto">Do these first</span>
         </div>
         <div className="px-6 py-6">
           <div className="max-w-3xl mb-5">
             <p className="text-sm text-foreground/85 leading-relaxed">
-              The fastest path is not more reporting. It is three practical controls that protect profit this week before the drift becomes normal.
+              The fastest path is not more reporting. It is three practical controls that protect profit in this review period before the drift becomes normal.
             </p>
           </div>
           <div className="divide-y divide-indigo-800/35">

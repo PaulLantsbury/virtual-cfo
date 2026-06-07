@@ -5,6 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
 import { cn } from "@/lib/utils";
+import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
@@ -298,33 +299,19 @@ const TIMELINE_FRAMING: Record<string, {
   /** Concise per-row sub-label shown beneath each £ impact figure */
   impactBasis:   string;
 }> = {
-  "7d":  {
-    upliftPhrase:  "next month at current 7-day run rate",
-    baselineNote:  "current 7-day run rate",
-    rowLabel:      "next month",
-    combinedLabel: "next month if implemented now",
-    impactBasis:   "next month · 7-day run rate",
+  last_complete_week: {
+    upliftPhrase:  "based on the latest completed weekly review",
+    baselineNote:  "latest completed week",
+    rowLabel:      "weekly review",
+    combinedLabel: "weekly review if implemented now",
+    impactBasis:   "latest completed week",
   },
-  "30d": {
-    upliftPhrase:  "next month at current 30-day run rate",
-    baselineNote:  "current 30-day run rate",
-    rowLabel:      "next month",
-    combinedLabel: "next month if implemented now",
-    impactBasis:   "next month · 30-day run rate",
-  },
-  "90d": {
-    upliftPhrase:  "next month based on 90-day run rate",
-    baselineNote:  "90-day run rate",
-    rowLabel:      "next month",
-    combinedLabel: "next month if implemented now",
-    impactBasis:   "next month · 90-day run rate",
-  },
-  "12m": {
-    upliftPhrase:  "based on trailing 12-month performance",
-    baselineNote:  "trailing 12-month performance",
-    rowLabel:      "projected",
-    combinedLabel: "projected, if implemented now",
-    impactBasis:   "projected · 12-month avg",
+  last_complete_month: {
+    upliftPhrase:  "based on the latest completed monthly review",
+    baselineNote:  "latest completed month",
+    rowLabel:      "monthly review",
+    combinedLabel: "monthly review if implemented now",
+    impactBasis:   "latest completed month",
   },
 };
 
@@ -332,7 +319,7 @@ const TIMELINE_FRAMING: Record<string, {
 
 export default function MarketingEfficiency() {
   const { timeline } = useTimeline();
-  const framing = TIMELINE_FRAMING[timeline] ?? TIMELINE_FRAMING["30d"];
+  const framing = TIMELINE_FRAMING[timeline] ?? TIMELINE_FRAMING.last_complete_month;
 
   // ── Phase 1: live discount dependency and repeat purchase rate ────────────
   // Walks back from the current month to find the most recent month with data.
@@ -515,7 +502,7 @@ export default function MarketingEfficiency() {
     <AppLayout>
 
       {/* ── Page header ─────────────────────────────────────────────────────── */}
-      <div className="mb-8">
+      <div className="mb-8 flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Marketing Efficiency
@@ -530,6 +517,7 @@ export default function MarketingEfficiency() {
             dateTo={dateTo}
           />
         </div>
+        <TimelineSelector />
       </div>
 
       {/* ══════════════════════════════════════════════════════════════════════

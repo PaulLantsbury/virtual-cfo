@@ -192,6 +192,12 @@ const RECOVERY_GHOST_LABELS: Record<string, string> = {
   "Lower discount depth":   "Improve pricing strategy",
 };
 
+const OPPORTUNITY_LEAK_COPY: Record<string, string> = {
+  "Reallocate Meta spend": "Most significant margin drag.",
+  "Reduce shipping costs": "Carrier costs are increasing.",
+  "Lower discount depth": "Promotions are reducing retained profit.",
+};
+
 /** Number of scenarios shown by default; extras revealed via "View more" */
 const VISIBLE_SCENARIO_COUNT = 3;
 const RECOVERY_TOTAL_PP   = +RECOVERY_SCENARIOS.reduce((s, r) => s + r.ppGain,    0).toFixed(1);
@@ -612,7 +618,7 @@ export default function MarginAnalysis() {
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 whitespace-nowrap">Action required</span>
         </div>
         <div className="px-6 py-4">
-          <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">Profit is leaking through acquisition and fulfilment costs.</p>
+          <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">Margin is below target - £{RECOVERY_TOTAL_CASH.toLocaleString()} of profit appears recoverable.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 pb-3 border-b border-primary/15">
             <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Current margin</p>
@@ -636,7 +642,7 @@ export default function MarginAnalysis() {
               )}
             </div>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed mt-3">Contribution margin has fallen below the healthy range and is now approaching the warning threshold.</p>
+          <p className="text-sm text-muted-foreground leading-relaxed mt-3">Current margin is below the healthy range, recoverable contribution has been identified, and action is required.</p>
           <div className="pt-3 flex flex-wrap gap-2">
             {["Meta CAC drag", "Shipping cost pressure", "Discount depth"].map((signal) => (
               <span key={signal} className="rounded-full bg-secondary/30 border border-primary/10 px-3 py-1.5 text-xs font-semibold text-foreground">{signal}</span>
@@ -669,7 +675,7 @@ export default function MarginAnalysis() {
             </div>
             {canAccess("opportunity_breakdown") ? (
               <div className="space-y-1.5">
-                <p className="text-xs text-muted-foreground leading-relaxed">{s.detail}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{OPPORTUNITY_LEAK_COPY[s.shortLabel]}</p>
                 <div className="flex flex-wrap gap-1.5">
                   <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{s.confidence === "high" ? "High" : "Medium"} confidence</span>
                   <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{s.effort} effort</span>

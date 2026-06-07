@@ -251,7 +251,7 @@ export default function PricingOptimisation() {
       <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
         <div>
           <h3 className="font-semibold text-lg text-foreground">Pricing Scenario Model</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">Model how changes in discounts, full-price mix, conversion, returns and shipping subsidy affect contribution.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">See exactly how much profit you could recover before changing a single price.</p>
         </div>
         {!isPro && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
       </div>
@@ -356,7 +356,7 @@ export default function PricingOptimisation() {
           </div>
           <UpgradeCta
             title="Model pricing and discount scenarios"
-            description="Assess how discounts, full-price mix, conversion and shipping subsidy affect contribution before changing pricing."
+            description="Unlock the pricing simulator to test discount changes, conversion risk and profit upside before making the wrong move."
           />
         </div>
       )}
@@ -398,17 +398,17 @@ export default function PricingOptimisation() {
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-5 pb-4 border-b border-primary/15">
             <div>
               <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">
-                You are giving away too much profit through discounts.
+                You're buying revenue with discounts.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-                Sales are still coming in, but more of each order is being handed back to customers through promotions and weaker full-price sales.
+                Sales are still coming in, but too much contribution is being handed back to customers through promotions, weaker full-price sales and returns.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Profit available</p>
-                <p className="text-sm font-bold text-foreground">£52,000</p>
+                <p className="text-sm font-bold text-foreground">£52,000 of contribution appears recoverable through tighter pricing control.</p>
               </div>
               <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-3 py-2.5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Do first</p>
@@ -442,9 +442,21 @@ export default function PricingOptimisation() {
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Highest confidence opportunity</p>
-                <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">£38,000</span>
+                {isProRec ? (
+                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">£38,000</span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700/50">
+                    <Lock className="w-3 h-3" />
+                    PRO
+                  </span>
+                )}
               </div>
-              <p className="text-sm text-foreground leading-relaxed">Tighten broad discounting before changing prices across the store.</p>
+              <p className="text-sm font-semibold text-foreground leading-relaxed">Reduce discount dependency</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                {isProRec
+                  ? "Tighten broad discounting before changing prices across the store."
+                  : "Upgrade to Pro to see the value of this lever"}
+              </p>
             </div>
           </div>
         </div>
@@ -454,9 +466,21 @@ export default function PricingOptimisation() {
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <p className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Additional opportunity</p>
-                <span className="text-sm font-bold text-amber-700 dark:text-amber-300">£14,000</span>
+                {isProRec ? (
+                  <span className="text-sm font-bold text-amber-700 dark:text-amber-300">£14,000</span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700/50">
+                    <Lock className="w-3 h-3" />
+                    PRO
+                  </span>
+                )}
               </div>
-              <p className="text-sm text-foreground leading-relaxed">Improve targeted offers, shipping subsidies and returns on discounted sales.</p>
+              <p className="text-sm font-semibold text-foreground leading-relaxed">Improve targeted offers, shipping subsidies and returns</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                {isProRec
+                  ? "Improve targeted offers, shipping subsidies and returns on discounted sales."
+                  : "Upgrade to Pro to see the value of this lever"}
+              </p>
             </div>
           </div>
         </div>

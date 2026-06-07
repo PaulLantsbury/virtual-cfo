@@ -605,36 +605,39 @@ export default function MarginAnalysis() {
         <TimelineSelector />
       </div>
 
-      <div className="sc-purple rounded-2xl shadow-md mb-6 overflow-hidden">
+      <div className="sc-purple rounded-2xl shadow-md mb-5 overflow-hidden">
         <div className="sc-purple-header flex items-center gap-3 px-6 py-3">
           <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">CFO Margin Verdict</span>
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 whitespace-nowrap">Action required</span>
         </div>
-        <div className="px-6 py-5">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-5 pb-4 border-b border-primary/15">
-            <div>
-              <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">Profit is leaking through acquisition and fulfilment costs.</p>
-              <p className="text-sm text-muted-foreground leading-relaxed mt-2">Contribution margin has fallen below the healthy range and is now approaching the warning threshold.</p>
+        <div className="px-6 py-4">
+          <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">Profit is leaking through acquisition and fulfilment costs.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 pb-3 border-b border-primary/15">
+            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Current margin</p>
+              <p className="text-xl font-display font-bold text-foreground leading-none">{CM_PCT}%</p>
+              <p className="text-[11px] text-muted-foreground leading-snug mt-1">Healthy 45-60%; warning 40%.</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2">
-              <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Current margin</p>
-                <p className="text-2xl font-display font-bold text-foreground leading-none">{CM_PCT}%</p>
-                <p className="text-xs text-muted-foreground leading-snug mt-1.5">Healthy range 45-60%; warning threshold 40%.</p>
-              </div>
-              <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-3 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Recoverable contribution</p>
-                <p className="text-2xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">£{RECOVERY_TOTAL_CASH.toLocaleString()}</p>
-                <p className="text-xs text-emerald-700/75 dark:text-emerald-300/75 leading-snug mt-1.5">of contribution appears recoverable over the selected completed period.</p>
-              </div>
-              <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Primary recommendation</p>
+            <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Recoverable contribution</p>
+              <p className="text-3xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">£{RECOVERY_TOTAL_CASH.toLocaleString()}</p>
+              <p className="text-xs text-emerald-700/75 dark:text-emerald-300/75 leading-snug mt-1">recoverable over the selected completed period.</p>
+            </div>
+            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Do first</p>
+              {canAccess("opportunity_breakdown") ? (
                 <p className="text-sm font-bold text-foreground leading-snug">Reduce Meta acquisition costs and rebalance spend toward higher-margin channels.</p>
-              </div>
+              ) : (
+                <div>
+                  <p className="text-sm font-bold text-foreground leading-snug">Primary recommendation identified</p>
+                  <p className="text-xs text-muted-foreground leading-snug mt-1">Upgrade to Pro to view the recovery plan.</p>
+                </div>
+              )}
             </div>
           </div>
-          <div className="pt-4 flex flex-wrap gap-2">
+          <p className="text-sm text-muted-foreground leading-relaxed mt-3">Contribution margin has fallen below the healthy range and is now approaching the warning threshold.</p>
+          <div className="pt-3 flex flex-wrap gap-2">
             {["Meta CAC drag", "Shipping cost pressure", "Discount depth"].map((signal) => (
               <span key={signal} className="rounded-full bg-secondary/30 border border-primary/10 px-3 py-1.5 text-xs font-semibold text-foreground">{signal}</span>
             ))}
@@ -643,13 +646,13 @@ export default function MarginAnalysis() {
       </div>
 
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Where The Opportunity Is</h2>
+        <h2 className="text-xl font-bold text-foreground">Where Profit Is Leaking</h2>
         <p className="text-sm text-muted-foreground mt-0.5">The biggest places to recover margin without needing more revenue.</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         {RECOVERY_SCENARIOS.map((s) => (
-          <div key={s.shortLabel} className="rounded-2xl border border-border/60 bg-card px-5 py-4 shadow-sm">
-            <div className="flex items-start justify-between gap-3 mb-3">
+          <div key={s.shortLabel} className="rounded-xl border border-border/60 bg-card px-4 py-3 shadow-sm">
+            <div className="flex items-start justify-between gap-3 mb-2">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
                   {s.shortLabel === "Reallocate Meta spend" ? "Customer acquisition" : s.shortLabel === "Reduce shipping costs" ? "Shipping costs" : "Discount depth"}
@@ -665,7 +668,7 @@ export default function MarginAnalysis() {
               )}
             </div>
             {canAccess("opportunity_breakdown") ? (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <p className="text-xs text-muted-foreground leading-relaxed">{s.detail}</p>
                 <div className="flex flex-wrap gap-1.5">
                   <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-secondary text-muted-foreground">{s.confidence === "high" ? "High" : "Medium"} confidence</span>
@@ -716,7 +719,7 @@ export default function MarginAnalysis() {
         <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5"><div className="flex items-start gap-3"><div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0"><Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /></div><div><p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Margin Recovery Plan</p><p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">A clear route exists to recover margin across acquisition, fulfilment and pricing controls. Upgrade to view values, timing and implementation steps.</p></div></div></div>
       )}
 
-      <div className="mb-2"><h2 className="text-xl font-bold text-foreground">Margin Recovery Simulator</h2><p className="text-sm text-muted-foreground mt-0.5">See exactly how much contribution you could recover before changing a single cost.</p></div>
+      <div className="mb-2"><h2 className="text-xl font-bold text-foreground">Margin Recovery Simulator</h2><p className="text-sm text-muted-foreground mt-0.5">See how much profit you could recover before making a single operational change.</p></div>
       {isPro ? (
         <div className="rounded-2xl border border-primary/30 shadow-md mb-8 overflow-hidden bg-card"><div className="flex items-center gap-3 px-6 py-3 bg-primary/10 border-b border-primary/20"><SlidersHorizontal className="w-4 h-4 text-primary shrink-0" /><span className="text-xs font-semibold uppercase tracking-wider text-primary">Margin Recovery Simulator</span><span className="ml-auto text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-primary/20 text-primary uppercase tracking-wider">Pro</span></div><div className="bg-primary/5 px-6 py-6"><div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6 mb-8">
           {[

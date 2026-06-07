@@ -56,16 +56,19 @@ const PROFIT_LOSS_AREAS = [
     title: "Discounting",
     explanation: "Promotions are reducing retained profit.",
     value: 18_000,
+    freeLabel: "Largest Opportunity",
   },
   {
     title: "Fixed Costs",
     explanation: "Overheads are rising faster than profit capacity.",
     value: 13_000,
+    freeLabel: "Material Opportunity",
   },
   {
     title: "Returns & Leakage",
     explanation: "Returns and leakage reduce profit after the sale.",
     value: 4_000,
+    freeLabel: "Secondary Opportunity",
   },
 ];
 
@@ -227,7 +230,7 @@ export default function ProfitGrowth() {
               {canAccess("profit_recommendations") ? (
                 <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">£{area.value.toLocaleString()}</p>
               ) : (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20"><Lock className="w-3 h-3" /> PRO</span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{area.freeLabel}</span>
               )}
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">{area.explanation}</p>
@@ -452,10 +455,10 @@ export default function ProfitGrowth() {
                 {(canAccess("profit_recommendations")
                   ? PROFIT_GROWTH_ACTIONS.map((item) => ({ title: item.title, impact: item.impact }))
                   : [
-                      { title: "Discounting", impact: null },
-                      { title: "Fixed costs", impact: null },
-                      { title: "Returns & leakage", impact: null },
-                      { title: "Revenue quality", impact: null },
+                      { title: "Revenue Quality", impact: null },
+                      { title: "Cost Structure", impact: null },
+                      { title: "Operational Efficiency", impact: null },
+                      { title: "Customer Retention", impact: null },
                     ]
                 ).map((item, i) => (
                   <li key={item.title} className="flex items-center gap-3">
@@ -467,6 +470,9 @@ export default function ProfitGrowth() {
                   </li>
                 ))}
               </ol>
+              {!canAccess("profit_recommendations") && (
+                <p className="text-xs text-primary font-semibold mt-3">Upgrade to view ranked profit drivers and opportunity values.</p>
+              )}
             </div>
 
             <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">

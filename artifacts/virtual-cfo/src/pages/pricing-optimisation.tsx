@@ -426,6 +426,123 @@ export default function PricingOptimisation() {
     },
   ].sort((a, b) => b.impact - a.impact);
 
+  const pricingScenarioModel = (
+    <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
+      <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold text-lg text-foreground">Pricing Scenario Model</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">Model how changes in discounts, full-price mix, conversion, returns and shipping subsidy affect contribution.</p>
+        </div>
+        {!isPro && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
+      </div>
+
+      {isPro ? (
+        <div className="px-6 py-6">
+          <div className="mb-5">
+            <InlineCfoInsight text="Contribution is currently most sensitive to discount depth and full-price order mix. Use this tool before changing promotional strategy." />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <SimulatorSlider label="Average Discount Change"      value={discountChange}  min={-8}  max={8}  step={0.5} unit="pp"  showSign onChange={setDiscountChange}  positiveIsGood={false} description="Reducing discount improves retained revenue" />
+              <SimulatorSlider label="Full-Price Order Ratio Change" value={fullPriceChange} min={-15} max={20} step={1}   unit="pp"  showSign onChange={setFullPriceChange} positiveIsGood={true}  description="More full-price orders improve contribution" />
+              <SimulatorSlider label="Conversion Rate Impact"       value={convChange}      min={-15} max={10} step={0.5} unit="%"   showSign onChange={setConvChange}      positiveIsGood={true}  description="Conversion change affects revenue and contribution" />
+              <SimulatorSlider label="Returns Rate Change"          value={returnsChange}   min={-5}  max={5}  step={0.5} unit="pp"  showSign onChange={setReturnsChange}   positiveIsGood={false} description="Lower returns preserve contribution" />
+              <SimulatorSlider label="Shipping Subsidy Change"      value={shippingChange}  min={-30} max={30} step={1}   unit="%"   showSign onChange={setShippingChange}  positiveIsGood={false} description="Higher subsidy reduces contribution" />
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-foreground">Modelled Scenario Outputs</h4>
+              <div className="space-y-2">
+                {[
+                  { label: "Scenario Revenue",              value: `£${Math.round(projRevenue).toLocaleString()}`, highlight: true,  isPeriod: false },
+                  { label: "Scenario Contribution",         value: fmt(projContribution),                           highlight: true,  isPeriod: false },
+                  { label: "Contribution vs Base",          value: "",                                              highlight: true,  isPeriod: true  },
+                  { label: "Scenario Contribution Margin",  value: `${projContribMargin.toFixed(1)}%`,              highlight: false, isPeriod: false },
+                  { label: "Scenario Risk Level",           value: pricingRisk,                                     highlight: false, isPeriod: false },
+                ].map(({ label, value, highlight, isPeriod }) => (
+                  <div key={label} className={cn("flex items-center justify-between px-4 py-2.5 rounded-xl",
+                    highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30",
+                  )}>
+                    <span className={cn("text-xs", highlight ? "font-semibold text-foreground" : "text-muted-foreground")}>{label}</span>
+                    {isPeriod ? (
+                      <PeriodImpact value={contribDelta} className="items-end" />
+                    ) : (
+                      <span className={cn("text-sm font-bold tabular-nums",
+                        highlight
+                          ? projContribution < 150_000 ? "text-red-600 dark:text-red-400"
+                            : contribDelta >= 0 ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-amber-600 dark:text-amber-400"
+                          : "text-foreground",
+                      )}>{value}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15 px-4 py-3 flex items-start gap-2.5">
+                <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-0.5">Fastest lever to improve contribution</p>
+                  <p className="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed">Reducing average discount by 3pp is modelled to improve contribution by approximately £38k.</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/15 px-4 py-3 flex items-start gap-2.5">
+                <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Safest lever to improve contribution</p>
+                  <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">Reducing shipping subsidy by 10% improves contribution with lower conversion risk than changing headline discounts.</p>
+                </div>
+              </div>
+
+              <div className={cn("rounded-xl border px-4 py-3 flex items-start gap-2.5", simColor)}>
+                <SimIcon className="w-4 h-4 shrink-0 mt-0.5" />
+                <p className="text-xs leading-relaxed font-medium">{simText}</p>
+              </div>
+
+              {slidersActive && (
+                <button
+                  onClick={() => { setDiscountChange(0); setFullPriceChange(0); setConvChange(0); setReturnsChange(0); setShippingChange(0); }}
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline mt-1"
+                >
+                  Reset scenario
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="px-6 py-6">
+          <div className="blur-sm opacity-30 pointer-events-none select-none space-y-3 mb-4" aria-hidden>
+            <div className="grid grid-cols-2 gap-3">
+              {["Average Discount", "Full-Price Orders", "Conversion Rate", "Returns Rate"].map((s) => (
+                <div key={s} className="h-10 bg-secondary rounded-xl" />
+              ))}
+            </div>
+            <div className="rounded-xl border border-indigo-200 px-4 py-3 flex items-center gap-2.5 bg-indigo-50/60">
+              <div className="w-4 h-4 rounded bg-indigo-200 shrink-0" />
+              <div className="space-y-1 flex-1">
+                <div className="h-2.5 bg-indigo-200 rounded w-40" />
+                <div className="h-2 bg-indigo-100 rounded w-56" />
+              </div>
+            </div>
+            <div className="rounded-xl border border-emerald-200 px-4 py-3 flex items-center gap-2.5 bg-emerald-50/60">
+              <div className="w-4 h-4 rounded bg-emerald-200 shrink-0" />
+              <div className="space-y-1 flex-1">
+                <div className="h-2.5 bg-emerald-200 rounded w-36" />
+                <div className="h-2 bg-emerald-100 rounded w-52" />
+              </div>
+            </div>
+          </div>
+          <UpgradeCta
+            title="Model pricing and discount scenarios"
+            description="Assess how discounts, full-price mix, conversion and shipping subsidy affect contribution before changing pricing."
+          />
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <AppLayout>
       {/* ── Page header ── */}
@@ -450,8 +567,6 @@ export default function PricingOptimisation() {
       <div className="mb-6">
         <CfoInsightCard text="Discounting is the largest pricing pressure in the current snapshot. A 3pp reduction in average discount is modelled to improve contribution by approximately £38k before any volume impact." />
       </div>
-
-      <AiCfoAskCard pageId="pricing" />
 
       {/* ── 2. Pricing Power Risk Level ── */}
       <div className="flex items-start gap-4 p-5 rounded-2xl border border-[#F59E0B]/30 bg-[#182A4A] mb-4">
@@ -508,6 +623,152 @@ export default function PricingOptimisation() {
           </div>
         </div>
       </div>
+
+      {/* ── Pricing Recovery Plan ── */}
+      <div className="mb-2">
+        <h2 className="text-xl font-bold text-foreground">Pricing Recovery Plan</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          The next actions to recover contribution and protect pricing power.
+        </p>
+      </div>
+
+      {isProRec ? (
+        <div className="space-y-4 mb-8">
+          {[
+            {
+              title: "Reduce blanket discounting",
+              impact: "£38,000",
+              confidence: "High",
+              effort: "Medium",
+              timing: "30 days",
+              why: "Average discount increased to 18%, so retained contribution is being lost before fulfilment and overheads.",
+              start: "Tighten broad promo codes, preserve offers for targeted segments, and test a 3pp discount reduction before widening the change.",
+            },
+            {
+              title: "Protect full-price conversion",
+              impact: "£26,000",
+              confidence: "Medium",
+              effort: "Medium",
+              timing: "30-45 days",
+              why: "Full-price order ratio fell to 46%, which points to weaker pricing resilience.",
+              start: "Audit products that only convert under promotion and improve merchandising, bundles, or value messaging before adding new discounts.",
+            },
+            {
+              title: "Reduce returns on discounted orders",
+              impact: "£14,000",
+              confidence: "Medium",
+              effort: "Low",
+              timing: "14-30 days",
+              why: "Returns are adding leakage on top of discounts, reducing the amount of revenue retained from each sale.",
+              start: "Review discounted SKUs with high return rates and tighten size, fit, quality or offer rules where returns are concentrated.",
+            },
+          ].map((action, i) => (
+            <details
+              key={action.title}
+              open={i === 0}
+              className={cn(
+                "group rounded-2xl border bg-card shadow-sm overflow-hidden",
+                i === 0
+                  ? "border-emerald-300 dark:border-emerald-700/60 bg-emerald-50/50 dark:bg-emerald-950/10 shadow-md"
+                  : "border-border/60",
+              )}
+            >
+              <summary className={cn(
+                "list-none cursor-pointer px-6 py-5 transition-colors",
+                i === 0 ? "hover:bg-emerald-50 dark:hover:bg-emerald-950/20" : "hover:bg-secondary/20",
+              )}>
+                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-5 items-start">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className={cn(
+                      "flex items-center justify-center w-8 h-8 rounded-full shrink-0 text-xs font-bold",
+                      i === 0
+                        ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300"
+                        : "bg-secondary text-muted-foreground",
+                    )}>
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-base font-bold text-foreground">{action.title}</p>
+                        {i === 0 && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white dark:bg-emerald-500 dark:text-emerald-950 uppercase tracking-wider">
+                            START FIRST
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1 leading-snug">{action.why}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto_auto_auto_auto] gap-2 lg:justify-end">
+                    <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-700/40 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Impact</p>
+                      <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums">{action.impact}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Confidence</p>
+                      <p className="text-sm font-semibold text-foreground">{action.confidence}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Effort</p>
+                      <p className="text-sm font-semibold text-foreground">{action.effort}</p>
+                    </div>
+                    <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Timing</p>
+                      <p className="text-sm font-semibold text-foreground">{action.timing}</p>
+                    </div>
+                  </div>
+                </div>
+              </summary>
+              <div className="px-6 pb-5 -mt-1">
+                <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-4 pl-11">
+                  <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Why it matters</p>
+                    <p className="text-sm text-foreground leading-relaxed">{action.why}</p>
+                  </div>
+                  <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">How to start</p>
+                    <p className="text-sm text-foreground leading-relaxed">{action.start}</p>
+                  </div>
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5">
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
+              <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Pricing Recovery Plan</p>
+              <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
+                A clear route exists to recover contribution from pricing leakage. Upgrade to view the prioritised action plan, timing, expected contribution impact and implementation steps.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pricingScenarioModel}
+
+      <AiCfoAskCard pageId="pricing" />
+
+      {/* ── Supporting Analysis ── */}
+      <details className="group bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
+        <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Pricing KPIs, leakage charts, bridge detail, sensitivity ranking and trend evidence.
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
+            <span className="text-xs font-semibold text-primary hidden group-open:inline">Collapse</span>
+          </div>
+        </summary>
+        <div className="px-6 pb-6 pt-2">
 
       {/* ── 4. Pricing Trend bar ── */}
       <div className="sc-orange flex items-center gap-3 px-5 py-3 rounded-xl mb-4">
@@ -614,69 +875,6 @@ export default function PricingOptimisation() {
             </span>
           </div>
           <p className="text-xs text-orange-300/80 leading-relaxed">The increase in discounting vs the prior period reduced contribution by approximately £{Math.round(liveDiscountIncrease / 1_000)}k in the selected period.</p>
-        </div>
-      </div>
-
-      {/* ── Free only: upgrade narrative ── */}
-      {!isPro && (
-        <div className="mb-8 rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-gradient-to-br from-indigo-50 to-indigo-50/30 dark:from-indigo-950/40 dark:to-indigo-950/10 shadow-sm overflow-hidden">
-          <div className="px-6 py-5">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center shrink-0 mt-0.5">
-                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200">Unlock your pricing action plan</p>
-                <p className="text-sm text-indigo-800/80 dark:text-indigo-300/80 mt-1 leading-relaxed">
-                  Upgrade to Pro to move from seeing margin leakage to actively improving contribution.
-                </p>
-              </div>
-            </div>
-            <ul className="space-y-1.5 mb-5 pl-1">
-              {[
-                "Model pricing and discount scenarios",
-                "See which pricing lever has the biggest £ impact",
-                "Understand what moved contribution in the selected period",
-                "Get priority pricing actions",
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-2.5">
-                  <CheckCircle className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
-                  <span className="text-sm text-indigo-800 dark:text-indigo-300">{item}</span>
-                </li>
-              ))}
-            </ul>
-            <a href="/upgrade" className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md hover:opacity-90 transition-opacity">
-              <Sparkles className="w-4 h-4" />
-              Unlock Pro
-            </a>
-          </div>
-        </div>
-      )}
-
-      {/* ── 6. What Would Improve Margin Fastest? ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
-        <div className="px-6 py-5 border-b border-border/50">
-          <h3 className="font-semibold text-lg text-foreground">What Would Improve Margin Fastest?</h3>
-        </div>
-        <div className="px-6 py-5 space-y-4">
-          <p className="text-sm text-foreground leading-relaxed">
-            The fastest route to higher contribution is to reduce discount depth, increase full-price orders and reduce returns on discounted sales.
-          </p>
-          <ul className="space-y-2">
-            {[
-              "Reduce average discount from 18% to 15%",
-              "Increase full-price order ratio by 6pp",
-              "Reduce returns on discounted orders by 2pp",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2.5">
-                <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
-                <span className="text-sm text-foreground">{item}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="text-sm text-foreground font-medium">
-            Together, these scenario changes could increase contribution by approximately £42k.
-          </p>
         </div>
       </div>
 
@@ -943,135 +1141,6 @@ export default function PricingOptimisation() {
         )}
       </div>
 
-      {/* ── 11. Pricing Sensitivity Simulator — Pro gated ── */}
-      {/*
-        SIMULATOR GUARD: All projected values below (projContribution, projRevenue,
-        projContribMargin, pricingRisk) are computed from the static scenario constants
-        (BASE_CONTRIBUTION = 198k, BASE_NET_REVENUE = 356k, GROSS_REVENUE = 420k).
-        The simulator is intentionally NOT connected to the live monthly data shown
-        in the KPI strip above — it operates as a modelling tool on a reference
-        scenario basis.  Do not pass live* values into the simulator maths.
-      */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
-        <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
-          <div>
-            <h3 className="font-semibold text-lg text-foreground">Pricing Scenario Model</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Model how changes in discounts, full-price mix, conversion, returns and shipping subsidy affect contribution.</p>
-          </div>
-          {!isPro && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
-        </div>
-
-        {isPro ? (
-          <div className="px-6 py-6">
-            <div className="mb-5">
-              <InlineCfoInsight text="Contribution is currently most sensitive to discount depth and full-price order mix. Use this tool before changing promotional strategy." />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Sliders */}
-              <div className="space-y-6">
-                <SimulatorSlider label="Average Discount Change"      value={discountChange}  min={-8}  max={8}  step={0.5} unit="pp"  showSign onChange={setDiscountChange}  positiveIsGood={false} description="Reducing discount improves retained revenue" />
-                <SimulatorSlider label="Full-Price Order Ratio Change" value={fullPriceChange} min={-15} max={20} step={1}   unit="pp"  showSign onChange={setFullPriceChange} positiveIsGood={true}  description="More full-price orders improve contribution" />
-                <SimulatorSlider label="Conversion Rate Impact"       value={convChange}      min={-15} max={10} step={0.5} unit="%"   showSign onChange={setConvChange}      positiveIsGood={true}  description="Conversion change affects revenue and contribution" />
-                <SimulatorSlider label="Returns Rate Change"          value={returnsChange}   min={-5}  max={5}  step={0.5} unit="pp"  showSign onChange={setReturnsChange}   positiveIsGood={false} description="Lower returns preserve contribution" />
-                <SimulatorSlider label="Shipping Subsidy Change"      value={shippingChange}  min={-30} max={30} step={1}   unit="%"   showSign onChange={setShippingChange}  positiveIsGood={false} description="Higher subsidy reduces contribution" />
-              </div>
-
-              {/* Outputs */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold text-foreground">Modelled Scenario Outputs</h4>
-                <div className="space-y-2">
-                  {[
-                    { label: "Scenario Revenue",              value: `£${Math.round(projRevenue).toLocaleString()}`, highlight: true,  isPeriod: false },
-                    { label: "Scenario Contribution",         value: fmt(projContribution),                           highlight: true,  isPeriod: false },
-                    { label: "Contribution vs Base",          value: "",                                              highlight: true,  isPeriod: true  },
-                    { label: "Scenario Contribution Margin",  value: `${projContribMargin.toFixed(1)}%`,              highlight: false, isPeriod: false },
-                    { label: "Scenario Risk Level",           value: pricingRisk,                                     highlight: false, isPeriod: false },
-                  ].map(({ label, value, highlight, isPeriod }) => (
-                    <div key={label} className={cn("flex items-center justify-between px-4 py-2.5 rounded-xl",
-                      highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30",
-                    )}>
-                      <span className={cn("text-xs", highlight ? "font-semibold text-foreground" : "text-muted-foreground")}>{label}</span>
-                      {isPeriod ? (
-                        <PeriodImpact value={contribDelta} className="items-end" />
-                      ) : (
-                        <span className={cn("text-sm font-bold tabular-nums",
-                          highlight
-                            ? projContribution < 150_000 ? "text-red-600 dark:text-red-400"
-                              : contribDelta >= 0 ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-amber-600 dark:text-amber-400"
-                            : "text-foreground",
-                        )}>{value}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Fastest lever */}
-                <div className="rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15 px-4 py-3 flex items-start gap-2.5">
-                  <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-0.5">Fastest lever to improve contribution</p>
-                    <p className="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed">Reducing average discount by 3pp is modelled to improve contribution by approximately £38k.</p>
-                  </div>
-                </div>
-
-                {/* Safest lever */}
-                <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/15 px-4 py-3 flex items-start gap-2.5">
-                  <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Safest lever to improve contribution</p>
-                    <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">Reducing shipping subsidy by 10% improves contribution with lower conversion risk than changing headline discounts.</p>
-                  </div>
-                </div>
-
-                {/* Dynamic interpretation */}
-                <div className={cn("rounded-xl border px-4 py-3 flex items-start gap-2.5", simColor)}>
-                  <SimIcon className="w-4 h-4 shrink-0 mt-0.5" />
-                  <p className="text-xs leading-relaxed font-medium">{simText}</p>
-                </div>
-
-                {(discountChange !== 0 || fullPriceChange !== 0 || convChange !== 0 || returnsChange !== 0 || shippingChange !== 0) && (
-                  <button
-                    onClick={() => { setDiscountChange(0); setFullPriceChange(0); setConvChange(0); setReturnsChange(0); setShippingChange(0); }}
-                    className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline mt-1"
-                  >
-                    Reset scenario
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="px-6 py-6">
-            <div className="blur-sm opacity-30 pointer-events-none select-none space-y-3 mb-4" aria-hidden>
-              <div className="grid grid-cols-2 gap-3">
-                {["Average Discount", "Full-Price Orders", "Conversion Rate", "Returns Rate"].map((s) => (
-                  <div key={s} className="h-10 bg-secondary rounded-xl" />
-                ))}
-              </div>
-              <div className="rounded-xl border border-indigo-200 px-4 py-3 flex items-center gap-2.5 bg-indigo-50/60">
-                <div className="w-4 h-4 rounded bg-indigo-200 shrink-0" />
-                <div className="space-y-1 flex-1">
-                  <div className="h-2.5 bg-indigo-200 rounded w-40" />
-                  <div className="h-2 bg-indigo-100 rounded w-56" />
-                </div>
-              </div>
-              <div className="rounded-xl border border-emerald-200 px-4 py-3 flex items-center gap-2.5 bg-emerald-50/60">
-                <div className="w-4 h-4 rounded bg-emerald-200 shrink-0" />
-                <div className="space-y-1 flex-1">
-                  <div className="h-2.5 bg-emerald-200 rounded w-36" />
-                  <div className="h-2 bg-emerald-100 rounded w-52" />
-                </div>
-              </div>
-            </div>
-            <UpgradeCta
-              title="Model pricing and discount scenarios"
-              description="Assess how discounts, full-price mix, conversion and shipping subsidy affect contribution before changing pricing."
-            />
-          </div>
-        )}
-      </div>
-
       {/* ── 12. Pricing Sensitivity Ranking — Pro gated ── */}
       <div className="mb-6 rounded-2xl border border-border/50 bg-card shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between gap-3">
@@ -1307,71 +1376,8 @@ export default function PricingOptimisation() {
         )}
       </div>
 
-      {/* ── 15. Free teaser ── */}
-      {!isProRec && (
-        <div className="mb-4 flex items-center gap-2.5 px-5 py-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15">
-          <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-          <p className="text-sm text-indigo-800 dark:text-indigo-300">
-            <span className="font-semibold">One pricing action could increase contribution in this scenario.</span>{" "}
-            Upgrade to Pro to see the full recommendations.
-          </p>
         </div>
-      )}
-
-      {/* ── 16. This Month's Pricing Priorities — Pro gated ── */}
-      <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
-        <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
-          <div>
-            <h3 className="font-semibold text-lg text-foreground">Pricing Priorities</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Priority actions based on the current pricing signals and scenario assumptions.</p>
-          </div>
-          {!isProRec && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
-        </div>
-
-        {isProRec ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
-            <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50 dark:bg-emerald-950/20 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">What Improved</p>
-              </div>
-              <p className="text-sm text-emerald-700/85 dark:text-emerald-400/85 leading-relaxed">
-                Product mix improved in the current snapshot, adding £12k of contribution and partly offsetting discount pressure.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-950/20 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                <p className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">What To Watch</p>
-              </div>
-              <p className="text-sm text-amber-700/85 dark:text-amber-400/85 leading-relaxed">
-                Average discount increased to 18%, while full-price orders fell to 46%. This indicates rising promotional dependence.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50 dark:bg-indigo-950/20 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                <p className="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-300">Recommended Action</p>
-              </div>
-              <p className="text-sm text-indigo-700/85 dark:text-indigo-400/85 leading-relaxed">
-                Reduce blanket discounting, use targeted offers where needed, and protect full-price conversion before increasing promotional frequency.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="px-6 py-6">
-            <div className="blur-sm opacity-40 pointer-events-none select-none grid grid-cols-1 md:grid-cols-3 gap-4 mb-4" aria-hidden>
-              {["What Improved", "What To Watch", "Recommended Action"].map((t) => (
-                <div key={t} className="rounded-2xl border border-border/40 bg-secondary/30 p-5 h-28" />
-              ))}
-            </div>
-            <UpgradeCta
-              title="Unlock Pricing Priorities"
-              description="Get three high-priority pricing actions — what improved, what to watch, and what to do next."
-            />
-          </div>
-        )}
-      </div>
+      </details>
 
       <DataBenchmarkAssumptions
         benchmarkNote="Discount dependency is measured as total discount value divided by gross revenue (value-based ratio). Shipping subsidy and payment fee leakage figures are static estimates — not yet connected to live cost data."

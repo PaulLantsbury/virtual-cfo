@@ -193,9 +193,15 @@ const RECOVERY_GHOST_LABELS: Record<string, string> = {
 };
 
 const OPPORTUNITY_LEAK_COPY: Record<string, string> = {
-  "Reallocate Meta spend": "Most significant margin drag.",
-  "Reduce shipping costs": "Carrier costs are increasing.",
-  "Lower discount depth": "Promotions are reducing retained profit.",
+  "Reallocate Meta spend": "Acquisition costs are reducing profit per order.",
+  "Reduce shipping costs": "Carrier and fulfilment costs are eroding margin.",
+  "Lower discount depth": "Promotions are reducing retained contribution.",
+};
+
+const OPPORTUNITY_LEAK_TITLES: Record<string, string> = {
+  "Reallocate Meta spend": "Customer acquisition costs rising",
+  "Reduce shipping costs": "Shipping costs increasing",
+  "Lower discount depth": "Discounting reducing profit",
 };
 
 /** Number of scenarios shown by default; extras revealed via "View more" */
@@ -618,7 +624,7 @@ export default function MarginAnalysis() {
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 whitespace-nowrap">Action required</span>
         </div>
         <div className="px-6 py-4">
-          <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">Margin is below target - £{RECOVERY_TOTAL_CASH.toLocaleString()} of profit appears recoverable.</p>
+          <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">You're losing profit through rising costs. £{RECOVERY_TOTAL_CASH.toLocaleString()} can likely be recovered.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 pb-3 border-b border-primary/15">
             <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Current margin</p>
@@ -642,7 +648,7 @@ export default function MarginAnalysis() {
               )}
             </div>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed mt-3">Current margin is below the healthy range, recoverable contribution has been identified, and action is required.</p>
+          <p className="text-sm text-muted-foreground leading-relaxed mt-3">Contribution margin has fallen below the healthy range. Rising acquisition, fulfilment and pricing costs are reducing profit on every order.</p>
           <div className="pt-3 flex flex-wrap gap-2">
             {["Meta CAC drag", "Shipping cost pressure", "Discount depth"].map((signal) => (
               <span key={signal} className="rounded-full bg-secondary/30 border border-primary/10 px-3 py-1.5 text-xs font-semibold text-foreground">{signal}</span>
@@ -661,10 +667,10 @@ export default function MarginAnalysis() {
             <div className="flex items-start justify-between gap-3 mb-2">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                  {s.shortLabel === "Reallocate Meta spend" ? "Customer acquisition" : s.shortLabel === "Reduce shipping costs" ? "Shipping costs" : "Discount depth"}
+                  {OPPORTUNITY_LEAK_TITLES[s.shortLabel]}
                 </p>
                 <p className="text-sm font-semibold text-foreground leading-snug">
-                  {s.shortLabel === "Reallocate Meta spend" ? "Customer acquisition" : s.shortLabel === "Reduce shipping costs" ? "Shipping costs" : "Discount depth"}
+                  {OPPORTUNITY_LEAK_TITLES[s.shortLabel]}
                 </p>
               </div>
               {canAccess("opportunity_breakdown") ? (

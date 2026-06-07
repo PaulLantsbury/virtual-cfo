@@ -408,7 +408,8 @@ export default function PricingOptimisation() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Profit available</p>
-                <p className="text-sm font-bold text-foreground">£52,000 of contribution appears recoverable through tighter pricing control.</p>
+                <p className="text-2xl font-display font-bold text-foreground leading-none">£52,000</p>
+                <p className="text-xs text-muted-foreground leading-snug mt-1.5">of contribution appears recoverable through tighter pricing control.</p>
               </div>
               <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-3 py-2.5">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Do first</p>
@@ -418,7 +419,7 @@ export default function PricingOptimisation() {
           </div>
 
           <div className="pt-4 flex flex-wrap gap-2">
-            {["Discounts too broad", "Full-price sales weakening", "Returns adding leakage"].map((signal) => (
+            {["Discount dependency", "Full-price weakness", "Returns leakage"].map((signal) => (
               <span key={signal} className="rounded-full bg-secondary/30 border border-primary/10 px-3 py-1.5 text-xs font-semibold text-foreground">
                 {signal}
               </span>

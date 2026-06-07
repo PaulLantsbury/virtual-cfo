@@ -183,15 +183,15 @@ export default function ProfitGrowth() {
         <div className="px-6 py-4">
           <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">Profit is improving, but £18,000/month remains trapped in discounts and overheads.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 pb-3 border-b border-primary/15">
-            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Current Profit</p>
-              <p className="text-xl font-display font-bold text-foreground leading-none">£{BASE_EBITDA.toLocaleString()}</p>
-              <p className="text-[11px] text-muted-foreground leading-snug mt-1">15% of revenue.</p>
-            </div>
             <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-3 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Profit Available</p>
               <p className="text-3xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">£18,000</p>
               <p className="text-xs text-emerald-700/75 dark:text-emerald-300/75 leading-snug mt-1">additional monthly profit identified.</p>
+            </div>
+            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Current Profit</p>
+              <p className="text-xl font-display font-bold text-foreground leading-none">£{BASE_EBITDA.toLocaleString()}</p>
+              <p className="text-[11px] text-muted-foreground leading-snug mt-1">15% of revenue.</p>
             </div>
             <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Do First</p>
@@ -211,9 +211,9 @@ export default function ProfitGrowth() {
         </div>
       </div>
 
-      {/* ── 2. Where Profit Is Being Lost ── */}
+      {/* ── 2. Biggest Profit Leaks ── */}
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Where Profit Is Being Lost</h2>
+        <h2 className="text-xl font-bold text-foreground">Biggest Profit Leaks</h2>
         <p className="text-sm text-muted-foreground mt-0.5">The biggest recoverable leaks before adding more revenue.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">

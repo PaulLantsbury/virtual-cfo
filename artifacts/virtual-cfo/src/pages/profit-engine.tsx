@@ -53,19 +53,19 @@ const DRIVER_DATA = [
 
 const PROFIT_LOSS_AREAS = [
   {
-    title: "Revenue Quality",
-    explanation: "Revenue is not converting into profit as efficiently as it could.",
-    value: 6_000,
-  },
-  {
-    title: "Overhead Growth",
-    explanation: "Fixed costs are rising faster than profit capacity.",
-    value: 4_000,
-  },
-  {
-    title: "Discount Leakage",
+    title: "Discounting",
     explanation: "Promotions are reducing retained profit.",
-    value: 8_000,
+    value: 18_000,
+  },
+  {
+    title: "Fixed Costs",
+    explanation: "Overheads are rising faster than profit capacity.",
+    value: 13_000,
+  },
+  {
+    title: "Returns & Leakage",
+    explanation: "Returns and leakage reduce profit after the sale.",
+    value: 4_000,
   },
 ];
 
@@ -181,7 +181,7 @@ export default function ProfitGrowth() {
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 whitespace-nowrap">Action required</span>
         </div>
         <div className="px-6 py-4">
-          <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">£18,000 of additional monthly profit appears available.</p>
+          <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">Profit is improving, but £18,000/month remains trapped in discounts and overheads.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 pb-3 border-b border-primary/15">
             <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Current Profit</p>
@@ -202,7 +202,7 @@ export default function ProfitGrowth() {
               )}
             </div>
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed mt-3">Profit is improving, but discounting, overhead growth and revenue quality are still reducing how much revenue converts into profit.</p>
+          <p className="text-sm text-muted-foreground leading-relaxed mt-3">Current profit is positive and profit quality is improving, but discounting and overhead growth are still limiting how much revenue converts into profit.</p>
           <div className="pt-3 flex flex-wrap gap-2">
             {["Discount leakage", "Overhead pressure", "Revenue quality"].map((signal) => (
               <span key={signal} className="rounded-full bg-secondary/30 border border-primary/10 px-3 py-1.5 text-xs font-semibold text-foreground">{signal}</span>
@@ -214,7 +214,7 @@ export default function ProfitGrowth() {
       {/* ── 2. Where Profit Is Being Lost ── */}
       <div className="mb-2">
         <h2 className="text-xl font-bold text-foreground">Where Profit Is Being Lost</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">The main areas where profit can be recovered without relying on more revenue.</p>
+        <p className="text-sm text-muted-foreground mt-0.5">The biggest recoverable leaks before adding more revenue.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
         {PROFIT_LOSS_AREAS.map((area) => (
@@ -436,9 +436,7 @@ export default function ProfitGrowth() {
                             ? row.amount < 0
                               ? `(£${Math.abs(row.amount).toLocaleString()})`
                               : `£${row.amount.toLocaleString()}`
-                            : row.step === "Revenue" || row.step === "Profit"
-                              ? row.step
-                              : "Locked"}
+                            : "Locked"}
                         </td>
                       </tr>
                     ))}
@@ -451,12 +449,20 @@ export default function ProfitGrowth() {
               <h3 className="text-sm font-bold text-foreground">Profit sensitivity ranking</h3>
               <p className="text-xs text-muted-foreground mt-1 mb-3">What to watch next: the levers that move profit fastest if they drift in the wrong direction.</p>
               <ol className="space-y-2">
-                {PROFIT_GROWTH_ACTIONS.map((item, i) => (
+                {(canAccess("profit_recommendations")
+                  ? PROFIT_GROWTH_ACTIONS.map((item) => ({ title: item.title, impact: item.impact }))
+                  : [
+                      { title: "Discounting", impact: null },
+                      { title: "Fixed costs", impact: null },
+                      { title: "Returns & leakage", impact: null },
+                      { title: "Revenue quality", impact: null },
+                    ]
+                ).map((item, i) => (
                   <li key={item.title} className="flex items-center gap-3">
                     <span className="w-5 h-5 rounded-full bg-background border border-border/60 flex items-center justify-center text-[11px] font-bold text-muted-foreground shrink-0">{i + 1}</span>
                     <span className="text-xs font-medium text-foreground">{item.title}</span>
                     <span className="ml-auto text-xs font-semibold text-foreground tabular-nums">
-                      {canAccess("profit_recommendations") ? `£${item.impact.toLocaleString()}` : "Pro"}
+                      {item.impact !== null ? `£${item.impact.toLocaleString()}` : "Pro"}
                     </span>
                   </li>
                 ))}
@@ -489,9 +495,9 @@ export default function ProfitGrowth() {
               <p className="text-xs text-muted-foreground mt-1 mb-3">What to watch next: team costs are converting into profit more efficiently, but overhead discipline still matters.</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[
-                  { label: "Efficiency", value: "£2.80", note: "per £1 staff cost" },
-                  { label: "Staff cost ratio", value: "18.5%", note: "of revenue" },
-                  { label: "Trend", value: "Improving", note: "4 periods" },
+                  { label: "Efficiency", value: "£2.80", note: canAccess("profit_staff_cost_trend") ? "per £1 staff cost" : "staff efficiency detail" },
+                  { label: "Staff cost ratio", value: "18.5%", note: canAccess("profit_staff_cost_trend") ? "of revenue" : "overhead discipline" },
+                  { label: "Trend", value: "Improving", note: canAccess("profit_staff_cost_trend") ? "4 periods" : "trend evidence" },
                 ].map((item) => (
                   <div key={item.label} className="rounded-lg bg-background/60 border border-border/50 px-3 py-2">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{item.label}</p>

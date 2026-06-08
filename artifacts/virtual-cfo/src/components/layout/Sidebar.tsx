@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { LayoutDashboard, HelpCircle, TrendingDown, BarChart2, Megaphone, Cpu, Wallet, Tag, FlaskConical, Target, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Morning Briefing",        href: "/dashboard"              },
@@ -21,13 +22,12 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border shadow-2xl z-10">
       <div className="h-24 flex items-center justify-center px-6 border-b border-sidebar-border/50">
-        <Link href="/" className="group flex items-center justify-center rounded-2xl bg-white/5 p-2 shadow-xl shadow-black/20 ring-1 ring-white/10 transition-all hover:scale-[1.03] hover:bg-white/10">
-          <img
-            src={`${import.meta.env.BASE_URL}nightscout-dog-mark.png`}
-            alt="Night Scout logo"
-            className="h-16 w-16 rounded-full object-contain"
-          />
-        </Link>
+        <BrandLogo
+          variant="mascot"
+          glow
+          className="group rounded-2xl bg-white/5 p-2 ring-1 ring-white/10 transition-all hover:scale-[1.03] hover:bg-white/10"
+          imageClassName="h-20 w-20 rounded-full"
+        />
       </div>
 
       <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">

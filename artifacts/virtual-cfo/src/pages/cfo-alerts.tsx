@@ -354,7 +354,7 @@ function AlertToggleCard({
                 ? "bg-primary/10 text-primary hover:bg-primary/20"
                 : "bg-secondary text-muted-foreground/40 cursor-not-allowed"
             )}
-            title={isPro ? "AI CFO explanation" : "Pro only"}
+            title={isPro ? "Night Scout explanation" : "Pro only"}
           >
             <Sparkles className="w-3 h-3" />
             Explain

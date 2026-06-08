@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,13 +25,7 @@ export default function Login() {
         </Link>
         
         <div className="w-full max-w-md">
-          <Link href="/" className="inline-block mb-8">
-            <img
-              src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
-              alt="Night Scout logo"
-              className="h-20 w-auto"
-            />
-          </Link>
+          <BrandLogo className="mb-8" imageClassName="h-20" />
           
           <h1 className="text-3xl font-display font-bold mb-2">Welcome Back To Night Scout</h1>
           <p className="text-muted-foreground mb-8">Wake up to profitable growth.</p>

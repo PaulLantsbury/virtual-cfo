@@ -9,7 +9,7 @@ const FREE_FEATURES = [
   "Margin Recovery",
   "Cash Control",
   "Profit Growth",
-  "AI CFO Chat",
+  "Ask Night Scout",
 ];
 
 const PRO_FEATURES = [
@@ -18,7 +18,7 @@ const PRO_FEATURES = [
   "Opportunity Values",
   "Growth Simulators",
   "Weekly Night Scout Briefings",
-  "AI CFO Recommendations",
+  "Scout Recommendations",
   "Cash Forecasting",
   "Growth Modelling",
 ];
@@ -183,7 +183,7 @@ export default function Upgrade() {
                 body: "Test how margin, pricing, marketing and cash decisions affect profitable growth.",
               },
               {
-                title: "AI CFO recommendations",
+                title: "Scout recommendations",
                 body: "Get clear recommended actions, not just another place to inspect numbers.",
               },
             ].map((item) => (

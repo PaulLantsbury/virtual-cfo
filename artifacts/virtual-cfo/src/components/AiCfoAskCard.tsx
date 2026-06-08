@@ -48,7 +48,7 @@ export function AiCfoAskCard({ pageId, className }: AiCfoAskCardProps) {
         <div className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 shrink-0">
           <Sparkles className="w-3.5 h-3.5 text-primary" />
         </div>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Ask your AI CFO</p>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-primary">Ask Night Scout</p>
         {!hasActionPlans && (
           <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary/70 border border-primary/20">
             <Lock className="w-2.5 h-2.5" />

@@ -28,7 +28,7 @@ const STATUS_CONFIG: Record<MonitorStatus, StatusConfig> = {
   },
   amber: {
     label: "Action recommended",
-    tooltip: "Your AI CFO is monitoring margin, cash, marketing efficiency and pricing signals. 3 areas need attention.",
+    tooltip: "Night Scout is monitoring margin, cash, marketing efficiency and pricing signals. 3 areas need attention.",
     dot:   "bg-amber-500",
     pulse: "bg-amber-400",
     pill:  "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-300",

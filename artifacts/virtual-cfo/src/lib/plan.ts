@@ -72,8 +72,8 @@ export type FeatureName =
   | "scenario_lab_plans"             // Scenario Lab — CFO Suggested Plans with Apply buttons
   | "scenario_lab_builder"           // Scenario Lab — Full Scenario Builder (all sliders + live outputs)
   | "scenario_lab_bridge"            // Scenario Lab — Contribution Bridge, Cash Consequence, Quality Score
-  | "scenario_lab_implementation"    // Scenario Lab — Implementation Plan + AI CFO Recommendation
-  | "ai_cfo_action_plans"            // AI CFO — recommended action + expected impact across all pages
+  | "scenario_lab_implementation"    // Scenario Lab — Implementation Plan + Scout Recommendation
+  | "ai_cfo_action_plans"            // Night Scout — recommended action + expected impact across all pages
   | "cfo_alerts_controls";           // Night Scout Alerts — enable/edit/configure alerts and reports
 
 // ─── Feature access matrix ────────────────────────────────────────────────────

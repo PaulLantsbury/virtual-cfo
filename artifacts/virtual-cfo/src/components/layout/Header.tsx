@@ -1,6 +1,7 @@
 import { Bell, Menu } from "lucide-react";
 import { DevPlanToggle } from "@/components/DevPlanToggle";
 import { CfoMonitoringStatus } from "@/components/CfoMonitoringStatus";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export function Header() {
   return (
@@ -11,6 +12,11 @@ export function Header() {
       <button className="md:hidden p-2 text-white/70 hover:bg-white/10 rounded-lg transition-colors">
         <Menu className="w-5 h-5" />
       </button>
+      <BrandLogo
+        variant="mascot"
+        className="md:hidden ml-2"
+        imageClassName="h-11 w-11 rounded-full"
+      />
 
       <div className="flex items-center gap-3 ml-auto">
         <CfoMonitoringStatus />

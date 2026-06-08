@@ -97,7 +97,7 @@ export function AiCfoDrawer() {
       <aside
         role="dialog"
         aria-modal="true"
-        aria-label="AI CFO Analysis"
+        aria-label="Night Scout Analysis"
         className={cn(
           "fixed top-0 right-0 z-50 h-full w-full max-w-[500px] bg-background shadow-2xl border-l border-border transition-transform duration-300 ease-in-out flex flex-col",
           isOpen ? "translate-x-0" : "translate-x-full"
@@ -110,7 +110,7 @@ export function AiCfoDrawer() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-primary">AI CFO Analysis</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Night Scout Analysis</p>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary/70 border border-primary/20">
                 Context: {pageName}
               </span>
@@ -187,7 +187,7 @@ export function AiCfoDrawer() {
                     <div className="flex items-center gap-2 mb-2">
                       <ChevronRight className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                       <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
-                        Recommended Action
+                        Scout Recommendation
                       </p>
                     </div>
                     <p className="text-sm text-emerald-900 dark:text-emerald-200 leading-relaxed">{data.recommendedAction}</p>
@@ -272,7 +272,7 @@ export function AiCfoDrawer() {
         {/* Footer */}
         <div className="shrink-0 px-5 py-4 border-t border-border bg-secondary/20">
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            AI CFO analysis is based on your current mock data and industry benchmarks. Figures are indicative — connect live data for production accuracy.
+            Night Scout analysis is based on your current mock data and industry benchmarks. Figures are indicative — connect live data for production accuracy.
           </p>
         </div>
       </aside>

@@ -770,7 +770,7 @@ main [class~="text-xs"]            { font-size: 14px; }
 /* No JSX changes. All selectors scoped to main.                             */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── 1. CFO Insight / AI CFO Recommendation cards → sc-purple elevation ──── */
+/* ── 1. CFO Insight / Scout Recommendation cards → sc-purple elevation ──── */
 /* Both bg-card panels contain a direct descendant with BOTH text-primary AND */
 /* uppercase tokens (the label paragraph). :has() is safe because:           */
 /*   – AiCfoAskCard wrapper uses bg-primary/5, NOT bg-card               */
@@ -859,11 +859,11 @@ main [class*="text-[10px]"]     { font-size: 14px; }
 main [class*="text-[11px]"]     { font-size: 14px; }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
-/* AI CFO COMPONENTS — AiCfoAskCard (main) + AiCfoDrawer (aside) readability */
+/* NIGHT SCOUT COMPONENTS — AiCfoAskCard (main) + AiCfoDrawer (aside) readability */
 /* AiCfoAskCard renders inside <main> → main-scoped rules apply.             */
 /* AiCfoDrawer is a fixed <aside role="dialog"> OUTSIDE <main> — none of our */
 /* existing main-scoped rules reach it, so all drawer fixes use the          */
-/* aside[aria-label="AI CFO Analysis"] scope.                                */
+/* aside[aria-label="Night Scout Analysis"] scope.                                */
 /* No JSX changes.                                                            */
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -902,15 +902,15 @@ main [class*="bg-primary/5"][class*="border-primary/25"] button[class*="rounded-
   color:            #FFFFFF;
 }
 
-/* ══ B. AiCfoDrawer (aside[aria-label="AI CFO Analysis"]) ═════════════════════ */
+/* ══ B. AiCfoDrawer (aside[aria-label="Night Scout Analysis"]) ═════════════════════ */
 
 /* ── B1. Font sizes — drawer is outside <main>, so main-scoped floor rules    */
 /*   don't apply. Replicate the same hierarchy for the drawer context.        */
 
-aside[aria-label="AI CFO Analysis"] [class~="text-sm"]     { font-size: 15px; }
-aside[aria-label="AI CFO Analysis"] [class~="text-xs"]     { font-size: 14px; }
-aside[aria-label="AI CFO Analysis"] [class*="text-[10px]"] { font-size: 14px; }
-aside[aria-label="AI CFO Analysis"] [class*="text-[11px]"] { font-size: 14px; }
+aside[aria-label="Night Scout Analysis"] [class~="text-sm"]     { font-size: 15px; }
+aside[aria-label="Night Scout Analysis"] [class~="text-xs"]     { font-size: 14px; }
+aside[aria-label="Night Scout Analysis"] [class*="text-[10px]"] { font-size: 14px; }
+aside[aria-label="Night Scout Analysis"] [class*="text-[11px]"] { font-size: 14px; }
 
 /* ── B2. Confidence badge colours — badge uses hardcoded Tailwind classes    */
 /*   (bg-emerald-100, text-emerald-700, border-emerald-300, etc.) that       */
@@ -918,23 +918,23 @@ aside[aria-label="AI CFO Analysis"] [class*="text-[11px]"] { font-size: 14px; }
 /*   unless overridden here.                                                  */
 /*   Specificity: aside+[aria-label]+[class*] = (0,2,1) — beats Tailwind.   */
 
-aside[aria-label="AI CFO Analysis"] [class*="bg-emerald-1"]     { background-color: rgba(34,  197,  94, 0.12); }
-aside[aria-label="AI CFO Analysis"] [class*="text-emerald-7"]   { color: #22C55E; }
-aside[aria-label="AI CFO Analysis"] [class*="border-emerald-3"] { border-color: rgba(34,  197,  94, 0.35); }
+aside[aria-label="Night Scout Analysis"] [class*="bg-emerald-1"]     { background-color: rgba(34,  197,  94, 0.12); }
+aside[aria-label="Night Scout Analysis"] [class*="text-emerald-7"]   { color: #22C55E; }
+aside[aria-label="Night Scout Analysis"] [class*="border-emerald-3"] { border-color: rgba(34,  197,  94, 0.35); }
 
-aside[aria-label="AI CFO Analysis"] [class*="bg-amber-1"]       { background-color: rgba(245, 158,  11, 0.12); }
-aside[aria-label="AI CFO Analysis"] [class*="text-amber-7"]     { color: #F59E0B; }
-aside[aria-label="AI CFO Analysis"] [class*="border-amber-3"]   { border-color: rgba(245, 158,  11, 0.35); }
+aside[aria-label="Night Scout Analysis"] [class*="bg-amber-1"]       { background-color: rgba(245, 158,  11, 0.12); }
+aside[aria-label="Night Scout Analysis"] [class*="text-amber-7"]     { color: #F59E0B; }
+aside[aria-label="Night Scout Analysis"] [class*="border-amber-3"]   { border-color: rgba(245, 158,  11, 0.35); }
 
-aside[aria-label="AI CFO Analysis"] [class*="bg-slate-1"]       { background-color: rgba(148, 163, 184, 0.12); }
-aside[aria-label="AI CFO Analysis"] [class*="text-slate-6"]     { color: #94A3B8; }
-aside[aria-label="AI CFO Analysis"] [class*="border-slate-3"]   { border-color: rgba(148, 163, 184, 0.30); }
+aside[aria-label="Night Scout Analysis"] [class*="bg-slate-1"]       { background-color: rgba(148, 163, 184, 0.12); }
+aside[aria-label="Night Scout Analysis"] [class*="text-slate-6"]     { color: #94A3B8; }
+aside[aria-label="Night Scout Analysis"] [class*="border-slate-3"]   { border-color: rgba(148, 163, 184, 0.30); }
 
 /* ── B3. Drawer header label → #A5B4FC ────────────────────────────────────── */
 /* Header div has bg-primary/5 AND shrink-0. The Verdict card also has       */
 /* bg-primary/5 but NOT shrink-0, so shrink-0 is the discriminator. ✓       */
 
-aside[aria-label="AI CFO Analysis"] [class*="bg-primary/5"][class*="shrink-0"] [class*="text-primary"] {
+aside[aria-label="Night Scout Analysis"] [class*="bg-primary/5"][class*="shrink-0"] [class*="text-primary"] {
   color: #A5B4FC;
 }
 
@@ -946,9 +946,9 @@ aside[aria-label="AI CFO Analysis"] [class*="bg-primary/5"][class*="shrink-0"] [
 /* [class~="rounded-xl"] word-boundary avoids rounded-full chip elements. ✓  */
 /* Upgrade prompt uses bg-primary/3 (not /5) → not matched. ✓               */
 
-aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-primary/5"],
-aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-emerald-50"],
-aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"] {
+aside[aria-label="Night Scout Analysis"] [class~="rounded-xl"][class*="bg-primary/5"],
+aside[aria-label="Night Scout Analysis"] [class~="rounded-xl"][class*="bg-emerald-50"],
+aside[aria-label="Night Scout Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"] {
   background-color: #182A4A;
   border:           1px solid rgba(99, 102, 241, 0.25);
   border-left:      4px solid #6366F1;
@@ -961,9 +961,9 @@ aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"]
 /* Higher specificity (0,4,1) than B2 confidence-badge rules (0,2,1).        */
 /* Wins for card labels while B2 still controls the top-level badge chips.   */
 
-aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-primary/5"]  [class*="text-primary"],
-aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-emerald-50"] [class*="text-emerald-7"],
-aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"]  [class*="text-indigo-7"] {
+aside[aria-label="Night Scout Analysis"] [class~="rounded-xl"][class*="bg-primary/5"]  [class*="text-primary"],
+aside[aria-label="Night Scout Analysis"] [class~="rounded-xl"][class*="bg-emerald-50"] [class*="text-emerald-7"],
+aside[aria-label="Night Scout Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"]  [class*="text-indigo-7"] {
   color: #A5B4FC;
 }
 
@@ -972,8 +972,8 @@ aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"]
 /* Impact) are hardcoded Tailwind dark-green / dark-indigo — unreadable on   */
 /* the new dark #182A4A surface without this override.                        */
 
-aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-emerald-50"] [class*="text-emerald-9"],
-aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"]  [class*="text-indigo-9"] {
+aside[aria-label="Night Scout Analysis"] [class~="rounded-xl"][class*="bg-emerald-50"] [class*="text-emerald-9"],
+aside[aria-label="Night Scout Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"]  [class*="text-indigo-9"] {
   color: #F8FAFC;
 }
 
@@ -981,20 +981,20 @@ aside[aria-label="AI CFO Analysis"] [class~="rounded-xl"][class*="bg-indigo-50"]
 /* Unlocked chips: bg-background text-foreground border-border/60 rounded-full*/
 /* Locked chips:   bg-secondary → already dark, leave untouched.             */
 
-aside[aria-label="AI CFO Analysis"] button[class~="bg-background"][class*="rounded-full"] {
+aside[aria-label="Night Scout Analysis"] button[class~="bg-background"][class*="rounded-full"] {
   background-color: #182A4A;
   border-color:     #263B63;
   color:            #CBD5E1;
 }
-aside[aria-label="AI CFO Analysis"] button[class~="bg-background"][class*="rounded-full"]:hover {
+aside[aria-label="Night Scout Analysis"] button[class~="bg-background"][class*="rounded-full"]:hover {
   background-color: #1E3A5F;
   color:            #FFFFFF;
 }
 
 /* ── B8. Links inside the drawer → #60A5FA, hover #93C5FD ─────────────────── */
 
-aside[aria-label="AI CFO Analysis"] a       { color: #60A5FA; }
-aside[aria-label="AI CFO Analysis"] a:hover { color: #93C5FD; }
+aside[aria-label="Night Scout Analysis"] a       { color: #60A5FA; }
+aside[aria-label="Night Scout Analysis"] a:hover { color: #93C5FD; }
 
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /* MARKETING EFFICIENCY — Opportunity value hierarchy                         */
@@ -1452,7 +1452,7 @@ main span[class*="rounded-full"][class*="font-semibold"][class~="mb-2"] {
 /* p.text-[11px].font-bold.uppercase.tracking-widest in AiCfoAskCard.       */
 /* tracking-widest (not tracking-wider) is the safe discriminator:          */
 /* engine module titles use tracking-wider → excluded. ✓                    */
-/* Inline "Ask your AI CFO:" span uses tracking-wide (not widest) → ✓      */
+/* Inline "Ask Night Scout:" span uses tracking-wide (not widest) → ✓      */
 
 main p[class*="text-[11px]"][class*="uppercase"][class*="tracking-widest"] {
   font-size:      0.8125rem !important;  /* 13px */

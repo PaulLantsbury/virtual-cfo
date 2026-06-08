@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { BarChart3, ChevronRight, CheckCircle2, ShieldCheck, Sparkles, TrendingUp, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function Landing() {
   return (
@@ -9,13 +10,7 @@ export default function Landing() {
       {/* Navigation */}
       <nav className="fixed w-full top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center">
-            <img
-              src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
-              alt="Night Scout logo"
-              className="h-16 w-auto"
-            />
-          </Link>
+          <BrandLogo imageClassName="h-20" />
           <div className="hidden md:flex items-center gap-8 font-medium text-sm text-muted-foreground">
             <a href="#discover" className="hover:text-foreground transition-colors">Discoveries</a>
             <a href="#process" className="hover:text-foreground transition-colors">How it works</a>
@@ -56,6 +51,13 @@ export default function Landing() {
             Built for Shopify founders using Xero
           </motion.div>
           
+          <BrandLogo
+            variant="mascot"
+            glow
+            className="mx-auto mb-8"
+            imageClassName="h-32 w-32 sm:h-40 sm:w-40 rounded-full"
+          />
+
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -220,7 +222,7 @@ export default function Landing() {
       <section id="features" className="py-24 bg-background relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Your AI CFO in five minutes</h2>
+            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Your Night Scout CFO in five minutes</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               Connect the systems you already use and wake up to founder-grade insight, not another data chore.
             </p>
@@ -251,7 +253,7 @@ export default function Landing() {
               {
                 icon: Sparkles,
                 title: "Night Scout Briefing",
-                desc: "Wake up to the insight your AI CFO would put first."
+                desc: "Wake up to the insight Night Scout would put first."
               }
             ].map((feat, i) => (
               <div key={i} className="bg-card p-6 rounded-xl border border-border hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group">
@@ -280,7 +282,7 @@ export default function Landing() {
             {[
               ["01", "Connect Shopify", "Bring in the trading signals that reveal demand, discounts and customer behaviour."],
               ["02", "Connect Xero", "Add the cash, cost and profitability context behind the numbers."],
-              ["03", "Night Scout analyses your data overnight", "Your AI CFO looks for hidden profit, cashflow risk and practical next moves."],
+              ["03", "Night Scout analyses your data overnight", "Night Scout looks for hidden profit, cashflow risk and practical next moves."],
               ["04", "Wake up to your CFO briefing", "Start the day with the one action most likely to improve profitable growth."],
             ].map(([step, title, desc]) => (
               <div key={step} className="rounded-xl border border-border bg-background p-6">
@@ -297,13 +299,7 @@ export default function Landing() {
       <footer className="bg-sidebar py-12 text-sidebar-foreground border-t border-sidebar-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <Link href="/" className="inline-flex items-center">
-              <img
-                src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
-                alt="Night Scout logo"
-                className="h-14 w-auto"
-              />
-            </Link>
+            <BrandLogo imageClassName="h-16" />
           </div>
           <p className="text-sidebar-foreground/60 text-sm">© 2024 Night Scout Inc. All rights reserved.</p>
         </div>

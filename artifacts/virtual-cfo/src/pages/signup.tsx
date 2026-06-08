@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,13 +24,7 @@ export default function Signup() {
         </Link>
 
         <div className="w-full max-w-md">
-          <Link href="/" className="inline-block mb-8">
-            <img
-              src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
-              alt="Night Scout logo"
-              className="h-20 w-auto"
-            />
-          </Link>
+          <BrandLogo className="mb-8" imageClassName="h-20" />
 
           <h1 className="text-3xl font-display font-bold mb-2">Create Your Night Scout Account</h1>
           <p className="text-muted-foreground mb-8">Connect Shopify and Xero and start uncovering hidden profit in minutes.</p>

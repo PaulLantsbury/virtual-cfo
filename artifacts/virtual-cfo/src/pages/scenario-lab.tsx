@@ -565,14 +565,14 @@ export default function ScenarioLab() {
           </div>
         </div>
 
-        {/* ══ 4. AI CFO RECOMMENDATION (moved up) ══════════════════════════════ */}
+        {/* ══ 4. SCOUT RECOMMENDATION (moved up) ═══════════════════════════════ */}
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
           <div className="flex items-start gap-3 mb-4">
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">AI CFO Recommendation</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Scout Recommendation</p>
               <p className="text-sm text-foreground leading-relaxed">
                 Start with the Balanced Growth Plan. It delivers meaningful contribution uplift while protecting cash runway and
                 avoiding over-reliance on new paid acquisition. Prioritise discount discipline, Meta budget reallocation and

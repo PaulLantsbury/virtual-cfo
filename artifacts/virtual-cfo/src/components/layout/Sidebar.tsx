@@ -20,12 +20,12 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border shadow-2xl z-10">
-      <div className="h-16 flex items-center px-6 border-b border-sidebar-border/50">
-        <Link href="/dashboard" className="flex items-center gap-3 group">
+      <div className="h-24 flex items-center justify-center px-6 border-b border-sidebar-border/50">
+        <Link href="/" className="group flex items-center justify-center rounded-2xl bg-white/5 p-2 shadow-xl shadow-black/20 ring-1 ring-white/10 transition-all hover:scale-[1.03] hover:bg-white/10">
           <img
-            src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
+            src={`${import.meta.env.BASE_URL}nightscout-dog-mark.png`}
             alt="Night Scout logo"
-            className="h-10 w-auto max-w-[150px] group-hover:scale-[1.02] transition-transform"
+            className="h-16 w-16 rounded-full object-contain"
           />
         </Link>
       </div>

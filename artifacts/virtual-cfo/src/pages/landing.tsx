@@ -9,14 +9,16 @@ export default function Landing() {
       {/* Navigation */}
       <nav className="fixed w-full top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <img
-            src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
-            alt="Night Scout logo"
-            className="h-12 w-auto"
-          />
+          <Link href="/" className="inline-flex items-center">
+            <img
+              src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
+              alt="Night Scout logo"
+              className="h-16 w-auto"
+            />
+          </Link>
           <div className="hidden md:flex items-center gap-8 font-medium text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Briefing</a>
-            <a href="#opportunities" className="hover:text-foreground transition-colors">Opportunities</a>
+            <a href="#discover" className="hover:text-foreground transition-colors">Discoveries</a>
+            <a href="#process" className="hover:text-foreground transition-colors">How it works</a>
             <Link href="/upgrade" className="hover:text-foreground transition-colors">Pricing</Link>
           </div>
           <div className="flex items-center gap-4">
@@ -70,7 +72,7 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
-            Night Scout works while you sleep, analysing your Shopify and Xero data to uncover hidden profit, cash flow risks and growth opportunities.
+            While you sleep, Night Scout analyses your Shopify and Xero data, finds hidden profit opportunities, spots cashflow risks and prepares your next CFO briefing.
           </motion.p>
 
           <motion.ul
@@ -79,7 +81,11 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm font-semibold text-foreground"
           >
-            {["Connect Shopify + Xero in minutes", "No spreadsheets", "Plain-English CFO insights"].map((item) => (
+            {[
+              "Where profit is leaking",
+              "How much cash you really have",
+              "What action will make the biggest difference next",
+            ].map((item) => (
               <li key={item} className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 {item}
@@ -146,48 +152,17 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Systems Section */}
-      <section className="py-24 bg-card relative z-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight text-foreground mb-6 leading-tight">
-              Your Business Is Already Telling You What To Fix
-            </h2>
-            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              Night Scout connects your systems and automatically explains:
-            </p>
-            <ul className="flex flex-col gap-4 mb-10">
-              {[
-                "Where profit is leaking",
-                "Why margins are changing",
-                "How long your cash will last",
-                "Which actions create the biggest impact",
-                "What to focus on next",
-              ].map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="flex-none mt-1 w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
-                    <span className="w-2 h-2 rounded-full bg-primary"></span>
-                  </span>
-                  <span className="text-foreground text-lg">{item}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="text-base font-semibold text-muted-foreground tracking-wide">No spreadsheets required.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Pain Point Section */}
-      <section className="py-24 bg-background relative z-20">
+      {/* Founder belief section */}
+      <section id="founders" className="py-24 bg-background relative z-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground mb-10 leading-tight">
-            Most founders don't know whether<br className="hidden md:block" /> they are growing profitably
+            Most founders think they're growing profitably
           </h2>
           <ul className="flex flex-col items-center gap-4 mb-10">
             {[
-              "Revenue is rising but margins are falling",
-              "Discounting is driving growth more than retention",
-              "Cash is tightening faster than expected",
+              "Revenue is up, but contribution is quietly leaking away.",
+              "Discounts are doing more of the work than retention.",
+              "Cash is tightening before the warning signs feel obvious.",
             ].map((point) => (
               <li key={point} className="flex items-center gap-3 text-lg text-muted-foreground">
                 <span className="flex-none w-5 h-5 rounded-full bg-red-500/15 flex items-center justify-center">
@@ -198,17 +173,57 @@ export default function Landing() {
             ))}
           </ul>
           <p className="text-xl font-semibold text-foreground">
-            Night Scout explains what is really happening —{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">automatically.</span>
+            Night Scout shows what profitable growth really looks like before another week slips by.
           </p>
         </div>
       </section>
 
+      {/* Overnight discoveries */}
+      <section id="discover" className="py-24 bg-card relative z-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">What Night Scout discovers overnight</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              It reads the signals founders rarely have time to connect, then turns them into practical CFO actions by morning.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                title: "Hidden profit",
+                value: "£20,400",
+                desc: "Contribution leaking through discounts, costs and channel mix."
+              },
+              {
+                title: "Cash risk",
+                value: "+ 2",
+                desc: "Upcoming cashflow pressure before it becomes a founder firefight."
+              },
+              {
+                title: "Next best action",
+                value: "1 focus",
+                desc: "The most important move to make next, ranked by impact."
+              }
+            ].map((item) => (
+              <div key={item.title} className="rounded-xl border border-border bg-background p-7 shadow-sm">
+                <p className="text-sm font-semibold text-muted-foreground mb-4">{item.title}</p>
+                <p className="text-4xl font-display font-bold text-foreground mb-4">{item.value}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Grid */}
-      <section id="features" className="py-24 bg-card relative z-20">
+      <section id="features" className="py-24 bg-background relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Your AI CFO In Five Minutes</h2>
+            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Your AI CFO in five minutes</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Connect the systems you already use and wake up to founder-grade insight, not another data chore.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-5 gap-5">
@@ -216,30 +231,30 @@ export default function Landing() {
               {
                 icon: BarChart3,
                 title: "Growth Quality",
-                desc: "Is growth creating value or destroying it?"
+                desc: "See whether growth is creating value or masking weakness."
               },
               {
                 icon: TrendingUp,
                 title: "Margin Recovery",
-                desc: "Find hidden profit opportunities."
+                desc: "Find profit leaks and the actions most likely to recover them."
               },
               {
                 icon: Wallet,
                 title: "Cash Control",
-                desc: "Spot future cash issues before they happen."
+                desc: "Know how much cash you really have and what could tighten next."
               },
               {
                 icon: ShieldCheck,
                 title: "Profit Growth",
-                desc: "Understand what drives profit and what is holding it back."
+                desc: "Understand what is driving profit and what is holding it back."
               },
               {
-                icon: ShieldCheck,
-                title: "Weekly Night Scout Briefing",
-                desc: "Wake up to the most important insight in your business."
+                icon: Sparkles,
+                title: "Night Scout Briefing",
+                desc: "Wake up to the insight your AI CFO would put first."
               }
             ].map((feat, i) => (
-              <div key={i} className="bg-background p-6 rounded-xl border border-border hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group">
+              <div key={i} className="bg-card p-6 rounded-xl border border-border hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group">
                 <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
                   <feat.icon className="w-5 h-5 text-primary" />
                 </div>
@@ -251,26 +266,30 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Opportunities Section */}
-      <section id="opportunities" className="py-24 bg-background relative z-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground mb-12">
-            Hidden Profit Found This Month
-          </h2>
-          <div className="grid md:grid-cols-3 gap-5 mb-10 text-left">
+      {/* Process Section */}
+      <section id="process" className="py-24 bg-card relative z-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">How Night Scout works</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Set it up once. Night Scout keeps watch while the business is quiet.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-5">
             {[
-              ["Contribution Recovery", "£20,400"],
-              ["Profit Growth Opportunity", "£18,000"],
-              ["Cash Released", "£12,500"],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-xl border border-border bg-card p-7 shadow-sm">
-                <p className="text-sm font-semibold text-muted-foreground mb-4">{label}</p>
-                <p className="text-4xl font-display font-bold text-foreground">{value}</p>
+              ["01", "Connect Shopify", "Bring in the trading signals that reveal demand, discounts and customer behaviour."],
+              ["02", "Connect Xero", "Add the cash, cost and profitability context behind the numbers."],
+              ["03", "Night Scout analyses your data overnight", "Your AI CFO looks for hidden profit, cashflow risk and practical next moves."],
+              ["04", "Wake up to your CFO briefing", "Start the day with the one action most likely to improve profitable growth."],
+            ].map(([step, title, desc]) => (
+              <div key={step} className="rounded-xl border border-border bg-background p-6">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary mb-4">{step}</p>
+                <h3 className="text-lg font-bold text-foreground mb-3">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
-          <p className="text-xl font-semibold text-foreground">Night Scout doesn't just report problems.</p>
-          <p className="text-xl font-semibold text-primary mt-2">It quantifies the opportunity.</p>
         </div>
       </section>
 
@@ -278,11 +297,13 @@ export default function Landing() {
       <footer className="bg-sidebar py-12 text-sidebar-foreground border-t border-sidebar-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <img
-              src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
-              alt="Night Scout logo"
-              className="h-10 w-auto"
-            />
+            <Link href="/" className="inline-flex items-center">
+              <img
+                src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
+                alt="Night Scout logo"
+                className="h-14 w-auto"
+              />
+            </Link>
           </div>
           <p className="text-sidebar-foreground/60 text-sm">© 2024 Night Scout Inc. All rights reserved.</p>
         </div>

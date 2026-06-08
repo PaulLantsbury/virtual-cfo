@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Briefcase, ArrowRight, LayoutDashboard } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 export default function Login() {
@@ -24,15 +24,14 @@ export default function Login() {
         </Link>
         
         <div className="w-full max-w-md">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Briefcase className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-2xl tracking-tight">Virtual CFO</span>
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
+            alt="Night Scout logo"
+            className="h-14 w-auto mb-8"
+          />
           
-          <h1 className="text-3xl font-display font-bold mb-2">Welcome back</h1>
-          <p className="text-muted-foreground mb-8">Enter your details to access your dashboard.</p>
+          <h1 className="text-3xl font-display font-bold mb-2">Welcome Back To Night Scout</h1>
+          <p className="text-muted-foreground mb-8">Wake up to profitable growth.</p>
           
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-2">
@@ -59,7 +58,7 @@ export default function Login() {
             </div>
             
             <Button type="submit" className="w-full h-12 text-base mt-2" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign In to Dashboard"}
+              {isLoading ? "Signing in..." : "Sign In to Night Scout"}
             </Button>
             
             <div className="relative my-8">
@@ -81,7 +80,7 @@ export default function Login() {
           </form>
           
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            New to Virtual CFO?{" "}
+            New to Night Scout?{" "}
             <Link href="/signup" className="font-semibold text-primary hover:underline">Get started</Link>
           </p>
 
@@ -96,8 +95,8 @@ export default function Login() {
                 window.location.href = "/dashboard";
               }}
             >
-              <LayoutDashboard className="w-4 h-4" />
-              Enter demo dashboard
+              <Sparkles className="w-4 h-4" />
+              Enter demo briefing
             </Button>
           </div>
         </div>
@@ -112,11 +111,19 @@ export default function Login() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-sidebar/90 via-sidebar/20 to-transparent"></div>
         <div className="absolute bottom-12 left-12 right-12 text-white">
-          <blockquote className="text-2xl font-display font-medium leading-tight mb-4 text-white/90">
-            "Virtual CFO helped us see that sales were growing but margins were slipping. We finally had clarity on profitability and cash."
-          </blockquote>
-          <p className="font-semibold text-lg text-primary-foreground">Hannah Cole</p>
-          <p className="text-primary-foreground/70">Founder, DTC retail brand</p>
+          <div className="rounded-2xl border border-white/15 bg-white/10 backdrop-blur-md p-7">
+            <p className="text-xs font-bold uppercase tracking-widest text-white/60 mb-2">Good Morning.</p>
+            <h2 className="text-2xl font-display font-bold text-white mb-5">Night Scout identified:</h2>
+            <div className="space-y-3 mb-6">
+              <p className="flex justify-between gap-4 text-white/90"><span>£20,400 hidden contribution</span><span className="text-emerald-300">found</span></p>
+              <p className="flex justify-between gap-4 text-white/90"><span>£18,000 profit opportunity</span><span className="text-emerald-300">ready</span></p>
+              <p className="flex justify-between gap-4 text-white/90"><span>+ 1 cash risk</span><span className="text-amber-300">watch</span></p>
+            </div>
+            <div className="rounded-xl bg-white/10 border border-white/15 p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-white/50 mb-1">Recommended focus</p>
+              <p className="text-xl font-display font-bold text-white">Reduce discount dependency</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

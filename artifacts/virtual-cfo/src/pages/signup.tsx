@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Briefcase, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 export default function Signup() {
@@ -23,15 +23,14 @@ export default function Signup() {
         </Link>
 
         <div className="w-full max-w-md">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Briefcase className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-2xl tracking-tight">Virtual CFO</span>
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
+            alt="Night Scout logo"
+            className="h-14 w-auto mb-8"
+          />
 
-          <h1 className="text-3xl font-display font-bold mb-2">Get started with Virtual CFO</h1>
-          <p className="text-muted-foreground mb-8">Create your account to see profitability, cash runway, and growth quality in minutes.</p>
+          <h1 className="text-3xl font-display font-bold mb-2">Create Your Night Scout Account</h1>
+          <p className="text-muted-foreground mb-8">Connect Shopify and Xero and start uncovering hidden profit in minutes.</p>
 
           <form onSubmit={handleSignup} className="space-y-5">
             <div className="space-y-2">
@@ -103,7 +102,7 @@ export default function Signup() {
         <div className="absolute inset-0 bg-gradient-to-t from-sidebar/90 via-sidebar/20 to-transparent"></div>
         <div className="absolute bottom-12 left-12 right-12 text-white">
           <blockquote className="text-2xl font-display font-medium leading-tight mb-4 text-white/90">
-            "Virtual CFO gave us the financial clarity we needed to confidently raise our Series A. It's like having a dedicated finance team on auto-pilot."
+            "Night Scout found the profit leaks we were missing and gave us the next actions before the team started work."
           </blockquote>
           <p className="font-semibold text-lg text-primary-foreground">Sarah Jenkins</p>
           <p className="text-primary-foreground/70">CEO, TechFlow</p>

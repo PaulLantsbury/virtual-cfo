@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { BarChart3, TrendingUp, ShieldCheck, Zap, Briefcase, ChevronRight, ArrowDownRight, ArrowUpRight, Minus, Sparkles } from "lucide-react";
+import { BarChart3, ChevronRight, CheckCircle2, ShieldCheck, Sparkles, TrendingUp, Wallet } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Landing() {
@@ -9,21 +9,20 @@ export default function Landing() {
       {/* Navigation */}
       <nav className="fixed w-full top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Briefcase className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <span className="font-display font-bold text-2xl tracking-tight">Virtual CFO</span>
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
+            alt="Night Scout logo"
+            className="h-12 w-auto"
+          />
           <div className="hidden md:flex items-center gap-8 font-medium text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-            <a href="#testimonials" className="hover:text-foreground transition-colors">Testimonials</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+            <a href="#features" className="hover:text-foreground transition-colors">Briefing</a>
+            <a href="#opportunities" className="hover:text-foreground transition-colors">Opportunities</a>
+            <Link href="/upgrade" className="hover:text-foreground transition-colors">Pricing</Link>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/login" className="font-semibold text-sm hover:text-primary transition-colors">Log in</Link>
             <Link href="/signup">
-              <Button className="rounded-full px-6">Get Started</Button>
+              <Button className="rounded-full px-6">Find Hidden Profit</Button>
             </Link>
           </div>
         </div>
@@ -61,8 +60,8 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-5xl md:text-7xl font-display font-extrabold tracking-tight text-foreground max-w-4xl mx-auto leading-[1.1]"
           >
-            Your AI CFO for <br className="hidden md:block"/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Shopify businesses using Xero</span>
+            Wake Up To <br className="hidden md:block"/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Profitable Growth</span>
           </motion.h1>
           
           <motion.p 
@@ -71,8 +70,22 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
-            Understand whether your business is growing profitably — and what to do about it — in minutes instead of spreadsheets.
+            Night Scout works while you sleep, analysing your Shopify and Xero data to uncover hidden profit, cash flow risks and growth opportunities.
           </motion.p>
+
+          <motion.ul
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-sm font-semibold text-foreground"
+          >
+            {["Connect Shopify + Xero in minutes", "No spreadsheets", "Plain-English CFO insights"].map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                {item}
+              </li>
+            ))}
+          </motion.ul>
           
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -82,116 +95,74 @@ export default function Landing() {
           >
             <Link href="/signup">
               <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg rounded-full">
-                See your financial health in minutes <ChevronRight className="w-5 h-5 ml-2" />
+                Find Hidden Profit <ChevronRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
             <Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-lg rounded-full bg-background/50 backdrop-blur">
-              View live demo
+              See Night Scout In Action
             </Button>
           </motion.div>
 
-          {/* Hero Dashboard Preview */}
+          {/* Hero morning briefing preview */}
           <motion.div 
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-20 relative mx-auto max-w-5xl rounded-2xl md:rounded-[2rem] border border-border/50 bg-background/50 backdrop-blur-xl shadow-2xl p-2 md:p-4"
+            className="mt-20 relative mx-auto max-w-4xl rounded-2xl md:rounded-[2rem] border border-border/50 bg-background/80 backdrop-blur-xl shadow-2xl p-4 md:p-6 text-left"
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 h-full rounded-[2rem] pointer-events-none"></div>
-            <img 
-              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&h=900&fit=crop" 
-              alt="Dashboard Preview" 
-              className="rounded-xl md:rounded-2xl border border-border shadow-sm object-cover w-full h-[400px] md:h-[600px]"
-            />
+            <div className="rounded-xl md:rounded-2xl border border-border bg-card overflow-hidden">
+              <div className="flex items-center justify-between border-b border-border px-5 py-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Good Morning</p>
+                  <h2 className="text-2xl font-display font-bold text-foreground">Night Scout identified:</h2>
+                </div>
+                <div className="flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-600">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Overnight scan complete
+                </div>
+              </div>
+              <div className="grid md:grid-cols-3 gap-4 p-5">
+                {[
+                  ["£20,400", "hidden contribution", "Profit leak found"],
+                  ["£18,000", "profit opportunity", "Recovery available"],
+                  ["+ 2", "cash flow risks", "Needs attention"],
+                ].map(([value, label, note]) => (
+                  <div key={label} className="rounded-xl bg-background border border-border p-5">
+                    <p className="text-3xl font-display font-bold text-foreground">{value}</p>
+                    <p className="text-sm font-semibold text-foreground mt-1">{label}</p>
+                    <p className="text-xs text-muted-foreground mt-3">{note}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mx-5 mb-5 rounded-xl bg-primary/10 border border-primary/20 p-5">
+                <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">Recommended focus</p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <p className="text-xl font-display font-bold text-foreground">Reduce discount dependency</p>
+                  <Button size="sm" className="rounded-full w-full sm:w-auto">View action</Button>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Insight Preview Strip */}
-      <section className="relative z-20 bg-sidebar border-y border-sidebar-border overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="flex h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
-            <span className="text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-widest">Live dashboard preview</span>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
-            {/* Contribution Margin */}
-            <div className="flex-none min-w-[180px] bg-sidebar-accent/40 border border-sidebar-border rounded-xl p-4">
-              <p className="text-xs text-sidebar-foreground/50 mb-1 font-medium">Contribution Margin</p>
-              <div className="flex items-end gap-2">
-                <span className="text-2xl font-bold text-sidebar-foreground">21%</span>
-                <span className="flex items-center gap-0.5 text-red-400 text-sm font-semibold mb-0.5">
-                  <ArrowDownRight className="w-3.5 h-3.5" />↓
-                </span>
-              </div>
-              <p className="text-xs text-red-400/80 mt-1">Lower than expected</p>
-            </div>
-
-            {/* Cash Runway */}
-            <div className="flex-none min-w-[180px] bg-sidebar-accent/40 border border-sidebar-border rounded-xl p-4">
-              <p className="text-xs text-sidebar-foreground/50 mb-1 font-medium">Cash Runway</p>
-              <div className="flex items-end gap-2">
-                <span className="text-2xl font-bold text-sidebar-foreground">4.2</span>
-                <span className="text-sidebar-foreground/60 text-sm mb-0.5 font-medium">months</span>
-              </div>
-              <p className="text-xs text-amber-400/80 mt-1">Monitor closely</p>
-            </div>
-
-            {/* Discount Dependency */}
-            <div className="flex-none min-w-[180px] bg-sidebar-accent/40 border border-sidebar-border rounded-xl p-4">
-              <p className="text-xs text-sidebar-foreground/50 mb-1 font-medium">Discount Dependency</p>
-              <div className="flex items-end gap-2">
-                <span className="text-2xl font-bold text-sidebar-foreground">38%</span>
-                <span className="flex items-center gap-0.5 text-red-400 text-sm font-semibold mb-0.5">
-                  <ArrowUpRight className="w-3.5 h-3.5" />↑
-                </span>
-              </div>
-              <p className="text-xs text-red-400/80 mt-1">Rising quickly</p>
-            </div>
-
-            {/* Repeat Purchase Rate */}
-            <div className="flex-none min-w-[180px] bg-sidebar-accent/40 border border-sidebar-border rounded-xl p-4">
-              <p className="text-xs text-sidebar-foreground/50 mb-1 font-medium">Repeat Purchase Rate</p>
-              <div className="flex items-end gap-2">
-                <span className="text-2xl font-bold text-sidebar-foreground">27%</span>
-                <span className="flex items-center gap-0.5 text-red-400 text-sm font-semibold mb-0.5">
-                  <ArrowDownRight className="w-3.5 h-3.5" />↓
-                </span>
-              </div>
-              <p className="text-xs text-red-400/80 mt-1">Needs attention</p>
-            </div>
-
-            {/* AI Insight Card */}
-            <div className="flex-none min-w-[260px] bg-primary/20 border border-primary/30 rounded-xl p-4">
-              <div className="flex items-center gap-1.5 mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
-                <p className="text-xs text-primary font-semibold uppercase tracking-widest">AI Insight</p>
-              </div>
-              <p className="text-sm text-sidebar-foreground leading-snug font-medium">
-                Margin pressure increasing due to promotions
-              </p>
-              <p className="text-xs text-sidebar-foreground/40 mt-2">Updated just now</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Built For Section */}
+      {/* Systems Section */}
       <section className="py-24 bg-card relative z-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-3xl md:text-4xl font-display font-bold tracking-tight text-foreground mb-6 leading-tight">
-              Built for founders who already use Shopify and Xero
+              Your Business Is Already Telling You What To Fix
             </h2>
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              Virtual CFO connects your store and accounting data automatically to explain:
+              Night Scout connects your systems and automatically explains:
             </p>
             <ul className="flex flex-col gap-4 mb-10">
               {[
-                "Whether your growth is profitable",
+                "Where profit is leaking",
+                "Why margins are changing",
                 "How long your cash will last",
-                "What is driving margin changes",
-                "Where performance is improving or weakening",
+                "Which actions create the biggest impact",
+                "What to focus on next",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <span className="flex-none mt-1 w-5 h-5 rounded-full bg-primary/15 flex items-center justify-center">
@@ -227,7 +198,7 @@ export default function Landing() {
             ))}
           </ul>
           <p className="text-xl font-semibold text-foreground">
-            Virtual CFO explains what is really happening —{" "}
+            Night Scout explains what is really happening —{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">automatically.</span>
           </p>
         </div>
@@ -237,37 +208,69 @@ export default function Landing() {
       <section id="features" className="py-24 bg-card relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Everything you need to run your business</h2>
-            <p className="text-lg text-muted-foreground">Replace messy spreadsheets with real-time financial dashboards that actually make sense.</p>
+            <h2 className="text-3xl md:text-5xl font-display font-bold mb-6">Your AI CFO In Five Minutes</h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-5 gap-5">
             {[
               {
                 icon: BarChart3,
-                title: "True Contribution Margin",
-                desc: "See whether your growth is actually profitable after fulfilment, fees, and discounts."
+                title: "Growth Quality",
+                desc: "Is growth creating value or destroying it?"
               },
               {
                 icon: TrendingUp,
-                title: "Cash Runway Visibility",
-                desc: "Know how many months of cash you really have left based on real trading performance."
+                title: "Margin Recovery",
+                desc: "Find hidden profit opportunities."
+              },
+              {
+                icon: Wallet,
+                title: "Cash Control",
+                desc: "Spot future cash issues before they happen."
               },
               {
                 icon: ShieldCheck,
-                title: "AI CFO Commentary",
-                desc: "Get a plain-English financial briefing explaining what changed in your business and why."
+                title: "Profit Growth",
+                desc: "Understand what drives profit and what is holding it back."
+              },
+              {
+                icon: ShieldCheck,
+                title: "Weekly Night Scout Briefing",
+                desc: "Wake up to the most important insight in your business."
               }
             ].map((feat, i) => (
-              <div key={i} className="bg-background p-8 rounded-3xl border border-border hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <feat.icon className="w-7 h-7 text-primary" />
+              <div key={i} className="bg-background p-6 rounded-xl border border-border hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 group">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                  <feat.icon className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">{feat.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feat.desc}</p>
+                <h3 className="text-base font-bold mb-3">{feat.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{feat.desc}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Opportunities Section */}
+      <section id="opportunities" className="py-24 bg-background relative z-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-5xl font-display font-bold tracking-tight text-foreground mb-12">
+            Hidden Profit Found This Month
+          </h2>
+          <div className="grid md:grid-cols-3 gap-5 mb-10 text-left">
+            {[
+              ["Contribution Recovery", "£20,400"],
+              ["Profit Growth Opportunity", "£18,000"],
+              ["Cash Released", "£12,500"],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-xl border border-border bg-card p-7 shadow-sm">
+                <p className="text-sm font-semibold text-muted-foreground mb-4">{label}</p>
+                <p className="text-4xl font-display font-bold text-foreground">{value}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xl font-semibold text-foreground">Night Scout doesn't just report problems.</p>
+          <p className="text-xl font-semibold text-primary mt-2">It quantifies the opportunity.</p>
         </div>
       </section>
 
@@ -275,10 +278,13 @@ export default function Landing() {
       <footer className="bg-sidebar py-12 text-sidebar-foreground border-t border-sidebar-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <Briefcase className="w-6 h-6 text-primary" />
-            <span className="font-display font-bold text-xl">Virtual CFO</span>
+            <img
+              src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
+              alt="Night Scout logo"
+              className="h-10 w-auto"
+            />
           </div>
-          <p className="text-sidebar-foreground/60 text-sm">© 2024 Virtual CFO Inc. All rights reserved.</p>
+          <p className="text-sidebar-foreground/60 text-sm">© 2024 Night Scout Inc. All rights reserved.</p>
         </div>
       </footer>
     </div>

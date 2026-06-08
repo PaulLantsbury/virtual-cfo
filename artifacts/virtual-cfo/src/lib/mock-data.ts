@@ -1,5 +1,5 @@
 /**
- * Centralised mock data for the Virtual CFO app.
+ * Centralised mock data for the Night Scout app.
  *
  * This module holds benchmark ranges, shared opportunity objects and the
  * action library. Each structure is designed to be replaced with live

@@ -186,15 +186,15 @@ const CFO_REPORTS: ReportConfig[] = [
   },
   {
     id: "weekly-digest",
-    title: "Weekly CFO Digest",
+    title: "Weekly Night Scout Briefing",
     frequency: "Every Monday",
-    description: "A comprehensive weekly overview from your virtual CFO.",
+    description: "A comprehensive weekly overview from Night Scout.",
     includes: ["Sales vs last week", "Contribution margin", "Cash runway", "Biggest risk", "Biggest opportunity", "Top recommended action"],
     frequencies: ["Every Monday", "Every Friday", "Mid-week (Wednesday)"],
   },
   {
     id: "monthly-summary",
-    title: "Monthly CFO Summary",
+    title: "Monthly Night Scout Summary",
     frequency: "Month-end",
     description: "A full month-end board-ready summary.",
     includes: ["Revenue and contribution", "Profit performance", "Cash position", "Opportunities identified", "Recommended plan for next month"],
@@ -566,9 +566,9 @@ export default function CfoAlerts() {
       {/* ── Page header ────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">CFO Alerts</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Night Scout Alerts</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Choose what your virtual CFO should monitor and how often you want to be notified.
+            Choose what Night Scout should monitor and how often you want to be notified.
           </p>
         </div>
         {!isPro && (
@@ -577,7 +577,7 @@ export default function CfoAlerts() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shrink-0"
           >
             <Zap className="w-4 h-4" />
-            Unlock CFO Alerts
+            Unlock Night Scout Alerts
           </Link>
         )}
       </div>
@@ -588,7 +588,7 @@ export default function CfoAlerts() {
           <div className="flex items-center justify-center w-7 h-7 rounded-full bg-indigo-900/50 shrink-0">
             <Activity className="w-3.5 h-3.5 text-indigo-300" />
           </div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-300">Your CFO is currently monitoring</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-indigo-300">Night Scout is currently monitoring</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
@@ -674,17 +674,17 @@ export default function CfoAlerts() {
           <div className="flex flex-col sm:flex-row gap-5">
             <div className="flex-1">
               <p className="text-base font-bold text-indigo-900 dark:text-indigo-200 mb-2">
-                Unlock proactive CFO monitoring
+                Unlock proactive Night Scout monitoring
               </p>
               <p className="text-sm text-indigo-700/80 dark:text-indigo-400/80 leading-snug mb-4">
-                CFO Alerts watches your sales, margin, cash and marketing performance so you know when something needs attention — before it becomes a bigger problem.
+                Night Scout watches your sales, margin, cash and marketing performance so you know when something needs attention before it becomes a bigger problem.
               </p>
               <ul className="space-y-1.5 mb-5">
                 {[
                   "Monitor sales, margin, cash and marketing movements",
-                  "Receive warning alerts when key metrics move",
-                  "Schedule daily, weekly and monthly CFO summaries",
-                  "Get AI CFO explanations and suggested actions",
+                  "Receive warning alerts when key signals move",
+                  "Schedule daily, weekly and monthly Night Scout briefings",
+                  "Get plain-English recommendations and suggested actions",
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2 text-sm text-indigo-800 dark:text-indigo-300">
                     <CheckCircle2 className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
@@ -696,7 +696,7 @@ export default function CfoAlerts() {
                 href="/upgrade"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors"
               >
-                Unlock CFO Alerts
+                Unlock Night Scout Alerts
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -836,11 +836,11 @@ export default function CfoAlerts() {
         </div>
       </div>
 
-      {/* ══ RECURRING CFO REPORTS ════════════════════════════════════════════ */}
+      {/* ══ RECURRING NIGHT SCOUT BRIEFINGS ══════════════════════════════════ */}
       <div className="mb-8">
         <SectionHeader
-          title="Recurring CFO Reports"
-          subtitle="Choose the regular summaries your virtual CFO should prepare."
+          title="Recurring Night Scout Briefings"
+          subtitle="Choose the regular summaries Night Scout should prepare."
         />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {CFO_REPORTS.map((report) => (
@@ -861,22 +861,22 @@ export default function CfoAlerts() {
         </div>
         {!isPro && (
           <p className="text-xs text-muted-foreground/60 text-center mt-3">
-            Report delivery and configuration available on Pro.{" "}
-            <Link href="/upgrade" className="text-primary underline underline-offset-2">Unlock reports on Pro</Link>
+            Briefing delivery and configuration available on Pro.{" "}
+            <Link href="/upgrade" className="text-primary underline underline-offset-2">Unlock briefings on Pro</Link>
           </p>
         )}
       </div>
 
-      {/* ══ WHAT YOUR CFO WOULD HAVE FLAGGED ════════════════════════════════ */}
+      {/* ══ WHAT NIGHT SCOUT WOULD HAVE FLAGGED ═════════════════════════════ */}
       <div className="mb-8">
         <div className="flex items-center justify-between gap-3 mb-5">
           <div>
             <h2 className="text-xl font-bold text-foreground">
-              What your CFO would have flagged this week
+              What Night Scout would have flagged this week
             </h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {isPro
-                ? "Issues your virtual CFO detected — with estimated financial impact."
+                ? "Issues Night Scout detected — with estimated financial impact."
                 : "Preview of what live monitoring would catch — upgrade to activate."}
             </p>
           </div>
@@ -961,7 +961,7 @@ export default function CfoAlerts() {
 
           <div className="space-y-3">
             {[
-              { key: "inApp" as const,        label: "In-app alerts",        icon: Smartphone, available: true,  desc: "Show notifications inside the dashboard." },
+              { key: "inApp" as const,        label: "In-app alerts",        icon: Smartphone, available: true,  desc: "Show notifications inside Night Scout." },
               { key: "email" as const,         label: "Email alerts",         icon: Mail,       available: true,  desc: "Send alert emails to your account email." },
               { key: "weeklySummary" as const, label: "Weekly summary email", icon: Calendar,   available: true,  desc: "Receive the weekly CFO Digest by email." },
             ].map(({ key, label, icon: Icon, desc }) => (
@@ -1024,9 +1024,9 @@ export default function CfoAlerts() {
             <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Lock className="w-6 h-6 text-primary" />
             </div>
-            <p className="text-base font-bold text-foreground mb-2">CFO Alerts — Pro feature</p>
+            <p className="text-base font-bold text-foreground mb-2">Night Scout Alerts — Pro feature</p>
             <p className="text-sm text-muted-foreground mb-5 leading-snug">
-              Upgrade to Pro to enable alerts, configure thresholds and receive proactive CFO monitoring.
+              Upgrade to Pro to enable alerts, configure thresholds and receive proactive Night Scout monitoring.
             </p>
             <Link
               href="/upgrade"

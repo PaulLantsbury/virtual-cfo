@@ -1,18 +1,18 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, HelpCircle, Briefcase, TrendingDown, BarChart2, Megaphone, Cpu, Wallet, Tag, FlaskConical, Target, Bell } from "lucide-react";
+import { LayoutDashboard, HelpCircle, TrendingDown, BarChart2, Megaphone, Cpu, Wallet, Tag, FlaskConical, Target, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Dashboard",              href: "/dashboard"              },
-  { icon: TrendingDown,    label: "Margin Analysis",         href: "/margin-analysis"        },
+  { icon: LayoutDashboard, label: "Morning Briefing",        href: "/dashboard"              },
+  { icon: TrendingDown,    label: "Margin Recovery",         href: "/margin-analysis"        },
   { icon: BarChart2,       label: "Growth Quality",         href: "/growth-quality"         },
-  { icon: Megaphone,       label: "Marketing Efficiency",   href: "/marketing-efficiency"   },
-  { icon: Tag,             label: "Pricing Optimisation",   href: "/pricing-optimisation"   },
+  { icon: Megaphone,       label: "Growth Efficiency",      href: "/marketing-efficiency"   },
+  { icon: Tag,             label: "Discount Recovery",      href: "/pricing-optimisation"   },
   { icon: Cpu,             label: "Profit Growth",          href: "/profit-engine"          },
   { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
   { icon: Target,          label: "Profit Opportunities",   href: "/profit-opportunities"   },
   { icon: FlaskConical,    label: "Scenario Lab",           href: "/scenario-lab"           },
-  { icon: Bell,            label: "CFO Alerts",             href: "/cfo-alerts"             },
+  { icon: Bell,            label: "Night Scout Alerts",     href: "/cfo-alerts"             },
 ];
 
 export function Sidebar() {
@@ -22,10 +22,11 @@ export function Sidebar() {
     <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border shadow-2xl z-10">
       <div className="h-16 flex items-center px-6 border-b border-sidebar-border/50">
         <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-            <Briefcase className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <span className="font-display font-bold text-lg tracking-tight">Virtual CFO</span>
+          <img
+            src={`${import.meta.env.BASE_URL}nightscout-logo.png`}
+            alt="Night Scout logo"
+            className="h-10 w-auto max-w-[150px] group-hover:scale-[1.02] transition-transform"
+          />
         </Link>
       </div>
 

@@ -1,7 +1,7 @@
 /**
  * metrics.ts
  *
- * Central metric name registry for the Virtual CFO dashboard.
+ * Central metric name registry for the Night Scout app.
  *
  * This is the single source of truth for canonical metric naming.
  *

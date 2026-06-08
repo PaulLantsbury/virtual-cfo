@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 // ─── Page metadata ────────────────────────────────────────────────────────────
 
 const PAGE_NAMES: Record<PageId, string> = {
-  dashboard:     "Dashboard",
+  dashboard:     "Morning Briefing",
   margin:        "Margin Analysis",
   growth:        "Growth Quality",
   marketing:     "Marketing Efficiency",
@@ -22,7 +22,7 @@ const PAGE_NAMES: Record<PageId, string> = {
   cash:          "Cash Control",
   opportunities: "Profit Opportunities",
   scenario:      "Scenario Lab",
-  alerts:        "CFO Alerts",
+  alerts:        "Night Scout Alerts",
 };
 
 const CONFIDENCE_META: Record<Confidence, { label: string; colour: string }> = {

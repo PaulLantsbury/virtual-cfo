@@ -13,9 +13,8 @@ export function Header() {
         <Menu className="w-5 h-5" />
       </button>
       <BrandLogo
-        variant="mascot"
         className="md:hidden ml-2"
-        imageClassName="h-11 w-11 rounded-full"
+        imageClassName="h-12 max-w-[160px]"
       />
 
       <div className="flex items-center gap-3 ml-auto">

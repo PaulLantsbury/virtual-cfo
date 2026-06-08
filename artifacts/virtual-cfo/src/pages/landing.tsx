@@ -41,21 +41,11 @@ export default function Landing() {
         <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-accent/20 blur-[100px] rounded-full pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium text-sm mb-8"
-          >
-            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-            Built for Shopify founders using Xero
-          </motion.div>
-          
           <BrandLogo
             variant="mascot"
             glow
-            className="mx-auto mb-8"
-            imageClassName="h-32 w-32 sm:h-40 sm:w-40 rounded-full"
+            className="mx-auto mb-12"
+            imageClassName="h-48 w-48 sm:h-60 sm:w-60 rounded-full"
           />
 
           <motion.h1 

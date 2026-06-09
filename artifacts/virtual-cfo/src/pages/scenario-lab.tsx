@@ -491,58 +491,79 @@ export default function ScenarioLab() {
         <SectionHeading title="Why Night Scout Chose This" />
 
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 space-y-5">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-primary" />
-            </div>
-            <p className="text-sm text-foreground leading-relaxed">
-              This plan is recommended because Meta CAC is reducing contribution by £3.40 per order, discounting has increased by 1.8pp,
-              and inventory build is tightening cash runway within 60 days. It improves contribution without requiring additional stock investment.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-3 gap-4">
-            {[
-              {
-                icon: AlertTriangle, color: "amber",
-                title: "Margin pressure",
-                text:  "Contribution margin is 42.3%, below the healthy 45–60% benchmark range.",
-              },
-              {
-                icon: Target, color: "orange",
-                title: "Marketing inefficiency",
-                text:  "Meta is generating materially lower contribution per order than Email and Organic.",
-              },
-              {
-                icon: Zap, color: "red",
-                title: "Cash tightening",
-                text:  "Inventory build and supplier timing are reducing cash headroom over the next 60 days.",
-              },
-            ].map(({ icon: Icon, color, title, text }) => (
-              <div key={title} className={cn(
-                "rounded-xl border p-4",
-                color === "amber"  ? "bg-amber-50/60 dark:bg-amber-950/15 border-amber-200/60 dark:border-amber-700/30"
-                : color === "orange" ? "bg-orange-50/60 dark:bg-orange-950/15 border-orange-200/60 dark:border-orange-700/30"
-                : "bg-rose-50/60 dark:bg-rose-950/15 border-rose-200/60 dark:border-rose-700/30"
-              )}>
-                <div className={cn(
-                  "w-7 h-7 rounded-full flex items-center justify-center mb-2",
-                  color === "amber"  ? "bg-amber-100 dark:bg-amber-900/40"
-                  : color === "orange" ? "bg-orange-100 dark:bg-orange-900/40"
-                  : "bg-rose-100 dark:bg-rose-900/40"
-                )}>
-                  <Icon className={cn(
-                    "w-4 h-4",
-                    color === "amber"  ? "text-amber-600 dark:text-amber-400"
-                    : color === "orange" ? "text-orange-600 dark:text-orange-400"
-                    : "text-rose-600 dark:text-rose-400"
-                  )} />
+          {isPro ? (
+            <>
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-primary" />
                 </div>
-                <p className="text-sm font-semibold text-foreground mb-1">{title}</p>
-                <p className="text-xs text-muted-foreground leading-snug">{text}</p>
+                <p className="text-sm text-foreground leading-relaxed">
+                  This plan is recommended because Meta CAC is reducing contribution by £3.40 per order, discounting has increased by 1.8pp,
+                  and inventory build is tightening cash runway within 60 days. It improves contribution without requiring additional stock investment.
+                </p>
               </div>
-            ))}
-          </div>
+
+              <div className="grid sm:grid-cols-3 gap-4">
+                {[
+                  {
+                    icon: AlertTriangle, color: "amber",
+                    title: "Margin pressure",
+                    text:  "Contribution margin is 42.3%, below the healthy 45–60% benchmark range.",
+                  },
+                  {
+                    icon: Target, color: "orange",
+                    title: "Marketing inefficiency",
+                    text:  "Meta is generating materially lower contribution per order than Email and Organic.",
+                  },
+                  {
+                    icon: Zap, color: "red",
+                    title: "Cash tightening",
+                    text:  "Inventory build and supplier timing are reducing cash headroom over the next 60 days.",
+                  },
+                ].map(({ icon: Icon, color, title, text }) => (
+                  <div key={title} className={cn(
+                    "rounded-xl border p-4",
+                    color === "amber"  ? "bg-amber-50/60 dark:bg-amber-950/15 border-amber-200/60 dark:border-amber-700/30"
+                    : color === "orange" ? "bg-orange-50/60 dark:bg-orange-950/15 border-orange-200/60 dark:border-orange-700/30"
+                    : "bg-rose-50/60 dark:bg-rose-950/15 border-rose-200/60 dark:border-rose-700/30"
+                  )}>
+                    <div className={cn(
+                      "w-7 h-7 rounded-full flex items-center justify-center mb-2",
+                      color === "amber"  ? "bg-amber-100 dark:bg-amber-900/40"
+                      : color === "orange" ? "bg-orange-100 dark:bg-orange-900/40"
+                      : "bg-rose-100 dark:bg-rose-900/40"
+                    )}>
+                      <Icon className={cn(
+                        "w-4 h-4",
+                        color === "amber"  ? "text-amber-600 dark:text-amber-400"
+                        : color === "orange" ? "text-orange-600 dark:text-orange-400"
+                        : "text-rose-600 dark:text-rose-400"
+                      )} />
+                    </div>
+                    <p className="text-sm font-semibold text-foreground mb-1">{title}</p>
+                    <p className="text-xs text-muted-foreground leading-snug">{text}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-foreground leading-relaxed">
+                Night Scout has identified three signals influencing this recommendation.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-3">
+                {[
+                  "Margin pressure",
+                  "Marketing efficiency opportunity",
+                  "Cash protection opportunity",
+                ].map(signal => (
+                  <div key={signal} className="rounded-xl border border-border/60 bg-secondary/30 px-4 py-3">
+                    <p className="text-sm font-semibold text-foreground">{signal}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ══ 6. OTHER ROUTES ════════════════════════════════════════════════ */}
@@ -586,7 +607,7 @@ export default function ScenarioLab() {
                   ? "border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/40"
                   : "border-border/40 text-muted-foreground/60 bg-secondary/30 cursor-not-allowed"
               )}>
-                Apply this plan
+                {isProPlans ? "Apply this plan" : "View Route"}
               </button>
             </div>
 
@@ -623,7 +644,7 @@ export default function ScenarioLab() {
                   ? "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-700/30"
                   : "border-border/40 text-muted-foreground/60 bg-secondary/30 cursor-not-allowed"
               )}>
-                Apply this plan
+                {isProPlans ? "Apply this plan" : "View Route"}
               </button>
             </div>
 
@@ -660,7 +681,7 @@ export default function ScenarioLab() {
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
                   : "bg-secondary text-muted-foreground/60 cursor-not-allowed"
               )}>
-                Apply this plan
+                {isProPlans ? "Apply this plan" : "View Route"}
               </button>
             </div>
           </div>
@@ -671,7 +692,7 @@ export default function ScenarioLab() {
             <div className="flex-1">
               <p className="text-base font-bold text-indigo-900 dark:text-indigo-100 mb-1">Unlock Your Launch Plan</p>
               <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 leading-relaxed">
-                See the actions, expected profit uplift, cash impact and implementation roadmap.
+                See exactly how much profit is available, which route delivers the strongest outcome and the step-by-step implementation plan.
               </p>
             </div>
             <a

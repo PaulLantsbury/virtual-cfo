@@ -381,8 +381,8 @@ export default function ScenarioLab() {
 
         {/* ══ 3. RECOMMENDED LAUNCH PLAN SUMMARY ══════════════════════════════ */}
         <SectionHeading
-          title="Recommended Launch Plan: Balanced Growth Plan"
-          subtitle="This is Night Scout’s recommended route for profit uplift, cash protection and manageable implementation risk."
+          title="Recommended Route To Higher Profit"
+          subtitle="Night Scout recommends the Balanced Growth Plan."
         />
 
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
@@ -397,23 +397,60 @@ export default function ScenarioLab() {
               Confidence: Medium–High
             </span>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className={cn("grid gap-3", isPro ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4")}>
             {[
-              { label: "Profit impact",    value: "+£42,000",   subLabel: "30-day impact", annualised: "+£504,000 (annualised)", color: "emerald" },
-              { label: "Cash impact",      value: "+£64,000",   subLabel: "30-day impact", annualised: "+£768,000 (annualised)", color: "emerald" },
-              { label: "Runway impact",    value: "+0.8 months", subLabel: undefined,       annualised: undefined,               color: "emerald" },
-              { label: "Margin impact",    value: "+4.2pp",      subLabel: undefined,       annualised: undefined,               color: "emerald" },
-            ].map(({ label, value, subLabel, annualised, color }) => (
+              {
+                label: "Profit impact",
+                value: "+£42,000",
+                freeValue: "Meaningful profit improvement identified",
+                subLabel: "30-day impact",
+                annualised: "+£504,000 (annualised)",
+                color: "emerald",
+              },
+              {
+                label: "Cash impact",
+                value: "+£64,000",
+                freeValue: "Meaningful cash improvement identified",
+                subLabel: "30-day impact",
+                annualised: "+£768,000 (annualised)",
+                color: "emerald",
+              },
+              {
+                label: "Runway impact",
+                value: "+0.8 months",
+                freeValue: "Improved runway resilience identified",
+                subLabel: undefined,
+                annualised: undefined,
+                color: "emerald",
+              },
+              {
+                label: "Margin impact",
+                value: "+4.2pp",
+                freeValue: "Margin improvement opportunity identified",
+                subLabel: undefined,
+                annualised: undefined,
+                color: "emerald",
+              },
+              ...(isPro ? [{
+                label: "Plan quality",
+                value: "Strong",
+                freeValue: "",
+                subLabel: undefined,
+                annualised: undefined,
+                color: "indigo",
+              }] : []),
+            ].map(({ label, value, freeValue, subLabel, annualised, color }) => (
               <div key={label} className="flex flex-col items-center text-center bg-secondary/40 rounded-xl p-4 gap-0.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
                 <p className={cn(
-                  "text-lg font-bold leading-tight",
+                  isPro ? "text-lg font-bold leading-tight" : "text-sm font-bold leading-snug",
                   color === "emerald" ? "text-emerald-600 dark:text-emerald-400" : "text-primary"
                 )}>
-                  {value}
+                  {isPro ? value : freeValue}
                 </p>
-                {subLabel   && <p className="text-[10px] text-muted-foreground/70">{subLabel}</p>}
-                {annualised && <p className="text-[10px] text-muted-foreground/60 tabular-nums">{annualised}</p>}
+                {isPro && subLabel   && <p className="text-[10px] text-muted-foreground/70">{subLabel}</p>}
+                {isPro && annualised && <p className="text-[10px] text-muted-foreground/60 tabular-nums">{annualised}</p>}
+                {!isPro && <p className="text-[10px] text-muted-foreground/70 mt-1">Upgrade to see expected impact.</p>}
               </div>
             ))}
           </div>
@@ -532,7 +569,9 @@ export default function ScenarioLab() {
               <div>
                 <p className="text-sm font-bold text-foreground">Margin Recovery Plan</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Best for: Immediate contribution improvement</p>
-                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">+£42k contribution / month</p>
+                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
+                  {isPro ? "+£42k contribution / month" : "Upgrade to compare expected impact."}
+                </p>
               </div>
               <ul className="space-y-1.5">
                 {["Reduce average discount by 3pp","Reallocate 15% of Meta spend to Email and Organic","Reduce shipping cost per order by £1.50","Pause low-margin acquisition campaigns"].map(a => (
@@ -567,7 +606,9 @@ export default function ScenarioLab() {
               <div>
                 <p className="text-sm font-bold text-foreground">Cash Protection Plan</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Best for: Protecting runway and reducing cash pressure</p>
-                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-1">+£64k cash headroom</p>
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-1">
+                  {isPro ? "+£64k cash headroom" : "Upgrade to compare expected impact."}
+                </p>
               </div>
               <ul className="space-y-1.5">
                 {["Reduce inventory days by 12","Delay non-essential supplier payments by 6 days","Hold fixed costs flat","Pause discretionary marketing spend"].map(a => (
@@ -602,7 +643,9 @@ export default function ScenarioLab() {
               <div>
                 <p className="text-sm font-bold text-foreground">Balanced Growth Plan</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Best for: Improving profit without choking growth</p>
-                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">+£28k contribution / +0.5 months runway</p>
+                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
+                  {isPro ? "+£28k contribution / +0.5 months runway" : "Upgrade to compare expected impact."}
+                </p>
               </div>
               <ul className="space-y-1.5">
                 {["Reduce blanket discounts by 2pp","Shift 10% of Meta spend to Email","Improve full-price order mix","Keep Google Shopping spend stable"].map(a => (

@@ -103,7 +103,7 @@ const PLAN_PRESETS: Record<PlanId, ScenarioState> = {
   custom:   ZERO_STATE,
 };
 
-// ─── Opportunity presets (from Profit Opportunities page) ─────────────────────
+// ─── Opportunity presets (from Opportunity Finder) ────────────────────────────
 // Each preset loads when the user clicks "Model this scenario" on an opportunity
 // card. Values start from ZERO_STATE so only relevant levers are set, making
 // the connection between the recommendation and the slider change explicit.

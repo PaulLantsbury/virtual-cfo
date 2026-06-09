@@ -347,9 +347,9 @@ export default function Opportunities() {
       {/* ── Page header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Profit Recovery Plan</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Opportunity Finder</h1>
           <p className="text-muted-foreground mt-1">
-            A practical CFO action plan for recovering contribution without adding unnecessary complexity.
+            Night Scout continuously scans your business for profit, cash and growth opportunities worth pursuing.
           </p>
         </div>
         <DataPeriodLabel

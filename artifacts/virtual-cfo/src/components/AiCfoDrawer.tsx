@@ -20,7 +20,7 @@ const PAGE_NAMES: Record<PageId, string> = {
   pricing:       "Pricing Optimisation",
   profit:        "Profit Growth",
   cash:          "Cash Control",
-  opportunities: "Profit Opportunities",
+  opportunities: "Opportunity Finder",
   scenario:      "Profit Launchpad",
   alerts:        "Night Scout Alerts",
 };

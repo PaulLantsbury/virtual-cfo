@@ -119,7 +119,7 @@ Source of email marketing spend (platform cost) and email-attributed order reven
 
 ### 1.6 Internal Opportunity Engine
 
-Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly contribution improvement range shown on the Dashboard and Profit Opportunities page.
+Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly contribution improvement range shown on the Dashboard and Opportunity Finder.
 
 | Property | Detail |
 |---|---|
@@ -375,7 +375,7 @@ Source for `RECOVERABLE_LOW` and `RECOVERABLE_HIGH` — the estimated monthly co
 |---|---|
 | Formula | `sum(opportunities.uplift_low WHERE status = "active")` / `sum(opportunities.uplift_high WHERE status = "active")` |
 | Source fields | Internal opportunity engine — `opportunities.uplift_low`, `uplift_high`, `status` |
-| Consuming pages | Dashboard (CFO insight upside card), Profit Opportunities (TOTAL_LOW / TOTAL_HIGH) |
+| Consuming pages | Dashboard (CFO insight upside card), Opportunity Finder (TOTAL_LOW / TOTAL_HIGH) |
 | Confidence risks | Opportunity uplifts are estimates — methodology must be documented per opportunity type to be credible |
 | Data quality flags | Flag if no active opportunities exist (range would be £0–£0); flag if any opportunity's underlying data is stale |
 
@@ -937,7 +937,7 @@ When a new KPI tile is added, the required steps are: (1) add the canonical name
 | **Source table / view** | Current: `RECOVERABLE_LOW` / `RECOVERABLE_HIGH` constants in `business-snapshot.ts` · Future: `opportunities` table → `v_recoverable_contribution` view |
 | **Current status** | **MOCK** — both endpoints of the range are static constants |
 | **Source confirmation** | The dashboard KPI tile must use `RECOVERABLE_LOW` / `RECOVERABLE_HIGH` from the internal opportunity engine (currently `business-snapshot.ts`, future: `opportunities` table). It must **not** use `diagnosticLeakageEstimate`, `liveOrderLeakageEstimate`, or any formula from `commerceMetrics.ts`. Those are internal diagnostic signals, not the headline opportunity range |
-| **Distinction from liveOrderLeakageEstimate** | `metrics.liveOrderLeakageEstimate` in `commerceMetrics.ts` computes excess discount + refund + payment fee leakage order-by-order from Supabase data. It is a diagnostic tool for the engineering layer and future Profit Opportunities detail pages — it does not power the KPI tile. The KPI tile value is the strategic opportunity range from the opportunity engine. See `commerceMetrics.ts` type header for the full distinction |
+| **Distinction from liveOrderLeakageEstimate** | `metrics.liveOrderLeakageEstimate` in `commerceMetrics.ts` computes excess discount + refund + payment fee leakage order-by-order from Supabase data. It is a diagnostic tool for the engineering layer and future Opportunity Finder detail pages — it does not power the KPI tile. The KPI tile value is the strategic opportunity range from the opportunity engine. See `commerceMetrics.ts` type header for the full distinction |
 | **Confidence risk** | Opportunity uplift methodology is not yet documented per opportunity type. Once live, each opportunity row should carry a `confidence` field (`HIGH / MEDIUM / LOW`) and the range should be labelled accordingly |
 | **Data quality flag** | Surface "Opportunity being calculated" when no active opportunities exist; alert if any active opportunity's underlying data is stale > 7 days |
 
@@ -1064,7 +1064,7 @@ When a new KPI tile is added, the required steps are: (1) add the canonical name
 | **Components** | **Refund Value** — sum of refunded order/subtotal value in the selected period (revenue reversed, not fulfilment cost) · **Gross Sales** — sales before discounts, refunds and VAT/sales tax (pre-deduction revenue) |
 | **Rationale** | Using Gross Sales as the denominator measures the proportion of full-price revenue potential that was lost to returns. This is the correct basis for a financial leakage metric and aligns with the `liveOrderLeakageEstimate` diagnostic in `commerceMetrics.ts` |
 | **Current formula (live)** | `SUM(orders.refunds) / SUM(orders.gross_sales) × 100` · `commerceMetrics.refundRate` — matches the canonical definition |
-| **Future operational view** | A future view may also surface **Refunded Orders / Total Orders** (count-based rate) as a secondary operational metric on the Profit Opportunities or Pricing Optimisation pages, to distinguish high-frequency low-value returns from low-frequency high-value returns |
+| **Future operational view** | A future view may also surface **Refunded Orders / Total Orders** (count-based rate) as a secondary operational metric on the Opportunity Finder or Pricing Optimisation pages, to distinguish high-frequency low-value returns from low-frequency high-value returns |
 | **Source system** | Supabase |
 | **Source table / view** | `orders` (columns: `refunds`, `gross_sales`) |
 | **Current status** | **LIVE** — formula runs against Supabase. Initialises to 0% when orders table is empty |

@@ -11,7 +11,7 @@ const navItems = [
   { icon: Tag,             label: "Discount Recovery",      href: "/pricing-optimisation"   },
   { icon: Cpu,             label: "Profit Growth",          href: "/profit-engine"          },
   { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
-  { icon: Target,          label: "Profit Opportunities",   href: "/profit-opportunities"   },
+  { icon: Target,          label: "Opportunity Finder",     href: "/profit-opportunities"   },
   { icon: FlaskConical,    label: "Profit Launchpad",       href: "/scenario-lab"           },
   { icon: Bell,            label: "Night Scout Alerts",     href: "/cfo-alerts"             },
 ];

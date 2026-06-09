@@ -297,7 +297,7 @@ LIMIT 3;
 | Weekly priorities (What to focus on this week) | Top 3 by `priority_rank` |
 | Opportunity sources list | All active opportunities for a store |
 
-**Pages consuming:** Dashboard, Profit Opportunities
+**Pages consuming:** Dashboard, Opportunity Finder
 
 ---
 

@@ -127,7 +127,7 @@ export const MONTHLY_ORDER_VOLUME   = 2_000;
 export const CURRENT_PERIOD         = "March 2026";
 
 // ─── Recoverable contribution range ───────────────────────────────────────────
-// Used by: Dashboard (CFO_INSIGHT.upside), Profit Opportunities (TOTAL_LOW / TOTAL_HIGH)
+// Used by: Dashboard (CFO_INSIGHT.upside), Opportunity Finder (TOTAL_LOW / TOTAL_HIGH)
 
 /**
  * Low end of the estimated monthly contribution improvement range (£).

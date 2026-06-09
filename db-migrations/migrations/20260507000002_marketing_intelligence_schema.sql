@@ -826,7 +826,7 @@ $$;
 -- ── channel_opportunities_active ──────────────────────────────────────────────
 -- Returns active channel opportunity scores, ordered by score DESC.
 -- Reads from: channel_opportunity_scores (SCORED OUTPUT).
--- Used by the marketing pages and Profit Opportunities channel breakdown.
+-- Used by the marketing pages and Opportunity Finder channel breakdown.
 --
 -- Usage:
 --   const { data } = await supabase.rpc('channel_opportunities_active', {

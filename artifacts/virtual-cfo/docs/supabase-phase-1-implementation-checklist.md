@@ -185,7 +185,7 @@ All functions exclude `financial_status = 'cancelled'` and limit to `financial_s
 
 - [ ] **`v_active_opportunities`** — active opportunities enriched with store currency code
   - Formula: `opportunities JOIN stores ON store_id WHERE status = 'active'`
-  - Used by: Profit Opportunities panel and weekly priorities in `dashboard.tsx`
+  - Used by: Opportunity Finder panel and weekly priorities in `dashboard.tsx`
 
 ---
 

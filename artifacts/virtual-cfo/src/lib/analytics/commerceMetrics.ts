@@ -11,7 +11,7 @@ import { COST_ASSUMPTIONS } from "./costAssumptions";
  * 1. liveOrderLeakageEstimate  (this file)
  *    A diagnostic signal computed order-by-order from actual Supabase data.
  *    Formula: excessDiscountLoss + excessRefundLoss + excessPaymentFees
- *    Use: internal diagnostic tooling, future Profit Opportunities deep-dive.
+ *    Use: internal diagnostic tooling, future Opportunity Finder deep-dive.
  *    NOT used as the headline dashboard KPI.
  *
  * 2. Headline Recoverable Contribution  (business-snapshot.ts)

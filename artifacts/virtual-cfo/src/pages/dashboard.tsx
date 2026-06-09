@@ -416,7 +416,7 @@ const HEALTH_MODULES = [
   },
   {
     id:       "scenario",
-    title:    "Profit Launchpad / Opportunities",
+    title:    "Profit Launchpad / Opportunity Finder",
     headline: "£18k–£42k contribution upside",
     subtitle: "Test the combined impact of the priority improvement actions.",
     cta:      "Open Launchpad",

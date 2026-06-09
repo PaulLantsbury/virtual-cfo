@@ -188,7 +188,7 @@ or static mock files. Updated after Phase 6 (Growth Quality live wiring + Opport
 
 ---
 
-## 9. Profit Opportunities (`/opportunities`)
+## 9. Opportunity Finder (`/opportunities`)
 
 > **Status: Live Orchestration Layer with Seeded Intelligence.**
 > All opportunity cards, prioritisation, phased plan, header totals, and uplift figures are
@@ -292,7 +292,7 @@ via `useLatestDataPeriod()`. Phase 2a is called from `phase2aMetrics.ts`.
 | **Profit Engine** | Static Mock | — | Everything |
 | **Cash Control** | Static Mock | — | Everything (cash runway RPC exists but not wired here) |
 | **Scenario Lab** | Partially Connected | Opportunities → Scenario Lab workflow: URL preset loading, slider pre-population, recommendation banner for 3 supported presets | All base inputs (revenue, EBITDA, CPO, cash, runway) remain static |
-| **Profit Opportunities** | Live Orchestration Layer | Opportunity cards, prioritisation ordering, Do Now / Next Wave, rationale, execution priority badge, period label, recoverable contribution header totals, total estimated uplift, Phase 3 marketing intelligence enrichment, "Model this scenario" deep-link to Scenario Lab — all from live RPC or live workflow | Plan-gated UI labels; free-tier blurred ranges |
+| **Opportunity Finder** | Live Orchestration Layer | Opportunity cards, prioritisation ordering, Do Now / Next Wave, rationale, execution priority badge, period label, recoverable contribution header totals, total estimated uplift, Phase 3 marketing intelligence enrichment, "Model this scenario" deep-link to Scenario Lab — all from live RPC or live workflow | Plan-gated UI labels; free-tier blurred ranges |
 
 ### Top priorities for next wiring phases
 1. **Marketing Efficiency** — CAC trend chart can use `cac_trend_by_channel` data already fetched but not yet passed to the Recharts component; opportunity narrative text could generate from scored `channel_opportunities_active` rows

@@ -49,7 +49,7 @@ A modern SaaS financial dashboard for founders and operators.
 - `/margin-analysis` — Contribution margin breakdown by channel, discount impact, returns analysis
 - `/growth-quality` — Repeat rate, CAC payback, discount dependency, growth quality score
 - `/marketing-efficiency` — Channel CAC, blended efficiency, acquisition diagnostics
-- `/opportunities` — Ranked profit opportunities with phased execution plan (Do now / Next wave)
+- `/opportunities` — Opportunity Finder with ranked opportunities and phased execution plan (Do now / Next wave)
 - `/profit-engine` — EBITDA bridge, break-even analysis, profit sensitivity simulator, driver attribution
 - `/settings` — Settings page
 - `/upgrade` — Plan upgrade page

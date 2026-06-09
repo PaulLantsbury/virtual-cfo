@@ -64,7 +64,7 @@ export default function Landing() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
-            While you sleep, Night Scout analyses your Shopify and Xero data, finds hidden profit opportunities, spots cashflow risks and prepares your next CFO briefing.
+            While you sleep, Night Scout analyses your Shopify and Xero data, finds hidden opportunities, spots cashflow risks and prepares your next CFO briefing.
           </motion.p>
 
           <motion.ul

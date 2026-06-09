@@ -21,7 +21,7 @@ const PAGE_NAMES: Record<PageId, string> = {
   profit:        "Profit Growth",
   cash:          "Cash Control",
   opportunities: "Profit Opportunities",
-  scenario:      "Scenario Lab",
+  scenario:      "Profit Launchpad",
   alerts:        "Night Scout Alerts",
 };
 
@@ -255,14 +255,14 @@ export function AiCfoDrawer() {
                 </div>
               </div>
 
-              {/* Scenario Lab CTA — Pro only */}
+              {/* Profit Launchpad CTA — Pro only */}
               {hasActionPlans && (
                 <button
                   onClick={() => { closeDrawer(); navigate("/scenario-lab"); }}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-primary/30 bg-primary/5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
                 >
                   <FlaskConical className="w-4 h-4" />
-                  Apply to Scenario Lab
+                  Apply to Profit Launchpad
                 </button>
               )}
             </>

@@ -142,7 +142,7 @@ const CASH_RECOVERY_ACTIONS = [
     why: "Inventory build is the biggest cash trap and is absorbing cash before trading profit reaches the bank.",
     start: "Review slow-moving SKUs, tighten purchase orders for low-velocity stock, and set a weekly target to bring stock days back below 70.",
     link: "/scenario-lab",
-    linkLabel: "Model stock-day scenario",
+    linkLabel: "Open Profit Launchpad",
   },
   {
     id: "cash2",

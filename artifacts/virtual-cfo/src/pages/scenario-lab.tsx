@@ -305,7 +305,7 @@ function OutputCard({
           <p className="text-sm font-semibold text-foreground">{base}</p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] text-muted-foreground mb-0.5">Scenario</p>
+          <p className="text-[10px] text-muted-foreground mb-0.5">Plan</p>
           <p className="text-sm font-bold text-foreground">{scenario}</p>
         </div>
       </div>
@@ -331,7 +331,7 @@ const BRIDGE_DATA = [
   { name: "Shipping",      invis: 225_500, value: 6_800,   type: "positive" },
   { name: "Returns",       invis: 232_300, value: 2_700,   type: "positive" },
   { name: "Overheads",     invis: 235_000, value: 5_000,   type: "positive" },
-  { name: "Scenario\ncontrib", invis: 0,  value: 240_000, type: "result"   },
+  { name: "Plan\ncontrib", invis: 0,  value: 240_000, type: "result"   },
 ];
 
 const BRIDGE_COLORS: Record<string, string> = {
@@ -424,10 +424,10 @@ export default function ScenarioLab() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">
-              Scenario Lab
+              Profit Launchpad
             </h1>
             <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed max-w-xl">
-              Build a joined-up forecast across profit, cash, pricing and marketing before making decisions.
+              Night Scout’s recommended route to higher profit and stronger cashflow.
             </p>
           </div>
           <div className="flex flex-col items-end gap-1.5 shrink-0 text-right">
@@ -449,7 +449,7 @@ export default function ScenarioLab() {
             <div className="flex items-center gap-3 min-w-0">
               <FlaskConical className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
               <p className="text-sm font-medium text-indigo-900 dark:text-indigo-200 leading-snug">
-                Recommended scenario loaded from Opportunities:{" "}
+                Recommended plan loaded from Opportunities:{" "}
                 <span className="font-semibold">"{loadedPresetLabel}"</span>
                 <span className="ml-2 text-indigo-600/70 dark:text-indigo-400/70 font-normal text-xs">
                   · Relevant sliders pre-populated below
@@ -473,10 +473,10 @@ export default function ScenarioLab() {
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">CFO Insight</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Scout Verdict</p>
               <p className="text-sm text-foreground leading-relaxed">
-                Your current performance suggests the best near-term opportunity is a balanced recovery plan: reduce discounting,
-                improve marketing efficiency and protect cash by controlling stock and overhead growth.
+                Night Scout recommends a Balanced Growth Plan: reduce discounting, improve marketing efficiency and protect cash
+                before adding more growth spend.
               </p>
             </div>
           </div>
@@ -486,26 +486,24 @@ export default function ScenarioLab() {
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/30">
           <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
-            This scenario increases contribution by approximately 21% without requiring additional customer acquisition.
+            This plan increases contribution by approximately 21% without relying on more paid acquisition.
           </p>
         </div>
-
-        <AiCfoAskCard pageId="scenario" />
 
         {/* ── Free upgrade card ────────────────────────────────────────────── */}
         {!isPro && (
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 px-6 py-5 rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/30">
             <div className="flex-1">
-              <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-1">Unlock your CFO scenario plan</p>
+              <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-1">Night Scout has identified a recommended launch plan.</p>
               <p className="text-xs text-indigo-700/80 dark:text-indigo-400/80 leading-snug mb-3">
-                Upgrade to Pro to build joined-up profit, cash, pricing and marketing scenarios.
+                Upgrade to Pro to see the actions, expected profit impact, cash impact and implementation roadmap.
               </p>
               <ul className="space-y-1">
                 {[
-                  "Apply CFO-suggested plans",
-                  "Model combined profit and cash impact",
-                  "Compare scenarios side by side",
-                  "Build an implementation plan",
+                  "Recommended plan: Balanced Growth Plan",
+                  "Broad reason: margin pressure, marketing inefficiency and cash tightening",
+                  "Expected direction: higher contribution and stronger cash headroom",
+                  "Unlock values, actions and implementation steps",
                 ].map(b => (
                   <li key={b} className="flex items-center gap-2 text-xs text-indigo-800 dark:text-indigo-300">
                     <CheckCircle className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
@@ -524,10 +522,10 @@ export default function ScenarioLab() {
           </div>
         )}
 
-        {/* ══ 3. RECOMMENDED SCENARIO SUMMARY ═════════════════════════════════ */}
+        {/* ══ 3. RECOMMENDED LAUNCH PLAN SUMMARY ══════════════════════════════ */}
         <SectionHeading
-          title="Recommended Scenario: Balanced Growth Plan"
-          subtitle="This plan offers the best balance of profit uplift, cash protection and implementation risk."
+          title="Recommended Launch Plan: Balanced Growth Plan"
+          subtitle="This is Night Scout’s recommended route for profit uplift, cash protection and manageable implementation risk."
         />
 
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
@@ -548,7 +546,7 @@ export default function ScenarioLab() {
               { label: "Cash impact",      value: "+£64,000",   subLabel: "30-day impact", annualised: "+£768,000 (annualised)", color: "emerald" },
               { label: "Runway impact",    value: "+0.8 months", subLabel: undefined,       annualised: undefined,               color: "emerald" },
               { label: "Margin impact",    value: "+4.2pp",      subLabel: undefined,       annualised: undefined,               color: "emerald" },
-              { label: "Scenario quality", value: "Strong",      subLabel: undefined,       annualised: undefined,               color: "indigo"  },
+              { label: "Plan quality",     value: "Strong",      subLabel: undefined,       annualised: undefined,               color: "indigo"  },
             ].map(({ label, value, subLabel, annualised, color }) => (
               <div key={label} className="flex flex-col items-center text-center bg-secondary/40 rounded-xl p-4 gap-0.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
@@ -612,111 +610,8 @@ export default function ScenarioLab() {
           )}
         </div>
 
-        {/* ══ 5. SCENARIO IMPACT ══════════════════════════════════════════════ */}
-        <SectionHeading title="Scenario Impact" />
-        <p className="text-[10px] text-muted-foreground -mt-2 mb-3">All £ values shown for the selected 30-day period. Annualised estimates shown beneath each figure.</p>
-
-        {/* Row 1 — always visible */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <OutputCard label="Revenue"      base={fmtK(BASE_REVENUE)}      scenario={fmtK(out.revenue)}      delta={fmtDelta(out.revenueDelta)}      positive={out.revenueDelta >= 0}      note={fmtDelta(out.revenueDelta * 12) + " (annualised)"} />
-          <OutputCard label="Contribution" base={fmtK(BASE_CONTRIBUTION)}  scenario={fmtK(out.contribution)}  delta={fmtDelta(out.contributionDelta)}  positive={out.contributionDelta >= 0} note={fmtDelta(out.contributionDelta * 12) + " (annualised)"} />
-          <OutputCard label="EBITDA"       base={fmtK(BASE_EBITDA)}        scenario={fmtK(out.ebitda)}        delta={fmtDelta(out.ebitdaDelta)}        positive={out.ebitdaDelta >= 0}       note={fmtDelta(out.ebitdaDelta * 12) + " (annualised)"} />
-          <OutputCard label="Cash Balance" base={fmtK(BASE_CASH)}          scenario={fmtK(out.cash)}          delta={fmtDelta(out.cashDelta)}          positive={out.cashDelta >= 0}         note={fmtDelta(out.cashDelta * 12) + " (annualised)"} />
-        </div>
-
-        {/* Row 2 — Pro */}
-        <PremiumBlurPreview
-          title="Detailed outputs"
-          isPro={isPro}
-          ctaTitle="Unlock detailed scenario outputs"
-          ctaDescription="See how the scenario affects cash runway, working capital drag and unit economics."
-          ghostContent={
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {["Cash Runway", "Working Capital Drag", "CAC Payback", "Contribution / Order"].map(l => (
-                <div key={l} className="bg-secondary/40 rounded-xl p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{l}</p>
-                  <div className="flex justify-between mb-2"><span className="text-sm text-foreground">— —</span></div>
-                  <div className="h-6 rounded-lg bg-border/40" />
-                </div>
-              ))}
-            </div>
-          }
-        >
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <OutputCard
-              label="Cash Runway"
-              base={`${BASE_RUNWAY} mo`}
-              scenario={`${out.runway} mo`}
-              delta={`${fmtDeltaRaw(out.runwayDelta, 1)} months`}
-              positive={out.runwayDelta >= 0}
-            />
-            <OutputCard
-              label="Working Capital Drag"
-              base={fmtK(BASE_WORKING_CAPITAL)}
-              scenario={fmtK(out.workingCapital)}
-              delta={fmtDelta(out.wcDelta)}
-              positive={out.wcDelta <= 0}
-            />
-            <OutputCard
-              label="CAC Payback"
-              base={`${BASE_CAC_PAYBACK} orders`}
-              scenario={`${out.cacPayback} orders`}
-              delta={out.cacPaybackDelta <= 0 ? "Improved" : "Worsened"}
-              positive={out.cacPaybackDelta <= 0}
-            />
-            <OutputCard
-              label="Contribution / Order"
-              base={`£${BASE_CPO.toFixed(2)}`}
-              scenario={`£${out.cpo.toFixed(2)}`}
-              delta={`${fmtDeltaRaw(out.cpoDelta, 2)} per order`}
-              positive={out.cpoDelta >= 0}
-            />
-          </div>
-        </PremiumBlurPreview>
-
-        {/* ══ 6. SCENARIO QUALITY SCORE (moved earlier) ════════════════════════ */}
-        <PremiumBlurPreview
-          title="Scenario Quality Score"
-          isPro={isProBridge}
-          ctaTitle="Unlock scenario quality scoring"
-          ctaDescription="See a structured quality assessment across profit, cash, risk and payback."
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-5">
-            <div className="flex items-center justify-center w-24 h-24 rounded-full border-4 border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 shrink-0">
-              <p className="text-xl font-black text-emerald-700 dark:text-emerald-400">Strong</p>
-            </div>
-            <div className="flex-1 space-y-2">
-              {[
-                { factor: "Profit uplift",       score: "Strong",      color: "emerald" },
-                { factor: "Cash impact",          score: "Strong",      color: "emerald" },
-                { factor: "Implementation risk",  score: "Moderate",    color: "amber"   },
-                { factor: "Confidence level",     score: "Medium–High", color: "blue"    },
-                { factor: "Payback period",       score: "Fast",        color: "emerald" },
-              ].map(({ factor, score, color }) => (
-                <div key={factor} className="flex items-center justify-between gap-4">
-                  <p className="text-xs text-muted-foreground">{factor}</p>
-                  <span className={cn(
-                    "text-xs font-semibold px-2 py-0.5 rounded-full",
-                    color === "emerald" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
-                    : color === "amber"  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
-                    : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400"
-                  )}>
-                    {score}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
-            <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-snug">
-              Confidence reflects stability of CAC trends, discount behaviour and shipping cost variance over the last 90 days.
-            </p>
-          </div>
-        </PremiumBlurPreview>
-
-        {/* ══ 7. WHY THIS PLAN? ═══════════════════════════════════════════════ */}
-        <SectionHeading title="Why this plan?" />
+        {/* ══ 5. WHY NIGHT SCOUT CHOSE THIS ══════════════════════════════════ */}
+        <SectionHeading title="Why Night Scout Chose This" />
 
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 space-y-5">
           <div className="flex items-start gap-3">
@@ -773,23 +668,23 @@ export default function ScenarioLab() {
           </div>
         </div>
 
-        {/* ══ 8. CHOOSE OR ADJUST YOUR PLAN ═══════════════════════════════════ */}
+        {/* ══ 6. ALTERNATIVE LAUNCH PLANS ═════════════════════════════════════ */}
         <SectionHeading
-          title="Choose or adjust your plan"
-          subtitle="Start with the recommended plan, or switch to a more profit-focused or cash-focused scenario."
+          title="Alternative Launch Plans"
+          subtitle="Start with the recommended plan, or switch to a more profit-focused or cash-focused plan."
         />
 
         <PremiumBlurPreview
-          title="Plan selector"
+          title="Alternative Launch Plans"
           isPro={isProPlans}
-          ctaTitle="Unlock CFO-suggested plans"
-          ctaDescription="Upgrade to Pro to apply pre-built plans and see their combined financial impact."
+          ctaTitle="Unlock Night Scout launch plans"
+          ctaDescription="Upgrade to Pro to apply pre-built plans and see their combined profit and cash impact."
           ghostContent={
             <div className="grid sm:grid-cols-3 gap-4">
               {[
                 { name: "Margin Recovery Plan",  badge: "Profit Focus", color: "bg-blue-50 dark:bg-blue-950/20 border-blue-200/60 dark:border-blue-700/40",     badgeColor: "text-blue-600 dark:text-blue-400 bg-blue-100/80 dark:bg-blue-900/40" },
                 { name: "Cash Protection Plan",  badge: "Cash Focus",   color: "bg-slate-50 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/40",  badgeColor: "text-slate-600 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-800/40" },
-                { name: "Balanced Growth Plan",  badge: "Recommended",  color: "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-700/40", badgeColor: "text-emerald-600 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-900/40" },
+                { name: "Balanced Growth Plan",  badge: "Balanced Growth", color: "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-700/40", badgeColor: "text-emerald-600 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-900/40" },
               ].map(p => (
                 <div key={p.name} className={cn("rounded-xl border p-4", p.color)}>
                   <span className={cn("inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mb-2", p.badgeColor)}>{p.badge}</span>
@@ -893,16 +788,16 @@ export default function ScenarioLab() {
           </div>
         </PremiumBlurPreview>
 
-        {/* ══ 9. SCENARIO BUILDER ═════════════════════════════════════════════ */}
+        {/* ══ 7. PROFIT LAUNCHPAD SIMULATOR ══════════════════════════════════ */}
         <SectionHeading
-          title="Scenario Builder"
-          subtitle="Adjust the assumptions to see the combined impact across profit, cash, pricing and marketing."
+          title="Profit Launchpad Simulator"
+          subtitle="Model revenue, margin, marketing, cash and overhead changes before committing resources."
         />
 
-        {/* Active scenario banner */}
+        {/* Active plan banner */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 rounded-2xl bg-secondary/60 border border-border/50">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Active scenario</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Active plan</p>
             <p className="text-sm font-bold text-foreground">{PLAN_LABELS[activePlan]}</p>
             <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
               These assumptions are loaded from the recommended plan and can be adjusted below.
@@ -922,17 +817,17 @@ export default function ScenarioLab() {
               <RefreshCw className="w-3 h-3" /> Reset
             </button>
             <button className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <Save className="w-3 h-3" /> Save as new scenario
+              <Save className="w-3 h-3" /> Save as new plan
             </button>
           </div>
         </div>
 
         <PremiumBlurPreview
-          title="Full Scenario Builder"
+          title="Profit Launchpad Simulator"
           subtitle="18 levers across Growth, Margin, Marketing, Cash and Overheads."
           isPro={isPro}
-          ctaTitle="Unlock the full Scenario Builder"
-          ctaDescription="Model any combination of levers and see the combined financial impact in real time."
+          ctaTitle="Unlock the Profit Launchpad Simulator"
+          ctaDescription="Test any combination of levers and see the combined financial impact in real time."
           ghostContent={
             <div className="space-y-4">
               <div className="flex gap-2 flex-wrap">
@@ -1007,25 +902,105 @@ export default function ScenarioLab() {
 
           <div className="flex flex-wrap items-center gap-2 mt-6 pt-5 border-t border-border/40">
             <button onClick={() => { setScenario(BALANCED_GROWTH); setActivePlan("balanced"); }} className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <RefreshCw className="w-3.5 h-3.5" /> Reset scenario
+              <RefreshCw className="w-3.5 h-3.5" /> Reset plan
             </button>
             <button className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <Save className="w-3.5 h-3.5" /> Save scenario
+              <Save className="w-3.5 h-3.5" /> Save plan
             </button>
             <button className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <Layers className="w-3.5 h-3.5" /> Compare scenario
+              <Layers className="w-3.5 h-3.5" /> Compare plans
             </button>
           </div>
         </PremiumBlurPreview>
 
-        {/* ══ 10. IMPORTED ASSUMPTIONS (collapsible) ═══════════════════════════ */}
+        <AiCfoAskCard pageId="scenario" />
+
+        {/* ══ 8. SUPPORTING ANALYSIS ═════════════════════════════════════════ */}
+        <details className="group bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
+          <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Contribution bridge, cash consequence, implementation plan and scenario quality.
+                </p>
+              </div>
+              <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
+              <span className="text-xs font-semibold text-primary hidden group-open:inline">Collapse</span>
+            </div>
+          </summary>
+          <div className="px-6 pb-6 pt-2 space-y-8">
+
+        {/* Detailed impact */}
+        <div>
+          <SectionHeading title="Detailed Impact" />
+          <p className="text-[10px] text-muted-foreground -mt-2 mb-3">All £ values shown for the selected 30-day period. Annualised estimates shown beneath each figure.</p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <OutputCard label="Revenue"      base={fmtK(BASE_REVENUE)}      scenario={fmtK(out.revenue)}      delta={fmtDelta(out.revenueDelta)}      positive={out.revenueDelta >= 0}      note={fmtDelta(out.revenueDelta * 12) + " (annualised)"} />
+            <OutputCard label="Contribution" base={fmtK(BASE_CONTRIBUTION)}  scenario={fmtK(out.contribution)}  delta={fmtDelta(out.contributionDelta)}  positive={out.contributionDelta >= 0} note={fmtDelta(out.contributionDelta * 12) + " (annualised)"} />
+            <OutputCard label="EBITDA"       base={fmtK(BASE_EBITDA)}        scenario={fmtK(out.ebitda)}        delta={fmtDelta(out.ebitdaDelta)}        positive={out.ebitdaDelta >= 0}       note={fmtDelta(out.ebitdaDelta * 12) + " (annualised)"} />
+            <OutputCard label="Cash Balance" base={fmtK(BASE_CASH)}          scenario={fmtK(out.cash)}          delta={fmtDelta(out.cashDelta)}          positive={out.cashDelta >= 0}         note={fmtDelta(out.cashDelta * 12) + " (annualised)"} />
+          </div>
+        </div>
+
+        <PremiumBlurPreview
+          title="Detailed impact"
+          isPro={isPro}
+          ctaTitle="Unlock detailed plan impact"
+          ctaDescription="See how the plan affects cash runway, working capital drag and unit economics."
+          ghostContent={
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {["Cash Runway", "Working Capital Drag", "CAC Payback", "Contribution / Order"].map(l => (
+                <div key={l} className="bg-secondary/40 rounded-xl p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{l}</p>
+                  <div className="flex justify-between mb-2"><span className="text-sm text-foreground">— —</span></div>
+                  <div className="h-6 rounded-lg bg-border/40" />
+                </div>
+              ))}
+            </div>
+          }
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <OutputCard
+              label="Cash Runway"
+              base={`${BASE_RUNWAY} mo`}
+              scenario={`${out.runway} mo`}
+              delta={`${fmtDeltaRaw(out.runwayDelta, 1)} months`}
+              positive={out.runwayDelta >= 0}
+            />
+            <OutputCard
+              label="Working Capital Drag"
+              base={fmtK(BASE_WORKING_CAPITAL)}
+              scenario={fmtK(out.workingCapital)}
+              delta={fmtDelta(out.wcDelta)}
+              positive={out.wcDelta <= 0}
+            />
+            <OutputCard
+              label="CAC Payback"
+              base={`${BASE_CAC_PAYBACK} orders`}
+              scenario={`${out.cacPayback} orders`}
+              delta={out.cacPaybackDelta <= 0 ? "Improved" : "Worsened"}
+              positive={out.cacPaybackDelta <= 0}
+            />
+            <OutputCard
+              label="Contribution / Order"
+              base={`£${BASE_CPO.toFixed(2)}`}
+              scenario={`£${out.cpo.toFixed(2)}`}
+              delta={`${fmtDeltaRaw(out.cpoDelta, 2)} per order`}
+              positive={out.cpoDelta >= 0}
+            />
+          </div>
+        </PremiumBlurPreview>
+
+        {/* Imported assumptions */}
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
           <button
             onClick={() => setImportedOpen(o => !o)}
             className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left hover:bg-secondary/30 transition-colors"
           >
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">Imported assumptions from other scenario tools</p>
+              <p className="text-sm font-semibold text-foreground">Imported assumptions from other planning tools</p>
               {!importedOpen && (
                 <p className="text-xs text-muted-foreground mt-0.5">Show assumptions pulled from page-level what-if sliders.</p>
               )}
@@ -1082,13 +1057,13 @@ export default function ScenarioLab() {
         {/* ══ 11. SCENARIO CONTRIBUTION BRIDGE ════════════════════════════════ */}
         <PremiumBlurPreview
           title="Scenario Contribution Bridge"
-          subtitle="Shows how the plan moves contribution from today's position to the scenario result."
+          subtitle="Shows how the plan moves contribution from today's position to the plan result."
           isPro={isProBridge}
           ctaTitle="Unlock the contribution bridge"
           ctaDescription="See exactly which levers drive the contribution improvement — and by how much."
           ghostContent={
             <div className="space-y-3">
-              {["Base contribution","Pricing improvement","Marketing reallocation","Shipping reduction","Scenario contribution"].map((l, i) => (
+              {["Base contribution","Pricing improvement","Marketing reallocation","Shipping reduction","Plan contribution"].map((l, i) => (
                 <div key={l} className="flex items-center gap-3 py-1.5 border-b border-border/30 last:border-0">
                   <p className="text-sm text-foreground flex-1">{l}</p>
                   <div className={cn("h-2 rounded-full bg-border/50", i === 0 || i === 4 ? "w-24" : "w-14")} />
@@ -1121,7 +1096,7 @@ export default function ScenarioLab() {
               { label: "Shipping cost reduction",  value:   6_800, type: "gain"    },
               { label: "Returns reduction",        value:   2_700, type: "gain"    },
               { label: "Fixed cost / overhead",    value:   5_000, type: "gain"    },
-              { label: "Scenario contribution",    value: 240_000, type: "result"  },
+              { label: "Plan contribution",        value: 240_000, type: "result"  },
             ].map(({ label, value, type }) => (
               <div key={label} className="flex items-start justify-between py-1.5 border-b border-border/30 last:border-0">
                 <span className="text-sm text-foreground">{label}</span>
@@ -1156,10 +1131,10 @@ export default function ScenarioLab() {
         {/* ══ 12. CASH AND PROFIT CONSEQUENCE (simplified) ════════════════════ */}
         <PremiumBlurPreview
           title="Cash and Profit Consequence"
-          subtitle="Shows whether the scenario improves both profitability and cash resilience."
+          subtitle="Shows whether the plan improves both profitability and cash resilience."
           isPro={isProBridge}
           ctaTitle="Unlock cash and profit consequence"
-          ctaDescription="Understand how the scenario affects both P&L and cash simultaneously."
+          ctaDescription="Understand how the plan affects both P&L and cash simultaneously."
         >
           <div className="flex items-start gap-3 mb-5">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
@@ -1175,7 +1150,7 @@ export default function ScenarioLab() {
               { icon: TrendingUp,   color: "emerald", label: "Profit uplift",    value: "+£42,000", period: "30-day impact", note: "+£504,000 (annualised)", text: "Contribution improves through better margin and marketing efficiency." },
               { icon: Shield,       color: "blue",    label: "Cash uplift",      value: "+£64,000", period: "30-day impact", note: "+£768,000 (annualised)", text: "Cash improves because working capital drag reduces." },
               { icon: Zap,          color: "indigo",  label: "Runway extension", value: "+0.8 months",        note: undefined,    text: "Cash cover improves from 3.4 to 4.2 months." },
-              { icon: CheckCircle,  color: "green",   label: "Risk movement",    value: "Lower",              note: undefined,    text: "Scenario reduces both margin risk and cash risk." },
+              { icon: CheckCircle,  color: "green",   label: "Risk movement",    value: "Lower",              note: undefined,    text: "Plan reduces both margin risk and cash risk." },
             ].map(({ icon: Icon, color, label, value, period, note, text }) => (
               <div key={label} className="bg-secondary/40 rounded-xl p-4 space-y-2">
                 <div className={cn(
@@ -1206,7 +1181,7 @@ export default function ScenarioLab() {
         {/* ══ 13. IMPLEMENTATION PLAN (with checkboxes) ════════════════════════ */}
         <PremiumBlurPreview
           title="Implementation Plan"
-          subtitle="The practical actions required to deliver this scenario."
+          subtitle="The practical actions required to deliver this plan."
           isPro={isProImpl}
           ctaTitle="Unlock the implementation plan"
           ctaDescription="Get a step-by-step action plan with timing, effort and expected impact for each lever."
@@ -1279,11 +1254,54 @@ export default function ScenarioLab() {
           </div>
         </PremiumBlurPreview>
 
+        <PremiumBlurPreview
+          title="Scenario Quality Score"
+          isPro={isProBridge}
+          ctaTitle="Unlock plan quality scoring"
+          ctaDescription="See a structured quality assessment across profit, cash, risk and payback."
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-5">
+            <div className="flex items-center justify-center w-24 h-24 rounded-full border-4 border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 shrink-0">
+              <p className="text-xl font-black text-emerald-700 dark:text-emerald-400">Strong</p>
+            </div>
+            <div className="flex-1 space-y-2">
+              {[
+                { factor: "Profit uplift",       score: "Strong",      color: "emerald" },
+                { factor: "Cash impact",          score: "Strong",      color: "emerald" },
+                { factor: "Implementation risk",  score: "Moderate",    color: "amber"   },
+                { factor: "Confidence level",     score: "Medium-High", color: "blue"    },
+                { factor: "Payback period",       score: "Fast",        color: "emerald" },
+              ].map(({ factor, score, color }) => (
+                <div key={factor} className="flex items-center justify-between gap-4">
+                  <p className="text-xs text-muted-foreground">{factor}</p>
+                  <span className={cn(
+                    "text-xs font-semibold px-2 py-0.5 rounded-full",
+                    color === "emerald" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
+                    : color === "amber"  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
+                    : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400"
+                  )}>
+                    {score}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
+            <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-snug">
+              Confidence reflects stability of CAC trends, discount behaviour and shipping cost variance over the last 90 days.
+            </p>
+          </div>
+        </PremiumBlurPreview>
+
+          </div>
+        </details>
+
       </div>
 
       <DataBenchmarkAssumptions
         benchmarkNote="Scenario quality is assessed against margin, cash runway and CAC payback benchmarks."
-        dataQualityNote="Scenario outputs are directional estimates, not guaranteed outcomes."
+        dataQualityNote="Plan impact is a directional estimate, not a guaranteed outcome."
         confidenceNote="Accuracy improves when Shopify, Xero, Google Ads, Meta and cost mappings are kept up to date."
         className="mb-2"
       />

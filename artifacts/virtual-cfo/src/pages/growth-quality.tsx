@@ -165,7 +165,7 @@ const GROWTH_RECOVERY_ACTIONS = [
     why: "Retention is the one improving signal; strengthening it reduces reliance on paid acquisition and blanket promotions.",
     start: "Launch post-purchase email journeys for first-order customers and target repeat rate above 30% before adding more acquisition spend.",
     link: "/scenario-lab",
-    linkLabel: "Model repeat-rate scenario",
+    linkLabel: "Open Profit Launchpad",
   },
 ] as const;
 
@@ -905,7 +905,7 @@ export default function GrowthQuality() {
               <div>
                 <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Growth Recovery Plan</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  3 prioritised actions identified to improve contribution quality. Upgrade to view the action plan, implementation steps, confidence scoring and scenario links.
+                  3 prioritised actions identified to improve contribution quality. Upgrade to view the action plan, implementation steps, confidence scoring and launch plan links.
                 </p>
               </div>
             </div>

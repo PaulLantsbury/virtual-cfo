@@ -416,10 +416,10 @@ const HEALTH_MODULES = [
   },
   {
     id:       "scenario",
-    title:    "Scenario Lab / Opportunities",
+    title:    "Profit Launchpad / Opportunities",
     headline: "£18k–£42k contribution upside",
-    subtitle: "Model the combined impact of the priority improvement actions.",
-    cta:      "Model opportunity",
+    subtitle: "Test the combined impact of the priority improvement actions.",
+    cta:      "Open Launchpad",
     href:     "/scenario-lab",
   },
 ] as const;
@@ -430,7 +430,7 @@ const FREE_HEALTH_MODULE_CTAS: Record<(typeof HEALTH_MODULES)[number]["id"], str
   growth:      "Unlock growth analysis",
   acquisition: "Unlock acquisition insights",
   cash:        "Unlock cash opportunities",
-  scenario:    "Unlock scenario modelling",
+  scenario:    "Unlock Profit Launchpad",
 };
 
 const FREE_HEALTH_MODULE_HEADLINES: Record<(typeof HEALTH_MODULES)[number]["id"], string> = {
@@ -439,7 +439,7 @@ const FREE_HEALTH_MODULE_HEADLINES: Record<(typeof HEALTH_MODULES)[number]["id"]
   growth:      "Growth quality concern detected",
   acquisition: "Acquisition efficiency issue detected",
   cash:        "Cash headroom opportunity identified",
-  scenario:    "Improvement scenarios available",
+  scenario:    "Recommended launch plan available",
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -1123,7 +1123,7 @@ export default function Dashboard() {
               <ChevronRight className="w-4 h-4" />
             </Link>
             <Link href={hasFullActionPlan ? "/scenario-lab" : "/upgrade"} className="inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-300 hover:text-indigo-200 transition-colors">
-              {hasFullActionPlan ? "Model the impact" : "Unlock scenario modelling"} <ArrowRight className="w-4 h-4" />
+              {hasFullActionPlan ? "Open Profit Launchpad" : "Unlock Profit Launchpad"} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>

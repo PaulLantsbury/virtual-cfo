@@ -12,7 +12,7 @@ const navItems = [
   { icon: Cpu,             label: "Profit Growth",          href: "/profit-engine"          },
   { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
   { icon: Target,          label: "Profit Opportunities",   href: "/profit-opportunities"   },
-  { icon: FlaskConical,    label: "Scenario Lab",           href: "/scenario-lab"           },
+  { icon: FlaskConical,    label: "Profit Launchpad",       href: "/scenario-lab"           },
   { icon: Bell,            label: "Night Scout Alerts",     href: "/cfo-alerts"             },
 ];
 

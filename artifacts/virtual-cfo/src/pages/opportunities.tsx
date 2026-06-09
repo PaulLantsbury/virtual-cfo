@@ -40,8 +40,8 @@ const CAPITAL_FREE_HIGH = 26_000;
 type ImpactLevel = "high" | "medium" | "quick-win";
 
 /**
- * Maps opportunity card titles to Scenario Lab preset IDs.
- * Only the 3 supported opportunities get a "Model this scenario" button.
+ * Maps opportunity card titles to Profit Launchpad preset IDs.
+ * Only the 3 supported opportunities get an "Open Launchpad" button.
  */
 const TITLE_TO_PRESET: Record<string, string> = {
   "Reduce average discount depth":   "reduce-discount-depth",
@@ -538,7 +538,7 @@ export default function Opportunities() {
                             className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/25 px-3 py-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                           >
                             <FlaskConical className="w-3.5 h-3.5" />
-                            Model scenario
+                            Open Launchpad
                           </a>
                         )}
                       </div>
@@ -570,7 +570,7 @@ export default function Opportunities() {
                   3 prioritised recovery actions identified.
                 </p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  Upgrade to view the prioritised recovery plan, implementation guidance, confidence scoring, recovery estimates and scenario modelling.
+                  Upgrade to view the prioritised recovery plan, implementation guidance, confidence scoring, recovery estimates and launch planning.
                 </p>
               </div>
             </div>
@@ -598,7 +598,7 @@ export default function Opportunities() {
               <div>
                 <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">How to execute this is available on Pro</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  Unlock the CFO execution detail: why each action matters, how to implement it, the evidence behind it and the scenario to model.
+                  Unlock the CFO execution detail: why each action matters, how to implement it, the evidence behind it and the launch plan to test.
                 </p>
               </div>
             </div>

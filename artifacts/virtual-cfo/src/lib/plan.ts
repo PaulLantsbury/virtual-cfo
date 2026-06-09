@@ -69,10 +69,10 @@ export type FeatureName =
   | "marketing_budget_simulator"      // Marketing Efficiency — Budget Reallocation Simulator + Recoverable Contribution card
   | "margin_simulator"               // Margin Analysis — Margin Recovery Simulator (5 sliders)
   | "margin_sensitivity_ranking"     // Margin Analysis — Sensitivity Ranking with £ impact per lever
-  | "scenario_lab_plans"             // Scenario Lab — CFO Suggested Plans with Apply buttons
-  | "scenario_lab_builder"           // Scenario Lab — Full Scenario Builder (all sliders + live outputs)
-  | "scenario_lab_bridge"            // Scenario Lab — Contribution Bridge, Cash Consequence, Quality Score
-  | "scenario_lab_implementation"    // Scenario Lab — Implementation Plan + Scout Recommendation
+  | "scenario_lab_plans"             // Profit Launchpad — suggested launch plans with Apply buttons
+  | "scenario_lab_builder"           // Profit Launchpad — full simulator (all sliders + live impact)
+  | "scenario_lab_bridge"            // Profit Launchpad — contribution bridge, cash consequence, quality score
+  | "scenario_lab_implementation"    // Profit Launchpad — implementation plan + Scout Recommendation
   | "ai_cfo_action_plans"            // Night Scout — recommended action + expected impact across all pages
   | "cfo_alerts_controls";           // Night Scout Alerts — enable/edit/configure alerts and reports
 

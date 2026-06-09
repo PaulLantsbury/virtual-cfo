@@ -176,19 +176,19 @@ export const AI_CFO_RESPONSES: Record<PageId, AiCfoResponse> = {
 
   scenario: {
     pageId: "scenario",
-    question: "What combined scenario gives me the best risk-adjusted profit outcome?",
+    question: "What launch plan gives me the best risk-adjusted profit outcome?",
     verdict:
-      "A balanced recovery scenario — combining moderate discount reduction, marketing reallocation and working capital optimisation — delivers the best risk-adjusted outcome. Aggressive single-lever scenarios (e.g. 5pp discount cut) carry meaningful volume risk. The balanced path recovers 15–22% more contribution with lower execution risk.",
+      "A Balanced Growth Plan — combining moderate discount reduction, marketing reallocation and working capital optimisation — delivers the best risk-adjusted outcome. Aggressive single-lever plans, such as a 5pp discount cut, carry meaningful volume risk. The balanced route recovers 15–22% more contribution with lower execution risk.",
     evidence: [
-      "Discount-only scenario: +£12k–£18k/month contribution but carries 3–5% volume risk if applied too aggressively.",
-      "Marketing reallocation scenario: +£6k–£9k/month with near-zero volume risk — purely a budget instruction.",
-      "Combined scenario (discount + marketing): +£18k–£27k/month, volume risk mitigated because marketing efficiency gain offsets acquisition volume loss.",
-      "Cash consequence: combined scenario improves cash position by £8k–£14k/month, extending runway from 3.4 to 5.1 months.",
+      "Profit Focus plan: +£12k–£18k/month contribution but carries 3–5% volume risk if applied too aggressively.",
+      "Marketing reallocation plan: +£6k–£9k/month with near-zero volume risk because it is primarily a budget instruction.",
+      "Balanced Growth plan: +£18k–£27k/month, with volume risk mitigated because marketing efficiency gain offsets acquisition volume loss.",
+      "Cash consequence: the recommended plan improves cash position by £8k–£14k/month, extending runway from 3.4 to 5.1 months.",
     ],
     recommendedAction:
-      "Build a 90-day combined scenario: Month 1 — marketing reallocation (lowest risk, fastest); Month 2 — phased discount reduction on returning customers; Month 3 — supplier payment term negotiation. Stack the improvements to compound the contribution recovery and avoid operational overload.",
+      "Launch a 90-day Balanced Growth Plan: Month 1 — marketing reallocation (lowest risk, fastest); Month 2 — phased discount reduction on returning customers; Month 3 — supplier payment term negotiation. Stack the improvements to compound contribution recovery and avoid operational overload.",
     expectedImpact:
-      "90-day stacked scenario recovers £18k–£27k/month contribution, increases contribution margin by 2.8–4.1pp, and improves the growth quality score from 54 to an estimated 68–74. Cash runway extends by 1.7 months.",
+      "The 90-day launch plan recovers £18k–£27k/month contribution, increases contribution margin by 2.8–4.1pp, and improves the growth quality score from 54 to an estimated 68–74. Cash runway extends by 1.7 months.",
     confidence: "medium",
   },
 

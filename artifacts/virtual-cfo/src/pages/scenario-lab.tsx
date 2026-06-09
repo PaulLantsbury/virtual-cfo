@@ -1,24 +1,16 @@
 import { useState, useEffect } from "react";
 import {
-  Sparkles, TrendingUp, AlertTriangle, Info,
-  Zap, Shield, CheckCircle, ArrowUpRight, Lock,
+  Sparkles, TrendingUp, AlertTriangle,
+  Zap, CheckCircle,
   RefreshCw, Save, Layers, Target, ChevronRight,
-  ChevronDown, FlaskConical, X,
+  FlaskConical, X,
 } from "lucide-react";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
-} from "recharts";
 import { Slider } from "@/components/ui/slider";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
-import { TimelineSelector } from "@/components/TimelineSelector";
-import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { AiCfoAskCard } from "@/components/AiCfoAskCard";
-import { PeriodImpact } from "@/components/PeriodImpact";
-import { DataPeriodLabel } from "@/components/DataPeriodLabel";
-import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { GROSS_REVENUE as BASE_REVENUE, BASE_CONTRIBUTION, CONTRIBUTION_PER_ORDER as BASE_CPO } from "@/lib/data/pricing-metrics";
 import { BASE_EBITDA } from "@/lib/data/business-snapshot";
 import { CASH_BALANCE as BASE_CASH, CASH_RUNWAY as BASE_RUNWAY, WORKING_CAPITAL_DRAG as BASE_WORKING_CAPITAL } from "@/lib/data/cash-snapshot";
@@ -38,7 +30,6 @@ import { CASH_BALANCE as BASE_CASH, CASH_RUNWAY as BASE_RUNWAY, WORKING_CAPITAL_
 // Scenario-lab specific: BASE_CAC_PAYBACK uses 1.6 as a scenario modelling starting
 // point (intentionally higher than the shared CAC_PAYBACK = 1.4 in growth-metrics.ts,
 // which reflects the current actual payback — 1.6 is the conservative scenario base).
-const SCENARIO_STORE_ID = "10000000-0000-0000-0000-000000000001";
 const BASE_CAC_PAYBACK = 1.6;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -235,18 +226,6 @@ function fmtK(n: number) {
   return `£${abs.toFixed(0)}`;
 }
 
-function fmtDelta(n: number) {
-  const sign  = n >= 0 ? "+" : "−";
-  const abs   = Math.abs(n);
-  const value = abs >= 1000 ? `${(abs / 1000).toFixed(0)}k` : `${abs}`;
-  return `${sign}£${value}`;
-}
-
-function fmtDeltaRaw(n: number, decimals = 0) {
-  const sign = n >= 0 ? "+" : "−";
-  return `${sign}${Math.abs(n).toFixed(decimals)}`;
-}
-
 // ─── Local components ─────────────────────────────────────────────────────────
 function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
@@ -290,85 +269,14 @@ function SliderRow({
   );
 }
 
-function OutputCard({
-  label, base, scenario, delta, positive, note,
-}: {
-  label: string; base: string; scenario: string;
-  delta: string; positive: boolean; note?: string;
-}) {
-  return (
-    <div className="bg-secondary/40 rounded-xl p-4 flex flex-col gap-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <div className="flex items-end justify-between gap-2">
-        <div>
-          <p className="text-[10px] text-muted-foreground mb-0.5">Base</p>
-          <p className="text-sm font-semibold text-foreground">{base}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-[10px] text-muted-foreground mb-0.5">Plan</p>
-          <p className="text-sm font-bold text-foreground">{scenario}</p>
-        </div>
-      </div>
-      <div className={cn(
-        "flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold",
-        positive
-          ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400"
-          : "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400"
-      )}>
-        {positive ? <ArrowUpRight className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
-        {delta}
-      </div>
-      {note && <p className="text-[10px] text-muted-foreground/60 text-center leading-snug">{note}</p>}
-    </div>
-  );
-}
-
-// ─── Bridge chart data ────────────────────────────────────────────────────────
-const BRIDGE_DATA = [
-  { name: "Base\ncontrib", invis: 0,       value: 198_000, type: "base"     },
-  { name: "Pricing",       invis: 198_000, value: 18_000,  type: "positive" },
-  { name: "Marketing",     invis: 216_000, value: 9_500,   type: "positive" },
-  { name: "Shipping",      invis: 225_500, value: 6_800,   type: "positive" },
-  { name: "Returns",       invis: 232_300, value: 2_700,   type: "positive" },
-  { name: "Overheads",     invis: 235_000, value: 5_000,   type: "positive" },
-  { name: "Plan\ncontrib", invis: 0,  value: 240_000, type: "result"   },
-];
-
-const BRIDGE_COLORS: Record<string, string> = {
-  base:     "#6366f1",
-  positive: "#22c55e",
-  negative: "#ef4444",
-  result:   "#6366f1",
-};
-
-// ─── Implementation actions ───────────────────────────────────────────────────
-const IMPL_ACTIONS = [
-  { action: "Reduce discounting by 3pp",    impact: "+£38k contribution",  conf: "High",   effort: "Low",    timing: "Immediate"  },
-  { action: "Reallocate Meta spend",        impact: "+£9.5k contribution",  conf: "Medium", effort: "Low",    timing: "1–2 weeks"  },
-  { action: "Reduce inventory days",        impact: "+£46k cash",           conf: "Medium", effort: "Medium", timing: "4–8 weeks"  },
-  { action: "Renegotiate shipping",         impact: "+£6.8k contribution",  conf: "High",   effort: "Medium", timing: "2–4 weeks"  },
-  { action: "Hold fixed costs flat",        impact: "+£12k cash protection", conf: "High",  effort: "Low",    timing: "Immediate"  },
-];
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ScenarioLab() {
-  const {
-    dateFrom: scenarioDateFrom,
-    dateTo: scenarioDateTo,
-    periodLabel: scenarioPeriodLabel,
-    loading: scenarioPeriodLoading,
-  } = useLatestDataPeriod(SCENARIO_STORE_ID);
-
   const isPro       = canAccess("scenario_lab_builder");
   const isProPlans  = canAccess("scenario_lab_plans");
-  const isProBridge = canAccess("scenario_lab_bridge");
-  const isProImpl   = canAccess("scenario_lab_implementation");
 
   const [scenario,    setScenario]    = useState<ScenarioState>(BALANCED_GROWTH);
   const [activeTab,   setActiveTab]   = useState<"growth"|"margin"|"marketing"|"cash"|"overheads">("growth");
   const [activePlan,  setActivePlan]  = useState<PlanId>("balanced");
-  const [importedOpen, setImportedOpen] = useState(false);
-  const [checkedActions, setCheckedActions] = useState<Set<number>>(new Set());
   const [loadedPresetLabel, setLoadedPresetLabel] = useState<string | null>(null);
 
   // Detect ?preset= param on first mount only — applies the opportunity preset,
@@ -400,14 +308,6 @@ export default function ScenarioLab() {
     setScenario(PLAN_PRESETS[plan]);
   }
 
-  function toggleAction(i: number) {
-    setCheckedActions(prev => {
-      const next = new Set(prev);
-      next.has(i) ? next.delete(i) : next.add(i);
-      return next;
-    });
-  }
-
   const TABS = [
     { id: "growth",     label: "Growth"    },
     { id: "margin",     label: "Margin"    },
@@ -421,7 +321,7 @@ export default function ScenarioLab() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-10">
 
         {/* ══ 1. PAGE HEADER ══════════════════════════════════════════════════ */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
           <div>
             <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">
               Profit Launchpad
@@ -429,17 +329,6 @@ export default function ScenarioLab() {
             <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed max-w-xl">
               Night Scout’s recommended route to higher profit and stronger cashflow.
             </p>
-          </div>
-          <div className="flex flex-col items-end gap-1.5 shrink-0 text-right">
-            <TimelineSelector />
-            <DataPeriodLabel
-              periodLabel={scenarioPeriodLabel}
-              loading={scenarioPeriodLoading}
-              dateFrom={scenarioDateFrom}
-              dateTo={scenarioDateTo}
-              variant="based"
-              className="mt-0"
-            />
           </div>
         </div>
 
@@ -490,38 +379,6 @@ export default function ScenarioLab() {
           </p>
         </div>
 
-        {/* ── Free upgrade card ────────────────────────────────────────────── */}
-        {!isPro && (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-5 px-6 py-5 rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/30">
-            <div className="flex-1">
-              <p className="text-sm font-bold text-indigo-900 dark:text-indigo-200 mb-1">Night Scout has identified a recommended launch plan.</p>
-              <p className="text-xs text-indigo-700/80 dark:text-indigo-400/80 leading-snug mb-3">
-                Upgrade to Pro to see the actions, expected profit impact, cash impact and implementation roadmap.
-              </p>
-              <ul className="space-y-1">
-                {[
-                  "Recommended plan: Balanced Growth Plan",
-                  "Broad reason: margin pressure, marketing inefficiency and cash tightening",
-                  "Expected direction: higher contribution and stronger cash headroom",
-                  "Unlock values, actions and implementation steps",
-                ].map(b => (
-                  <li key={b} className="flex items-center gap-2 text-xs text-indigo-800 dark:text-indigo-300">
-                    <CheckCircle className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 shrink-0" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <a
-              href="/upgrade"
-              className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-md shadow-indigo-500/20"
-            >
-              Unlock Pro
-              <ChevronRight className="w-4 h-4" />
-            </a>
-          </div>
-        )}
-
         {/* ══ 3. RECOMMENDED LAUNCH PLAN SUMMARY ══════════════════════════════ */}
         <SectionHeading
           title="Recommended Launch Plan: Balanced Growth Plan"
@@ -540,13 +397,12 @@ export default function ScenarioLab() {
               Confidence: Medium–High
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               { label: "Profit impact",    value: "+£42,000",   subLabel: "30-day impact", annualised: "+£504,000 (annualised)", color: "emerald" },
               { label: "Cash impact",      value: "+£64,000",   subLabel: "30-day impact", annualised: "+£768,000 (annualised)", color: "emerald" },
               { label: "Runway impact",    value: "+0.8 months", subLabel: undefined,       annualised: undefined,               color: "emerald" },
               { label: "Margin impact",    value: "+4.2pp",      subLabel: undefined,       annualised: undefined,               color: "emerald" },
-              { label: "Plan quality",     value: "Strong",      subLabel: undefined,       annualised: undefined,               color: "indigo"  },
             ].map(({ label, value, subLabel, annualised, color }) => (
               <div key={label} className="flex flex-col items-center text-center bg-secondary/40 rounded-xl p-4 gap-0.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
@@ -563,22 +419,22 @@ export default function ScenarioLab() {
           </div>
         </div>
 
-        {/* ══ 4. SCOUT RECOMMENDATION (moved up) ═══════════════════════════════ */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
-          <div className="flex items-start gap-3 mb-4">
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 text-primary" />
+        {/* ══ 4. SCOUT RECOMMENDATION ════════════════════════════════════════ */}
+        {isPro && (
+          <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Scout Recommendation</p>
+                <p className="text-sm text-foreground leading-relaxed">
+                  Start with the Balanced Growth Plan. It delivers meaningful contribution uplift while protecting cash runway and
+                  avoiding over-reliance on new paid acquisition. Prioritise discount discipline, Meta budget reallocation and
+                  inventory control before increasing growth spend.
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Scout Recommendation</p>
-              <p className="text-sm text-foreground leading-relaxed">
-                Start with the Balanced Growth Plan. It delivers meaningful contribution uplift while protecting cash runway and
-                avoiding over-reliance on new paid acquisition. Prioritise discount discipline, Meta budget reallocation and
-                inventory control before increasing growth spend.
-              </p>
-            </div>
-          </div>
-          {isPro ? (
             <ul className="space-y-2">
               {[
                 "Apply the Balanced Growth Plan this month",
@@ -591,24 +447,8 @@ export default function ScenarioLab() {
                 </li>
               ))}
             </ul>
-          ) : (
-            <div className="space-y-2">
-              {[
-                "Apply the Balanced Growth Plan this month",
-                "Review Meta and Google performance weekly",
-                "Reassess inventory and cash runway after 30 days",
-              ].map(bullet => (
-                <div key={bullet} className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-secondary/40 blur-[3px] select-none pointer-events-none" aria-hidden="true">
-                  <CheckCircle className="w-4 h-4 text-emerald-500/40 shrink-0" />
-                  <span className="text-sm font-medium text-foreground/50">{bullet}</span>
-                </div>
-              ))}
-              <a href="/upgrade" className="flex items-center justify-center gap-2 mt-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
-                <Lock className="w-3 h-3" /> Unlock action plan with Pro
-              </a>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* ══ 5. WHY NIGHT SCOUT CHOSE THIS ══════════════════════════════════ */}
         <SectionHeading title="Why Night Scout Chose This" />
@@ -668,33 +508,13 @@ export default function ScenarioLab() {
           </div>
         </div>
 
-        {/* ══ 6. ALTERNATIVE LAUNCH PLANS ═════════════════════════════════════ */}
+        {/* ══ 6. OTHER ROUTES ════════════════════════════════════════════════ */}
         <SectionHeading
-          title="Alternative Launch Plans"
-          subtitle="Start with the recommended plan, or switch to a more profit-focused or cash-focused plan."
+          title="Other Routes You Could Take"
+          subtitle="Night Scout recommends the Balanced Growth Plan, but you can choose a more profit-focused or cash-focused route if priorities change."
         />
 
-        <PremiumBlurPreview
-          title="Alternative Launch Plans"
-          isPro={isProPlans}
-          ctaTitle="Unlock Night Scout launch plans"
-          ctaDescription="Upgrade to Pro to apply pre-built plans and see their combined profit and cash impact."
-          ghostContent={
-            <div className="grid sm:grid-cols-3 gap-4">
-              {[
-                { name: "Margin Recovery Plan",  badge: "Profit Focus", color: "bg-blue-50 dark:bg-blue-950/20 border-blue-200/60 dark:border-blue-700/40",     badgeColor: "text-blue-600 dark:text-blue-400 bg-blue-100/80 dark:bg-blue-900/40" },
-                { name: "Cash Protection Plan",  badge: "Cash Focus",   color: "bg-slate-50 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/40",  badgeColor: "text-slate-600 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-800/40" },
-                { name: "Balanced Growth Plan",  badge: "Balanced Growth", color: "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-700/40", badgeColor: "text-emerald-600 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-900/40" },
-              ].map(p => (
-                <div key={p.name} className={cn("rounded-xl border p-4", p.color)}>
-                  <span className={cn("inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mb-2", p.badgeColor)}>{p.badge}</span>
-                  <p className="text-sm font-semibold text-foreground mb-2">{p.name}</p>
-                  <p className="text-xs text-muted-foreground">Expected impact: — —</p>
-                </div>
-              ))}
-            </div>
-          }
-        >
+        <div>
           <div className="grid sm:grid-cols-3 gap-4">
             {/* Margin Recovery Plan */}
             <div className={cn(
@@ -721,7 +541,12 @@ export default function ScenarioLab() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => applyPlan("margin")} className="w-full mt-auto text-xs font-semibold px-4 py-2 rounded-xl border border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">
+              <button disabled={!isProPlans} onClick={() => applyPlan("margin")} className={cn(
+                "w-full mt-auto text-xs font-semibold px-4 py-2 rounded-xl border transition-colors",
+                isProPlans
+                  ? "border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/40"
+                  : "border-border/40 text-muted-foreground/60 bg-secondary/30 cursor-not-allowed"
+              )}>
                 Apply this plan
               </button>
             </div>
@@ -751,7 +576,12 @@ export default function ScenarioLab() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => applyPlan("cash")} className="w-full mt-auto text-xs font-semibold px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-700/30 transition-colors">
+              <button disabled={!isProPlans} onClick={() => applyPlan("cash")} className={cn(
+                "w-full mt-auto text-xs font-semibold px-4 py-2 rounded-xl border transition-colors",
+                isProPlans
+                  ? "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-700/30"
+                  : "border-border/40 text-muted-foreground/60 bg-secondary/30 cursor-not-allowed"
+              )}>
                 Apply this plan
               </button>
             </div>
@@ -781,12 +611,38 @@ export default function ScenarioLab() {
                   </li>
                 ))}
               </ul>
-              <button onClick={() => applyPlan("balanced")} className="w-full mt-auto text-xs font-semibold px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors shadow-sm shadow-emerald-500/20">
+              <button disabled={!isProPlans} onClick={() => applyPlan("balanced")} className={cn(
+                "w-full mt-auto text-xs font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm",
+                isProPlans
+                  ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
+                  : "bg-secondary text-muted-foreground/60 cursor-not-allowed"
+              )}>
                 Apply this plan
               </button>
             </div>
           </div>
-        </PremiumBlurPreview>
+        </div>
+
+        {!isPro && (
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 px-6 py-5 rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/30">
+            <div className="flex-1">
+              <p className="text-base font-bold text-indigo-900 dark:text-indigo-100 mb-1">Unlock Your Launch Plan</p>
+              <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 leading-relaxed">
+                See the actions, expected profit uplift, cash impact and implementation roadmap.
+              </p>
+            </div>
+            <a
+              href="/upgrade"
+              className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-md shadow-indigo-500/20"
+            >
+              Unlock Pro
+              <ChevronRight className="w-4 h-4" />
+            </a>
+          </div>
+        )}
+
+        {isPro && (
+          <>
 
         {/* ══ 7. PROFIT LAUNCHPAD SIMULATOR ══════════════════════════════════ */}
         <SectionHeading
@@ -922,389 +778,85 @@ export default function ScenarioLab() {
               <div>
                 <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Contribution bridge, cash consequence, implementation plan and scenario quality.
+                  Compact evidence behind the recommended launch plan.
                 </p>
               </div>
               <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
               <span className="text-xs font-semibold text-primary hidden group-open:inline">Collapse</span>
             </div>
           </summary>
-          <div className="px-6 pb-6 pt-2 space-y-8">
-
-        {/* Detailed impact */}
-        <div>
-          <SectionHeading title="Detailed Impact" />
-          <p className="text-[10px] text-muted-foreground -mt-2 mb-3">All £ values shown for the selected 30-day period. Annualised estimates shown beneath each figure.</p>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <OutputCard label="Revenue"      base={fmtK(BASE_REVENUE)}      scenario={fmtK(out.revenue)}      delta={fmtDelta(out.revenueDelta)}      positive={out.revenueDelta >= 0}      note={fmtDelta(out.revenueDelta * 12) + " (annualised)"} />
-            <OutputCard label="Contribution" base={fmtK(BASE_CONTRIBUTION)}  scenario={fmtK(out.contribution)}  delta={fmtDelta(out.contributionDelta)}  positive={out.contributionDelta >= 0} note={fmtDelta(out.contributionDelta * 12) + " (annualised)"} />
-            <OutputCard label="EBITDA"       base={fmtK(BASE_EBITDA)}        scenario={fmtK(out.ebitda)}        delta={fmtDelta(out.ebitdaDelta)}        positive={out.ebitdaDelta >= 0}       note={fmtDelta(out.ebitdaDelta * 12) + " (annualised)"} />
-            <OutputCard label="Cash Balance" base={fmtK(BASE_CASH)}          scenario={fmtK(out.cash)}          delta={fmtDelta(out.cashDelta)}          positive={out.cashDelta >= 0}         note={fmtDelta(out.cashDelta * 12) + " (annualised)"} />
-          </div>
-        </div>
-
-        <PremiumBlurPreview
-          title="Detailed impact"
-          isPro={isPro}
-          ctaTitle="Unlock detailed plan impact"
-          ctaDescription="See how the plan affects cash runway, working capital drag and unit economics."
-          ghostContent={
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {["Cash Runway", "Working Capital Drag", "CAC Payback", "Contribution / Order"].map(l => (
-                <div key={l} className="bg-secondary/40 rounded-xl p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{l}</p>
-                  <div className="flex justify-between mb-2"><span className="text-sm text-foreground">— —</span></div>
-                  <div className="h-6 rounded-lg bg-border/40" />
-                </div>
-              ))}
+          <div className="px-6 pb-6 pt-2 grid grid-cols-1 xl:grid-cols-3 gap-4">
+            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
+              <h3 className="text-sm font-bold text-foreground">Plan Impact Summary</h3>
+              <p className="text-xs text-muted-foreground mt-1 mb-3">Current position compared with the active plan.</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-border/40 text-muted-foreground">
+                      <th className="text-left font-semibold py-2 pr-3">Metric</th>
+                      <th className="text-right font-semibold py-2 px-3">Current</th>
+                      <th className="text-right font-semibold py-2 pl-3">Plan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/30">
+                    {[
+                      { label: "Contribution", current: fmtK(BASE_CONTRIBUTION), plan: fmtK(out.contribution) },
+                      { label: "EBITDA", current: fmtK(BASE_EBITDA), plan: fmtK(out.ebitda) },
+                      { label: "Cash Balance", current: fmtK(BASE_CASH), plan: fmtK(out.cash) },
+                    ].map(row => (
+                      <tr key={row.label}>
+                        <td className="py-2 pr-3 font-medium text-foreground">{row.label}</td>
+                        <td className="py-2 px-3 text-right text-muted-foreground tabular-nums">{row.current}</td>
+                        <td className="py-2 pl-3 text-right font-semibold text-foreground tabular-nums">{row.plan}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          }
-        >
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <OutputCard
-              label="Cash Runway"
-              base={`${BASE_RUNWAY} mo`}
-              scenario={`${out.runway} mo`}
-              delta={`${fmtDeltaRaw(out.runwayDelta, 1)} months`}
-              positive={out.runwayDelta >= 0}
-            />
-            <OutputCard
-              label="Working Capital Drag"
-              base={fmtK(BASE_WORKING_CAPITAL)}
-              scenario={fmtK(out.workingCapital)}
-              delta={fmtDelta(out.wcDelta)}
-              positive={out.wcDelta <= 0}
-            />
-            <OutputCard
-              label="CAC Payback"
-              base={`${BASE_CAC_PAYBACK} orders`}
-              scenario={`${out.cacPayback} orders`}
-              delta={out.cacPaybackDelta <= 0 ? "Improved" : "Worsened"}
-              positive={out.cacPaybackDelta <= 0}
-            />
-            <OutputCard
-              label="Contribution / Order"
-              base={`£${BASE_CPO.toFixed(2)}`}
-              scenario={`£${out.cpo.toFixed(2)}`}
-              delta={`${fmtDeltaRaw(out.cpoDelta, 2)} per order`}
-              positive={out.cpoDelta >= 0}
-            />
-          </div>
-        </PremiumBlurPreview>
 
-        {/* Imported assumptions */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
-          <button
-            onClick={() => setImportedOpen(o => !o)}
-            className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left hover:bg-secondary/30 transition-colors"
-          >
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground">Imported assumptions from other planning tools</p>
-              {!importedOpen && (
-                <p className="text-xs text-muted-foreground mt-0.5">Show assumptions pulled from page-level what-if sliders.</p>
-              )}
-            </div>
-            <ChevronDown className={cn(
-              "w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200",
-              importedOpen && "rotate-180"
-            )} />
-          </button>
-
-          {importedOpen && (
-            <div className="px-6 pb-5 border-t border-border/40 pt-4">
-              {!isPro && (
-                <p className="text-xs text-muted-foreground/70 mb-3 flex items-center gap-1.5">
-                  <Lock className="w-3 h-3" /> Upgrade to Pro to apply imported assumptions.
-                </p>
-              )}
-              <div className="flex flex-wrap gap-2 mb-4">
+            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
+              <h3 className="text-sm font-bold text-foreground">Key Drivers</h3>
+              <p className="text-xs text-muted-foreground mt-1 mb-3">The three changes doing most of the work.</p>
+              <div className="space-y-3">
                 {[
-                  "Pricing Optimisation: discount reduced by 3pp",
-                  "Marketing Efficiency: 15% Meta spend reallocated",
-                  "Cash Control: inventory days reduced by 12",
-                  "Profit Margin: shipping cost reduced by £1.50/order",
-                  "Profit Growth: fixed costs held flat",
-                ].map(chip => (
-                  <span key={chip} className={cn(
-                    "inline-flex items-center text-xs px-3 py-1.5 rounded-full border font-medium",
-                    isPro
-                      ? "bg-secondary text-foreground border-border/60"
-                      : "bg-secondary/50 text-muted-foreground/60 border-border/30 blur-[2px] select-none"
-                  )}>
-                    {chip}
-                  </span>
+                  { title: "Discount reduction", text: "Tighter discounting protects contribution without needing more traffic." },
+                  { title: "Marketing reallocation", text: "Spend shifts away from weaker paid acquisition into higher-efficiency channels." },
+                  { title: "Inventory reduction", text: "Lower stock days release cash and improve short-term headroom." },
+                ].map(driver => (
+                  <div key={driver.title} className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">{driver.title}</p>
+                      <p className="text-xs text-muted-foreground leading-snug mt-0.5">{driver.text}</p>
+                    </div>
+                  </div>
                 ))}
               </div>
-              <div className="flex gap-2">
-                <button disabled={!isPro} className={cn(
-                  "text-xs font-semibold px-4 py-2 rounded-xl transition-colors border",
-                  isPro ? "border-primary/30 text-primary bg-primary/5 hover:bg-primary/10" : "border-border/30 text-muted-foreground/50 cursor-not-allowed"
-                )}>
-                  Apply current page assumptions
-                </button>
-                <button disabled={!isPro} className={cn(
-                  "text-xs font-semibold px-4 py-2 rounded-xl transition-colors border",
-                  isPro ? "border-border text-muted-foreground hover:text-foreground" : "border-border/30 text-muted-foreground/50 cursor-not-allowed"
-                )}>
-                  Clear imported assumptions
-                </button>
-              </div>
             </div>
-          )}
-        </div>
 
-        {/* ══ 11. SCENARIO CONTRIBUTION BRIDGE ════════════════════════════════ */}
-        <PremiumBlurPreview
-          title="Scenario Contribution Bridge"
-          subtitle="Shows how the plan moves contribution from today's position to the plan result."
-          isPro={isProBridge}
-          ctaTitle="Unlock the contribution bridge"
-          ctaDescription="See exactly which levers drive the contribution improvement — and by how much."
-          ghostContent={
-            <div className="space-y-3">
-              {["Base contribution","Pricing improvement","Marketing reallocation","Shipping reduction","Plan contribution"].map((l, i) => (
-                <div key={l} className="flex items-center gap-3 py-1.5 border-b border-border/30 last:border-0">
-                  <p className="text-sm text-foreground flex-1">{l}</p>
-                  <div className={cn("h-2 rounded-full bg-border/50", i === 0 || i === 4 ? "w-24" : "w-14")} />
-                  <span className="text-sm font-semibold text-muted-foreground/40 w-20 text-right">£ —,———</span>
-                </div>
-              ))}
-            </div>
-          }
-        >
-          <div className="h-56 w-full mb-6">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={BRIDGE_DATA} barCategoryGap="30%" margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.5} vertical={false} />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-                <YAxis tickFormatter={v => `£${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-                <Tooltip formatter={(v: number) => [`£${(v/1000).toFixed(0)}k`, ""]} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px", fontSize: 12 }} />
-                <Bar dataKey="invis" stackId="a" fill="transparent" />
-                <Bar dataKey="value" stackId="a" radius={[4,4,0,0]}>
-                  {BRIDGE_DATA.map(entry => <Cell key={entry.name} fill={BRIDGE_COLORS[entry.type]} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="space-y-2 mb-5">
-            {[
-              { label: "Base contribution",        value: 198_000, type: "base"    },
-              { label: "Pricing improvement",      value:  18_000, type: "gain"    },
-              { label: "Marketing reallocation",   value:   9_500, type: "gain"    },
-              { label: "Shipping cost reduction",  value:   6_800, type: "gain"    },
-              { label: "Returns reduction",        value:   2_700, type: "gain"    },
-              { label: "Fixed cost / overhead",    value:   5_000, type: "gain"    },
-              { label: "Plan contribution",        value: 240_000, type: "result"  },
-            ].map(({ label, value, type }) => (
-              <div key={label} className="flex items-start justify-between py-1.5 border-b border-border/30 last:border-0">
-                <span className="text-sm text-foreground">{label}</span>
-                <div className="text-right">
-                  <span className={cn(
-                    "text-sm font-semibold tabular-nums block",
-                    type === "result" ? "text-primary font-bold"
-                    : type === "gain"  ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-foreground"
-                  )}>
-                    {type === "gain" ? `+£${(value/1000).toFixed(1)}k` : `£${(value/1000).toFixed(0)}k`}
-                    {type !== "gain" && <span className="font-normal text-[10px] text-muted-foreground ml-1">{type === "base" || type === "result" ? "(30 days)" : ""}</span>}
-                  </span>
-                  {type === "gain" && (
-                    <span className="text-[10px] text-muted-foreground tabular-nums">
-                      +£{((value * 12)/1000).toFixed(0)}k (annualised)
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
-            <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-snug">
-              Most of the contribution uplift comes from reducing discounting and reallocating inefficient paid spend rather than relying on new customer growth.
-            </p>
-          </div>
-        </PremiumBlurPreview>
-
-        {/* ══ 12. CASH AND PROFIT CONSEQUENCE (simplified) ════════════════════ */}
-        <PremiumBlurPreview
-          title="Cash and Profit Consequence"
-          subtitle="Shows whether the plan improves both profitability and cash resilience."
-          isPro={isProBridge}
-          ctaTitle="Unlock cash and profit consequence"
-          ctaDescription="Understand how the plan affects both P&L and cash simultaneously."
-        >
-          <div className="flex items-start gap-3 mb-5">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Sparkles className="w-4 h-4 text-primary" />
-            </div>
-            <p className="text-sm text-foreground leading-relaxed">
-              Cash improves because inventory reduction releases working capital as well as improving operating performance.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { icon: TrendingUp,   color: "emerald", label: "Profit uplift",    value: "+£42,000", period: "30-day impact", note: "+£504,000 (annualised)", text: "Contribution improves through better margin and marketing efficiency." },
-              { icon: Shield,       color: "blue",    label: "Cash uplift",      value: "+£64,000", period: "30-day impact", note: "+£768,000 (annualised)", text: "Cash improves because working capital drag reduces." },
-              { icon: Zap,          color: "indigo",  label: "Runway extension", value: "+0.8 months",        note: undefined,    text: "Cash cover improves from 3.4 to 4.2 months." },
-              { icon: CheckCircle,  color: "green",   label: "Risk movement",    value: "Lower",              note: undefined,    text: "Plan reduces both margin risk and cash risk." },
-            ].map(({ icon: Icon, color, label, value, period, note, text }) => (
-              <div key={label} className="bg-secondary/40 rounded-xl p-4 space-y-2">
-                <div className={cn(
-                  "w-8 h-8 rounded-full flex items-center justify-center",
-                  color === "emerald" ? "bg-emerald-100 dark:bg-emerald-900/40"
-                  : color === "blue"   ? "bg-blue-100 dark:bg-blue-900/40"
-                  : color === "indigo" ? "bg-primary/10"
-                  : "bg-green-100 dark:bg-green-900/40"
-                )}>
-                  <Icon className={cn(
-                    "w-4 h-4",
-                    color === "emerald" ? "text-emerald-600 dark:text-emerald-400"
-                    : color === "blue"   ? "text-blue-600 dark:text-blue-400"
-                    : color === "indigo" ? "text-primary"
-                    : "text-green-600 dark:text-green-400"
-                  )} />
-                </div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-                <p className="text-base font-bold text-foreground leading-tight">{value}</p>
-                {period && <p className="text-[10px] text-muted-foreground/70 -mt-1">{period}</p>}
-                {note   && <p className="text-[10px] text-muted-foreground/70 tabular-nums">{note}</p>}
-                <p className="text-xs text-muted-foreground leading-snug">{text}</p>
-              </div>
-            ))}
-          </div>
-        </PremiumBlurPreview>
-
-        {/* ══ 13. IMPLEMENTATION PLAN (with checkboxes) ════════════════════════ */}
-        <PremiumBlurPreview
-          title="Implementation Plan"
-          subtitle="The practical actions required to deliver this plan."
-          isPro={isProImpl}
-          ctaTitle="Unlock the implementation plan"
-          ctaDescription="Get a step-by-step action plan with timing, effort and expected impact for each lever."
-          ghostContent={
-            <div className="space-y-3">
-              <div className="grid grid-cols-5 gap-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground pb-2 border-b border-border/40">
-                {["", "Action", "Impact", "Confidence", "Timing"].map(h => <span key={h}>{h}</span>)}
-              </div>
-              {IMPL_ACTIONS.map(row => (
-                <div key={row.action} className="grid grid-cols-5 gap-3 items-center py-2 border-b border-border/30 last:border-0">
-                  <div className="w-4 h-4 rounded border border-border/50 bg-secondary/40" />
-                  <p className="text-sm text-foreground">{row.action}</p>
-                  <p className="text-xs text-muted-foreground/40">— —</p>
-                  <span className="text-xs text-muted-foreground/40">—</span>
-                  <span className="text-xs text-muted-foreground/40">—</span>
-                </div>
-              ))}
-            </div>
-          }
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/40">
-                  <th className="w-8 pb-3" />
-                  {["Action","Impact","Confidence","Effort","Timing"].map(h => (
-                    <th key={h} className="text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground pb-3 pr-4">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {IMPL_ACTIONS.map((row, i) => (
-                  <tr key={row.action} className={cn("border-b border-border/30 last:border-0 group", checkedActions.has(i) && "opacity-60")}>
-                    <td className="py-3 pr-3 align-middle">
-                      <button
-                        onClick={() => toggleAction(i)}
-                        className={cn(
-                          "w-5 h-5 rounded flex items-center justify-center border-2 transition-all",
-                          checkedActions.has(i)
-                            ? "bg-emerald-500 border-emerald-500 text-white"
-                            : "border-border hover:border-primary/50 bg-background"
-                        )}
-                      >
-                        {checkedActions.has(i) && <CheckCircle className="w-3 h-3" />}
-                      </button>
-                    </td>
-                    <td className={cn("py-3 pr-4 font-medium text-foreground", checkedActions.has(i) && "line-through text-muted-foreground")}>{row.action}</td>
-                    <td className="py-3 pr-4 text-emerald-600 dark:text-emerald-400 font-semibold whitespace-nowrap">{row.impact}</td>
-                    <td className="py-3 pr-4">
-                      <span className={cn(
-                        "text-xs font-semibold px-2 py-0.5 rounded-full",
-                        row.conf === "High"
-                          ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
-                          : "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
-                      )}>{row.conf}</span>
-                    </td>
-                    <td className="py-3 pr-4">
-                      <span className={cn(
-                        "text-xs font-semibold px-2 py-0.5 rounded-full",
-                        row.effort === "Low"
-                          ? "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                          : "bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400"
-                      )}>{row.effort}</span>
-                    </td>
-                    <td className="py-3 text-xs text-muted-foreground whitespace-nowrap">{row.timing}</td>
-                  </tr>
+            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
+              <h3 className="text-sm font-bold text-foreground">Why Night Scout Has Confidence</h3>
+              <p className="text-xs text-muted-foreground mt-1 mb-3">The recommendation is grounded in stable operating signals.</p>
+              <ul className="space-y-2">
+                {[
+                  "CAC trends stable",
+                  "Discount behaviour predictable",
+                  "Inventory reduction already underway",
+                ].map(item => (
+                  <li key={item} className="flex items-start gap-2 text-xs text-foreground">
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                    {item}
+                  </li>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </PremiumBlurPreview>
-
-        <PremiumBlurPreview
-          title="Scenario Quality Score"
-          isPro={isProBridge}
-          ctaTitle="Unlock plan quality scoring"
-          ctaDescription="See a structured quality assessment across profit, cash, risk and payback."
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-5">
-            <div className="flex items-center justify-center w-24 h-24 rounded-full border-4 border-emerald-300 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 shrink-0">
-              <p className="text-xl font-black text-emerald-700 dark:text-emerald-400">Strong</p>
+              </ul>
             </div>
-            <div className="flex-1 space-y-2">
-              {[
-                { factor: "Profit uplift",       score: "Strong",      color: "emerald" },
-                { factor: "Cash impact",          score: "Strong",      color: "emerald" },
-                { factor: "Implementation risk",  score: "Moderate",    color: "amber"   },
-                { factor: "Confidence level",     score: "Medium-High", color: "blue"    },
-                { factor: "Payback period",       score: "Fast",        color: "emerald" },
-              ].map(({ factor, score, color }) => (
-                <div key={factor} className="flex items-center justify-between gap-4">
-                  <p className="text-xs text-muted-foreground">{factor}</p>
-                  <span className={cn(
-                    "text-xs font-semibold px-2 py-0.5 rounded-full",
-                    color === "emerald" ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400"
-                    : color === "amber"  ? "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400"
-                    : "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400"
-                  )}>
-                    {score}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-secondary/50">
-            <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-snug">
-              Confidence reflects stability of CAC trends, discount behaviour and shipping cost variance over the last 90 days.
-            </p>
-          </div>
-        </PremiumBlurPreview>
-
           </div>
         </details>
 
+          </>
+        )}
       </div>
-
-      <DataBenchmarkAssumptions
-        benchmarkNote="Scenario quality is assessed against margin, cash runway and CAC payback benchmarks."
-        dataQualityNote="Plan impact is a directional estimate, not a guaranteed outcome."
-        confidenceNote="Accuracy improves when Shopify, Xero, Google Ads, Meta and cost mappings are kept up to date."
-        className="mb-2"
-      />
 
     </AppLayout>
   );

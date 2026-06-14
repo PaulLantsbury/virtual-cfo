@@ -181,16 +181,16 @@ const ALERT_HISTORY = [
 ];
 
 const FREE_STATUS = [
-  { area: "Pricing recovery", status: "Improving", tone: "green" as const },
-  { area: "Marketing efficiency", status: "Needs attention", tone: "amber" as const },
-  { area: "Cash control", status: "Stable", tone: "green" as const },
-  { area: "Inventory discipline", status: "Improving", tone: "green" as const },
+  { area: "Pricing & Margin", status: "Improving", tone: "green" as const },
+  { area: "Marketing", status: "Needs attention", tone: "amber" as const },
+  { area: "Cash", status: "Stable", tone: "green" as const },
+  { area: "Inventory", status: "Improving", tone: "green" as const },
 ];
 
 const UNLOCK_BULLETS = [
   "See which actions are working",
   "Spot stalled or worsening areas",
-  "Track weekly, daily or monthly movement",
+  "Track daily, weekly and monthly progress",
   "Receive CFO-style monitoring updates",
   "Know what needs attention next",
 ];
@@ -253,7 +253,7 @@ export default function CfoAlerts() {
             <div className="mt-3 space-y-2 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>{isPro ? "Profit signals improving" : "One area needs attention"}</span>
+                <span>{isPro ? "Profit signals improving" : "One area still needs attention"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-3.5 h-3.5 text-amber-300 shrink-0" />
@@ -293,7 +293,7 @@ export default function CfoAlerts() {
                 <div>
                   <p className="text-base font-bold text-foreground">Unlock Night Scout Monitoring</p>
                   <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-                    Track whether the recommended plan is working, see which actions are improving performance and receive proactive CFO updates.
+                    Track whether the recommended plan is working, identify stalled actions and receive proactive CFO monitoring updates.
                   </p>
                   <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-1.5 mt-4">
                     {UNLOCK_BULLETS.map((item) => (

@@ -61,6 +61,23 @@ function priorityTierFromScore(score: number): PriorityTier {
   return "Watch List";
 }
 
+function freeOpportunityLabel(opp: { label: string; category?: string; impactType?: string }): string {
+  const text = `${opp.label} ${opp.category ?? ""}`.toLowerCase();
+  if (opp.impactType === "cash_improvement" || text.includes("inventory") || text.includes("cash")) return "Cash release opportunity identified";
+  if (text.includes("meta") || text.includes("acquisition") || text.includes("marketing")) return "Marketing opportunity identified";
+  if (text.includes("shipping") || text.includes("fulfil") || text.includes("margin")) return "Margin opportunity identified";
+  if (text.includes("discount") || text.includes("full-price") || text.includes("pricing")) return "Pricing opportunity identified";
+  return `${opp.category ?? "Profit"} opportunity identified`;
+}
+
+function freeOpportunityRationale(opp: { category?: string; impactType?: string }): string {
+  if (opp.impactType === "cash_improvement") return "Night Scout has found a cash lever that may improve runway.";
+  if (opp.category === "Marketing") return "Night Scout has found a customer acquisition lever worth investigating.";
+  if (opp.category === "Margin") return "Night Scout has found a margin lever worth investigating.";
+  if (opp.category === "Pricing") return "Night Scout has found a pricing lever that may recover contribution.";
+  return "Night Scout has found a controllable opportunity worth investigating.";
+}
+
 /**
  * Maps opportunity card titles to Profit Launchpad preset IDs.
  * Only the 3 supported opportunities get an "Open Launchpad" button.
@@ -427,9 +444,9 @@ export default function Opportunities() {
             {topAction && !hasRecoveryPlan && (
               <div className="mt-4 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-3">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Highest impact opportunity</p>
-                <p className="text-sm font-semibold text-foreground">{topAction.label}</p>
+                <p className="text-sm font-semibold text-foreground">{freeOpportunityLabel(topAction)}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  {OPPORTUNITY_GUIDANCE[topAction.label]?.shortWhy ?? topAction.description}
+                  Upgrade to see the recommended action and expected impact.
                 </p>
               </div>
             )}
@@ -456,7 +473,7 @@ export default function Opportunities() {
               ) : (
                 <>
                   <p className="text-2xl font-display font-bold text-emerald-300 mt-1">Recoverable contribution identified</p>
-                  <p className="text-xs text-muted-foreground mt-1">Upgrade to Pro to see the value and action plan.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Upgrade to see the recommended action and expected impact.</p>
                 </>
               )}
               <div className="flex flex-wrap gap-2 mt-3">
@@ -516,7 +533,9 @@ export default function Opportunities() {
                           </span>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-semibold text-foreground text-sm leading-snug">{opp.label}</p>
+                              <p className="font-semibold text-foreground text-sm leading-snug">
+                                {hasRecoveryPlan ? opp.label : freeOpportunityLabel(opp)}
+                              </p>
                               <span className={cn(
                                 "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
                                 priorityTierStyles[opp.priorityTier],
@@ -525,7 +544,7 @@ export default function Opportunities() {
                               </span>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                              {guidance?.shortWhy ?? opp.implementationType}
+                              {hasRecoveryPlan ? guidance?.shortWhy ?? opp.implementationType : freeOpportunityRationale(opp)}
                             </p>
                           </div>
                         </div>
@@ -644,9 +663,9 @@ export default function Opportunities() {
                 <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Unlock the full opportunity plan</p>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Unlock the action plan</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  See the value of each opportunity, the recommended actions, evidence, and the launch plan to test.
+                  See the exact action, expected impact, supporting evidence and recommended launch plan.
                 </p>
               </div>
             </div>

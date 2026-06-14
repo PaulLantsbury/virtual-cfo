@@ -38,6 +38,28 @@ const CAPITAL_FREE_LOW  = 18_000;
 const CAPITAL_FREE_HIGH = 26_000;
 
 type ImpactLevel = "high" | "medium" | "quick-win";
+type PriorityTier = "Do First" | "High Priority" | "Next Up" | "Watch List";
+
+const priorityTierStyles: Record<PriorityTier, string> = {
+  "Do First":      "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/70 dark:border-emerald-800/50",
+  "High Priority": "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-200/70 dark:border-indigo-800/50",
+  "Next Up":       "bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 border-sky-200/70 dark:border-sky-800/50",
+  "Watch List":    "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200/70 dark:border-amber-800/50",
+};
+
+const priorityTierCopy: Record<PriorityTier, string> = {
+  "Do First":      "Start here",
+  "High Priority": "Next best action",
+  "Next Up":       "Worth scheduling",
+  "Watch List":    "Lower priority for now",
+};
+
+function priorityTierFromScore(score: number): PriorityTier {
+  if (score >= 90) return "Do First";
+  if (score >= 75) return "High Priority";
+  if (score >= 60) return "Next Up";
+  return "Watch List";
+}
 
 /**
  * Maps opportunity card titles to Profit Launchpad preset IDs.
@@ -234,8 +256,8 @@ export default function Opportunities() {
 
   const maxUplift = Math.max(...mappedOpportunities.map((o) => o.uplift), 1);
 
-  // ── Intelligent ranking ──────────────────────────────────────────────────────
-  // Composite score: confidence (35%) + effort (25%) + timing (20%) + uplift (20%).
+  // ── Internal ordering ────────────────────────────────────────────────────────
+  // Internal priority signal: confidence (35%) + effort (25%) + timing (20%) + uplift (20%).
   // Sorting is deterministic as soon as opportunity_breakdown resolves.
   const rankOpp = (opp: (typeof mappedOpportunities)[number]): number => {
     const conf = opp.confidence === "High" ? 100 : opp.confidence === "Medium" ? 60 : 30;
@@ -251,7 +273,14 @@ export default function Opportunities() {
 
   const sortedOpportunities = [...mappedOpportunities].sort(
     (a, b) => rankOpp(b) - rankOpp(a),
-  );
+  ).map((opp, index) => {
+    const tier = index === 0 ? "Do First" : priorityTierFromScore(rankOpp(opp));
+    return {
+      ...opp,
+      priorityTier: tier,
+      priorityCopy: priorityTierCopy[tier],
+    };
+  });
 
   // ── Live header values ────────────────────────────────────────────────────────
   // Header "monthly contribution" total: sum impact_low/high from
@@ -380,7 +409,7 @@ export default function Opportunities() {
             </p>
             {topAction && hasRecoveryPlan && (
               <div className="mt-4 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Start first</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Start here</p>
                 <p className="text-sm font-semibold text-foreground">{topAction.label}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   {OPPORTUNITY_GUIDANCE[topAction.label]?.shortWhy ?? topAction.description}
@@ -389,41 +418,44 @@ export default function Opportunities() {
             )}
             {topAction && !hasRecoveryPlan && (
               <div className="mt-4 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Recovery plan identified</p>
-                <p className="text-sm font-semibold text-foreground">3 prioritised actions are ready to unlock.</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Start here</p>
+                <p className="text-sm font-semibold text-foreground">{topAction.label}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  The diagnosis points to discount leakage, fulfilment pressure and acquisition inefficiency, but the specific action plan is available on Pro.
+                  {OPPORTUNITY_GUIDANCE[topAction.label]?.shortWhy ?? topAction.description}
                 </p>
               </div>
             )}
             {!hasRecoveryPlan && (
               <div className="flex items-center gap-2 mt-3 text-xs text-indigo-200/70">
                 <Lock className="w-3.5 h-3.5 shrink-0" />
-                <span>Upgrade to unlock the full prioritised execution plan.</span>
+                <span>Upgrade to unlock quantified value, detailed action steps and deeper evidence.</span>
               </div>
             )}
           </div>
 
           {topAction && (
             <div className="w-full lg:w-[19rem] shrink-0 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-4">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70">Recoverable contribution</p>
-              <p className="text-3xl font-display font-bold text-emerald-300 mt-1">
-                £{(liveTotalLow / 1000).toFixed(0)}k–£{(liveTotalHigh / 1000).toFixed(0)}k
+              <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70">
+                {showHeadline ? "Recoverable contribution" : "Recommended focus"}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Estimated monthly contribution recovery.</p>
+              {showHeadline ? (
+                <>
+                  <p className="text-3xl font-display font-bold text-emerald-300 mt-1">
+                    £{(liveTotalLow / 1000).toFixed(0)}k–£{(liveTotalHigh / 1000).toFixed(0)}k
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">Estimated monthly contribution recovery.</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-2xl font-display font-bold text-emerald-300 mt-1">{topAction.priorityTier}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{topAction.priorityCopy}: {topAction.category} opportunity.</p>
+                </>
+              )}
               <div className="flex flex-wrap gap-2 mt-3">
-                {hasRecoveryPlan ? (
-                  <>
-                    <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.confidence} confidence</span>
-                    <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.effort} effort</span>
-                    <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.timing}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">High-confidence signals</span>
-                    <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">Urgent recovery window</span>
-                  </>
-                )}
+                <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-semibold", priorityTierStyles[topAction.priorityTier])}>{topAction.priorityTier}</span>
+                <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.confidence} confidence</span>
+                <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.effort} effort</span>
+                <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.timing}</span>
               </div>
             </div>
           )}
@@ -431,17 +463,18 @@ export default function Opportunities() {
       </div>
 
       {/* ── Start here ── */}
-      {hasRecoveryPlan ? (
+      {visibleQueue.length > 0 ? (
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
           <div className="px-6 py-5 border-b border-border/50">
             <h3 className="font-semibold text-lg text-foreground">Start here</h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              The first three profit recovery actions to brief into the team.
+              The next best actions to brief into the team.
             </p>
             <p className="text-xs text-muted-foreground/70 mt-2 leading-relaxed">
               <span className="font-semibold text-foreground/70">Why these three? </span>
-              They recover contribution quickly, need little or no new spend, and are within management control.
+              They combine management control, confidence, timing and likely impact.
               {showHeadline && ` The low-effort actions alone represent £${(capitalFreeLow / 1000).toFixed(0)}k–£${(capitalFreeHigh / 1000).toFixed(0)}k of recoverable upside.`}
+              {!showHeadline && " Pro adds quantified value, detailed action steps and deeper evidence."}
             </p>
           </div>
 
@@ -474,11 +507,12 @@ export default function Opportunities() {
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-semibold text-foreground text-sm leading-snug">{opp.label}</p>
-                              {idx === 0 && (
-                                <span className="inline-flex items-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-                                  Do first
-                                </span>
-                              )}
+                              <span className={cn(
+                                "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                                priorityTierStyles[opp.priorityTier],
+                              )}>
+                                {opp.priorityTier}
+                              </span>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                               {guidance?.shortWhy ?? opp.implementationType}
@@ -493,7 +527,12 @@ export default function Opportunities() {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{opp.impactRangeLabel}</span>
+                        {showUpliftValues ? (
+                          <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{opp.impactRangeLabel}</span>
+                        ) : (
+                          <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.category}</span>
+                        )}
+                        <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.priorityCopy}</span>
                         <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.timing}</span>
                         <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.confidence} confidence</span>
                         <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.effort} effort</span>
@@ -501,7 +540,7 @@ export default function Opportunities() {
                     </div>
                   </button>
 
-                  {isExpanded && (
+                  {isExpanded && hasRecoveryPlan && (
                     <div className="space-y-4 mt-4 pt-4 border-t border-border/50">
                       <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-4">
                         <div className="rounded-xl border border-emerald-200/70 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 px-4 py-3">
@@ -552,6 +591,15 @@ export default function Opportunities() {
                       </div>
                     </div>
                   )}
+
+                  {isExpanded && !hasRecoveryPlan && (
+                    <div className="space-y-3 mt-4 pt-4 border-t border-border/50">
+                      <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-3">
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-1">Why it matters</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{guidance?.shortWhy ?? opp.description}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -565,23 +613,14 @@ export default function Opportunities() {
                 <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100 uppercase tracking-wide">Your Profit Recovery Plan</p>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100 uppercase tracking-wide">Opportunity Finder</p>
                 <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-100 mt-1">
-                  3 prioritised recovery actions identified.
+                  No active recommended actions were found for this period.
                 </p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  Upgrade to view the prioritised recovery plan, implementation guidance, confidence scoring, recovery estimates and launch planning.
+                  Night Scout will show the next best action here when a controllable opportunity appears.
                 </p>
               </div>
-            </div>
-            <div className="shrink-0 lg:text-right">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 mb-1">Estimated recovery</p>
-              <p className="text-2xl font-display font-bold text-indigo-900 dark:text-indigo-100">
-                £{(liveTotalLow / 1000).toFixed(0)}k–£{(liveTotalHigh / 1000).toFixed(0)}k/month
-              </p>
-              <a href="/upgrade" className="text-xs font-semibold text-indigo-600 dark:text-indigo-300 hover:underline mt-1 inline-block">
-                Upgrade to Pro →
-              </a>
             </div>
           </div>
         </div>
@@ -627,7 +666,15 @@ export default function Opportunities() {
               {cashReleaseProjects.map((opp) => (
                 <div key={opp.id} className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-foreground">{opp.label}</p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-foreground">{opp.label}</p>
+                      <span className={cn(
+                        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                        priorityTierStyles[opp.priorityTier],
+                      )}>
+                        {opp.priorityTier}
+                      </span>
+                    </div>
                     <p className="text-xs text-muted-foreground mt-1">{opp.implementationType}</p>
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
@@ -640,23 +687,29 @@ export default function Opportunities() {
               ))}
             </div>
           ) : (
-            <div className="px-6 py-5 bg-amber-50/60 dark:bg-amber-950/15">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-900/40 shrink-0">
-                    <Lock className="w-4 h-4 text-amber-700 dark:text-amber-300" />
-                  </div>
+            <div className="divide-y divide-border/40">
+              {cashReleaseProjects.map((opp) => (
+                <div key={opp.id} className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-amber-50/40 dark:bg-amber-950/10">
                   <div>
-                    <p className="text-sm font-semibold text-amber-950 dark:text-amber-100">Additional cash release opportunities identified.</p>
-                    <p className="text-sm text-amber-800/75 dark:text-amber-200/75 mt-1">
-                      Upgrade to view the projects, expected cash release, timing, effort and confidence.
-                    </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-foreground">{opp.label}</p>
+                      <span className={cn(
+                        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                        priorityTierStyles[opp.priorityTier],
+                      )}>
+                        {opp.priorityTier}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{OPPORTUNITY_GUIDANCE[opp.label]?.shortWhy ?? opp.implementationType}</p>
+                  </div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-xs font-semibold text-muted-foreground">{opp.category}</span>
+                    <span className="text-xs font-semibold text-muted-foreground">{opp.confidence} confidence</span>
+                    <span className="text-xs font-semibold text-muted-foreground">{opp.effort} effort</span>
+                    <span className="text-xs font-semibold text-muted-foreground">{opp.timing}</span>
                   </div>
                 </div>
-                <a href="/upgrade" className="text-sm font-semibold text-amber-700 dark:text-amber-300 hover:underline shrink-0">
-                  Upgrade to Pro →
-                </a>
-              </div>
+              ))}
             </div>
           )}
         </div>
@@ -665,7 +718,7 @@ export default function Opportunities() {
       <AiCfoAskCard pageId="opportunities" />
 
       <DataBenchmarkAssumptions
-        benchmarkNote="Opportunities are ranked by estimated value, confidence, timing and effort."
+        benchmarkNote="Recommended actions are ordered by estimated value, confidence, timing and effort."
         dataQualityNote="Opportunity values are directional estimates based on current connected data quality."
         confidenceNote="High-confidence opportunities use direct Shopify and cost data. Medium and low confidence use industry benchmarks and trend extrapolation."
         className="mb-2"

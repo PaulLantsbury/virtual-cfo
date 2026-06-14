@@ -61,15 +61,6 @@ function priorityTierFromScore(score: number): PriorityTier {
   return "Watch List";
 }
 
-function opportunityLeverLabel(opp: { label: string; category?: string }): string {
-  const text = `${opp.label} ${opp.category ?? ""}`.toLowerCase();
-  if (text.includes("discount") || text.includes("full-price") || text.includes("pricing")) return "discount leakage";
-  if (text.includes("shipping") || text.includes("fulfil")) return "shipping pressure";
-  if (text.includes("meta") || text.includes("acquisition") || text.includes("marketing")) return "acquisition inefficiency";
-  if (text.includes("inventory") || text.includes("working capital") || text.includes("cash")) return "cash tied up";
-  return "operational leakage";
-}
-
 /**
  * Maps opportunity card titles to Profit Launchpad preset IDs.
  * Only the 3 supported opportunities get an "Open Launchpad" button.
@@ -327,23 +318,6 @@ export default function Opportunities() {
   const cashReleaseProjects = sortedOpportunities.filter((o) => o.impactType === "cash_improvement");
   const visibleQueue = monthlyQueue.slice(0, 3);
   const topAction = visibleQueue[0] ?? sortedOpportunities[0];
-  const contributionBreakdown = (() => {
-    const source = monthlyQueue.length > 0 ? monthlyQueue : sortedOpportunities;
-    const totals = source.reduce<Record<string, number>>((acc, opp) => {
-      const value = Number((opp as any).impact_mid ?? 0);
-      if (value <= 0) return acc;
-      const label = opportunityLeverLabel(opp);
-      acc[label] = (acc[label] ?? 0) + value;
-      return acc;
-    }, {});
-    const total = Object.values(totals).reduce((sum, value) => sum + value, 0);
-    if (total <= 0) return null;
-    return Object.entries(totals)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([label, value]) => `${Math.round((value / total) * 100)}% ${label}`)
-      .join(" • ");
-  })();
 
   // ── Live "why this matters" rationale ─────────────────────────────────────────
   // Derives a concise data-driven sentence from Phase 1 / Phase 3 live signals.
@@ -426,11 +400,14 @@ export default function Opportunities() {
             <h2 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
               Profit is leaking through controllable decisions, not weak demand.
             </h2>
-            {contributionBreakdown && showHeadline && (
-              <p className="text-xs text-indigo-200/70 mt-2 leading-relaxed">
-                Most of the opportunity comes from: {contributionBreakdown}
-              </p>
-            )}
+            <div className="text-xs text-indigo-200/70 mt-2 leading-relaxed">
+              <p>Most opportunity is concentrated in three areas:</p>
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                <span>• Discounting</span>
+                <span>• Customer acquisition efficiency</span>
+                <span>• Fulfilment costs</span>
+              </div>
+            </div>
             <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">
               {topAction
                 ? `Contribution margin is below the healthy range, but the primary issues are discount leakage, rising acquisition costs and fulfilment pressure. Together, the actions below represent approximately ${showHeadline ? `£${(liveTotalLow / 1000).toFixed(0)}k–£${(liveTotalHigh / 1000).toFixed(0)}k per month` : "meaningful monthly contribution"} of recoverable contribution without requiring additional marketing spend.`
@@ -478,7 +455,7 @@ export default function Opportunities() {
                 </>
               ) : (
                 <>
-                  <p className="text-2xl font-display font-bold text-emerald-300 mt-1">Contribution recovery identified</p>
+                  <p className="text-2xl font-display font-bold text-emerald-300 mt-1">Recoverable contribution identified</p>
                   <p className="text-xs text-muted-foreground mt-1">Upgrade to Pro to see the value and action plan.</p>
                 </>
               )}
@@ -568,7 +545,7 @@ export default function Opportunities() {
                           <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.category}</span>
                         )}
                         {!showUpliftValues && idx > 0 && (
-                          <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">Value available on Pro</span>
+                          <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">Estimated value available on Pro</span>
                         )}
                         {showUpliftValues && (
                           <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.priorityCopy}</span>
@@ -691,7 +668,7 @@ export default function Opportunities() {
                 These actions improve cash runway rather than monthly profit.
               </p>
               <p className="text-xs text-muted-foreground/70 mt-1 leading-relaxed">
-                Profit opportunities recover contribution. Cash release projects improve runway by freeing trapped cash.
+                These actions primarily improve cash runway rather than monthly profit by releasing cash already trapped in the business.
                 {showUpliftValues && ` All identified value including cash release is £${(liveAllLow / 1000).toFixed(0)}k–£${(liveAllHigh / 1000).toFixed(0)}k.`}
               </p>
             </div>

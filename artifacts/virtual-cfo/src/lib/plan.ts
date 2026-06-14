@@ -74,7 +74,7 @@ export type FeatureName =
   | "scenario_lab_bridge"            // Profit Launchpad — contribution bridge, cash consequence, quality score
   | "scenario_lab_implementation"    // Profit Launchpad — implementation plan + Scout Recommendation
   | "ai_cfo_action_plans"            // Night Scout — recommended action + expected impact across all pages
-  | "cfo_alerts_controls";           // Night Scout Alerts — enable/edit/configure alerts and reports
+  | "cfo_alerts_controls";           // Night Scout Monitoring — settings and delivery controls
 
 // ─── Feature access matrix ────────────────────────────────────────────────────
 

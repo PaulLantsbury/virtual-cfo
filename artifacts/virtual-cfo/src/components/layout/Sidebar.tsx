@@ -13,7 +13,7 @@ const navItems = [
   { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
   { icon: Target,          label: "Opportunity Finder",     href: "/profit-opportunities"   },
   { icon: FlaskConical,    label: "Profit Launchpad",       href: "/scenario-lab"           },
-  { icon: Bell,            label: "Night Scout Alerts",     href: "/cfo-alerts"             },
+  { icon: Bell,            label: "Night Scout Monitoring", href: "/monitoring"             },
 ];
 
 export function Sidebar() {

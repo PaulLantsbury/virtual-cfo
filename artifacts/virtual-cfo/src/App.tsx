@@ -50,6 +50,7 @@ function Router() {
       <Route path="/cash-control" component={CashControl} />
       <Route path="/pricing-optimisation" component={PricingOptimisation} />
       <Route path="/scenario-lab" component={ScenarioLab} />
+      <Route path="/monitoring" component={CfoAlerts} />
       <Route path="/cfo-alerts" component={CfoAlerts} />
       <Route path="/settings" component={Settings} />
       <Route path="/upgrade" component={Upgrade} />

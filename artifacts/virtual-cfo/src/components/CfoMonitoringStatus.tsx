@@ -73,7 +73,7 @@ export function CfoMonitoringStatus() {
   }
 
   function goToAlerts() {
-    navigate("/cfo-alerts");
+    navigate("/monitoring");
     setOpen(false);
   }
 
@@ -89,7 +89,7 @@ export function CfoMonitoringStatus() {
           "hover:opacity-80"
         )}
         title={config.tooltip}
-        aria-label="CFO Monitoring Status — click to view alerts"
+        aria-label="CFO Monitoring Status — click to view monitoring"
       >
         {/* Pulse dot */}
         <span className="relative flex items-center justify-center w-2.5 h-2.5 shrink-0">
@@ -127,7 +127,7 @@ export function CfoMonitoringStatus() {
             <p className="text-[11px] text-muted-foreground mt-0.5">
               {isPro
                 ? "CFO monitoring active — live signals."
-                : "Monitoring preview available. Upgrade to Pro to activate alerts."}
+                : "Monitoring preview available. Upgrade to Pro to activate updates."}
             </p>
           </div>
 
@@ -150,7 +150,7 @@ export function CfoMonitoringStatus() {
               onClick={goToAlerts}
               className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
             >
-              View alerts
+              View monitoring
               <ArrowRight className="w-3 h-3" />
             </button>
           </div>

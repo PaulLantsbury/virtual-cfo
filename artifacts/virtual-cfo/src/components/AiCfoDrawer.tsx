@@ -22,7 +22,7 @@ const PAGE_NAMES: Record<PageId, string> = {
   cash:          "Cash Control",
   opportunities: "Opportunity Finder",
   scenario:      "Profit Launchpad",
-  alerts:        "Night Scout Alerts",
+  alerts:        "Night Scout Monitoring",
 };
 
 const CONFIDENCE_META: Record<Confidence, { label: string; colour: string }> = {

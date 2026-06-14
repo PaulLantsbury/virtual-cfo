@@ -198,19 +198,24 @@ export const AI_CFO_RESPONSES: Record<PageId, AiCfoResponse> = {
 
   alerts: {
     pageId: "alerts",
-    question: "Which areas of my business need proactive monitoring right now?",
+    question: "What should I focus on this week?",
+    suggestedQuestions: [
+      "Which recommendation is improving performance?",
+      "What has changed since last week?",
+      "Which issue needs attention first?",
+    ],
     verdict:
-      "Marketing efficiency and cash position are the two areas most likely to deteriorate without early warning. Your Meta CAC has been volatile, and cash headroom is narrowing — both warrant active monitoring to prevent surprises.",
+      "Execution is improving, but marketing efficiency still needs attention. The current Night Scout plan is showing early positive movement in margin quality and cash discipline, while customer acquisition remains the highest-priority watch area.",
     evidence: [
-      "Meta CAC increased 18% last week — without an alert this would typically go unnoticed until month-end review.",
-      "Cash runway is 3.4 months, below the 4-month comfortable threshold, and tightening by approximately £4k per month.",
-      "Discount dependency rose from 26% to 34% over the past 8 weeks — a trend that accelerates margin erosion if unchecked.",
-      "Contribution margin fell below 40% twice in the last 6 weeks — both instances required CFO-level decisions.",
+      "Contribution quality is improving after the pricing recovery action.",
+      "Inventory pressure is easing, which supports cash runway stability.",
+      "Marketing efficiency is stable but not yet improving enough to call the plan fully on track.",
+      "Cash runway has stopped deteriorating, but remains worth monitoring weekly.",
     ],
     recommendedAction:
-      "Enable the Meta CAC alert, contribution margin threshold alert and cash runway alert immediately. Set the Meta CAC threshold at 15% week-on-week increase and the margin alert at 40%. Review the weekly CFO digest to catch slow-moving risks before they compound.",
+      "Focus this week on the marketing efficiency workstream. Keep pricing recovery live, continue the inventory discipline, and review whether paid acquisition spend should be reallocated before scaling.",
     expectedImpact:
-      "Early-warning alerts on these three metrics could prevent £8k–£18k per month of undetected margin and cash erosion. Proactive monitoring typically reduces the time-to-decision by 3–4 weeks per issue identified.",
+      "If the current plan continues to improve, Night Scout should see stronger contribution quality first, followed by stabilised cash runway and cleaner customer acquisition economics.",
     confidence: "high",
   },
 };

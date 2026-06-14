@@ -201,21 +201,21 @@ export const AI_CFO_RESPONSES: Record<PageId, AiCfoResponse> = {
     question: "What should I focus on this week?",
     suggestedQuestions: [
       "Which recommendation is improving performance?",
-      "What has changed since last week?",
+      "What changed since the last review?",
       "Which issue needs attention first?",
     ],
     verdict:
-      "Execution is improving, but marketing efficiency still needs attention. The current Night Scout plan is showing early positive movement in margin quality and cash discipline, while customer acquisition remains the highest-priority watch area.",
+      "The current Night Scout plan is showing early progress, but one workstream still needs attention. The overall direction is positive, though the plan is not yet fully on track.",
     evidence: [
-      "Contribution quality is improving after the pricing recovery action.",
-      "Inventory pressure is easing, which supports cash runway stability.",
-      "Marketing efficiency is stable but not yet improving enough to call the plan fully on track.",
-      "Cash runway has stopped deteriorating, but remains worth monitoring weekly.",
+      "Some recommendations are improving performance, while one area remains stalled.",
+      "The latest review shows progress, but not enough to stop monitoring closely.",
+      "Detailed movement, action-level tracking and follow-up checks are available on Pro.",
+      "Night Scout is prioritising the areas with the strongest impact on the current plan.",
     ],
     recommendedAction:
-      "Focus this week on the marketing efficiency workstream. Keep pricing recovery live, continue the inventory discipline, and review whether paid acquisition spend should be reallocated before scaling.",
+      "Focus this week on the workstream Night Scout has marked as needing attention. Upgrade to Pro to see the exact action, supporting evidence and latest monitoring history.",
     expectedImpact:
-      "If the current plan continues to improve, Night Scout should see stronger contribution quality first, followed by stabilised cash runway and cleaner customer acquisition economics.",
+      "If the current plan continues to improve, Night Scout should show clearer progress across the priority actions and flag any stalled areas before they compound.",
     confidence: "high",
   },
 };

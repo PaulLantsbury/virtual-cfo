@@ -17,6 +17,7 @@ export function AiCfoAskCard({ pageId, className }: AiCfoAskCardProps) {
   const hasActionPlans = canAccess("ai_cfo_action_plans");
   const data = AI_CFO_RESPONSES[pageId];
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggestedPrompts = [data.question, ...(data.suggestedQuestions ?? [])];
 
   function triggerAnalysis(customQuestion?: string) {
     setLoading(true);
@@ -88,17 +89,20 @@ export function AiCfoAskCard({ pageId, className }: AiCfoAskCardProps) {
         </button>
       </div>
 
-      {/* Suggested prompt chip */}
+      {/* Suggested prompt chips */}
       <div className="flex items-center gap-2 flex-wrap">
         <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wide shrink-0">Suggested:</p>
-        <button
-          onClick={() => !loading && triggerAnalysis(data.question)}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-background border border-border/60 text-foreground/80 hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-colors disabled:opacity-50"
-        >
-          <Sparkles className="w-3 h-3 text-primary/70" />
-          {data.question}
-        </button>
+        {suggestedPrompts.map((prompt) => (
+          <button
+            key={prompt}
+            onClick={() => !loading && triggerAnalysis(prompt)}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full bg-background border border-border/60 text-foreground/80 hover:bg-primary/5 hover:border-primary/30 hover:text-primary transition-colors disabled:opacity-50"
+          >
+            <Sparkles className="w-3 h-3 text-primary/70" />
+            {prompt}
+          </button>
+        ))}
       </div>
     </div>
   );

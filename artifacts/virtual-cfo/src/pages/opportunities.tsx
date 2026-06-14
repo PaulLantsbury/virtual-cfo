@@ -61,6 +61,15 @@ function priorityTierFromScore(score: number): PriorityTier {
   return "Watch List";
 }
 
+function opportunityLeverLabel(opp: { label: string; category?: string }): string {
+  const text = `${opp.label} ${opp.category ?? ""}`.toLowerCase();
+  if (text.includes("discount") || text.includes("full-price") || text.includes("pricing")) return "discount leakage";
+  if (text.includes("shipping") || text.includes("fulfil")) return "shipping pressure";
+  if (text.includes("meta") || text.includes("acquisition") || text.includes("marketing")) return "acquisition inefficiency";
+  if (text.includes("inventory") || text.includes("working capital") || text.includes("cash")) return "cash tied up";
+  return "operational leakage";
+}
+
 /**
  * Maps opportunity card titles to Profit Launchpad preset IDs.
  * Only the 3 supported opportunities get an "Open Launchpad" button.
@@ -318,6 +327,23 @@ export default function Opportunities() {
   const cashReleaseProjects = sortedOpportunities.filter((o) => o.impactType === "cash_improvement");
   const visibleQueue = monthlyQueue.slice(0, 3);
   const topAction = visibleQueue[0] ?? sortedOpportunities[0];
+  const contributionBreakdown = (() => {
+    const source = monthlyQueue.length > 0 ? monthlyQueue : sortedOpportunities;
+    const totals = source.reduce<Record<string, number>>((acc, opp) => {
+      const value = Number((opp as any).impact_mid ?? 0);
+      if (value <= 0) return acc;
+      const label = opportunityLeverLabel(opp);
+      acc[label] = (acc[label] ?? 0) + value;
+      return acc;
+    }, {});
+    const total = Object.values(totals).reduce((sum, value) => sum + value, 0);
+    if (total <= 0) return null;
+    return Object.entries(totals)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([label, value]) => `${Math.round((value / total) * 100)}% ${label}`)
+      .join(" • ");
+  })();
 
   // ── Live "why this matters" rationale ─────────────────────────────────────────
   // Derives a concise data-driven sentence from Phase 1 / Phase 3 live signals.
@@ -391,7 +417,7 @@ export default function Opportunities() {
       </div>
 
       {/* ── CFO verdict ── */}
-      <div className="sc-purple rounded-2xl px-6 py-6 mb-6">
+      <div className="sc-purple rounded-2xl px-6 py-6 mb-10">
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-widest text-indigo-300/80 mb-2">
@@ -400,6 +426,11 @@ export default function Opportunities() {
             <h2 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
               Profit is leaking through controllable decisions, not weak demand.
             </h2>
+            {contributionBreakdown && (
+              <p className="text-xs text-indigo-200/70 mt-2 leading-relaxed">
+                Most of the opportunity comes from: {contributionBreakdown}
+              </p>
+            )}
             <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">
               {topAction
                 ? `Contribution margin is below the healthy range, but the primary issues are discount leakage, rising acquisition costs and fulfilment pressure. Together, the actions below represent approximately ${showHeadline ? `£${(liveTotalLow / 1000).toFixed(0)}k–£${(liveTotalHigh / 1000).toFixed(0)}k per month` : "meaningful monthly contribution"} of recoverable contribution without requiring additional marketing spend.`
@@ -409,7 +440,7 @@ export default function Opportunities() {
             </p>
             {topAction && hasRecoveryPlan && (
               <div className="mt-4 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Start here</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Highest impact opportunity</p>
                 <p className="text-sm font-semibold text-foreground">{topAction.label}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   {OPPORTUNITY_GUIDANCE[topAction.label]?.shortWhy ?? topAction.description}
@@ -418,7 +449,7 @@ export default function Opportunities() {
             )}
             {topAction && !hasRecoveryPlan && (
               <div className="mt-4 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Start here</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Highest impact opportunity</p>
                 <p className="text-sm font-semibold text-foreground">{topAction.label}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   {OPPORTUNITY_GUIDANCE[topAction.label]?.shortWhy ?? topAction.description}
@@ -462,18 +493,17 @@ export default function Opportunities() {
         </div>
       </div>
 
-      {/* ── Start here ── */}
+      {/* ── Priority actions ── */}
       {visibleQueue.length > 0 ? (
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
+        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
           <div className="px-6 py-5 border-b border-border/50">
-            <h3 className="font-semibold text-lg text-foreground">Start here</h3>
+            <h3 className="font-semibold text-lg text-foreground">Priority Actions</h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              The next best actions to brief into the team.
+              The highest-impact profit recovery actions to brief into the team.
             </p>
             <p className="text-xs text-muted-foreground/70 mt-2 leading-relaxed">
-              <span className="font-semibold text-foreground/70">Why these three? </span>
-              They combine management control, confidence, timing and likely impact.
-              {showHeadline && ` The low-effort actions alone represent £${(capitalFreeLow / 1000).toFixed(0)}k–£${(capitalFreeHigh / 1000).toFixed(0)}k of recoverable upside.`}
+              <span className="font-semibold text-foreground/70">Why these actions? </span>
+              These actions combine management control, confidence, timing and likely impact. Together they represent the fastest route to recovering contribution without increasing marketing spend.
               {!showHeadline && " Pro adds quantified value, detailed action steps and deeper evidence."}
             </p>
           </div>
@@ -606,7 +636,7 @@ export default function Opportunities() {
           </div>
         </div>
       ) : (
-        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5">
+        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-10 px-6 py-5">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
@@ -628,7 +658,7 @@ export default function Opportunities() {
 
       {/* ── How to execute this ── */}
       {!hasRecoveryPlan && (
-        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5">
+        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-10 px-6 py-5">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0">
@@ -650,13 +680,16 @@ export default function Opportunities() {
 
       {/* ── Cash release projects ── */}
       {cashReleaseProjects.length > 0 && (
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
+        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
           <div className="px-6 py-5 border-b border-border/50 flex items-center gap-3">
             <Target className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <div>
               <h3 className="font-semibold text-lg text-foreground">Cash release projects</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
-                These actions do not materially improve monthly contribution, but they can release trapped cash and strengthen runway.
+                These actions improve cash runway rather than monthly profit.
+              </p>
+              <p className="text-xs text-muted-foreground/70 mt-1 leading-relaxed">
+                Profit opportunities recover contribution. Cash release projects improve runway by freeing trapped cash.
                 {showUpliftValues && ` All identified value including cash release is £${(liveAllLow / 1000).toFixed(0)}k–£${(liveAllHigh / 1000).toFixed(0)}k.`}
               </p>
             </div>
@@ -715,7 +748,7 @@ export default function Opportunities() {
         </div>
       )}
 
-      <AiCfoAskCard pageId="opportunities" />
+      <AiCfoAskCard pageId="opportunities" className="mb-10" />
 
       <DataBenchmarkAssumptions
         benchmarkNote="Recommended actions are ordered by estimated value, confidence, timing and effort."

@@ -22,6 +22,7 @@ export type Confidence = "high" | "medium" | "low";
 export interface AiCfoResponse {
   pageId: PageId;
   question: string;
+  suggestedQuestions?: string[];
   verdict: string;
   evidence: string[];
   recommendedAction: string;
@@ -158,7 +159,10 @@ export const AI_CFO_RESPONSES: Record<PageId, AiCfoResponse> = {
 
   opportunities: {
     pageId: "opportunities",
-    question: "Which opportunity should I tackle first for the fastest profit impact?",
+    question: "Which opportunity delivers the highest return for the least effort?",
+    suggestedQuestions: [
+      "What would happen if I only fixed the top two opportunities?",
+    ],
     verdict:
       "Discount optimisation is your highest-impact, lowest-effort opportunity and should be actioned this week. It requires no new budget, no operational change, and directly recovers cash. The combined recoverable contribution across all identified opportunities is £18k–£42k per month.",
     evidence: [

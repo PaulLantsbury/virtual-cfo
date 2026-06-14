@@ -426,7 +426,7 @@ export default function Opportunities() {
             <h2 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
               Profit is leaking through controllable decisions, not weak demand.
             </h2>
-            {contributionBreakdown && (
+            {contributionBreakdown && showHeadline && (
               <p className="text-xs text-indigo-200/70 mt-2 leading-relaxed">
                 Most of the opportunity comes from: {contributionBreakdown}
               </p>
@@ -478,8 +478,8 @@ export default function Opportunities() {
                 </>
               ) : (
                 <>
-                  <p className="text-2xl font-display font-bold text-emerald-300 mt-1">{topAction.priorityTier}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{topAction.priorityCopy}: {topAction.category} opportunity.</p>
+                  <p className="text-2xl font-display font-bold text-emerald-300 mt-1">Contribution recovery identified</p>
+                  <p className="text-xs text-muted-foreground mt-1">Upgrade to Pro to see the value and action plan.</p>
                 </>
               )}
               <div className="flex flex-wrap gap-2 mt-3">
@@ -510,7 +510,7 @@ export default function Opportunities() {
 
           <div className="space-y-3 p-4">
             {visibleQueue.map((opp, idx) => {
-              const isExpanded = expandedOppId ? expandedOppId === opp.id : idx === 0;
+              const isExpanded = hasRecoveryPlan && (expandedOppId ? expandedOppId === opp.id : idx === 0);
               const guidance = OPPORTUNITY_GUIDANCE[opp.label];
               const liveSignal = liveRationale(opp);
 
@@ -522,8 +522,11 @@ export default function Opportunities() {
                 )}>
                   <button
                     type="button"
-                    onClick={() => setExpandedOppId(isExpanded ? null : opp.id)}
-                    className="w-full text-left"
+                    onClick={() => {
+                      if (!hasRecoveryPlan) return;
+                      setExpandedOppId(isExpanded ? null : opp.id);
+                    }}
+                    className={cn("w-full text-left", !hasRecoveryPlan && "cursor-default")}
                   >
                     <div className="flex flex-col gap-4">
                       <div className="flex items-start justify-between gap-4">
@@ -550,10 +553,12 @@ export default function Opportunities() {
                           </div>
                         </div>
 
-                        <ChevronDown className={cn(
-                          "w-4 h-4 text-muted-foreground transition-transform shrink-0 mt-1",
-                          isExpanded && "rotate-180",
-                        )} />
+                        {hasRecoveryPlan && (
+                          <ChevronDown className={cn(
+                            "w-4 h-4 text-muted-foreground transition-transform shrink-0 mt-1",
+                            isExpanded && "rotate-180",
+                          )} />
+                        )}
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
@@ -562,7 +567,12 @@ export default function Opportunities() {
                         ) : (
                           <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.category}</span>
                         )}
-                        <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.priorityCopy}</span>
+                        {!showUpliftValues && idx > 0 && (
+                          <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">Value available on Pro</span>
+                        )}
+                        {showUpliftValues && (
+                          <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.priorityCopy}</span>
+                        )}
                         <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.timing}</span>
                         <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.confidence} confidence</span>
                         <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.effort} effort</span>
@@ -622,14 +632,6 @@ export default function Opportunities() {
                     </div>
                   )}
 
-                  {isExpanded && !hasRecoveryPlan && (
-                    <div className="space-y-3 mt-4 pt-4 border-t border-border/50">
-                      <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-3">
-                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-1">Why it matters</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{guidance?.shortWhy ?? opp.description}</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -665,14 +667,14 @@ export default function Opportunities() {
                 <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">How to execute this is available on Pro</p>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Unlock the full opportunity plan</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  Unlock the CFO execution detail: why each action matters, how to implement it, the evidence behind it and the launch plan to test.
+                  See the value of each opportunity, the recommended actions, evidence, and the launch plan to test.
                 </p>
               </div>
             </div>
-            <a href="/upgrade" className="text-sm font-semibold text-indigo-600 dark:text-indigo-300 hover:underline shrink-0">
-              Upgrade to Pro →
+            <a href="/upgrade" className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors shrink-0">
+              Unlock Pro
             </a>
           </div>
         </div>
@@ -725,7 +727,7 @@ export default function Opportunities() {
                 <div key={opp.id} className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-amber-50/40 dark:bg-amber-950/10">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-foreground">{opp.label}</p>
+                      <p className="text-sm font-semibold text-foreground">Cash release opportunity identified</p>
                       <span className={cn(
                         "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
                         priorityTierStyles[opp.priorityTier],
@@ -733,7 +735,6 @@ export default function Opportunities() {
                         {opp.priorityTier}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{OPPORTUNITY_GUIDANCE[opp.label]?.shortWhy ?? opp.implementationType}</p>
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-xs font-semibold text-muted-foreground">{opp.category}</span>

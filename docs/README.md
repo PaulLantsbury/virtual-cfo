@@ -4,6 +4,8 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Start here
 
+[Agreed financial definitions](agreed-financial-definitions.md) — approved sales/VAT/AOV/refund rules, implementation status and documentation ownership. Read this before older financial definitions.
+
 1. [Restart sprint and current handover](restart-sprint.md) — what is implemented, what remains and acceptance criteria.
 2. [Restart audit, 8 September 2026](restart-audit-2026-09-08.md) — verified baseline and its limits.
 3. [Calculation logic](calculation-logic.md), [Opportunity Engine](opportunity-engine-spec.md), [Recommendation Engine](recommendation-engine.md) — original product specifications recovered from Replit.
@@ -28,4 +30,4 @@ Older checklists describe earlier snapshots, not current completion. Verify clai
 
 ## Working together
 
-Use this repository as the durable project record. Keep sprint progress, decisions, validation and remaining work here rather than relying on chat history. A new task can begin by reading this guide and the sprint handover. Keep individual changes scoped and reviewed; preserve the Replit-only specifications when reconciling branches.
+GitHub is the durable project record. Replit should use a checkout of these same versioned documents; do not maintain a separate authoritative specification there. Draft-branch changes are not automatically present in Replit or main. Keep sprint progress, decisions, validation and remaining work here rather than relying on chat history. A new task can begin by reading this guide and the sprint handover. Keep individual changes scoped and reviewed; preserve the Replit-only specifications when reconciling branches.

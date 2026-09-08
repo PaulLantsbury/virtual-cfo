@@ -19,7 +19,8 @@ Implemented and locally verified; not merged or deployed:
 ## Sprint backlog and acceptance criteria
 
 - [x] Recover original product specifications into the working branch and provide one documentation entry point.
-- [ ] Review/accept the proposed financial and scoring contract in `baseline-decisions.md`.
+- [x] Agree sales/VAT/shipping/AOV/discount/refund-timing definitions; see `agreed-financial-definitions.md`.
+- [ ] Agree remaining order eligibility, contribution/profit/cash and scoring definitions before implementing them.
 - [ ] Complete dashboard consistency for current data: remove fixed narratives, status claims, upside values and all-time/snapshot fallbacks; preserve zero as a valid value. Apply the same evidence rules throughout the other analysis pages.
 - [ ] Make monthly and weekly calculations reconcile against a known dataset including refunds, tax, COGS, overhead and period boundaries. No misleading comparison when the prior period is absent.
 - [ ] Implement real authentication, store membership and server-side entitlements. Prove user A cannot read user B's data, and anonymous requests cannot access customer records or privileged analytics. Preserve a deliberately isolated demo experience.
@@ -67,4 +68,12 @@ Validation: 20 regression tests pass; full workspace type checking and frontend 
 
 Validation: 23 regression tests and full workspace type checking pass. Production build passes with the existing bundle-size and sourcemap warnings. New tests pass observed aggregate March/April responses through the trading adapter and briefing model; no new live browser/authenticated API verification is claimed.
 
-Next: settle the explicit tax/refund/AOV contract, implement and test versioned normalised trading and coverage in a disposable database, then add historic COGS and rewire contribution/overhead/cash and detailed pages. Keep existing raw test records intact.
+Sales/VAT/AOV/refund timing are now approved in `agreed-financial-definitions.md`; remaining eligibility and financial definitions still need agreement. Next implementation stage, after remaining relevant decisions: implement and test versioned normalised trading and coverage in a disposable database, then add historic COGS and rewire contribution/overhead/cash and detailed pages. Keep existing raw test records intact.
+
+## Sales definitions approval — documentation only
+
+Paul approved sales definitions v1 on 8 September, explicitly including pre-refund AOV and refund-event timing. Recorded the exact scope and worked example in `agreed-financial-definitions.md`, linked it from the guide and updated the decision/backlog status. No further code or database changes were made.
+
+GitHub is the durable record; Replit should use the same versioned documents. This documentation is on the existing draft branch, not yet merged into main or verified as synced to Replit. Preserve Replit's uncommitted work when syncing.
+
+Validation: documentation links and diff reviewed; no application tests rerun for this documentation-only change.

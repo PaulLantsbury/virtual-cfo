@@ -1,5 +1,7 @@
 # Trading reconciliation — 8 September 2026
 
+> Subsequent decision: Paul approved [sales definitions v1](agreed-financial-definitions.md), including pre-refund AOV and refund-event timing. Proposed sales conventions below are superseded by that decision; the measured legacy behaviour and other outstanding decisions remain valid.
+
 ## Result and limits
 
 Read-only checks of the demo store found **119 matching calculations across 3 months and 14 weeks**: six trading metrics plus the qualifying order count. The SQL independently aggregates source rows and compares them with the deployed RPCs. This verifies the current implementation's arithmetic, not the correctness of the financial definition or completeness of the seed data. Boundary weeks are included; their presence does not certify a complete import.

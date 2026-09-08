@@ -1,6 +1,6 @@
 # Night Scout
 
-Read `docs/README.md` and `docs/restart-sprint.md` before changing the application. This is a commerce virtual CFO, not the separate Sam personal assistant.
+Read `docs/README.md`, `docs/restart-sprint.md` and `docs/agreed-financial-definitions.md` before changing the application. Approved financial definitions take precedence over conflicting older proposals; distinguish agreement from implementation. This is a commerce virtual CFO, not the separate Sam personal assistant.
 
 Treat the recovered engine specifications as product requirements, with their unresolved differences recorded in `docs/baseline-decisions.md`. Do not claim a planned feature is implemented simply because a page or specification exists.
 

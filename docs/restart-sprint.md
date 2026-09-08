@@ -84,3 +84,11 @@ Validation: documentation links and diff reviewed; no application tests rerun fo
 Paul approved all proposed contribution, profit and cash definitions on 8 September 2026. Updated `agreed-financial-definitions.md`, the guide and baseline decision record. Main contribution is after marketing; runway uses actual average monthly cash burn over the last three complete months. Historic costs, saleable-return COGS reversal, margin denominator, separate EBITDA, daily overhead allocation and separate cash-release opportunities are recorded explicitly.
 
 Status: agreed, not implemented or deployed. No code/database changes. GitHub draft branch remains the durable record; main/Replit synchronisation is still pending. Remaining edge cases are distinguished from the approved core definitions. Validation: documentation diff and links checked; no application tests rerun.
+
+## Financial acceptance cases v1 — before implementation
+
+Created ten synthetic worked cases in `financial-acceptance-cases.md` and matching machine-readable integer-pence fixtures in `tests/fixtures/financial-acceptance-v1.json`. Includes tax normalisation, zero-rated sales, a complete February profit bridge, March partial/full refunds of February orders, historic cost and saleable return handling, missing costs, cross-month weekly overhead allocation, cash transfer exclusion, actual-burn runway, positive cash generation and separate one-off cash-release impacts.
+
+Manually specified expected results were independently checked for arithmetic consistency. JSON parses and case IDs are unique; documentation links and diff checked. These are acceptance targets, not automated tests against the application or live SQL. No application tests rerun because runtime code was unchanged. The existing 23-test suite remains the earlier wiring baseline.
+
+Unresolved edge cases are listed without inventing expected policy. Next implementation work can use these fixtures to test versioned calculations in a disposable database, then API/UI outputs. No Supabase data/schema or application changes, merges, deployments or Replit synchronisation were performed. Fixtures and docs are saved in the GitHub draft branch.

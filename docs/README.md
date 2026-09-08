@@ -9,6 +9,10 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 3. [Calculation logic](calculation-logic.md), [Opportunity Engine](opportunity-engine-spec.md), [Recommendation Engine](recommendation-engine.md) — original product specifications recovered from Replit.
 4. [Baseline decisions](baseline-decisions.md) — reconciliations and proposed decisions; distinguishes implemented behaviour from future work.
 
+## Supabase wiring
+
+[Metric-to-source reconciliation](metric-source-reconciliation.md) records the existing tables, unfinished connections and the next data work package. Current values are test data; database-backed does not mean financially reconciled.
+
 ## Supporting documents
 
 - [Number-source audit](number-source-audit.md) and [data-source status map](data-source-status-map.md).

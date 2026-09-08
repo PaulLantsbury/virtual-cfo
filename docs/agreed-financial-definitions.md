@@ -2,9 +2,9 @@
 
 ## Decision record
 
-Sales definitions v1 — approved by Paul Lantsbury on 8 September 2026, including pre-refund AOV and refund-event timing. Status: **approved requirements; implementation pending**. This approval does not mean existing SQL, seed data or screens conform, and does not approve the remaining contribution/profit/cash or ranking proposals.
+Sales definitions v1 — approved by Paul Lantsbury on 8 September 2026, including pre-refund AOV and refund-event timing. Status: **approved requirements; implementation pending**. Contribution, profit and cash definitions v1 were subsequently approved by Paul on 8 September 2026, including all recommendations below. Both decisions are approved requirements with implementation pending. Existing SQL, seed data and screens are not certified by this approval. Opportunity ranking/scoring remains unapproved.
 
-This document takes precedence over conflicting sales definitions in older dictionaries, audit snapshots and proposed calculation notes. Preserve those documents as history. Record future agreed changes here with their approval date and implementation status.
+This document takes precedence over conflicting financial definitions in older dictionaries, audit snapshots and proposed calculation notes. Preserve those documents as history. Record future agreed changes here with their approval date and implementation status.
 
 ## Approved sales definitions
 
@@ -29,13 +29,43 @@ A March product refund pays £24 back, including £4 recorded refund VAT. March 
 
 Shipping charges and their discounts/refunds have their own components and do not enter product AOV.
 
+## Approved contribution, profit and cash definitions
+
+Approved by Paul on 8 September 2026 after reviewing all the definitions and recommendations in this section. No application or database changes accompany this record.
+
+| Measure | Approved definition |
+| --- | --- |
+| Gross profit | Net product sales minus cost of goods sold (COGS). |
+| Contribution before marketing | Gross profit plus net shipping revenue minus variable operating costs. |
+| Contribution after marketing | Contribution before marketing minus marketing expenditure. This is Night Scout's main **Contribution** measure. |
+| Operating profit | Contribution after marketing minus operating overheads, including depreciation and amortisation. Excludes interest and corporation tax. |
+| EBITDA | Operating profit plus depreciation and amortisation; show separately when supported by the data. |
+| Contribution and operating profit margin percentages | Divide the corresponding profit/contribution amount by net product sales plus net shipping revenue. Label the denominator consistently. |
+
+| Cost treatment | Approved definition |
+| --- | --- |
+| Product costs | Use cost applicable when goods were sold, including consistently allocated freight/import costs. Missing costs mean incomplete profit figures, not zero costs. |
+| Returned goods | Reverse related product cost only when goods return to saleable inventory. A refund without a recoverable product reduces revenue without reversing COGS. |
+| Variable operating costs | Payment processing, fulfilment, packaging, outbound shipping and return handling. Prefer actual costs and clearly label estimates. |
+| Marketing expenditure | Deduct period advertising spend in contribution after marketing. Agency fees, salaries and software belong in overheads. Count every cost once. |
+| Weekly overheads | Allocate recurring monthly overheads by calendar day where finer data is unavailable. Label this as an allocation. |
+
+| Cash measure | Approved definition |
+| --- | --- |
+| Available cash | Dated, unrestricted bank/payment-account balances. Transfers between included accounts are excluded from cash movement. Show unsettled processor funds separately. |
+| Net cash movement | Actual cash inflows less actual cash outflows in the period, kept separate from accounting profit. |
+| Cash runway | Available cash divided by average monthly net cash burn over the last three complete months. If cash generation is positive, show **Not currently burning cash**, rather than an artificial runway figure. |
+| Cash-release opportunities | One-off working-capital improvements, such as excess-inventory reduction. Keep separate from recurring contribution or profit improvements. |
+
+Runway is based on actual cash burn, not overheads alone. Available cash must be dated, and the three-month measurement period must be explicit.
+
 ## Implementation and remaining decisions
 
 No application or database change is included in this approval record. The current net-sales/AOV RPCs and order-count availability logic do not implement this contract. Tests comparing the current SQL to source rows describe legacy behaviour, not acceptance of that behaviour.
 
 Before implementing: agree original-order status eligibility, source date/timezone handling, and treatment of edits/cancellations and non-product goodwill refunds. Define the refund-rate denominator and interpretation under event-period reporting separately; a March refund can relate to February sales, so it is not automatically a same-order-cohort return rate. Repeat-customer identity/eligibility also remains open.
 
-Contribution/COGS, overhead, operating profit, cash runway, weekly allocation and opportunity/scoring definitions require their own agreement. Do not infer approval of those from this sales decision.
+Contribution/COGS, overhead, operating profit, EBITDA, cash runway and weekly allocation are now approved above. Opportunity/scoring definitions remain proposals. Detailed implementation choices still need recording: exact cost allocation method, return-to-stock event timing, zero/negative margin denominators, cash currency/account coverage, zero burn, fewer than three complete months and financing/one-off flow treatment in the burn measure. Do not silently introduce new policy for these cases or present missing inputs as zero.
 
 The source evidence and incomplete data are recorded in [the measured reconciliation](trading-reconciliation-2026-09-08.md). Shopify terminology informed the discussion: [sales report definitions](https://help.shopify.com/en/manual/reports-and-analytics/shopify-reports/report-types/default-reports/sales-report). Night Scout's approved decisions above are the contract; Shopify's separate order-inclusion rules are not implicitly adopted.
 

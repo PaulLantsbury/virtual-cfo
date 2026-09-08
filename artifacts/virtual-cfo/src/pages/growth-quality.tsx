@@ -223,7 +223,7 @@ export default function GrowthQuality() {
   // Only these two KPI headlines are wired — all other GQ metrics (GQ_SCORE,
   // CAC_PAYBACK, SCORE grades, composition chart, driver impacts) remain static
   // pending ad-platform integration and a prior-period RPC.
-  const { phase1: gqPhase1, dateFrom: gqDateFrom, dateTo: gqDateTo, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
+  const { status: reportingStatus,  phase1: gqPhase1, dateFrom: gqDateFrom, dateTo: gqDateTo, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
 
   // ── Phase 2: month-on-month deltas ────────────────────────────────────────
   // Fires after useLatestDataPeriod resolves. Used for:
@@ -529,7 +529,7 @@ export default function GrowthQuality() {
           <p className="text-muted-foreground mt-1">
             Assess whether revenue growth is generating lasting profit — or being bought through discounts and paid spend.
           </p>
-          <DataPeriodLabel
+          <DataPeriodLabel status={reportingStatus}
             periodLabel={gqPeriodLabel}
             loading={gqPeriodLoading}
             dateFrom={gqDateFrom}

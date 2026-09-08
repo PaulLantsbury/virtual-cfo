@@ -154,7 +154,7 @@ function DriverTooltip({ active, payload, label }: any) {
 export default function PricingOptimisation() {
   // ── Phase 1 live data (current calendar month) ────────────────────────────
   // Resolves to the most recent month with order data.
-  const {
+  const { status: reportingStatus,
     phase1:      pricingPhase1,
     dateFrom:    pricingDateFrom,
     dateTo:      pricingDateTo,
@@ -372,7 +372,7 @@ export default function PricingOptimisation() {
           <p className="text-sm text-muted-foreground mt-1">
             See whether discounts are protecting profit or quietly giving too much away.
           </p>
-          <DataPeriodLabel
+          <DataPeriodLabel status={reportingStatus}
             periodLabel={pricingPeriodLabel}
             loading={pricingPeriodLoading}
             dateFrom={pricingDateFrom}

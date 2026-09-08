@@ -1,3 +1,4 @@
+import { BriefingDataState } from "@/components/BriefingDataState";
 import { getCommerceMetrics } from "@/lib/analytics/commerceMetrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
@@ -22,7 +23,6 @@ import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { TimingBadge } from "@/components/TimingBadge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MONTHLY_CM_PCT, MONTHLY_REVENUE, MONTHLY_OPERATING_PROFIT, RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
-import { supabase } from "@/lib/supabase";
 import { CASH_RUNWAY } from "@/lib/data/cash-snapshot";
 import { DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
 // Treat 0 as "no data" (e.g. current month has no orders yet)
@@ -40,7 +40,7 @@ const PHASE1_STORE_ID = "10000000-0000-0000-0000-000000000001";
 
 // Date range is now resolved dynamically by useLatestDataPeriod() inside the
 // component — it walks back from the current month until it finds a period
-// with order data (up to 3 months). activeDateFrom / activeDateTo are used
+// with order data (up to two years). activeDateFrom / activeDateTo are used
 // by both the Phase 1 and Phase 2a fetches so both cover the same period.
 
 type KpiStatus = "warning" | "positive" | "danger" | "neutral";
@@ -451,6 +451,7 @@ export default function Dashboard() {
   // activeDateFrom / activeDateTo are forwarded to Phase 2a so both fetches
   // cover the same resolved period.
   const {
+    status: periodStatus,
     phase1: phase1Metrics,
     dateFrom: activeDateFrom,
     dateTo:        activeDateTo,
@@ -469,48 +470,21 @@ export default function Dashboard() {
   const [phase2aMetrics, setPhase2aMetrics] = useState<Phase2aMetricsResponse | null>(null);
 
   useEffect(() => {
-    // Wait until useLatestDataPeriod has resolved the active period before
-    // fetching Phase 2a — both phases must cover the same month.
-    if (!activeDateFrom || !activeDateTo) return;
+    let cancelled = false;
+    setPhase2aMetrics(null);
+    if (periodStatus !== "ready") return;
     getPhase2aMetrics(PHASE1_STORE_ID, activeDateFrom, activeDateTo)
-      .then(setPhase2aMetrics)
-      .catch(() => {
-        // Network or RPC error: leave phase2aMetrics null so affected tiles
-        // fall back to their snapshot constants rather than breaking.
-      });
-  }, [activeDateFrom, activeDateTo]);
+      .then(result => { if (!cancelled) setPhase2aMetrics(result); })
+      .catch(() => { /* Leave unavailable; no stale response from a previous period. */ });
+    return () => { cancelled = true; };
+  }, [activeDateFrom, activeDateTo, periodStatus]);
 
-  // ── Opportunity breakdown: recoverable contribution headline ─────────────────
-  // Fetches opportunity_breakdown(p_store_id) to compute recoverableLow / recoverableHigh
-  // for the headline panel by summing impact_low and impact_high across all rows.
-  // Independent of phase1Metrics — a failure here does not affect any other tile.
-  // Falls back to RECOVERABLE_LOW / RECOVERABLE_HIGH from business-snapshot.ts
-  // while loading (null) or if the RPC returns an error.
-  const [oppBreakdown, setOppBreakdown] = useState<{ lo: number; hi: number } | null>(null);
-
-  useEffect(() => {
-    // supabase.rpc() returns PromiseLike, not Promise — wrap to get .catch().
-    Promise.resolve(
-      supabase.rpc("opportunity_breakdown", { p_store_id: PHASE1_STORE_ID }),
-    )
-      .then(({ data, error }) => {
-        if (error || !Array.isArray(data)) return; // leave null → snapshot fallback
-        const lo = data.reduce((sum: number, row: Record<string, unknown>) => sum + (Number(row.impact_low) || 0), 0);
-        const hi = data.reduce((sum: number, row: Record<string, unknown>) => sum + (Number(row.impact_high) || 0), 0);
-        setOppBreakdown({ lo, hi });
-      })
-      .catch(() => {
-        // Network or RPC error: leave oppBreakdown null so the headline falls
-        // back to RECOVERABLE_LOW / RECOVERABLE_HIGH rather than breaking.
-      });
-  }, []);
-
-  // Headline recoverable contribution range for the green opportunity panel.
-  // oppBreakdown null = still loading → safe fallback to snapshot constants.
-  // oppBreakdown resolved = use live summed RPC values.
-  const rcHeadlineLo = oppBreakdown !== null ? oppBreakdown.lo : RECOVERABLE_LOW;
-  const rcHeadlineHi = oppBreakdown !== null ? oppBreakdown.hi : RECOVERABLE_HIGH;
-  const rcHeadlineStr = `£${(rcHeadlineLo / 1_000).toFixed(0)}k–£${(rcHeadlineHi / 1_000).toFixed(0)}k`;
+  // Use the same range as the KPI tile; no second permission-dependent query.
+  const rcAvailable = phase1Metrics !== null &&
+    !phase1Metrics.errors.some(e => e.fn === "recoverable_contribution_range");
+  const rcHeadlineStr = rcAvailable
+    ? `£${(phase1Metrics.data.recoverableLow / 1_000).toFixed(0)}k–£${(phase1Metrics.data.recoverableHigh / 1_000).toFixed(0)}k`
+    : "Opportunity estimate unavailable";
 
   // ── Phase 2: month-on-month delta metrics ────────────────────────────────
   // Fires after useLatestDataPeriod resolves — same period gate as Phase 2a.
@@ -518,7 +492,7 @@ export default function Dashboard() {
   // to card.change static sentinel (shown while loading) or "—" (after load,
   // no prior-period data).  Phase 1 and Phase 2a tiles are unaffected.
   const { deltas: phase2Deltas, trends: phase2Trends, loading: phase2DeltasLoading } = usePhase2Deltas(
-    PHASE1_STORE_ID, activeDateFrom, activeDateTo,
+    PHASE1_STORE_ID, periodStatus === "ready" ? activeDateFrom : "", periodStatus === "ready" ? activeDateTo : "",
   );
 
   const liveKpiCards = KPI_CARDS.map((card) => {
@@ -940,6 +914,17 @@ export default function Dashboard() {
   });
   const hasFullActionPlan = canAccess("dashboard_full_action_plan");
   const hasDriverDetail = canAccess("dashboard_driver_detail");
+  if (periodStatus !== "ready") {
+    return <AppLayout showMonitoring={false}>
+      <div className="mb-5 flex flex-col sm:flex-row justify-between items-start gap-4">
+        <div><h1 className="text-3xl font-bold">CFO Briefing</h1>
+          <p className="text-muted-foreground mt-1">A clear view starts with verified trading data.</p></div>
+        <TimelineSelector />
+      </div>
+      <BriefingDataState period={{ phase1: phase1Metrics, dateFrom: activeDateFrom, dateTo: activeDateTo,
+        periodLabel: activePeriodLabel, loading: periodLoading, status: periodStatus }} />
+    </AppLayout>;
+  }
   return (
     <AppLayout>
 
@@ -951,6 +936,7 @@ export default function Dashboard() {
           <DataPeriodLabel
             periodLabel={activePeriodLabel}
             loading={periodLoading}
+            status={periodStatus}
             dateFrom={activeDateFrom}
             dateTo={activeDateTo}
           />
@@ -1141,8 +1127,8 @@ export default function Dashboard() {
               {/*
                 Live value from opportunity_breakdown() RPC — recoverableLow / recoverableHigh
                 are the summed impact_low / impact_high across all non-archived opportunity rows.
-                Falls back to RECOVERABLE_LOW / RECOVERABLE_HIGH (business-snapshot.ts) while
-                loading or if the RPC fails.  See oppBreakdown state and rcHeadlineStr derivation.
+                Uses the same recoverable-range response as the KPI tile.
+                See rcHeadlineStr; no independent opportunity-breakdown request.
               */}
               <p className="text-3xl font-display font-black text-emerald-700 dark:text-emerald-400 mb-1">
                 {rcHeadlineStr}

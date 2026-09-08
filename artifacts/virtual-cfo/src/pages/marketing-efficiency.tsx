@@ -325,7 +325,7 @@ export default function MarketingEfficiency() {
   // Walks back from the current month to find the most recent month with data.
   // Only these two fields are used here — all other ME metrics require ad
   // platform data (Meta/Google Ads API) and remain static for now.
-  const { phase1: mktPhase1, periodLabel: mePeriodLabel, loading: mePeriodLoading, dateFrom, dateTo } = useLatestDataPeriod(ME_STORE_ID);
+  const { status: reportingStatus,  phase1: mktPhase1, periodLabel: mePeriodLabel, loading: mePeriodLoading, dateFrom, dateTo } = useLatestDataPeriod(ME_STORE_ID);
 
   // Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
   const liveDiscountDep = mktPhase1
@@ -510,7 +510,7 @@ export default function MarketingEfficiency() {
           <p className="text-muted-foreground mt-1">
             Which channels are creating profitable customers, and where budget should move next.
           </p>
-          <DataPeriodLabel
+          <DataPeriodLabel status={reportingStatus}
             periodLabel={mePeriodLabel}
             loading={mePeriodLoading}
             dateFrom={dateFrom}

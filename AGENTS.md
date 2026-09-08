@@ -1,0 +1,9 @@
+# Night Scout
+
+Read `docs/README.md` and `docs/restart-sprint.md` before changing the application. This is a commerce virtual CFO, not the separate Sam personal assistant.
+
+Treat the recovered engine specifications as product requirements, with their unresolved differences recorded in `docs/baseline-decisions.md`. Do not claim a planned feature is implemented simply because a page or specification exists.
+
+Update the sprint handover with changes, verification and remaining work. Keep secrets and customer data out of commits. Use the committed package lock and report failed checks accurately.
+
+Local application work does not require changes to live Supabase or Replit. Prepare and test migrations before proposing their application; the connected Supabase audit account is read-only.

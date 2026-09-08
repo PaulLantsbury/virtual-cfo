@@ -348,7 +348,7 @@ export default function MarginAnalysis() {
   // Walks back from the current month to find the most recent month with data.
   // A network failure leaves phase1 null; all derived values fall back to
   // the static snapshot constants below.
-  const { phase1, dateFrom: maDateFrom, dateTo: maDateTo, periodLabel: maPeriodLabel, loading: maPeriodLoading } = useLatestDataPeriod(MA_STORE_ID);
+  const { status: reportingStatus,  phase1, dateFrom: maDateFrom, dateTo: maDateTo, periodLabel: maPeriodLabel, loading: maPeriodLoading } = useLatestDataPeriod(MA_STORE_ID);
 
   // ── Phase 2: month-on-month deltas + rolling 3m averages + trailing 12m avg
   // All three RPCs fire in parallel inside the hook. Used for:
@@ -612,7 +612,7 @@ export default function MarginAnalysis() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Margin Analysis</h1>
           <p className="text-muted-foreground mt-1">Where contribution is leaking, how much can be recovered, and what to fix first.</p>
-          <DataPeriodLabel periodLabel={maPeriodLabel} loading={maPeriodLoading} dateFrom={maDateFrom} dateTo={maDateTo} />
+          <DataPeriodLabel status={reportingStatus} periodLabel={maPeriodLabel} loading={maPeriodLoading} dateFrom={maDateFrom} dateTo={maDateTo} />
         </div>
         <TimelineSelector />
       </div>

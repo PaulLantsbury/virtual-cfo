@@ -3,7 +3,7 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { FlaskConical, X } from "lucide-react";
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({ children, showMonitoring = true }: { children: React.ReactNode; showMonitoring?: boolean }) {
   const [isDemoMode, setIsDemoMode] = useState(false);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         )}
-        <Header />
+        <Header showMonitoring={showMonitoring} />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {children}

@@ -282,7 +282,7 @@ function DriverTooltip({ active, payload, label }: any) {
 
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function CashControl() {
-  const {
+  const { status: reportingStatus,
     dateFrom: cashDateFrom,
     dateTo: cashDateTo,
     periodLabel: cashPeriodLabel,
@@ -437,7 +437,7 @@ export default function CashControl() {
           <p className="text-sm text-muted-foreground mt-1">
             See where cash is coming from, where it is getting trapped, and whether growth is creating or consuming cash.
           </p>
-          <DataPeriodLabel
+          <DataPeriodLabel status={reportingStatus}
             periodLabel={cashPeriodLabel}
             loading={cashPeriodLoading}
             dateFrom={cashDateFrom}

@@ -13,12 +13,11 @@
 
 Paul approved [sales definitions v1](agreed-financial-definitions.md) on 8 September 2026: tax-exclusive product sales and discounts, separate shipping/VAT, pre-refund AOV, value-based discount rate and refund-event-period reporting. This supersedes conflicting older sales proposals; existing SQL has not been changed.
 
-## Remaining proposed calculation contract — not yet approved or applied to live SQL
+## Approved contribution, profit and cash contract — implementation pending
 
-- Contribution should deduct product cost/COGS as well as the intended variable operating costs. Do not assume missing product costs are zero. The source, refund treatment and historic cost versioning need to be settled before changing this metric.
-- Distinguish contribution after marketing from operating profit after overhead. Cash release is not recurring monthly profit; do not add unlike impacts into one headline.
-- Weekly calculations require week-compatible inputs and an explicit overhead-allocation convention; monthly functions cannot merely be called with seven-day dates.
-- Cash runway needs a dated cash balance and matching expense basis. Display both dates and avoid silently substituting the calendar's current month.
+Paul approved all proposed contribution/profit/cash definitions on 8 September 2026. The authoritative detail is in [agreed financial definitions](agreed-financial-definitions.md): historic product costs and saleable-return COGS reversal, contribution after marketing as the main measure, operating profit and separate EBITDA, consistent margin denominators, calendar-day allocation of recurring monthly overhead, dated unrestricted cash, actual net cash movement and three-month actual-burn runway. Cash release stays separate from recurring profit improvements.
+
+These replace the earlier proposals in this section. Approval does not mean the existing functions or screens implement them. Remaining edge cases and data gaps are recorded in the authoritative document; engine ranking remains proposed below.
 
 ## Proposed engine reconciliation — awaiting implementation
 

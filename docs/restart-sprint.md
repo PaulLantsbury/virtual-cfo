@@ -20,7 +20,8 @@ Implemented and locally verified; not merged or deployed:
 
 - [x] Recover original product specifications into the working branch and provide one documentation entry point.
 - [x] Agree sales/VAT/shipping/AOV/discount/refund-timing definitions; see `agreed-financial-definitions.md`.
-- [ ] Agree remaining order eligibility, contribution/profit/cash and scoring definitions before implementing them.
+- [x] Agree contribution/COGS, overhead, profit/EBITDA, cash and weekly-allocation definitions.
+- [ ] Resolve remaining order eligibility and financial edge cases; agree opportunity/scoring definitions before implementing those policies.
 - [ ] Complete dashboard consistency for current data: remove fixed narratives, status claims, upside values and all-time/snapshot fallbacks; preserve zero as a valid value. Apply the same evidence rules throughout the other analysis pages.
 - [ ] Make monthly and weekly calculations reconcile against a known dataset including refunds, tax, COGS, overhead and period boundaries. No misleading comparison when the prior period is absent.
 - [ ] Implement real authentication, store membership and server-side entitlements. Prove user A cannot read user B's data, and anonymous requests cannot access customer records or privileged analytics. Preserve a deliberately isolated demo experience.
@@ -68,7 +69,7 @@ Validation: 20 regression tests pass; full workspace type checking and frontend 
 
 Validation: 23 regression tests and full workspace type checking pass. Production build passes with the existing bundle-size and sourcemap warnings. New tests pass observed aggregate March/April responses through the trading adapter and briefing model; no new live browser/authenticated API verification is claimed.
 
-Sales/VAT/AOV/refund timing are now approved in `agreed-financial-definitions.md`; remaining eligibility and financial definitions still need agreement. Next implementation stage, after remaining relevant decisions: implement and test versioned normalised trading and coverage in a disposable database, then add historic COGS and rewire contribution/overhead/cash and detailed pages. Keep existing raw test records intact.
+Sales/VAT/AOV/refund timing are now approved in `agreed-financial-definitions.md`; contribution/profit/cash definitions are also approved below. Remaining eligibility, edge cases and scoring decisions still need resolution. Next implementation stage, after remaining relevant decisions: implement and test versioned normalised trading and coverage in a disposable database, then add historic COGS and rewire contribution/overhead/cash and detailed pages. Keep existing raw test records intact.
 
 ## Sales definitions approval — documentation only
 
@@ -77,3 +78,9 @@ Paul approved sales definitions v1 on 8 September, explicitly including pre-refu
 GitHub is the durable record; Replit should use the same versioned documents. This documentation is on the existing draft branch, not yet merged into main or verified as synced to Replit. Preserve Replit's uncommitted work when syncing.
 
 Validation: documentation links and diff reviewed; no application tests rerun for this documentation-only change.
+
+## Contribution, profit and cash approval — documentation only
+
+Paul approved all proposed contribution, profit and cash definitions on 8 September 2026. Updated `agreed-financial-definitions.md`, the guide and baseline decision record. Main contribution is after marketing; runway uses actual average monthly cash burn over the last three complete months. Historic costs, saleable-return COGS reversal, margin denominator, separate EBITDA, daily overhead allocation and separate cash-release opportunities are recorded explicitly.
+
+Status: agreed, not implemented or deployed. No code/database changes. GitHub draft branch remains the durable record; main/Replit synchronisation is still pending. Remaining edge cases are distinguished from the approved core definitions. Validation: documentation diff and links checked; no application tests rerun.

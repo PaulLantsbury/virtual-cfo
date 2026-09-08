@@ -20,7 +20,7 @@ const definitions: { id: keyof TradingMetrics; title: string; rate: boolean; exp
   { id: "netSales", title: "Net sales", rate: false, explanation: "Sales after discounts, refunds and tax, excluding cancelled orders." },
   { id: "grossRevenue", title: "Gross sales", rate: false, explanation: "Gross sales on non-cancelled orders in this period." },
   { id: "averageOrderValue", title: "Average order value", rate: false, explanation: "Net sales per qualifying order; fully refunded orders are excluded from the order count." },
-  { id: "repeatPurchaseRate", title: "Repeat purchase rate", rate: true, explanation: "Share of registered purchasing customers who first ordered before this period. Customers without a linked customer record are excluded." },
+  { id: "repeatPurchaseRate", title: "Repeat purchase rate", rate: true, explanation: "Share of linked purchasing customers who first ordered before this period. Customers without a linked customer record are excluded." },
   { id: "discountDependency", title: "Discount rate", rate: true, explanation: "Discount value as a share of gross sales." },
   { id: "refundRate", title: "Refund rate", rate: true, explanation: "Refund value as a share of gross sales, attributed to the original order period." },
 ];

@@ -1,8 +1,10 @@
+import { buildBriefing } from "@/lib/analytics/briefing";
+import type { TradingMetricsResponse } from "@/lib/analytics/tradingMetrics";
 import type { LatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { DataPeriodLabel } from "./DataPeriodLabel";
 
 /** No diagnoses, changes or recovery estimates are supported by stale/absent data. */
-export function BriefingDataState({ period }: { period: LatestDataPeriod }) {
+export function BriefingDataState({ period }: { period: LatestDataPeriod<TradingMetricsResponse> }) {
   const copy = {
     loading: ["Checking your trading data", "Finding the most recent completed period with orders."],
     empty: ["No trading data found", "No orders were found in the reporting periods checked over the past two years. This does not establish that sales have fallen. Check your data connection or import more recent trading history."],
@@ -11,15 +13,7 @@ export function BriefingDataState({ period }: { period: LatestDataPeriod }) {
     ready: ["Trading data available", "Your completed reporting period is ready."],
   }[period.status];
   const data = period.status === "stale" ? period.phase1?.data : null;
-  const money = (value: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(value);
-  const historical = data ? [
-    ["Gross sales", money(data.grossRevenue)],
-    ["Net sales", money(data.netSales)],
-    ["Average order value", money(data.averageOrderValue)],
-    ["Repeat purchase rate", `${(data.repeatPurchaseRate * 100).toFixed(1)}%`],
-    ["Discount rate", `${(data.discountDependency * 100).toFixed(1)}%`],
-    ["Refund rate", `${(data.refundRate * 100).toFixed(1)}%`],
-  ] : [];
+  const historical = data ? buildBriefing(data, null, "empty").metrics.map(metric => [metric.title, metric.value]) : [];
   return (
     <section className="space-y-6" aria-live="polite">
       <div className="rounded-2xl border border-amber-200 bg-card p-6">

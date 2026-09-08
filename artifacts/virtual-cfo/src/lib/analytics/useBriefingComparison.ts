@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase";
-import { getPhase1Metrics } from "./phase1Metrics";
+import { getTradingMetrics } from "./getTradingMetrics";
 import { previousReportingPeriod, type ComparisonStatus, type TradingMetrics } from "./briefing";
 import type { ReportingTimeline } from "./reportingPeriod";
 
@@ -23,7 +23,7 @@ export function useBriefingComparison(storeId: string, dateFrom: string, timelin
         if (error || count === null || !Number.isSafeInteger(orders) || orders < 0) { publish("error"); return; }
         if (orders === 0) { publish("empty"); return; }
         if (controller.signal.aborted) return;
-        const result = await getPhase1Metrics(storeId, period.dateFrom, period.dateTo);
+        const result = await getTradingMetrics(storeId, period.dateFrom, period.dateTo);
         if (result.errors.length) { publish("error"); return; }
         publish("ready", result.data);
       } catch { publish("error"); }

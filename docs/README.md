@@ -11,6 +11,8 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Supabase wiring
 
+[Measured trading reconciliation, 8 September](trading-reconciliation-2026-09-08.md) contains 119 source/RPC checks, the current screen wiring map, source completeness findings and a proposed synthetic ledger. Matching current SQL does not certify the financial definition.
+
 [Metric-to-source reconciliation](metric-source-reconciliation.md) records the existing tables, unfinished connections and the next data work package. Current values are test data; database-backed does not mean financially reconciled.
 
 ## Supporting documents

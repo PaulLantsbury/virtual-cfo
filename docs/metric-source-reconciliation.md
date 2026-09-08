@@ -2,6 +2,8 @@
 
 Paul confirmed on 8 September 2026 that the current dataset is test data, and that the previous development effort was still building and connecting the Supabase tables. A working query, a populated column and an accurate business metric are three different things. Do not treat any as proof of the others.
 
+The [measured reconciliation](trading-reconciliation-2026-09-08.md) now records source/RPC agreement, source gaps and the current UI mapping. Financial reconciliation remains incomplete.
+
 This inventory records the existing wiring and known gaps; it is not a completed numerical reconciliation. Schema and seven trading-function definitions were read from Supabase on 8 September. No tables or data were changed.
 
 ## Trading metrics used by the dynamic briefing

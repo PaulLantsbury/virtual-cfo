@@ -56,3 +56,15 @@ Implemented in the same draft branch (not deployed):
 Paul clarified that Supabase table construction and UI wiring were incomplete when development paused. The next work package is the [metric-to-source reconciliation](metric-source-reconciliation.md). It distinguishes existing tables from missing calculations, incomplete test data and unconnected fields. No Supabase changes were made in this work package.
 
 Validation: 20 regression tests pass; full workspace type checking and frontend build pass. Browser fixtures verified rising sales, falling sales, missing and failed prior-period data, and opening/closing the explicitly labelled historical test preview: the headline and cards changed together, and absent comparisons produced no trend or suggested review. Existing build warnings about bundle size and tooltip sourcemaps remain.
+
+## Work package 3 — measured source reconciliation
+
+- Compared source aggregates with all six trading RPCs and qualifying order count over 3 months and 14 weeks: 119 checks, no arithmetic mismatches against the current SQL. Reproducible read-only SQL is in `db-migrations/checks/`.
+- Recorded missing stored sales/currency, incomplete refund events/tax components, missing product costs and a probable conflict between seed tax basis and the current net-sales formula. Current SQL agreement is not financial correctness.
+- Updated the screen-to-source map and proposed a small synthetic ledger with explicit tax/refund/cost conventions in `trading-reconciliation-2026-09-08.md`.
+- Dashboard and comparison now load only six trading sources; unrelated contribution/opportunity failures cannot suppress trading. Failed fields stay unavailable. Historical/current formatting is shared, including AOV precision.
+- Detailed pages still contain the mapped snapshot fallbacks and inconsistent bases. These are not marked complete. No live schema/data, ingestion, migration replay or deployment changes.
+
+Validation: 23 regression tests and full workspace type checking pass. Production build passes with the existing bundle-size and sourcemap warnings. New tests pass observed aggregate March/April responses through the trading adapter and briefing model; no new live browser/authenticated API verification is claimed.
+
+Next: settle the explicit tax/refund/AOV contract, implement and test versioned normalised trading and coverage in a disposable database, then add historic COGS and rewire contribution/overhead/cash and detailed pages. Keep existing raw test records intact.

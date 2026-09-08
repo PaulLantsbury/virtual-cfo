@@ -1,3 +1,4 @@
+import { getTradingMetrics } from "@/lib/analytics/getTradingMetrics";
 import { useState } from "react";
 import { Link } from "wouter";
 import { ArrowRight, ArrowUpRight, ArrowDownRight, Minus, Search } from "lucide-react";
@@ -23,7 +24,7 @@ const ANALYSIS_PAGES = [
 ];
 
 export default function Dashboard() {
-  const period = useLatestDataPeriod(STORE_ID);
+  const period = useLatestDataPeriod(STORE_ID, getTradingMetrics);
   const { timeline } = useTimeline();
   const [previewKey, setPreviewKey] = useState<string | null>(null);
   const historicalKey = `${timeline}:${period.dateFrom}`;

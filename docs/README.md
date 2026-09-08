@@ -13,7 +13,7 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Financial acceptance cases
 
-[Ten worked financial cases](financial-acceptance-cases.md) give synthetic inputs and expected results for the approved definitions. Matching machine-readable fixtures live in `tests/fixtures/financial-acceptance-v1.json`. These are acceptance targets, not evidence that the current application implements the new contract.
+[Ten worked financial cases](financial-acceptance-cases.md) give synthetic inputs and expected results for the approved definitions. Matching machine-readable fixtures live in `tests/fixtures/financial-acceptance-v1.json`. The isolated [financial prototype](../experiments/financial-v1/README.md) now passes these targets in local Node tests. The current application and Supabase still use the earlier calculations.
 
 ## Supabase wiring
 

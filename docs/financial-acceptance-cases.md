@@ -2,7 +2,9 @@
 
 Derived from [Paul's approved definitions](agreed-financial-definitions.md), 8 September 2026. These are synthetic worked examples and expected results for the future implementation, not assertions that the existing application passes. No production data, SQL or UI has been changed. Machine-readable values are in `tests/fixtures/financial-acceptance-v1.json`; all money there is integer GBP pence.
 
-Use the IDs below when building automated tests. Test the future calculation service/database first, then the displayed values and narrative. The existing 23 analytics tests exercise legacy wiring; they do not certify this new contract. Preserve raw source events and original order links in the future fixture importer.
+The isolated prototype now exercises F01–F10 using `pnpm test:financial`, alongside five guard-test groups. This validates local calculation code only; production database/API/UI conformance remains pending.
+
+Use the IDs below when building automated database and UI tests. Test the future calculation service/database first, then the displayed values and narrative. The existing 23 analytics tests exercise legacy wiring; they do not certify this new contract. Preserve raw source events and original order links in the future fixture importer.
 
 ## F01 — sales and tax normalisation
 

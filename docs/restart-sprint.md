@@ -92,3 +92,11 @@ Created ten synthetic worked cases in `financial-acceptance-cases.md` and matchi
 Manually specified expected results were independently checked for arithmetic consistency. JSON parses and case IDs are unique; documentation links and diff checked. These are acceptance targets, not automated tests against the application or live SQL. No application tests rerun because runtime code was unchanged. The existing 23-test suite remains the earlier wiring baseline.
 
 Unresolved edge cases are listed without inventing expected policy. Next implementation work can use these fixtures to test versioned calculations in a disposable database, then API/UI outputs. No Supabase data/schema or application changes, merges, deployments or Replit synchronisation were performed. Fixtures and docs are saved in the GitHub draft branch.
+
+## Isolated financial prototype — implementation against agreed cases
+
+Added `experiments/financial-v1/calculations.mjs`, a pure local module with no app, database, network or fixture dependencies. Normalises explicit tax bases, aggregates sales/refunds by resolved event date, preserves original AOV, handles historic/saleable-return COGS and missing costs, assembles the approved profit bridge, allocates recurring overhead and calculates scoped cash movement/runway. Forecast cash-release impacts remain separate from actual balances.
+
+`pnpm test:financial`: 15 tests pass (F01–F10 plus five guard groups). The existing `pnpm test:baseline` suite also passes all 23 tests. Tests consume the previously committed expected fixtures; expected amounts were not changed to fit implementation. Covers store/currency/date checks, duplicate events, unknown eligibility, missing costs, invalid money, unverified cash history, non-positive denominators and fractional allocation. Inputs must already have complete coverage and resolved eligibility/event/currency policies; this module does not infer them from live data.
+
+This is a Node test environment, not a disposable PostgreSQL/Supabase instance. No migration, live data write, app wiring, merge, deployment or Replit sync. Future adapters still need verified source mappings, deduplication/correction rules, cost evidence, authorisation and policies for outstanding cases. Next: build a versioned source adapter and disposable database tests against the same fixtures before changing the app.

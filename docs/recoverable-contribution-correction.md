@@ -26,6 +26,6 @@ Run `pnpm test:migration-baseline` for these three tests plus the two baseline t
 
 The live function still has the discrepancy until a reviewed deployment occurs. Before application, compare the then-current definition/signature/security settings with the captured baseline, resolve the migration registration strategy, and complete the production authentication/store-isolation review. Preserving existing SECURITY DEFINER permissions is compatibility, not an authorisation fix; a caller-supplied store ID is not proof that the caller owns that store.
 
-The next development step is to specify and test authenticated store access before enabling this correction in the live API. Opportunity scoring, evidence quality and dashboard claim restoration remain separate work. No changes to opportunity_breakdown, seed data, live migration ledger, Replit or main are included.
+A [membership-based access proposal](auth-store-isolation-plan.md) now passes local role/RLS tests. Real sign-in and Supabase gateway verification remain required before deployment. The correction now rejects a changed security mode so replay cannot undo later SECURITY INVOKER hardening. Opportunity scoring, evidence quality and dashboard claim restoration remain separate work. No changes to opportunity_breakdown, seed data, live migration ledger, Replit or main are included.
 
 GitHub draft PR #1 holds this correction, tests and documentation. Replit should consume the same versioned documents after a reviewed sync.

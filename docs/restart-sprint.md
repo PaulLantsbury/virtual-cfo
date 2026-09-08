@@ -136,3 +136,13 @@ Prepared `db-migrations/proposed/20260908000001_recoverable_contribution_monthly
 Three new regression groups reproduce the mixed-impact defect and verify corrected totals, cross-store/archived exclusions, empty inputs, row/object/grant preservation and repeat application against the restored observed public schema. All 66 tests pass. No runtime app/dependency edits; type/build not rerun. See `recoverable-contribution-correction.md`.
 
 Saved to the GitHub draft, not deployed, merged or synced to Replit. Supabase was not accessed or modified in this package. Next: production authentication/store-isolation design and API-role tests, then a reviewed migration registration/deployment. Existing security-definer access remains an explicit limitation.
+
+## Authentication/store-access verification and local protection
+
+Confirmed simulated login/signup and no membership model in the captured schema. Reproduced an anonymous cross-store read via the legacy security-definer range RPC in disposable PostgreSQL. Replaced misleading older auth-plan claims with the actual enforcement requirements.
+
+Prepared an undeployed membership/RLS proposal for all 22 public tables, five views and 24 RPCs. Authenticated users read member stores only; anonymous RPC execution and client writes/self-enrolment are denied. Four tests cover the baseline leak, all-RPC/view isolation, missing identity, revocation, denied writes, and protection against replaying the earlier financial fix to undo hardening. Auth identity is stubbed locally; no JWT/gateway conformance is claimed.
+
+Removed service-role proxying from the local unauthenticated opportunity endpoint; it returns 503 until real authenticated access exists. A loopback HTTP test verifies anonymous and forged identity/store requests cannot trigger upstream access. Initial sandbox socket denial was resolved through an approved local test run.
+
+Validation: 71 tests pass (70 database/financial/dashboard tests plus the HTTP test). Workspace type checking passes. The first build stopped because PORT/BASE_PATH were absent; rerunning the workspace build with local PORT=5173 and BASE_PATH=/ passes, with existing frontend sourcemap/bundle warnings. No live Supabase reads/writes, deployment, merge or Replit sync. Next: confirm Supabase Auth, implement actual sessions and membership-selected stores, and run two-user staging gateway tests before enabling the route or deploying proposals.

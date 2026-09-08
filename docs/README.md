@@ -17,6 +17,8 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Supabase wiring
 
+[Authentication and store isolation](auth-store-isolation-plan.md) — access gap reproduced, membership/RLS proposal tested locally, and privileged public proxy disabled in the draft. Real sign-in/gateway verification remains pending.
+
 [Recoverable contribution correction](recoverable-contribution-correction.md) — locally tested separation of monthly contribution from cash/other impacts; not deployed.
 
 [Migration history reconciliation](migration-history-reconciliation.md) — all 25 recorded versions recovered, later changes compared, and observed public schema rebuilt locally. Live ledger repair remains pending.

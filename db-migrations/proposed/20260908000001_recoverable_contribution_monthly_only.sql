@@ -8,6 +8,9 @@ BEGIN
   IF to_regprocedure('public.recoverable_contribution_range(uuid)') IS NULL THEN
     RAISE EXCEPTION 'Expected existing recoverable_contribution_range(uuid); reconcile baseline first';
   END IF;
+  IF NOT (SELECT prosecdef FROM pg_proc WHERE oid='public.recoverable_contribution_range(uuid)'::regprocedure) THEN
+    RAISE EXCEPTION 'Security mode changed; do not overwrite subsequent store-access hardening';
+  END IF;
 END;
 $precondition$;
 

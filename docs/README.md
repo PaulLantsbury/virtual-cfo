@@ -6,10 +6,11 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 [Agreed financial definitions](agreed-financial-definitions.md) — approved sales/VAT/AOV/refund, contribution/profit/EBITDA and cash rules, implementation status and documentation ownership. Read this before older financial definitions.
 
-1. [Restart sprint and current handover](restart-sprint.md) — what is implemented, what remains and acceptance criteria.
-2. [Restart audit, 8 September 2026](restart-audit-2026-09-08.md) — verified baseline and its limits.
-3. [Calculation logic](calculation-logic.md), [Opportunity Engine](opportunity-engine-spec.md), [Recommendation Engine](recommendation-engine.md) — original product specifications recovered from Replit.
-4. [Baseline decisions](baseline-decisions.md) — reconciliations and proposed decisions; distinguishes implemented behaviour from future work.
+1. [Local sign-in handover](local-auth-handover.md) — implemented SDK sessions and membership-gated pages, mocked verification and next-session staging steps.
+2. [Restart sprint and current handover](restart-sprint.md) — what is implemented, what remains and acceptance criteria.
+3. [Restart audit, 8 September 2026](restart-audit-2026-09-08.md) — verified baseline and its limits.
+4. [Calculation logic](calculation-logic.md), [Opportunity Engine](opportunity-engine-spec.md), [Recommendation Engine](recommendation-engine.md) — original product specifications recovered from Replit.
+5. [Baseline decisions](baseline-decisions.md) — reconciliations and proposed decisions; distinguishes implemented behaviour from future work.
 
 ## Financial acceptance cases
 
@@ -17,7 +18,7 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Supabase wiring
 
-[Authentication and store isolation](auth-store-isolation-plan.md) — access gap reproduced, membership/RLS proposal tested locally, and privileged public proxy disabled in the draft. Real sign-in/gateway verification remains pending.
+[Authentication and store isolation](auth-store-isolation-plan.md) — access gap reproduced, membership/RLS proposal tested locally, and privileged public proxy disabled in the draft. Real gateway verification remains pending; the local SDK sign-in flow is now implemented.
 
 [Recoverable contribution correction](recoverable-contribution-correction.md) — locally tested separation of monthly contribution from cash/other impacts; not deployed.
 

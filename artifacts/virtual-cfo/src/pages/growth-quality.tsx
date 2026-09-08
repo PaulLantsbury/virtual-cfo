@@ -1,3 +1,4 @@
+import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { useState, useEffect } from "react";
 import { Sparkles, TrendingUp, TrendingDown, Minus, ArrowRight, Lock } from "lucide-react";
 import {
@@ -32,7 +33,7 @@ import {
 
 // ─── Store ID ─────────────────────────────────────────────────────────────────
 // Dev store UUID — matches Dashboard, Margin Analysis, and Marketing Efficiency.
-const GQ_STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 
 // ─── Data constants ──────────────────────────────────────────────────────────
 // REPEAT_RATE, DISCOUNT_DEP, CAC_PAYBACK imported from
@@ -216,6 +217,7 @@ const STATUS_CONFIG: Record<ScoreStatus, { label: string; bar: string; badge: st
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function GrowthQuality() {
+  const GQ_STORE_ID = useActiveStore();
   useTimeline();
 
   // ── Phase 1: live repeat rate and discount dependency ─────────────────────

@@ -1,3 +1,4 @@
+import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { useState, useEffect } from "react";
 import { Sparkles, Lock, SlidersHorizontal, Info, Zap, Shield } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -40,7 +41,7 @@ import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/ana
 // DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx and margin-analysis.tsx.
 // Must be replaced with the authenticated session's store_id before multi-tenant use.
 // Date range is resolved dynamically by useLatestDataPeriod() inside the component.
-const ME_STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 // BLENDED_CAC, BLENDED_ROAS, CAC_BY_CHANNEL, PAYBACK_BY_CHANNEL, CHANNEL_CM_PCT
@@ -318,6 +319,7 @@ const TIMELINE_FRAMING: Record<string, {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MarketingEfficiency() {
+  const ME_STORE_ID = useActiveStore();
   const { timeline } = useTimeline();
   const framing = TIMELINE_FRAMING[timeline] ?? TIMELINE_FRAMING.last_complete_month;
 

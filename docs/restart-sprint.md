@@ -146,3 +146,13 @@ Prepared an undeployed membership/RLS proposal for all 22 public tables, five vi
 Removed service-role proxying from the local unauthenticated opportunity endpoint; it returns 503 until real authenticated access exists. A loopback HTTP test verifies anonymous and forged identity/store requests cannot trigger upstream access. Initial sandbox socket denial was resolved through an approved local test run.
 
 Validation: 71 tests pass (70 database/financial/dashboard tests plus the HTTP test). Workspace type checking passes. The first build stopped because PORT/BASE_PATH were absent; rerunning the workspace build with local PORT=5173 and BASE_PATH=/ passes, with existing frontend sourcemap/bundle warnings. No live Supabase reads/writes, deployment, merge or Replit sync. Next: confirm Supabase Auth, implement actual sessions and membership-selected stores, and run two-user staging gateway tests before enabling the route or deploying proposals.
+
+## Local Supabase sign-in and session/store gate
+
+Implemented real SDK password login/signup, confirmation/error handling, session restoration/user verification and membership-selected stores. Removed simulated auth, nonfunctional social/reset buttons and demo bypass/banner. All merchant routes plus timeline/AI drawer are gated; seven connected pages use the selected authorised store. Missing membership/table or session errors keep merchant data hidden.
+
+Account/token/store transitions clear the query cache and remount protected state. Delayed results are discarded. Logout closes the UI immediately; failed logout cannot be undone by an automatic token refresh. Real database RLS remains essential and is not applied by this package. The disabled opportunity API stays disabled.
+
+Validation: eight controller tests and five mocked browser groups added; total 84 passing tests including the previous 71. Full type checking and workspace build pass with local PORT/BASE_PATH and existing warnings. Mocked browser tests used installed Chrome, an isolated profile and fake Supabase endpoints; no real accounts or database writes. Login error layout visually reviewed. No deployment, merge or Replit sync.
+
+Stop here for today. Next-session staging setup, exact prerequisites, remaining features and reproduction commands are in `local-auth-handover.md`. GitHub draft is the durable handover; live sign-in/gateway/real-token tests remain pending.

@@ -1,3 +1,4 @@
+import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { getTradingMetrics } from "@/lib/analytics/getTradingMetrics";
 import { useState } from "react";
 import { Link } from "wouter";
@@ -13,7 +14,7 @@ import { useTimeline } from "@/lib/timeline";
 import { canAccess } from "@/lib/plan";
 
 // Demo store only. Customer authentication and store isolation remain sprint work.
-const STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 const ANALYSIS_PAGES = [
   ["Margin Recovery", "Explore the components of contribution and margin.", "/margin-analysis"],
   ["Growth Quality", "Examine sales mix and repeat purchasing.", "/growth-quality"],
@@ -24,6 +25,7 @@ const ANALYSIS_PAGES = [
 ];
 
 export default function Dashboard() {
+  const STORE_ID = useActiveStore();
   const period = useLatestDataPeriod(STORE_ID, getTradingMetrics);
   const { timeline } = useTimeline();
   const [previewKey, setPreviewKey] = useState<string | null>(null);

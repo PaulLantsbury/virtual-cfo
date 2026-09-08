@@ -63,6 +63,10 @@ Runway is based on actual cash burn, not overheads alone. Available cash must be
 
 [Financial acceptance cases v1](financial-acceptance-cases.md) translates these approved rules into ten worked examples, with integer-pence fixtures in `tests/fixtures/financial-acceptance-v1.json`. Deferred policy choices are explicitly excluded from asserted outcomes. These examples do not change the approved definitions or the application.
 
+## Isolated implementation progress
+
+An isolated prototype in `experiments/financial-v1/` implements the agreed core arithmetic and passes the ten worked cases plus five groups of input/edge-case checks. It is not imported by the application and has no database/network access. This is local calculation validation, not deployed conformance or a completed Supabase migration. See its README for adapter preconditions and deferred policies.
+
 ## Implementation and remaining decisions
 
 No application or database change is included in this approval record. The current net-sales/AOV RPCs and order-count availability logic do not implement this contract. Tests comparing the current SQL to source rows describe legacy behaviour, not acceptance of that behaviour.

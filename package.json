@@ -7,7 +7,8 @@
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
-    "test:baseline": "node --experimental-strip-types --test artifacts/virtual-cfo/src/lib/analytics/*.test.ts"
+    "test:baseline": "node --experimental-strip-types --test artifacts/virtual-cfo/src/lib/analytics/*.test.ts",
+    "test:financial": "node --test experiments/financial-v1/calculations.test.mjs"
   },
   "private": true,
   "devDependencies": {

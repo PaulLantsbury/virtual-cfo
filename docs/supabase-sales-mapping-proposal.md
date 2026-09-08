@@ -45,15 +45,15 @@ The test role cannot access mapping views; even after an artificial grant of sch
 
 ## Migration-history finding
 
-The standard migration-list tool failed because `supabase_migrations.schema_migrations` has only a `version` column, not `name`. A read-only direct query recovered 25 recorded versions, from `20260429000000` to `20260502000018`. Repository migration files include later May changes that are not present in that ledger, while many earlier recorded versions are absent as files. The repository also contains `20260430000007z_pre_views_functions.sql`, which is not the exact recorded version string.
+The standard migration-list tool failed because `supabase_migrations.schema_migrations` has only a `version` column, not `name`. A read-only direct query recovered 25 recorded versions, from `20260429000000` to `20260502000018`. Repository migration files include later May changes that are not present in that ledger, while many earlier recorded versions were absent from the active folders. Those 25 versions have since been recovered from Git history; see [migration reconciliation](migration-history-reconciliation.md). The repository also contains `20260430000007z_pre_views_functions.sql`, which is not the exact recorded version string.
 
-Do not repair this by marking versions applied or replaying all files. Capture the real schema/functions/grants and reconcile provenance with the ledger first. The PGlite baseline reproduces the relevant table shape, not the entire Supabase project or migration history.
+Do not repair this by marking versions applied or replaying all files. Capture the real schema/functions/grants and reconcile provenance with the ledger first. The initial PGlite mapping tests reproduce the relevant table shape. A subsequent observed-public-schema baseline now verifies structural compatibility of this proposal; it does not reproduce the entire Supabase project or establish migration execution provenance.
 
 ## Before applying or wiring the application
 
 1. Resolve remaining eligibility/date/adjustment policies and obtain source evidence for tax/refund splits and complete imports. Do not infer approval from test data.
 2. Review this proposal's schema, indexing impact, evidence workflow/history and server access design.
-3. Reconcile the migration baseline and test against a faithful disposable copy, including actual API roles.
+3. Observed public-schema compatibility now passes locally. Complete full Supabase/API-role and authentication tests and agree the ledger strategy before deployment.
 4. Apply only after review, populate verified evidence through a controlled process, and reconcile actual source totals. Then change the API/UI to consume the verified result.
 
 Current outcome: schema mapping, proposed SQL and its local tests are complete for sales/refunds. Live wiring, data verification/backfill, line-level cost recovery and production deployment remain pending. GitHub draft branch contains these artifacts; main/Replit are not synchronised.

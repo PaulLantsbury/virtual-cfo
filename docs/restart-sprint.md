@@ -120,3 +120,11 @@ Nine disposable PostgreSQL tests execute the exact proposed SQL and verify F03/F
 Full mapping, proposed deployment sequence and limits: `supabase-sales-mapping-proposal.md`. Pending: approval/evidence workflow, missing source facts, original eligibility/timezone policies, faithful migration baseline and production role tests. No live schema/data edits, app wiring, merge, deployment or Replit sync.
 
 Validation for this proposal: all 61 tests pass (9 cloud-shaped mapping + 14 source adapter + 15 financial + 23 dashboard). No new dependency/runtime-app changes; type/build were not rerun because this package adds isolated test code, proposed SQL and documentation only. Links and diff checked.
+
+## Migration history recovery and observed baseline
+
+Recovered 27 historical SQL files from Git history, covering every one of the 25 recorded cloud versions. Preserved hashes/provenance in an archive outside the runner. Compared later repository function bodies with the live definitions: several later changes are present despite missing ledger entries; recoverable contribution lacks the repository monthly-contribution filter, and opportunity breakdown differs from its recovered source. Data patches remain unverified.
+
+Captured public schema/ACL metadata read-only and rebuilt 22 tables, 5 views and 24 functions in disposable PostgreSQL. Round-trip structural and non-owner object-grant checks pass, including generated columns. The exact additive sales-evidence proposal applies to that baseline without changing existing function definitions. Archive hashes also pass. No live ledger/schema/data changes or historical migration replay.
+
+Validation: 63 tests pass across the two migration-baseline groups and previous 61 dashboard/financial/adapter tests. No application/runtime dependency changes; type/build not rerun for this isolated test/documentation package. See `migration-history-reconciliation.md` for evidence, limitations and next steps. Full Supabase/API-role reproduction, targeted opportunity correction and reviewed ledger repair remain pending. GitHub draft updated; main/Replit not synchronised.

@@ -50,7 +50,7 @@ This is **not a full Supabase backup or deployable replacement**. It excludes cu
 
 ## Next controlled step
 
-Use this observed baseline for local compatibility tests and prepare a targeted, versioned correction for the recoverable-contribution mismatch, without replaying its bundled seed migration. Keep deployment pending until production authentication/store isolation and API-role tests are specified.
+The [targeted recoverable-contribution correction](recoverable-contribution-correction.md) has now been prepared and tested against this observed baseline, without replaying its bundled seed migration. It remains unapplied. Next: specify and test production authentication/store isolation and API-role behaviour before deployment.
 
 Before any future ledger repair, obtain a full schema-only backup/project configuration, reconcile remaining object/security/data provenance, and agree a reviewed baseline strategy. Do not add a name column, mark later versions applied, or rewrite old ledger entries solely from body matches.
 

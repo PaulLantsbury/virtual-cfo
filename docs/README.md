@@ -17,6 +17,8 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Supabase wiring
 
+[Recoverable contribution correction](recoverable-contribution-correction.md) — locally tested separation of monthly contribution from cash/other impacts; not deployed.
+
 [Migration history reconciliation](migration-history-reconciliation.md) — all 25 recorded versions recovered, later changes compared, and observed public schema rebuilt locally. Live ledger repair remains pending.
 
 [Supabase sales/refund mapping proposal](supabase-sales-mapping-proposal.md) maps inspected raw fields to verified inputs and documents the additive SQL tested locally. It is not applied to Supabase.

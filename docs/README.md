@@ -17,6 +17,8 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Supabase wiring
 
+[Supabase sales/refund mapping proposal](supabase-sales-mapping-proposal.md) maps inspected raw fields to verified inputs and documents the additive SQL tested locally. It is not applied to Supabase.
+
 [Source adapter and disposable database tests](source-adapter-status.md) records the tested trading/refund/cost adapter and its remaining integration limits.
 
 [Measured trading reconciliation, 8 September](trading-reconciliation-2026-09-08.md) contains 119 source/RPC checks, the current screen wiring map, source completeness findings and a proposed synthetic ledger. Matching current SQL does not certify the financial definition.

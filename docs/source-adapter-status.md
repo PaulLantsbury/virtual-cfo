@@ -36,6 +36,10 @@ The fixture schema uses one historic unit cost per original order. Multi-line pr
 
 `assessLegacyOrder` is a minimum-evidence diagnostic only. A successful result would not certify a full import, refund reconciliation, access control or financial correctness. The existing cloud-shaped sample without this evidence is explicitly rejected by the test.
 
+## Sales/refund mapping progress
+
+The [cloud-shaped mapping proposal](supabase-sales-mapping-proposal.md) now joins the actual raw table shape to separately verified evidence and tests the proposed SQL. It has not been applied to Supabase; live evidence collection and migration reconciliation remain open.
+
 ## Remaining integration work
 
 This schema is deliberately outside `db-migrations/migrations`; do not apply it to connected Supabase. It is not a dump or reconstruction of the cloud schema. No live records were downloaded, backfilled or modified to make the tests pass.

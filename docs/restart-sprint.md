@@ -110,3 +110,13 @@ Added a versioned experimental source schema and read-only adapter in `experimen
 See `source-adapter-status.md` for limits: current cloud rows lack key evidence; live mappings, cash/marketing feeds, automatic idempotent ingestion/corrections, production authentication/RLS and migration-history reconciliation remain pending. No live DB access/write, app wiring, migration application, deployment or Replit sync in this package.
 
 Validation for this package: all 52 tests pass (14 database adapter + 15 isolated financial + 23 dashboard baseline). Workspace type checks and frontend production build pass. Existing tooltip sourcemap and bundle-size warnings remain. Dependency lock changes reviewed: PGlite added as an exact dev dependency and existing Drizzle optional-peer resolution updated; other package versions unchanged.
+
+## Supabase-shaped sales/refund mapping proposal
+
+Inspected current orders/refunds/line/store schema and constraints read-only. Added `db-migrations/proposed/finance_v1_sales_evidence.sql` outside automatic migrations: private evidence schema, same-store foreign keys, mapping views with stale-source detection and deny-by-default RLS. No backfill or raw financial changes. Added a read-only sales mapper that joins the inspected raw shape to explicit evidence; COGS remains unavailable until line-level history/recovery is mapped.
+
+Nine disposable PostgreSQL tests execute the exact proposed SQL and verify F03/F04 monetary sales/refunds and AOV, preservation of raw records, missing/stale evidence, split reconciliation, cross-store links, RLS and atomic rerun failure. The live Supabase migration-list tool failed on missing `name`; direct read-only queries show a version-only ledger with 25 entries through 20260502000018, inconsistent with repository history. No ledger repair attempted.
+
+Full mapping, proposed deployment sequence and limits: `supabase-sales-mapping-proposal.md`. Pending: approval/evidence workflow, missing source facts, original eligibility/timezone policies, faithful migration baseline and production role tests. No live schema/data edits, app wiring, merge, deployment or Replit sync.
+
+Validation for this proposal: all 61 tests pass (9 cloud-shaped mapping + 14 source adapter + 15 financial + 23 dashboard). No new dependency/runtime-app changes; type/build were not rerun because this package adds isolated test code, proposed SQL and documentation only. Links and diff checked.

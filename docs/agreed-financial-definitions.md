@@ -59,6 +59,10 @@ Approved by Paul on 8 September 2026 after reviewing all the definitions and rec
 
 Runway is based on actual cash burn, not overheads alone. Available cash must be dated, and the three-month measurement period must be explicit.
 
+## Worked acceptance cases
+
+[Financial acceptance cases v1](financial-acceptance-cases.md) translates these approved rules into ten worked examples, with integer-pence fixtures in `tests/fixtures/financial-acceptance-v1.json`. Deferred policy choices are explicitly excluded from asserted outcomes. These examples do not change the approved definitions or the application.
+
 ## Implementation and remaining decisions
 
 No application or database change is included in this approval record. The current net-sales/AOV RPCs and order-count availability logic do not implement this contract. Tests comparing the current SQL to source rows describe legacy behaviour, not acceptance of that behaviour.

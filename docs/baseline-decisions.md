@@ -9,9 +9,12 @@
 - A Sunday cannot be included in a completed week until Monday. Browser-local calendar boundaries remain in use pending store timezone implementation.
 - Dashboard headline and opportunity KPI use the same existing recoverable-range response. This removes their divergent access paths but does not validate the meaning or freshness of seeded opportunity estimates.
 
-## Proposed calculation contract — not yet applied to live SQL
+## Approved sales contract — implementation pending
 
-- Keep gross sales, discounts, refunds and VAT on one documented tax basis; net sales must reconcile to known orders. Return events and order-date attribution must be explicit.
+Paul approved [sales definitions v1](agreed-financial-definitions.md) on 8 September 2026: tax-exclusive product sales and discounts, separate shipping/VAT, pre-refund AOV, value-based discount rate and refund-event-period reporting. This supersedes conflicting older sales proposals; existing SQL has not been changed.
+
+## Remaining proposed calculation contract — not yet approved or applied to live SQL
+
 - Contribution should deduct product cost/COGS as well as the intended variable operating costs. Do not assume missing product costs are zero. The source, refund treatment and historic cost versioning need to be settled before changing this metric.
 - Distinguish contribution after marketing from operating profit after overhead. Cash release is not recurring monthly profit; do not add unlike impacts into one headline.
 - Weekly calculations require week-compatible inputs and an explicit overhead-allocation convention; monthly functions cannot merely be called with seven-day dates.

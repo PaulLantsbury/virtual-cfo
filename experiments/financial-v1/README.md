@@ -4,6 +4,10 @@ Run `pnpm test:financial` from the repository root. Uses Node's built-in test ru
 
 `calculations.mjs` is a pure prototype, not imported by the application. Its functions have no fixture dependencies; the test file adapts the synthetic cases to its inputs. This is an isolated Node environment, not a disposable PostgreSQL instance. Live RPCs, the current UI and Replit have not been changed.
 
+## Disposable database adapter
+
+`pnpm test:financial-db` now runs 14 tests in an in-memory PGlite PostgreSQL database. See [source adapter status](../../docs/source-adapter-status.md). This adds relational source reads for trading, refunds, historical cost and period expense inputs. It is a separate test schema, not a migration or replica of cloud Supabase. Cash/bank feed adapters and production source mappings are still pending.
+
 ## Input contract and responsibility
 
 - Money uses safe integer minor units; overflow/non-integer/missing values are rejected. Ratios carry unrounded numbers and a reason when unavailable. No storage rounding policy is invented. Recurring overhead returns exact fractional portions and withholds a rounded amount when residual-penny allocation is unresolved.

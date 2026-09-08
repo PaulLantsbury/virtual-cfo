@@ -8,11 +8,13 @@
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
     "test:baseline": "node --experimental-strip-types --test artifacts/virtual-cfo/src/lib/analytics/*.test.ts",
-    "test:financial": "node --test experiments/financial-v1/calculations.test.mjs"
+    "test:financial": "node --test experiments/financial-v1/calculations.test.mjs",
+    "test:financial-db": "node --test experiments/financial-v1/source-adapter.test.mjs"
   },
   "private": true,
   "devDependencies": {
-    "typescript": "~5.9.2",
-    "prettier": "^3.8.1"
+    "@electric-sql/pglite": "0.5.8",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2"
   }
 }

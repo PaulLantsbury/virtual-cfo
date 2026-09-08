@@ -1,3 +1,4 @@
+import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { useState } from "react";
 import {
   Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
@@ -34,7 +35,7 @@ import { ANNUAL_REVENUE } from "@/lib/data/business-snapshot";
 // and src/lib/data/business-snapshot.ts). Replace those files with live
 // Xero / Shopify feeds when integrations are connected.
 
-const CASH_STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 
 const NET_CASH_MOVEMENT = 14_000; // unique to Cash Control — not shared elsewhere
 const RUNWAY_DENOM      = Math.round(CASH_BALANCE / CASH_RUNWAY);
@@ -282,6 +283,7 @@ function DriverTooltip({ active, payload, label }: any) {
 
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function CashControl() {
+  const CASH_STORE_ID = useActiveStore();
   const { status: reportingStatus,
     dateFrom: cashDateFrom,
     dateTo: cashDateTo,

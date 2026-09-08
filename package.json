@@ -12,7 +12,8 @@
     "test:financial-db": "node --test experiments/financial-v1/source-adapter.test.mjs",
     "test:financial-cloud": "node --test experiments/financial-v1/cloud-sales-adapter.test.mjs",
     "test:migration-baseline": "node --test experiments/migration-baseline/*.test.mjs",
-    "test:access": "node --experimental-strip-types --test experiments/migration-baseline/store-access.test.mjs artifacts/api-server/tests/opportunities-access.test.mjs"
+    "test:access": "node --experimental-strip-types --test experiments/migration-baseline/store-access.test.mjs artifacts/api-server/tests/opportunities-access.test.mjs",
+    "test:auth": "node --experimental-strip-types --test artifacts/virtual-cfo/src/lib/auth/*.test.ts"
   },
   "private": true,
   "devDependencies": {

@@ -1,3 +1,4 @@
+import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { useState } from "react";
 import { ArrowDownRight, ArrowUpRight, TrendingUp, Info, Sparkles, AlertTriangle, ChevronDown, Lock, SlidersHorizontal, Shield, Zap } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
@@ -26,7 +27,7 @@ import { deltaToSentiment, DELTA_POLARITY } from "@/lib/analytics/deltaSentiment
 // DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx.
 // Must be replaced with the authenticated session's store_id before multi-tenant use.
 // Date range is resolved dynamically by useLatestDataPeriod() inside the component.
-const MA_STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true  },
@@ -342,6 +343,7 @@ function SectionHeading({ title, subtitle, support }: { title: string; subtitle?
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function MarginAnalysis() {
+  const MA_STORE_ID = useActiveStore();
   const { selectedLabel } = useTimeline();
 
   // ── Phase 1 data fetch ────────────────────────────────────────────────────

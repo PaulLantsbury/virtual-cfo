@@ -1,3 +1,4 @@
+import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { useState } from "react";
 import {
   Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
@@ -30,7 +31,7 @@ import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
 // ─── Data period config ────────────────────────────────────────────────────────
 // DEV-ONLY: hardcoded seed store UUID — matches dashboard.tsx, margin-analysis.tsx, etc.
 // Replace with authenticated session store_id before multi-tenant use.
-const PO_STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 // Imported from src/lib/data/pricing-metrics.ts — the central source of truth
@@ -152,6 +153,7 @@ function DriverTooltip({ active, payload, label }: any) {
 
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function PricingOptimisation() {
+  const PO_STORE_ID = useActiveStore();
   // ── Phase 1 live data (current calendar month) ────────────────────────────
   // Resolves to the most recent month with order data.
   const { status: reportingStatus,

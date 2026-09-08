@@ -38,4 +38,21 @@ The application preview used a local test-data server, not real credentials. Dev
 
 ## Remaining limits
 
-This first work package starts the agreed sprint; it does not complete authentication, financial SQL reconciliation, ingestion or the recommendation engine. Current-data dashboard narratives and other pages still contain prototype content. Weekly analytics remain semantically incomplete even though calendar boundaries are corrected. The bounded search can report no data found for history older than two years. Store timezone support is not yet implemented. The connected Supabase account remains read-only.
+This first work package starts the agreed sprint; it does not complete authentication, financial SQL reconciliation, ingestion or the recommendation engine. Other analysis pages still contain prototype content. Dashboard financial estimates are withheld pending reconciliation; its trading narrative is now dynamic. Weekly analytics remain semantically incomplete even though calendar boundaries are corrected. The bounded search can report no data found for history older than two years. Store timezone support is not yet implemented. The connected Supabase account remains read-only.
+
+
+## Work package 2 — dynamic trading briefing
+
+Implemented in the same draft branch (not deployed):
+
+- The current-period headline, metric cards and suggested areas to investigate now come from one pure calculation model. No fixed profit/advertising/cash diagnoses remain on the dashboard.
+- Compare the immediately preceding completed period using the same trading functions. An absent or failed comparison produces no change claim or recommendation. Rate changes use percentage points; non-positive comparison bases use absolute currency differences.
+- Preserve valid zeros. Missing/malformed scalar database results record errors rather than masquerading as zero.
+- Offer an explicit historical test preview so the existing older seed data can exercise the dynamic briefing without being described as current trading.
+- Label the hardcoded store explicitly as test data. Withhold contribution/profit, runway and recovery estimates until their cost, date and impact definitions are reconciled. Keep their detailed pages and models available for continued development.
+- Automated monitoring is labelled inactive on the dashboard. Review prompts describe observed changes, not proven causes or promised savings.
+- Financial consistency on other pages and the real shared recommendation engine remain unfinished.
+
+Paul clarified that Supabase table construction and UI wiring were incomplete when development paused. The next work package is the [metric-to-source reconciliation](metric-source-reconciliation.md). It distinguishes existing tables from missing calculations, incomplete test data and unconnected fields. No Supabase changes were made in this work package.
+
+Validation: 20 regression tests pass; full workspace type checking and frontend build pass. Browser fixtures verified rising sales, falling sales, missing and failed prior-period data, and opening/closing the explicitly labelled historical test preview: the headline and cards changed together, and absent comparisons produced no trend or suggested review. Existing build warnings about bundle size and tooltip sourcemaps remain.

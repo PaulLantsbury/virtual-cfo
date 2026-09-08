@@ -128,3 +128,11 @@ Recovered 27 historical SQL files from Git history, covering every one of the 25
 Captured public schema/ACL metadata read-only and rebuilt 22 tables, 5 views and 24 functions in disposable PostgreSQL. Round-trip structural and non-owner object-grant checks pass, including generated columns. The exact additive sales-evidence proposal applies to that baseline without changing existing function definitions. Archive hashes also pass. No live ledger/schema/data changes or historical migration replay.
 
 Validation: 63 tests pass across the two migration-baseline groups and previous 61 dashboard/financial/adapter tests. No application/runtime dependency changes; type/build not rerun for this isolated test/documentation package. See `migration-history-reconciliation.md` for evidence, limitations and next steps. Full Supabase/API-role reproduction, targeted opportunity correction and reviewed ledger repair remain pending. GitHub draft updated; main/Replit not synchronised.
+
+## Targeted recoverable-contribution correction
+
+Prepared `db-migrations/proposed/20260908000001_recoverable_contribution_monthly_only.sql`, outside the automatic runner. It restricts the existing range function to monthly-contribution impacts without replaying seed changes. Existing signature, store/status scope, security mode, owner/grants and legacy empty/NULL aggregation semantics remain intact. No opportunity scoring or data classification is introduced.
+
+Three new regression groups reproduce the mixed-impact defect and verify corrected totals, cross-store/archived exclusions, empty inputs, row/object/grant preservation and repeat application against the restored observed public schema. All 66 tests pass. No runtime app/dependency edits; type/build not rerun. See `recoverable-contribution-correction.md`.
+
+Saved to the GitHub draft, not deployed, merged or synced to Replit. Supabase was not accessed or modified in this package. Next: production authentication/store-isolation design and API-role tests, then a reviewed migration registration/deployment. Existing security-definer access remains an explicit limitation.

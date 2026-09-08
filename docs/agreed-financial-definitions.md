@@ -67,6 +67,8 @@ Runway is based on actual cash burn, not overheads alone. Available cash must be
 
 An isolated prototype in `experiments/financial-v1/` implements the agreed core arithmetic and passes the ten worked cases plus five groups of input/edge-case checks. It is not imported by the application and has no database/network access. This is local calculation validation, not deployed conformance or a completed Supabase migration. See its README for adapter preconditions and deferred policies.
 
+A [targeted SQL correction](recoverable-contribution-correction.md) now passes local regression tests excluding cash/other impacts from recoverable monthly contribution. This is an undeployed proposal; it does not certify opportunity estimates or scoring.
+
 ## Implementation and remaining decisions
 
 No application or database change is included in this approval record. The current net-sales/AOV RPCs and order-count availability logic do not implement this contract. Tests comparing the current SQL to source rows describe legacy behaviour, not acceptance of that behaviour.

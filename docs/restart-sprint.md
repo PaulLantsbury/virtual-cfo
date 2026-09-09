@@ -206,4 +206,4 @@ Validation: all 30 analytics tests pass, covering timezone-boundary differences,
 
 This does not re-date historic evidence or certify a later timezone change. Evidence must be regenerated/reverified when its source assumptions change. Remaining work: persist the timezone/source-settings provenance with evidence, build controlled ingestion and support reliable period coverage beyond hand-created fixtures. Frontend work is local/draft only; no Replit sync, merge or production release.
 
-Publication checkpoint: this store-settings package is saved locally. Automatic review blocked the public GitHub upload pending explicit approval for this subsequent package.
+Publication checkpoint: Paul explicitly approved this store-settings code-and-documentation package and its upload to the public GitHub draft.

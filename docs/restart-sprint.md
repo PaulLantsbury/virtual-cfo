@@ -252,3 +252,9 @@ Paul requested removal of repeated routine upload approvals. Recorded scoped sta
 Extended the local candidate-intake proposal with per-order/refund source versions and sticky period recheck flags. Older unseen versions are refused; same-version conflicts and missing records require review. Accepted changes conservatively flag all known candidate periods for the store. The private candidate-state reader returns no figures, including when data awaits review. No replay clears a flag.
 
 29 Shopify tests pass. Existing rollback/restart/role protections remain covered; new cases cover independent refund versions, unseen older input and multiple affected periods. See import-candidate-intake.md for the important boundary: this is candidate-state protection, not yet wired to existing finance coverage or the briefing. No live database, Replit or production changes. Next is a reviewed recheck/publication flow that carries these controls into authoritative evidence.
+
+## Verified-coverage invalidation bridge prepared locally
+
+Added an additive SQL proposal linking raw/source changes and candidate review flags to finance_v1 coverage. Same-transaction invalidation makes the existing verified-sales adapter reject previously verified figures; other stores remain available. It never publishes candidates or restores coverage. See verified-invalidation.md for trigger scope, tests and the remaining reviewed-publication/client-refresh work.
+
+35 Shopify tests pass, including six new integration groups against the exact committed staging bootstrap and financial fixture package in disposable PostgreSQL. No live staging changes, application updates, Replit sync or production release. Next: bind independently reviewed evidence and completeness to exact source versions before a publication transaction can re-enable figures.

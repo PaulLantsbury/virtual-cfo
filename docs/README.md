@@ -4,6 +4,8 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Start here
 
+[Latest stopping point — 9 September 2026](session-handover-2026-09-09.md): today’s achievements, exact resume point, deployment boundaries and remaining product roadmap. This supersedes older next-session instructions.
+
 [Agreed financial definitions](agreed-financial-definitions.md) — approved sales/VAT/AOV/refund, contribution/profit/EBITDA and cash rules, implementation status and documentation ownership. Read this before older financial definitions.
 
 1. [Local sign-in handover](local-auth-handover.md) — implemented SDK sessions and membership-gated pages, mocked verification and next-session staging steps.

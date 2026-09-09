@@ -288,3 +288,8 @@ Added a server-side Supabase getUser adapter that verifies each supplied bearer 
 Prepared and ran a standalone PostgreSQL 18.4 test harness using an isolated temporary cluster with TCP disabled. Seven cases pass: committed/rolled-back competing writes, raw/evidence changes after review locks, duplicate approvals, reviewer permission removal and lock timeout. Tests observe lock waits from a third connection and verify final audit, coverage and the existing member sales reader. Another store remains readable. The 52 existing Shopify tests also pass after sharing fixture setup between the suites.
 
 The runner shuts down and removes its synthetic cluster; standalone binaries stay outside the repository. No application dependency/lockfile change, live Supabase mutation, Replit sync or production release. Forced deadlock/load testing and matching the deployed service configuration remain limitations. Next: least-privilege service configuration and authenticated request/UI integration; token verification remains tested with synthetic Auth responses.
+
+
+## End-of-day handover — 9 September
+
+Paul stopped development for today. Read session-handover-2026-09-09.md before resuming: it records the current tested checkpoint, applied-versus-proposed boundary, remaining roadmap and next service-permissions/authenticated-review work. No further development or deployment was performed for this handover.

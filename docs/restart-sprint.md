@@ -168,3 +168,7 @@ Prepared one atomic bootstrap from the observed schema plus monthly-contribution
 After Paul's explicit approval, applied the exact tested atomic bootstrap only to Night Scout Staging (`bioalckltvkhlczusdvl`). SQL editor copy-back matched the committed SHA-256. Supabase reported success; read-only checks confirmed 23 tables with RLS, 23 policies, five invoker views, 24 functions, zero security-definer/anonymous-executable functions and zero users/memberships/stores. See `staging-setup-2026-09-09.md`.
 
 Original Supabase project, Auth settings and Replit were untouched. No application deployment or merge. Next: staging preview configuration and user-assisted test accounts, then actual JWT/gateway store-isolation and sign-in checks. Prior local tests do not replace those checks.
+
+## Financial event rules approved and preparation implemented
+
+On 9 September Paul approved original paid/completed eligibility, explicit exclusions, store-local actual event dates and review of ambiguous adjustments. Recorded in agreed-financial-definitions.md. Added isolated event-evidence preparation and five passing regression groups. No application/database change; financial integration remains incomplete. See financial-integration-next-step.md for the staged connection and acceptance checks.

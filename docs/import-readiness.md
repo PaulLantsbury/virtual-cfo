@@ -4,7 +4,7 @@
 
 A local dry-run checker now reviews a source-adapter envelope before any future evidence write. It is not a Shopify connector, CSV mapper, source authentication mechanism or production importer. No remote records are read or written by it. Run `pnpm test:import-review` (eight tests).
 
-The user has been asked which Shopify development store or order/refund export is available. Source-specific mapping and independent reconciliation remain pending that answer. Do not infer full refund history from a general order export or an order's current cumulative refund field.
+Paul confirmed that no Shopify account is available yet and approved developing the connection with synthetic test data. A read-only extraction foundation is now locally tested; see shopify-connection.md. Live authentication and independent source reconciliation remain pending a future test store. Do not infer full refund history from a general order export or an order's current cumulative refund field.
 
 ## Input contract
 

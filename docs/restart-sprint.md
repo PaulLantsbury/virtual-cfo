@@ -215,3 +215,11 @@ Added a source-neutral import-readiness checker and eight passing tests. It chec
 No actual Shopify store/export has been supplied for this checkpoint. No database, Replit or production changes. The user has been asked which real source is available. This is preparation for ingestion, not a completed real-data connection. Tests cover this isolated addition; unchanged application type/build checks were not repeated.
 
 Publication: Paul explicitly approved uploading the import-review code and documentation to the public GitHub draft. Earlier packages remain published.
+
+## Shopify extraction foundation with test data — 9 September
+
+Paul confirmed no Shopify account is available and approved building against test data. Added a server-only fixed-query reader and bounded order/refund-summary collector, checked against official API documentation and tested with synthetic HTTP responses. Ten Shopify test groups and eight import-review groups pass. See shopify-connection.md for implemented checks, source references and limitations.
+
+The collector retains review-required refunds/edits and does not certify coverage or populate financial evidence. Complete line/tax mapping, installation/authentication, durable collection/writes and a real-store conformance check remain outstanding. No live Shopify/Supabase calls, Replit sync, merge or production release. Application/build code is unchanged.
+
+Publication checkpoint: Paul explicitly approved uploading the Shopify connection foundation code, tests and documentation to the public GitHub draft. Earlier packages remain published.

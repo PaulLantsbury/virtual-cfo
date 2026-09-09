@@ -62,7 +62,7 @@ export function mapShopifySales(extraction,{storeId,shopId,from,to}){
    const charge=sum([gross-discount,productTax,shippingNet,shippingTax]);
    check(charge===money(o.originalTotalPriceSet)&&charge===money(sale.amountSet),'Original payment does not reconcile');
    check(sum([productTax,shippingTax])===money(o.totalTaxSet)&&sum([discount,shippingDiscount])===money(o.totalDiscountsSet),'Order tax/discount totals do not reconcile');
-   events.push({id:`sale:${o.id}`,orderId:o.id,storeId,currency,type:'sale',date:saleDay,eligible:true,grossProductExVat:gross,discountExVat:discount,netShipping:shippingNet,historicCost:null});
+   events.push({id:`sale:${o.id}`,orderId:o.id,storeId,currency,type:'sale',date:saleDay,eligible:true,grossProductExVat:gross,discountExVat:discount,netShipping:shippingNet,productVat:productTax,shippingVat:shippingTax,customerCharge:charge,historicCost:null});
    const used=new Map(),usedShipping=new Map(),refundTransactions=new Set(),refundIds=new Set();
    const consume=(map,usage,key,net,vat)=>{const limit=map.get(key);check(limit,'Refund original line missing');const previous=usage.get(key)||[0,0];const next=[sum([previous[0],net]),sum([previous[1],vat])];check(next.every((v,i)=>v<=limit[i]),'Refund exceeds original line component');usage.set(key,next);};
    for(const r of o.refunds){

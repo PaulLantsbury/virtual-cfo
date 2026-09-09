@@ -264,3 +264,9 @@ Added an additive SQL proposal linking raw/source changes and candidate review f
 Added individual event reconciliation and a snapshot-bound review packet, documented in candidate-review.md. Matching aggregate totals cannot conceal changed source identities, dates or financial event components. The packet checks current source versions/settings and existing evidence, remains uncertified, and performs no writes. 41 Shopify tests pass, including an actual disposable PostgreSQL snapshot check.
 
 The restoration step is not complete: original sale VAT component reconciliation, independent coverage review, reviewer audit storage and an atomic guarded publication operation remain required. This checkpoint prepares the review without prematurely restoring figures. No remote database changes, Replit sync or production deployment.
+
+## Original-sale VAT reconciliation
+
+Source sale events now retain actual product VAT after discounts, shipping VAT and the original reconciled customer payment. Candidate review compares all three against finance evidence, blocking incorrect tax allocations even when net sales and total payment agree. Missing original tax/payment evidence also blocks. Existing AOV/refund timing rules are unchanged.
+
+43 Shopify tests pass, with original tax/payment assertions in the synthetic HTTP mapping tests and mismatch/review regression cases. Updated candidate-review.md with exact restoration gates and remaining boundaries: tax-inclusive imports and separate pre-discount VAT allocations are not inferred; completeness review and the atomic audited restoration writer are still pending. No live database, Replit or production changes.

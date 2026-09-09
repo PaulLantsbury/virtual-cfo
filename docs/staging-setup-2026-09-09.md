@@ -6,11 +6,11 @@ Paul created **Night Scout Staging** in West Hill Ventures Limited. Its project 
 
 The existing project `futkktdebdygsdrcknpr` is not the deployment target. It remains unchanged.
 
-Read-only inventory in the staging SQL editor returned **0 public tables, 0 public views, 0 public functions and 0 Auth users**. Project status is Healthy. The form had automatic table exposure disabled before Paul created it. Authentication currently has email enabled, confirmation required, signup enabled and anonymous signup disabled. Site URL is still http://localhost:3000 and the redirect allow-list is empty; no Auth setting has been changed by this package.
+Before setup, read-only inventory in the staging SQL editor returned **0 public tables, 0 public views, 0 public functions and 0 Auth users**. Project status is Healthy. The form had automatic table exposure disabled before Paul created it. Authentication currently has email enabled, confirmation required, signup enabled and anonymous signup disabled. Site URL is still http://localhost:3000 and the redirect allow-list is empty; no Auth setting has been changed by this package.
 
 Supabase MCP tools are unavailable in this session; inspection used the user's signed-in Supabase dashboard. No credentials were copied into the repository or conversation.
 
-## Prepared change — not yet executed remotely
+## Applied change — staging only
 
 [Atomic bootstrap](../db-migrations/staging/20260909_bootstrap.sql) creates the captured public application structure, applies the monthly-contribution correction, and applies membership-based read access within a single transaction. It ends with 23 tables (including memberships), five views, 24 caller-permission functions and 23 read policies. Anonymous RPC access/client writes are denied. Authenticated clients cannot create public-schema objects.
 
@@ -29,6 +29,21 @@ Bootstrap SHA-256: `558bc6b3c925ab69df00f5cf1798e3a99165336563c394e98124d86d3349
 
 These are two additional passing groups beyond the previous 84-test checkpoint; the full earlier suite was not rerun for this SQL/generator/documentation-only package. No runtime app or dependency changes. No real JWT/gateway test is claimed.
 
-After approval and execution on staging, run [read-only verification](../db-migrations/staging/verify-bootstrap.sql). Expected result is recorded in the query header. Then inspect provider/redirect requirements for the agreed staging preview and arrange two synthetic-store users plus a non-member. User credentials and any security-access changes through the browser require the applicable confirmation/handoff; do not invent credentials or grant real-user memberships automatically.
+Paul explicitly approved application of the staging tables and restricted permissions. On 9 September 2026 the exact script was pasted into the staging dashboard SQL editor and its copied-back SHA-256 matched the hash above. Supabase returned “Success. No rows returned”. The subsequent read-only verification returned:
 
-Current status: **prepared and locally tested; awaiting confirmation to apply database permissions on the new staging project**. The SQL was not run remotely, users were not created, authentication URLs were not changed, and nothing was merged or deployed to Replit. GitHub draft remains the durable record.
+| Check | Result |
+|---|---:|
+| Public tables | 23 |
+| Tables with RLS | 23 |
+| Read policies | 23 |
+| Invoker views | 5 |
+| Public functions | 24 |
+| Security-definer functions | 0 |
+| Anonymous-executable functions | 0 |
+| Auth users / memberships / stores | 0 / 0 / 0 |
+
+Dashboard query: `c587020c-9cf2-4cf6-9cf0-47ea2edae738` in project `bioalckltvkhlczusdvl`. Its editor now contains the read-only verification query; the exact executed bootstrap remains versioned here.
+
+Current status: **bootstrap applied and catalog verified on Night Scout Staging**. No users, business rows or memberships were created. Authentication URLs, the original database and Replit remain unchanged. No merge or application deployment occurred. Local role tests passed previously; actual JWT/gateway and browser sign-in tests remain pending.
+
+Next: configure the agreed staging preview, arrange two synthetic-store users plus a non-member, and verify real sign-in, store isolation and logout. User credentials require handoff; do not invent credentials or grant real-user memberships automatically. The financial evidence proposal remains unapplied, and existing financial functions are not certified against the agreed definitions.

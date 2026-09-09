@@ -15,7 +15,7 @@ This document takes precedence over conflicting financial definitions in older d
 | Net product sales | Gross product sales minus product discounts minus product refunds/sales reversals, all excluding VAT. Do not deduct VAT again from tax-exclusive amounts. |
 | Shipping revenue | Shipping charged to customers less shipping discounts and shipping refunds, excluding VAT; presented separately from product sales. |
 | VAT | Keep sales VAT and refunded VAT separately. Normalise tax-inclusive source amounts using the actual recorded VAT, not a blanket 20% assumption. |
-| Average order value (AOV) | Product sales after discounts, before subsequent refunds, excluding VAT and shipping, divided by the matching original order count. Later refunds do not remove the original order from this denominator or rewrite its original AOV. Detailed order-status eligibility is still to be agreed. |
+| Average order value (AOV) | Product sales after discounts, before subsequent refunds, excluding VAT and shipping, divided by the matching original order count. Later refunds do not remove the original order from this denominator or rewrite its original AOV. Original eligibility follows the 9 September decision below. |
 | Discount rate | Product discount value divided by gross product sales. This is a value percentage, not the proportion of orders using a discount code. Zero-denominator presentation remains an implementation decision to document. |
 | Refund timing | Financial reductions are recorded in the period of the refund/reversal event. A March refund of a February sale reduces March net sales, not February net sales. Preserve the original-order link for customer/product analysis. |
 
@@ -73,7 +73,7 @@ A [targeted SQL correction](recoverable-contribution-correction.md) now passes l
 
 No application or database change is included in this approval record. The current net-sales/AOV RPCs and order-count availability logic do not implement this contract. Tests comparing the current SQL to source rows describe legacy behaviour, not acceptance of that behaviour.
 
-Before implementing: agree original-order status eligibility, source date/timezone handling, and treatment of edits/cancellations and non-product goodwill refunds. Define the refund-rate denominator and interpretation under event-period reporting separately; a March refund can relate to February sales, so it is not automatically a same-order-cohort return rate. Repeat-customer identity/eligibility also remains open.
+Original-order eligibility and event-date/timezone rules were approved on 9 September below. Ambiguous edits/cancellations and non-product goodwill adjustments must be reviewed rather than inferred. Define the refund-rate denominator and interpretation under event-period reporting separately; a March refund can relate to February sales, so it is not automatically a same-order-cohort return rate. Repeat-customer identity/eligibility also remains open.
 
 Contribution/COGS, overhead, operating profit, EBITDA, cash runway and weekly allocation are now approved above. Opportunity/scoring definitions remain proposals. Detailed implementation choices still need recording: exact cost allocation method, return-to-stock event timing, zero/negative margin denominators, cash currency/account coverage, zero burn, fewer than three complete months and financing/one-off flow treatment in the burn measure. Do not silently introduce new policy for these cases or present missing inputs as zero.
 
@@ -86,3 +86,9 @@ The GitHub repository is the durable source of truth for code, specifications, d
 Replit should hold a working checkout of the same versioned documents. Update through the repository workflow and verify the revision, rather than maintaining an independently edited second specification. Preserve and reconcile any uncommitted Replit changes before synchronising; do not overwrite them. Record decisions as agreed, proposed, implemented or deployed so approval cannot be mistaken for delivery.
 
 Current location: recorded on `codex/restart-baseline` in draft PR #1. This is not yet a merge into `main` or a verified synchronisation to Replit. The handover must retain that distinction until each step is confirmed.
+
+## Eligibility and event-date decision — 9 September 2026
+
+Paul explicitly agreed: count paid/completed original orders, including orders refunded later; exclude unpaid, test and pre-sale-cancelled orders. Use the store timezone and actual sale/refund event timestamps, never import timestamps. Flag ambiguous edits, cancellations and goodwill payments for review instead of guessing. Original payment facts must be evidenced; a current refunded/cancelled status alone cannot reconstruct the original sale.
+
+Implementation status: isolated event-evidence preparation now derives local event dates from explicit-offset timestamps and verified timezone, requires explicit original-order facts and rejects review-required adjustments. Five tests pass covering later refunds, exclusions, month/DST boundaries, missing facts and invalid dates. It is not yet connected to a live importer, evidence writer or dashboard. Tax/currency/coverage verification remains separately required.

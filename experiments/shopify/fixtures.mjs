@@ -12,3 +12,11 @@ export function orderFixture(id=1){
  refunds:[{id:`gid://shopify/Refund/${id}`,createdAt:'2026-03-05T12:00:00Z',updatedAt:'2026-03-05T12:00:00Z',totalRefundedSet:money('24.00'),transactions:{pageInfo:{hasNextPage:false,endCursor:'refund-end'},nodes:[refundTx]}}]};
 }
 export function pageFixture(nodes,next=null){return {orders:{nodes,pageInfo:{hasNextPage:next!==null,endCursor:next}}};}
+export const connectionFixture=nodes=>({pageInfo:{hasNextPage:false},nodes});
+export function detailsFixture(id=1){
+ const order=orderFixture(id),lineId=`gid://shopify/LineItem/${id}`;
+ return {order:{id:order.id,updatedAt:order.updatedAt,
+ lineItems:connectionFixture([{id:lineId,quantity:1,isGiftCard:false,originalTotalSet:money('100.00'),discountAllocations:[{allocatedAmountSet:money('10.00')}],taxLines:[{priceSet:money('18.00')}]}]),
+ shippingLines:connectionFixture([]),
+ refunds:[{id:order.refunds[0].id,updatedAt:order.refunds[0].updatedAt,orderAdjustments:connectionFixture([]),refundLineItems:connectionFixture([{id:`gid://shopify/RefundLineItem/${id}`,quantity:1,lineItem:{id:lineId},subtotalSet:money('20.00'),totalTaxSet:money('4.00')}]),refundShippingLines:connectionFixture([])}]}};
+}

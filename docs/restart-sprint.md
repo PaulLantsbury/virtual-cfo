@@ -223,3 +223,12 @@ Paul confirmed no Shopify account is available and approved building against tes
 The collector retains review-required refunds/edits and does not certify coverage or populate financial evidence. Complete line/tax mapping, installation/authentication, durable collection/writes and a real-store conformance check remain outstanding. No live Shopify/Supabase calls, Replit sync, merge or production release. Application/build code is unchanged.
 
 Publication checkpoint: Paul explicitly approved uploading the Shopify connection foundation code, tests and documentation to the public GitHub draft. Earlier packages remain published.
+
+
+## Shopify detail mapping with synthetic end-to-end checks
+
+Added fixed product/shipping/refund detail retrieval and conservative source mapping for unedited, tax-exclusive, single-SALE orders. Actual components reconcile to original payment and refund transactions; store-local payment dates preserve original AOV and event-period refunds. Unsupported/ambiguous cases are blocked. See shopify-connection.md for the exact supported subset and remaining work.
+
+19 Shopify tests and 15 shared financial tests pass. The synthetic HTTP-to-calculation case returns GBP 90 original AOV and a later GBP -20 net-product refund period. Shipping stays separate. No database/evidence write, live account call, application change, Replit sync or production release. Next: extend supported mappings and prepare durable source/provenance/coverage controls before a staging writer.
+
+Publication checkpoint: Paul explicitly approved uploading the product/tax/refund mapping code, tests and documentation to the public GitHub draft. The earlier connection package remains published.

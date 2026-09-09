@@ -5,9 +5,9 @@ import {fetchVerifiedSales} from '../financial-v1/rpc-sales-adapter.mjs';
 import {expected} from './fixtures.mjs';
 export const A='90000000-0000-4000-8000-000000000001',B='90000000-0000-4000-8000-000000000002',U='80000000-0000-4000-8000-000000000001',O='91000000-0000-4000-8000-000000000001';
 export const sql=p=>readFileSync(new URL('../../db-migrations/'+p,import.meta.url),'utf8');
-export async function setup(){
- const db=new PGlite();
- await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;CREATE SCHEMA auth;CREATE TABLE auth.users(id uuid PRIMARY KEY);CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;GRANT USAGE ON SCHEMA auth,public TO authenticated,anon;`);
+export async function setup(db=new PGlite(),{createRoles=true}={}){
+ if(createRoles)await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;`);
+ await db.exec(`CREATE SCHEMA auth;CREATE TABLE auth.users(id uuid PRIMARY KEY);CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;GRANT USAGE ON SCHEMA auth,public TO authenticated,anon;`);
  await db.exec(sql('staging/20260909_bootstrap.sql'));
  await db.query("INSERT INTO stores(id,shopify_domain,shopify_store_id) VALUES($1,$2,'1'),($3,'other.myshopify.com','2')",[A,expected.domain,B]);
  await db.query('INSERT INTO auth.users VALUES($1)',[U]);await db.query('INSERT INTO store_memberships VALUES($1,$2),($1,$3)',[U,A,B]);

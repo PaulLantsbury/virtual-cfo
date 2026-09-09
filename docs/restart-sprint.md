@@ -282,3 +282,9 @@ Implemented an internal authenticated-reviewer hook, explicit per-store reviewer
 Added a server-side Supabase getUser adapter that verifies each supplied bearer token, rejects anonymous/failed/malformed identities, suppresses upstream error details and ignores body-supplied reviewer IDs or authentication callbacks. The existing database membership and explicit reviewer grant remain mandatory. The successful synthetic database restoration test now runs through this adapter.
 
 52 Shopify tests pass; Auth responses are synthetic, not live verification. No local PostgreSQL server/Docker was found, so independent-session contention tests remain unrun; their exact required cases are recorded in restoration-concurrency-checklist.md. Live client provisioning, least-privilege permissions and HTTP/UI integration remain pending. No live database, Replit or production changes.
+
+## Independent PostgreSQL contention tests completed
+
+Prepared and ran a standalone PostgreSQL 18.4 test harness using an isolated temporary cluster with TCP disabled. Seven cases pass: committed/rolled-back competing writes, raw/evidence changes after review locks, duplicate approvals, reviewer permission removal and lock timeout. Tests observe lock waits from a third connection and verify final audit, coverage and the existing member sales reader. Another store remains readable. The 52 existing Shopify tests also pass after sharing fixture setup between the suites.
+
+The runner shuts down and removes its synthetic cluster; standalone binaries stay outside the repository. No application dependency/lockfile change, live Supabase mutation, Replit sync or production release. Forced deadlock/load testing and matching the deployed service configuration remain limitations. Next: least-privilege service configuration and authenticated request/UI integration; token verification remains tested with synthetic Auth responses.

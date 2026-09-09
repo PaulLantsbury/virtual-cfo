@@ -35,3 +35,7 @@ Missing/malformed bearer headers, failed verification, malformed IDs and anonymo
 52 Shopify tests pass. Four new authentication groups use synthetic Auth responses; the successful database restoration test now passes through the token adapter and verifies that a forged body identity is ignored. No real token or live Supabase authentication was exercised.
 
 No PostgreSQL server binaries or Docker command were found on the local executable path; common local PostgreSQL installation paths also had no server binary. Multi-session verification remains unrun. See restoration-concurrency-checklist.md for the required isolated test cases. Staging enablement remains pending that verification and service/route integration.
+
+## Independent-session verification completed
+
+The subsequent standalone PostgreSQL 18.4 harness passes seven contention cases, alongside all 52 existing tests. It verifies real lock waits, final audit/coverage state and the member sales reader. Temporary clusters are shut down and removed after each run; no Supabase data was used. See restoration-concurrency-checklist.md for reproducibility and limits. This supersedes the earlier statement that these tests were unrun. Live Auth/client provisioning, least-privilege service grants, request handling and review UI remain pending before staging enablement.

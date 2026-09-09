@@ -239,4 +239,9 @@ Added a private candidate-batch schema proposal and transactional recording help
 
 All 25 Shopify tests pass, including six new database groups for replay, source/settings checks, rollback, denied public access and persistence across close/reopen. No live schema/data change, application update, Replit sync or production deployment. Next: source-version ordering and cross-period invalidation before any verified-evidence writer.
 
-Publication checkpoint: this candidate-intake package is saved locally. Automatic review blocked its public GitHub upload pending explicit approval for the new schema proposal, helper, tests and documentation.
+Publication checkpoint: Paul explicitly approved uploading the candidate-intake schema proposal, helper, tests and documentation to the public GitHub draft.
+
+
+## Standing GitHub draft publication approval
+
+Paul requested removal of repeated routine upload approvals. Recorded scoped standing approval in AGENTS.md and in the local Codex auto_review.policy setting for this repository/draft. Existing local configuration was preserved. This covers subsequent development packages and their implementation documentation; credentials/customer data, database application, merging and production releases are outside scope. Managed review rules still take precedence, and immediate reload of the setting in an already-running task has not been verified.

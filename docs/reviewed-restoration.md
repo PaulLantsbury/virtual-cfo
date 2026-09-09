@@ -25,3 +25,13 @@ The migration also invalidates coverage when order/refund evidence changes, usin
 The prototype uses SHARE ROW EXCLUSIVE table locks and bounded lock/statement timeouts. Reads remain possible, but writes across stores pause during restoration. Deadlock or timeout must abort and surface for a fresh review; do not silently retry an approval. PGlite tests do not prove multi-session concurrency or production throughput. A separate PostgreSQL multi-session contention test is required before staging application, along with a least-privilege service role and authenticated review UI/endpoint. The global lock strategy needs review before scaling.
 
 No live Shopify/Supabase call, remote migration, Replit sync or production deployment occurred.
+
+## Token verification adapter — subsequent local checkpoint
+
+`reviewer-auth.mjs` composes the restoration helper with fresh `supabase.auth.getUser(token)` verification using a trusted server-owned client. Identity is taken only from the verified Auth response. The client must be configured for the same project as the database. Supabase documents that [getUser verifies through a request to its Auth server](https://supabase.com/docs/reference/javascript/auth-getuser); cached session data is not used for this decision.
+
+Missing/malformed bearer headers, failed verification, malformed IDs and anonymous users are refused. Upstream error details are suppressed; the request body cannot replace the authentication callback or reviewer identity. Database membership and explicit review authorisation are still required after token verification. The adapter does not itself provision a client, register a route, grant permissions or expose the operation in the UI.
+
+52 Shopify tests pass. Four new authentication groups use synthetic Auth responses; the successful database restoration test now passes through the token adapter and verifies that a forged body identity is ignored. No real token or live Supabase authentication was exercised.
+
+No PostgreSQL server binaries or Docker command were found on the local executable path; common local PostgreSQL installation paths also had no server binary. Multi-session verification remains unrun. See restoration-concurrency-checklist.md for the required isolated test cases. Staging enablement remains pending that verification and service/route integration.

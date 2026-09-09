@@ -176,3 +176,10 @@ On 9 September Paul approved original paid/completed eligibility, explicit exclu
 ## Verified-sales connection prepared
 
 Added an isolated development preview backed by a proposed member-checked evidence RPC and shared sales/refund calculation adapter. Exact staging package and three new integration groups pass; nine existing adapter tests also passed. Type checking/build pass. No remote database change yet: the permission change and synthetic refund fixtures await application. Existing briefing remains legacy. See financial-integration-next-step.md for scope, hash and expected results.
+
+
+## Verified-sales staging package applied and preview checked
+
+On 9 September, explicit approval was followed by successful application of the exact recorded financial evidence package to Night Scout Staging. Real Store B preview: August sales/AOV GBP 987; September refund GBP 87 and net sales GBP -87, with no original-order AOV. An uncovered July period remained unavailable. The new endpoint rejected other-store and anonymous requests; permitted evidence remained scoped to the assigned store. Temporary diagnostic page removed.
+
+See financial-integration-next-step.md for the applied hash, verification scope and limitations. Main briefing calculations remain legacy; next connect its sales/AOV and narrative to verified evidence. No production deployment, Replit sync or merge.

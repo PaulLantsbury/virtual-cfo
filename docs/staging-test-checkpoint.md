@@ -39,3 +39,9 @@ Following the instruction to continue with Store B assignment, linked the second
 Thirteen real-session checks passed: unfiltered stores, orders and memberships returned only B; direct A orders returned none and four A RPCs (gross_revenue, net_sales, average_order_value, order_count) returned zero; direct B orders returned its 987 sample, the three monetary RPCs returned 987 and order_count returned one. The restored dashboard showed only Store B and GBP 987. Together with the earlier A-session checks this establishes the tested read paths in both directions. No user IDs or credentials are recorded here. Temporary diagnostic removed.
 
 Still pending: other functions/views with distinct fixtures, membership revocation, token expiry, broader write tests and production readiness. Financial definitions remain a separate implementation task. Nothing was deployed to Replit or the original database.
+
+## Temporary revocation and restoration
+
+After explicit user approval, temporarily removed only the second account's B membership, then restored that same membership. In the same signed-in diagnostic page, membership/store/order counts changed from 1/1/1 to 0/0/0 and gross_revenue from 987 to 0. A newly opened dashboard showed the no-store gate. After restoration, the same probe returned 1/1/1 and 987; Check again reopened Store B with GBP 987. Business records and the first account's membership were unchanged. Diagnostic removed.
+
+This verifies subsequent gateway reads and dashboard revalidation after membership removal. It does not claim immediate erasure of content already rendered in an inactive browser tab. Natural token expiry and refresh remain unverified remotely; no expiry configuration was changed.

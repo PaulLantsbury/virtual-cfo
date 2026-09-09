@@ -59,7 +59,7 @@ test('signup mismatch is rejected locally; email-confirmation response does not 
  await fixture({},async(page,metrics)=>{
   await page.goto(origin+'/signup');await page.getByLabel('Email address').fill('test@example.invalid');await page.getByLabel('Password',{exact:true}).fill('test-password');await page.getByLabel('Confirm password').fill('different');
   await page.getByRole('button',{name:'Create account',exact:true}).click();await page.getByRole('alert').waitFor();
-  await page.getByLabel('Confirm password').fill('test-password');await page.getByRole('button',{name:'Create account',exact:true}).click();await page.getByRole('status').filter({hasText:'Check your email'}).waitFor();assert.equal(metrics.length,0);
+  await page.getByLabel('Confirm password').fill('test-password');await page.getByRole('button',{name:'Create account',exact:true}).click();await page.getByRole('status').filter({hasText:'Check your email'}).waitFor();assert.equal(metrics.length,0);assert.equal(await page.getByRole('button',{name:'Create account',exact:true}).count(),0);assert.equal(await page.getByLabel('Email address').count(),0);await page.getByRole('link',{name:'Go to sign in',exact:true}).waitFor();
  });
 });
 

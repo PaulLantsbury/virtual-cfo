@@ -12,6 +12,7 @@ test('synthetic HTTP through collection, detail mapping and approved period arit
  const read=createShopifyReader({...expected,accessToken:'synthetic-token',fetchImpl:async()=>new Response(JSON.stringify({data:responses.shift()}),{headers:{'x-shopify-api-version':'2026-07'}})});
  const data=await loadShopifyDetails(read,await collectShopifyOrders(read,expected));
  const feb=mapShopifySales(data,scope),mar=mapShopifySales(data,{...scope,from:'2026-03-01',to:'2026-03-31'});
+ assert.deepEqual([feb.events[0].productVat,feb.events[0].shippingVat,feb.events[0].customerCharge],[1800,0,10800]);
  assert.equal(feb.status,'mapped_for_review');assert.equal(feb.candidate.netProductSales,9000);assert.equal(feb.candidate.aov.value,9000);assert.equal(feb.candidate.discounts,1000);
  assert.equal(mar.candidate.netProductSales,-2000);assert.equal(mar.candidate.productRefundVat,400);assert.equal(mar.candidate.aov.value,null);assert.equal(mar.candidate.hasRefundActivity,true);assert.equal(mar.coverageCertified,false);assert.equal(mar.candidate.cogs,null);
 });
@@ -21,6 +22,7 @@ test('shipping revenue and shipping refunds stay outside product AOV',async()=>{
  o.originalTotalPriceSet=money('114');o.transactions[0].amountSet=money('114');o.totalTaxSet=money('19');o.totalDiscountsSet=money('11');
  const r=o.refunds[0];r.refundShippingLines=conn([{id:'refund-shipping-1',shippingLine:{id:'shipping-1'},subtotalAmountSet:money('2'),taxAmountSet:money('0.4')}]);r.totalRefundedSet=money('26.4');r.transactions.nodes[0].amountSet=money('26.4');
  const feb=mapShopifySales(data,scope),mar=mapShopifySales(data,{...scope,from:'2026-03-01',to:'2026-03-31'});
+ assert.deepEqual([feb.events[0].productVat,feb.events[0].shippingVat,feb.events[0].customerCharge],[1800,100,11400]);
  assert.equal(feb.candidate.aov.value,9000);assert.equal(feb.candidate.netShipping,500);assert.equal(mar.candidate.netShipping,-200);assert.equal(mar.candidate.cashRefunded,2640);
 });
 test('payment event timestamp determines store-local sale period',async()=>{

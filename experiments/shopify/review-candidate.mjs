@@ -17,9 +17,9 @@ const gid=(value,type)=>{
 export function reconcileCandidateEvents(events,orders,refunds){
  const expected=new Map();
  const add=(map,key,value)=>{requireValue(!map.has(key),'Duplicate source identity');map.set(key,value);};
- const sale=e=>({type:'sale',orderId:e.orderId,date:e.date,currency:e.currency,eligible:e.eligible,grossProductExVat:e.grossProductExVat,discountExVat:e.discountExVat,netShipping:e.netShipping});
+ const sale=e=>({type:'sale',orderId:e.orderId,date:e.date,currency:e.currency,eligible:e.eligible,grossProductExVat:e.grossProductExVat,discountExVat:e.discountExVat,netShipping:e.netShipping,productVat:e.productVat,shippingVat:e.shippingVat,customerCharge:e.customerCharge});
  const refund=e=>({type:'refund',orderId:e.orderId,date:e.date,currency:e.currency,productCash:e.productCash,productVat:e.productVat,shippingCash:e.shippingCash,shippingVat:e.shippingVat});
- for(const e of events){requireValue(['sale','refund'].includes(e.type),'Unsupported event');add(expected,e.id,e.type==='sale'?sale(e):refund(e));}
+ for(const e of events){requireValue(['sale','refund'].includes(e.type),'Unsupported event');if(e.type==='sale')requireValue([e.productVat,e.shippingVat,e.customerCharge].every(v=>Number.isSafeInteger(v)&&v>=0),'Original sale tax/payment evidence missing');add(expected,e.id,e.type==='sale'?sale(e):refund(e));}
  const actual=new Map(),orderIds=new Map();
  for(const o of orders){
   requireValue(o.mapping_state==='verified','Missing or stale source evidence');

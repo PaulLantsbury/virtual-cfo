@@ -6,7 +6,7 @@ import {loadShopifyDetails} from './map-sales.mjs';
 import {sourceVersions} from './source-versions.mjs';
 import {expected,contextFixture,orderFixture,pageFixture,detailsFixture} from './fixtures.mjs';
 const order={id:'local-1',shopify_order_id:'1',mapping_state:'verified',gross:'100',gross_vat:'20',discount:'10',discount_vat:'2',shipping:'0',shipping_vat:'0',tax_basis:'exclusive',day:'2026-02-15',currency:'GBP',original_eligible:true};
-const sale={id:'sale:gid://shopify/Order/1',orderId:'gid://shopify/Order/1',type:'sale',date:order.day,currency:'GBP',eligible:true,grossProductExVat:10000,discountExVat:1000,netShipping:0};
+const sale={id:'sale:gid://shopify/Order/1',orderId:'gid://shopify/Order/1',type:'sale',date:order.day,currency:'GBP',eligible:true,grossProductExVat:10000,discountExVat:1000,netShipping:0,productVat:1800,shippingVat:0,customerCharge:10800};
 test('reconciliation matches source identities and original sale components',()=>{
  assert.deepEqual(reconcileCandidateEvents([sale],[order],[]),[]);
  assert.deepEqual(reconcileCandidateEvents([sale],[{...order,shopify_order_id:'gid://shopify/Order/1'}],[]),[]);
@@ -53,4 +53,21 @@ test('advanced versions and missing evidence block the review packet',async()=>{
  assert.equal((await prepareCandidateReview(db,scope)).status,'blocked');
  const f=await fixture();f.rows.coverage=[];
  assert.equal((await prepareCandidateReview(f.db,f.scope)).status,'blocked');
+});
+
+test('original VAT and payment mismatches block despite identical tax-exclusive sales',()=>{
+ assert.equal(reconcileCandidateEvents([sale],[{...order,gross_vat:'21'}],[])[0].reason,'financial_event_mismatch');
+ const shippingOrder={...order,shipping:'10',shipping_vat:'2'};
+ const shippingSale={...sale,netShipping:1000,shippingVat:200,customerCharge:12000};
+ assert.deepEqual(reconcileCandidateEvents([shippingSale],[shippingOrder],[]),[]);
+ // Same total tax and customer payment; allocation between product/shipping is wrong.
+ assert.equal(reconcileCandidateEvents([shippingSale],[{...shippingOrder,gross_vat:'21',shipping_vat:'1'}],[])[0].reason,'financial_event_mismatch');
+ assert.equal(reconcileCandidateEvents([{...sale,customerCharge:10801}],[order],[])[0].reason,'financial_event_mismatch');
+ assert.throws(()=>reconcileCandidateEvents([{...sale,productVat:undefined}],[order],[]),/tax\/payment evidence missing/);
+});
+test('review recomputation rejects original VAT errors instead of trusting saved candidate totals',async()=>{
+ const {db,rows,scope}=await fixture();rows.orders[0].gross_vat='21';
+ const packet=await prepareCandidateReview(db,scope);
+ assert.equal(packet.status,'blocked');assert.equal(packet.coverageCertified,false);
+ assert.ok(packet.issues.some(i=>i.reason==='financial_event_mismatch'));
 });

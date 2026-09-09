@@ -162,3 +162,9 @@ Stop here for today. Next-session staging setup, exact prerequisites, remaining 
 Paul created Night Scout Staging (`bioalckltvkhlczusdvl`, Ireland). Read-only dashboard/SQL inspection confirms a healthy project with zero public tables/views/functions and zero Auth users. Email auth and confirmation are enabled; redirect configuration is still the default. Existing project remains untouched.
 
 Prepared one atomic bootstrap from the observed schema plus monthly-contribution and membership-read proposals. Two new local test groups pass, including role/membership reads and rollback after late failure. Script and read-only post-application verification are versioned under `db-migrations/staging/`; no remote DDL or users have been created by the agent. See `staging-setup-2026-09-09.md` for exact target, hash and approval boundary. Next: confirm applying these staging permissions, execute and verify, then arrange actual test users and preview redirect settings.
+
+## Staging bootstrap applied — 9 September
+
+After Paul's explicit approval, applied the exact tested atomic bootstrap only to Night Scout Staging (`bioalckltvkhlczusdvl`). SQL editor copy-back matched the committed SHA-256. Supabase reported success; read-only checks confirmed 23 tables with RLS, 23 policies, five invoker views, 24 functions, zero security-definer/anonymous-executable functions and zero users/memberships/stores. See `staging-setup-2026-09-09.md`.
+
+Original Supabase project, Auth settings and Replit were untouched. No application deployment or merge. Next: staging preview configuration and user-assisted test accounts, then actual JWT/gateway store-isolation and sign-in checks. Prior local tests do not replace those checks.

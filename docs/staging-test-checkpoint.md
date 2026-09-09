@@ -17,3 +17,9 @@ The gross-revenue RPC returned zero for both empty stores. That is inconclusive 
 With approval, inserted one clearly labelled TEST-ISOLATION order into each staging store, dated 15 August 2026: A GBP 123 and B GBP 987. Both have zero tax, shipping, discounts and refunds. These are access-test fixtures, not a comprehensive financial acceptance dataset. Administrator read-back confirmed both records. They remain in staging; the original database is unchanged.
 
 Five real-session gateway checks passed: A direct orders returned one row totalling 123; A gross_revenue returned 123; B direct orders returned no rows; B gross_revenue returned zero despite its stored 987; an unfiltered orders query returned only A. HTTP status was 200 throughout, consistent with filtered results. This replaces the earlier inconclusive empty-store RPC check for gross_revenue only. Other functions, second-user tests, writes, expiry, revocation and logout remain pending. No credentials were exported, and the temporary diagnostic page was removed.
+
+## Extended read and session checks
+
+Eight further gateway checks passed with the real staging session: order_count, net_sales and average_order_value returned A's expected 1/123/123 and zero for B; a separate non-persistent anonymous client was denied orders and gross_revenue with HTTP 401 and database code 42501. No stored user session was exported. These fixtures do not certify AOV/refund financial definitions.
+
+A fresh dashboard restored Store A and displayed August 2026 sales/AOV of GBP 123 with no previous-period comparison. Real sign-out removed merchant content, and a new dashboard page remained gated behind sign-in. The user must sign in again to continue. Diagnostic page removed. No additional database or permission changes. Second-user tests, token expiry, revocation, client-write denial and other financial functions remain pending.

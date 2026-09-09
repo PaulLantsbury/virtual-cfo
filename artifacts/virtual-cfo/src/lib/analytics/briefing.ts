@@ -25,7 +25,7 @@ const definitions: { id: keyof TradingMetrics; title: string; rate: boolean; exp
   { id: "refundRate", title: "Refund rate", rate: true, explanation: "Refund value as a share of gross sales, attributed to the original order period." },
 ];
 
-export function buildBriefing(current: TradingMetrics, previous: TradingMetrics | null, comparisonStatus: ComparisonStatus) {
+export function buildBriefing(current: TradingMetrics, previous: TradingMetrics | null, comparisonStatus: ComparisonStatus, currency = "GBP") {
   const comparable = comparisonStatus === "ready" && previous !== null;
   const comparisonNote = comparisonStatus === "loading" ? "Checking the previous period"
     : comparisonStatus === "empty" ? "No qualifying orders in the previous period — no comparison available"
@@ -43,11 +43,11 @@ export function buildBriefing(current: TradingMetrics, previous: TradingMetrics 
       const prefix = delta > 0 ? "+" : delta < 0 ? "−" : "";
       if (def.rate) change = `${prefix}${(Math.abs(delta) * 100).toFixed(1)} percentage points`;
       else if (prior! > 0) change = `${prefix}${(Math.abs(delta) / prior! * 100).toFixed(1)}%`;
-      else change = `${prefix}£${Math.abs(delta).toLocaleString("en-GB", { maximumFractionDigits: 2 })} (percentage comparison unavailable)`;
+      else change = `${prefix}${new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(Math.abs(delta))} (percentage comparison unavailable)`;
     }
     return { id: def.id, title: def.title,
       value: !valid ? "Unavailable" : def.rate ? `${(value * 100).toFixed(1)}%`
-        : new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: def.id === "averageOrderValue" ? 2 : 0 }).format(value),
+        : new Intl.NumberFormat("en-GB", { style: "currency", currency, maximumFractionDigits: def.id === "averageOrderValue" ? 2 : 0 }).format(value),
       change, direction, explanation: def.explanation };
   });
   const sales = metrics.find(metric => metric.id === "netSales")!;

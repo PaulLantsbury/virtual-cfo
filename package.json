@@ -17,7 +17,8 @@
     "test:staging": "node --test experiments/staging/*.test.mjs",
     "test:financial-events": "node --test experiments/financial-v1/event-evidence.test.mjs",
     "test:financial-member": "node --test experiments/financial-v1/member-sales.test.mjs",
-    "test:import-review": "node --test experiments/financial-v1/import-review.test.mjs"
+    "test:import-review": "node --test experiments/financial-v1/import-review.test.mjs",
+    "test:shopify": "node --test experiments/shopify/shopify.test.mjs"
   },
   "private": true,
   "devDependencies": {

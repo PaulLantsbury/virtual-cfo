@@ -156,3 +156,9 @@ Account/token/store transitions clear the query cache and remount protected stat
 Validation: eight controller tests and five mocked browser groups added; total 84 passing tests including the previous 71. Full type checking and workspace build pass with local PORT/BASE_PATH and existing warnings. Mocked browser tests used installed Chrome, an isolated profile and fake Supabase endpoints; no real accounts or database writes. Login error layout visually reviewed. No deployment, merge or Replit sync.
 
 Stop here for today. Next-session staging setup, exact prerequisites, remaining features and reproduction commands are in `local-auth-handover.md`. GitHub draft is the durable handover; live sign-in/gateway/real-token tests remain pending.
+
+## Staging project verified and bootstrap prepared — 9 September
+
+Paul created Night Scout Staging (`bioalckltvkhlczusdvl`, Ireland). Read-only dashboard/SQL inspection confirms a healthy project with zero public tables/views/functions and zero Auth users. Email auth and confirmation are enabled; redirect configuration is still the default. Existing project remains untouched.
+
+Prepared one atomic bootstrap from the observed schema plus monthly-contribution and membership-read proposals. Two new local test groups pass, including role/membership reads and rollback after late failure. Script and read-only post-application verification are versioned under `db-migrations/staging/`; no remote DDL or users have been created by the agent. See `staging-setup-2026-09-09.md` for exact target, hash and approval boundary. Next: confirm applying these staging permissions, execute and verify, then arrange actual test users and preview redirect settings.

@@ -26,3 +26,16 @@ No real customer data, live database calls or application changes. The rollback 
 - The current staging stores are synthetic. No changes were made to their source identity/settings or existing financial evidence.
 
 Next: define and test source-version and affected-period invalidation, then a reviewed path from candidate to verified evidence. Only after that should we prepare a concrete staging application package. Replit sync and production remain deferred.
+
+
+## Source ordering and period recheck checkpoint
+
+The unapplied schema proposal now includes private per-store source versions and a needs_recheck marker on candidate period heads. Order and refund updatedAt values are validated separately, with canonical content fingerprints. Intake compares every known source identity before accepting a candidate. An older source timestamp is rejected even for a previously unseen batch/range; conflicting content at an unchanged timestamp or missing known records flags every existing period for recheck without overwriting accepted source versions. Missing records are not automatically treated as deletions.
+
+Accepted newer or additional source records flag all known candidate periods for that store, including the incoming range. This intentionally over-invalidates rather than relying on incomplete event-date inference. An exact replay cannot clear a flag. The transaction includes version updates, invalidation, batch history and head changes; rollback covers the whole operation. Source settings/identity changes also cause the private period-state reader to report needs_recheck.
+
+The new private candidatePeriodState helper returns figures:null in every state. It distinguishes unavailable, awaiting_review and needs_recheck. There is no clearance/publication operation yet, so rerunning an import cannot make a period verified. These flags govern candidate intake only; they do not change existing finance_v1 coverage or the running briefing. A later reviewed publication path must enforce the gate before any authoritative figures are exposed.
+
+Validation now passes 29 Shopify tests, including unseen old versions, independent refund versions, multi-period invalidation, sticky flags, missing/conflicting snapshots and prior rollback/restart/access tests. This supersedes the earlier limitation about previously unseen older snapshots: ordering now checks source timestamps. Such metadata still does not prove snapshot isolation or authentic complete collection; concurrent/deleted source data and live Shopify behaviour remain unverified.
+
+No staging migration has been applied. The original proposal file was extended because it is still wholly undeployed; this is not an upgrade script for an existing installation. Next: design the reviewed publication/recheck flow and ensure authoritative financial evidence honours these invalidations before considering staging application.

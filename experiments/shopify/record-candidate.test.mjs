@@ -4,7 +4,7 @@ import {PGlite} from '@electric-sql/pglite';
 import {readFileSync,mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {recordShopifyCandidate} from './record-candidate.mjs';
+import {recordShopifyCandidate,candidatePeriodState} from './record-candidate.mjs';
 import {collectShopifyOrders} from './collect.mjs';
 import {loadShopifyDetails} from './map-sales.mjs';
 import {expected,contextFixture,orderFixture,pageFixture,detailsFixture} from './fixtures.mjs';
@@ -26,9 +26,9 @@ test('records candidate once; repeats retain the same batch and never certify co
 });
 test('changed and blocked source supersedes candidate; old replay cannot restore it',async()=>{
  const {db,data}=await setup();try{
- const old=await recordShopifyCandidate(db,data,scope);const changed=structuredClone(data);changed.orders[0].edited=true;
+ const old=await recordShopifyCandidate(db,data,scope);const changed=structuredClone(data);changed.orders[0].edited=true;changed.orders[0].updatedAt='2026-03-06T12:00:00Z';
  const next=await recordShopifyCandidate(db,changed,scope);assert.equal(next.status,'changed_requires_review');assert.equal(next.mappingState,'blocked');
- assert.equal((await recordShopifyCandidate(db,data,scope)).status,'historical_replay');
+ assert.equal((await recordShopifyCandidate(db,data,scope)).status,'stale_source');
  assert.equal((await db.query('SELECT batch_id FROM ingest_v1.heads')).rows[0].batch_id,next.batchId);
  assert.ok((await db.query('SELECT superseded_at FROM ingest_v1.batches WHERE id=$1',[old.batchId])).rows[0].superseded_at);
  }finally{await db.close();}
@@ -42,7 +42,7 @@ test('store identity and settings mismatch reject without writing',async()=>{
 });
 test('failure after batch insertion rolls back supersession and head atomically',async()=>{
  const {db,data}=await setup();try{
- const first=await recordShopifyCandidate(db,data,scope);const changed=structuredClone(data);changed.orders[0].edited=true;
+ const first=await recordShopifyCandidate(db,data,scope);const changed=structuredClone(data);changed.orders[0].edited=true;changed.orders[0].updatedAt='2026-03-06T12:00:00Z';
  const failing={transaction:fn=>db.transaction(tx=>fn({query:(sql,params)=>{if(sql.startsWith('INSERT INTO ingest_v1.heads'))throw new Error('simulated late failure');return tx.query(sql,params);}}))};
  await assert.rejects(()=>recordShopifyCandidate(failing,changed,scope),/simulated/);
  assert.equal((await db.query('SELECT count(*)::int n FROM ingest_v1.batches')).rows[0].n,1);
@@ -62,4 +62,42 @@ test('batch identity survives database close and reopen',async()=>{
  try{const initial=await setup(path);db=initial.db;const first=await recordShopifyCandidate(db,initial.data,scope);await db.close();db=new PGlite(path);
  const replay=await recordShopifyCandidate(db,initial.data,scope);assert.equal(replay.status,'replay');assert.equal(replay.batchId,first.batchId);
  }finally{if(db)await db.close();rmSync(path,{recursive:true,force:true});}
+});
+test('unseen older source is refused across reporting ranges',async()=>{
+ const {db,data}=await setup();try{
+ await recordShopifyCandidate(db,data,scope);
+ const older=structuredClone(data);older.orders[0].updatedAt='2026-03-04T12:00:00Z';older.orders[0].edited=true;
+ const result=await recordShopifyCandidate(db,older,{...scope,from:'2026-03-01',to:'2026-03-31'});
+ assert.equal(result.status,'stale_source');assert.equal((await db.query('SELECT count(*)::int n FROM ingest_v1.batches')).rows[0].n,1);
+ }finally{await db.close();}
+});
+test('new source invalidates all known store ranges and replay never clears flags',async()=>{
+ const {db,data}=await setup();try{
+ const march={...scope,from:'2026-03-01',to:'2026-03-31'};
+ await recordShopifyCandidate(db,data,scope);await recordShopifyCandidate(db,data,march);
+ assert.equal((await candidatePeriodState(db,scope)).status,'awaiting_review');
+ const next=structuredClone(data);next.orders[0].updatedAt='2026-04-01T12:00:00Z';
+ await recordShopifyCandidate(db,next,march);
+ for(const period of [scope,march]){const state=await candidatePeriodState(db,period);assert.equal(state.status,'needs_recheck');assert.equal(state.figures,null);}
+ await recordShopifyCandidate(db,next,march);assert.equal((await candidatePeriodState(db,march)).status,'needs_recheck');
+ }finally{await db.close();}
+});
+test('missing or same-version conflicting records flag review without overwriting source',async()=>{
+ const {db,data}=await setup();try{
+ const original=await recordShopifyCandidate(db,data,scope);
+ const changed=structuredClone(data);changed.orders[0].edited=true;
+ assert.equal((await recordShopifyCandidate(db,changed,scope)).status,'conflicting_source');
+ assert.equal((await recordShopifyCandidate(db,{...data,orders:[]},scope)).status,'missing_source');
+ assert.equal((await db.query('SELECT batch_id FROM ingest_v1.heads')).rows[0].batch_id,original.batchId);
+ assert.equal((await candidatePeriodState(db,scope)).status,'needs_recheck');
+ }finally{await db.close();}
+});
+test('refund versions and changed store settings independently prevent stale availability',async()=>{
+ const {db,data}=await setup();try{
+ await recordShopifyCandidate(db,data,scope);
+ const changed=structuredClone(data);changed.orders[0].refunds[0].updatedAt='2026-04-01T12:00:00Z';
+ assert.equal((await recordShopifyCandidate(db,changed,scope)).status,'changed_requires_review');
+ const older=structuredClone(changed);older.orders[0].refunds[0].updatedAt='2026-02-01T12:00:00Z';assert.equal((await recordShopifyCandidate(db,older,scope)).status,'stale_source');
+ await db.query("UPDATE stores SET timezone='UTC'");assert.equal((await candidatePeriodState(db,scope)).figures,null);
+ }finally{await db.close();}
 });

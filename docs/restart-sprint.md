@@ -245,3 +245,10 @@ Publication checkpoint: Paul explicitly approved uploading the candidate-intake 
 ## Standing GitHub draft publication approval
 
 Paul requested removal of repeated routine upload approvals. Recorded scoped standing approval in AGENTS.md and in the local Codex auto_review.policy setting for this repository/draft. Existing local configuration was preserved. This covers subsequent development packages and their implementation documentation; credentials/customer data, database application, merging and production releases are outside scope. Managed review rules still take precedence, and immediate reload of the setting in an already-running task has not been verified.
+
+
+## Source versions and cross-period recheck controls
+
+Extended the local candidate-intake proposal with per-order/refund source versions and sticky period recheck flags. Older unseen versions are refused; same-version conflicts and missing records require review. Accepted changes conservatively flag all known candidate periods for the store. The private candidate-state reader returns no figures, including when data awaits review. No replay clears a flag.
+
+29 Shopify tests pass. Existing rollback/restart/role protections remain covered; new cases cover independent refund versions, unseen older input and multiple affected periods. See import-candidate-intake.md for the important boundary: this is candidate-state protection, not yet wired to existing finance coverage or the briefing. No live database, Replit or production changes. Next is a reviewed recheck/publication flow that carries these controls into authoritative evidence.

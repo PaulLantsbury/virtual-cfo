@@ -10,9 +10,17 @@ export async function readMappedSales(db,{storeId,currency,from,to}) {
   return db.transaction(async tx=>{
     await tx.exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
     const {rows:coverage}=await tx.query('SELECT * FROM finance_v1.coverage_evidence WHERE store_id=$1 AND date_from=$2::date AND date_to=$3::date',[storeId,from,to]);
-    if(coverage.length!==1 || !coverage[0].sales_and_refunds_complete || coverage[0].currency!==currency)throw new Error('Sales/refund coverage evidence missing');
     const {rows:orders}=await tx.query('SELECT * FROM finance_v1.order_mapping WHERE store_id=$1',[storeId]);
     const {rows:refunds}=await tx.query('SELECT * FROM finance_v1.refund_mapping WHERE store_id=$1',[storeId]);
+    return calculateMappedSales({coverage,orders,refunds},{storeId,currency,from,to});
+  });
+}
+
+/** One authorised database snapshot; also used by the staging RPC client. */
+export function calculateMappedSales({coverage,orders,refunds},{storeId,currency,from,to}) {
+  if(!Array.isArray(coverage)||!Array.isArray(orders)||!Array.isArray(refunds))throw new Error('Malformed sales evidence');
+  if([...coverage,...orders,...refunds].some(r=>r.store_id!==storeId))throw new Error('Source store mismatch');
+    if(coverage.length!==1 || !coverage[0].sales_and_refunds_complete || coverage[0].currency!==currency)throw new Error('Sales/refund coverage evidence missing');
     if([...orders,...refunds].some(r=>r.mapping_state!=='verified'))throw new Error('Missing or stale source evidence');
     const known=new Map(),events=[],totals=new Map();
     for(const o of orders) {
@@ -43,5 +51,4 @@ export async function readMappedSales(db,{storeId,currency,from,to}) {
     const result=tradingPeriod({storeId,currency,from,to,events,coverageComplete:true});
     return {...result,cogs:null,profitDataState:'incomplete',costReason:'Historic line cost and stock recovery mapping pending',
       provenance:{storeId,currency,from,to,coverageEvidence:coverage[0].evidence_ref}};
-  });
 }

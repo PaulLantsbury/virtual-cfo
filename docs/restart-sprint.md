@@ -258,3 +258,9 @@ Extended the local candidate-intake proposal with per-order/refund source versio
 Added an additive SQL proposal linking raw/source changes and candidate review flags to finance_v1 coverage. Same-transaction invalidation makes the existing verified-sales adapter reject previously verified figures; other stores remain available. It never publishes candidates or restores coverage. See verified-invalidation.md for trigger scope, tests and the remaining reviewed-publication/client-refresh work.
 
 35 Shopify tests pass, including six new integration groups against the exact committed staging bootstrap and financial fixture package in disposable PostgreSQL. No live staging changes, application updates, Replit sync or production release. Next: bind independently reviewed evidence and completeness to exact source versions before a publication transaction can re-enable figures.
+
+## Read-only candidate review packet
+
+Added individual event reconciliation and a snapshot-bound review packet, documented in candidate-review.md. Matching aggregate totals cannot conceal changed source identities, dates or financial event components. The packet checks current source versions/settings and existing evidence, remains uncertified, and performs no writes. 41 Shopify tests pass, including an actual disposable PostgreSQL snapshot check.
+
+The restoration step is not complete: original sale VAT component reconciliation, independent coverage review, reviewer audit storage and an atomic guarded publication operation remain required. This checkpoint prepares the review without prematurely restoring figures. No remote database changes, Replit sync or production deployment.

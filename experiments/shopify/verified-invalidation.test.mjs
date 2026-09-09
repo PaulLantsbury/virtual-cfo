@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {PGlite} from '@electric-sql/pglite';
 import {readFileSync} from 'node:fs';
 import {fetchVerifiedSales} from '../financial-v1/rpc-sales-adapter.mjs';
+import {prepareCandidateReview} from './review-candidate.mjs';
 import {recordShopifyCandidate} from './record-candidate.mjs';
 import {collectShopifyOrders} from './collect.mjs';
 import {loadShopifyDetails} from './map-sales.mjs';
@@ -70,5 +71,20 @@ test('deleted raw refund also invalidates coverage rather than presenting higher
  await db.query('DELETE FROM finance_v1.refund_evidence WHERE store_id=$1',[A]);
  await db.query('DELETE FROM public.refunds WHERE store_id=$1',[A]);
  await assert.rejects(read(),/coverage/);assert.equal((await read(B)).netProductSales,98700);
+ }finally{await db.close();}
+});
+
+test('review packet reads actual database snapshots without restoring mismatched evidence',async()=>{
+ const {db,read}=await setup();try{
+ const request=async op=>op==='context'?contextFixture():op==='orders'?pageFixture([orderFixture()]):detailsFixture();
+ const data=await loadShopifyDetails(request,await collectShopifyOrders(request,expected));
+ const scope={storeId:A,shopId:expected.shopId,from:'2026-08-01',to:'2026-08-31'};
+ await recordShopifyCandidate(db,data,scope);
+ const first=await prepareCandidateReview(db,scope);
+ assert.equal(first.status,'blocked');assert.equal(first.coverageCertified,false);
+ assert.equal((await prepareCandidateReview(db,scope)).snapshotDigest,first.snapshotDigest);
+ await assert.rejects(read(),/coverage/);assert.equal((await read(B)).netProductSales,98700);
+ await db.query('UPDATE orders SET gross_sales=gross_sales+1 WHERE store_id=$1',[A]);
+ assert.notEqual((await prepareCandidateReview(db,scope)).snapshotDigest,first.snapshotDigest);
  }finally{await db.close();}
 });

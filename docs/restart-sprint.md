@@ -232,3 +232,16 @@ Added fixed product/shipping/refund detail retrieval and conservative source map
 19 Shopify tests and 15 shared financial tests pass. The synthetic HTTP-to-calculation case returns GBP 90 original AOV and a later GBP -20 net-product refund period. Shipping stays separate. No database/evidence write, live account call, application change, Replit sync or production release. Next: extend supported mappings and prepare durable source/provenance/coverage controls before a staging writer.
 
 Publication checkpoint: Paul explicitly approved uploading the product/tax/refund mapping code, tests and documentation to the public GitHub draft. The earlier connection package remains published.
+
+## Durable import candidate recording — local proposal
+
+Added a private candidate-batch schema proposal and transactional recording helper. Source identity/settings are checked against the locked store row; identical and historical replays are distinguished; changed or newly blocked content becomes a new candidate for the exact range while retaining prior history. Coverage cannot be certified through these tables. See import-candidate-intake.md for implementation and limits.
+
+All 25 Shopify tests pass, including six new database groups for replay, source/settings checks, rollback, denied public access and persistence across close/reopen. No live schema/data change, application update, Replit sync or production deployment. Next: source-version ordering and cross-period invalidation before any verified-evidence writer.
+
+Publication checkpoint: Paul explicitly approved uploading the candidate-intake schema proposal, helper, tests and documentation to the public GitHub draft.
+
+
+## Standing GitHub draft publication approval
+
+Paul requested removal of repeated routine upload approvals. Recorded scoped standing approval in AGENTS.md and in the local Codex auto_review.policy setting for this repository/draft. Existing local configuration was preserved. This covers subsequent development packages and their implementation documentation; credentials/customer data, database application, merging and production releases are outside scope. Managed review rules still take precedence, and immediate reload of the setting in an already-running task has not been verified.

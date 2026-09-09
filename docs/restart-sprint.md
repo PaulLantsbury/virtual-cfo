@@ -231,4 +231,4 @@ Added fixed product/shipping/refund detail retrieval and conservative source map
 
 19 Shopify tests and 15 shared financial tests pass. The synthetic HTTP-to-calculation case returns GBP 90 original AOV and a later GBP -20 net-product refund period. Shipping stays separate. No database/evidence write, live account call, application change, Replit sync or production release. Next: extend supported mappings and prepare durable source/provenance/coverage controls before a staging writer.
 
-Publication checkpoint: the product/tax/refund mapping package is saved locally. Automatic review blocked its public GitHub upload pending explicit approval for this new package; the earlier connection package remains published.
+Publication checkpoint: Paul explicitly approved uploading the product/tax/refund mapping code, tests and documentation to the public GitHub draft. The earlier connection package remains published.

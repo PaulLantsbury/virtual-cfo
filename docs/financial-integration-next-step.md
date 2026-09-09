@@ -1,10 +1,10 @@
 # Financial integration next step
 
-Status: prepared 9 September 2026; not implemented or deployed. The user has requested continuation from staging access checks into financial integration.
+Status: applied to Night Scout Staging on 9 September 2026 after explicit approval; populated development preview verified. Main briefing integration remains outstanding.
 
 ## Current boundary
 
-The dashboard calls legacy RPCs through getTradingMetrics.ts. The isolated readMappedSales adapter implements event-period sales and pre-refund AOV using private finance_v1 evidence. That schema is not present in staging and the adapter has no authorised application entry point. Passing access tests on legacy RPCs does not certify their financial definitions.
+The dashboard calls legacy RPCs through getTradingMetrics.ts. The isolated readMappedSales adapter implements event-period sales and pre-refund AOV using private finance_v1 evidence. The schema is now present in staging, with an authorised RPC used by the development-only /verified-sales preview. Passing access tests on legacy RPCs does not certify their financial definitions.
 
 ## Rules approved 9 September
 
@@ -33,7 +33,7 @@ This plan does not represent completed integration. Natural session expiry/refre
 
 event-evidence.mjs now prepares event_date/original_eligible from explicit verified source facts; it never falls back to created_at/current refund status. Five regression groups pass. This helper only prepares event metadata, not tax/currency/coverage certification or database writes. Staging population and the authorised read boundary remain the next implementation steps.
 
-## Prepared staging connection — awaiting application
+## Prepared staging connection — subsequently applied below
 
 Implemented public.verified_sales_source as a SECURITY INVOKER, member-checked single-snapshot JSON read. The private evidence tables and mapping views gain authenticated SELECT only with per-store RLS. Anonymous access and evidence writes are denied, including where permissive default table grants existed. The endpoint does not use a service-role proxy. It returns all mapped records for the permitted store to conservatively detect incomplete evidence; this is a bounded synthetic staging design, not yet a scalable production query.
 
@@ -44,3 +44,14 @@ The atomic staging package db-migrations/staging/20260909_finance_setup.sql comb
 Verification: nine existing cloud-adapter tests passed after sharing the calculation function; three new integration groups pass against the exact staging schema/package, covering event periods, RLS, non-members, anonymous requests, denied evidence updates, stale/missing evidence, revocation, permissive defaults and rerun refusal. Type checking and frontend build pass with existing sourcemap/chunk warnings. The live preview's missing-endpoint state shows unavailable, not zero. Remote application and populated UI verification remain pending.
 
 Prepared package SHA-256: `bdb703c3578774c439524bcd02dd886372619a7e8ec2ff53207fa8d58630ea7d`.
+
+
+## Applied and verified — 9 September 2026
+
+After explicit user approval, applied the exact package above to Night Scout Staging only. The SQL editor copy-back matched the recorded SHA-256; Supabase returned success. This package must not be rerun against the existing finance schema.
+
+The real signed-in Store B preview showed August gross/net product sales and original AOV of GBP 987 with one original order. September showed the GBP 87 product refund, net product sales of GBP -87, zero original orders and unavailable AOV, with a refund-only explanation. July, without verified coverage, showed unavailable rather than zero or legacy figures. Store A's GBP 23 refund is part of the applied fixture; its populated browser view was not rechecked in this checkpoint.
+
+Real-session checks of the new endpoint confirmed an other-store request was rejected (403), an anonymous request was rejected (401), and the permitted response contained only the account's assigned store evidence. The temporary diagnostic page was removed after these checks. Earlier local tests cover the wider permission and calculation cases; natural session expiry/refresh remains unverified remotely.
+
+These are synthetic staging results. The main briefing still uses legacy calculations; no production release, Replit sync or merge occurred. Next: connect the briefing's sales/AOV figures and related narrative to the same verified result, preserving explicit unavailable states and withholding unsupported profit/cost claims.

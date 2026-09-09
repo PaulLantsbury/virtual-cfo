@@ -24,3 +24,11 @@ test('verified inactivity is explicit and zero denominator is unavailable',()=>{
  assert.match(b.summary,/no sales or refunds/);
  assert.equal(b.metrics.find(m=>m.id==='discountDependency')?.value,'Unavailable');
 });
+test('currency follows evidence and incompatible comparison is withheld',()=>{
+ const usd={...august,provenance:{...august.provenance,currency:'USD'}};
+ const b=buildVerifiedBriefing(usd,august,'ready');
+ assert.match(b.metrics.find(m=>m.id==='netSales')!.value,/US\$987.00/);
+ assert.match(b.summary,/US\$987.00/);
+ assert.ok(b.metrics.every(m=>m.direction==='unknown'));
+ assert.equal(b.signals.length,0);
+});

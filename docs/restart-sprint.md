@@ -194,3 +194,16 @@ The bounded staging integration uses GBP and Europe/London; general store curren
 Validation: 26 analytics tests pass, including three new verified-briefing cases for original AOV, refund-only periods and inactivity. Workspace type checking and frontend build pass (existing sourcemap/chunk warnings). Signed-in browser check showed August GBP 987 sales and AOV with unavailable previous-period comparison; changing to the uncovered week hid figures and narrative and showed unavailable. Refund-only copy is regression-tested; September remains available in the separate preview because it is not yet a completed month.
 
 Saved locally; Paul subsequently explicitly approved publishing this code-and-document package to the public GitHub draft. No database changes, Replit sync, merge or production deployment in this step. Next: generalise store reporting settings and evidence coverage/ingestion before expanding beyond synthetic staging data.
+
+
+## Store reporting settings connected — 9 September
+
+The local verified briefing and comparison preview now read the selected store's existing currency and timezone settings. Completed reporting periods follow the store calendar, including month boundaries and DST. Missing/invalid settings block financial reads; cache keys include store, currency, timezone and dates. Currency must match the verified evidence, and incompatible previous-store/currency comparisons are withheld.
+
+The arithmetic currently supports currencies with two decimal minor units; unsupported precision (for example JPY or KWD) is explicitly unavailable. No currency conversion was added. No store settings or database records were changed.
+
+Validation: all 30 analytics tests pass, covering timezone-boundary differences, DST, malformed settings, unsupported precision, dollar formatting and incompatible comparisons. Workspace type checking and frontend build pass with existing sourcemap/chunk warnings. Signed-in staging briefing still displays August GBP 987 sales and AOV after loading the store settings.
+
+This does not re-date historic evidence or certify a later timezone change. Evidence must be regenerated/reverified when its source assumptions change. Remaining work: persist the timezone/source-settings provenance with evidence, build controlled ingestion and support reliable period coverage beyond hand-created fixtures. Frontend work is local/draft only; no Replit sync, merge or production release.
+
+Publication checkpoint: Paul explicitly approved this store-settings code-and-documentation package and its upload to the public GitHub draft.

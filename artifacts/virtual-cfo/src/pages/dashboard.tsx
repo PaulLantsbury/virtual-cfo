@@ -1,19 +1,12 @@
+import { useVerifiedBriefing } from "@/lib/analytics/useVerifiedBriefing";
 import { useActiveStore } from "@/lib/auth/AuthProvider";
-import { getTradingMetrics } from "@/lib/analytics/getTradingMetrics";
-import { useState } from "react";
 import { Link } from "wouter";
 import { ArrowRight, ArrowUpRight, ArrowDownRight, Minus, Search } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { BriefingDataState } from "@/components/BriefingDataState";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 import { TimelineSelector } from "@/components/TimelineSelector";
-import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
-import { useBriefingComparison } from "@/lib/analytics/useBriefingComparison";
-import { buildBriefing } from "@/lib/analytics/briefing";
-import { useTimeline } from "@/lib/timeline";
 import { canAccess } from "@/lib/plan";
 
-// Demo store only. Customer authentication and store isolation remain sprint work.
 
 const ANALYSIS_PAGES = [
   ["Margin Recovery", "Explore the components of contribution and margin.", "/margin-analysis"],
@@ -26,37 +19,26 @@ const ANALYSIS_PAGES = [
 
 export default function Dashboard() {
   const STORE_ID = useActiveStore();
-  const period = useLatestDataPeriod(STORE_ID, getTradingMetrics);
-  const { timeline } = useTimeline();
-  const [previewKey, setPreviewKey] = useState<string | null>(null);
-  const historicalKey = `${timeline}:${period.dateFrom}`;
-  const historicalPreview = period.status === "stale" && previewKey === historicalKey;
-  const canBuildBriefing = period.status === "ready" || historicalPreview;
-  const comparison = useBriefingComparison(STORE_ID, period.dateFrom, timeline, canBuildBriefing);
+  const { period, briefing, comparison, loading } = useVerifiedBriefing(STORE_ID);
   const hasFullActionPlan = canAccess("dashboard_full_action_plan");
-  const briefing = period.phase1 && canBuildBriefing
-    ? buildBriefing(period.phase1.data, comparison.data, comparison.status) : null;
 
   return <AppLayout showMonitoring={false}>
     <div className="mb-5 flex flex-col sm:flex-row justify-between items-start gap-4">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">CFO Briefing</h1>
         <p className="text-muted-foreground mt-1 text-sm">What the trading data shows, what changed, and where to look next.</p>
-        {briefing && <DataPeriodLabel periodLabel={period.periodLabel} loading={false} status={period.status} dateFrom={period.dateFrom} dateTo={period.dateTo} />}
+        {briefing && <DataPeriodLabel periodLabel={period.label} loading={false} status="ready" dateFrom={period.dateFrom} dateTo={period.dateTo} />}
       </div>
       <TimelineSelector />
     </div>
 
-    <p className="mb-5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">Test store · This briefing uses development data. Connected figures and financial definitions are still being reconciled.</p>
+    <p className="mb-5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">Test store · This briefing uses development data. Sales use verified evidence for the selected period. Profit and other financial measures remain incomplete.</p>
 
-    {period.status === "stale" && <div className="mb-5 flex flex-wrap items-center gap-3">
-      <button type="button" className="rounded-lg border border-primary/40 px-4 py-2 text-sm font-semibold text-primary" onClick={() => setPreviewKey(historicalPreview ? null : historicalKey)}>
-        {historicalPreview ? "Close historical test preview" : "Preview briefing with historical test data"}
-      </button>
-      {historicalPreview && <span className="text-sm text-muted-foreground">Historical test preview · conclusions apply to {period.periodLabel}, not current trading.</span>}
-    </div>}
-
-    {!briefing ? <BriefingDataState period={period} /> : <>
+    {!briefing ? <section role="status" className="rounded-2xl border bg-card p-6">
+      <h2 className="text-xl font-bold">{loading ? "Checking verified trading data" : "Verified figures unavailable"}</h2>
+      <p className="mt-3 text-muted-foreground">{period.label}: {period.dateFrom} – {period.dateTo}</p>
+      <p className="mt-3">{loading ? "Checking evidence for this reporting period." : "The period’s evidence is missing, incomplete or unavailable. Missing figures are not treated as zero, and older periods are not substituted."}</p>
+    </section> : <>
       <section className="bg-card rounded-2xl border border-border shadow-sm mb-7 p-6 sm:p-7" aria-live="polite">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">This period's read</p>
         <h2 className="text-2xl font-bold mb-3">{briefing.headline}</h2>
@@ -83,7 +65,7 @@ export default function Dashboard() {
               </Link>
             </div>)}
           </div> : <p className="text-sm">{comparison.status === "ready"
-            ? "No increases in discount or refund rates, or decreases in net sales or repeat purchase rate, were found in this comparison. This is not an assessment of overall business health."
+            ? "No increase in the verified discount rate or decrease in verified net product sales was found in this comparison. This is not an assessment of overall business health."
             : "A previous-period comparison is needed before highlighting changes to investigate."}</p>}
         </div>
       </section>
@@ -106,10 +88,12 @@ export default function Dashboard() {
         </div>
       </section>
 
+      <p className="mb-7 text-sm text-muted-foreground">Product refunds in this period: {briefing.refunds}. Net shipping revenue: {briefing.shipping}. Both exclude VAT. Refund rate and repeat purchase rate await agreed definitions and verified data.</p>
+
       <section className="mb-7 rounded-2xl border border-border bg-card p-6">
         <h2 className="font-bold text-lg">Financial estimates awaiting verification</h2>
         <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-4xl">Contribution margin and profit need a reconciled product-cost and overhead basis. Cash runway needs a dated cash balance and matching expense period. Recoverable profit and cash-release opportunities need separate, supported estimates. These figures are not included in this briefing yet.</p>
-        <p className="text-sm text-muted-foreground mt-3">Automated monitoring is not active. Weekly trading comparisons cover orders only; they do not establish weekly profit or cash performance.</p>
+        <p className="text-sm text-muted-foreground mt-3">Automated monitoring is not active. Weekly comparisons require their own complete evidence; monthly coverage is not assumed to certify a week.</p>
       </section>
 
       <section className="mb-7">

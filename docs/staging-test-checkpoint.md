@@ -23,3 +23,7 @@ Five real-session gateway checks passed: A direct orders returned one row totall
 Eight further gateway checks passed with the real staging session: order_count, net_sales and average_order_value returned A's expected 1/123/123 and zero for B; a separate non-persistent anonymous client was denied orders and gross_revenue with HTTP 401 and database code 42501. No stored user session was exported. These fixtures do not certify AOV/refund financial definitions.
 
 A fresh dashboard restored Store A and displayed August 2026 sales/AOV of GBP 123 with no previous-period comparison. Real sign-out removed merchant content, and a new dashboard page remained gated behind sign-in. The user must sign in again to continue. Diagnostic page removed. No additional database or permission changes. Second-user tests, token expiry, revocation, client-write denial and other financial functions remain pending.
+
+## Re-login and read-only write check
+
+The user signed back in successfully and the dashboard showed Store A. A same-value update probe against its verified synthetic order was refused with HTTP 403 / 42501. Read-back confirmed gross_sales remained 123. This verifies UPDATE denial on orders only; other write operations are not claimed tested. Diagnostic removed. Next: user-assisted second-account setup for independent-user isolation and account switching; expiry and revocation remain pending.

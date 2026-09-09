@@ -214,4 +214,4 @@ Added a source-neutral import-readiness checker and eight passing tests. It chec
 
 No actual Shopify store/export has been supplied for this checkpoint. No database, Replit or production changes. The user has been asked which real source is available. This is preparation for ingestion, not a completed real-data connection. Tests cover this isolated addition; unchanged application type/build checks were not repeated.
 
-Publication: the import-review addition is saved locally. Automatic review blocked its public GitHub upload pending explicit approval for this new package; earlier packages remain published.
+Publication: Paul explicitly approved uploading the import-review code and documentation to the public GitHub draft. Earlier packages remain published.

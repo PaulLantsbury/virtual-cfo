@@ -18,6 +18,8 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Supabase wiring
 
+[Staging setup, 9 September](staging-setup-2026-09-09.md) — verified new empty staging target and atomic, locally tested setup script awaiting application.
+
 [Authentication and store isolation](auth-store-isolation-plan.md) — access gap reproduced, membership/RLS proposal tested locally, and privileged public proxy disabled in the draft. Real gateway verification remains pending; the local SDK sign-in flow is now implemented.
 
 [Recoverable contribution correction](recoverable-contribution-correction.md) — locally tested separation of monthly contribution from cash/other impacts; not deployed.

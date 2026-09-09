@@ -27,3 +27,7 @@ A fresh dashboard restored Store A and displayed August 2026 sales/AOV of GBP 12
 ## Re-login and read-only write check
 
 The user signed back in successfully and the dashboard showed Store A. A same-value update probe against its verified synthetic order was refused with HTTP 403 / 42501. Read-back confirmed gross_sales remained 123. This verifies UPDATE denial on orders only; other write operations are not claimed tested. Diagnostic removed. Next: user-assisted second-account setup for independent-user isolation and account switching; expiry and revocation remain pending.
+
+## Signup confirmation screen
+
+Fixed the repeated-registration impression reported after signup: a successful confirmation-required response replaces the registration form and submit button with a Check your email message and sign-in link. Error responses retain the form. The local staging preview includes this change; Replit/main are not deployed. Type checking and all five mocked authentication browser groups pass, including assertions that the registration button and email field disappear after success. The user reports the second confirmed account reaches the expected no-store gate; its membership has not yet been assigned.

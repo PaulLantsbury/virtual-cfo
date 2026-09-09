@@ -9,7 +9,7 @@ export function AuthForm({ signup = false }: { signup?: boolean }) {
   const [, navigate] = useLocation();
   const { beginSignIn } = useAuth();
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState('');
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [error, setError] = useState('');
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -20,14 +20,14 @@ export function AuthForm({ signup = false }: { signup?: boolean }) {
     const password = String(fields.get('password') || '');
     if (signup && password !== fields.get('confirmation')) { setError('The passwords do not match.'); return; }
     beginSignIn();
-    setBusy(true); setError(''); setMessage('');
+    setBusy(true); setError('');
     try {
       if (signup) {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) { setError('We could not create your account. Check your details and try again.'); return; }
         form.reset();
         if (data.session) navigate('/dashboard');
-        else setMessage('Check your email for a confirmation link, then sign in. Your account will also need to be linked to a store.');
+        else setAwaitingConfirmation(true);
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error || !data.session) { setError('We could not sign you in. Check your email and password, and confirm your email if needed.'); return; }
@@ -42,6 +42,11 @@ export function AuthForm({ signup = false }: { signup?: boolean }) {
       <Link href="/" className="mb-8 text-sm text-primary">← Back to home</Link>
       <div className="w-full max-w-md mx-auto">
         <BrandLogo className="mb-8" imageClassName="h-20" />
+        {signup && awaitingConfirmation ? <section role="status" aria-live="polite">
+          <h1 className="text-3xl font-display font-bold mb-3">Check your email</h1>
+          <p className="text-muted-foreground mb-6">Follow the confirmation link in your email, then sign in to Night Scout.</p>
+          <Link className="text-primary underline" href="/login">Go to sign in</Link>
+        </section> : <>
         <h1 className="text-3xl font-display font-bold mb-3">{signup ? 'Create your Night Scout account' : 'Welcome back to Night Scout'}</h1>
         <p className="text-muted-foreground mb-8">{signup ? 'Create an account, then ask your administrator to link your store.' : 'Sign in to access your store.'}</p>
         <form onSubmit={submit} className="space-y-5">
@@ -49,10 +54,10 @@ export function AuthForm({ signup = false }: { signup?: boolean }) {
           <div><label htmlFor="password" className="block mb-2 font-medium">Password</label><input id="password" name="password" type="password" autoComplete={signup ? 'new-password' : 'current-password'} minLength={signup ? 8 : undefined} required disabled={busy} className={inputClass} /></div>
           {signup && <div><label htmlFor="confirmation" className="block mb-2 font-medium">Confirm password</label><input id="confirmation" name="confirmation" type="password" autoComplete="new-password" required disabled={busy} className={inputClass} /></div>}
           {error && <p role="alert" className="text-destructive">{error}</p>}
-          {message && <p role="status">{message}</p>}
           <Button type="submit" className="w-full h-12" disabled={busy}>{busy ? 'Please wait…' : signup ? 'Create account' : 'Sign in'}</Button>
         </form>
         <p className="mt-6 text-sm">{signup ? 'Already have an account? ' : 'Need an account? '}<Link className="text-primary underline" href={signup ? '/login' : '/signup'}>{signup ? 'Sign in' : 'Create account'}</Link></p>
+        </>}
       </div>
     </div>
     <div className="hidden lg:flex bg-sidebar text-white items-end p-12"><div><h2 className="text-3xl font-display mb-4">A clearer view of your business.</h2><p className="text-white/75">Your store data stays hidden until your account and store access are verified.</p></div></div>

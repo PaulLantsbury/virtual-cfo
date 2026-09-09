@@ -44,13 +44,19 @@ export function reconcileCandidateEvents(events,orders,refunds){
 export async function prepareCandidateReview(db,{storeId,from,to}){
  return db.transaction(async tx=>{
   await tx.exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
+  return inspectCandidateReview(tx,{storeId,from,to});
+ });
+}
+
+/** Internal transaction helper: caller owns isolation/locking and authorisation. */
+export async function inspectCandidateReview(tx,{storeId,from,to},{includeSnapshot=false}={}){
   const read=async(sql,params=[storeId])=>(await tx.query(sql,params)).rows;
   const stores=await read('SELECT id,shopify_domain,shopify_store_id,currency_code,timezone FROM public.stores WHERE id=$1');
   const heads=await read('SELECT h.*,b.fingerprint,b.mapping_state,b.payload FROM ingest_v1.heads h JOIN ingest_v1.batches b ON b.id=h.batch_id WHERE h.store_id=$1 AND h.date_from=$2 AND h.date_to=$3',[storeId,from,to]);
   requireValue(stores.length===1&&heads.length===1,'Store or candidate period missing');
   const versions=await read('SELECT * FROM ingest_v1.source_versions WHERE store_id=$1 ORDER BY source_id');
-  const orders=await read('SELECT m.*,o.shopify_order_id FROM finance_v1.order_mapping m JOIN public.orders o ON o.id=m.id AND o.store_id=m.store_id WHERE m.store_id=$1 ORDER BY m.id');
-  const refunds=await read('SELECT m.*,r.shopify_refund_id FROM finance_v1.refund_mapping m JOIN public.refunds r ON r.id=m.id AND r.store_id=m.store_id WHERE m.store_id=$1 ORDER BY m.id');
+  const orders=await read('SELECT m.*,o.shopify_order_id,to_jsonb(e) AS review_evidence FROM finance_v1.order_mapping m JOIN public.orders o ON o.id=m.id AND o.store_id=m.store_id LEFT JOIN finance_v1.order_evidence e ON e.store_id=m.store_id AND e.order_id=m.id WHERE m.store_id=$1 ORDER BY m.id');
+  const refunds=await read('SELECT m.*,r.shopify_refund_id,to_jsonb(e) AS review_evidence FROM finance_v1.refund_mapping m JOIN public.refunds r ON r.id=m.id AND r.store_id=m.store_id LEFT JOIN finance_v1.refund_evidence e ON e.store_id=m.store_id AND e.refund_id=m.id WHERE m.store_id=$1 ORDER BY m.id');
   const coverage=await read('SELECT * FROM finance_v1.coverage_evidence WHERE store_id=$1 AND date_from=$2 AND date_to=$3',[storeId,from,to]);
   const snapshot={scope:{storeId,from,to},stores,heads,versions,orders,refunds,coverage};
   const issues=[],head=heads[0],store=stores[0],source=head.payload.source;
@@ -67,6 +73,5 @@ export async function prepareCandidateReview(db,{storeId,from,to}){
    requireValue(coverage.length===1,'Coverage evidence missing');
    calculateMappedSales({orders,refunds,coverage:[{...coverage[0],sales_and_refunds_complete:true}]},{storeId,from,to,currency:source.settings.currency});
   }catch(error){issues.push({reason:error.message});}
-  return {status:issues.length?'blocked':'awaiting_independent_coverage_review',batchId:head.batch_id,scope:{storeId,from,to},snapshotDigest:digest(snapshot),issues,coverageCertified:false,figures:null};
- });
+  return {...(includeSnapshot?{snapshot}:{}),status:issues.length?'blocked':'awaiting_independent_coverage_review',batchId:head.batch_id,scope:{storeId,from,to},snapshotDigest:digest(snapshot),issues,coverageCertified:false,figures:null};
 }

@@ -222,4 +222,4 @@ Paul confirmed no Shopify account is available and approved building against tes
 
 The collector retains review-required refunds/edits and does not certify coverage or populate financial evidence. Complete line/tax mapping, installation/authentication, durable collection/writes and a real-store conformance check remain outstanding. No live Shopify/Supabase calls, Replit sync, merge or production release. Application/build code is unchanged.
 
-Publication checkpoint: Shopify connection foundation is saved locally. Automatic review blocked the new public GitHub upload pending explicit package approval. Earlier packages remain published.
+Publication checkpoint: Paul explicitly approved uploading the Shopify connection foundation code, tests and documentation to the public GitHub draft. Earlier packages remain published.

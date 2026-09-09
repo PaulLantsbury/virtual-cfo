@@ -276,3 +276,9 @@ Source sale events now retain actual product VAT after discounts, shipping VAT a
 Implemented an internal authenticated-reviewer hook, explicit per-store reviewer authorisation, exact snapshot recheck, retained append-only audit snapshot and atomic restoration of the reviewed coverage range. Evidence edits now also invalidate coverage. Existing source/raw invalidation and client read restrictions remain in place. See reviewed-restoration.md.
 
 48 Shopify tests pass, including five disposable PostgreSQL restoration groups. Live authentication/provisioning, least-privilege service grants, multi-session concurrency testing and review UI integration remain required before staging application. The conservative global table locks block writes during restoration and need throughput review. No Supabase changes, Replit sync or production release.
+
+## Reviewer token verification — local composition
+
+Added a server-side Supabase getUser adapter that verifies each supplied bearer token, rejects anonymous/failed/malformed identities, suppresses upstream error details and ignores body-supplied reviewer IDs or authentication callbacks. The existing database membership and explicit reviewer grant remain mandatory. The successful synthetic database restoration test now runs through this adapter.
+
+52 Shopify tests pass; Auth responses are synthetic, not live verification. No local PostgreSQL server/Docker was found, so independent-session contention tests remain unrun; their exact required cases are recorded in restoration-concurrency-checklist.md. Live client provisioning, least-privilege permissions and HTTP/UI integration remain pending. No live database, Replit or production changes.

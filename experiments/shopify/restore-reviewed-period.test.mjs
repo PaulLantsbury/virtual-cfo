@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {A,B,U,setup,sql} from './finance-fixture.mjs';
 import {restoreReviewedPeriod} from './restore-reviewed-period.mjs';
+import {restoreWithReviewerToken} from './reviewer-auth.mjs';
 import {prepareCandidateReview} from './review-candidate.mjs';
 import {recordShopifyCandidate} from './record-candidate.mjs';
 import {collectShopifyOrders} from './collect.mjs';
@@ -33,7 +34,7 @@ async function fixture(){
 test('authorised review restores only exact period and records immutable audit',async()=>{
  const {db,read,request}=await fixture();try{
  await assert.rejects(read(),/coverage/);
- const result=await restoreReviewedPeriod(db,request,identity);assert.equal(result.status,'restored');
+ const result=await restoreWithReviewerToken(db,{...request,reviewerId:'forged-body-id'},{authorization:'Bearer synthetic-token',supabase:{auth:{getUser:async token=>{assert.equal(token,'synthetic-token');return {data:{user:{id:U,is_anonymous:false}},error:null};}}}});assert.equal(result.status,'restored');
  assert.equal((await read()).netProductSales,12300);assert.equal((await read(B)).netProductSales,98700);
  const {rows}=await db.query('SELECT * FROM ingest_v1.review_audit');assert.equal(rows.length,1);assert.equal(rows[0].reviewer_id,U);assert.equal(rows[0].snapshot_digest,request.snapshotDigest);assert.equal(rows[0].review_snapshot.scope.storeId,A);assert.equal(rows[0].review_snapshot.orders.length,1);
  assert.equal((await db.query('SELECT count(*)::int n FROM finance_v1.coverage_evidence WHERE store_id=$1 AND sales_and_refunds_complete',[A])).rows[0].n,1);

@@ -25,3 +25,7 @@ This is invalidation only. No candidate data is copied into authoritative order/
 No server-side collection can revoke figures already rendered in an open browser instantly. The adapter rejects invalid coverage on the next read; immediate client refresh/invalidation and cache behaviour need explicit integration tests before a release. Existing staging data/permissions and the browser preview were not changed by this local package.
 
 No live Shopify or Supabase request, Replit synchronisation, merge or production deployment occurred. Next: the reviewed publication/revalidation design and tests, before proposing any staging application.
+
+## Subsequent review preparation
+
+A read-only snapshot/reconciliation packet is now available; see candidate-review.md. It does not implement the restoration operation described above. Existing invalidation remains in force until the remaining evidence and publication controls are complete.

@@ -183,3 +183,14 @@ Added an isolated development preview backed by a proposed member-checked eviden
 On 9 September, explicit approval was followed by successful application of the exact recorded financial evidence package to Night Scout Staging. Real Store B preview: August sales/AOV GBP 987; September refund GBP 87 and net sales GBP -87, with no original-order AOV. An uncovered July period remained unavailable. The new endpoint rejected other-store and anonymous requests; permitted evidence remained scoped to the assigned store. Temporary diagnostic page removed.
 
 See financial-integration-next-step.md for the applied hash, verification scope and limitations. Main briefing calculations remain legacy; next connect its sales/AOV and narrative to verified evidence. No production deployment, Replit sync or merge.
+
+
+## Main briefing connected to verified sales — 9 September
+
+The local dashboard now reads the verified sales endpoint for the selected completed period and the immediately preceding period. It no longer uses legacy order counts to skip refund-only periods or substitute older periods. Cards and narrative share verified net/gross product sales, original AOV and value-based discount rate. Refund amounts and net shipping are shown separately; refund-rate and repeat-purchase ratios remain withheld pending definitions/evidence. Unsupported profit/cost claims remain unavailable.
+
+The bounded staging integration uses GBP and Europe/London; general store currency/timezone configuration and scalable evidence retrieval remain outstanding. Weekly dates require exact verified coverage; monthly coverage is not silently treated as weekly coverage.
+
+Validation: 26 analytics tests pass, including three new verified-briefing cases for original AOV, refund-only periods and inactivity. Workspace type checking and frontend build pass (existing sourcemap/chunk warnings). Signed-in browser check showed August GBP 987 sales and AOV with unavailable previous-period comparison; changing to the uncovered week hid figures and narrative and showed unavailable. Refund-only copy is regression-tested; September remains available in the separate preview because it is not yet a completed month.
+
+Saved locally; Paul subsequently explicitly approved publishing this code-and-document package to the public GitHub draft. No database changes, Replit sync, merge or production deployment in this step. Next: generalise store reporting settings and evidence coverage/ingestion before expanding beyond synthetic staging data.

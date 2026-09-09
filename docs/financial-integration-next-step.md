@@ -1,6 +1,6 @@
 # Financial integration next step
 
-Status: applied to Night Scout Staging on 9 September 2026 after explicit approval; populated development preview verified. Main briefing integration remains outstanding.
+Status: applied to Night Scout Staging on 9 September 2026 after explicit approval; populated development preview verified. Main briefing now uses this source locally; see the latest sprint checkpoint.
 
 ## Current boundary
 
@@ -55,3 +55,8 @@ The real signed-in Store B preview showed August gross/net product sales and ori
 Real-session checks of the new endpoint confirmed an other-store request was rejected (403), an anonymous request was rejected (401), and the permitted response contained only the account's assigned store evidence. The temporary diagnostic page was removed after these checks. Earlier local tests cover the wider permission and calculation cases; natural session expiry/refresh remains unverified remotely.
 
 These are synthetic staging results. The main briefing still uses legacy calculations; no production release, Replit sync or merge occurred. Next: connect the briefing's sales/AOV figures and related narrative to the same verified result, preserving explicit unavailable states and withholding unsupported profit/cost claims.
+
+
+## Main briefing local connection
+
+The subsequent 9 September sprint checkpoint connects the dashboard to verified sales for both reporting periods, removes legacy order-count fallback and withholds unapproved ratios. Earlier statements above that the briefing remains legacy describe the previous checkpoint. This frontend change is local/draft only, not released to Replit or production. See restart-sprint.md for validation and remaining store-setting/coverage work.

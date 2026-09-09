@@ -32,3 +32,15 @@ This plan does not represent completed integration. Natural session expiry/refre
 ## Local preparation completed
 
 event-evidence.mjs now prepares event_date/original_eligible from explicit verified source facts; it never falls back to created_at/current refund status. Five regression groups pass. This helper only prepares event metadata, not tax/currency/coverage certification or database writes. Staging population and the authorised read boundary remain the next implementation steps.
+
+## Prepared staging connection — awaiting application
+
+Implemented public.verified_sales_source as a SECURITY INVOKER, member-checked single-snapshot JSON read. The private evidence tables and mapping views gain authenticated SELECT only with per-store RLS. Anonymous access and evidence writes are denied, including where permissive default table grants existed. The endpoint does not use a service-role proxy. It returns all mapped records for the permitted store to conservatively detect incomplete evidence; this is a bounded synthetic staging design, not yet a scalable production query.
+
+The existing calculation logic now also consumes this snapshot through rpc-sales-adapter.mjs. It checks response store/date/version and coverage, and shares the same tested arithmetic as readMappedSales. A development-only /verified-sales page is inside the existing authentication/store gate. It displays verified sales, shipping and original AOV, labels refund-only periods and withholds profit. The current briefing remains on legacy calculations for comparison; this page is not a production replacement.
+
+The atomic staging package db-migrations/staging/20260909_finance_setup.sql combines the evidence schema, member read permissions and explicit synthetic fixtures. It refuses a changed fixture or existing finance schema. It preserves the two existing sample orders, adds product-only zero-VAT refunds of A GBP 23 and B GBP 87 dated 5 September, and updates their synthetic cumulative refund fields. It records complete synthetic August/September evidence only. September's completeness applies solely to these hand-created fixtures, never to live month-to-date trading. Expected August sales/AOV: A 123, B 987. Expected September net product sales: A -23, B -87, no original orders and unavailable AOV. Store assignments and real accounts are unchanged.
+
+Verification: nine existing cloud-adapter tests passed after sharing the calculation function; three new integration groups pass against the exact staging schema/package, covering event periods, RLS, non-members, anonymous requests, denied evidence updates, stale/missing evidence, revocation, permissive defaults and rerun refusal. Type checking and frontend build pass with existing sourcemap/chunk warnings. The live preview's missing-endpoint state shows unavailable, not zero. Remote application and populated UI verification remain pending.
+
+Prepared package SHA-256: `bdb703c3578774c439524bcd02dd886372619a7e8ec2ff53207fa8d58630ea7d`.

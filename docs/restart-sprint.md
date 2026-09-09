@@ -172,3 +172,7 @@ Original Supabase project, Auth settings and Replit were untouched. No applicati
 ## Financial event rules approved and preparation implemented
 
 On 9 September Paul approved original paid/completed eligibility, explicit exclusions, store-local actual event dates and review of ambiguous adjustments. Recorded in agreed-financial-definitions.md. Added isolated event-evidence preparation and five passing regression groups. No application/database change; financial integration remains incomplete. See financial-integration-next-step.md for the staged connection and acceptance checks.
+
+## Verified-sales connection prepared
+
+Added an isolated development preview backed by a proposed member-checked evidence RPC and shared sales/refund calculation adapter. Exact staging package and three new integration groups pass; nine existing adapter tests also passed. Type checking/build pass. No remote database change yet: the permission change and synthetic refund fixtures await application. Existing briefing remains legacy. See financial-integration-next-step.md for scope, hash and expected results.

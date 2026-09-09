@@ -207,3 +207,11 @@ Validation: all 30 analytics tests pass, covering timezone-boundary differences,
 This does not re-date historic evidence or certify a later timezone change. Evidence must be regenerated/reverified when its source assumptions change. Remaining work: persist the timezone/source-settings provenance with evidence, build controlled ingestion and support reliable period coverage beyond hand-created fixtures. Frontend work is local/draft only; no Replit sync, merge or production release.
 
 Publication checkpoint: Paul explicitly approved this store-settings code-and-documentation package and its upload to the public GitHub draft.
+
+## Import dry-run review prepared — 9 September
+
+Added a source-neutral import-readiness checker and eight passing tests. It checks scope/settings, completed-period capture, page chains, duplicate/missing records, mapped evidence and shared financial reconciliation; it reports candidate results without certifying coverage or writing records. Identical/changed batch fingerprints support a future reconciliation process but are not persistent idempotency. See import-readiness.md for the input contract, limitations and next source-mapping/writer steps.
+
+No actual Shopify store/export has been supplied for this checkpoint. No database, Replit or production changes. The user has been asked which real source is available. This is preparation for ingestion, not a completed real-data connection. Tests cover this isolated addition; unchanged application type/build checks were not repeated.
+
+Publication: Paul explicitly approved uploading the import-review code and documentation to the public GitHub draft. Earlier packages remain published.

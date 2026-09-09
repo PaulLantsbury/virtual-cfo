@@ -6,11 +6,11 @@ The check compares individual source identities, original order links, event dat
 
 Current scope is deliberately conservative. Excluded source orders that still exist as finance records are reported as unexpected events; handling those requires an explicit exclusion-evidence design. For supported tax-exclusive source orders, the event model now carries actual product VAT after discounts, shipping VAT and the reconciled original customer payment. The review compares those against normalised finance evidence. It does not infer pre-discount VAT or discount VAT separately: only their net product VAT is established from the source. Tax-inclusive source imports remain blocked. This is transaction reconciliation, not independent completeness certification.
 
-A matching packet says `awaiting_independent_coverage_review`, never verified. It exposes no financial figures, restores no coverage, clears no recheck flags and writes no reviewer approval. A digest is a snapshot identifier, not a security token. The future publication transaction must reread and compare it, authenticate the reviewer, independently establish completeness and record an audit entry while coordinating with source/evidence writes. That write operation remains unimplemented.
+A matching packet says `awaiting_independent_coverage_review`, never verified. It exposes no financial figures, restores no coverage, clears no recheck flags and writes no reviewer approval. A digest is a snapshot identifier, not a security token. The future publication transaction must reread and compare it, authenticate the reviewer, independently establish completeness and record an audit entry while coordinating with source/evidence writes. A subsequent local-only write proposal now implements these transaction steps; see reviewed-restoration.md for its authorisation, evidence and concurrency limits.
 
 Verification includes component/identity mismatches, duplicate and stale evidence, refund links/tax, changed source versions and store settings, deterministic/changing digests, and a real disposable PostgreSQL snapshot using the committed staging schema. The real-database test confirms mismatched evidence remains unavailable while another store stays readable. No live schema, Supabase data, Replit or production changes.
 
-## Required restoration gates (design, not implemented)
+## Required restoration gates
 
 - An authenticated internal reviewer must be authorised for the exact store. Client-supplied reviewer names are not sufficient authentication.
 - The current packet must pass all reconciliation checks and match the reviewed snapshot digest, batch, store and date range. Recompute with the current mapper; older saved candidate events may lack VAT fields.
@@ -18,4 +18,4 @@ Verification includes component/identity mismatches, duplicate and stale evidenc
 - In one transaction, coordinate with source, raw-data and evidence writers; reread the snapshot, reject changes, append the reviewer identity/evidence reference/digest audit record, restore only the exact coverage range and clear only that range's recheck flag. A failure must roll everything back.
 - Subsequent changes must invalidate restored coverage. Test concurrent writes, stale/repeated approvals, denied members, rollback and other-store isolation before staging application.
 
-No restoration endpoint, audit table or coverage write is added by this checkpoint. Existing verified evidence is still required; the candidate review does not create or repair it.
+The subsequent reviewed-restoration.md proposal adds a private audit table and internal coverage write. There is still no live endpoint. Existing verified evidence is required; the candidate review does not create or repair it.

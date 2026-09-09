@@ -270,3 +270,9 @@ The restoration step is not complete: original sale VAT component reconciliation
 Source sale events now retain actual product VAT after discounts, shipping VAT and the original reconciled customer payment. Candidate review compares all three against finance evidence, blocking incorrect tax allocations even when net sales and total payment agree. Missing original tax/payment evidence also blocks. Existing AOV/refund timing rules are unchanged.
 
 43 Shopify tests pass, with original tax/payment assertions in the synthetic HTTP mapping tests and mismatch/review regression cases. Updated candidate-review.md with exact restoration gates and remaining boundaries: tax-inclusive imports and separate pre-discount VAT allocations are not inferred; completeness review and the atomic audited restoration writer are still pending. No live database, Replit or production changes.
+
+## Recorded approval and period restoration — local proposal
+
+Implemented an internal authenticated-reviewer hook, explicit per-store reviewer authorisation, exact snapshot recheck, retained append-only audit snapshot and atomic restoration of the reviewed coverage range. Evidence edits now also invalidate coverage. Existing source/raw invalidation and client read restrictions remain in place. See reviewed-restoration.md.
+
+48 Shopify tests pass, including five disposable PostgreSQL restoration groups. Live authentication/provisioning, least-privilege service grants, multi-session concurrency testing and review UI integration remain required before staging application. The conservative global table locks block writes during restoration and need throughput review. No Supabase changes, Replit sync or production release.

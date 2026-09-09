@@ -31,3 +31,11 @@ The user signed back in successfully and the dashboard showed Store A. A same-va
 ## Signup confirmation screen
 
 Fixed the repeated-registration impression reported after signup: a successful confirmation-required response replaces the registration form and submit button with a Check your email message and sign-in link. Error responses retain the form. The local staging preview includes this change; Replit/main are not deployed. Type checking and all five mocked authentication browser groups pass, including assertions that the registration button and email field disappear after success. The user reports the second confirmed account reaches the expected no-store gate; its membership has not yet been assigned.
+
+## Second-account Store B verification
+
+Following the instruction to continue with Store B assignment, linked the second confirmed staging account to B only. A guarded transaction checked the confirmed account, synthetic store identity and absence of existing memberships. First-account membership was unchanged.
+
+Thirteen real-session checks passed: unfiltered stores, orders and memberships returned only B; direct A orders returned none and four A RPCs (gross_revenue, net_sales, average_order_value, order_count) returned zero; direct B orders returned its 987 sample, the three monetary RPCs returned 987 and order_count returned one. The restored dashboard showed only Store B and GBP 987. Together with the earlier A-session checks this establishes the tested read paths in both directions. No user IDs or credentials are recorded here. Temporary diagnostic removed.
+
+Still pending: other functions/views with distinct fixtures, membership revocation, token expiry, broader write tests and production readiness. Financial definitions remain a separate implementation task. Nothing was deployed to Replit or the original database.

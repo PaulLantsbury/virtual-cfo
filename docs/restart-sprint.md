@@ -422,3 +422,10 @@ Await Paul's approval for the single bounded staging sequence (package, one refu
 Paul approved the bounded package. It was applied once to Night Scout Staging, then the restricted TLS runtime imported one additional April refund and returned already_imported on explicit retry. C now has one unchanged order, two refunds and two receipts; the new GBP 24 refund includes GBP 4 VAT and is dated 6 April, linked to the original sale. February coverage remains false. Original records, A/B financial/evidence/coverage/receipt rows and the single review audit are unchanged. C still has no memberships or reviewer grants. See the [execution record](staging-subsequent-import-run.md#actual-staging-execution--10-september-2026).
 
 The approved bounded trial is complete. No production, Replit or main changes. Remaining development includes broader supported source cases, a live Shopify account/connection when available, operational import orchestration and completing review/reporting integration; none is certified by this synthetic trial.
+
+
+## Connected transaction review display — 10 September
+
+Implemented and checked [transaction evidence display](review-transaction-display.md) through the existing authorised prepare route. Reconciled rows show dates, product/shipping/VAT/cash and original order linkage; blocked evidence is withheld, later events are labelled and completeness is not inferred. 86 source/import/review tests, five isolated browser groups and frontend type checking pass.
+
+Paul approved C staging membership and reviewer access. The real signed-in port-3000 screen successfully prepared February and displayed the original sale plus March/April refunds. C completeness remains false and audit count one; no restoration submitted. Use http://localhost:3000/financial-review rather than the stale 3001 tab. Remaining work includes independent completeness evidence, separate refund-period candidate coverage, wider Shopify mappings/live connectivity, and broader reporting integration. Production/Replit/main unchanged.

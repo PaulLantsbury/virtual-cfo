@@ -19,11 +19,7 @@ export async function restoreReviewedPeriod(db,request,{authenticateReviewer}){
   // Conservative prototype: block writes to every dependency until commit.
   // Readers remain allowed. This also covers writers not using the intake helper.
   // Deadlocks/timeouts abort the whole operation; never retry an approval silently.
-  await tx.exec(`LOCK TABLE public.stores,public.store_memberships,
-   ingest_v1.review_authorizations,public.orders,public.refunds,
-   finance_v1.order_evidence,finance_v1.refund_evidence,
-   ingest_v1.source_versions,ingest_v1.batches,ingest_v1.heads,
-   finance_v1.coverage_evidence,ingest_v1.review_audit IN SHARE ROW EXCLUSIVE MODE`);
+  await tx.exec('SELECT ingest_v1.lock_review_dependencies()');
   const {rows:allowed}=await tx.query('SELECT 1 FROM ingest_v1.review_authorizations a JOIN public.store_memberships m ON m.store_id=a.store_id AND m.user_id=a.reviewer_id WHERE a.store_id=$1 AND a.reviewer_id=$2',[scope.storeId,reviewer.id]);
   check(allowed.length===1,'Reviewer is not authorised for this store');
   const current=await inspectCandidateReview(tx,scope,{includeSnapshot:true});

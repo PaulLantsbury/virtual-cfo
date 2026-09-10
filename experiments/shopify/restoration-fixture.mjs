@@ -10,6 +10,7 @@ export const identity={authenticateReviewer:async()=>({id:U})};
 export async function restorationFixture(database,options){
  const f=await setup(database,options),{db}=f;
  await db.exec(sql('proposed/ingest_v1_review_restoration.sql'));
+ await db.exec(sql('proposed/ingest_v1_review_service.sql'));
  const request=async op=>op==='context'?contextFixture():op==='orders'?pageFixture([orderFixture()]):detailsFixture();
  const data=await loadShopifyDetails(request,await collectShopifyOrders(request,expected));
  // Align synthetic source with the established August £123 / September £23 records.

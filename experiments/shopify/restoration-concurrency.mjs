@@ -16,7 +16,7 @@ assert.ok(bin,'Set NIGHT_SCOUT_TEST_PG_BIN to a standalone PostgreSQL bin direct
 const root=await mkdtemp(join(tmpdir(),'ns-pg-')),data=join(root,'data');
 const run=(name,args)=>execFileSync(join(resolve(bin),name),args,{encoding:'utf8',stdio:'pipe'});
 const connect=async database=>{const c=new Client({host:root,port:5432,user:'night_scout_test',database});await c.connect();return c;};
-const adapter=(c,onLock)=>({query:(...args)=>c.query(...args),exec:async sql=>{const result=await c.query(sql);if(sql.startsWith('LOCK TABLE'))await onLock?.();return result;},transaction:async fn=>{await c.query('BEGIN');try{const result=await fn(adapter(c,onLock));await c.query('COMMIT');return result;}catch(e){await c.query('ROLLBACK');throw e;}}});
+const adapter=(c,onLock,asService=false)=>({query:(...args)=>c.query(...args),exec:async sql=>{const result=await c.query(sql);if(sql==='SELECT ingest_v1.lock_review_dependencies()')await onLock?.();return result;},transaction:async fn=>{await c.query('BEGIN');try{if(asService)await c.query('SET LOCAL ROLE night_scout_review_service');const result=await fn(adapter(c,onLock));await c.query('COMMIT');return result;}catch(e){await c.query('ROLLBACK');throw e;}}});
 const deferred=()=>{let resolve;const promise=new Promise(r=>resolve=r);return {promise,resolve};};
 const outcome=p=>p.then(value=>({value}),error=>({error}));
 async function waiting(observer,client){
@@ -43,7 +43,7 @@ try{
     await writer.query('BEGIN');
     if(name==='permission_revoked')await writer.query('DELETE FROM ingest_v1.review_authorizations WHERE store_id=$1',[A]);
     else await writer.query('UPDATE public.orders SET gross_sales=gross_sales+1 WHERE store_id=$1',[A]);
-    const pending=outcome(restoreReviewedPeriod(adapter(reviewer),f.request,identity));
+    const pending=outcome(restoreReviewedPeriod(adapter(reviewer,undefined,true),f.request,identity));
     await waiting(observer,reviewer);
     if(name==='lock_timeout'){
      const result=await pending;assert.equal(result.error?.code,'55P03');await writer.query('ROLLBACK');
@@ -55,11 +55,11 @@ try{
     }
    }else{
     const locked=deferred(),release=deferred();
-    const first=outcome(restoreReviewedPeriod(adapter(reviewer,async()=>{locked.resolve();await release.promise;}),f.request,identity));
+    const first=outcome(restoreReviewedPeriod(adapter(reviewer,async()=>{locked.resolve();await release.promise;},true),f.request,identity));
     await Promise.race([locked.promise,first.then(r=>{throw r.error??new Error('Review ended before lock barrier');})]);
     // Ordinary reads from another session still work while reviewer holds locks.
     assert.equal((await observer.query('SELECT count(*)::int n FROM public.orders WHERE store_id=$1',[B])).rows[0].n,1);
-    const second=name==='two_reviews'?outcome(restoreReviewedPeriod(adapter(writer),f.request,identity)):outcome(writer.query(name==='review_first_raw'?'UPDATE public.orders SET gross_sales=gross_sales+1 WHERE store_id=$1':"UPDATE finance_v1.refund_evidence SET evidence_ref='concurrent-change' WHERE store_id=$1",[A]));
+    const second=name==='two_reviews'?outcome(restoreReviewedPeriod(adapter(writer,undefined,true),f.request,identity)):outcome(writer.query(name==='review_first_raw'?'UPDATE public.orders SET gross_sales=gross_sales+1 WHERE store_id=$1':"UPDATE finance_v1.refund_evidence SET evidence_ref='concurrent-change' WHERE store_id=$1",[A]));
     try{await waiting(observer,writer);}finally{release.resolve();}
     assert.equal((await first).value?.status,'restored');
     const secondResult=await second;

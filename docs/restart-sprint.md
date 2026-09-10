@@ -293,3 +293,9 @@ The runner shuts down and removes its synthetic cluster; standalone binaries sta
 ## End-of-day handover — 9 September
 
 Paul stopped development for today. Read session-handover-2026-09-09.md before resuming: it records the current tested checkpoint, applied-versus-proposed boundary, remaining roadmap and next service-permissions/authenticated-review work. No further development or deployment was performed for this handover.
+
+## 10 September — restricted review service and authorised preparation
+
+Resumed from the 9 September handover. Added a local-only non-login internal review role with explicit read/append/column-update grants and RLS policies. A fixed argument-free definer helper acquires dependency locks without granting source mutation rights. Authenticated preparation now checks explicit reviewer authorisation before inspecting a candidate. See review-service-permissions.md for the trust boundary and deliberate definer exception.
+
+56 tests pass, plus all seven independent PostgreSQL contention cases rerun with restricted-role restoration. No live role/login provisioning, migration, Replit sync, merge or production release. Next: server client/pool environment matching, bounded authentication requests and safe HTTP integration before a reviewer UI and staging enablement.

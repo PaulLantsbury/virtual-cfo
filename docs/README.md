@@ -4,6 +4,8 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Start here
 
+[Latest 10 September checkpoint — review server runtime](review-server-runtime.md): checked connection configuration, restricted pool and next enablement/UI work.
+
 [Latest 10 September checkpoint — review HTTP integration](review-http-integration.md): tested request boundary, disabled live route and remaining client/pool configuration.
 
 [10 September progress — review service permissions](review-service-permissions.md): current checkpoint and next integration work after the saved 9 September stopping point.

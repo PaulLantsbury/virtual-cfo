@@ -305,3 +305,9 @@ Resumed from the 9 September handover. Added a local-only non-login internal rev
 Added a default-disabled API review router and trusted composition with the existing authenticated review helpers. Strict input/size/type checks precede service access, responses are non-cacheable, and fixed error messages avoid exposing SQL/upstream details. Four loopback HTTP groups pass, including actual prepare/restore through restricted-role synthetic database fixtures; API type checking and build pass. The initial sandbox listener failure was resolved by running with loopback permission.
 
 See review-http-integration.md. Next: verified same-environment Auth client/database pool with bounded requests, deployment request controls and reviewer UI. The mounted endpoint stays 503 until explicitly composed with verified dependencies. No Supabase, Replit or production changes.
+
+## 10 September — review server runtime composition
+
+Added explicit same-project Auth/direct-database validation, restricted username and verified TLS options, bounded Auth fetch/response size, dedicated pool transaction handling and startup permission checks. Uncertain commits are not retried and their connections are discarded. See review-server-runtime.md for supported configurations and remaining deployment checks.
+
+61 Shopify tests pass; standalone PostgreSQL passes the seven concurrency scenarios plus a new real restricted-login/pg-Pool prepare-and-restore case with synthetic Auth. The app route remains disabled. Next: explicit server runtime enablement/readiness, reviewer UI and a concrete staging configuration plan. No live database/Auth changes, Replit sync or production release.

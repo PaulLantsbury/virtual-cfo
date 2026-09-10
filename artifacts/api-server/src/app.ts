@@ -2,9 +2,10 @@ import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
-import financialReviewRouter from "./routes/financial-reviews";
+import {createFinancialReviewRouter, type ReviewService} from "./routes/financial-reviews";
 import { logger } from "./lib/logger";
 
+export function createApp(reviewService?: ReviewService): Express {
 const app: Express = express();
 
 app.use(
@@ -28,10 +29,13 @@ app.use(
 );
 app.use(cors());
 // Mount before general body parsing so review limits and safe errors apply.
-app.use("/api/financial-reviews", financialReviewRouter);
+app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
-export default app;
+return app;
+}
+
+export default createApp();

@@ -13,6 +13,7 @@ import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
+import FinancialReviewPage from "@/pages/financial-review";
 import VerifiedSalesPage from "@/pages/verified-sales";
 import Dashboard from "@/pages/dashboard";
 import MarginAnalysis from "@/pages/margin-analysis";
@@ -40,6 +41,7 @@ function MerchantRouter() {
   return (
     <Switch>
       {import.meta.env.DEV && <Route path="/verified-sales" component={VerifiedSalesPage} />}
+      <Route path="/financial-review" component={FinancialReviewPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/transactions" component={Dashboard} /> {/* Map to dashboard for now */}
       <Route path="/margin-analysis" component={MarginAnalysis} />

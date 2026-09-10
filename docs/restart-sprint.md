@@ -408,3 +408,10 @@ Resume with the append-only writer and full stored-value reconciliation, then re
 The [append-only writer](subsequent-import-writer.md) now repeats preparation under dependency locks, reconciles stored identities/values/evidence, inserts only new events, and records counts/receipts in the same transaction. Refund-only and no-op batches are supported by a proposed zero-order receipt constraint. Existing receipts and role permissions are unchanged. Retry, rollback, preserved original rows and tampering refusal are tested.
 
 85 source/import/review tests and all 14 standalone PostgreSQL cases passed, including real contention and interrupted subsequent imports. Next: restricted runtime composition and a concrete guarded staging C candidate/receipt migration package for approval. No remote database changes were made; the current staging runtime still uses the first-import writer.
+
+
+## Subsequent-import staging package ready — 10 September
+
+Prepared [exact guarded package and runbook](staging-subsequent-import-run.md) for one additional April refund to store C, using the existing restricted login. The subsequent runtime has a separate initializer and retains the original runtime's safeguards; first-import behaviour is unchanged. Two exact-package tests, three runtime checks and all 15 standalone PostgreSQL cases pass. Artifact hash is in the runbook.
+
+Await Paul's approval for the single bounded staging sequence (package, one refund import, one explicit retry, verification). Do not apply remotely before approval. No new user/reviewer grants, review/restoration, production/Replit/main change or live Shopify account is involved.

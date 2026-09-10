@@ -1,3 +1,5 @@
+> Next approval: [bounded staging subsequent-import trial](staging-subsequent-import-run.md), adding one later synthetic refund to C and testing retry. Exact package and restricted runtime are tested; nothing applied remotely.
+
 > Latest local development: [subsequent-import writer verified](subsequent-import-writer.md). Adds new orders/later refunds without overwriting existing records; 85 tests and 14 standalone PostgreSQL checks pass. Staging runtime remains unchanged.
 
 > Latest local development: [subsequent-import preparation](subsequent-import-preparation.md) identifies new events and blocks changed history. Ten new tests pass; the append-only writer remains to be implemented.

@@ -1,9 +1,10 @@
+import {subsequentCandidate} from './subsequent-fixture.mjs';
 // Opt-in standalone PostgreSQL test. Creates and removes its own temporary cluster.
 // Never reads DATABASE_URL or connects to an existing database/server.
 import assert from 'node:assert/strict';
 import {runImportChecks} from './import-concurrency.mjs';
 import {importFixture} from './import-fixture.mjs';
-import {initialiseImportRuntime} from './import-runtime.mjs';
+import {initialiseImportRuntime,initialiseSubsequentImportRuntime} from './import-runtime.mjs';
 import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
@@ -102,6 +103,14 @@ try{
   assert.equal((await importRuntime.run()).status,'already_imported');
   assert.equal((await importOwner.query('SELECT count(*)::int n FROM ingest_v1.import_receipts')).rows[0].n,1);
   console.log('PASS importer_runtime: dedicated LOGIN and pooled one-batch import/retry');
+  await importRuntime.close();importRuntime=null;
+  await importOwner.query(sql('proposed/ingest_v1_incremental_receipts.sql'));
+  const next=await subsequentCandidate(adapter(importOwner),f.input,'refund');
+  importRuntime=await initialiseSubsequentImportRuntime({projectRef:'bioalckltvkhlczusdvl',databaseUrl:'postgresql://night_scout_import_login:synthetic@db.bioalckltvkhlczusdvl.supabase.co/postgres',scope:next},{createPool:o=>new Pool({...o,host:root,database:'importer_runtime',ssl:false})});
+  assert.deepEqual(await importRuntime.run(),{status:'imported_awaiting_review',coverageCertified:false,orders:0,refunds:1});
+  assert.equal((await importRuntime.run()).status,'already_imported');
+  assert.equal((await importOwner.query('SELECT count(*)::int n FROM ingest_v1.import_receipts')).rows[0].n,2);
+  console.log('PASS subsequent_runtime: dedicated LOGIN and fixed-scope refund-only import/retry');
  }finally{await importRuntime?.close();await importOwner.end();}
  // Actual restricted LOGIN and pg Pool adapter; no live Auth/project is contacted.
  await admin.query('CREATE DATABASE runtime_check');

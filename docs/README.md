@@ -1,3 +1,5 @@
+> Latest development: [first financial import prototype](first-financial-import.md), tested locally; not connected to staging.
+
 > Latest result: [the positive synthetic review flow passed end to end](staging-review-scenario.md): August restored with an audit; September remains unverified.
 
 > Latest access status: [restricted staging login and selected reviewer are provisioned and the TLS connection is verified](staging-review-access.md). Real-auth screen testing remains.

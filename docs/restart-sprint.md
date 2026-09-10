@@ -355,3 +355,7 @@ Applied exact approved test artifact to staging after project/hash/editor verifi
 ### Positive synthetic end-to-end review completed
 
 Following continuation approval, submitted the explicitly synthetic completeness statement through the real signed-in August review screen. Browser success confirmed independently: one correct-reviewer audit with snapshot/digest, August A true and linked to audit, September A false, B unchanged, amounts unchanged. This completes the positive synthetic flow, not real merchant validation. See staging-review-scenario.md. Next: source-to-evidence import implementation and additional failure-path acceptance checks; no production release.
+
+### First financial-record importer — local only
+
+Added a transactional first-import writer using the retained current candidate, recomputed mapping and source-version checks. Inserts raw sale/refund rows plus matching evidence; creates only false completeness coverage. Refuses nonempty stores, stale/blocked/excluded candidates and overwrites. Focused tests pass for reconciliation, later-period refunds, other-store isolation, replay refusal and full rollback. See first-financial-import.md for limitations. No remote application or new permissions. Next: extend acceptance tests and design dedicated importer permissions/audit before any staging invocation; incremental imports remain unsupported.

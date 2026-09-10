@@ -1,4 +1,4 @@
-# Staging review package — ready for approval, not applied
+# Staging review package — applied and verified 10 September 2026
 
 Target: **Night Scout Staging**, project **bioalckltvkhlczusdvl**. The original project futkktdebdygsdrcknpr is excluded. This is a database-only package; no production deployment, merge or Replit sync is included.
 
@@ -34,4 +34,19 @@ A failure inside the transaction rolls the entire package back, including the ne
 
 For the subsequent login/UI step, the concrete requirements are: a dedicated NOINHERIT, non-privileged review login granted only the review role; a strong private credential held outside Git; explicit reviewer assignment to an existing synthetic-store member; the four dedicated server variables; matching staging frontend/Auth target; same-origin API routing; request/deployment limits; then verified prepare/restore/revocation tests. No production user or merchant-data import is included. Credentials should never be pasted into this document or public GitHub.
 
-Standing approval in AGENTS.md covers draft uploads but excludes applying database migrations. This exact staging package therefore awaits Paul's approval.
+Paul explicitly approved this exact staging package on 10 September 2026. Application and verification are recorded below.
+
+## Actual staging application — 10 September 2026
+
+Applied only to Night Scout Staging `bioalckltvkhlczusdvl` through its authenticated SQL editor after explicit approval. The preflight was run as a single JSON result containing the committed preflight checks: no intake schema or review roles, required finance objects present, exactly the two expected synthetic stores/orders, GBP/Europe-London stores, and four complete August/September coverage periods.
+
+The full editor content was copied back and compared byte-for-byte with the approved SQL artifact; its SHA-256 matched the value above. Execution returned “Success. No rows returned”. Postflight combined the committed verification queries into one JSON result and confirmed:
+
+- All five intake/review tables have RLS enabled.
+- Only the non-login review service role exists; all privileged role attributes and inheritance are false.
+- Only the fixed lock helper is a definer function; no internal function is executable by anon/authenticated.
+- Candidate batches, reviewer assignments and audit rows are all zero.
+- Source mutation, self-grant and audit-mutation privileges are false.
+- All four coverage flags remain true. Existing order gross/net/total sales remain GBP 123 and GBP 987.
+
+No login, credential, reviewer assignment, candidate import or API enablement was performed. No production, original-project, Replit or main-branch change was made. A fresh real-user UI/RPC end-to-end check was not part of this database-only application. Next: prepare dedicated staging runtime access and reviewer provisioning, then test the complete review flow using synthetic data.

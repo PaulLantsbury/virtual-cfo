@@ -41,7 +41,8 @@ export function createFinancialReviewRouter(service?: ReviewService): IRouter {
     const e=(error??{}) as {message?: string;code?: string};
     if(['Reviewer sign-in required','Reviewer sign-in could not be verified'].includes(e.message??'')){res.status(401).json({error:'Reviewer sign-in could not be verified'});return;}
     if(e.message==='Reviewer is not authorised for this store'){res.status(403).json({error:'Review access unavailable'});return;}
-    if(['Review snapshot changed; prepare a new review','Financial reconciliation has not passed','Store or candidate period missing'].includes(e.message??'')){res.status(409).json({error:'Prepare a new review before continuing'});return;}
+    if(e.message==='Store or candidate period missing'){res.status(409).json({code:'REVIEW_DATA_MISSING',error:'No imported transactions are ready for this period'});return;}
+    if(['Review snapshot changed; prepare a new review','Financial reconciliation has not passed'].includes(e.message??'')){res.status(409).json({error:'Prepare a new review before continuing'});return;}
     res.status(503).json({error:'Review could not be completed; check its status before retrying'});
    }
   });

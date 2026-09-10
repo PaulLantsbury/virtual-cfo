@@ -54,3 +54,9 @@ test('HTTP review uses verified identity and restricted database service through
  await db.exec('RESET ROLE');assert.equal((await read()).netProductSales,12300);
  }finally{await db.close();}
 });
+
+test('missing candidate data gives a distinct safe action instead of a stale-review loop',async()=>{
+ await server({prepare:async()=>{throw new Error('Store or candidate period missing');},restore:async()=>{}},async request=>{
+  const r=await request('prepare',{scope});assert.equal(r.status,409);assert.equal(JSON.parse(r.text).code,'REVIEW_DATA_MISSING');
+ });
+});

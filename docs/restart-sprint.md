@@ -311,3 +311,9 @@ See review-http-integration.md. Next: verified same-environment Auth client/data
 Added explicit same-project Auth/direct-database validation, restricted username and verified TLS options, bounded Auth fetch/response size, dedicated pool transaction handling and startup permission checks. Uncertain commits are not retried and their connections are discarded. See review-server-runtime.md for supported configurations and remaining deployment checks.
 
 61 Shopify tests pass; standalone PostgreSQL passes the seven concurrency scenarios plus a new real restricted-login/pg-Pool prepare-and-restore case with synthetic Auth. The app route remains disabled. Next: explicit server runtime enablement/readiness, reviewer UI and a concrete staging configuration plan. No live database/Auth changes, Replit sync or production release.
+
+## 10 September — API startup and reviewer screen
+
+Connected explicit default-off runtime startup to the API router and added the protected /financial-review screen. Independent evidence/confirmation is required after a passing review; dates/account changes clear approvals and stale/uncertain responses never auto-retry restoration. Direct API dependencies use existing pinned workspace versions and are recorded in the lockfile.
+
+Two startup, four HTTP and four isolated browser groups pass; full type checking and API/frontend builds pass with documented build warnings. Browser/Auth responses remain synthetic. See review-screen-startup.md. Next: concrete staging migration/login/enablement plan, same-origin UI/API setup and real staging end-to-end verification after approval. Nothing was applied to Supabase or released to production.

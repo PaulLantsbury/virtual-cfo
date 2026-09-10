@@ -21,3 +21,13 @@ The proposed NOLOGIN/NOINHERIT role can read required source/candidate/evidence 
 Four focused test groups pass, including actual SET LOCAL ROLE import success and denial of certification, source overwrite/delete/truncate, clearing recheck and granting role membership. A dedicated login, route, credentials and remote setup remain absent. Repeat imports are still explicitly refused pending audited idempotency design.
 
 Full regression after this change: 65 Shopify/source/review tests pass.
+
+## Safe repeat requests — local proposal
+
+The new ingest_v1_import_receipts.sql follows the importer-role proposal. A receipt is written in the same transaction as the financial rows; its primary key and scope foreign key bind it to one candidate batch. Receipts retain the candidate fingerprint, counts and completion time and reject update/delete/truncate. The importer role can read/append but cannot mutate history. This records a technical import, not a human review or proof that present-day figures are still correct.
+
+Under the existing dependency locks, a retry checks for a matching receipt before inspecting the current candidate head or inserting rows. It returns already_imported with original counts and never changes records, verification flags or recheck state. Fingerprint inconsistency is refused. Changed/new batches still cannot overwrite an occupied store. No automatic retry follows an uncertain commit; a later explicit retry can inspect the committed receipt.
+
+Six focused groups pass, including restricted-role retry, one-receipt behaviour, preserving subsequently verified or invalidated status, append-only enforcement and rolling back records if receipt writing fails. Actual concurrent importer connections have not yet been exercised in standalone PostgreSQL; that is the next verification step. These changes remain local/draft only, with no staging migration or runtime enablement.
+
+Full regression after retry support: 67 Shopify/source/review tests pass.

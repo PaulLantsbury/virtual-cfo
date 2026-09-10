@@ -379,3 +379,7 @@ Composed guarded atomic role/receipt package with hash and read-only verificatio
 ### Approved importer package applied to staging
 
 Confirmed target, expected preflight and exact hash/editor contents, then applied approved package. Postflight permissions/RLS/immutability checks pass; zero receipts and no importer login. Amounts, coverage/evidence references and single review audit unchanged. See staging-import-package.md. Importer remains disabled; next is controlled invocation and a separate empty synthetic-store scenario. No production/Replit changes.
+
+### Controlled importer runtime verified locally
+
+Added staging-bound explicit runtime configuration, dedicated login checks, frozen batch scope, pool lifecycle and safe uncertain-commit handling. Three unit groups and twelve standalone PostgreSQL cases pass including dedicated importer LOGIN/Pool first import and receipt retry. No staging changes. Next: generate/test exact third-store candidate and private importer-login provisioning package described in importer-runtime.md; do not seed financial rows or automatically grant user membership.

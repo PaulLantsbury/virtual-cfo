@@ -339,3 +339,7 @@ Confirmed the selected existing sign-in is a member of test store A; provisioned
 ### 10 September — connected local review preview
 
 Isolated loopback review server implemented; two tests pass. Real restricted runtime readiness passed and the separate port-3001 frontend routes reviews to port 4001. Missing-token request correctly returned 401. Port 3000 unchanged. User asked to sign in interactively to port 3001; authenticated review and candidate-data scenario remain pending. Private launcher/config outside Git; details in staging-review-access.md.
+
+### Connected preview consolidated onto port 3000
+
+Stopped the two identified local preview processes and restarted the private launcher with frontend origin/port 3000 and review API 4001. This preserves the existing browser sign-in and avoids the extra port-3001 login. The authenticated financial-review screen loaded test store A; preparing August 2026 returned the safe evidence-needs-attention response. The empty candidate schema means a successful review is not yet possible. The message currently conflates missing candidate data with stale evidence and should be clarified before the next test. No restoration, candidate import or finance-row change was performed. Next: explicit synthetic candidate scenario, then full review/restoration validation.

@@ -13,3 +13,7 @@ Local application work does not require changes to live Supabase or Replit. Prep
 Paul explicitly requested fewer repeated approval prompts and authorised routine Night Scout development uploads to the public GitHub repository PaulLantsbury/virtual-cfo, branch codex/restart-baseline and its existing draft PR. This includes subsequent code, tests, synthetic fixtures, schema proposals, specifications, architecture/implementation documents and handovers within the requested work. Do not ask for fresh approval merely because a routine package is new.
 
 Keep credentials, secrets and real customer data out of public uploads. This standing publication approval does not authorise merging, production releases, applying database migrations, destructive operations or publishing to other repositories. Respect managed tool restrictions; report a genuine block rather than bypassing it.
+
+## Working cadence — 10 September 2026
+
+Paul asked to proceed automatically through agreed implementation and verification steps rather than stopping for repeated “continue” prompts. Continue within established decisions and authorisation; keep concise progress updates. Pause for Paul’s decisions about product behaviour, financial rules, scope, spending or deployment, and retain the database/production approval boundaries above. Prepare concrete packages before asking, and bundle related test/setup actions into one reviewable request when possible.

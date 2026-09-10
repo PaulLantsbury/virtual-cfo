@@ -383,3 +383,7 @@ Confirmed target, expected preflight and exact hash/editor contents, then applie
 ### Controlled importer runtime verified locally
 
 Added staging-bound explicit runtime configuration, dedicated login checks, frozen batch scope, pool lifecycle and safe uncertain-commit handling. Three unit groups and twelve standalone PostgreSQL cases pass including dedicated importer LOGIN/Pool first import and receipt retry. No staging changes. Next: generate/test exact third-store candidate and private importer-login provisioning package described in importer-runtime.md; do not seed financial rows or automatically grant user membership.
+
+### Store C and importer-login package prepared
+
+Exact deterministic seed adds only new synthetic store/candidate history. Private login SQL generator enforces staging, constrained password handling, isolated role, one connection and refuses replay. Two package tests pass including restricted import/retry and rollback. Nothing applied remotely. See staging-import-run.md for one bundled approval covering seed, private login, first import/retry and postverification; no review/restoration or A/B changes. Working cadence preference recorded in AGENTS.md.

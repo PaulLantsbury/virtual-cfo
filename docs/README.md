@@ -1,3 +1,5 @@
+> Next approval: [bounded staging first-import run](staging-import-run.md), covering store C, dedicated private login, one import and one retry. Prepared and tested; not applied.
+
 > Latest development: [controlled one-batch importer runtime](importer-runtime.md), verified locally with a dedicated database login. Staging provisioning remains pending.
 
 > Latest staging status: [importer database installation applied and verified](staging-import-package.md). Importer remains disabled; no login or data import.

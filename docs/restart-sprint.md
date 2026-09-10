@@ -359,3 +359,7 @@ Following continuation approval, submitted the explicitly synthetic completeness
 ### First financial-record importer — local only
 
 Added a transactional first-import writer using the retained current candidate, recomputed mapping and source-version checks. Inserts raw sale/refund rows plus matching evidence; creates only false completeness coverage. Refuses nonempty stores, stale/blocked/excluded candidates and overwrites. Focused tests pass for reconciliation, later-period refunds, other-store isolation, replay refusal and full rollback. See first-financial-import.md for limitations. No remote application or new permissions. Next: extend acceptance tests and design dedicated importer permissions/audit before any staging invocation; incremental imports remain unsupported.
+
+### Restricted importer capability — local only
+
+Added proposed non-login importer role with insert-only raw/evidence permissions, false-only coverage policies and true-only recheck updates; fixed lock helper avoids source write grants. Import succeeds under the role; tests deny certification, source overwrite/deletion/truncation, clearing recheck and permission grants. No staging changes or credentials. Next: importer audit/idempotency design and retry support before preparing any remote package.

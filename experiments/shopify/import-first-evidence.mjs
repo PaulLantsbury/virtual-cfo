@@ -10,7 +10,7 @@ const sourceId=(id,type)=>{check(new RegExp(`^gid://shopify/${type}/[1-9][0-9]*$
 export async function importFirstEvidence(db,{storeId,from,to,batchId}){
  return db.transaction(async tx=>{
   await tx.query("SET LOCAL lock_timeout='5s'");
-  await tx.query('LOCK TABLE public.stores,public.orders,public.refunds,finance_v1.order_evidence,finance_v1.refund_evidence,finance_v1.coverage_evidence,ingest_v1.source_versions,ingest_v1.batches,ingest_v1.heads IN SHARE ROW EXCLUSIVE MODE');
+  await tx.query('SELECT ingest_v1.lock_import_dependencies()');
   const {rows:stores}=await tx.query('SELECT * FROM public.stores WHERE id=$1',[storeId]);
   const {rows:heads}=await tx.query('SELECT b.payload,h.batch_id FROM ingest_v1.heads h JOIN ingest_v1.batches b ON b.id=h.batch_id WHERE h.store_id=$1 AND h.date_from=$2 AND h.date_to=$3',[storeId,from,to]);
   check(stores.length===1&&heads.length===1&&heads[0].batch_id===batchId,'Candidate changed or missing');

@@ -6,8 +6,18 @@ The writer locks source/settings/candidate/evidence dependencies, confirms the r
 
 Original successful sale/refund timestamps populate raw event times. Store-local event dates, actual tax components and matching raw snapshots populate evidence. The original net product amount is stored before later refunds; refund payments stay separate. Historic costs are not invented. The first coverage row is always false: matching transaction evidence does not establish completeness. Although the existing mapping view calls matching evidence 'verified', public financial completeness remains false until independent review. Existing legacy aggregate columns are not a new certification of older dashboard calculations.
 
-The trusted administrative caller supplies the transaction database. The restricted review login must not be used or expanded to run this importer. Dedicated importer permissions, invocation/authentication, batch/import audit linkage, incremental updates and source-to-customer/product/order-item mapping remain future work. No staging or production data was changed by this package.
+The trusted administrative caller supplies the transaction database. The restricted review login must not be used or expanded to run this importer. Remote importer provisioning, invocation/authentication, batch/import audit linkage, incremental updates and source-to-customer/product/order-item mapping remain future work. No staging or production data was changed by this package.
 
 Focused tests cover import/reconciliation with February sale and March refund, coverage remaining false, other-store preservation, replay refusal, stale source refusal, and late-error rollback of all inserted records/evidence.
 
 The full Shopify/source/review suite passes: 64 tests, including the three new import groups.
+
+## Restricted importer role — local proposal
+
+The importer now uses a fixed lock-only definer helper so it does not need source UPDATE privileges simply to acquire transaction locks. Apply the new proposed ingest_v1_import_service.sql in disposable environments before using this version. No migration has been applied remotely.
+
+The proposed NOLOGIN/NOINHERIT role can read required source/candidate/evidence tables and insert raw records/evidence. Coverage insertion/update is constrained by RLS to false; head updates can only require recheck. These update grants allow existing invoker invalidation triggers to work while prohibiting restoration. Raw updates/deletes/truncates, permission grants and candidate writes are not granted. This is a trusted internal capability across stores, not a tenant-facing authorisation boundary; it can insert records or invalidate coverage and must remain behind a separately reviewed service. Database grants do not enforce the application's empty-store rule by themselves.
+
+Four focused test groups pass, including actual SET LOCAL ROLE import success and denial of certification, source overwrite/delete/truncate, clearing recheck and granting role membership. A dedicated login, route, credentials and remote setup remain absent. Repeat imports are still explicitly refused pending audited idempotency design.
+
+Full regression after this change: 65 Shopify/source/review tests pass.

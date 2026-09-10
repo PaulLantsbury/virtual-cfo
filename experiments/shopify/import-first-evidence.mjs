@@ -11,8 +11,15 @@ export async function importFirstEvidence(db,{storeId,from,to,batchId}){
  return db.transaction(async tx=>{
   await tx.query("SET LOCAL lock_timeout='5s'");
   await tx.query('SELECT ingest_v1.lock_import_dependencies()');
+  // Receipt means only that this batch committed previously, not that current
+  // financial records remain unchanged or verified. Never rewrite on retry.
+  const {rows:receipts}=await tx.query('SELECT r.*,b.fingerprint FROM ingest_v1.import_receipts r JOIN ingest_v1.batches b ON b.id=r.batch_id WHERE r.batch_id=$1 AND r.store_id=$2 AND r.date_from=$3 AND r.date_to=$4',[batchId,storeId,from,to]);
+  if(receipts.length){
+   const r=receipts[0];check(r.source_fingerprint===r.fingerprint,'Imported batch fingerprint changed');
+   return {status:'already_imported',coverageCertified:false,orders:r.order_count,refunds:r.refund_count};
+  }
   const {rows:stores}=await tx.query('SELECT * FROM public.stores WHERE id=$1',[storeId]);
-  const {rows:heads}=await tx.query('SELECT b.payload,h.batch_id FROM ingest_v1.heads h JOIN ingest_v1.batches b ON b.id=h.batch_id WHERE h.store_id=$1 AND h.date_from=$2 AND h.date_to=$3',[storeId,from,to]);
+  const {rows:heads}=await tx.query('SELECT b.payload,b.fingerprint,h.batch_id FROM ingest_v1.heads h JOIN ingest_v1.batches b ON b.id=h.batch_id WHERE h.store_id=$1 AND h.date_from=$2 AND h.date_to=$3',[storeId,from,to]);
   check(stores.length===1&&heads.length===1&&heads[0].batch_id===batchId,'Candidate changed or missing');
   const store=stores[0],source=heads[0].payload.source;
   check(source.scope.storeId===storeId&&source.scope.from===from&&source.scope.to===to,'Candidate scope mismatch');
@@ -37,6 +44,7 @@ export async function importFirstEvidence(db,{storeId,from,to,batchId}){
    await tx.query("INSERT INTO finance_v1.refund_evidence(store_id,refund_id,order_id,observed_raw,event_date,currency,product_cash,product_vat,shipping_cash,shipping_vat,evidence_ref,verified_by) SELECT $1,$2,$3,current_snapshot,$4,$5,$6,$7,$8,$9,$10,'source-mapper-v1' FROM finance_v1.refund_mapping WHERE store_id=$1 AND id=$2",[storeId,rows[0].id,ids.get(e.orderId),e.date,e.currency,money(e.productCash),money(e.productVat),money(e.shippingCash),money(e.shippingVat),ref]);
   }
   await tx.query("INSERT INTO finance_v1.coverage_evidence(store_id,date_from,date_to,currency,sales_and_refunds_complete,evidence_ref,verified_by) VALUES($1,$2,$3,$4,false,$5,'source-mapper-v1')",[storeId,from,to,source.settings.currency,ref]);
+  await tx.query('INSERT INTO ingest_v1.import_receipts(batch_id,store_id,date_from,date_to,source_fingerprint,order_count,refund_count) VALUES($1,$2,$3,$4,$5,$6,$7)',[batchId,storeId,from,to,heads[0].fingerprint,ids.size,mapped.events.filter(e=>e.type==='refund').length]);
   return {status:'imported_awaiting_review',coverageCertified:false,orders:ids.size,refunds:mapped.events.filter(e=>e.type==='refund').length};
  });
 }

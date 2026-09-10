@@ -363,3 +363,7 @@ Added a transactional first-import writer using the retained current candidate, 
 ### Restricted importer capability — local only
 
 Added proposed non-login importer role with insert-only raw/evidence permissions, false-only coverage policies and true-only recheck updates; fixed lock helper avoids source write grants. Import succeeds under the role; tests deny certification, source overwrite/deletion/truncation, clearing recheck and permission grants. No staging changes or credentials. Next: importer audit/idempotency design and retry support before preparing any remote package.
+
+### Import retry receipt — local only
+
+Added atomic append-only receipt bound to candidate scope/fingerprint. Explicit repeats return historical completion counts without inserting duplicates or changing current verification. Receipt failure rolls all financial inserts back. Six focused groups pass. No remote migration. Next: standalone PostgreSQL concurrent-retry/uncertain-response checks and complete importer deployment package; changed-data incremental imports remain unsupported.

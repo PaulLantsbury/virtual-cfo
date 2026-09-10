@@ -28,6 +28,14 @@ The new ingest_v1_import_receipts.sql follows the importer-role proposal. A rece
 
 Under the existing dependency locks, a retry checks for a matching receipt before inspecting the current candidate head or inserting rows. It returns already_imported with original counts and never changes records, verification flags or recheck state. Fingerprint inconsistency is refused. Changed/new batches still cannot overwrite an occupied store. No automatic retry follows an uncertain commit; a later explicit retry can inspect the committed receipt.
 
-Six focused groups pass, including restricted-role retry, one-receipt behaviour, preserving subsequently verified or invalidated status, append-only enforcement and rolling back records if receipt writing fails. Actual concurrent importer connections have not yet been exercised in standalone PostgreSQL; that is the next verification step. These changes remain local/draft only, with no staging migration or runtime enablement.
+Six focused groups pass, including restricted-role retry, one-receipt behaviour, preserving subsequently verified or invalidated status, append-only enforcement and rolling back records if receipt writing fails. Concurrent importer connections are now verified as recorded below. These changes remain local/draft only, with no staging migration or runtime enablement.
 
 Full regression after retry support: 67 Shopify/source/review tests pass.
+
+## Standalone PostgreSQL retry verification
+
+The disposable PostgreSQL 18.4 harness now includes two importer cases using independent connections and SET LOCAL ROLE night_scout_import_service. An observer confirms a real lock wait rather than relying on timing. Simultaneous same-batch imports yield one import plus one already_imported response. In the second case the first backend is terminated after writing raw/evidence/coverage rows but before the receipt/commit; the waiting request then completes one clean import. Both finish with exactly one order, refund and receipt, and false completeness.
+
+Discarding a successful return and explicitly retrying also yields already_imported. This models a caller losing the result; it is not a network fault injected into COMMIT itself. No automatic mutation retries were added.
+
+All eleven standalone checks pass: exact staging package, seven review concurrency scenarios, two importer scenarios and restricted review-login runtime. The temporary cluster was shut down and removed. Six importer tests pass after extracting the shared fixture. No staging connection or data was used. Next: prepare the complete reviewed importer deployment package and invocation boundary; incremental changed-data imports remain unsupported.

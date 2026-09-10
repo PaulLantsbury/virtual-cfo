@@ -1,6 +1,7 @@
 // Opt-in standalone PostgreSQL test. Creates and removes its own temporary cluster.
 // Never reads DATABASE_URL or connects to an existing database/server.
 import assert from 'node:assert/strict';
+import {runImportChecks} from './import-concurrency.mjs';
 import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
@@ -85,6 +86,7 @@ try{
    console.log(`PASS ${name}: observed lock wait, final coverage and audit checked`);
   }finally{await Promise.all([reviewer.end(),writer.end(),observer.end()]);}
  }
+ await runImportChecks({admin,connect,adapter,waiting});
  // Actual restricted LOGIN and pg Pool adapter; no live Auth/project is contacted.
  await admin.query('CREATE DATABASE runtime_check');
  const owner=await connect('runtime_check');let runtime;

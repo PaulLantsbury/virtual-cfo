@@ -299,3 +299,9 @@ Paul stopped development for today. Read session-handover-2026-09-09.md before r
 Resumed from the 9 September handover. Added a local-only non-login internal review role with explicit read/append/column-update grants and RLS policies. A fixed argument-free definer helper acquires dependency locks without granting source mutation rights. Authenticated preparation now checks explicit reviewer authorisation before inspecting a candidate. See review-service-permissions.md for the trust boundary and deliberate definer exception.
 
 56 tests pass, plus all seven independent PostgreSQL contention cases rerun with restricted-role restoration. No live role/login provisioning, migration, Replit sync, merge or production release. Next: server client/pool environment matching, bounded authentication requests and safe HTTP integration before a reviewer UI and staging enablement.
+
+## 10 September — review HTTP boundary
+
+Added a default-disabled API review router and trusted composition with the existing authenticated review helpers. Strict input/size/type checks precede service access, responses are non-cacheable, and fixed error messages avoid exposing SQL/upstream details. Four loopback HTTP groups pass, including actual prepare/restore through restricted-role synthetic database fixtures; API type checking and build pass. The initial sandbox listener failure was resolved by running with loopback permission.
+
+See review-http-integration.md. Next: verified same-environment Auth client/database pool with bounded requests, deployment request controls and reviewer UI. The mounted endpoint stays 503 until explicitly composed with verified dependencies. No Supabase, Replit or production changes.

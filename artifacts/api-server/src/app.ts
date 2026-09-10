@@ -2,6 +2,7 @@ import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
+import financialReviewRouter from "./routes/financial-reviews";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
@@ -26,6 +27,8 @@ app.use(
   }),
 );
 app.use(cors());
+// Mount before general body parsing so review limits and safe errors apply.
+app.use("/api/financial-reviews", financialReviewRouter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -1,3 +1,4 @@
+import {importSubsequentEvidence} from './import-subsequent-evidence.mjs';
 import {importFirstEvidence} from './import-first-evidence.mjs';
 const valid=(ok)=>{if(!ok)throw new Error('Importer configuration is invalid');};
 /** Staging-only, operator-configured one-batch runner. No HTTP or environment reads. */
@@ -18,7 +19,9 @@ export function importDatabase(pool){return {transaction:async fn=>{
  catch(e){discard=committing;try{await client.query('ROLLBACK');}catch{discard=true;}throw e;}
  finally{client.release(discard);}
 }};}
-export async function initialiseImportRuntime(config,{createPool}){
+export const initialiseImportRuntime=(config,deps)=>initialiseRuntime(config,deps,importFirstEvidence);
+export const initialiseSubsequentImportRuntime=(config,deps)=>initialiseRuntime(config,deps,importSubsequentEvidence);
+async function initialiseRuntime(config,{createPool},writer){
  const options=importConnectionOptions(config);let pool;
  try{
  pool=createPool(options.pool);const db=importDatabase(pool);
@@ -30,6 +33,6 @@ export async function initialiseImportRuntime(config,{createPool}){
  const r=rows[0];valid(rows.length===1&&r.role==='night_scout_import_service'&&r.safe_login===true&&r.unsafe_writes===false&&r.lock_ready===true);
  await tx.query('SELECT batch_id FROM ingest_v1.import_receipts LIMIT 0');
  });
- return {run:async()=>{try{return await importFirstEvidence(db,options.scope);}catch{throw new Error('Import outcome could not be confirmed; inspect receipt before retrying');}},close:()=>pool.end()};
+ return {run:async()=>{try{return await writer(db,options.scope);}catch{throw new Error('Import outcome could not be confirmed; inspect receipt before retrying');}},close:()=>pool.end()};
  }catch{try{await pool?.end();}catch{}throw new Error('Importer could not be initialised');}
 }

@@ -327,3 +327,7 @@ Status: ready for approval, NOT applied. It adds schema/triggers/restricted non-
 ### 10 September — approved staging review package applied
 
 Paul approved the exact database package. Applied to bioalckltvkhlczusdvl after matching preflight and byte-for-byte editor verification. Five RLS-protected tables and restricted non-login role verified; no public/member internal execution or source/self-grant/audit mutation permissions. Zero candidate/reviewer/audit rows. Four existing coverage flags remain true and synthetic order amounts remain GBP 123/987. See staging-review-package-2026-09-10.md for full execution record. API still disabled; no login/reviewer provisioning, production deployment, merge or Replit update. Next work is the dedicated staging runtime/reviewer setup and real-auth synthetic end-to-end check.
+
+### 10 September — local review connection prepared
+
+Added opt-in loopback-only Vite proxy for the review API, with route boundaries, port checks and bounded forwarding. Two connection tests and frontend type checking pass. No live server enablement, credential, reviewer assignment or candidate import yet. Next is direct staging connectivity and dedicated runtime/reviewer provisioning, then real-auth synthetic review checks. See review-screen-startup.md.

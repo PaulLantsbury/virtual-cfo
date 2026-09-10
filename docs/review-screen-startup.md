@@ -28,3 +28,11 @@ The route is available directly; it is not yet added to ordinary merchant naviga
 - Browser responses were synthetic and all non-preview traffic was mocked/blocked. The screen was visually inspected in an isolated browser. No live Supabase authentication, migration or restoration was exercised.
 
 Next: prepare the exact staging migration/login/enablement plan and review deployment request limits/origin controls. After approval, provision only the staging role/login, verify real Auth plus the same-origin UI/API path and test the review end to end. Source-to-authoritative-evidence importing and wider financial product work remain unfinished. No Replit sync, merge or production release occurred.
+
+## Local same-origin connection — 10 September follow-up
+
+Vite dev/preview now support explicit `NIGHT_SCOUT_LOCAL_REVIEW_API_PORT` for the review route only. With it set, Vite binds to 127.0.0.1, retains host checks, and forwards only `/api/financial-reviews` (or its descendants) to the specified loopback port. Remote destinations, invalid ports and self-proxying to the configured frontend port are rejected. No database credential enters frontend configuration. Forwarding deadlines are 35 seconds, below the screen's 40-second wait. This option does not enable the API or create any access grants. Existing Replit behaviour remains unchanged when the option is absent.
+
+Two tests pass, including a real temporary Vite-to-HTTP-server request verifying bearer/body forwarding and route isolation. Frontend type checking passes. Initial execution could not bind a local socket under the sandbox; the same test passed with approved local-server execution. Test servers were stopped. The running preview has not been restarted or enabled, and real staging Auth/database transport remains unverified.
+
+Next: check direct staging database connectivity, prepare a dedicated private credential and explicit test-member reviewer assignment, then enable the server and local proxy together. A candidate batch and matching evidence are needed for a successful review; the newly applied database package intentionally created neither. Do not describe an empty review screen as a completed end-to-end financial test.

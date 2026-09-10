@@ -1,3 +1,5 @@
+> Next action: [review the staging importer installation package](staging-import-package.md). Tested and ready; not applied.
+
 > Latest development: [first financial import prototype](first-financial-import.md), tested locally; not connected to staging.
 
 > Latest result: [the positive synthetic review flow passed end to end](staging-review-scenario.md): August restored with an audit; September remains unverified.

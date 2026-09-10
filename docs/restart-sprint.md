@@ -343,3 +343,7 @@ Isolated loopback review server implemented; two tests pass. Real restricted run
 ### Connected preview consolidated onto port 3000
 
 Stopped the two identified local preview processes and restarted the private launcher with frontend origin/port 3000 and review API 4001. This preserves the existing browser sign-in and avoids the extra port-3001 login. The authenticated financial-review screen loaded test store A; preparing August 2026 returned the safe evidence-needs-attention response. The empty candidate schema means a successful review is not yet possible. The message currently conflates missing candidate data with stale evidence and should be clarified before the next test. No restoration, candidate import or finance-row change was performed. Next: explicit synthetic candidate scenario, then full review/restoration validation.
+
+### Synthetic review scenario prepared; application pending
+
+Prepared deterministic staging-only test package to normalise test store A's placeholder source identities and add a matching August candidate. Amounts/evidence stay unchanged; both A coverage periods are intentionally revoked by existing triggers, B untouched. Two exact-artifact/rollback tests pass. Fixed the misleading missing-candidate message; five HTTP groups and frontend type checking pass. See staging-review-scenario.md for hash/scope and execution plan. Not applied; API restart pending for message change.

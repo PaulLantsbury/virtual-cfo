@@ -29,7 +29,12 @@ export default function FinancialReviewPage(){
    if(!response.ok){
     if(response.status===401)throw new Error('Please sign in again before reviewing.');
     if(response.status===403)throw new Error('You do not have permission to review this store. Ask your administrator.');
-    if(response.status===409)throw new Error('The evidence has changed or needs attention. Prepare a new review.');
+    if(response.status===409){
+     const detail=await response.json().catch(()=>null);
+     if(current!==generation.current)return;
+     if(detail?.code==='REVIEW_DATA_MISSING')throw new Error('No imported transactions are ready for this period. Load the transaction data before preparing a review.');
+     throw new Error('The evidence has changed or needs attention. Prepare a new review.');
+    }
     throw new Error(action==='restore'?'Restoration could not be confirmed. Check the period’s status before trying again.':'The review service is unavailable. No financial records have been changed.');
    }
    const result=await response.json();

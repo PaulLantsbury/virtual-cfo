@@ -1,6 +1,6 @@
-# March/April refund-only reviews — ready for staging approval
+# March/April refund-only reviews — applied and verified
 
-10 September 2026. Local implementation and exact package tests complete; not applied remotely.
+10 September 2026. Applied to staging with Paul’s explicit approval and verified through the signed-in screen.
 
 ## Proposed bounded run
 
@@ -27,3 +27,11 @@ The selected-period summary uses the existing mapped candidate calculation only 
 Two exact-package disposable-database groups pass: independent March/April preparation and correct negative results, preserved February values, unchanged orders/refunds/evidence/receipts/source versions/access/audits and existing coverage, replay rejection, rollback and changed-source refusal. All 86 source/import/review tests pass. Six isolated browser groups pass, including both refund-only months, negative sales, zero original orders and disabled completeness approval. Frontend type checking and diff checks pass.
 
 No staging changes have been made by this package. No live Shopify account, production release, Replit sync or main merge is implied.
+
+## Actual staging execution — 10 September 2026
+
+Confirmed the actual staging project, captured a private read-only baseline, checked the artifact hash and exact SQL editor contents, and applied once. C now has three scoped heads and three false completeness records. Existing orders, refunds, financial evidence, import receipts, source versions and pre-existing coverage matched the baseline; other-store records remained unchanged. No import was rerun.
+
+Restarted the existing local review preview and selected C in the real authenticated screen. March 1–31 and April 1–30 each prepared successfully and showed net product sales GBP -20, original orders zero and refund-only activity. Linked events outside each period were correctly labelled. A February recheck showed GBP 90 and one original order. No completeness box was checked or restoration submitted. Final database check: three C periods, none complete; total review audit count remains one.
+
+The approved final work package is complete. Code and documentation are on the draft branch; production, Replit and main remain unchanged. Stop for the day and resume from the 10 September handover.

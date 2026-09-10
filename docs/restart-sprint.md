@@ -436,3 +436,8 @@ Paul approved C staging membership and reviewer access. The real signed-in port-
 Prepared two guarded review candidates and false coverage records without importing again. Selected-period evidence summary shows GBP -20, zero original orders and refund activity for each month; February stays GBP 90. Local exact-package tests prove preservation/rollback/replay refusal. 86 source/import/review tests, six browser groups and frontend type checking pass.
 
 The [staging package](staging-refund-periods.md) awaits approval. After applying and checking the connected screen, update the [10 September handover](session-handover-2026-09-10.md) and stop for the day. No completeness restoration or production/Replit/main changes are included.
+
+
+## End-of-day stop — March/April applied and verified
+
+Paul approved the final package. Applied the exact guarded script once, verified existing financial rows/evidence/receipts/source versions/coverage preservation, then checked March, April and February in the real signed-in screen. Results: -GBP 20/zero original orders for each refund-only month, GBP 90/one order for February. All three C periods remain unverified; audit count remains one and no restoration was submitted. [Final handover](session-handover-2026-09-10.md) is updated. Stop for today; no production/Replit/main changes.

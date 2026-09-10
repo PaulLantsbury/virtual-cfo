@@ -11,15 +11,15 @@ Night Scout is the commerce virtual CFO, separate from Sam. Durable source: Paul
 - Paul explicitly approved C staging membership/reviewer access. The connected review screen at http://localhost:3000/financial-review successfully showed all three events. The old port-3001 tab is stale. No C completeness review/restoration was submitted.
 - Subsequent imports are append-only and require cumulative supported source history. Changed/missing previous financial events are blocked for review. No live Shopify account is available.
 
-## Final work package — awaiting staging approval
+## Final work package — complete; stopping point
 
-March/April separate review candidates and false coverage records are built/tested locally. The selected-period screen summary explicitly shows unverified net product sales; refund-only periods display GBP -20, zero original orders and refund activity. February stays GBP 90. See [exact staging runbook](staging-refund-periods.md) for hash, guards, effects and execution checklist.
+March/April separate review candidates and false coverage records are now applied to staging with explicit approval. Verified both in the real signed-in screen: each shows GBP -20, zero original orders and refund-only activity. February remains GBP 90 with one order. All three months remain unverified. Existing financial rows, receipts, source versions and prior coverage were preserved, and review audit count remains one. See [execution record](staging-refund-periods.md#actual-staging-execution--10-september-2026).
 
-Next action is Paul's approval of that bounded staging package. Then apply once, restart the local review preview, prepare March/April through the signed-in screen, verify false completeness/unchanged financial records and audits, document the outcome and stop. Do not submit restoration or mark completeness on Paul's behalf. If deferred overnight, resume from this package without recreating imports or granting access again.
+Today's final package is complete. Do not recreate imports, reapply the guarded package, grant access again or submit completeness restoration. The connected preview remains at http://localhost:3000/financial-review, last checked on C/February. On resumption, review this handover and agree the next work package: independent completeness evidence and the path from reviewed figures into reporting remain open. No further work should start today.
 
 ## Verification checkpoint
 
-86 source/import/review tests, six isolated browser groups, two new exact-period-package groups and frontend type checking passed. Earlier standalone PostgreSQL checks passed all 15 cases, including concurrent/interrupted subsequent imports and actual restricted-login runtimes. The new period package was verified in disposable PGlite; do not imply it was already applied remotely or independently run through the standalone PostgreSQL harness.
+86 source/import/review tests, six isolated browser groups, two new exact-period-package groups and frontend type checking passed. Earlier standalone PostgreSQL checks passed all 15 cases, including concurrent/interrupted subsequent imports and actual restricted-login runtimes. The period package was verified in disposable PGlite and then applied/checked on actual staging; it was not separately run through the standalone PostgreSQL harness.
 
 ## Remaining roadmap
 

@@ -1,4 +1,4 @@
-# Staging importer installation — ready, not applied
+# Staging importer installation — applied and verified
 
 Target: Night Scout Staging bioalckltvkhlczusdvl only. Artifact: db-migrations/staging/20260910_import_setup.sql. SHA-256: 1e831db2d96027c123b1987f49c494cae0f9efbdb95946ff2471c2528e121f79.
 
@@ -13,3 +13,11 @@ A failed transaction rolls back automatically. Do not automatically drop objects
 ## Controlled invocation still to prepare
 
 After installation, keep the role non-login/unassigned until a concrete runtime is reviewed. Plan a separate private importer credential, trusted store/batch selection and readiness checks; never expose a general import endpoint to merchants or share review credentials. Test on a separately authorised empty synthetic store because existing A/B records must not be overwritten. The current importer supports first imports and exact retries; changed-data/incremental updates remain unsupported.
+
+## Actual application — 10 September 2026
+
+Paul explicitly approved this exact package. Verified the dashboard target bioalckltvkhlczusdvl and preflight absence of importer roles/receipt table/helper, two synthetic stores, amounts A123/23 and B987/87, A August true/September false, both B periods true and one review audit. Confirmed artifact checksum and exact editor copyback before execution. SQL returned success.
+
+Postflight: only the non-login importer service role exists, all privileged attributes/inheritance false; zero receipts with RLS; false-only coverage policies and true-only recheck policy present; receipt immutability trigger enabled; no raw mutation, receipt mutation, reviewer-grant or review-audit write permissions; no anon/member lock-helper execution. Repeated baseline queries confirmed unchanged amounts, all coverage flags/evidence references and one audit.
+
+No importer login, credential, role assignment, invocation or new test store was created. Runtime remains disabled. Original project, production and Replit untouched. Next is a concrete restricted invocation/login plan and an authorised empty synthetic-store import scenario.

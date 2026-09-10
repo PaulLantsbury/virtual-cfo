@@ -375,3 +375,7 @@ Independent PostgreSQL clients and observed lock waits confirm one import/receip
 ### Staging importer installation package prepared
 
 Composed guarded atomic role/receipt package with hash and read-only verification SQL. Two package tests pass for exact preservation/replay refusal and late-error rollback. No credentials, login, imports or remote changes. See staging-import-package.md for scope, expected existing coverage/audit state and remaining controlled invocation work. Next: apply exact package only after approval; importer stays disabled.
+
+### Approved importer package applied to staging
+
+Confirmed target, expected preflight and exact hash/editor contents, then applied approved package. Postflight permissions/RLS/immutability checks pass; zero receipts and no importer login. Amounts, coverage/evidence references and single review audit unchanged. See staging-import-package.md. Importer remains disabled; next is controlled invocation and a separate empty synthetic-store scenario. No production/Replit changes.

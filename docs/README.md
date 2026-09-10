@@ -1,4 +1,4 @@
-> Next action: [review the staging importer installation package](staging-import-package.md). Tested and ready; not applied.
+> Latest staging status: [importer database installation applied and verified](staging-import-package.md). Importer remains disabled; no login or data import.
 
 > Latest development: [first financial import prototype](first-financial-import.md), tested locally; not connected to staging.
 

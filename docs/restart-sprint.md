@@ -394,3 +394,10 @@ Exact deterministic seed adds only new synthetic store/candidate history. Privat
 The approved [bounded staging trial](staging-import-run.md#execution-record--10-september-2026) is complete. Store C was seeded empty, its dedicated restricted login provisioned privately, and one synthetic sale/refund imported with one immutable receipt. A confirmation retry returned already_imported and counts stayed 1/1/1. Event dates and VAT components match the retained test source; February completeness remains false. A/B amounts/coverage and the single existing review audit are unchanged. C has no memberships or reviewer authorizations. No C review or restoration was performed.
 
 Verification used the actual restricted TLS runtime and read-only database/dashboard checks. Initial invocation output was not retained; committed records were inspected before confirming the retry. No production/Replit/main changes. Next requires agreement on the next bounded work package: the current importer supports only a first import into an empty store, not incremental synchronization or live Shopify operation.
+
+
+## Subsequent-import work started — 10 September
+
+Paul approved the next work package. [Local preparation](subsequent-import-preparation.md) now compares cumulative retained source against committed import history, separates new events from unchanged events, and blocks changed/missing history. A read-only database wrapper checks current candidate/settings/source versions/receipts and raw-evidence state. Eight planner tests and two disposable-database tests pass; 78 source/import/review tests passed before the two database tests were added. No staging changes.
+
+Resume with the append-only writer and full stored-value reconciliation, then receipt constraints for refund-only/no-new-event batches, rollback/retry/concurrency checks, and a concrete staging proposal. The current runtime still supports first import only; do not present preparation as implemented incremental synchronization.

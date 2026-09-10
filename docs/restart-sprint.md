@@ -335,3 +335,7 @@ Added opt-in loopback-only Vite proxy for the review API, with route boundaries,
 ### 10 September — restricted staging access verified
 
 Confirmed the selected existing sign-in is a member of test store A; provisioned that store's reviewer assignment and a dedicated restricted login in a guarded transaction. Four local provisioning tests pass. Real direct PostgreSQL authentication and SET LOCAL ROLE succeeded using the official Supabase root CA with certificate verification enabled; no source-write/self-grant privileges. Private credential/config remain Git-ignored with 0600 access. See staging-review-access.md. No candidate import/API enablement/real-auth screen test yet. Next: review-only local server composition (avoid unrelated generic DATABASE_URL), matching public Auth configuration, and deliberate synthetic end-to-end scenario.
+
+### 10 September — connected local review preview
+
+Isolated loopback review server implemented; two tests pass. Real restricted runtime readiness passed and the separate port-3001 frontend routes reviews to port 4001. Missing-token request correctly returned 401. Port 3000 unchanged. User asked to sign in interactively to port 3001; authenticated review and candidate-data scenario remain pending. Private launcher/config outside Git; details in staging-review-access.md.

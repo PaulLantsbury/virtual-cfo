@@ -79,7 +79,7 @@ export async function inspectCandidateReview(tx,{storeId,from,to},{includeSnapsh
      shippingExVat:e.type==='sale'?e.netShipping:-(e.shippingCash-e.shippingVat),
      vat:e.type==='sale'?e.productVat+e.shippingVat:-(e.productVat+e.shippingVat),
      cash:e.type==='sale'?e.customerCharge:-(e.productCash+e.shippingCash)})).sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
-    transactionEvidence={rows:rows.slice(0,200),totalEvents:rows.length,timezone:source.settings.timezone};
+    transactionEvidence={rows:rows.slice(0,200),totalEvents:rows.length,timezone:source.settings.timezone,periodSummary:{currency:source.settings.currency,netProductSales:mapped.candidate.netProductSales,originalOrders:mapped.candidate.originalOrders,hasActivity:mapped.candidate.hasActivity}};
    }
   }catch(error){issues.push({reason:error.message});}
   return {...(includeSnapshot?{snapshot}:{}),status:issues.length?'blocked':'awaiting_independent_coverage_review',batchId:head.batch_id,scope:{storeId,from,to},snapshotDigest:digest(snapshot),issues,transactionEvidence,coverageCertified:false,figures:null};

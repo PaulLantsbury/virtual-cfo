@@ -78,3 +78,12 @@ test('transaction evidence shows original sale and later refunds without enablin
  await page.getByLabel('From',{exact:true}).fill('2026-03-01');assert.equal(await table.count(),0);
  });
 });
+test('refund-only selected period shows negative sales and activity, with no certification',async()=>{
+ await fixture({stores:[a],review:route=>response(route,{...packet(route.request().postDataJSON().scope),transactionEvidence:{rows:[{id:'refund:1',orderId:'gid://shopify/Order/1',type:'refund',date:route.request().postDataJSON().scope.from.slice(0,8)+'05',currency:'GBP',productExVat:-2000,shippingExVat:0,vat:-400,cash:-2400}],totalEvents:1,timezone:'Europe/London',periodSummary:{currency:'GBP',netProductSales:-2000,originalOrders:0,hasActivity:true}}})},async page=>{
+ await openReview(page);
+ for(const [from,to]of [['2026-03-01','2026-03-31'],['2026-04-01','2026-04-30']]){
+ await page.getByLabel('From',{exact:true}).fill(from);await page.getByLabel('To',{exact:true}).fill(to);await page.getByRole('button',{name:'Prepare review',exact:true}).click();await page.getByText('Selected period — unverified',{exact:true}).waitFor();
+ assert.equal(await page.getByText('Net product sales: -£20.00',{exact:true}).count(),1);assert.equal(await page.getByText('Original orders: 0',{exact:true}).count(),1);assert.equal(await page.getByText('Refund activity only — no new orders in this period.',{exact:true}).count(),1);assert.equal(await page.getByRole('button',{name:'Record review and restore figures'}).isEnabled(),false);
+ }
+ });
+});

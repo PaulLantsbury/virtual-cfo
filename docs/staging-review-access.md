@@ -17,3 +17,11 @@ The generated strong password/configuration is stored in .local/review-staging.j
 ## Next
 
 The app API/proxy is not enabled yet. Configure the dedicated runtime with the matching staging Auth public key and NODE_EXTRA_CA_CERTS pointing to the official certificate. Use a separate local review-only server or resolve the existing general API's DATABASE_URL dependency without reusing restricted credentials for unrelated routes. Verify runtime readiness and real Auth through the signed-in screen. The database has no candidate batches yet: a passing synthetic end-to-end review needs a deliberate candidate fixture plus matching evidence, not just a successful connection. Production/Replit remain unchanged.
+
+## Connected local preview
+
+Added review-local-server.mjs, an isolated loopback-only HTTP composition which imports no generic database/dashboard routes. It rejects unrelated browser origins, uses the existing review router's bearer/body/error checks and bounds HTTP header/request reads. Two listener tests pass for origin rejection, accepted local review forwarding and absence of unrelated API routes.
+
+A private local launcher at .local/start-review-preview.mjs composes the real restricted runtime and a separate Vite preview. It reads the two ignored configuration files (review-staging.json and review-public-config.json) and starts with NODE_EXTRA_CA_CERTS=.local/staging-root.crt. Run from the repository with Node's --experimental-strip-types. It binds the review API to 127.0.0.1:4001 and the preview to 127.0.0.1:3001, leaving the prior port-3000 preview alone. The startup permission readiness query passed against staging; a request through port 3001 without a token returned 401. No credential is passed to Vite or the browser. The frontend gets only the existing public Auth configuration.
+
+The /financial-review screen is open and awaiting the user's interactive sign-in. Real authenticated review is still pending. No candidate batch has been loaded, so successful financial restoration is not yet expected. This is a local test launcher, not a production deployment or process supervisor; a fresh machine needs private provisioning/configuration again.

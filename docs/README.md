@@ -4,6 +4,8 @@ Night Scout is the virtual CFO platform for commerce businesses. Sam is a separa
 
 ## Start here
 
+[Current next action — staging review package](staging-review-package-2026-09-10.md): exact tested database package, approval scope and read-only verification steps; not applied.
+
 [Latest checkpoint — reviewer screen and API startup](review-screen-startup.md): default-off runtime integration, protected review page and next staging preparation.
 
 [Latest 10 September checkpoint — review server runtime](review-server-runtime.md): checked connection configuration, restricted pool and next enablement/UI work.

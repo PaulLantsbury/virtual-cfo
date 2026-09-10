@@ -1,3 +1,5 @@
+> End-of-day checkpoint: [10 September handover](session-handover-2026-09-10.md). Final [March/April staging review package](staging-refund-periods.md) is tested and awaits approval; no new remote changes.
+
 > Latest connected preview: [imported transaction review display](review-transaction-display.md) shows C’s February sale and March/April refunds with VAT, linked orders and out-of-period labels. Paul has approved C staging access; no completeness review submitted.
 
 > Latest staging result: [subsequent-import trial passed](staging-subsequent-import-run.md#actual-staging-execution--10-september-2026). One April refund added to C, explicit retry created no duplicate, original records/A/B/review history unchanged. Completeness remains false.

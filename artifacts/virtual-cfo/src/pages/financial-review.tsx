@@ -6,7 +6,7 @@ import {supabase} from '@/lib/supabase';
 import {Button} from '@/components/ui/button';
 type Scope={storeId:string;from:string;to:string};
 type EvidenceRow={id:string;orderId:string;type:'sale'|'refund';date:string;currency:string;productExVat:number;shippingExVat:number;vat:number;cash:number};
-type TransactionEvidence={rows:EvidenceRow[];totalEvents:number;timezone:string};
+type TransactionEvidence={rows:EvidenceRow[];totalEvents:number;timezone:string;periodSummary?:{currency:string;netProductSales:number;originalOrders:number;hasActivity:boolean}};
 const validEvidence=(v:TransactionEvidence)=>v&&typeof v.timezone==='string'&&Number.isSafeInteger(v.totalEvents)&&v.totalEvents>=v.rows?.length&&Array.isArray(v.rows)&&v.rows.length<=200&&v.rows.every(r=>typeof r.id==='string'&&typeof r.orderId==='string'&&['sale','refund'].includes(r.type)&&/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&/^[A-Z]{3}$/.test(r.currency)&&[r.productExVat,r.shippingExVat,r.vat,r.cash].every(Number.isSafeInteger));
 const amount=(n:number,currency:string)=>new Intl.NumberFormat('en-GB',{style:'currency',currency}).format(n/100);
 const dateLabel=(v:string)=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(v+'T00:00:00Z'));
@@ -47,6 +47,8 @@ export default function FinancialReviewPage(){
    if(action==='prepare'){
     if(!same(result.scope,scope)||!['blocked','awaiting_independent_coverage_review'].includes(result.status)||typeof result.batchId!=='string'||!/^[a-f0-9]{64}$/.test(result.snapshotDigest)||!Array.isArray(result.issues))throw new Error('The review response could not be verified. Please try again.');
     if(result.transactionEvidence!=null&&!validEvidence(result.transactionEvidence))throw new Error('The transaction evidence could not be verified. Prepare a new review.');
+    const summary=result.transactionEvidence?.periodSummary;
+    if(summary&&(!/^[A-Z]{3}$/.test(summary.currency)||!Number.isSafeInteger(summary.netProductSales)||!Number.isSafeInteger(summary.originalOrders)||summary.originalOrders<0||typeof summary.hasActivity!=='boolean'))throw new Error('The period evidence could not be verified.');
     setPacket(result);setConfirmed(false);setEvidence('');setStatement('');
     setMessage(result.status==='blocked'?'The financial evidence does not yet reconcile. Resolve the differences before preparing another review.':'Transaction checks passed. Complete the independent history review below before restoring figures.');
    }else{
@@ -75,6 +77,12 @@ export default function FinancialReviewPage(){
     <h2 className="text-xl font-semibold">Imported transactions — awaiting review</h2>
     <p>These transactions match the retained import. This does not confirm that the history is complete. Later refunds stay in their own month and do not rewrite the original sale.</p>
     <p className="text-sm text-muted-foreground">Dates use {packet.transactionEvidence.timezone}. Linked events outside your selected period are included and labelled. Amounts are in the store’s currency; refunds are shown as reductions.</p>
+    {packet.transactionEvidence.periodSummary&&<div className="rounded border p-3 space-y-1" aria-label="Selected period evidence">
+     <p className="font-semibold">Selected period — unverified</p>
+     <p>Net product sales: {amount(packet.transactionEvidence.periodSummary.netProductSales,packet.transactionEvidence.periodSummary.currency)}</p>
+     <p>Original orders: {packet.transactionEvidence.periodSummary.originalOrders}</p>
+     <p>{packet.transactionEvidence.periodSummary.hasActivity?(packet.transactionEvidence.periodSummary.originalOrders===0?'Refund activity only — no new orders in this period.':'Sales or refund activity in this period.'):'No events in the retained evidence for this period; completeness remains unverified.'}</p>
+    </div>}
     <div className="overflow-x-auto"><table className="w-full text-sm text-left"><caption className="sr-only">Imported sales and refunds</caption>
      <thead><tr>{['Event date','Transaction','Original order','Product excluding VAT','Shipping excluding VAT','VAT','Customer payment / refund'].map(label=><th className="p-3 border-b" key={label} scope="col">{label}</th>)}</tr></thead>
      <tbody>{packet.transactionEvidence.rows.map(r=><tr key={r.id}>

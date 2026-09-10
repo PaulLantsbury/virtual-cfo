@@ -429,3 +429,10 @@ The approved bounded trial is complete. No production, Replit or main changes. R
 Implemented and checked [transaction evidence display](review-transaction-display.md) through the existing authorised prepare route. Reconciled rows show dates, product/shipping/VAT/cash and original order linkage; blocked evidence is withheld, later events are labelled and completeness is not inferred. 86 source/import/review tests, five isolated browser groups and frontend type checking pass.
 
 Paul approved C staging membership and reviewer access. The real signed-in port-3000 screen successfully prepared February and displayed the original sale plus March/April refunds. C completeness remains false and audit count one; no restoration submitted. Use http://localhost:3000/financial-review rather than the stale 3001 tab. Remaining work includes independent completeness evidence, separate refund-period candidate coverage, wider Shopify mappings/live connectivity, and broader reporting integration. Production/Replit/main unchanged.
+
+
+## Final package today — independent March/April reviews
+
+Prepared two guarded review candidates and false coverage records without importing again. Selected-period evidence summary shows GBP -20, zero original orders and refund activity for each month; February stays GBP 90. Local exact-package tests prove preservation/rollback/replay refusal. 86 source/import/review tests, six browser groups and frontend type checking pass.
+
+The [staging package](staging-refund-periods.md) awaits approval. After applying and checking the connected screen, update the [10 September handover](session-handover-2026-09-10.md) and stop for the day. No completeness restoration or production/Replit/main changes are included.

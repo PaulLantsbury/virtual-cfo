@@ -331,3 +331,7 @@ Paul approved the exact database package. Applied to bioalckltvkhlczusdvl after 
 ### 10 September — local review connection prepared
 
 Added opt-in loopback-only Vite proxy for the review API, with route boundaries, port checks and bounded forwarding. Two connection tests and frontend type checking pass. No live server enablement, credential, reviewer assignment or candidate import yet. Next is direct staging connectivity and dedicated runtime/reviewer provisioning, then real-auth synthetic review checks. See review-screen-startup.md.
+
+### 10 September — restricted staging access verified
+
+Confirmed the selected existing sign-in is a member of test store A; provisioned that store's reviewer assignment and a dedicated restricted login in a guarded transaction. Four local provisioning tests pass. Real direct PostgreSQL authentication and SET LOCAL ROLE succeeded using the official Supabase root CA with certificate verification enabled; no source-write/self-grant privileges. Private credential/config remain Git-ignored with 0600 access. See staging-review-access.md. No candidate import/API enablement/real-auth screen test yet. Next: review-only local server composition (avoid unrelated generic DATABASE_URL), matching public Auth configuration, and deliberate synthetic end-to-end scenario.

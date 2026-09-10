@@ -1,4 +1,6 @@
-> Latest status (10 September): the staging review database package is now applied and verified. See [application record](staging-review-package-2026-09-10.md#actual-staging-application--10-september-2026). Runtime login/reviewer provisioning and end-to-end testing remain.
+> Latest access status: [restricted staging login and selected reviewer are provisioned and the TLS connection is verified](staging-review-access.md). Real-auth screen testing remains.
+
+> Latest status (10 September): the staging review database package is now applied and verified. See [application record](staging-review-package-2026-09-10.md#actual-staging-application--10-september-2026). Runtime login/reviewer provisioning is now complete; end-to-end testing remains.
 
 # Night Scout — project guide
 

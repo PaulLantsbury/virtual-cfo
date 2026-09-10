@@ -367,3 +367,7 @@ Added proposed non-login importer role with insert-only raw/evidence permissions
 ### Import retry receipt — local only
 
 Added atomic append-only receipt bound to candidate scope/fingerprint. Explicit repeats return historical completion counts without inserting duplicates or changing current verification. Receipt failure rolls all financial inserts back. Six focused groups pass. No remote migration. Next: standalone PostgreSQL concurrent-retry/uncertain-response checks and complete importer deployment package; changed-data incremental imports remain unsupported.
+
+### Standalone importer concurrency and disconnect checks passed
+
+Independent PostgreSQL clients and observed lock waits confirm one import/receipt under simultaneous requests. Terminating the first backend after writes but before commit rolls it back and lets the waiting request finish once. Explicit retry after discarding success returns already_imported. Eleven standalone checks and six importer regression tests pass; cluster removed. No staging changes. Next: importer deployment/invocation package and auditable access boundary; incremental updates remain unsupported.

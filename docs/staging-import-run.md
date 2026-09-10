@@ -1,4 +1,4 @@
-# Staging first-import run — ready for approval
+# Staging first-import run — applied and verified
 
 ## Concrete scope
 
@@ -16,4 +16,16 @@ Before applying, verify actual dashboard project, installed importer objects, ab
 
 After provisioning, verify role attributes and only intended membership. After seed confirm C has no financial rows or user grants. After import/retry verify one C order/refund/receipt, matching evidence, false completeness and unchanged A/B records/coverage/review history. Do not change production, original Supabase project, Replit or merge the draft.
 
-Two exact-package tests pass for preservation, restricted first-import/retry, empty seed, no membership, replay refusal, login constraints and late-error rollback. Existing runtime previously passed real dedicated-login PostgreSQL checks. This newly composed seed/login package is tested locally; it has not been applied to staging. Approval is requested for the whole bounded sequence above.
+Two exact-package tests pass for preservation, restricted first-import/retry, empty seed, no membership, replay refusal, login constraints and late-error rollback. Existing runtime previously passed real dedicated-login PostgreSQL checks. The exact package was subsequently approved and applied to staging; see the execution record below.
+
+## Execution record — 10 September 2026
+
+Paul approved the bounded sequence. The exact seed hash and SQL editor content were checked before execution. Store C and its retained candidate were created successfully; C initially had zero financial rows and zero memberships. The dedicated login was provisioned with NOINHERIT, no administrative attributes, connection limit one and only night_scout_import_service membership. Credentials and generated login SQL remain private, mode 0600 and Git-ignored.
+
+The restricted runtime connected using verified TLS and the official Supabase CA. The original invocation output was unavailable after context truncation, so its committed outcome was inspected before any further attempt. The database contained exactly one C sale, refund and receipt. An explicit confirmation retry then returned already_imported, coverageCertified false, orders 1, refunds 1. Final counts remained 1/1/1. The original invocation's first/retry return values are not claimed as captured evidence.
+
+Verified stored values: sale date 2026-02-15, gross product GBP 100, discount GBP 10, VAT GBP 18, customer charge GBP 108; refund date 2026-03-05, product cash GBP 24 including GBP 4 VAT, shipping zero. Evidence retains these actual event dates and VAT components. February coverage remains false; no March coverage was created.
+
+A/B amounts remained GBP 123/23 and GBP 987/87 respectively. A August retains its existing review reference and true coverage, A September remains false, and both B periods remain true. Total review audits remains one. C has zero memberships and zero reviewer authorizations. No C human review/restoration occurred. Connections were closed after checks.
+
+This proves a bounded synthetic first import and nonduplicating retry in staging, not live Shopify connectivity, incremental updates, complete financial reporting or readiness for production. No production, original-project, Replit or main-branch changes were made. Next scope decision: agree the next import/review work package before extending this first-import-only trial.

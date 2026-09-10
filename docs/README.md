@@ -1,10 +1,4 @@
-> Next approval: [bounded staging first-import run](staging-import-run.md), covering store C, dedicated private login, one import and one retry. Prepared and tested; not applied.
-
-> Latest development: [controlled one-batch importer runtime](importer-runtime.md), verified locally with a dedicated database login. Staging provisioning remains pending.
-
-> Latest staging status: [importer database installation applied and verified](staging-import-package.md). Importer remains disabled; no login or data import.
-
-> Latest development: [first financial import prototype](first-financial-import.md), tested locally; not connected to staging.
+> Latest staging result: [bounded first import and retry passed](staging-import-run.md#execution-record--10-september-2026). Store C has one synthetic sale/refund/receipt, false completeness and no user grants. Existing A/B data and review history are unchanged. Dedicated importer login is provisioned; no continuous job or public import endpoint is enabled.
 
 > Latest result: [the positive synthetic review flow passed end to end](staging-review-scenario.md): August restored with an audit; September remains unverified.
 

@@ -1,6 +1,6 @@
 # Restart sprint — Reliable Night Scout baseline
 
-Started 8 September 2026 with Paul's approval. Work is on branch `codex/restart-baseline` in an isolated checkout based on `2cf59f6`. No live application or database changes have been made.
+Started 8 September 2026 with Paul's approval. Work is on branch `codex/restart-baseline` in an isolated checkout based on `2cf59f6`. Production remains unchanged. Later sections record explicitly approved staging database changes.
 
 ## First work package: trustworthy reporting-period states
 
@@ -387,3 +387,10 @@ Added staging-bound explicit runtime configuration, dedicated login checks, froz
 ### Store C and importer-login package prepared
 
 Exact deterministic seed adds only new synthetic store/candidate history. Private login SQL generator enforces staging, constrained password handling, isolated role, one connection and refuses replay. Two package tests pass including restricted import/retry and rollback. Nothing applied remotely. See staging-import-run.md for one bundled approval covering seed, private login, first import/retry and postverification; no review/restoration or A/B changes. Working cadence preference recorded in AGENTS.md.
+
+
+## Latest checkpoint — staging first import and retry, 10 September
+
+The approved [bounded staging trial](staging-import-run.md#execution-record--10-september-2026) is complete. Store C was seeded empty, its dedicated restricted login provisioned privately, and one synthetic sale/refund imported with one immutable receipt. A confirmation retry returned already_imported and counts stayed 1/1/1. Event dates and VAT components match the retained test source; February completeness remains false. A/B amounts/coverage and the single existing review audit are unchanged. C has no memberships or reviewer authorizations. No C review or restoration was performed.
+
+Verification used the actual restricted TLS runtime and read-only database/dashboard checks. Initial invocation output was not retained; committed records were inspected before confirming the retry. No production/Replit/main changes. Next requires agreement on the next bounded work package: the current importer supports only a first import into an empty store, not incremental synchronization or live Shopify operation.

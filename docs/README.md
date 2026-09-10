@@ -1,4 +1,4 @@
-> Next action: [approve the exact synthetic staging review scenario](staging-review-scenario.md). Prepared and tested; not applied.
+> Latest result: [synthetic staging import applied and live August reconciliation passed](staging-review-scenario.md). Final completeness confirmation/restoration remains unsubmitted.
 
 > Latest access status: [restricted staging login and selected reviewer are provisioned and the TLS connection is verified](staging-review-access.md). Real-auth screen testing remains.
 

@@ -1,4 +1,4 @@
-# Synthetic review scenario — prepared, not applied
+# Synthetic review scenario — applied and reconciled
 
 Target: Night Scout Staging bioalckltvkhlczusdvl only. Exact artifact: db-migrations/staging/20260910_review_scenario.sql. SHA-256: 4fc6665fa39ad0019e75360907b01ddd5f8b9d9972fdb578ec83ad69b8314faf.
 
@@ -11,3 +11,9 @@ The script locks dependencies and refuses unexpected source identifiers, amounts
 Separately fixed the missing-candidate API response with REVIEW_DATA_MISSING and a clear screen instruction to load transactions first. Five HTTP groups and frontend type checking pass. The running review API still needs restart to load that response change.
 
 Application remains pending approval under the repository's remote-database change boundary. After approval: confirm dashboard project, copy/compare exact script, execute once, verify both stores' amounts/coverage, prepare August through the existing signed-in screen on localhost:3000, and inspect the candidate before any synthetic completeness confirmation/restoration. September remains unverified unless separately prepared and reviewed. Keep original production project/Replit/main unchanged.
+
+## Applied result — 10 September 2026
+
+Paul explicitly approved loading this package. Confirmed Night Scout Staging in the dashboard, matched the artifact SHA-256 and copied the editor content back for an exact comparison. The guarded transaction returned success. Read-only checks through the restricted login confirmed: one batch, one head, two source versions, zero review audits; A sales/refund still GBP 123/23, B still GBP 987/87; both A coverage periods false and both B periods true.
+
+Opened localhost:3000/financial-review using the existing signed-in member session and prepared August 1–31 for store A. The live browser reported “Transaction checks passed” and displayed the independent completeness form. No checkbox, evidence statement or restoration was submitted. Thus real Auth, role checks, candidate reading and reconciliation work through the UI; final review/audit/restoration remains to be tested explicitly using the documented synthetic evidence. September is still unverified.

@@ -415,3 +415,10 @@ The [append-only writer](subsequent-import-writer.md) now repeats preparation un
 Prepared [exact guarded package and runbook](staging-subsequent-import-run.md) for one additional April refund to store C, using the existing restricted login. The subsequent runtime has a separate initializer and retains the original runtime's safeguards; first-import behaviour is unchanged. Two exact-package tests, three runtime checks and all 15 standalone PostgreSQL cases pass. Artifact hash is in the runbook.
 
 Await Paul's approval for the single bounded staging sequence (package, one refund import, one explicit retry, verification). Do not apply remotely before approval. No new user/reviewer grants, review/restoration, production/Replit/main change or live Shopify account is involved.
+
+
+## Subsequent-import staging trial completed — 10 September
+
+Paul approved the bounded package. It was applied once to Night Scout Staging, then the restricted TLS runtime imported one additional April refund and returned already_imported on explicit retry. C now has one unchanged order, two refunds and two receipts; the new GBP 24 refund includes GBP 4 VAT and is dated 6 April, linked to the original sale. February coverage remains false. Original records, A/B financial/evidence/coverage/receipt rows and the single review audit are unchanged. C still has no memberships or reviewer grants. See the [execution record](staging-subsequent-import-run.md#actual-staging-execution--10-september-2026).
+
+The approved bounded trial is complete. No production, Replit or main changes. Remaining development includes broader supported source cases, a live Shopify account/connection when available, operational import orchestration and completing review/reporting integration; none is certified by this synthetic trial.

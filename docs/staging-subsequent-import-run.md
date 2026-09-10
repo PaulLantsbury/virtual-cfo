@@ -1,6 +1,6 @@
-# Staging subsequent import — ready for approval
+# Staging subsequent import — applied and verified
 
-Prepared 10 September 2026. Not applied remotely.
+Prepared and applied with Paul’s explicit approval on 10 September 2026.
 
 ## Bounded proposal
 
@@ -27,3 +27,13 @@ Existing February completeness stays false; no March/April coverage certificatio
 Two exact-package disposable-database tests pass, including restricted-role import/retry, A/B coverage and all original order preservation, guarded replay refusal, stale source refusal and late-error rollback of both candidate changes and the receipt constraint. Three existing runtime configuration/failure tests pass. All 15 standalone PostgreSQL cases pass, including the new initializer with a real dedicated LOGIN and pg Pool: one refund-only import then already_imported. Its test-only Unix socket transport does not retest cloud TLS; the approved real run must verify TLS.
 
 The previous writer suite passed 85 source/import/review tests and 14 standalone cases; this package adds the two exact-package tests and the fifteenth standalone case. This remains synthetic cumulative-source testing, not live Shopify synchronization or production readiness.
+
+## Actual staging execution — 10 September 2026
+
+Confirmed Night Scout Staging bioalckltvkhlczusdvl in the dashboard. Captured a private read-only baseline, verified the committed artifact hash above and exact SQL editor copy, and applied the atomic package once. The new head ended in 0004, source versions increased from two to three, and financial rows/receipts remained unchanged before the writer ran.
+
+Using the existing dedicated importer login and verified TLS with the official Supabase CA, the subsequent runtime returned imported_awaiting_review with orders 0, refunds 1, coverageCertified false. The explicit retry returned already_imported with the same counts. Pools/connections were closed after use.
+
+Final C counts are one original order, two refunds, two matching refund-evidence rows and two receipts. The added refund has raw timestamp 2026-04-06T12:00:00Z, store-local event date 2026-04-06, GBP 24 cash and GBP 4 VAT, linked to the existing original order. The original orders, refunds, refund evidence and receipts were compared with the pre-run snapshot and remain unchanged. A/B financial rows, evidence, coverage and receipts also match the baseline exactly. C has one false February coverage row, no additional period coverage, zero memberships and zero reviewer grants. Review audit count remains one. No human review/restoration was performed.
+
+This confirms the bounded subsequent-import path and nonduplicating retry in actual staging. It does not establish live Shopify connectivity, completeness or production readiness. Production, original Supabase project, Replit and main remain unchanged. Private credentials/snapshots were not published.

@@ -2,6 +2,8 @@
 // Never reads DATABASE_URL or connects to an existing database/server.
 import assert from 'node:assert/strict';
 import {runImportChecks} from './import-concurrency.mjs';
+import {importFixture} from './import-fixture.mjs';
+import {initialiseImportRuntime} from './import-runtime.mjs';
 import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
@@ -87,6 +89,20 @@ try{
   }finally{await Promise.all([reviewer.end(),writer.end(),observer.end()]);}
  }
  await runImportChecks({admin,connect,adapter,waiting});
+ await admin.query('CREATE DATABASE importer_runtime');
+ const importOwner=await connect('importer_runtime');let importRuntime;
+ try{
+  const f=await importFixture(adapter(importOwner),{createRoles:false,reuseImportRole:true});
+  await importOwner.query(sql('proposed/ingest_v1_review_restoration.sql'));
+  await importOwner.query(sql('proposed/ingest_v1_review_service.sql'));
+  await admin.query('CREATE ROLE night_scout_import_login LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS');
+  await admin.query('GRANT night_scout_import_service TO night_scout_import_login');
+  importRuntime=await initialiseImportRuntime({projectRef:'bioalckltvkhlczusdvl',databaseUrl:'postgresql://night_scout_import_login:synthetic@db.bioalckltvkhlczusdvl.supabase.co/postgres',scope:f.input},{createPool:o=>new Pool({...o,host:root,database:'importer_runtime',ssl:false})});
+  assert.equal((await importRuntime.run()).status,'imported_awaiting_review');
+  assert.equal((await importRuntime.run()).status,'already_imported');
+  assert.equal((await importOwner.query('SELECT count(*)::int n FROM ingest_v1.import_receipts')).rows[0].n,1);
+  console.log('PASS importer_runtime: dedicated LOGIN and pooled one-batch import/retry');
+ }finally{await importRuntime?.close();await importOwner.end();}
  // Actual restricted LOGIN and pg Pool adapter; no live Auth/project is contacted.
  await admin.query('CREATE DATABASE runtime_check');
  const owner=await connect('runtime_check');let runtime;

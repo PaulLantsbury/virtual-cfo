@@ -7,10 +7,11 @@ import {join,resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {restorationFixture,identity} from './restoration-fixture.mjs';
-import {A,B} from './finance-fixture.mjs';
+import {A,B,U} from './finance-fixture.mjs';
+import {initialiseReviewRuntime} from './review-runtime.mjs';
 import {restoreReviewedPeriod} from './restore-reviewed-period.mjs';
 const require=createRequire(new URL('../../lib/db/package.json',import.meta.url));
-const {Client,types}=require('pg');types.setTypeParser(1082,v=>v);
+const {Client,Pool,types}=require('pg');types.setTypeParser(1082,v=>v);
 const bin=process.env.NIGHT_SCOUT_TEST_PG_BIN;
 assert.ok(bin,'Set NIGHT_SCOUT_TEST_PG_BIN to a standalone PostgreSQL bin directory');
 const root=await mkdtemp(join(tmpdir(),'ns-pg-')),data=join(root,'data');
@@ -74,6 +75,25 @@ try{
    console.log(`PASS ${name}: observed lock wait, final coverage and audit checked`);
   }finally{await Promise.all([reviewer.end(),writer.end(),observer.end()]);}
  }
+ // Actual restricted LOGIN and pg Pool adapter; no live Auth/project is contacted.
+ await admin.query('CREATE DATABASE runtime_check');
+ const owner=await connect('runtime_check');let runtime;
+ try{
+  const fixture=await restorationFixture(adapter(owner),{createRoles:false});
+  await admin.query('CREATE ROLE night_scout_review_login LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS');
+  await admin.query('GRANT night_scout_review_service TO night_scout_review_login');
+  const ref='abcdefghijklmnopqrst';
+  runtime=await initialiseReviewRuntime({projectRef:ref,authUrl:`https://${ref}.supabase.co`,publishableKey:'sb_publishable_synthetic',databaseUrl:`postgresql://night_scout_review_login:synthetic@db.${ref}.supabase.co/postgres`},{
+   // Test-only transport override: isolated Unix socket, never a cloud database.
+   createPool:options=>new Pool({...options,host:root,database:'runtime_check',ssl:false}),
+   createAuthClient:()=>({auth:{getUser:async()=>({data:{user:{id:U,is_anonymous:false}},error:null})}}),
+  });
+  const packet=await runtime.service.prepare(fixture.request.scope,'Bearer synthetic-token');
+  assert.equal(packet.snapshotDigest,fixture.request.snapshotDigest);
+  assert.equal((await runtime.service.restore(fixture.request,'Bearer synthetic-token')).status,'restored');
+  assert.equal((await fixture.read()).netProductSales,12300);
+  console.log('PASS runtime_check: actual restricted LOGIN, pg Pool and review composition');
+ }finally{await runtime?.close();await owner.end();}
 }finally{
  await admin?.end();
  if(started)run('pg_ctl',['-D',data,'-m','immediate','-w','stop']);

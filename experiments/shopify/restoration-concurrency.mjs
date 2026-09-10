@@ -7,7 +7,7 @@ import {join,resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {restorationFixture,identity} from './restoration-fixture.mjs';
-import {A,B,U} from './finance-fixture.mjs';
+import {A,B,U,setup,sql} from './finance-fixture.mjs';
 import {initialiseReviewRuntime} from './review-runtime.mjs';
 import {restoreReviewedPeriod} from './restore-reviewed-period.mjs';
 const require=createRequire(new URL('../../lib/db/package.json',import.meta.url));
@@ -35,6 +35,16 @@ try{
  run('pg_ctl',['-D',data,'-l',join(root,'postgres.log'),'-o',`-h '' -k ${root}`,'-w','start']);started=true;
  admin=await connect('postgres');await admin.query('CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role');
  console.log(run('postgres',['--version']).trim());
+ await admin.query('CREATE DATABASE staging_package');
+ const packageOwner=await connect('staging_package');
+ try{
+  const fixture=await setup(adapter(packageOwner),{createRoles:false,installIntake:false});
+  await packageOwner.query(sql('staging/20260910_review_setup.sql'));
+  assert.equal((await fixture.read()).netProductSales,12300);
+  await packageOwner.query(sql('staging/verify-review-setup.sql'));
+  console.log('PASS staging_package: exact atomic script preserves existing verified figures');
+ }finally{await packageOwner.end();}
+
  for(const name of ['writer_commit','writer_rollback','review_first','review_first_raw','two_reviews','permission_revoked','lock_timeout']){
   await admin.query(`CREATE DATABASE ${name}`);
   const reviewer=await connect(name),writer=await connect(name),observer=await connect(name);

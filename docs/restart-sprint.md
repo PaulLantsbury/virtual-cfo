@@ -317,3 +317,9 @@ Added explicit same-project Auth/direct-database validation, restricted username
 Connected explicit default-off runtime startup to the API router and added the protected /financial-review screen. Independent evidence/confirmation is required after a passing review; dates/account changes clear approvals and stale/uncertain responses never auto-retry restoration. Direct API dependencies use existing pinned workspace versions and are recorded in the lockfile.
 
 Two startup, four HTTP and four isolated browser groups pass; full type checking and API/frontend builds pass with documented build warnings. Browser/Auth responses remain synthetic. See review-screen-startup.md. Next: concrete staging migration/login/enablement plan, same-origin UI/API setup and real staging end-to-end verification after approval. Nothing was applied to Supabase or released to production.
+
+## 10 September — concrete staging review package prepared
+
+Built one guarded atomic SQL artifact from the four tested intake/review proposals, plus read-only pre/post checks. Its SHA-256 and exact scope are in staging-review-package-2026-09-10.md. Three package groups pass, including rollback and baseline refusal; the exact script also passes on isolated PostgreSQL 18.4 with the seven contention cases and restricted-login runtime case. Current verified fixture figures are preserved.
+
+Status: ready for approval, NOT applied. It adds schema/triggers/restricted non-login permissions only, with no login, reviewer assignments or imports. No live preflight inspection, Supabase mutation, Replit sync or production release has occurred. Next action after approval: verify the selected staging project and current baseline, apply the exact package and record the catalog/coverage checks; keep the API disabled pending login/UI provisioning.

@@ -19,6 +19,7 @@
     "test:financial-member": "node --test experiments/financial-v1/member-sales.test.mjs",
     "test:import-review": "node --test experiments/financial-v1/import-review.test.mjs",
     "test:shopify": "node --test experiments/shopify/*.test.mjs",
+    "test:review-http": "node --experimental-strip-types --test artifacts/api-server/tests/financial-reviews.test.mjs",
     "test:restoration-concurrency": "node experiments/shopify/restoration-concurrency.mjs"
   },
   "private": true,

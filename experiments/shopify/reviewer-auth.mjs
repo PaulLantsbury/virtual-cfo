@@ -40,3 +40,11 @@ export async function prepareReviewWithReviewerToken(db,scope,{supabase,authoriz
   return inspectCandidateReview(tx,scope);
  });
 }
+
+/** Server-owned composition for the HTTP router; no client/provisioning side effects. */
+export function createReviewerService(db,supabase){
+ return {
+  prepare:(scope,authorization)=>prepareReviewWithReviewerToken(db,scope,{supabase,authorization}),
+  restore:(request,authorization)=>restoreWithReviewerToken(db,request,{supabase,authorization}),
+ };
+}

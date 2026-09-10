@@ -1,10 +1,12 @@
+> Latest status (10 September): the staging review database package is now applied and verified. See [application record](staging-review-package-2026-09-10.md#actual-staging-application--10-september-2026). Runtime login/reviewer provisioning and end-to-end testing remain.
+
 # Night Scout — project guide
 
 Night Scout is the virtual CFO platform for commerce businesses. Sam is a separate personal assistant and is not part of this repository.
 
 ## Start here
 
-[Current next action — staging review package](staging-review-package-2026-09-10.md): exact tested database package, approval scope and read-only verification steps; not applied.
+[Staging review package — applied and verified](staging-review-package-2026-09-10.md): exact database package, execution record and remaining runtime/reviewer setup.
 
 [Latest checkpoint — reviewer screen and API startup](review-screen-startup.md): default-off runtime integration, protected review page and next staging preparation.
 

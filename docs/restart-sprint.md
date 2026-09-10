@@ -401,3 +401,10 @@ Verification used the actual restricted TLS runtime and read-only database/dashb
 Paul approved the next work package. [Local preparation](subsequent-import-preparation.md) now compares cumulative retained source against committed import history, separates new events from unchanged events, and blocks changed/missing history. A read-only database wrapper checks current candidate/settings/source versions/receipts and raw-evidence state. Eight planner tests and two disposable-database tests pass; 78 source/import/review tests passed before the two database tests were added. No staging changes.
 
 Resume with the append-only writer and full stored-value reconciliation, then receipt constraints for refund-only/no-new-event batches, rollback/retry/concurrency checks, and a concrete staging proposal. The current runtime still supports first import only; do not present preparation as implemented incremental synchronization.
+
+
+## Subsequent-import writer verified locally — 10 September
+
+The [append-only writer](subsequent-import-writer.md) now repeats preparation under dependency locks, reconciles stored identities/values/evidence, inserts only new events, and records counts/receipts in the same transaction. Refund-only and no-op batches are supported by a proposed zero-order receipt constraint. Existing receipts and role permissions are unchanged. Retry, rollback, preserved original rows and tampering refusal are tested.
+
+85 source/import/review tests and all 14 standalone PostgreSQL cases passed, including real contention and interrupted subsequent imports. Next: restricted runtime composition and a concrete guarded staging C candidate/receipt migration package for approval. No remote database changes were made; the current staging runtime still uses the first-import writer.

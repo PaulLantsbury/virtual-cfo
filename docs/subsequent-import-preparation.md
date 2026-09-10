@@ -1,3 +1,5 @@
+> Superseded implementation checkpoint: the [database writer is now locally tested](subsequent-import-writer.md). The preparation history below records the earlier limits.
+
 # Subsequent import preparation — 10 September 2026
 
 Paul approved starting the subsequent-import work package after the successful staging first-import trial. This checkpoint implements local preparation only; it does not enable a second financial write or change staging.

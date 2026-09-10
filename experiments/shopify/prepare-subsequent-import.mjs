@@ -6,6 +6,12 @@ const check=(ok,message)=>{if(!ok)throw new Error(message);};
 export async function prepareSubsequentImport(db,{storeId,batchId,from,to}){
  return db.transaction(async tx=>{
   await tx.query('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');
+  return (await inspectSubsequentImport(tx,{storeId,batchId,from,to})).plan;
+ });
+}
+
+/** Internal checks; caller owns snapshot/locking and transaction. */
+export async function inspectSubsequentImport(tx,{storeId,batchId,from,to}){
   const {rows}=await tx.query('SELECT b.payload,b.fingerprint,s.shopify_domain,s.shopify_store_id,s.currency_code,s.timezone FROM ingest_v1.heads h JOIN ingest_v1.batches b ON b.id=h.batch_id JOIN public.stores s ON s.id=h.store_id WHERE h.store_id=$1 AND h.date_from=$2 AND h.date_to=$3 AND h.batch_id=$4',[storeId,from,to,batchId]);
   check(rows.length===1,'Current candidate required');
   const row=rows[0],source=row.payload.source,settings=source.settings;
@@ -22,6 +28,5 @@ export async function prepareSubsequentImport(db,{storeId,batchId,from,to}){
   // This only detects missing/extra stored rows. A future writer must also compare
   // all stored values/identities to source; matching snapshots alone are insufficient.
   if(plan.status!=='blocked')check(states.length===plan.unchangedEvents,'Stored event count differs from committed history');
-  return {...plan,batchId,sourceFingerprint:row.fingerprint};
- });
+  return {source,plan:{...plan,batchId,sourceFingerprint:row.fingerprint}};
 }

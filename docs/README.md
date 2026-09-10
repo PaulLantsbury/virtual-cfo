@@ -1,3 +1,5 @@
+> Latest local development: [subsequent-import writer verified](subsequent-import-writer.md). Adds new orders/later refunds without overwriting existing records; 85 tests and 14 standalone PostgreSQL checks pass. Staging runtime remains unchanged.
+
 > Latest local development: [subsequent-import preparation](subsequent-import-preparation.md) identifies new events and blocks changed history. Ten new tests pass; the append-only writer remains to be implemented.
 
 > Latest staging result: [bounded first import and retry passed](staging-import-run.md#execution-record--10-september-2026). Store C has one synthetic sale/refund/receipt, false completeness and no user grants. Existing A/B data and review history are unchanged. Dedicated importer login is provisioned; no continuous job or public import endpoint is enabled.

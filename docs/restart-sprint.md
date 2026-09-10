@@ -351,3 +351,7 @@ Prepared deterministic staging-only test package to normalise test store A's pla
 ### Approved scenario applied; signed-in reconciliation passed
 
 Applied exact approved test artifact to staging after project/hash/editor verification. One batch/head and two versions; no audits. Amounts A123/23 and B987/87 unchanged. A coverage revoked, B coverage preserved. Existing real signed-in account prepared August through localhost:3000/financial-review and received Transaction checks passed. Final completeness confirmation/restoration NOT submitted. Next: independently check the documented synthetic completeness evidence, then exercise review/audit/restoration; September remains unverified.
+
+### Positive synthetic end-to-end review completed
+
+Following continuation approval, submitted the explicitly synthetic completeness statement through the real signed-in August review screen. Browser success confirmed independently: one correct-reviewer audit with snapshot/digest, August A true and linked to audit, September A false, B unchanged, amounts unchanged. This completes the positive synthetic flow, not real merchant validation. See staging-review-scenario.md. Next: source-to-evidence import implementation and additional failure-path acceptance checks; no production release.

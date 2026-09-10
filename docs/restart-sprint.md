@@ -347,3 +347,7 @@ Stopped the two identified local preview processes and restarted the private lau
 ### Synthetic review scenario prepared; application pending
 
 Prepared deterministic staging-only test package to normalise test store A's placeholder source identities and add a matching August candidate. Amounts/evidence stay unchanged; both A coverage periods are intentionally revoked by existing triggers, B untouched. Two exact-artifact/rollback tests pass. Fixed the misleading missing-candidate message; five HTTP groups and frontend type checking pass. See staging-review-scenario.md for hash/scope and execution plan. Not applied; API restart pending for message change.
+
+### Approved scenario applied; signed-in reconciliation passed
+
+Applied exact approved test artifact to staging after project/hash/editor verification. One batch/head and two versions; no audits. Amounts A123/23 and B987/87 unchanged. A coverage revoked, B coverage preserved. Existing real signed-in account prepared August through localhost:3000/financial-review and received Transaction checks passed. Final completeness confirmation/restoration NOT submitted. Next: independently check the documented synthetic completeness evidence, then exercise review/audit/restoration; September remains unverified.

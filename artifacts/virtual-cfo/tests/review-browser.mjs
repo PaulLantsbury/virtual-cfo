@@ -67,3 +67,14 @@ test('missing API returning HTML shows a safe unavailable state',async()=>{
   await page.getByRole('status').filter({hasText:'review service is unavailable'}).waitFor();assert.equal(await page.getByRole('checkbox').count(),0);
  });
 });
+test('transaction evidence shows original sale and later refunds without enabling approval',async()=>{
+ const rows=[['sale','2026-02-15',9000,1800,10800],['refund','2026-03-05',-2000,-400,-2400],['refund','2026-04-06',-2000,-400,-2400]].map(([type,date,productExVat,vat,cash],i)=>({id:String(i),orderId:'gid://shopify/Order/1',type,date,currency:'GBP',productExVat,shippingExVat:0,vat,cash}));
+ await fixture({stores:[a],review:route=>response(route,{...packet(route.request().postDataJSON().scope),transactionEvidence:{rows,totalEvents:3,timezone:'Europe/London'}})},async page=>{
+ await openReview(page);await page.getByLabel('From',{exact:true}).fill('2026-02-01');await page.getByLabel('To',{exact:true}).fill('2026-02-28');await page.getByRole('button',{name:'Prepare review',exact:true}).click();
+ await page.getByRole('heading',{name:'Imported transactions — awaiting review'}).waitFor();const table=page.getByRole('table',{name:'Imported sales and refunds'});
+ assert.equal(await table.getByRole('row').count(),4);assert.equal(await table.getByText('Outside selected period').count(),2);
+ assert.ok((await table.innerText()).includes('£90.00'));assert.equal(await table.getByText('-£20.00',{exact:true}).count(),2);assert.equal(await table.getByText('-£4.00',{exact:true}).count(),2);
+ assert.equal(await page.getByRole('button',{name:'Record review and restore figures'}).isEnabled(),false);
+ await page.getByLabel('From',{exact:true}).fill('2026-03-01');assert.equal(await table.count(),0);
+ });
+});

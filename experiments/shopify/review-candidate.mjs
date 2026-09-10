@@ -59,6 +59,7 @@ export async function inspectCandidateReview(tx,{storeId,from,to},{includeSnapsh
   const refunds=await read('SELECT m.*,r.shopify_refund_id,to_jsonb(e) AS review_evidence FROM finance_v1.refund_mapping m JOIN public.refunds r ON r.id=m.id AND r.store_id=m.store_id LEFT JOIN finance_v1.refund_evidence e ON e.store_id=m.store_id AND e.refund_id=m.id WHERE m.store_id=$1 ORDER BY m.id');
   const coverage=await read('SELECT * FROM finance_v1.coverage_evidence WHERE store_id=$1 AND date_from=$2 AND date_to=$3',[storeId,from,to]);
   const snapshot={scope:{storeId,from,to},stores,heads,versions,orders,refunds,coverage};
+  let transactionEvidence=null;
   const issues=[],head=heads[0],store=stores[0],source=head.payload.source;
   try{
    requireValue(source.scope.storeId===storeId&&source.scope.from===from&&source.scope.to===to,'Candidate scope mismatch');
@@ -72,6 +73,14 @@ export async function inspectCandidateReview(tx,{storeId,from,to},{includeSnapsh
    // coverage assertion never reaches the database or the returned packet.
    requireValue(coverage.length===1,'Coverage evidence missing');
    calculateMappedSales({orders,refunds,coverage:[{...coverage[0],sales_and_refunds_complete:true}]},{storeId,from,to,currency:source.settings.currency});
+   if(issues.length===0){
+    const rows=mapped.events.map(e=>({id:e.id,orderId:e.orderId,type:e.type,date:e.date,currency:e.currency,
+     productExVat:e.type==='sale'?e.grossProductExVat-e.discountExVat:-(e.productCash-e.productVat),
+     shippingExVat:e.type==='sale'?e.netShipping:-(e.shippingCash-e.shippingVat),
+     vat:e.type==='sale'?e.productVat+e.shippingVat:-(e.productVat+e.shippingVat),
+     cash:e.type==='sale'?e.customerCharge:-(e.productCash+e.shippingCash)})).sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
+    transactionEvidence={rows:rows.slice(0,200),totalEvents:rows.length,timezone:source.settings.timezone};
+   }
   }catch(error){issues.push({reason:error.message});}
-  return {...(includeSnapshot?{snapshot}:{}),status:issues.length?'blocked':'awaiting_independent_coverage_review',batchId:head.batch_id,scope:{storeId,from,to},snapshotDigest:digest(snapshot),issues,coverageCertified:false,figures:null};
+  return {...(includeSnapshot?{snapshot}:{}),status:issues.length?'blocked':'awaiting_independent_coverage_review',batchId:head.batch_id,scope:{storeId,from,to},snapshotDigest:digest(snapshot),issues,transactionEvidence,coverageCertified:false,figures:null};
 }

@@ -371,3 +371,7 @@ Added atomic append-only receipt bound to candidate scope/fingerprint. Explicit 
 ### Standalone importer concurrency and disconnect checks passed
 
 Independent PostgreSQL clients and observed lock waits confirm one import/receipt under simultaneous requests. Terminating the first backend after writes but before commit rolls it back and lets the waiting request finish once. Explicit retry after discarding success returns already_imported. Eleven standalone checks and six importer regression tests pass; cluster removed. No staging changes. Next: importer deployment/invocation package and auditable access boundary; incremental updates remain unsupported.
+
+### Staging importer installation package prepared
+
+Composed guarded atomic role/receipt package with hash and read-only verification SQL. Two package tests pass for exact preservation/replay refusal and late-error rollback. No credentials, login, imports or remote changes. See staging-import-package.md for scope, expected existing coverage/audit state and remaining controlled invocation work. Next: apply exact package only after approval; importer stays disabled.

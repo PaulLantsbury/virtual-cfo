@@ -1,5 +1,7 @@
 # Night Scout
 
+Start with `docs/project-brief.md` and `docs/team-working-agreement.md` for the current coordination checkpoint. Paul requested parallel agents within agreed packages: delegate independent bounded work when useful; the coordinator owns integration and publication. The scopes in `docs/parallel-pilot.md` remain proposals until Paul agrees them.
+
 Read `docs/README.md`, `docs/restart-sprint.md` and `docs/agreed-financial-definitions.md` before changing the application. Approved financial definitions take precedence over conflicting older proposals; distinguish agreement from implementation. This is a commerce virtual CFO, not the separate Sam personal assistant.
 
 Treat the recovered engine specifications as product requirements, with their unresolved differences recorded in `docs/baseline-decisions.md`. Do not claim a planned feature is implemented simply because a page or specification exists.

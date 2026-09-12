@@ -1,3 +1,11 @@
+# Current starting point — 12 September 2026
+
+Read the [current project brief](project-brief.md), [team working agreement](team-working-agreement.md) and [proposed parallel pilot](parallel-pilot.md) first. The project-management setup is established; the two implementation scopes await Paul's agreement. Real-reference-data comparison work remains paused.
+
+The older checkpoint notices below are retained as history. Their “latest”, “next” and “remaining” statements describe the time they were written; use the current brief and dated handovers to resolve later progress.
+
+## Historical checkpoint notices
+
 > Latest local demo: [select, validate and compare two files](../experiments/completeness/local-comparison.html). Use the synthetic reference/imported samples in experiments/completeness/samples. No uploads, database writes or completeness approvals.
 
 > Latest local package: [reference-file format and validator](../experiments/completeness/reference-file-format.md), with valid/faulty JSON samples and local CLI. 18 validator/comparison groups pass; no uploads or completeness approvals.

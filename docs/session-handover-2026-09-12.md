@@ -47,3 +47,9 @@ Three offline browser groups passed, including invalid data, scope mismatch, dup
 ## Agreed pause — real reference data needed
 
 Paul endorsed and asked us to remember the recommendation to pause further transaction-comparison expansion until a suitable Shopify account/export or another agreed real sales-and-refunds reference example is available. The last stated position was that no Shopify account was available; no new source has been confirmed. Do not keep adding synthetic scenarios as a substitute for verifying a real connection. At the next planning point, check whether a suitable source is available; otherwise propose another roadmap item for Paul to choose. Existing synthetic checks remain useful but do not establish real-source completeness.
+
+## Project-management setup — complete; pilot scopes proposed
+
+Paul requested this conversation coordinate parallel coding/testing agents. Created the current project brief, team working agreement and concrete two-task pilot proposal; added the reading/delegation rules to AGENTS.md and a current entry point to the guide. Two read-only agents reviewed roadmap/source independently. Proposed tasks: reject impossible review-response dates, and identify Cash Control's sample figures honestly. No pilot application work has started; Paul still decides the scopes. Shopify/reference comparison remains paused.
+
+The coordinator checked documentation links and the diff, and completed a read-only review of the setup documents. The review clarified that already-agreed visible changes do not need repeated approval. This package changes documentation only; no application tests or live database checks were rerun. Routine draft-branch publication remains authorised; no merge, staging mutation, Replit sync or production release. Resume by obtaining Paul's decision on docs/parallel-pilot.md, then dispatch disjoint work with an independent reviewer.

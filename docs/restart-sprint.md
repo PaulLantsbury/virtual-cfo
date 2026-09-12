@@ -466,3 +466,7 @@ Completed the approved local versioned JSON contract, field-level validator, CLI
 ## Connected local file comparison — 12 September
 
 Completed standalone file-selection report using the actual validator/comparator. Both inputs must validate and match scope; invalid/duplicate data blocks comparison. Replacements clear results. Three offline browser groups and layout inspection passed; no network/storage. Synthetic imported sample added, no new dependency. [Handover](session-handover-2026-09-12.md) updated. No staging, production, Replit or financial approvals changed.
+
+## 12 September — project-management and parallel-work setup
+
+Established docs/project-brief.md as the current starting point and docs/team-working-agreement.md as the coordination/decision boundary. Two read-only agent reviews informed docs/parallel-pilot.md. The proposed review-date robustness and Cash Control illustration tasks await Paul's agreement; neither is implemented by this setup package. Documentation only, preserving the real-reference-data pause and existing deployment/database boundaries. See the latest handover for the exact resume point.

@@ -4,6 +4,8 @@ Read the [current project brief](project-brief.md), [team working agreement](tea
 
 The older checkpoint notices below are retained as history. Their “latest”, “next” and “remaining” statements describe the time they were written; use the current brief and dated handovers to resolve later progress.
 
+The [Growth Efficiency and Pricing package](growth-pricing-package.md) is complete: 55 isolated browser checks and real staging page checks passed. Paul accepted the preceding walkthrough; these two pages are ready for his next review.
+
 ## Historical checkpoint notices
 
 > Latest local demo: [select, validate and compare two files](../experiments/completeness/local-comparison.html). Use the synthetic reference/imported samples in experiments/completeness/samples. No uploads, database writes or completeness approvals.

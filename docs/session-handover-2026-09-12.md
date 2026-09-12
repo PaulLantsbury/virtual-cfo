@@ -25,3 +25,9 @@ This guidance work is complete. Next agree a bounded package for the actual inde
 Paul subsequently approved a separate local comparison prototype. Implemented [normalized reference-ledger comparison](../experiments/completeness/README.md) with separately handwritten synthetic inputs. It catches missing/extra transactions, duplicates, changed amounts/VAT/order links and date shifts, including compensating errors with equal totals. Nine test groups pass. All results explicitly leave coverageCertified false; distinct reference labels do not establish independent provenance. No database, screen, upload or completeness-restoration integration was added.
 
 Both 12 September packages are now complete. The next proposed task is to agree the actual independent reference source/adapter and, if desired, expose a read-only comparison report. Do not claim this prototype proves real source completeness. Existing staging status and approval boundaries are unchanged.
+
+## Third approved package — visible comparison report
+
+Completed a standalone [read-only synthetic comparison demo](../experiments/completeness/comparison-demo.html), generated from the tested comparator. Eight scenarios show matches and transaction-level issues with reference/imported rows side by side. Offline Chrome verification passed all cases with no network traffic and no write/upload/approval controls; layout inspected. This is an HTML artifact, not a new staging/application route. No financial records or approvals changed.
+
+All three approved 12 September packages are complete. Resume by agreeing the real reference source and adapter before connecting this prototype to merchant data. The demo does not establish independent provenance or completeness.

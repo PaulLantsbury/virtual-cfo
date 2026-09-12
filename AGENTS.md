@@ -1,6 +1,6 @@
 # Night Scout
 
-Start with `docs/project-brief.md` and `docs/team-working-agreement.md` for the current coordination checkpoint. Paul requested parallel agents within agreed packages: delegate independent bounded work when useful; the coordinator owns integration and publication. Paul approved the two scopes in `docs/parallel-pilot.md` on 12 September; keep work within those boundaries.
+Start with `docs/project-brief.md` and `docs/team-working-agreement.md` for the current coordination checkpoint. Paul requested parallel agents within agreed packages: delegate independent bounded work when useful; the coordinator owns integration and publication. The first pilot is complete. Paul approved the next package in `docs/reporting-truthfulness-package.md` on 12 September; keep work within those boundaries.
 
 Read `docs/README.md`, `docs/restart-sprint.md` and `docs/agreed-financial-definitions.md` before changing the application. Approved financial definitions take precedence over conflicting older proposals; distinguish agreement from implementation. This is a commerce virtual CFO, not the separate Sam personal assistant.
 

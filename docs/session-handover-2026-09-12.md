@@ -61,3 +61,11 @@ Paul approved both proposed scopes. Two developers worked on disjoint pages/test
 19 review browser checks and 12 Cash Control checks pass with isolated mocked services. Frontend type checking/build and diff checks pass; inherited tooltip sourcemap/bundle-size warnings remain. Desktop/mobile layouts inspected. Initial cash harness failures (missing store fixture and slider wrapper selector) were corrected before the successful rerun. Independent review found no remaining in-scope issues. See docs/parallel-pilot.md for acceptance, limits and deferred shared-component observations.
 
 Current resume point: pilot complete, routine GitHub development-branch publication only. Do not restart these tasks. No staging records, completeness approvals, financial formulas, shared snapshots or entitlements changed; no main merge/production/Replit update. Reference comparison remains paused pending a suitable real source. Bring the next bounded scope to Paul for agreement.
+
+## Second parallel package — Margin Recovery and Monitoring complete
+
+Paul approved both tasks. Margin source figures no longer use invented fallback values, genuine zeros remain, source currency is not assumed and actual margin/recovery remains unavailable pending verified inputs. The retained model and supporting charts are explicit separate samples. Monitoring is clearly a prototype: examples are not completed checks, settings are unsaved local previews and notifications are not sent. Both pages remove misleading local AI/monitoring claims.
+
+20 Margin and 6 Monitoring browser checks pass against a fixed local build with mocked services; frontend typecheck/build pass with inherited warnings. Desktop/mobile screenshots inspected and independent review complete. An initial mobile Monitoring test was interrupted during development reloads; all six passed on the stable build without a source fix. See docs/reporting-truthfulness-package.md for exact acceptance/limits.
+
+Resume point: this package is complete and saved on the development branch; do not repeat it. Source/cost wiring and real monitoring are still future work. Shopify/reference comparison remains paused. No staging data, access, completeness approvals, financial rules, shared sample formulas or deployment changed; main/production/Replit remain outside this package. Agree the next concrete scope with Paul.

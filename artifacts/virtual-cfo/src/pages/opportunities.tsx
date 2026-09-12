@@ -1,3 +1,4 @@
+import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { useEffect, useState } from "react";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import {
@@ -17,7 +18,7 @@ import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 // ─── Data constants ───────────────────────────────────────────────────────────
 
 /** Seed store UUID — shared by all Phase 1, Phase 3, and opportunity_breakdown calls. */
-const STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 
 /**
  * Static fallback totals — used while Phase 1 RPC is loading or on failure.
@@ -79,7 +80,7 @@ function freeOpportunityRationale(opp: { category?: string; impactType?: string 
 }
 
 /**
- * Maps opportunity card titles to Profit Launchpad preset IDs.
+ * Maps opportunity card titles to Scenario Planner preset IDs.
  * Only the 3 supported opportunities get an "Open Launchpad" button.
  */
 const TITLE_TO_PRESET: Record<string, string> = {
@@ -157,8 +158,27 @@ const OPPORTUNITY_GUIDANCE: Record<string, {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+type OpportunityRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  confidence: string | null;
+  effort: string | null;
+  timing: string | null;
+  linked_page: string | null;
+  linked_page_label: string | null;
+  impact_type: string | null;
+  impact_low: number | null;
+  impact_high: number | null;
+  impact_mid: number | null;
+  recommended_action: string | null;
+  implementation_type: string | null;
+};
+
 export default function Opportunities() {
-  const [opportunities, setOpportunities] = useState<any[]>([]);
+  const STORE_ID = useActiveStore();
+  const [opportunities, setOpportunities] = useState<OpportunityRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOppId, setExpandedOppId] = useState<string | null>(null);
 
@@ -167,7 +187,7 @@ export default function Opportunities() {
       try {
         const res = await fetch(`/api/opportunities`);
         if (!res.ok) throw new Error(`API ${res.status}`);
-        const data: any[] = await res.json();
+        const data: OpportunityRow[] = await res.json();
         setOpportunities(data);
       } catch (err) {
         console.error("Error fetching opportunities:", err);
@@ -180,7 +200,7 @@ export default function Opportunities() {
   }, []);
 
   // ── Phase 1 — period label + recoverable range (no extra fetch) ─────────────
-  const {
+  const { status: reportingStatus,
     phase1,
     dateFrom,
     dateTo,
@@ -398,7 +418,7 @@ export default function Opportunities() {
             Night Scout continuously scans your business for profit, cash and growth opportunities worth pursuing.
           </p>
         </div>
-        <DataPeriodLabel
+        <DataPeriodLabel status={reportingStatus}
           periodLabel={periodLabel}
           loading={periodLoading}
           dateFrom={dateFrom}

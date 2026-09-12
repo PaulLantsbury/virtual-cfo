@@ -227,7 +227,7 @@ export default function Landing() {
               },
               {
                 icon: TrendingUp,
-                title: "Margin Recovery",
+                title: "Margin Analysis",
                 desc: "Find profit leaks and the actions most likely to recover them."
               },
               {
@@ -237,7 +237,7 @@ export default function Landing() {
               },
               {
                 icon: ShieldCheck,
-                title: "Profit Growth",
+                title: "Profit Overview",
                 desc: "Understand what is driving profit and what is holding it back."
               },
               {

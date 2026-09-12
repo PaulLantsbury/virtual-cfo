@@ -6,11 +6,26 @@
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
-    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
+    "test:baseline": "node --experimental-strip-types --test artifacts/virtual-cfo/src/lib/analytics/*.test.ts",
+    "test:financial": "node --test experiments/financial-v1/calculations.test.mjs",
+    "test:financial-db": "node --test experiments/financial-v1/source-adapter.test.mjs",
+    "test:financial-cloud": "node --test experiments/financial-v1/cloud-sales-adapter.test.mjs",
+    "test:migration-baseline": "node --test experiments/migration-baseline/*.test.mjs",
+    "test:access": "node --experimental-strip-types --test experiments/migration-baseline/store-access.test.mjs artifacts/api-server/tests/opportunities-access.test.mjs",
+    "test:auth": "node --experimental-strip-types --test artifacts/virtual-cfo/src/lib/auth/*.test.ts",
+    "test:staging": "node --test experiments/staging/*.test.mjs",
+    "test:financial-events": "node --test experiments/financial-v1/event-evidence.test.mjs",
+    "test:financial-member": "node --test experiments/financial-v1/member-sales.test.mjs",
+    "test:import-review": "node --test experiments/financial-v1/import-review.test.mjs",
+    "test:shopify": "node --test experiments/shopify/*.test.mjs",
+    "test:review-http": "node --experimental-strip-types --test artifacts/api-server/tests/financial-reviews.test.mjs",
+    "test:restoration-concurrency": "node experiments/shopify/restoration-concurrency.mjs"
   },
   "private": true,
   "devDependencies": {
-    "typescript": "~5.9.2",
-    "prettier": "^3.8.1"
+    "@electric-sql/pglite": "0.5.8",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2"
   }
 }

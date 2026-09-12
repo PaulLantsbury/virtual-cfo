@@ -5,12 +5,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TimelineProvider } from "@/lib/timeline";
 import { AiCfoProvider } from "@/components/AiCfoProvider";
 import { AiCfoDrawer } from "@/components/AiCfoDrawer";
+import { AuthProvider } from "@/lib/auth/AuthProvider";
+import { StoreAccessGate } from "@/components/StoreAccessGate";
 import NotFound from "@/pages/not-found";
 
 // Pages
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
+import FinancialReviewPage from "@/pages/financial-review";
+import VerifiedSalesPage from "@/pages/verified-sales";
 import Dashboard from "@/pages/dashboard";
 import MarginAnalysis from "@/pages/margin-analysis";
 import GrowthQuality from "@/pages/growth-quality";
@@ -33,12 +37,11 @@ const queryClient = new QueryClient({
   }
 });
 
-function Router() {
+function MerchantRouter() {
   return (
     <Switch>
-      <Route path="/" component={Landing} />
-      <Route path="/login" component={Login} />
-      <Route path="/signup" component={Signup} />
+      {import.meta.env.DEV && <Route path="/verified-sales" component={VerifiedSalesPage} />}
+      <Route path="/financial-review" component={FinancialReviewPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/transactions" component={Dashboard} /> {/* Map to dashboard for now */}
       <Route path="/margin-analysis" component={MarginAnalysis} />
@@ -62,19 +65,26 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <TimelineProvider>
-          <AiCfoProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-            <AiCfoDrawer />
-            <Toaster />
-          </AiCfoProvider>
-        </TimelineProvider>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Switch>
+              <Route path="/" component={Landing} />
+              <Route path="/login" component={Login} />
+              <Route path="/signup" component={Signup} />
+              <Route>
+                <StoreAccessGate>
+                  <TimelineProvider>
+                    <AiCfoProvider><MerchantRouter /><AiCfoDrawer /></AiCfoProvider>
+                  </TimelineProvider>
+                </StoreAccessGate>
+              </Route>
+            </Switch>
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
-
 export default App;

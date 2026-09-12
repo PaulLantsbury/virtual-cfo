@@ -1,3 +1,4 @@
+import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { useState, useEffect } from "react";
 import { Sparkles, TrendingUp, TrendingDown, Minus, ArrowRight, Lock } from "lucide-react";
 import {
@@ -32,7 +33,7 @@ import {
 
 // ─── Store ID ─────────────────────────────────────────────────────────────────
 // Dev store UUID — matches Dashboard, Margin Analysis, and Marketing Efficiency.
-const GQ_STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 
 // ─── Data constants ──────────────────────────────────────────────────────────
 // REPEAT_RATE, DISCOUNT_DEP, CAC_PAYBACK imported from
@@ -165,7 +166,7 @@ const GROWTH_RECOVERY_ACTIONS = [
     why: "Retention is the one improving signal; strengthening it reduces reliance on paid acquisition and blanket promotions.",
     start: "Launch post-purchase email journeys for first-order customers and target repeat rate above 30% before adding more acquisition spend.",
     link: "/scenario-lab",
-    linkLabel: "Open Profit Launchpad",
+    linkLabel: "Open Scenario Planner",
   },
 ] as const;
 
@@ -216,6 +217,7 @@ const STATUS_CONFIG: Record<ScoreStatus, { label: string; bar: string; badge: st
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function GrowthQuality() {
+  const GQ_STORE_ID = useActiveStore();
   useTimeline();
 
   // ── Phase 1: live repeat rate and discount dependency ─────────────────────
@@ -223,7 +225,7 @@ export default function GrowthQuality() {
   // Only these two KPI headlines are wired — all other GQ metrics (GQ_SCORE,
   // CAC_PAYBACK, SCORE grades, composition chart, driver impacts) remain static
   // pending ad-platform integration and a prior-period RPC.
-  const { phase1: gqPhase1, dateFrom: gqDateFrom, dateTo: gqDateTo, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
+  const { status: reportingStatus,  phase1: gqPhase1, dateFrom: gqDateFrom, dateTo: gqDateTo, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
 
   // ── Phase 2: month-on-month deltas ────────────────────────────────────────
   // Fires after useLatestDataPeriod resolves. Used for:
@@ -524,12 +526,12 @@ export default function GrowthQuality() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Growth Quality Analysis
+            Growth Quality
           </h1>
           <p className="text-muted-foreground mt-1">
             Assess whether revenue growth is generating lasting profit — or being bought through discounts and paid spend.
           </p>
-          <DataPeriodLabel
+          <DataPeriodLabel status={reportingStatus}
             periodLabel={gqPeriodLabel}
             loading={gqPeriodLoading}
             dateFrom={gqDateFrom}

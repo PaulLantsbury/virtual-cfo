@@ -4,16 +4,16 @@ import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/BrandLogo";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Morning Briefing",        href: "/dashboard"              },
-  { icon: TrendingDown,    label: "Margin Recovery",         href: "/margin-analysis"        },
+  { icon: LayoutDashboard, label: "CFO Briefing",        href: "/dashboard"              },
+  { icon: TrendingDown,    label: "Margin Analysis",         href: "/margin-analysis"        },
   { icon: BarChart2,       label: "Growth Quality",         href: "/growth-quality"         },
-  { icon: Megaphone,       label: "Growth Efficiency",      href: "/marketing-efficiency"   },
-  { icon: Tag,             label: "Discount Recovery",      href: "/pricing-optimisation"   },
-  { icon: Cpu,             label: "Profit Growth",          href: "/profit-engine"          },
+  { icon: Megaphone,       label: "Marketing Efficiency",      href: "/marketing-efficiency"   },
+  { icon: Tag,             label: "Pricing & Discounts",      href: "/pricing-optimisation"   },
+  { icon: Cpu,             label: "Profit Overview",          href: "/profit-engine"          },
   { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
   { icon: Target,          label: "Opportunity Finder",     href: "/profit-opportunities"   },
-  { icon: FlaskConical,    label: "Profit Launchpad",       href: "/scenario-lab"           },
-  { icon: Bell,            label: "Night Scout Monitoring", href: "/monitoring"             },
+  { icon: FlaskConical,    label: "Scenario Planner",       href: "/scenario-lab"           },
+  { icon: Bell,            label: "Monitoring", href: "/monitoring"             },
 ];
 
 export function Sidebar() {

@@ -1,3 +1,5 @@
+> Latest checkpoint: [12 September handover](session-handover-2026-09-12.md). Review readiness guidance is implemented and tested; no database or financial approval changes.
+
 > End-of-day checkpoint: [10 September handover](session-handover-2026-09-10.md). Final [March/April staging review package](staging-refund-periods.md) is applied and verified. Both refund-only months show -£20; all three C periods remain unverified. Today’s work is complete.
 
 > Latest connected preview: [imported transaction review display](review-transaction-display.md) shows C’s February sale and March/April refunds with VAT, linked orders and out-of-period labels. Paul has approved C staging access; no completeness review submitted.

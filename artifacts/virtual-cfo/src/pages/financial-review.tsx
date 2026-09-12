@@ -73,6 +73,28 @@ export default function FinancialReviewPage(){
    <Button disabled={busy||!from||!to||from>to} onClick={()=>void perform('prepare')}>{busy?'Checking…':'Prepare review'}</Button>
    <p role="status" aria-live="polite" className="rounded-lg border p-4">{message}</p>
    {packet?.status==='blocked'&&<p>{packet.issues.length} evidence check{packet.issues.length===1?' requires':'s require'} attention. Figures remain unverified.</p>}
+   {packet&&<section className="space-y-4 rounded-lg border p-5" aria-labelledby="review-readiness-title">
+    <h2 id="review-readiness-title" className="text-xl font-semibold">What still needs checking?</h2>
+    <div>
+     <h3 className="font-semibold">Automatic transaction checks — {ready?'passed':'need attention'}</h3>
+     {ready?<ul className="mt-2 list-disc pl-5 space-y-1">
+      <li>The selected store and period match the retained import, and its source versions are current.</li>
+      <li>Imported sales and refunds match the stored financial evidence, including amounts, VAT, event dates and original-order links.</li>
+      <li>The stored evidence passes the sales and refund calculation checks.</li>
+     </ul>:<p className="mt-2">The checks have not all passed. Resolve missing or changed transaction evidence, then prepare this period again. Completeness approval is unavailable while these checks are blocked.</p>}
+    </div>
+    <div>
+     <h3 className="font-semibold">Independent completeness review — still required</h3>
+     <p className="mt-2">Matching the transactions we have does not prove that none are missing. Compare the selected period with your retained source records:</p>
+     <ul className="mt-2 list-disc pl-5 space-y-1">
+      <li>Check that the whole period was collected, including every page of results and any gaps or source-access limits.</li>
+      <li>Check refunds paid during this period, including refunds linked to orders placed in earlier months.</li>
+      <li>Check excluded orders and any edits, cancellations or adjustments that require investigation.</li>
+     </ul>
+     <p className="mt-2">{ready?'Record where the supporting evidence is kept and what you checked in the form below.':'Once the transaction checks pass, the independent-review form will become available.'} If anything remains unresolved, leave completeness unconfirmed.</p>
+    </div>
+    <p className="text-sm text-muted-foreground">Preparing this review does not approve completeness. This guidance does not cover product costs, profit or cash balances.</p>
+   </section>}
    {ready&&packet?.transactionEvidence&&<section className="space-y-3 rounded-lg border p-5">
     <h2 className="text-xl font-semibold">Imported transactions — awaiting review</h2>
     <p>These transactions match the retained import. This does not confirm that the history is complete. Later refunds stay in their own month and do not rewrite the original sale.</p>

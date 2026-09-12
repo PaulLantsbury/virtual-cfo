@@ -91,3 +91,9 @@ During walkthrough Paul queried the arbitrary 30% combined-shift cap. Inspection
 Paul approved the naming set in docs/page-naming.md. Applied it to all ten navigation/page headings, destination references, landing/upgrade feature labels and contextual drawer names. Sample/prototype/unavailable notices remain separate and prominent. Existing URLs, financial calculations and plan gates unchanged. Updated existing browser-test heading selectors. All ten heading/menu pairs checked; frontend typecheck and staging Pricing heading/status checks pass. No new financial testing required for copy-only changes.
 
 Paul asked to leave the Replit setup as it is. No Replit reconciliation, synchronisation or hosting change is part of this work; retain the existing setup until separately agreed.
+
+## Growth Quality / Profit Overview complete
+
+Paul approved the package; two developers and an independent reviewer delivered it. Source percentages no longer feed illustrative Growth scores/diagnoses. Profit Overview explicitly uses unvalidated sample arithmetic and discloses mixed periods, rather than claiming operating profit/EBITDA or annualised forecasts. Simulator equations and plan gates preserved. See docs/growth-profit-package.md.
+
+31 isolated browser cases, frontend typecheck/build and independent review pass. Real existing staging store A shows Growth source zeros and fixed sample C+, Profit actual reporting unavailable and GBP78,000 sample result. No database or financial-approval changes, Replit/main/production untouched. Next: Paul’s walkthrough; package coding complete. Maintain staging-after-package cadence and deferred modeller/real-source decisions.

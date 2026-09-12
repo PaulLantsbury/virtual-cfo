@@ -1,5 +1,4 @@
 import { useActiveStore } from "@/lib/auth/AuthProvider";
-import { useState, useEffect } from "react";
 import { Sparkles, TrendingUp, TrendingDown, Minus, ArrowRight, Lock } from "lucide-react";
 import {
   BarChart, Bar,
@@ -12,7 +11,6 @@ import { canAccess } from "@/lib/plan";
 import { useTimeline } from "@/lib/timeline";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
-import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import {
   REPEAT_RATE,
   REPEAT_RATE_PREV,
@@ -22,22 +20,9 @@ import {
   CAC_PAYBACK_PREV,
 } from "@/lib/data/growth-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
-import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
-import { DataPeriodLabel } from "@/components/DataPeriodLabel";
-import {
-  getMarketingChannelMetrics,
-  findChannel,
-  type ChannelMonthlyMetrics,
-  type CacTrendPoint,
-} from "@/lib/analytics/marketingChannelMetrics";
-
-// ─── Store ID ─────────────────────────────────────────────────────────────────
-// Dev store UUID — matches Dashboard, Margin Analysis, and Marketing Efficiency.
-
-
 // ─── Data constants ──────────────────────────────────────────────────────────
 // REPEAT_RATE, DISCOUNT_DEP, CAC_PAYBACK imported from
-// src/lib/data/growth-metrics.ts — the central source of truth for growth metrics.
+// src/lib/data/growth-metrics.ts — shared fixed illustrative growth metrics.
 // REPEAT_RATE resolved to 28% (was 27% here; Dashboard and BENCHMARKS both use 28%).
 
 const REPEAT_RATE_CHANGE  = +(REPEAT_RATE  - REPEAT_RATE_PREV).toFixed(1);
@@ -94,7 +79,7 @@ const KEY_DRIVERS: {
 
 /**
  * @dynamic Growth classification is computed from underlying metrics.
- * Rules (override when live data is connected):
+ * Historical proposed rules, not approved production policy:
  *   discount dependency > 35% AND declining repeat rate → "Promotion-led growth"
  *   repeat rate > 35% AND discount dep < 25%           → "Retention-led growth"
  *   paid channel share > 60%                           → "Paid-acquisition-led growth"
@@ -181,7 +166,7 @@ const GROWTH_RECOVERY_ACTIONS = [
 const RECOVERABLE_UPSIDE = {
   cashLow:  12_000,
   cashHigh: 28_000,
-  /** @ai-commentary Replace with AI-generated narrative when live */
+  /** @ai-commentary Historical placeholder narrative; fixed example only */
   supporting:
     "Reducing discount depth to target and improving Meta CAC efficiency unlocks an estimated £12k–£28k of contribution per month — without needing more revenue.",
   levers: [
@@ -220,107 +205,23 @@ export default function GrowthQuality() {
   const GQ_STORE_ID = useActiveStore();
   useTimeline();
 
-  // ── Phase 1: live repeat rate and discount dependency ─────────────────────
-  // Walks back from the current month to find the most recent month with data.
-  // Only these two KPI headlines are wired — all other GQ metrics (GQ_SCORE,
-  // CAC_PAYBACK, SCORE grades, composition chart, driver impacts) remain static
-  // pending ad-platform integration and a prior-period RPC.
-  const { status: reportingStatus,  phase1: gqPhase1, dateFrom: gqDateFrom, dateTo: gqDateTo, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
-
-  // ── Phase 2: month-on-month deltas ────────────────────────────────────────
-  // Fires after useLatestDataPeriod resolves. Used for:
-  //   - Repeat purchase rate change badge (replaces static REPEAT_RATE_CHANGE)
-  //   - Discount dependency change badge (replaces static DISCOUNT_DEP_CHANGE)
-  // A failure leaves gqDeltas null; badges fall back to static snapshots.
-  const { deltas: gqDeltas, loading: gqDeltasLoading } = usePhase2Deltas(GQ_STORE_ID, gqDateFrom, gqDateTo);
-
-  // ── Phase 3: marketing channel metrics (CAC payback + channel CM quality) ─
-  // Fires once gqDateFrom / gqDateTo resolve. On failure leaves arrays empty
-  // and blended null — all live values fall back to static constants.
-  // gqPhase3Loading stays true until the RPC resolves or fails, preventing
-  // the composite score from rendering with a mixed live/static input set.
-  const [gqChannels,    setGqChannels]    = useState<ChannelMonthlyMetrics[]>([]);
-  const [gqBlendedCm,   setGqBlendedCm]   = useState<number | null>(null);
-  const [gqCacTrend,    setGqCacTrend]    = useState<CacTrendPoint[]>([]);
-  const [gqPhase3Loading, setGqPhase3Loading] = useState(true);
-
-  useEffect(() => {
-    if (!gqDateFrom || !gqDateTo) return;
-    let cancelled = false;
-    setGqPhase3Loading(true);
-    getMarketingChannelMetrics(GQ_STORE_ID, gqDateFrom, gqDateTo).then(({ channels, blended, cacTrend }) => {
-      if (cancelled) return;
-      setGqChannels(channels);
-      setGqBlendedCm(blended?.blendedContributionMarginPct ?? null);
-      setGqCacTrend(cacTrend);
-      setGqPhase3Loading(false);
-    }).catch(() => {
-      if (!cancelled) setGqPhase3Loading(false);
-    });
-    return () => { cancelled = true; };
-  }, [gqDateFrom, gqDateTo]);
-
-  // ── Live repeat purchase rate % (1 d.p.) — fallback to static REPEAT_RATE.
-  const liveRepeatRate = gqPhase1
-    ? (gqPhase1.data.repeatPurchaseRate * 100).toFixed(1)
-    : REPEAT_RATE.toFixed(1);
-
-  // Raw numeric repeat rate — used in score formula.
-  const liveRepeatRateNum = gqPhase1
-    ? gqPhase1.data.repeatPurchaseRate * 100
-    : REPEAT_RATE;
-
-  // ── Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
-  const liveDiscountDep = gqPhase1
-    ? (gqPhase1.data.discountDependency * 100).toFixed(1)
-    : DISCOUNT_DEP.toFixed(1);
-
-  // Raw numeric discount dep — used in score formula.
-  const liveDiscountDepNum = gqPhase1
-    ? gqPhase1.data.discountDependency * 100
-    : DISCOUNT_DEP;
-
-  // ── Raw delta numbers for change badges.
-  // During loading → static snapshot fallback value.
-  // After load     → live pp value, or null (no prior period data → show "—").
-  const liveRprChangePp     = !gqDeltasLoading
-    ? (gqDeltas?.rpr_delta_pp ?? null)
-    : REPEAT_RATE_CHANGE;
-  const liveDiscDepChangePp = !gqDeltasLoading
-    ? (gqDeltas?.discount_dep_delta_pp ?? null)
-    : DISCOUNT_DEP_CHANGE;
-
-  // ── Live CAC Payback ───────────────────────────────────────────────────────
-  // Weighted average of cacPaybackOrders per channel, weighted by attributedOrders.
-  // Falls back to static CAC_PAYBACK if Phase 3 data has not loaded or all channels
-  // lack payback data (e.g. 0 attributed orders).
-  const liveCacPayback: number = (() => {
-    const valid = gqChannels.filter(
-      (c) => c.cacPaybackOrders !== null && c.attributedOrders > 0,
-    );
-    if (valid.length === 0) return CAC_PAYBACK;
-    const totalOrders  = valid.reduce((s, c) => s + c.attributedOrders, 0);
-    const weightedSum  = valid.reduce((s, c) => s + (c.cacPaybackOrders! * c.attributedOrders), 0);
-    return totalOrders > 0 ? +(weightedSum / totalOrders).toFixed(2) : CAC_PAYBACK;
-  })();
-
-  // ── CAC payback change vs prior period ────────────────────────────────────
-  // Derived from the weighted blended MoM CAC % change in the trend data.
-  // Payback is proportional to CAC, so a +14% CAC rise ≈ +14% payback rise.
-  // Falls back to static CAC_PAYBACK_CHANGE if trend data is empty or no MoM
-  // data exists (first seeded period has momChangePct = null).
-  const liveCacPaybackChange: number = (() => {
-    const withMom = gqCacTrend.filter(
-      (p) => p.momChangePct !== null && p.attributedNewCustomers > 0,
-    );
-    if (withMom.length === 0) return +(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(2);
-    const totalNew     = withMom.reduce((s, p) => s + p.attributedNewCustomers, 0);
-    const weightedPct  = withMom.reduce((s, p) => s + (p.momChangePct! * p.attributedNewCustomers), 0);
-    const blendedMomPct = totalNew > 0 ? weightedPct / totalNew : 0;
-    // Convert proportional CAC change to payback change in orders.
-    return +(liveCacPayback * blendedMomPct).toFixed(2);
-  })();
-
+  // Source ratios are displayed separately; the illustrative model never consumes them.
+  const { status: reportingStatus, phase1: gqPhase1, dateFrom: gqDateFrom, dateTo: gqDateTo, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
+  const sourcePercent = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? `${(value * 100).toFixed(2)}%` : "Unavailable";
+  const sourceStatus = reportingStatus === "loading" ? "Source figures loading"
+    : reportingStatus === "error" ? "Source figures unavailable"
+    : reportingStatus === "empty" ? "No source orders found in the reporting search"
+    : reportingStatus === "stale" ? "Unverified source figures: historical period"
+    : "Unverified source figures: latest completed period";
+  // Preserve the existing example inputs and scoring arithmetic, without source-data fallbacks.
+  const sampleRepeatRate = REPEAT_RATE.toFixed(1);
+  const sampleRepeatRateNum = REPEAT_RATE;
+  const sampleDiscountDep = DISCOUNT_DEP.toFixed(1);
+  const sampleDiscountDepNum = DISCOUNT_DEP;
+  const sampleRprChangePp = REPEAT_RATE_CHANGE;
+  const sampleDiscDepChangePp = DISCOUNT_DEP_CHANGE;
+  const sampleCacPayback = CAC_PAYBACK;
+  const sampleCacPaybackChange = +(CAC_PAYBACK - CAC_PAYBACK_PREV).toFixed(2);
   // ── Growth Quality Score: 4-component weighted model ──────────────────────
   //
   // Each sub-score is normalised to 0–100, then combined:
@@ -339,18 +240,13 @@ export default function GrowthQuality() {
 
   function clamp(v: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, v)); }
 
-  const repeatScore    = clamp((liveRepeatRateNum / 35) * 100, 0, 100);
-  const discountScore  = clamp((1 - Math.max(0, liveDiscountDepNum - 15) / 35) * 100, 0, 100);
-  const cacScore       = clamp(((2.0 - liveCacPayback) / 1.2) * 100, 0, 100);
-  const blendedCmPctNum = gqBlendedCm !== null ? gqBlendedCm * 100 : 38.6; // 38.6 = seeded fallback
+  const repeatScore    = clamp((sampleRepeatRateNum / 35) * 100, 0, 100);
+  const discountScore  = clamp((1 - Math.max(0, sampleDiscountDepNum - 15) / 35) * 100, 0, 100);
+  const cacScore       = clamp(((2.0 - sampleCacPayback) / 1.2) * 100, 0, 100);
+  const blendedCmPctNum = 38.6; // Fixed sample input
   const blendedCmScore  = clamp(((blendedCmPctNum - 25) / 30) * 100, 0, 100);
 
-  // Channel mix quality: % of attributed net sales from high-CM channels (email + organic).
-  // Used for the 5th score display component only — not in the composite.
-  const emailRevenue    = findChannel(gqChannels, "email")?.attributedNetSales   ?? 0;
-  const organicRevenue  = findChannel(gqChannels, "organic")?.attributedNetSales ?? 0;
-  const totalRevenue    = gqChannels.reduce((s, c) => s + c.attributedNetSales, 0);
-  const highCmShare     = totalRevenue > 0 ? (emailRevenue + organicRevenue) / totalRevenue : 0.30;
+  const highCmShare = 0.30; // Fixed sample owned-channel share
   const channelMixScore = clamp((highCmShare / 0.50) * 100, 0, 100);
 
   const compositeScore = Math.round(
@@ -403,20 +299,10 @@ export default function GrowthQuality() {
     return "D–";
   }
 
-  const liveGqGrade     = scoreToGrade(compositeScore);
+  const sampleGqGrade     = scoreToGrade(compositeScore);
 
-  // True only when every input to the composite score has settled.
-  // Phase 1 (repeat rate, discount dep) and Phase 3 (CAC payback, blended CM)
-  // load independently; mixing live + static values produces transient grades
-  // that differ from the fully-resolved value (e.g. "A" flash before "B+").
-  // The score tile suppresses its grade and direction badge until this is true.
-  const gqScoreReady = gqPhase1 !== null && !gqPhase3Loading;
-
-  // ── Live Score Components ──────────────────────────────────────────────────
-  // All 5 components now derive their score, status, grade, and explanation
-  // from live metric values. Direction ("strengthening" / "weakening") is also
-  // live-computed from the sub-score vs a healthy benchmark threshold.
-  const liveScoreComponents: {
+  // Fixed illustrative scores, not a certified growth quality model.
+  const sampleScoreComponents: {
     label:      string;
     status:     ScoreStatus;
     grade:      string;
@@ -428,7 +314,7 @@ export default function GrowthQuality() {
       label:      "Retention quality",
       status:     scoreToStatus(repeatScore),
       grade:      componentGrade(repeatScore),
-      explanation: `Repeat rate at ${liveRepeatRateNum.toFixed(1)}% — ${liveRepeatRateNum >= 30 ? "above the 30% level where retention carries the business" : "approaching the 30% level where customers return without paid re-acquisition"}.`,
+      explanation: `Repeat rate at ${sampleRepeatRateNum.toFixed(1)}% — ${sampleRepeatRateNum >= 30 ? "above the 30% level where retention carries the business" : "approaching the 30% level where customers return without paid re-acquisition"}.`,
       score:      Math.round(repeatScore),
       direction:  repeatScore >= 65 ? "strengthening" : "weakening",
     },
@@ -436,7 +322,7 @@ export default function GrowthQuality() {
       label:      "Discount reliance",
       status:     discountScore >= 65 ? "strong" : discountScore >= 40 ? "watch" : "weak",
       grade:      componentGrade(discountScore),
-      explanation: `${liveDiscountDepNum.toFixed(1)}% of orders use a discount code — ${liveDiscountDepNum <= 25 ? "within the 25% target" : "above the 25% target; discounts are driving orders that should return without them"}.`,
+      explanation: `${sampleDiscountDepNum.toFixed(1)}% of orders use a discount code — ${sampleDiscountDepNum <= 25 ? "within the 25% target" : "above the 25% target; discounts are driving orders that should return without them"}.`,
       score:      Math.round(discountScore),
       direction:  discountScore >= 65 ? "strengthening" : "weakening",
     },
@@ -444,7 +330,7 @@ export default function GrowthQuality() {
       label:      "CAC efficiency",
       status:     scoreToStatusWithDeclining(cacScore, 55),
       grade:      componentGrade(cacScore),
-      explanation: `CAC payback at ${liveCacPayback.toFixed(1)} orders. ${liveCacPayback <= 1.2 ? "Within target — new customers cover their acquisition cost within one order." : liveCacPayback <= 1.8 ? "Above the 1.2-order target — paid acquisition is costing more than one order earns back." : "Elevated — new customers require more than one order to cover their acquisition cost."}`,
+      explanation: `CAC payback at ${sampleCacPayback.toFixed(1)} orders. ${sampleCacPayback <= 1.2 ? "Within target — new customers cover their acquisition cost within one order." : sampleCacPayback <= 1.8 ? "Above the 1.2-order target — paid acquisition is costing more than one order earns back." : "Elevated — new customers require more than one order to cover their acquisition cost."}`,
       score:      Math.round(cacScore),
       direction:  cacScore >= 60 ? "strengthening" : "weakening",
     },
@@ -468,8 +354,8 @@ export default function GrowthQuality() {
 
   const isGqPro = canAccess("growth_quality_actions");
   const topGrowthDrivers = [KEY_DRIVERS[1], KEY_DRIVERS[2], KEY_DRIVERS[0]];
-  const strengtheningCount = liveScoreComponents.filter((c) => c.direction === "strengthening").length;
-  const weakeningCount = liveScoreComponents.filter((c) => c.direction === "weakening").length;
+  const strengtheningCount = sampleScoreComponents.filter((c) => c.direction === "strengthening").length;
+  const weakeningCount = sampleScoreComponents.filter((c) => c.direction === "weakening").length;
   const scorecardDisplay: Record<string, {
     currentLabel: string;
     currentClass: string;
@@ -484,7 +370,7 @@ export default function GrowthQuality() {
       travelLabel: "Supporting growth",
       travelClass: "text-emerald-700 dark:text-emerald-400",
       icon: "up",
-      explanation: `Repeat rate at ${liveRepeatRateNum.toFixed(1)}% — retention is still supporting growth, but it is not enough to offset discount and paid-acquisition pressure.`,
+      explanation: `Repeat rate at ${sampleRepeatRateNum.toFixed(1)}% — retention is still supporting growth, but it is not enough to offset discount and paid-acquisition pressure.`,
     },
     "Discount reliance": {
       currentLabel: "Monitor",
@@ -492,7 +378,7 @@ export default function GrowthQuality() {
       travelLabel: "Pressure increasing",
       travelClass: "text-amber-700 dark:text-amber-400",
       icon: "down",
-      explanation: `${liveDiscountDepNum.toFixed(1)}% of orders use a discount code — discount pressure is above target and needs active control even if current sales remain healthy.`,
+      explanation: `${sampleDiscountDepNum.toFixed(1)}% of orders use a discount code — discount pressure is above target and needs active control even if current sales remain healthy.`,
     },
     "CAC efficiency": {
       currentLabel: "Watch",
@@ -500,7 +386,7 @@ export default function GrowthQuality() {
       travelLabel: "Weakening",
       travelClass: "text-destructive",
       icon: "down",
-      explanation: `CAC payback at ${liveCacPayback.toFixed(1)} orders — paid growth is becoming more expensive, so new-customer revenue is carrying less contribution quality.`,
+      explanation: `CAC payback at ${sampleCacPayback.toFixed(1)} orders — paid growth is becoming more expensive, so new-customer revenue is carrying less contribution quality.`,
     },
     "Contribution quality": {
       currentLabel: "Watch",
@@ -521,7 +407,7 @@ export default function GrowthQuality() {
   };
 
   return (
-    <AppLayout>
+    <AppLayout showMonitoring={false}>
       {/* Page header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
@@ -529,24 +415,34 @@ export default function GrowthQuality() {
             Growth Quality
           </h1>
           <p className="text-muted-foreground mt-1">
-            Assess whether revenue growth is generating lasting profit — or being bought through discounts and paid spend.
+            Explore a sample growth quality model alongside separate unverified source ratios.
           </p>
-          <DataPeriodLabel status={reportingStatus}
-            periodLabel={gqPeriodLabel}
-            loading={gqPeriodLoading}
-            dateFrom={gqDateFrom}
-            dateTo={gqDateTo}
-          />
         </div>
         <TimelineSelector />
       </div>
 
-      {/* ── CFO Growth Verdict ── */}
+      <section aria-label="Growth quality reporting status" className="rounded-2xl border border-border bg-card p-6 mb-6">
+        <h2 className="text-xl font-bold">Actual growth quality analysis: unavailable</h2>
+        <p className="text-sm text-muted-foreground mt-2">Customer eligibility, channel costs and scoring rules still need validation. These existing source ratios do not establish growth quality, contribution or recoverable profit.</p>
+        <p role="status" className="text-sm mt-3">{sourceStatus}</p>
+        {!gqPeriodLoading && (reportingStatus === "ready" || reportingStatus === "stale") && <p className="text-xs text-muted-foreground">{gqPeriodLabel}: {gqDateFrom} to {gqDateTo}</p>}
+        <div className="grid sm:grid-cols-2 gap-4 mt-4">
+          <div><p className="text-sm">Unverified repeat purchase ratio</p><p className="text-xl font-bold">{sourcePercent(gqPhase1?.data.repeatPurchaseRate)}</p></div>
+          <div><p className="text-sm">Source-reported discount dependency (unverified value rate)</p><p className="text-xl font-bold">{sourcePercent(gqPhase1?.data.discountDependency)}</p></div>
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">The source discount ratio reports discount value against gross sales, not the share of orders using a code. Its inputs are not yet validated against the agreed financial definitions. Repeat-customer definitions remain unresolved.</p>
+      </section>
+      <section aria-label="Sample growth quality model notice" className="rounded-2xl border border-amber-300 bg-amber-50/50 dark:bg-amber-950/20 p-6 mb-6">
+        <h2 className="text-xl font-bold">Illustrative growth quality model</h2>
+        <p className="text-sm mt-2">All scores, trends, diagnoses, recovery amounts and actions below use fixed sample inputs. They do not change with the selected store or reporting period. Amounts are sample GBP; targets and confidence labels are unvalidated examples, not advice or forecasts for your business.</p>
+        <p className="text-sm mt-2">The score, trend chart and narrative are separate examples and may not reconcile. The sample discount measure counts fictional orders with codes; it differs from the value-based source ratio above. Actual monitoring and personalised CFO advice are unavailable here.</p>
+      </section>
+      {/* ── Sample Growth Verdict ── */}
       <div className="sc-purple rounded-2xl shadow-md mb-6 overflow-hidden">
         <div className="sc-purple-header flex items-center gap-3 px-6 py-3">
           <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
-            CFO Growth Verdict
+            Sample Growth Verdict
           </span>
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 whitespace-nowrap">
             Quality weakening
@@ -593,22 +489,22 @@ export default function GrowthQuality() {
         </div>
       </div>
 
-      {/* ── Recoverable Growth Quality ── */}
+      {/* ── Sample Growth Recovery ── */}
       <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 shadow-sm mb-8 px-6 py-5">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Recoverable Growth Quality</h2>
+            <h2 className="text-xl font-bold text-foreground">Sample Growth Recovery</h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
               Growth quality can improve without requiring additional revenue. The opportunity is to recover contribution already being lost to discount dependency and acquisition inefficiency.
             </p>
           </div>
           <div className="flex flex-wrap items-end gap-6">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Estimated recoverable contribution</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Illustrative contribution recovery</p>
               <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">
                 £{(RECOVERABLE_UPSIDE.cashLow / 1_000).toFixed(0)}k-£{(RECOVERABLE_UPSIDE.cashHigh / 1_000).toFixed(0)}k
               </p>
-              <p className="text-xs text-muted-foreground mt-1">per month · medium confidence</p>
+              <p className="text-xs text-muted-foreground mt-1">sample per month · illustrative confidence</p>
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Primary drivers</p>
@@ -635,7 +531,7 @@ export default function GrowthQuality() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5 pt-5 border-t border-emerald-200/70 dark:border-emerald-800/40">
-            {["Discount recovery lever identified", "Acquisition efficiency lever identified"].map((lever) => (
+            {["Sample discount recovery lever", "Sample acquisition efficiency lever"].map((lever) => (
               <div key={lever} className="flex items-center gap-3 rounded-xl bg-card/70 border border-border/50 px-4 py-3.5 shadow-sm">
                 <Lock className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
                 <p className="text-sm font-semibold text-foreground">{lever}</p>
@@ -645,11 +541,11 @@ export default function GrowthQuality() {
         )}
       </div>
 
-      {/* ── What Is Driving This? ── */}
+      {/* ── Sample Growth Drivers ── */}
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">What Is Driving This?</h2>
+        <h2 className="text-xl font-bold text-foreground">Sample Growth Drivers</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          The three commercial signals most responsible for this month's growth quality.
+          Fictional commercial signals for the example below.
         </p>
       </div>
 
@@ -684,13 +580,13 @@ export default function GrowthQuality() {
         ))}
       </div>
 
-      {/* ── Growth Quality Scorecard ── */}
+      {/* ── Sample Growth Quality Scorecard ── */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-5">
           <div>
-            <h2 className="text-xl font-bold text-foreground">Growth Quality Scorecard</h2>
+            <h2 className="text-xl font-bold text-foreground">Sample Growth Quality Scorecard</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Current levels remain usable, but the direction of travel is weakening.
+              Illustrative scores and narrative; no actual growth quality assessment.
             </p>
           </div>
           <div className="rounded-xl bg-secondary/40 border border-border/50 px-4 py-3 sm:text-right">
@@ -699,13 +595,13 @@ export default function GrowthQuality() {
               <p className="text-3xl font-display font-bold text-amber-700 dark:text-amber-300">Weakening</p>
             </div>
             <p className="text-[11px] text-muted-foreground mt-1">
-              {gqScoreReady ? `Current level ${liveGqGrade}` : "Current level calculating"}
+              {`Sample level ${sampleGqGrade}`}
             </p>
           </div>
         </div>
 
         <div className="divide-y divide-border/40">
-          {liveScoreComponents.map((component) => {
+          {sampleScoreComponents.map((component) => {
             const cfg = STATUS_CONFIG[component.status];
             const display = scorecardDisplay[component.label];
             return (
@@ -736,12 +632,12 @@ export default function GrowthQuality() {
         </div>
       </div>
 
-      {/* ── Growth Composition Trend ── */}
+      {/* ── Sample Growth Composition Trend ── */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
         <div className="mb-5">
-          <h2 className="text-xl font-bold text-foreground">Growth Composition Trend</h2>
+          <h2 className="text-xl font-bold text-foreground">Sample Growth Composition Trend</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Whether growth is becoming repeat-led, paid-led or discount-led.
+            Fictional six-month composition, independent of the selected reporting period.
           </p>
         </div>
         <div>
@@ -811,11 +707,11 @@ export default function GrowthQuality() {
         </div>
       </div>
 
-      {/* ── Growth Recovery Plan / Action Plan ── */}
+      {/* ── Sample Growth Recovery Plan / Action Plan ── */}
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Growth Recovery Plan</h2>
+        <h2 className="text-xl font-bold text-foreground">Sample Growth Recovery Plan</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          The next actions to recover contribution and make growth healthier.
+          Fictional actions illustrating a possible plan; not recommendations for your store.
         </p>
       </div>
 
@@ -851,7 +747,7 @@ export default function GrowthQuality() {
                         <p className="text-base font-bold text-foreground">{action.title}</p>
                         {i === 0 && (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white dark:bg-emerald-500 dark:text-emerald-950 uppercase tracking-wider">
-                            START FIRST
+                            EXAMPLE PRIORITY
                           </span>
                         )}
                       </div>
@@ -860,19 +756,19 @@ export default function GrowthQuality() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto_auto_auto_auto] gap-2 lg:justify-end">
                     <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-700/40 px-3 py-2">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Impact</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Sample impact</p>
                       <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums">{action.expectedImpact}</p>
                     </div>
                     <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Confidence</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Sample confidence</p>
                       <p className="text-sm font-semibold text-foreground">{action.confidence}</p>
                     </div>
                     <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Effort</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Sample effort</p>
                       <p className="text-sm font-semibold text-foreground">{action.effort}</p>
                     </div>
                     <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Timing</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Sample timing</p>
                       <p className="text-sm font-semibold text-foreground">{action.timing}</p>
                     </div>
                   </div>
@@ -905,9 +801,9 @@ export default function GrowthQuality() {
                 <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Growth Recovery Plan</p>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Sample Growth Recovery Plan</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  3 prioritised actions identified to improve contribution quality. Upgrade to view the action plan, implementation steps, confidence scoring and launch plan links.
+                  Explore three fictional actions with sample impact, confidence and implementation steps in the Pro preview. Upgrading does not activate real analysis.
                 </p>
               </div>
             </div>
@@ -920,16 +816,16 @@ export default function GrowthQuality() {
         </div>
       )}
 
-      <AiCfoAskCard pageId="growth" />
+      <p className="text-sm text-muted-foreground mb-8">Personalised CFO advice is unavailable on this sample page.</p>
 
-      {/* ── Growth Diagnostics ── */}
+      {/* ── Sample Growth Diagnostics ── */}
       <details className="group bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
         <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-foreground">Growth Diagnostics</h2>
+              <h2 className="text-xl font-bold text-foreground">Sample Growth Diagnostics</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Detailed driver context, KPI movements and benchmark logic.
+                Fixed example drivers, KPI movements and unvalidated benchmarks.
               </p>
             </div>
             <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
@@ -945,18 +841,18 @@ export default function GrowthQuality() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
                   <p className="text-xs text-muted-foreground mb-1">Repeat purchase rate</p>
-                  <p className="text-2xl font-display font-bold text-foreground">{liveRepeatRate}%</p>
-                  <p className="text-xs text-muted-foreground mt-1">{liveRprChangePp !== null ? `${liveRprChangePp >= 0 ? "+" : ""}${Math.abs(liveRprChangePp).toFixed(1)}pp vs last month` : "- vs last month"}</p>
+                  <p className="text-2xl font-display font-bold text-foreground">{sampleRepeatRate}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">{sampleRprChangePp !== null ? `${sampleRprChangePp >= 0 ? "+" : ""}${Math.abs(sampleRprChangePp).toFixed(1)}pp vs last month` : "- vs last month"}</p>
                 </div>
                 <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
                   <p className="text-xs text-muted-foreground mb-1">Discount dependency</p>
-                  <p className="text-2xl font-display font-bold text-foreground">{liveDiscountDep}%</p>
-                  <p className="text-xs text-muted-foreground mt-1">{liveDiscDepChangePp !== null ? `${liveDiscDepChangePp >= 0 ? "+" : ""}${Math.abs(liveDiscDepChangePp).toFixed(1)}pp vs last month` : "- vs last month"}</p>
+                  <p className="text-2xl font-display font-bold text-foreground">{sampleDiscountDep}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">{sampleDiscDepChangePp !== null ? `${sampleDiscDepChangePp >= 0 ? "+" : ""}${Math.abs(sampleDiscDepChangePp).toFixed(1)}pp vs last month` : "- vs last month"}</p>
                 </div>
                 <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
                   <p className="text-xs text-muted-foreground mb-1">CAC payback</p>
-                  <p className="text-2xl font-display font-bold text-foreground">{gqPhase3Loading ? "-" : `${liveCacPayback.toFixed(1)} orders`}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{gqPhase3Loading ? "Calculating" : `${liveCacPaybackChange > 0 ? "+" : ""}${liveCacPaybackChange.toFixed(2)} orders vs last month`}</p>
+                  <p className="text-2xl font-display font-bold text-foreground">{`${sampleCacPayback.toFixed(1)} orders`}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{`${sampleCacPaybackChange > 0 ? "+" : ""}${sampleCacPaybackChange.toFixed(2)} orders vs sample prior month`}</p>
                 </div>
                 <div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3">
                   <p className="text-xs text-muted-foreground mb-1">High-CM channel share</p>
@@ -991,7 +887,7 @@ export default function GrowthQuality() {
             <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-3">
               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">Benchmark logic</p>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Healthy growth quality is benchmarked against 30%+ repeat purchase rate, discount dependency below 25%, CAC payback below 1.2 orders, contribution margin in the 45-55% range and a stronger owned-channel mix.
+                This fictional model assumes 30%+ repeat purchase rate, discount dependency below 25%, CAC payback below 1.2 orders, contribution margin in the 45-55% range and a stronger owned-channel mix.
               </p>
             </div>
           </div>
@@ -1001,9 +897,9 @@ export default function GrowthQuality() {
               <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
-              <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Detailed diagnostics are available on Pro</p>
+              <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Detailed sample diagnostics in the Pro preview</p>
               <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                Unlock the full driver list, detailed KPI movements, benchmark logic and quantified impact commentary.
+                Explore fictional drivers, KPI movements and unvalidated benchmark examples. These are not store findings.
               </p>
             </div>
           </div>
@@ -1012,8 +908,8 @@ export default function GrowthQuality() {
       </details>
 
       <DataBenchmarkAssumptions
-        benchmarkNote="Repeat purchase rate benchmark: 30%+ indicates healthy self-sustaining retention. Below 30% means paid acquisition is doing the work customers should be doing for free."
-        dataQualityNote="Growth quality depends on accurate customer, order and discount tagging."
+        benchmarkNote="All thresholds and grades shown are unvalidated sample assumptions. Real scoring and customer definitions require agreement."
+        dataQualityNote="Source ratios are unverified. The illustrative model does not establish actual growth quality, recovery or contribution."
         className="mb-2"
       />
 

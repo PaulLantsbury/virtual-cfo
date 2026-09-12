@@ -6,6 +6,8 @@ The older checkpoint notices below are retained as history. Their “latest”, 
 
 The [Growth Efficiency and Pricing package](growth-pricing-package.md) is complete: 55 isolated browser checks and real staging page checks passed. Paul accepted the preceding walkthrough; these two pages are ready for his next review.
 
+The [Growth Quality / Profit Overview package](growth-profit-package.md) is complete with 31 browser checks and local staging verification.
+
 ## Historical checkpoint notices
 
 > Latest local demo: [select, validate and compare two files](../experiments/completeness/local-comparison.html). Use the synthetic reference/imported samples in experiments/completeness/samples. No uploads, database writes or completeness approvals.

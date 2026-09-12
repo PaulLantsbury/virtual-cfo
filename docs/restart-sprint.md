@@ -461,3 +461,8 @@ Completed the approved standalone synthetic report. Eight comparator-backed case
 ## Reference-file validation — 12 September
 
 Completed the approved local versioned JSON contract, field-level validator, CLI and synthetic samples. 18 validator/comparison test groups pass; valid output integrates with the comparator. Format validity never certifies source completeness or provenance. No actual Shopify export mapping, application upload, staging write or financial-rule change. [Contract](../experiments/completeness/reference-file-format.md) and 12 September handover updated.
+
+
+## Connected local file comparison — 12 September
+
+Completed standalone file-selection report using the actual validator/comparator. Both inputs must validate and match scope; invalid/duplicate data blocks comparison. Replacements clear results. Three offline browser groups and layout inspection passed; no network/storage. Synthetic imported sample added, no new dependency. [Handover](session-handover-2026-09-12.md) updated. No staging, production, Replit or financial approvals changed.

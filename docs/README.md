@@ -1,3 +1,5 @@
+> Latest local demo: [select, validate and compare two files](../experiments/completeness/local-comparison.html). Use the synthetic reference/imported samples in experiments/completeness/samples. No uploads, database writes or completeness approvals.
+
 > Latest local package: [reference-file format and validator](../experiments/completeness/reference-file-format.md), with valid/faulty JSON samples and local CLI. 18 validator/comparison groups pass; no uploads or completeness approvals.
 
 > Latest demo: [read-only comparison report](../experiments/completeness/comparison-demo.html), with eight selectable synthetic scenarios and side-by-side evidence. Open the downloaded HTML in a browser; no staging connection.

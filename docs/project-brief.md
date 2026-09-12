@@ -1,5 +1,7 @@
 # Night Scout — current project brief
 
+Latest completed package: [Scenario Planner visible impact and corrected sample-month model](scenario-planner-correction.md). This supersedes the earlier preservation of its unvalidated formulas and preset behaviour. 40 checks and local staging verification pass; forecasts and real-source integration remain unfinished.
+
 Updated 12 September 2026. Start here for coordination, then follow the linked evidence. This is a current synthesis, not a fresh audit of deployed services.
 
 ## Product

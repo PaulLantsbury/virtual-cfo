@@ -200,10 +200,11 @@ export default function Opportunities() {
   const rankOpp = (opp: (typeof mappedOpportunities)[number]): number => {
     const conf = opp.confidence === "High" ? 100 : opp.confidence === "Medium" ? 60 : 30;
     const eff  = opp.effort === "Low"      ? 100 : opp.effort === "Medium"      ? 60 : 20;
+    const timing: string = opp.timing;
     const tim  =
-      opp.timing === "Immediate"                                                    ? 100
-      : (opp.timing === "1–2 weeks" || opp.timing === "2–4 weeks" || opp.timing === "30 days") ? 70
-      : opp.timing === "1–3 months"                                                 ? 40
+      timing === "Immediate"                                                    ? 100
+      : (timing === "1–2 weeks" || timing === "2–4 weeks" || timing === "30 days") ? 70
+      : timing === "1–3 months"                                                 ? 40
       : 20;
     const upl = maxUplift > 0 ? (opp.uplift / maxUplift) * 100 : 0;
     return conf * 0.35 + eff * 0.25 + tim * 0.20 + upl * 0.20;

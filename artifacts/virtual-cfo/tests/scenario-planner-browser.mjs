@@ -161,70 +161,133 @@ async function fixture(
 async function truth(page) {
  const notice=page.getByRole("region",{name:"Scenario planning status"});
  assert.match(await notice.innerText(), /Actual scenario planning: unavailable/);
- assert.match(await notice.innerText(), /fixed GBP examples/);
- assert.match(await notice.innerText(), /Payment fee, Meta spend and Google spend sliders currently have no effect/);
+ assert.match(await notice.innerText(), /single synthetic month/);
  assert.equal(await page.getByRole("button",{name:"CFO Monitoring Status"}).count(),0);
  assert.equal(await page.getByPlaceholder("Ask a question about this page…").count(),0);
  assert.equal(await page.getByText("Why Night Scout Chose This",{exact:true}).count(),0);
+ assert.equal(await page.getByRole("button",{name:"Load sample preset",exact:true}).count(),0);
+ assert.equal(await page.getByRole("button",{name:"Reload preset",exact:true}).count(),0);
  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"Fits viewport");
 }
 const slider=(page,label)=>page.locator(`[aria-label="${label}"]`).getByRole("slider");
+// Independent worked sample-month expectations, not a copy of the model equations.
+async function businessImpact(page, { sales, profit, salesChange, profitChange }) {
+ const summaries = ["Scenario summary", "Live business impact"];
+ for (const name of summaries) {
+  const region = page.getByRole("region", { name, exact: true });
+  for (const [metric, baseline, current, change] of [
+   ["Sales", "£95,000", sales, salesChange],
+   ["Operating profit", "£21,900", profit, profitChange],
+  ]) {
+   const card = region.getByRole("group", { name: metric, exact: true });
+   const text = (await card.innerText()).replace(/−/g, "-");
+   assert.ok(text.includes(baseline), `${name}: ${metric} keeps its sample starting position`);
+   assert.ok(text.includes(current), `${name}: ${metric} displays the full scenario amount ${current}`);
+   for (const value of change) assert.ok(text.includes(value), `${name}: ${metric} change includes ${value}`);
+  }
+ }
+ for (const metric of ["Sales", "Operating profit"]) {
+  const texts = await Promise.all(summaries.map(name => page.getByRole("region", {name, exact:true}).getByRole("group", {name:metric, exact:true}).innerText()));
+  assert.equal(texts[0], texts[1], `${metric}: summary and slider impact agree`);
+ }
+}
+const startingImpact = { sales:"£95,000", profit:"£21,900", salesChange:["£0", "0%"], profitChange:["£0", "0%"] };
+async function unchangedControls(page) {
+ for (const tab of ["Growth", "Costs", "Overheads"]) {
+  await page.getByRole("button", {name:tab, exact:true}).click();
+  for (const control of await page.getByRole("slider").all()) assert.equal(await control.getAttribute("aria-valuenow"), "0", `${tab} remains at zero`);
+ }
+ await page.getByRole("button", {name:"Growth", exact:true}).click();
+}
+async function tableAmounts(page, metric, baseline, current) {
+ const row = page.getByRole("table").getByRole("row").filter({has:page.getByRole("rowheader",{name:metric,exact:true})});
+ const cells = await row.getByRole("cell").allTextContents();
+ assert.deepEqual(cells.slice(0,2), [baseline, current]);
+ assert.equal(cells.length,3,"Supporting row includes the change as well as baseline/scenario amounts");
+}
 for(const viewport of Object.keys(viewports)) {
- test(`${viewport}: sample status, disabled persistence and supporting model`,async()=>fixture({viewport},async page=>{
+ test(`${viewport}: coherent month starts unchanged and persistence stays unavailable`,async()=>fixture({viewport},async page=>{
   await truth(page);
+  await businessImpact(page, startingImpact);
+  await unchangedControls(page);
   for(const b of await page.getByRole("button",{name:"Saving unavailable",exact:true}).all()) assert.equal(await b.isDisabled(),true);
   assert.equal(await page.getByRole("button",{name:"Comparison unavailable"}).isDisabled(),true);
   await page.getByRole("heading",{name:"Supporting Sample Analysis"}).click();
-  const table=page.getByRole("table");
-  assert.match(await table.innerText(),/£198k/);
-  assert.match(await table.innerText(),/£232k/);
-  await page.getByRole("button",{name:"Reset",exact:true}).click();
-  assert.match(await table.innerText(), /Contribution\s+£198k\s+£198k/);
-  await slider(page,"Revenue Change").focus();await slider(page,"Revenue Change").press("End");
-  assert.match(await table.innerText(),/£246k/);
-  await page.getByRole("button",{name:"Reload preset",exact:true}).click();
-  assert.match(await table.innerText(),/£232k/);
-  for(const tab of ["Margin","Marketing","Cash","Overheads"]) await page.getByRole("button",{name:tab,exact:true}).click();
+  await tableAmounts(page,"Sales","£95,000","£95,000");
+  await tableAmounts(page,"Contribution","£40,900","£40,900");
+  await tableAmounts(page,"Operating profit","£21,900","£21,900");
+  await tableAmounts(page,"EBITDA","£22,900","£22,900");
+  for(const tab of ["Costs","Overheads","Growth"]) await page.getByRole("button",{name:tab,exact:true}).click();
   await truth(page);
   const dir=process.env.NIGHT_SCOUT_SCENARIO_SCREENSHOT_DIR;
   if(dir){await mkdir(dir,{recursive:true});await page.screenshot({path:join(dir,viewport+".png"),fullPage:true});}
  }));
- test(`${viewport}: free gate keeps sample status and blocks plan loading`,async()=>fixture({viewport,plan:"free"},async page=>{
+ test(`${viewport}: order volume changes sales and profit consistently and reset restores baseline`,async()=>fixture({viewport},async page=>{
+  await slider(page,"Order Volume Change").focus();
+  await slider(page,"Order Volume Change").press("End");
+  await businessImpact(page, { sales:"£125,000", profit:"£37,200", salesChange:["+£30,000", "+31.6%"], profitChange:["+£15,300", "+69.9%"] });
+  await page.getByRole("heading",{name:"Supporting Sample Analysis"}).click();
+  await tableAmounts(page,"Sales","£95,000","£125,000");
+  await tableAmounts(page,"Contribution","£40,900","£56,200");
+  await tableAmounts(page,"Operating profit","£21,900","£37,200");
+  await tableAmounts(page,"EBITDA","£22,900","£38,200");
+  await page.getByRole("button",{name:"Reset",exact:true}).click();
+  await businessImpact(page, startingImpact);
+  assert.equal(await slider(page,"Order Volume Change").getAttribute("aria-valuenow"),"0");
+ }));
+ test(`${viewport}: AOV shows positive and negative business differences`,async()=>fixture({viewport},async page=>{
+  await slider(page,"Average Order Value Change").focus();
+  await slider(page,"Average Order Value Change").press("End");
+  await businessImpact(page,{sales:"£110,000",profit:"£36,900",salesChange:["+£15,000","+15.8%"],profitChange:["+£15,000","+68.5%"]});
+  await slider(page,"Average Order Value Change").press("Home");
+  await businessImpact(page,{sales:"£85,000",profit:"£11,900",salesChange:["-£10,000","-10.5%"],profitChange:["-£10,000","-45.7%"]});
+  await page.getByRole("heading",{name:"Supporting Sample Analysis"}).click();
+  await tableAmounts(page,"Sales","£95,000","£85,000");
+  await tableAmounts(page,"Operating profit","£21,900","£11,900");
+ }));
+ test(`${viewport}: lower marketing spend changes costs without guessing sales`,async()=>fixture({viewport},async page=>{
+  await page.getByRole("button",{name:"Costs",exact:true}).click();
+  await slider(page,"Marketing Spend Change").focus();
+  await slider(page,"Marketing Spend Change").press("Home");
+  await businessImpact(page,{sales:"£95,000",profit:"£24,900",salesChange:["£0","0%"],profitChange:["+£3,000","+13.7%"]});
+  await page.getByRole("heading",{name:"Supporting Sample Analysis"}).click();
+  await tableAmounts(page,"Contribution","£40,900","£43,900");
+ }));
+ test(`${viewport}: live impact stays in view while adjusting overheads`,async()=>fixture({viewport},async page=>{
+  await page.getByRole("button",{name:"Overheads",exact:true}).click();
+  const control = slider(page,"Other Overhead Cost Change");
+  await control.scrollIntoViewIfNeeded();
+  await control.focus();
+  await control.press("End");
+  const live = page.getByRole("region",{name:"Live business impact",exact:true});
+  for (const metric of ["Sales", "Operating profit"]) {
+   const bounds = await live.getByRole("group",{name:metric,exact:true}).boundingBox();
+   assert.ok(bounds && bounds.y >= 0 && bounds.y + bounds.height <= viewports[viewport].height, `${metric} stays fully visible while adjusting the last overhead slider`);
+  }
+  assert.ok(await control.isVisible(), "The slider remains available alongside the business impact");
+  await truth(page);
+ }));
+ test(`${viewport}: free gate keeps sample status without numerical controls`,async()=>fixture({viewport,plan:"free"},async page=>{
   await truth(page);
   assert.equal(await page.getByRole("slider").count(),0);
-  const buttons=await page.getByRole("button",{name:"Sample preset locked"}).all();assert.equal(buttons.length,3);
-  for(const b of buttons) assert.equal(await b.isDisabled(),true);
-  assert.match(await page.locator("main").innerText(),/upgrading does not activate analysis/);
+  for (const name of ["Scenario summary", "Live business impact"]) assert.equal(await page.getByRole("region", {name, exact:true}).count(), 0, "Free plan does not expose numerical impact panels");
  }));
- for(const [preset,label,values] of [
-  ["reduce-discount-depth","Reduce average discount depth",{"Discount Rate Change":-4,"Returns Rate Change":-1}],
-  ["reallocate-meta-spend","Reallocate inefficient Meta spend",{"Meta Spend Change":-15,"Email / Organic Mix Uplift":12,"Blended CAC Change":-10}],
-  ["improve-fullprice-ratio","Improve full-price order ratio",{"Discount Rate Change":-3}]
- ]) test(`${viewport}: ${preset} sample handoff and reload`,async()=>fixture({viewport,preset},async page=>{
-  assert.match(await page.locator("main").innerText(),/Sample preset loaded from Opportunity Finder/);
-  for(const [name,value] of Object.entries(values)) assert.equal(await slider(page,name).getAttribute("aria-valuenow"),String(value));
+ for(const preset of ["reduce-discount-depth","reallocate-meta-spend","improve-fullprice-ratio"])
+ test(`${viewport}: legacy ${preset} is not partially applied`,async()=>fixture({viewport,preset},async page=>{
+  assert.match(await page.locator("main").innerText(),/Previous preset not applied/);
+  await businessImpact(page,startingImpact);
+  await unchangedControls(page);
   assert.equal(new URL(page.url()).searchParams.has("preset"),false);
-  await page.getByRole("button",{name:"Dismiss",exact:true}).click();
-  assert.equal(await page.getByText(/Sample preset loaded from Opportunity Finder/).count(),0);
-  await page.reload();await page.getByRole("heading",{name:"Scenario Planner",exact:true}).waitFor();
-  assert.equal(await slider(page,"Revenue Change").getAttribute("aria-valuenow"),"5");
+  await page.reload();
+  await page.getByRole("heading",{name:"Scenario Planner",exact:true}).waitFor();
+  await businessImpact(page,startingImpact);
  }));
 }
-test("Missing source data cannot certify scenario outputs",async()=>fixture({state:"unavailable"},truth));
-test("Unknown preset retains default sample",async()=>fixture({preset:"unknown-example"},async page=>{
- assert.equal(await slider(page,"Revenue Change").getAttribute("aria-valuenow"),"5");await truth(page);
+test("Missing source data cannot certify actual scenario outputs",async()=>fixture({state:"unavailable"},async page=>{
+ await truth(page);await businessImpact(page,startingImpact);
 }));
-test("Sample preset buttons retain original outputs and unused sliders are disclosed",async()=>fixture({},async page=>{
- await page.getByRole("heading",{name:"Supporting Sample Analysis"}).click();
- const table=page.getByRole("table");
- const buttons=page.getByRole("button",{name:"Load sample preset",exact:true});
- await buttons.nth(0).click();assert.match(await table.innerText(),/Contribution\s+£198k\s+£236k/);
- await buttons.nth(1).click();assert.match(await table.innerText(),/Contribution\s+£198k\s+£198k/);
- await buttons.nth(2).click();assert.match(await table.innerText(),/Contribution\s+£198k\s+£232k/);
- const original=await table.innerText();
- await page.getByRole("button",{name:"Marketing",exact:true}).click();
- for(const name of ["Meta Spend Change","Google Spend Change"]){await slider(page,name).focus();await slider(page,name).press("End");}
- await page.getByRole("button",{name:"Margin",exact:true}).click();
- await slider(page,"Payment Fee Rate Change").focus();await slider(page,"Payment Fee Rate Change").press("End");
- assert.equal(await table.innerText(),original);
+test("Unknown preset leaves the whole coherent sample unchanged",async()=>fixture({preset:"unknown-example"},async page=>{
+ assert.match(await page.locator("main").innerText(),/Previous preset not applied/);
+ assert.equal(new URL(page.url()).searchParams.has("preset"),false);
+ await businessImpact(page,startingImpact);await truth(page);
 }));

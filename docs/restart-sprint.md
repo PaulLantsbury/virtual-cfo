@@ -490,3 +490,8 @@ Approved parallel package completed; 31 isolated browser cases, frontend checks,
 ## Opportunity and scenario checkpoint
 
 Opportunity Finder / Scenario Planner complete: 22 isolated browser checks and local staging handoff verified; see docs/opportunity-scenario-package.md. No financial rules, database, Replit/main or production changes.
+
+
+## Scenario Planner correction — 12 September 2026
+
+Paul approved visible live sales/profit comparisons, then correction of the sample formulas using one consistent month and orders × AOV. Implemented nine active controls, clear cost/profit bridge and unavailable unsupported forecasts; old presets explicitly declined. Baseline net sales £95,000 and operating profit £21,900. All40 tests, typecheck/build and independent review pass; current-source local staging store A checked and reset. See [implementation, verification and remaining scope](scenario-planner-correction.md). No DB writes, access changes, Replit sync, main merge or production release. Next: Paul walkthrough; further modelling policies need his decision.

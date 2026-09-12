@@ -1,5 +1,7 @@
 # Opportunity Finder and Scenario Planner — approved package
 
+**Superseded for Scenario Planner:** Paul subsequently approved [the corrected sample-month model](scenario-planner-correction.md), live summary and unsupported legacy preset rejection. The implementation/preservation details below describe the earlier package.
+
 Paul approved two coding workstreams and independent review. Audit opportunity estimates, rankings, confidence and suggested plans; separate unverified source readings from examples, remove invented fallbacks and claims an unimplemented engine selected a best plan. Preserve sample arithmetic, plan gates, existing presets and handoff routes. No new ranking/financial policy, model redesign, shared engine, migration, grants, imports, Replit sync, main merge or production release.
 
 Acceptance includes data availability/zero/failure where sources remain, sample-plan honesty, existing preset/slider/handoff interactions, access gates, desktop/mobile presentation, typecheck/build and independent review. After integration verify existing local staging and save code/tests/docs to the authorised GitHub branch. Actual opportunities and forecasts remain unfinished.

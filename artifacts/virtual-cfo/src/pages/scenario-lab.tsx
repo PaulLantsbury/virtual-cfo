@@ -1,929 +1,151 @@
-import { useState, useEffect } from "react";
-import {
-  Sparkles, TrendingUp, AlertTriangle,
-  Zap, CheckCircle,
-  RefreshCw, Save, Layers, Target, ChevronRight,
-  FlaskConical, X,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { RefreshCw, Save, Layers } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
-import { GROSS_REVENUE as BASE_REVENUE, BASE_CONTRIBUTION, CONTRIBUTION_PER_ORDER as BASE_CPO } from "@/lib/data/pricing-metrics";
-import { BASE_EBITDA } from "@/lib/data/business-snapshot";
-import { CASH_BALANCE as BASE_CASH, CASH_RUNWAY as BASE_RUNWAY, WORKING_CAPITAL_DRAG as BASE_WORKING_CAPITAL } from "@/lib/data/cash-snapshot";
+import { computeScenario, ZERO_SCENARIO_STATE } from "@/lib/scenario-model";
 
-// ─── Base financial constants ─────────────────────────────────────────────────
-// Imported from central mock data layer — replace those files with live feeds
-// when Shopify / Xero integrations are connected.
-//
-// BASE_REVENUE         = 420,000  (GROSS_REVENUE from pricing-metrics)
-// BASE_CONTRIBUTION    = 198,000  (from pricing-metrics — same value as business-snapshot CONTRIBUTION)
-// BASE_EBITDA          = 78,000   (from business-snapshot)
-// BASE_CASH            = 186,000  (CASH_BALANCE from cash-snapshot)
-// BASE_RUNWAY          = 3.4      (CASH_RUNWAY from cash-snapshot)
-// BASE_WORKING_CAPITAL = 74,000   (WORKING_CAPITAL_DRAG from cash-snapshot)
-// BASE_CPO             = 12.40    (CONTRIBUTION_PER_ORDER from pricing-metrics)
-
-// Scenario-lab specific: BASE_CAC_PAYBACK uses 1.6 as a scenario modelling starting
-// point (intentionally higher than the shared CAC_PAYBACK = 1.4 in growth-metrics.ts,
-// which reflects the current actual payback — 1.6 is the conservative scenario base).
-const BASE_CAC_PAYBACK = 1.6;
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface ScenarioState {
-  revenueChange: number;
-  orderVolumeChange: number;
-  aovChange: number;
-  discountChange: number;
-  returnsChange: number;
-  shippingChange: number;
-  paymentFeeChange: number;
-  metaSpendChange: number;
-  googleSpendChange: number;
-  emailMixUplift: number;
-  blendedCacChange: number;
-  inventoryDaysChange: number;
-  supplierPaymentDaysChange: number;
-  fixedCostChange: number;
-  marketingSpendChange: number;
-  staffCostChange: number;
-  softwareChange: number;
-  fulfilmentChange: number;
+type ScenarioState = typeof ZERO_SCENARIO_STATE;
+type Model = ReturnType<typeof computeScenario>;
+const money = (value: number) => `${value < 0 ? "−" : ""}£${Math.abs(value).toLocaleString("en-GB", { maximumFractionDigits: 2 })}`;
+function changeText(value: number, baseline: number) {
+  const delta = value - baseline;
+  const percentage = baseline > 0
+    ? ` (${delta < 0 ? "−" : delta > 0 ? "+" : ""}${(Math.abs(delta) / baseline * 100).toLocaleString("en-GB", { maximumFractionDigits: 1 })}%)`
+    : " (percentage unavailable)";
+  return `${delta > 0 ? "+" : ""}${money(delta)}${percentage}`;
 }
-
-type PlanId = "balanced" | "margin" | "cash" | "custom";
-
-// ─── Plan presets ─────────────────────────────────────────────────────────────
-const BALANCED_GROWTH: ScenarioState = {
-  revenueChange: 5, orderVolumeChange: 3, aovChange: 2,
-  discountChange: -2, returnsChange: 0, shippingChange: 0, paymentFeeChange: 0,
-  metaSpendChange: -10, googleSpendChange: 0, emailMixUplift: 10, blendedCacChange: -8,
-  inventoryDaysChange: -8, supplierPaymentDaysChange: 4, fixedCostChange: 0, marketingSpendChange: -5,
-  staffCostChange: 0, softwareChange: 0, fulfilmentChange: 0,
-};
-
-const MARGIN_RECOVERY: ScenarioState = {
-  revenueChange: 0, orderVolumeChange: 0, aovChange: 0,
-  discountChange: -3, returnsChange: 0, shippingChange: -1.5, paymentFeeChange: 0,
-  metaSpendChange: -15, googleSpendChange: 0, emailMixUplift: 15, blendedCacChange: 0,
-  inventoryDaysChange: 0, supplierPaymentDaysChange: 0, fixedCostChange: 0, marketingSpendChange: -5,
-  staffCostChange: 0, softwareChange: 0, fulfilmentChange: 0,
-};
-
-const CASH_PROTECTION: ScenarioState = {
-  revenueChange: 0, orderVolumeChange: 0, aovChange: 0,
-  discountChange: 0, returnsChange: 0, shippingChange: 0, paymentFeeChange: 0,
-  metaSpendChange: 0, googleSpendChange: 0, emailMixUplift: 0, blendedCacChange: 0,
-  inventoryDaysChange: -12, supplierPaymentDaysChange: 6, fixedCostChange: 0, marketingSpendChange: -10,
-  staffCostChange: 0, softwareChange: 0, fulfilmentChange: 0,
-};
-
-const ZERO_STATE: ScenarioState = {
-  revenueChange: 0, orderVolumeChange: 0, aovChange: 0,
-  discountChange: 0, returnsChange: 0, shippingChange: 0, paymentFeeChange: 0,
-  metaSpendChange: 0, googleSpendChange: 0, emailMixUplift: 0, blendedCacChange: 0,
-  inventoryDaysChange: 0, supplierPaymentDaysChange: 0, fixedCostChange: 0, marketingSpendChange: 0,
-  staffCostChange: 0, softwareChange: 0, fulfilmentChange: 0,
-};
-
-const PLAN_LABELS: Record<PlanId, string> = {
-  balanced: "Balanced Growth Plan",
-  margin:   "Margin Recovery Plan",
-  cash:     "Cash Protection Plan",
-  custom:   "Custom",
-};
-
-const PLAN_PRESETS: Record<PlanId, ScenarioState> = {
-  balanced: BALANCED_GROWTH,
-  margin:   MARGIN_RECOVERY,
-  cash:     CASH_PROTECTION,
-  custom:   ZERO_STATE,
-};
-
-// ─── Opportunity presets (from Opportunity Finder) ────────────────────────────
-// Each preset loads when the user clicks "Model this scenario" on an opportunity
-// card. Values start from ZERO_STATE so only relevant levers are set, making
-// the connection between the recommendation and the slider change explicit.
-interface OpportunityPreset {
-  label: string;
-  state: ScenarioState;
-  focusTab: "growth" | "margin" | "marketing" | "cash" | "overheads";
-}
-
-const OPPORTUNITY_PRESETS: Record<string, OpportunityPreset> = {
-  "reduce-discount-depth": {
-    label:    "Reduce average discount depth",
-    focusTab: "margin",
-    state: {
-      ...ZERO_STATE,
-      discountChange: -4,
-      aovChange:       2,
-      returnsChange:  -1,
-    },
-  },
-  "reallocate-meta-spend": {
-    label:    "Reallocate inefficient Meta spend",
-    focusTab: "marketing",
-    state: {
-      ...ZERO_STATE,
-      metaSpendChange:     -15,
-      emailMixUplift:       12,
-      blendedCacChange:    -10,
-      marketingSpendChange: -8,
-    },
-  },
-  "improve-fullprice-ratio": {
-    label:    "Improve full-price order ratio",
-    focusTab: "margin",
-    state: {
-      ...ZERO_STATE,
-      discountChange: -3,
-      aovChange:       3,
-      revenueChange:   2,
-    },
-  },
-};
-
-// ─── Calculation engine ───────────────────────────────────────────────────────
-function computeOutputs(s: ScenarioState) {
-  const scenarioRevenue = Math.round(BASE_REVENUE * (1 + s.revenueChange / 100));
-
-  const contribDelta = Math.round(
-    (s.revenueChange / 100) * BASE_CONTRIBUTION * 0.8 +
-    (s.orderVolumeChange / 100) * BASE_CONTRIBUTION * 0.25 +
-    (s.aovChange / 100) * BASE_CONTRIBUTION * 0.25 +
-    (-s.discountChange) * 5000 +
-    (-s.returnsChange) * 1800 +
-    (-s.shippingChange) * 5000 +
-    (s.emailMixUplift) * 1000 +
-    (-s.blendedCacChange / 100) * 40000
-  );
-
-  const scenarioContribution = Math.round(BASE_CONTRIBUTION + contribDelta);
-
-  const fixedCostDelta = Math.round(
-    (s.fixedCostChange / 100) * 120_000 +
-    (s.staffCostChange / 100) * 55_000 +
-    (s.softwareChange / 100) * 15_000 +
-    (s.fulfilmentChange / 100) * 20_000 +
-    (s.marketingSpendChange / 100) * 27_000 * 0.5
-  );
-
-  const scenarioEBITDA = Math.round(BASE_EBITDA + contribDelta - fixedCostDelta);
-
-  const inventoryCashChange  = Math.round(-s.inventoryDaysChange * 2_500);
-  const supplierCashChange   = Math.round(s.supplierPaymentDaysChange * 3_000);
-  const ebitdaCashConversion = Math.round((scenarioEBITDA - BASE_EBITDA) * 0.8);
-  const scenarioCash         = Math.round(BASE_CASH + inventoryCashChange + supplierCashChange + ebitdaCashConversion);
-
-  const scenarioWorkingCapital = Math.max(0, Math.round(
-    BASE_WORKING_CAPITAL + (s.inventoryDaysChange * 2_500) - (s.supplierPaymentDaysChange * 3_000)
-  ));
-
-  const cashDelta       = scenarioCash - BASE_CASH;
-  const scenarioRunway  = Math.round(Math.max(0, BASE_RUNWAY + cashDelta / 80_000) * 10) / 10;
-
-  const cpoDelta = Math.round((
-    (-s.discountChange) * 0.35 +
-    (-s.returnsChange)  * 0.20 +
-    (-s.shippingChange) * 0.85 +
-    (s.emailMixUplift)  * 0.025 +
-    (-s.blendedCacChange) * 0.05
-  ) * 100) / 100;
-  const scenarioCPO = Math.max(0, Math.round((BASE_CPO + cpoDelta) * 100) / 100);
-
-  const cacFactor          = 1 + s.blendedCacChange / 100;
-  const cpoPctChange       = scenarioCPO / BASE_CPO;
-  const scenarioCACPayback = Math.round(Math.max(0.5, BASE_CAC_PAYBACK * cacFactor / cpoPctChange) * 10) / 10;
-
-  return {
-    revenue:             scenarioRevenue,
-    contribution:        scenarioContribution,
-    ebitda:              scenarioEBITDA,
-    cash:                scenarioCash,
-    workingCapital:      scenarioWorkingCapital,
-    runway:              scenarioRunway,
-    cpo:                 scenarioCPO,
-    cacPayback:          scenarioCACPayback,
-    revenueDelta:        scenarioRevenue      - BASE_REVENUE,
-    contributionDelta:   scenarioContribution - BASE_CONTRIBUTION,
-    ebitdaDelta:         scenarioEBITDA       - BASE_EBITDA,
-    cashDelta:           scenarioCash         - BASE_CASH,
-    wcDelta:             scenarioWorkingCapital - BASE_WORKING_CAPITAL,
-    runwayDelta:         Math.round((scenarioRunway  - BASE_RUNWAY)        * 10) / 10,
-    cpoDelta:            Math.round((scenarioCPO     - BASE_CPO)           * 100) / 100,
-    cacPaybackDelta:     Math.round((scenarioCACPayback - BASE_CAC_PAYBACK) * 10) / 10,
-  };
-}
-
-// ─── Formatters ───────────────────────────────────────────────────────────────
-function fmtK(n: number) {
-  const abs = Math.abs(n);
-  if (abs >= 1000) return `£${(abs / 1000).toFixed(0)}k`;
-  return `£${abs.toFixed(0)}`;
-}
-
-// ─── Local components ─────────────────────────────────────────────────────────
-function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+function BusinessImpact({ model, title, sticky = false }: { model: Model; title: string; sticky?: boolean }) {
   return (
-    <div className="mb-6">
-      <h2 className="text-xl font-bold text-foreground">{title}</h2>
-      {subtitle && <p className="text-sm text-muted-foreground mt-1 leading-snug">{subtitle}</p>}
-      <div className="h-px bg-border/60 mt-3" />
-    </div>
+    <section aria-label={title} className={cn("rounded-xl border border-primary/30 bg-card p-3 sm:p-4", sticky && "sticky top-0 z-20 shadow-md mb-5")}>
+      <h2 className="text-sm font-bold">{title}</h2>
+      <p className="text-xs text-muted-foreground mt-1 mb-3">Compared with the sample starting position · one sample month · GBP</p>
+      <div className="grid grid-cols-2 gap-3" aria-live="polite" aria-atomic="true">
+        {[
+          { label: "Sales", baseline: model.baseline.sales, value: model.result.sales },
+          { label: "Operating profit", baseline: model.baseline.operatingProfit, value: model.result.operatingProfit },
+        ].map(({ label, baseline, value }) => (
+          <div key={label} role="group" aria-label={label} className="min-w-0 rounded-lg bg-secondary/40 p-2 sm:p-3">
+            <h3 className="text-xs font-semibold">{label}</h3>
+            <p className="text-xs text-muted-foreground mt-2">Your scenario</p>
+            <p className="text-lg sm:text-2xl font-bold tabular-nums">{money(value)}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Sample starting position <span className="tabular-nums">{money(baseline)}</span></p>
+            <p className={cn("text-xs sm:text-sm font-semibold tabular-nums mt-2", value > baseline ? "text-emerald-600 dark:text-emerald-400" : value < baseline ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground")}>
+              Change: {changeText(value, baseline)}
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="text-[11px] text-muted-foreground mt-2">Sales = net product sales, excluding VAT and shipping. Sample arithmetic, not a forecast.</p>
+    </section>
   );
 }
-
-function SliderRow({
-  label, value, min, max, step = 1, unit = "%", prefix = "", onChange,
-}: {
-  label: string; value: number; min: number; max: number;
-  step?: number; unit?: string; prefix?: string;
-  onChange: (v: number) => void;
+function SliderRow({ label, value, min, max, step = 1, unit = "%", onChange }: {
+  label: string; value: number; min: number; max: number; step?: number; unit?: string; onChange: (v: number) => void;
 }) {
-  const display = value === 0 ? "0" : value > 0
-    ? `+${prefix}${value}${unit}`
-    : `−${prefix}${Math.abs(value)}${unit}`;
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 py-3 border-b border-border/40 last:border-0">
-      <p className="text-sm font-medium text-foreground flex-1 min-w-0">{label}</p>
+      <p className="text-sm font-medium flex-1 min-w-0">{label}</p>
       <div className="flex items-center gap-3 shrink-0 w-full sm:w-72">
-        <Slider
-          aria-label={label} value={[value]} min={min} max={max} step={step}
-          onValueChange={([v]) => onChange(v)}
-          className="flex-1"
-        />
-        <span className={cn(
-          "text-sm font-semibold tabular-nums min-w-[64px] text-right",
-          value > 0 ? "text-emerald-600 dark:text-emerald-400"
-            : value < 0 ? "text-amber-600 dark:text-amber-400"
-            : "text-muted-foreground"
-        )}>
-          {display}
+        <Slider aria-label={label} value={[value]} min={min} max={max} step={step}
+          onValueChange={([v]) => onChange(v)} className="flex-1" />
+        <span className="text-sm font-semibold tabular-nums min-w-[64px] text-right">
+          {value > 0 ? "+" : value < 0 ? "−" : ""}{unit === "£" ? "£" : ""}{Math.abs(value)}{unit === "£" ? "" : unit}
         </span>
       </div>
     </div>
   );
 }
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ScenarioLab() {
-  const isPro       = canAccess("scenario_lab_builder");
-  const isProPlans  = canAccess("scenario_lab_plans");
-
-  const [scenario,    setScenario]    = useState<ScenarioState>(BALANCED_GROWTH);
-  const [activeTab,   setActiveTab]   = useState<"growth"|"margin"|"marketing"|"cash"|"overheads">("growth");
-  const [activePlan,  setActivePlan]  = useState<PlanId>("balanced");
-  const [loadedPresetLabel, setLoadedPresetLabel] = useState<string | null>(null);
-
-  // Detect ?preset= param on first mount only — applies the opportunity preset,
-  // switches to the relevant slider tab, then strips the param from the URL so
-  // a page refresh does not re-apply it. Empty dep array guarantees one execution.
+  const isPro = canAccess("scenario_lab_builder");
+  const [scenario, setScenario] = useState<ScenarioState>({ ...ZERO_SCENARIO_STATE });
+  const [activeTab, setActiveTab] = useState("Growth");
+  const [previousPreset, setPreviousPreset] = useState(false);
   useEffect(() => {
-    const params   = new URLSearchParams(window.location.search);
-    const presetId = params.get("preset");
-    if (presetId && presetId in OPPORTUNITY_PRESETS) {
-      const { label, state, focusTab } = OPPORTUNITY_PRESETS[presetId];
-      setScenario(state);
-      setActivePlan("custom");
-      setActiveTab(focusTab);
-      setLoadedPresetLabel(label);
-      const url = new URL(window.location.href);
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("preset")) {
+      setPreviousPreset(true);
       url.searchParams.delete("preset");
       window.history.replaceState({}, "", url.toString());
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const out = computeOutputs(scenario);
-
-  function set(key: keyof ScenarioState) {
-    return (v: number) => setScenario(prev => ({ ...prev, [key]: v }));
-  }
-
-  function applyPlan(plan: PlanId) {
-    setActivePlan(plan);
-    setScenario(PLAN_PRESETS[plan]);
-  }
-
-  const TABS = [
-    { id: "growth",     label: "Growth"    },
-    { id: "margin",     label: "Margin"    },
-    { id: "marketing",  label: "Marketing" },
-    { id: "cash",       label: "Cash"      },
-    { id: "overheads",  label: "Overheads" },
+  }, []);
+  const model = computeScenario(scenario);
+  const set = (key: keyof ScenarioState) => (v: number) => setScenario(prev => ({ ...prev, [key]: v }));
+  const controls = {
+    Growth: [
+      { key: "orderVolumeChange", label: "Order Volume Change", min: -20, max: 30 },
+      { key: "aovChange", label: "Average Order Value Change", min: -10, max: 15 },
+    ],
+    Costs: [
+      { key: "shippingChange", label: "Shipping Cost per Order Change", min: -3, max: 3, step: 0.5, unit: "£" },
+      { key: "paymentFeeChange", label: "Payment Cost per Order Change", min: -2, max: 2, step: 0.5, unit: "£" },
+      { key: "marketingSpendChange", label: "Marketing Spend Change", min: -30, max: 30 },
+      { key: "fulfilmentChange", label: "Fulfilment Cost Change", min: -20, max: 20 },
+    ],
+    Overheads: [
+      { key: "staffCostChange", label: "Staff Cost Change", min: -15, max: 20 },
+      { key: "softwareChange", label: "Software Cost Change", min: -20, max: 20 },
+      { key: "fixedCostChange", label: "Other Overhead Cost Change", min: -20, max: 20 },
+    ],
+  } satisfies Record<string, Array<{ key: keyof ScenarioState; label: string; min: number; max: number; step?: number; unit?: string }>>;
+  const rows = [
+    ["Gross product sales", "grossProductSales"], ["Discounts", "discounts"], ["Product refunds in the month", "productRefunds"],
+    ["Sales", "sales"], ["Net shipping revenue", "shippingRevenue"], ["Net cost of goods sold", "cogs"],
+    ["Gross profit", "grossProfit"], ["Variable operating costs", "variableCosts"], ["Marketing expenditure", "marketing"],
+    ["Contribution", "contribution"], ["Operating overheads including depreciation", "overheads"],
+    ["Depreciation and amortisation (included above)", "depreciationAmortisation"], ["Operating profit", "operatingProfit"], ["EBITDA", "ebitda"],
   ] as const;
-
   return (
     <AppLayout showMonitoring={false}>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-10">
-
-        {/* ══ 1. PAGE HEADER ══════════════════════════════════════════════════ */}
-        <div>
-          <div>
-            <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">
-              Scenario Planner
-            </h1>
-            <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed max-w-xl">
-              Explore illustrative scenarios using fixed sample assumptions.
-            </p>
-          </div>
-        </div>
-
-        <section aria-label="Scenario planning status" className="rounded-xl border border-amber-300 bg-amber-50/40 p-5 space-y-2">
+      <div className="max-w-5xl mx-auto px-2 sm:px-6 py-8 space-y-6">
+        <header><h1 className="text-3xl font-display font-bold">Scenario Planner</h1>
+          <p className="text-sm text-muted-foreground mt-2">See how your assumptions change sales and operating profit in one consistent sample month.</p></header>
+        <section aria-label="Scenario planning status" className="rounded-xl border border-amber-300 bg-amber-50/40 p-4 space-y-2">
           <h2 className="font-bold">Actual scenario planning: unavailable</h2>
-          <p className="text-sm">No store financial data is connected to this planner. All amounts are fixed GBP examples, not your store's currency or results. No best-plan selection, risk assessment or confidence engine is implemented.</p>
-          <p className="text-sm">The sample formulas are not validated against the agreed financial definitions. Cash conversion and runway use arbitrary coefficients; these are not forecasts. Static cards are separate illustrations and must not be added to simulator outputs.</p>
-          <p className="text-sm">Payment fee, Meta spend and Google spend sliders currently have no effect on outputs. Other inputs may overlap; changing sliders does not establish a real combined benefit. Saving and comparing plans are unavailable.</p>
+          <p className="text-sm">No store financial data is connected. These are fixed GBP examples for a single synthetic month, not your store’s results.</p>
+          <p className="text-sm">Sales is calculated from orders and average order value, less the month’s fixed product refunds. Changing AOV does not predict customer demand; changing marketing spend changes its cost only.</p>
+          <p className="text-sm">Cash forecasts, runway, channel-driven growth and discount/refund response modelling are unavailable until their assumptions are agreed. Saving and comparing plans are unavailable.</p>
         </section>
-
-        {/* ══ OPPORTUNITY PRESET BANNER ════════════════════════════════════════ */}
-        {loadedPresetLabel && (
-          <div className="flex items-center justify-between gap-4 px-5 py-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-700/50">
-            <div className="flex items-center gap-3 min-w-0">
-              <FlaskConical className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-              <p className="text-sm font-medium text-indigo-900 dark:text-indigo-200 leading-snug">
-                Sample preset loaded from Opportunity Finder:{" "}
-                <span className="font-semibold">"{loadedPresetLabel}"</span>
-                <span className="ml-2 text-indigo-600/70 dark:text-indigo-400/70 font-normal text-xs">
-                  · Relevant sliders pre-populated below
-                </span>
-              </p>
+        {previousPreset && <p role="status" className="rounded-xl border border-border p-4 text-sm"><strong>Previous preset not applied.</strong> Opportunity Finder’s older presets use assumptions that this corrected model does not support. Start from the sample baseline below; no partial preset has been loaded.</p>}
+        {isPro ? <>
+          <BusinessImpact model={model} title="Scenario summary" />
+          <section className="rounded-2xl border border-border/50 bg-card p-3 sm:p-6" aria-label="Scenario controls">
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+              <h2 className="text-xl font-bold">Scenario Planner Simulator</h2>
+              <button onClick={() => setScenario({ ...ZERO_SCENARIO_STATE })} className="inline-flex gap-2 items-center border border-border rounded-lg px-3 py-2 text-sm"><RefreshCw className="w-4 h-4" />Reset</button>
             </div>
-            <button
-              onClick={() => setLoadedPresetLabel(null)}
-              aria-label="Dismiss"
-              className="shrink-0 p-1 rounded-lg text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
-
-        {/* ══ 2. CFO INSIGHT CARD ═════════════════════════════════════════════ */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 text-primary" />
+            <BusinessImpact model={model} title="Live business impact" sticky />
+            <div className="flex gap-2 mb-4" aria-label="Input categories">
+              {Object.keys(controls).map(tab => <button key={tab} onClick={() => setActiveTab(tab)} className={cn("flex-1 rounded-lg px-3 py-2 text-sm font-semibold", tab === activeTab ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground")}>{tab}</button>)}
             </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Sample preset overview</p>
-              <p className="text-sm text-foreground leading-relaxed">
-                Balanced Growth is the default sample preset. No recommendation engine has selected it for your store.
-              </p>
+            {controls[activeTab as keyof typeof controls].map(({ key, ...control }) => <SliderRow key={key} {...control} value={scenario[key]} onChange={set(key)} />)}
+            <p className="text-xs text-muted-foreground mt-4">Orders are rounded to whole orders. AOV is after discounts and before later refunds. Other overheads exclude staff, software and depreciation, so these controls do not overlap.</p>
+            <div className="flex flex-wrap gap-3 mt-5">
+              <button disabled className="inline-flex items-center gap-2 text-xs text-muted-foreground"><Save className="w-4 h-4" />Saving unavailable</button>
+              <button disabled className="inline-flex items-center gap-2 text-xs text-muted-foreground"><Layers className="w-4 h-4" />Comparison unavailable</button>
             </div>
-          </div>
-        </div>
-
-        {/* ── Board-level summary strip ────────────────────────────────────── */}
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/30">
-          <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
-            These examples do not establish achievable benefits or identify the best plan for your store.
-          </p>
-        </div>
-
-        {/* ══ 3. RECOMMENDED LAUNCH PLAN SUMMARY ══════════════════════════════ */}
-        <SectionHeading
-          title="Static Sample Summary"
-          subtitle="These fixed examples do not update with the simulator and are not its calculated results."
-        />
-
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
-          <div className="flex flex-wrap items-center gap-2 mb-5">
-            <span className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700/40">
-              <Sparkles className="w-3 h-3" /> Default example
-            </span>
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
-              Risk: not assessed
-            </span>
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
-              Confidence: not assessed
-            </span>
-          </div>
-          <div className={cn("grid gap-3", isPro ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4")}>
-            {[
-              {
-                label: "Sample profit impact",
-                value: "+£42,000",
-                freeValue: "Sample profit illustration",
-                subLabel: "Fixed illustration only",
-                annualised: undefined,
-                color: "emerald",
-              },
-              {
-                label: "Sample cash impact",
-                value: "+£64,000",
-                freeValue: "Sample cash illustration",
-                subLabel: "Fixed illustration only",
-                annualised: undefined,
-                color: "emerald",
-              },
-              {
-                label: "Sample runway impact",
-                value: "+0.8 months",
-                freeValue: "Sample runway illustration",
-                subLabel: undefined,
-                annualised: undefined,
-                color: "emerald",
-              },
-              {
-                label: "Sample margin impact",
-                value: "+4.2pp",
-                freeValue: "Sample margin illustration",
-                subLabel: undefined,
-                annualised: undefined,
-                color: "emerald",
-              },
-              ...(isPro ? [{
-                label: "Plan assessment",
-                value: "Unavailable",
-                freeValue: "",
-                subLabel: undefined,
-                annualised: undefined,
-                color: "indigo",
-              }] : []),
-            ].map(({ label, value, freeValue, subLabel, annualised, color }) => (
-              <div key={label} className="flex flex-col items-center text-center bg-secondary/40 rounded-xl p-4 gap-0.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-                <p className={cn(
-                  isPro ? "text-lg font-bold leading-tight" : "text-sm font-bold leading-snug",
-                  color === "emerald" ? "text-emerald-600 dark:text-emerald-400" : "text-primary"
-                )}>
-                  {isPro ? value : freeValue}
-                </p>
-                {isPro && subLabel   && <p className="text-[10px] text-muted-foreground/70">{subLabel}</p>}
-                {isPro && annualised && <p className="text-[10px] text-muted-foreground/60 tabular-nums">{annualised}</p>}
-                {!isPro && <p className="text-[10px] text-muted-foreground/70 mt-1">Pro previews sample values only.</p>}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ══ 4. SCOUT RECOMMENDATION ════════════════════════════════════════ */}
-        {isPro && (
-          <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Sample checklist</p>
-                <p className="text-sm text-foreground leading-relaxed">
-                  This fictional checklist illustrates a possible plan layout. It is not generated from store evidence and does not schedule or implement any action.
-                </p>
-              </div>
-            </div>
-            <ul className="space-y-2">
-              {[
-                "Example: explore a balanced growth scenario",
-                "Example: review channel performance",
-                "Example: reassess inventory and cash inputs",
-              ].map(bullet => (
-                <li key={bullet} className="flex items-start gap-3 px-4 py-2.5 rounded-xl bg-secondary/50">
-                  <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <span className="text-sm font-medium text-foreground">{bullet}</span>
-                </li>
-              ))}
+          </section>
+          <details className="rounded-xl border border-border bg-card p-4">
+            <summary className="cursor-pointer"><h2 className="inline text-lg font-bold">Supporting Sample Analysis</h2></summary>
+            <p className="text-sm text-muted-foreground my-3">Same calculation as the headline cards. Costs are shown as positive deductions. All amounts exclude VAT and refer to the same sample month.</p>
+            <div className="overflow-x-auto"><table className="w-full text-xs sm:text-sm">
+              <thead><tr><th className="text-left py-2">Metric</th><th className="text-right px-2">Sample starting position</th><th className="text-right px-2">Your scenario</th><th className="text-right">Change</th></tr></thead>
+              <tbody>{rows.map(([label, key]) => <tr key={key} className="border-t border-border/50"><th className="text-left py-2 font-medium">{label}</th><td className="text-right px-2 tabular-nums">{money(model.baseline[key])}</td><td className="text-right px-2 tabular-nums">{money(model.result[key])}</td><td className="text-right tabular-nums">{changeText(model.result[key], model.baseline[key])}</td></tr>)}</tbody>
+            </table></div>
+          </details>
+          <details className="rounded-xl border border-border bg-card p-4">
+            <summary className="cursor-pointer font-bold">Sample inputs and assumptions</summary>
+            <ul className="list-disc pl-5 space-y-2 mt-3 text-sm">
+              <li>1,000 eligible original orders, £125 product value before discount per order, 20% discount and £100 AOV. Changing AOV scales the pre-discount basket value with the discount percentage held fixed; it is not a separate discount or price-demand forecast.</li>
+              <li>£5,000 product refunds and £100 shipping refunds occur in this month and stay fixed when modelling new orders. Original orders remain counted. £2,000 of returned product cost is explicitly recoverable because those goods returned to saleable inventory.</li>
+              <li>Per order: £40 historical product cost, £4 outbound shipping, £3 fulfilment and £2 payment processing. Shipping charged to customers is held at £3,000 for the month. Fixed product mix and per-order costs are synthetic assumptions; AOV changes do not automatically change them.</li>
+              <li>£10,000 marketing spend; £12,000 staff, £2,000 software, £4,000 other overheads and £1,000 depreciation/amortisation. Every cost is counted once. EBITDA adds depreciation/amortisation back to operating profit.</li>
+              <li>All values are invented test data excluding VAT. No currency conversion, tax estimate, automatic customer response or cash-conversion assumption is applied.</li>
             </ul>
-          </div>
-        )}
-
-        {/* ══ 5. WHY NIGHT SCOUT CHOSE THIS ══════════════════════════════════ */}
-        <SectionHeading title="Illustrative Context" />
-
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 space-y-5">
-          {isPro ? (
-            <>
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                </div>
-                <p className="text-sm text-foreground leading-relaxed">
-                  The following are fictional example signals, not observed store conditions, validated benchmarks or evidence for a recommendation.
-                </p>
-              </div>
-
-              <div className="grid sm:grid-cols-3 gap-4">
-                {[
-                  {
-                    icon: AlertTriangle, color: "amber",
-                    title: "Example margin pressure",
-                    text:  "A fictional margin comparison illustrates the layout; no healthy benchmark is established here.",
-                  },
-                  {
-                    icon: Target, color: "orange",
-                    title: "Example channel comparison",
-                    text:  "A fictional channel comparison, not an assessment of your Meta, Email or Organic performance.",
-                  },
-                  {
-                    icon: Zap, color: "red",
-                    title: "Example cash pressure",
-                    text:  "Inventory and supplier timing are example topics; no cash forecast is connected.",
-                  },
-                ].map(({ icon: Icon, color, title, text }) => (
-                  <div key={title} className={cn(
-                    "rounded-xl border p-4",
-                    color === "amber"  ? "bg-amber-50/60 dark:bg-amber-950/15 border-amber-200/60 dark:border-amber-700/30"
-                    : color === "orange" ? "bg-orange-50/60 dark:bg-orange-950/15 border-orange-200/60 dark:border-orange-700/30"
-                    : "bg-rose-50/60 dark:bg-rose-950/15 border-rose-200/60 dark:border-rose-700/30"
-                  )}>
-                    <div className={cn(
-                      "w-7 h-7 rounded-full flex items-center justify-center mb-2",
-                      color === "amber"  ? "bg-amber-100 dark:bg-amber-900/40"
-                      : color === "orange" ? "bg-orange-100 dark:bg-orange-900/40"
-                      : "bg-rose-100 dark:bg-rose-900/40"
-                    )}>
-                      <Icon className={cn(
-                        "w-4 h-4",
-                        color === "amber"  ? "text-amber-600 dark:text-amber-400"
-                        : color === "orange" ? "text-orange-600 dark:text-orange-400"
-                        : "text-rose-600 dark:text-rose-400"
-                      )} />
-                    </div>
-                    <p className="text-sm font-semibold text-foreground mb-1">{title}</p>
-                    <p className="text-xs text-muted-foreground leading-snug">{text}</p>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-sm text-foreground leading-relaxed">
-                Three fictional topics illustrate the detailed Pro preview; upgrading does not activate analysis.
-              </p>
-              <div className="grid sm:grid-cols-3 gap-3">
-                {[
-                  "Margin pressure",
-                  "Marketing efficiency opportunity",
-                  "Cash protection opportunity",
-                ].map(signal => (
-                  <div key={signal} className="rounded-xl border border-border/60 bg-secondary/30 px-4 py-3">
-                    <p className="text-sm font-semibold text-foreground">{signal}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ══ 6. OTHER ROUTES ════════════════════════════════════════════════ */}
-        <SectionHeading
-          title="Sample Presets"
-          subtitle="Choose a preset to load sample slider values. Card figures and action lists are static illustrations, not simulator outputs."
-        />
-
-        <div>
-          <div className="grid sm:grid-cols-3 gap-4">
-            {/* Margin Recovery Plan */}
-            <div className={cn(
-              "rounded-2xl border-2 p-5 flex flex-col gap-3 transition-all",
-              activePlan === "margin"
-                ? "border-blue-400 dark:border-blue-600 bg-blue-50/60 dark:bg-blue-950/20"
-                : "border-border/50 bg-secondary/20 hover:border-border"
-            )}>
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">
-                  Profit Focus
-                </span>
-                {activePlan === "margin" && <CheckCircle className="w-4 h-4 text-blue-500 dark:text-blue-400" />}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-foreground">Margin Recovery Plan</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Example focus: contribution</p>
-                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
-                  {isPro ? "Sample: +£42k contribution" : "Pro previews sample values only."}
-                </p>
-              </div>
-              <ul className="space-y-1.5">
-                {["Reduce average discount by 3pp","Reallocate 15% of Meta spend to Email and Organic","Reduce shipping cost per order by £1.50","Pause low-margin acquisition campaigns"].map(a => (
-                  <li key={a} className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400 dark:bg-blue-500 shrink-0" />{a}
-                  </li>
-                ))}
-              </ul>
-              <button disabled={!isProPlans} onClick={() => applyPlan("margin")} className={cn(
-                "w-full mt-auto text-xs font-semibold px-4 py-2 rounded-xl border transition-colors",
-                isProPlans
-                  ? "border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/40"
-                  : "border-border/40 text-muted-foreground/60 bg-secondary/30 cursor-not-allowed"
-              )}>
-                {isProPlans ? "Load sample preset" : "Sample preset locked"}
-              </button>
-            </div>
-
-            {/* Cash Protection Plan */}
-            <div className={cn(
-              "rounded-2xl border-2 p-5 flex flex-col gap-3 transition-all",
-              activePlan === "cash"
-                ? "border-slate-400 dark:border-slate-500 bg-slate-50/60 dark:bg-slate-800/30"
-                : "border-border/50 bg-secondary/20 hover:border-border"
-            )}>
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                  Cash Focus
-                </span>
-                {activePlan === "cash" && <CheckCircle className="w-4 h-4 text-slate-500 dark:text-slate-400" />}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-foreground">Cash Protection Plan</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Example focus: cash</p>
-                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-1">
-                  {isPro ? "Sample: +£64k cash headroom" : "Pro previews sample values only."}
-                </p>
-              </div>
-              <ul className="space-y-1.5">
-                {["Reduce inventory days by 12","Delay non-essential supplier payments by 6 days","Hold fixed costs flat","Pause discretionary marketing spend"].map(a => (
-                  <li key={a} className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0" />{a}
-                  </li>
-                ))}
-              </ul>
-              <button disabled={!isProPlans} onClick={() => applyPlan("cash")} className={cn(
-                "w-full mt-auto text-xs font-semibold px-4 py-2 rounded-xl border transition-colors",
-                isProPlans
-                  ? "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-700/30"
-                  : "border-border/40 text-muted-foreground/60 bg-secondary/30 cursor-not-allowed"
-              )}>
-                {isProPlans ? "Load sample preset" : "Sample preset locked"}
-              </button>
-            </div>
-
-            {/* Balanced Growth Plan — highlighted */}
-            <div className={cn(
-              "rounded-2xl border-2 p-5 flex flex-col gap-3 transition-all ring-1 ring-emerald-300/40 dark:ring-emerald-700/30",
-              activePlan === "balanced"
-                ? "border-emerald-400 dark:border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/20"
-                : "border-emerald-200 dark:border-emerald-700/50 bg-emerald-50/30 dark:bg-emerald-950/10 hover:border-emerald-300"
-            )}>
-              <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400">
-                  <Sparkles className="w-3 h-3" /> Default example
-                </span>
-                {activePlan === "balanced" && <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-foreground">Balanced Growth Plan</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Example focus: balanced growth</p>
-                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
-                  {isPro ? "Sample: +£28k contribution / +0.5 months runway" : "Pro previews sample values only."}
-                </p>
-              </div>
-              <ul className="space-y-1.5">
-                {["Reduce blanket discounts by 2pp","Shift 10% of Meta spend to Email","Improve full-price order mix","Keep Google Shopping spend stable"].map(a => (
-                  <li key={a} className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{a}
-                  </li>
-                ))}
-              </ul>
-              <button disabled={!isProPlans} onClick={() => applyPlan("balanced")} className={cn(
-                "w-full mt-auto text-xs font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm",
-                isProPlans
-                  ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
-                  : "bg-secondary text-muted-foreground/60 cursor-not-allowed"
-              )}>
-                {isProPlans ? "Load sample preset" : "Sample preset locked"}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {!isPro && (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-5 px-6 py-5 rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/30">
-            <div className="flex-1">
-              <p className="text-base font-bold text-indigo-900 dark:text-indigo-100 mb-1">Explore the Sample Planner</p>
-              <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 leading-relaxed">
-                Pro opens illustrative controls and example values. Actual planning, recommendations and validated forecasts remain unavailable.
-              </p>
-            </div>
-            <a
-              href="/upgrade"
-              className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors shadow-md shadow-indigo-500/20"
-            >
-              Unlock Pro
-              <ChevronRight className="w-4 h-4" />
-            </a>
-          </div>
-        )}
-
-        {isPro && (
-          <>
-
-        {/* ══ 7. PROFIT LAUNCHPAD SIMULATOR ══════════════════════════════════ */}
-        <SectionHeading
-          title="Scenario Planner Simulator"
-          subtitle="Adjust fixed example assumptions. Outputs are unvalidated illustrations, not forecasts or financial advice."
-        />
-
-        {/* Selected sample preset banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 rounded-2xl bg-secondary/60 border border-border/50">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Selected sample preset</p>
-            <p className="text-sm font-bold text-foreground">{PLAN_LABELS[activePlan]}</p>
-            <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-              Sliders start from the selected sample preset; edits remain only on this page. No plan is saved or implemented.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap shrink-0">
-            <button
-              onClick={() => applyPlan(activePlan)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 transition-colors"
-            >
-              <RefreshCw className="w-3 h-3" /> Reload preset
-            </button>
-            <button
-              onClick={() => setScenario(ZERO_STATE)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
-            >
-              <RefreshCw className="w-3 h-3" /> Reset
-            </button>
-            <button disabled title="Not implemented" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <Save className="w-3 h-3" /> Saving unavailable
-            </button>
-          </div>
-        </div>
-
-        <PremiumBlurPreview
-          title="Scenario Planner Simulator"
-          subtitle="18 levers across Growth, Margin, Marketing, Cash and Overheads."
-          isPro={isPro}
-          ctaTitle="Unlock the Scenario Planner Simulator"
-          ctaDescription="Explore illustrative outputs from fixed assumptions; actual impact is not established."
-          ghostContent={
-            <div className="space-y-4">
-              <div className="flex gap-2 flex-wrap">
-                {["Growth","Margin","Marketing","Cash","Overheads"].map(t => (
-                  <span key={t} className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-secondary text-muted-foreground border border-border/60">{t}</span>
-                ))}
-              </div>
-              {["Revenue Change","Discount Rate Change","Meta Spend Change","Inventory Days Change"].map(l => (
-                <div key={l} className="flex items-center gap-4 py-2.5 border-b border-border/40 last:border-0">
-                  <p className="text-sm font-medium text-foreground flex-1">{l}</p>
-                  <div className="w-48 h-1.5 rounded-full bg-border/60" />
-                  <span className="text-sm font-semibold text-muted-foreground/40 tabular-nums w-16 text-right">—</span>
-                </div>
-              ))}
-            </div>
-          }
-        >
-          {/* Tab bar */}
-          <div className="flex gap-1 flex-wrap mb-6 p-1 bg-secondary/60 rounded-xl">
-            {TABS.map(t => (
-              <button
-                key={t.id}
-                onClick={() => setActiveTab(t.id)}
-                className={cn(
-                  "flex-1 min-w-fit px-4 py-2 rounded-lg text-sm font-semibold transition-all",
-                  activeTab === t.id ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          {activeTab === "growth" && (
-            <div>
-              <SliderRow label="Revenue Change"              value={scenario.revenueChange}       min={-20} max={30}  onChange={set("revenueChange")} />
-              <SliderRow label="Order Volume Change"         value={scenario.orderVolumeChange}   min={-20} max={30}  onChange={set("orderVolumeChange")} />
-              <SliderRow label="Average Order Value Change"  value={scenario.aovChange}           min={-10} max={15}  onChange={set("aovChange")} />
-            </div>
-          )}
-          {activeTab === "margin" && (
-            <div>
-              <SliderRow label="Discount Rate Change"          value={scenario.discountChange}    min={-8}  max={8}   unit="pp"  onChange={set("discountChange")} />
-              <SliderRow label="Returns Rate Change"           value={scenario.returnsChange}     min={-5}  max={5}   unit="pp"  onChange={set("returnsChange")} />
-              <SliderRow label="Shipping Cost per Order Change" value={scenario.shippingChange}   min={-3}  max={3}   step={0.5} unit="" prefix="£" onChange={set("shippingChange")} />
-              <SliderRow label="Payment Fee Rate Change"       value={scenario.paymentFeeChange}  min={-2}  max={2}   unit="pp"  onChange={set("paymentFeeChange")} />
-            </div>
-          )}
-          {activeTab === "marketing" && (
-            <div>
-              <SliderRow label="Meta Spend Change"           value={scenario.metaSpendChange}    min={-30} max={30}  onChange={set("metaSpendChange")} />
-              <SliderRow label="Google Spend Change"         value={scenario.googleSpendChange}  min={-30} max={30}  onChange={set("googleSpendChange")} />
-              <SliderRow label="Email / Organic Mix Uplift"  value={scenario.emailMixUplift}     min={0}   max={30}  onChange={set("emailMixUplift")} />
-              <SliderRow label="Blended CAC Change"          value={scenario.blendedCacChange}   min={-25} max={25}  onChange={set("blendedCacChange")} />
-            </div>
-          )}
-          {activeTab === "cash" && (
-            <div>
-              <SliderRow label="Inventory Days Change"          value={scenario.inventoryDaysChange}       min={-20} max={30}  unit=" days" onChange={set("inventoryDaysChange")} />
-              <SliderRow label="Supplier Payment Days Change"   value={scenario.supplierPaymentDaysChange} min={-20} max={20}  unit=" days" onChange={set("supplierPaymentDaysChange")} />
-              <SliderRow label="Fixed Cost Change"              value={scenario.fixedCostChange}           min={-20} max={20}  onChange={set("fixedCostChange")} />
-              <SliderRow label="Marketing Spend Change"         value={scenario.marketingSpendChange}      min={-30} max={30}  onChange={set("marketingSpendChange")} />
-            </div>
-          )}
-          {activeTab === "overheads" && (
-            <div>
-              <SliderRow label="Staff Cost Change"            value={scenario.staffCostChange}  min={-15} max={20}  onChange={set("staffCostChange")} />
-              <SliderRow label="Software / Overhead Change"   value={scenario.softwareChange}   min={-20} max={20}  onChange={set("softwareChange")} />
-              <SliderRow label="Fulfilment Cost Change"       value={scenario.fulfilmentChange} min={-20} max={20}  onChange={set("fulfilmentChange")} />
-            </div>
-          )}
-
-          <div className="flex flex-wrap items-center gap-2 mt-6 pt-5 border-t border-border/40">
-            <button onClick={() => { setScenario(BALANCED_GROWTH); setActivePlan("balanced"); }} className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <RefreshCw className="w-3.5 h-3.5" /> Reset to balanced example
-            </button>
-            <button disabled title="Not implemented" className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <Save className="w-3.5 h-3.5" /> Saving unavailable
-            </button>
-            <button disabled title="Not implemented" className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <Layers className="w-3.5 h-3.5" /> Comparison unavailable
-            </button>
-          </div>
-        </PremiumBlurPreview>
-
-        <p className="text-sm text-muted-foreground">Store-specific advice is unavailable. This page does not run an AI analysis.</p>
-
-        {/* ══ 8. SUPPORTING ANALYSIS ═════════════════════════════════════════ */}
-        <details className="group bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
-          <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl font-bold text-foreground">Supporting Sample Analysis</h2>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Illustrative model outputs and fictional context; not evidence for a recommended plan.
-                </p>
-              </div>
-              <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
-              <span className="text-xs font-semibold text-primary hidden group-open:inline">Collapse</span>
-            </div>
-          </summary>
-          <div className="px-6 pb-6 pt-2 grid grid-cols-1 xl:grid-cols-3 gap-4">
-            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Sample Output Summary</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">Fixed sample baseline compared with the current slider calculation (GBP).</p>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-border/40 text-muted-foreground">
-                      <th className="text-left font-semibold py-2 pr-3">Metric</th>
-                      <th className="text-right font-semibold py-2 px-3">Sample baseline</th>
-                      <th className="text-right font-semibold py-2 pl-3">Sample output</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/30">
-                    {[
-                      { label: "Contribution", current: fmtK(BASE_CONTRIBUTION), plan: fmtK(out.contribution) },
-                      { label: "EBITDA", current: fmtK(BASE_EBITDA), plan: fmtK(out.ebitda) },
-                      { label: "Cash Balance", current: fmtK(BASE_CASH), plan: fmtK(out.cash) },
-                    ].map(row => (
-                      <tr key={row.label}>
-                        <td className="py-2 pr-3 font-medium text-foreground">{row.label}</td>
-                        <td className="py-2 px-3 text-right text-muted-foreground tabular-nums">{row.current}</td>
-                        <td className="py-2 pl-3 text-right font-semibold text-foreground tabular-nums">{row.plan}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Example Topics</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">Static examples, not a ranking of the current slider effects.</p>
-              <div className="space-y-3">
-                {[
-                  { title: "Discount reduction", text: "Discounting is an example input; customer response is not modelled." },
-                  { title: "Marketing reallocation", text: "Channel reallocation is illustrative; relative efficiency is not verified." },
-                  { title: "Inventory reduction", text: "Inventory days have a fixed sample cash coefficient, not a validated forecast." },
-                ].map(driver => (
-                  <div key={driver.title} className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-semibold text-foreground">{driver.title}</p>
-                      <p className="text-xs text-muted-foreground leading-snug mt-0.5">{driver.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Evidence Still Needed</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">No confidence assessment is implemented. Before real planning we need:</p>
-              <ul className="space-y-2">
-                {[
-                  "Validated acquisition cost data",
-                  "Evidence for pricing and discount effects",
-                  "Inventory, cost and cash data with agreed model rules",
-                ].map(item => (
-                  <li key={item} className="flex items-start gap-2 text-xs text-foreground">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </details>
-
-          </>
-        )}
+          </details>
+        </> : <p className="rounded-xl border border-border p-5">Pro previews the sample planner controls. Upgrading does not connect store data or activate forecasts.</p>}
       </div>
-
     </AppLayout>
   );
 }

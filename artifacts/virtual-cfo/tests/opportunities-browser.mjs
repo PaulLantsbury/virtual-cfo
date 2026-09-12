@@ -265,14 +265,14 @@ for (const viewport of Object.keys(viewports)) {
     });
   });
 }
-test("sample action navigates to its existing Scenario Planner preset", async () => {
+test("sample action opens corrected planner without applying unsupported legacy preset", async () => {
   await fixture({}, async page => {
     await page.getByRole("button").filter({hasText:"Reallocate inefficient Meta spend"}).click();
     await page.getByRole("link", {name:"Open Scenario Planner",exact:true}).click();
     await page.getByRole("heading",{name:"Scenario Planner",exact:true}).waitFor();
-    await page.getByText("Sample preset loaded from Opportunity Finder:", {exact:false}).waitFor();
-    assert.equal(await page.locator('[aria-label="Meta Spend Change"]').getByRole("slider").getAttribute("aria-valuenow"), "-15");
-    assert.equal(await page.locator('[aria-label="Email / Organic Mix Uplift"]').getByRole("slider").getAttribute("aria-valuenow"), "12");
-    assert.equal(await page.locator('[aria-label="Blended CAC Change"]').getByRole("slider").getAttribute("aria-valuenow"), "-10");
+    await page.getByText("Previous preset not applied.", {exact:true}).waitFor();
+    assert.equal(await page.locator('[aria-label="Order Volume Change"]').getByRole("slider").getAttribute("aria-valuenow"), "0");
+    assert.equal(await page.locator('[aria-label="Average Order Value Change"]').getByRole("slider").getAttribute("aria-valuenow"), "0");
+    assert.equal(new URL(page.url()).searchParams.has("preset"), false);
   });
 });

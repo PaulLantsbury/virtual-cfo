@@ -23,3 +23,8 @@ Unsupported discount/refund-response controls, channel growth, cash/runway/CAC o
 - Independent calculation/UI review completed. Desktop/mobile screenshots inspected. Existing authenticated local staging at localhost:3000, store A, shows baseline £95,000/£21,900. Increasing orders30% updates both panels to £125,000/£37,200 and differences +£30,000 (+31.6%)/+£15,300 (+69.9%). Reset restored baseline. No new access or database writes.
 
 This is tested sample arithmetic, not a complete forecast engine or verified live financial data. Real inputs, demand/discount/refund response assumptions, cash forecasts, replacement opportunity presets and persistence remain roadmap work. Other legacy pages' models are not certified by this correction. Local staging is not hosted staging or production.
+
+
+### Contribution headline follow-up
+
+Paul requested contribution alongside sales and operating profit. Both summary and sticky live panels now show contribution after marketing with its baseline and signed GBP/percentage difference, using the existing model unchanged. The three-column layout fits desktop/mobile. All20 Scenario browser cases pass, including contribution zero/positive/negative changes and visibility; build and whitespace checks pass (existing build warnings unchanged). Mobile screenshot inspected; current local staging store A shows £95,000 sales, £40,900 contribution and £21,900 operating profit. No financial formula, database, Replit or production change.

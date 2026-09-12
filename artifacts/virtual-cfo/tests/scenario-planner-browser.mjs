@@ -171,12 +171,13 @@ async function truth(page) {
 }
 const slider=(page,label)=>page.locator(`[aria-label="${label}"]`).getByRole("slider");
 // Independent worked sample-month expectations, not a copy of the model equations.
-async function businessImpact(page, { sales, profit, salesChange, profitChange }) {
+async function businessImpact(page, { sales, profit, contribution, salesChange, profitChange, contributionChange }) {
  const summaries = ["Scenario summary", "Live business impact"];
  for (const name of summaries) {
   const region = page.getByRole("region", { name, exact: true });
   for (const [metric, baseline, current, change] of [
    ["Sales", "£95,000", sales, salesChange],
+   ["Contribution", "£40,900", contribution, contributionChange],
    ["Operating profit", "£21,900", profit, profitChange],
   ]) {
    const card = region.getByRole("group", { name: metric, exact: true });
@@ -186,12 +187,12 @@ async function businessImpact(page, { sales, profit, salesChange, profitChange }
    for (const value of change) assert.ok(text.includes(value), `${name}: ${metric} change includes ${value}`);
   }
  }
- for (const metric of ["Sales", "Operating profit"]) {
+ for (const metric of ["Sales", "Contribution", "Operating profit"]) {
   const texts = await Promise.all(summaries.map(name => page.getByRole("region", {name, exact:true}).getByRole("group", {name:metric, exact:true}).innerText()));
   assert.equal(texts[0], texts[1], `${metric}: summary and slider impact agree`);
  }
 }
-const startingImpact = { sales:"£95,000", profit:"£21,900", salesChange:["£0", "0%"], profitChange:["£0", "0%"] };
+const startingImpact = { sales:"£95,000", profit:"£21,900", contribution:"£40,900", contributionChange:["£0","0%"], salesChange:["£0", "0%"], profitChange:["£0", "0%"] };
 async function unchangedControls(page) {
  for (const tab of ["Growth", "Costs", "Overheads"]) {
   await page.getByRole("button", {name:tab, exact:true}).click();
@@ -225,7 +226,7 @@ for(const viewport of Object.keys(viewports)) {
  test(`${viewport}: order volume changes sales and profit consistently and reset restores baseline`,async()=>fixture({viewport},async page=>{
   await slider(page,"Order Volume Change").focus();
   await slider(page,"Order Volume Change").press("End");
-  await businessImpact(page, { sales:"£125,000", profit:"£37,200", salesChange:["+£30,000", "+31.6%"], profitChange:["+£15,300", "+69.9%"] });
+  await businessImpact(page, { sales:"£125,000", profit:"£37,200", contribution:"£56,200", contributionChange:["+£15,300","+37.4%"], salesChange:["+£30,000", "+31.6%"], profitChange:["+£15,300", "+69.9%"] });
   await page.getByRole("heading",{name:"Supporting Sample Analysis"}).click();
   await tableAmounts(page,"Sales","£95,000","£125,000");
   await tableAmounts(page,"Contribution","£40,900","£56,200");
@@ -238,9 +239,9 @@ for(const viewport of Object.keys(viewports)) {
  test(`${viewport}: AOV shows positive and negative business differences`,async()=>fixture({viewport},async page=>{
   await slider(page,"Average Order Value Change").focus();
   await slider(page,"Average Order Value Change").press("End");
-  await businessImpact(page,{sales:"£110,000",profit:"£36,900",salesChange:["+£15,000","+15.8%"],profitChange:["+£15,000","+68.5%"]});
+  await businessImpact(page,{sales:"£110,000",profit:"£36,900",contribution:"£55,900",contributionChange:["+£15,000","+36.7%"],salesChange:["+£15,000","+15.8%"],profitChange:["+£15,000","+68.5%"]});
   await slider(page,"Average Order Value Change").press("Home");
-  await businessImpact(page,{sales:"£85,000",profit:"£11,900",salesChange:["-£10,000","-10.5%"],profitChange:["-£10,000","-45.7%"]});
+  await businessImpact(page,{sales:"£85,000",profit:"£11,900",contribution:"£30,900",contributionChange:["-£10,000","-24.4%"],salesChange:["-£10,000","-10.5%"],profitChange:["-£10,000","-45.7%"]});
   await page.getByRole("heading",{name:"Supporting Sample Analysis"}).click();
   await tableAmounts(page,"Sales","£95,000","£85,000");
   await tableAmounts(page,"Operating profit","£21,900","£11,900");
@@ -249,7 +250,7 @@ for(const viewport of Object.keys(viewports)) {
   await page.getByRole("button",{name:"Costs",exact:true}).click();
   await slider(page,"Marketing Spend Change").focus();
   await slider(page,"Marketing Spend Change").press("Home");
-  await businessImpact(page,{sales:"£95,000",profit:"£24,900",salesChange:["£0","0%"],profitChange:["+£3,000","+13.7%"]});
+  await businessImpact(page,{sales:"£95,000",profit:"£24,900",contribution:"£43,900",contributionChange:["+£3,000","+7.3%"],salesChange:["£0","0%"],profitChange:["+£3,000","+13.7%"]});
   await page.getByRole("heading",{name:"Supporting Sample Analysis"}).click();
   await tableAmounts(page,"Contribution","£40,900","£43,900");
  }));
@@ -260,7 +261,7 @@ for(const viewport of Object.keys(viewports)) {
   await control.focus();
   await control.press("End");
   const live = page.getByRole("region",{name:"Live business impact",exact:true});
-  for (const metric of ["Sales", "Operating profit"]) {
+  for (const metric of ["Sales", "Contribution", "Operating profit"]) {
    const bounds = await live.getByRole("group",{name:metric,exact:true}).boundingBox();
    assert.ok(bounds && bounds.y >= 0 && bounds.y + bounds.height <= viewports[viewport].height, `${metric} stays fully visible while adjusting the last overhead slider`);
   }

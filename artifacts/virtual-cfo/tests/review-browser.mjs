@@ -87,3 +87,21 @@ test('refund-only selected period shows negative sales and activity, with no cer
  }
  });
 });
+test('readiness guidance distinguishes passed checks from independent review and clears on period change',async()=>{
+ await fixture({stores:[a],review:route=>response(route,packet(route.request().postDataJSON().scope))},async page=>{
+ await openReview(page);assert.equal(await page.getByRole('heading',{name:'What still needs checking?'}).count(),0);
+ await page.getByRole('button',{name:'Prepare review',exact:true}).click();await page.getByRole('heading',{name:'Automatic transaction checks — passed'}).waitFor();
+ assert.equal(await page.getByRole('heading',{name:'Independent completeness review — still required'}).count(),1);
+ assert.ok((await page.getByRole('region',{name:'What still needs checking?'}).innerText()).includes('orders placed in earlier months'));
+ assert.equal(await page.getByRole('checkbox').isChecked(),false);assert.equal(await page.getByRole('button',{name:'Record review and restore figures'}).isEnabled(),false);
+ if(process.env.NIGHT_SCOUT_READINESS_SCREENSHOT)await page.screenshot({path:process.env.NIGHT_SCOUT_READINESS_SCREENSHOT,fullPage:true});
+ await page.getByLabel('From',{exact:true}).fill('2026-08-02');assert.equal(await page.getByRole('heading',{name:'What still needs checking?'}).count(),0);
+ });
+});
+test('blocked and unavailable reviews never show passed readiness or independent approval controls',async()=>{
+ for(const status of [200,503])await fixture({stores:[a],review:route=>response(route,status===200?{...packet(route.request().postDataJSON().scope),status:'blocked',issues:[{reason:'financial_event_mismatch'}]}:{error:'unavailable'},status)},async page=>{
+ await openReview(page);await page.getByRole('button',{name:'Prepare review',exact:true}).click();await page.getByRole('status').filter({hasText:status===200?'does not yet reconcile':'service is unavailable'}).waitFor();
+ assert.equal(await page.getByRole('heading',{name:'Automatic transaction checks — passed'}).count(),0);assert.equal(await page.getByRole('checkbox').count(),0);
+ assert.equal(await page.getByRole('heading',{name:'Automatic transaction checks — need attention'}).count(),status===200?1:0);
+ });
+});

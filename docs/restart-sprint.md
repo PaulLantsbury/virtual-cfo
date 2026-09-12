@@ -441,3 +441,8 @@ The [staging package](staging-refund-periods.md) awaits approval. After applying
 ## End-of-day stop — March/April applied and verified
 
 Paul approved the final package. Applied the exact guarded script once, verified existing financial rows/evidence/receipts/source versions/coverage preservation, then checked March, April and February in the real signed-in screen. Results: -GBP 20/zero original orders for each refund-only month, GBP 90/one order for February. All three C periods remain unverified; audit count remains one and no restoration was submitted. [Final handover](session-handover-2026-09-10.md) is updated. Stop for today; no production/Replit/main changes.
+
+
+## Review readiness guidance — 12 September
+
+Completed the agreed screen-only package. Passed responses explain the existing transaction checks; blocked responses explain that issues must be resolved. Independent completeness guidance covers collection gaps/limits, later refunds, exclusions and unresolved adjustments without adding approval rules. The panel clears on period changes and is absent for unavailable/unprepared states. Eight isolated browser groups, frontend type checking and diff checks pass. No database/access/financial-approval/production/Replit changes. See [12 September handover](session-handover-2026-09-12.md).

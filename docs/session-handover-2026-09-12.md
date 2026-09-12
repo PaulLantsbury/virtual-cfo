@@ -69,3 +69,9 @@ Paul approved both tasks. Margin source figures no longer use invented fallback 
 20 Margin and 6 Monitoring browser checks pass against a fixed local build with mocked services; frontend typecheck/build pass with inherited warnings. Desktop/mobile screenshots inspected and independent review complete. An initial mobile Monitoring test was interrupted during development reloads; all six passed on the stable build without a source fix. See docs/reporting-truthfulness-package.md for exact acceptance/limits.
 
 Resume point: this package is complete and saved on the development branch; do not repeat it. Source/cost wiring and real monitoring are still future work. Shopify/reference comparison remains paused. No staging data, access, completeness approvals, financial rules, shared sample formulas or deployment changed; main/production/Replit remain outside this package. Agree the next concrete scope with Paul.
+
+## Integrated staging package — 12 September
+
+Paul approved staging after every meaningful completed package; recorded in AGENTS.md and team agreement. Parallel agents checked startup/acceptance and staging database invariants. Coordinator started the current source preview at localhost:3000 against the existing staging project and verified retained Auth, store switching, HTTP401 without Auth, all three Store C periods and sample/unverified/inactive labels on Cash Control, Margin Analysis and Monitoring. See docs/staging-checkpoint-2026-09-12.md for version/evidence and limitations.
+
+No figures were restored; C coverage stays false for all three periods, audit total1/C0 and import receipts2 match baseline. No application code, migration, grant, Replit, main or production change. The preview is local, not hosted; old3001 is stale. Next is Paul’s walkthrough, then agreed bounded fixes; do not redo completed packages or expand synthetic comparison without real reference input.

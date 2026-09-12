@@ -451,3 +451,8 @@ Completed the agreed screen-only package. Passed responses explain the existing 
 ## Reference-ledger comparison prototype — 12 September
 
 Completed the next explicitly approved local package. Two separately handwritten synthetic ledgers exercise identity/component comparison over store-local event dates. Missing/extra events, duplicates, incorrect amounts/VAT/order links and cross-period date shifts are caught; equal totals cannot conceal different events. Nine test groups pass. Every outcome leaves completeness uncertified. No real reference source, UI integration, live writes or new financial policy. See [prototype contract](../experiments/completeness/README.md) and updated 12 September handover.
+
+
+## Read-only comparison report — 12 September
+
+Completed the approved standalone synthetic report. Eight comparator-backed cases cover matches, missing/duplicate transactions and amount/VAT/date/order-link/identity differences. Offline browser test passed every scenario; no network calls or write controls. Layout inspected. Report and generator saved alongside the prototype; it is not connected to real data or the staging review screen. Handover updated.

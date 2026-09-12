@@ -486,3 +486,7 @@ Approved parallel package separates unverified source readings from fixed sample
 ## Growth Quality / Profit Overview — complete
 
 Approved parallel package completed; 31 isolated browser cases, frontend checks, independent review and local staging checks pass. Source/sample separation and profit-model limitation disclosures implemented. See docs/growth-profit-package.md and latest handover; no database, Replit/main or production changes.
+
+## Opportunity and scenario checkpoint
+
+Opportunity Finder / Scenario Planner complete: 22 isolated browser checks and local staging handoff verified; see docs/opportunity-scenario-package.md. No financial rules, database, Replit/main or production changes.

@@ -10,7 +10,6 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PremiumBlurPreview } from "@/components/PremiumBlurPreview";
 import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
-import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { GROSS_REVENUE as BASE_REVENUE, BASE_CONTRIBUTION, CONTRIBUTION_PER_ORDER as BASE_CPO } from "@/lib/data/pricing-metrics";
 import { BASE_EBITDA } from "@/lib/data/business-snapshot";
 import { CASH_BALANCE as BASE_CASH, CASH_RUNWAY as BASE_RUNWAY, WORKING_CAPITAL_DRAG as BASE_WORKING_CAPITAL } from "@/lib/data/cash-snapshot";
@@ -248,11 +247,11 @@ function SliderRow({
     ? `+${prefix}${value}${unit}`
     : `−${prefix}${Math.abs(value)}${unit}`;
   return (
-    <div className="flex items-center gap-4 py-3 border-b border-border/40 last:border-0">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 py-3 border-b border-border/40 last:border-0">
       <p className="text-sm font-medium text-foreground flex-1 min-w-0">{label}</p>
-      <div className="flex items-center gap-3 shrink-0 w-60 sm:w-72">
+      <div className="flex items-center gap-3 shrink-0 w-full sm:w-72">
         <Slider
-          value={[value]} min={min} max={max} step={step}
+          aria-label={label} value={[value]} min={min} max={max} step={step}
           onValueChange={([v]) => onChange(v)}
           className="flex-1"
         />
@@ -317,7 +316,7 @@ export default function ScenarioLab() {
   ] as const;
 
   return (
-    <AppLayout>
+    <AppLayout showMonitoring={false}>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-10">
 
         {/* ══ 1. PAGE HEADER ══════════════════════════════════════════════════ */}
@@ -327,10 +326,17 @@ export default function ScenarioLab() {
               Scenario Planner
             </h1>
             <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed max-w-xl">
-              Night Scout’s recommended route to higher profit and stronger cashflow.
+              Explore illustrative scenarios using fixed sample assumptions.
             </p>
           </div>
         </div>
+
+        <section aria-label="Scenario planning status" className="rounded-xl border border-amber-300 bg-amber-50/40 p-5 space-y-2">
+          <h2 className="font-bold">Actual scenario planning: unavailable</h2>
+          <p className="text-sm">No store financial data is connected to this planner. All amounts are fixed GBP examples, not your store's currency or results. No best-plan selection, risk assessment or confidence engine is implemented.</p>
+          <p className="text-sm">The sample formulas are not validated against the agreed financial definitions. Cash conversion and runway use arbitrary coefficients; these are not forecasts. Static cards are separate illustrations and must not be added to simulator outputs.</p>
+          <p className="text-sm">Payment fee, Meta spend and Google spend sliders currently have no effect on outputs. Other inputs may overlap; changing sliders does not establish a real combined benefit. Saving and comparing plans are unavailable.</p>
+        </section>
 
         {/* ══ OPPORTUNITY PRESET BANNER ════════════════════════════════════════ */}
         {loadedPresetLabel && (
@@ -338,7 +344,7 @@ export default function ScenarioLab() {
             <div className="flex items-center gap-3 min-w-0">
               <FlaskConical className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
               <p className="text-sm font-medium text-indigo-900 dark:text-indigo-200 leading-snug">
-                Recommended plan loaded from Opportunities:{" "}
+                Sample preset loaded from Opportunity Finder:{" "}
                 <span className="font-semibold">"{loadedPresetLabel}"</span>
                 <span className="ml-2 text-indigo-600/70 dark:text-indigo-400/70 font-normal text-xs">
                   · Relevant sliders pre-populated below
@@ -362,10 +368,9 @@ export default function ScenarioLab() {
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Scout Verdict</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Sample preset overview</p>
               <p className="text-sm text-foreground leading-relaxed">
-                Night Scout recommends a Balanced Growth Plan: reduce discounting, improve marketing efficiency and protect cash
-                before adding more growth spend.
+                Balanced Growth is the default sample preset. No recommendation engine has selected it for your store.
               </p>
             </div>
           </div>
@@ -375,65 +380,65 @@ export default function ScenarioLab() {
         <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/30">
           <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
-            This plan increases contribution by approximately 21% without relying on more paid acquisition.
+            These examples do not establish achievable benefits or identify the best plan for your store.
           </p>
         </div>
 
         {/* ══ 3. RECOMMENDED LAUNCH PLAN SUMMARY ══════════════════════════════ */}
         <SectionHeading
-          title="Recommended Route To Higher Profit"
-          subtitle="Night Scout recommends the Balanced Growth Plan."
+          title="Static Sample Summary"
+          subtitle="These fixed examples do not update with the simulator and are not its calculated results."
         />
 
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6">
           <div className="flex flex-wrap items-center gap-2 mb-5">
             <span className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700/40">
-              <Sparkles className="w-3 h-3" /> Recommended
+              <Sparkles className="w-3 h-3" /> Default example
             </span>
             <span className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
-              Risk: Lower
+              Risk: not assessed
             </span>
             <span className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-muted-foreground border border-border/60">
-              Confidence: Medium–High
+              Confidence: not assessed
             </span>
           </div>
           <div className={cn("grid gap-3", isPro ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4")}>
             {[
               {
-                label: "Profit impact",
+                label: "Sample profit impact",
                 value: "+£42,000",
-                freeValue: "Meaningful profit improvement identified",
-                subLabel: "30-day impact",
-                annualised: "+£504,000 (annualised)",
+                freeValue: "Sample profit illustration",
+                subLabel: "Fixed illustration only",
+                annualised: undefined,
                 color: "emerald",
               },
               {
-                label: "Cash impact",
+                label: "Sample cash impact",
                 value: "+£64,000",
-                freeValue: "Meaningful cash improvement identified",
-                subLabel: "30-day impact",
-                annualised: "+£768,000 (annualised)",
+                freeValue: "Sample cash illustration",
+                subLabel: "Fixed illustration only",
+                annualised: undefined,
                 color: "emerald",
               },
               {
-                label: "Runway impact",
+                label: "Sample runway impact",
                 value: "+0.8 months",
-                freeValue: "Improved runway resilience identified",
+                freeValue: "Sample runway illustration",
                 subLabel: undefined,
                 annualised: undefined,
                 color: "emerald",
               },
               {
-                label: "Margin impact",
+                label: "Sample margin impact",
                 value: "+4.2pp",
-                freeValue: "Margin improvement opportunity identified",
+                freeValue: "Sample margin illustration",
                 subLabel: undefined,
                 annualised: undefined,
                 color: "emerald",
               },
               ...(isPro ? [{
-                label: "Plan quality",
-                value: "Strong",
+                label: "Plan assessment",
+                value: "Unavailable",
                 freeValue: "",
                 subLabel: undefined,
                 annualised: undefined,
@@ -450,7 +455,7 @@ export default function ScenarioLab() {
                 </p>
                 {isPro && subLabel   && <p className="text-[10px] text-muted-foreground/70">{subLabel}</p>}
                 {isPro && annualised && <p className="text-[10px] text-muted-foreground/60 tabular-nums">{annualised}</p>}
-                {!isPro && <p className="text-[10px] text-muted-foreground/70 mt-1">Upgrade to see expected impact.</p>}
+                {!isPro && <p className="text-[10px] text-muted-foreground/70 mt-1">Pro previews sample values only.</p>}
               </div>
             ))}
           </div>
@@ -464,19 +469,17 @@ export default function ScenarioLab() {
                 <Sparkles className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Scout Recommendation</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Sample checklist</p>
                 <p className="text-sm text-foreground leading-relaxed">
-                  Start with the Balanced Growth Plan. It delivers meaningful contribution uplift while protecting cash runway and
-                  avoiding over-reliance on new paid acquisition. Prioritise discount discipline, Meta budget reallocation and
-                  inventory control before increasing growth spend.
+                  This fictional checklist illustrates a possible plan layout. It is not generated from store evidence and does not schedule or implement any action.
                 </p>
               </div>
             </div>
             <ul className="space-y-2">
               {[
-                "Apply the Balanced Growth Plan this month",
-                "Review Meta and Google performance weekly",
-                "Reassess inventory and cash runway after 30 days",
+                "Example: explore a balanced growth scenario",
+                "Example: review channel performance",
+                "Example: reassess inventory and cash inputs",
               ].map(bullet => (
                 <li key={bullet} className="flex items-start gap-3 px-4 py-2.5 rounded-xl bg-secondary/50">
                   <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
@@ -488,7 +491,7 @@ export default function ScenarioLab() {
         )}
 
         {/* ══ 5. WHY NIGHT SCOUT CHOSE THIS ══════════════════════════════════ */}
-        <SectionHeading title="Why Night Scout Chose This" />
+        <SectionHeading title="Illustrative Context" />
 
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 space-y-5">
           {isPro ? (
@@ -498,8 +501,7 @@ export default function ScenarioLab() {
                   <Sparkles className="w-4 h-4 text-primary" />
                 </div>
                 <p className="text-sm text-foreground leading-relaxed">
-                  This plan is recommended because Meta CAC is reducing contribution by £3.40 per order, discounting has increased by 1.8pp,
-                  and inventory build is tightening cash runway within 60 days. It improves contribution without requiring additional stock investment.
+                  The following are fictional example signals, not observed store conditions, validated benchmarks or evidence for a recommendation.
                 </p>
               </div>
 
@@ -507,18 +509,18 @@ export default function ScenarioLab() {
                 {[
                   {
                     icon: AlertTriangle, color: "amber",
-                    title: "Margin pressure",
-                    text:  "Contribution margin is 42.3%, below the healthy 45–60% benchmark range.",
+                    title: "Example margin pressure",
+                    text:  "A fictional margin comparison illustrates the layout; no healthy benchmark is established here.",
                   },
                   {
                     icon: Target, color: "orange",
-                    title: "Marketing inefficiency",
-                    text:  "Meta is generating materially lower contribution per order than Email and Organic.",
+                    title: "Example channel comparison",
+                    text:  "A fictional channel comparison, not an assessment of your Meta, Email or Organic performance.",
                   },
                   {
                     icon: Zap, color: "red",
-                    title: "Cash tightening",
-                    text:  "Inventory build and supplier timing are reducing cash headroom over the next 60 days.",
+                    title: "Example cash pressure",
+                    text:  "Inventory and supplier timing are example topics; no cash forecast is connected.",
                   },
                 ].map(({ icon: Icon, color, title, text }) => (
                   <div key={title} className={cn(
@@ -549,7 +551,7 @@ export default function ScenarioLab() {
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-foreground leading-relaxed">
-                Night Scout has identified three signals influencing this recommendation.
+                Three fictional topics illustrate the detailed Pro preview; upgrading does not activate analysis.
               </p>
               <div className="grid sm:grid-cols-3 gap-3">
                 {[
@@ -568,8 +570,8 @@ export default function ScenarioLab() {
 
         {/* ══ 6. OTHER ROUTES ════════════════════════════════════════════════ */}
         <SectionHeading
-          title="Other Routes You Could Take"
-          subtitle="Night Scout recommends the Balanced Growth Plan, but you can choose a more profit-focused or cash-focused route if priorities change."
+          title="Sample Presets"
+          subtitle="Choose a preset to load sample slider values. Card figures and action lists are static illustrations, not simulator outputs."
         />
 
         <div>
@@ -589,9 +591,9 @@ export default function ScenarioLab() {
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">Margin Recovery Plan</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Best for: Immediate contribution improvement</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Example focus: contribution</p>
                 <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1">
-                  {isPro ? "+£42k contribution / month" : "Upgrade to compare expected impact."}
+                  {isPro ? "Sample: +£42k contribution" : "Pro previews sample values only."}
                 </p>
               </div>
               <ul className="space-y-1.5">
@@ -607,7 +609,7 @@ export default function ScenarioLab() {
                   ? "border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/30 hover:bg-blue-100 dark:hover:bg-blue-900/40"
                   : "border-border/40 text-muted-foreground/60 bg-secondary/30 cursor-not-allowed"
               )}>
-                {isProPlans ? "Apply this plan" : "View Route"}
+                {isProPlans ? "Load sample preset" : "Sample preset locked"}
               </button>
             </div>
 
@@ -626,9 +628,9 @@ export default function ScenarioLab() {
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">Cash Protection Plan</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Best for: Protecting runway and reducing cash pressure</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Example focus: cash</p>
                 <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mt-1">
-                  {isPro ? "+£64k cash headroom" : "Upgrade to compare expected impact."}
+                  {isPro ? "Sample: +£64k cash headroom" : "Pro previews sample values only."}
                 </p>
               </div>
               <ul className="space-y-1.5">
@@ -644,7 +646,7 @@ export default function ScenarioLab() {
                   ? "border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-700/30"
                   : "border-border/40 text-muted-foreground/60 bg-secondary/30 cursor-not-allowed"
               )}>
-                {isProPlans ? "Apply this plan" : "View Route"}
+                {isProPlans ? "Load sample preset" : "Sample preset locked"}
               </button>
             </div>
 
@@ -657,15 +659,15 @@ export default function ScenarioLab() {
             )}>
               <div className="flex items-center justify-between gap-2">
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400">
-                  <Sparkles className="w-3 h-3" /> Recommended
+                  <Sparkles className="w-3 h-3" /> Default example
                 </span>
                 {activePlan === "balanced" && <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />}
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">Balanced Growth Plan</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Best for: Improving profit without choking growth</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Example focus: balanced growth</p>
                 <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">
-                  {isPro ? "+£28k contribution / +0.5 months runway" : "Upgrade to compare expected impact."}
+                  {isPro ? "Sample: +£28k contribution / +0.5 months runway" : "Pro previews sample values only."}
                 </p>
               </div>
               <ul className="space-y-1.5">
@@ -681,7 +683,7 @@ export default function ScenarioLab() {
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20"
                   : "bg-secondary text-muted-foreground/60 cursor-not-allowed"
               )}>
-                {isProPlans ? "Apply this plan" : "View Route"}
+                {isProPlans ? "Load sample preset" : "Sample preset locked"}
               </button>
             </div>
           </div>
@@ -690,9 +692,9 @@ export default function ScenarioLab() {
         {!isPro && (
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 px-6 py-5 rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/30">
             <div className="flex-1">
-              <p className="text-base font-bold text-indigo-900 dark:text-indigo-100 mb-1">Unlock Your Launch Plan</p>
+              <p className="text-base font-bold text-indigo-900 dark:text-indigo-100 mb-1">Explore the Sample Planner</p>
               <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 leading-relaxed">
-                See exactly how much profit is available, which route delivers the strongest outcome and the step-by-step implementation plan.
+                Pro opens illustrative controls and example values. Actual planning, recommendations and validated forecasts remain unavailable.
               </p>
             </div>
             <a
@@ -711,16 +713,16 @@ export default function ScenarioLab() {
         {/* ══ 7. PROFIT LAUNCHPAD SIMULATOR ══════════════════════════════════ */}
         <SectionHeading
           title="Scenario Planner Simulator"
-          subtitle="Model revenue, margin, marketing, cash and overhead changes before committing resources."
+          subtitle="Adjust fixed example assumptions. Outputs are unvalidated illustrations, not forecasts or financial advice."
         />
 
-        {/* Active plan banner */}
+        {/* Selected sample preset banner */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-4 rounded-2xl bg-secondary/60 border border-border/50">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Active plan</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Selected sample preset</p>
             <p className="text-sm font-bold text-foreground">{PLAN_LABELS[activePlan]}</p>
             <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-              These assumptions are loaded from the recommended plan and can be adjusted below.
+              Sliders start from the selected sample preset; edits remain only on this page. No plan is saved or implemented.
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap shrink-0">
@@ -728,7 +730,7 @@ export default function ScenarioLab() {
               onClick={() => applyPlan(activePlan)}
               className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-primary/30 text-primary bg-primary/5 hover:bg-primary/10 transition-colors"
             >
-              <RefreshCw className="w-3 h-3" /> Reapply plan
+              <RefreshCw className="w-3 h-3" /> Reload preset
             </button>
             <button
               onClick={() => setScenario(ZERO_STATE)}
@@ -736,8 +738,8 @@ export default function ScenarioLab() {
             >
               <RefreshCw className="w-3 h-3" /> Reset
             </button>
-            <button className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <Save className="w-3 h-3" /> Save as new plan
+            <button disabled title="Not implemented" className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
+              <Save className="w-3 h-3" /> Saving unavailable
             </button>
           </div>
         </div>
@@ -747,7 +749,7 @@ export default function ScenarioLab() {
           subtitle="18 levers across Growth, Margin, Marketing, Cash and Overheads."
           isPro={isPro}
           ctaTitle="Unlock the Scenario Planner Simulator"
-          ctaDescription="Test any combination of levers and see the combined financial impact in real time."
+          ctaDescription="Explore illustrative outputs from fixed assumptions; actual impact is not established."
           ghostContent={
             <div className="space-y-4">
               <div className="flex gap-2 flex-wrap">
@@ -822,27 +824,27 @@ export default function ScenarioLab() {
 
           <div className="flex flex-wrap items-center gap-2 mt-6 pt-5 border-t border-border/40">
             <button onClick={() => { setScenario(BALANCED_GROWTH); setActivePlan("balanced"); }} className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <RefreshCw className="w-3.5 h-3.5" /> Reset plan
+              <RefreshCw className="w-3.5 h-3.5" /> Reset to balanced example
             </button>
-            <button className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <Save className="w-3.5 h-3.5" /> Save plan
+            <button disabled title="Not implemented" className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
+              <Save className="w-3.5 h-3.5" /> Saving unavailable
             </button>
-            <button className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
-              <Layers className="w-3.5 h-3.5" /> Compare plans
+            <button disabled title="Not implemented" className="inline-flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
+              <Layers className="w-3.5 h-3.5" /> Comparison unavailable
             </button>
           </div>
         </PremiumBlurPreview>
 
-        <AiCfoAskCard pageId="scenario" />
+        <p className="text-sm text-muted-foreground">Store-specific advice is unavailable. This page does not run an AI analysis.</p>
 
         {/* ══ 8. SUPPORTING ANALYSIS ═════════════════════════════════════════ */}
         <details className="group bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
           <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
+                <h2 className="text-xl font-bold text-foreground">Supporting Sample Analysis</h2>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Compact evidence behind the recommended launch plan.
+                  Illustrative model outputs and fictional context; not evidence for a recommended plan.
                 </p>
               </div>
               <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
@@ -851,15 +853,15 @@ export default function ScenarioLab() {
           </summary>
           <div className="px-6 pb-6 pt-2 grid grid-cols-1 xl:grid-cols-3 gap-4">
             <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Plan Impact Summary</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">Current position compared with the active plan.</p>
+              <h3 className="text-sm font-bold text-foreground">Sample Output Summary</h3>
+              <p className="text-xs text-muted-foreground mt-1 mb-3">Fixed sample baseline compared with the current slider calculation (GBP).</p>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-border/40 text-muted-foreground">
                       <th className="text-left font-semibold py-2 pr-3">Metric</th>
-                      <th className="text-right font-semibold py-2 px-3">Current</th>
-                      <th className="text-right font-semibold py-2 pl-3">Plan</th>
+                      <th className="text-right font-semibold py-2 px-3">Sample baseline</th>
+                      <th className="text-right font-semibold py-2 pl-3">Sample output</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/30">
@@ -880,13 +882,13 @@ export default function ScenarioLab() {
             </div>
 
             <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Key Drivers</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">The three changes doing most of the work.</p>
+              <h3 className="text-sm font-bold text-foreground">Example Topics</h3>
+              <p className="text-xs text-muted-foreground mt-1 mb-3">Static examples, not a ranking of the current slider effects.</p>
               <div className="space-y-3">
                 {[
-                  { title: "Discount reduction", text: "Tighter discounting protects contribution without needing more traffic." },
-                  { title: "Marketing reallocation", text: "Spend shifts away from weaker paid acquisition into higher-efficiency channels." },
-                  { title: "Inventory reduction", text: "Lower stock days release cash and improve short-term headroom." },
+                  { title: "Discount reduction", text: "Discounting is an example input; customer response is not modelled." },
+                  { title: "Marketing reallocation", text: "Channel reallocation is illustrative; relative efficiency is not verified." },
+                  { title: "Inventory reduction", text: "Inventory days have a fixed sample cash coefficient, not a validated forecast." },
                 ].map(driver => (
                   <div key={driver.title} className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0 mt-0.5" />
@@ -900,13 +902,13 @@ export default function ScenarioLab() {
             </div>
 
             <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Why Night Scout Has Confidence</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">The recommendation is grounded in stable operating signals.</p>
+              <h3 className="text-sm font-bold text-foreground">Evidence Still Needed</h3>
+              <p className="text-xs text-muted-foreground mt-1 mb-3">No confidence assessment is implemented. Before real planning we need:</p>
               <ul className="space-y-2">
                 {[
-                  "CAC trends stable",
-                  "Discount behaviour predictable",
-                  "Inventory reduction already underway",
+                  "Validated acquisition cost data",
+                  "Evidence for pricing and discount effects",
+                  "Inventory, cost and cash data with agreed model rules",
                 ].map(item => (
                   <li key={item} className="flex items-start gap-2 text-xs text-foreground">
                     <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />

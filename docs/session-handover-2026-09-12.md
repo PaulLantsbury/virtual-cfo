@@ -97,3 +97,7 @@ Paul asked to leave the Replit setup as it is. No Replit reconciliation, synchro
 Paul approved the package; two developers and an independent reviewer delivered it. Source percentages no longer feed illustrative Growth scores/diagnoses. Profit Overview explicitly uses unvalidated sample arithmetic and discloses mixed periods, rather than claiming operating profit/EBITDA or annualised forecasts. Simulator equations and plan gates preserved. See docs/growth-profit-package.md.
 
 31 isolated browser cases, frontend typecheck/build and independent review pass. Real existing staging store A shows Growth source zeros and fixed sample C+, Profit actual reporting unavailable and GBP78,000 sample result. No database or financial-approval changes, Replit/main/production untouched. Next: Paul’s walkthrough; package coding complete. Maintain staging-after-package cadence and deferred modeller/real-source decisions.
+
+## Opportunity and scenario checkpoint
+
+Opportunity Finder / Scenario Planner approved parallel package complete. Existing synthetic opportunities are explicit examples; unsupported source endpoint removed, one-off cash separate. Scenario formulas/presets preserved, best-plan claims removed, unused inputs and unavailable saving/comparing disclosed. 22 browser cases, typecheck/build and independent review pass; source/staging unchanged except page code, authenticated preset handoff verified. See docs/opportunity-scenario-package.md for harness corrections and limits. Next: Paul’s walkthrough. No DB/financial approval, Replit/main or production change.

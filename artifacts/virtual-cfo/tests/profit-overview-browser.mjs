@@ -174,15 +174,6 @@ async function assertBaseline(page) {
   assert.ok((await region.getByRole("group",{name:metric,exact:true}).innerText()).includes(amount), `${metric} baseline is ${amount}`);
  }
 }
-async function assertScenario(page, values = baseline, changes = {}) {
- const region = page.getByRole("region",{name:"Profit scenario comparison",exact:true});
- for (const [metric,amount] of Object.entries(values)) {
-  const text = (await region.getByRole("group",{name:metric,exact:true}).innerText()).replace(/−/g,"-");
-  assert.ok(text.includes(amount), `${metric} scenario is ${amount}`);
-  assert.ok(text.includes(baseline[metric]), `${metric} comparison retains baseline`);
-  for (const token of changes[metric] || ["£0","0%"]) assert.ok(text.includes(token), `${metric} change includes ${token}`);
- }
-}
 async function bridgeAmount(page, name, amount) {
  const table=page.getByRole("table",{name:"Sample profit bridge"});
  const row=table.getByRole("row").filter({has:page.getByRole("rowheader").filter({has:page.getByText(name,{exact:true})})});
@@ -192,7 +183,8 @@ for (const viewport of Object.keys(viewports)) {
  for (const state of ["current","empty","unavailable"]) test(`${viewport}: ${state} source cannot certify coherent sample profit`,async()=>fixture({viewport,state},async page=>{
   await assertTruthful(page);
   await assertBaseline(page);
-  await assertScenario(page);
+  assert.equal(await page.getByRole("slider").count(),0);
+  assert.equal(await page.getByRole("region",{name:"Profit scenario comparison"}).count(),0);
   const dir=process.env.NIGHT_SCOUT_PROFIT_SCREENSHOT_DIR;
   if(dir && state==="current") { await mkdir(dir,{recursive:true});await page.screenshot({path:join(dir,viewport+".png"),fullPage:true}); }
  }));
@@ -205,52 +197,6 @@ for (const viewport of Object.keys(viewports)) {
    ["Operating profit","£21,900"], ["EBITDA","£22,900"],
   ]) await bridgeAmount(page,name,amount);
  }));
- test(`${viewport}: more orders update one calculation and reset clears every control`,async()=>fixture({viewport},async page=>{
-  await slider(page,"Order Volume Change").focus();await slider(page,"Order Volume Change").press("End");
-  await assertScenario(page,{Sales:"£125,000",Contribution:"£56,200","Operating profit":"£37,200"},{
-   Sales:["+£30,000","+31.6%"],Contribution:["+£15,300","+37.4%"],"Operating profit":["+£15,300","+69.9%"],
-  });
-  await assertBaseline(page);
-  await bridgeAmount(page,"Contribution","£56,200");
-  await bridgeAmount(page,"Operating profit","£37,200");
-  await bridgeAmount(page,"EBITDA","£38,200");
-  await slider(page,"Average Order Value Change").focus();await slider(page,"Average Order Value Change").press("End");
-  await slider(page,"Marketing Spend Change").focus();await slider(page,"Marketing Spend Change").press("Home");
-  await slider(page,"Other Overhead Cost Change").scrollIntoViewIfNeeded();
-  await slider(page,"Other Overhead Cost Change").focus();await slider(page,"Other Overhead Cost Change").press("End");
-  const comparison=page.getByRole("region",{name:"Profit scenario comparison",exact:true});
-  for(const metric of Object.keys(baseline)) {
-   const bounds=await comparison.getByRole("group",{name:metric,exact:true}).boundingBox();
-   assert.ok(bounds && bounds.y >= 0 && bounds.y + bounds.height <= viewports[viewport].height, `${metric} remains visible while using the last overhead control`);
-  }
-  await page.getByRole("button",{name:"Reset",exact:true}).click();
-  await assertScenario(page);
-  for(const control of await page.getByRole("slider").all()) assert.equal(await control.getAttribute("aria-valuenow"),"0");
- }));
- test(`${viewport}: AOV reduction shows losses relative to baseline`,async()=>fixture({viewport},async page=>{
-  await slider(page,"Average Order Value Change").focus();await slider(page,"Average Order Value Change").press("Home");
-  await assertScenario(page,{Sales:"£85,000",Contribution:"£30,900","Operating profit":"£11,900"},{
-   Sales:["-£10,000","-10.5%"],Contribution:["-£10,000","-24.4%"],"Operating profit":["-£10,000","-45.7%"],
-  });
- }));
- test(`${viewport}: marketing cost changes do not invent sales`,async()=>fixture({viewport},async page=>{
-  await slider(page,"Marketing Spend Change").focus();await slider(page,"Marketing Spend Change").press("Home");
-  await assertScenario(page,{Sales:"£95,000",Contribution:"£43,900","Operating profit":"£24,900"},{
-   Sales:["£0","0%"],Contribution:["+£3,000","+7.3%"],"Operating profit":["+£3,000","+13.7%"],
-  });
-  await assertBaseline(page);
- }));
- test(`${viewport}: adverse assumptions display an operating loss without changing baseline`,async()=>fixture({viewport},async page=>{
-  for(const [name,key] of [["Order Volume Change","Home"],["Average Order Value Change","Home"],["Marketing Spend Change","End"],["Other Overhead Cost Change","End"]]) {
-   await slider(page,name).focus();await slider(page,name).press(key);
-  }
-  await assertScenario(page,{Sales:"£67,000",Contribution:"£19,700","Operating profit":"-£100"},{
-   Sales:["-£28,000","-29.5%"],Contribution:["-£21,200","-51.8%"],"Operating profit":["-£22,000","-100.5%"],
-  });
-  await assertBaseline(page);
-  await bridgeAmount(page,"Operating profit","-£100");
-  await bridgeAmount(page,"EBITDA","£900");
- }));
  test(`${viewport}: free plan has status but no numerical simulator`,async()=>fixture({viewport,plan:"free"},async page=>{
   await assertTruthful(page);
   assert.equal(await page.getByRole("slider").count(),0);
@@ -258,10 +204,9 @@ for (const viewport of Object.keys(viewports)) {
   const bridge=page.getByRole("table",{name:"Sample profit bridge"});
   for(const cell of await bridge.getByRole("cell").all()) assert.equal(await cell.innerText(),"Locked");
  }));
- test(`${viewport}: Scenario Planner opens with the same baseline and no unsaved carryover`,async()=>fixture({viewport},async page=>{
+ test(`${viewport}: Scenario Planner holds the controls and opens with the matching baseline`,async()=>fixture({viewport},async page=>{
   await assertBaseline(page);
-  await slider(page,"Order Volume Change").focus();await slider(page,"Order Volume Change").press("End");
-  await page.getByRole("link",{name:"Open Scenario Planner",exact:true}).click();
+  await page.getByRole("link",{name:"Explore changes in Scenario Planner",exact:true}).click();
   await page.getByRole("heading",{name:"Scenario Planner",exact:true}).waitFor();
   const summary=page.getByRole("region",{name:"Scenario summary",exact:true});
   for(const metric of ["Sales","Contribution","Operating profit"]) {

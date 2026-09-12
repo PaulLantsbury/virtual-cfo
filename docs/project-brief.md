@@ -1,5 +1,7 @@
 # Night Scout — current project brief
 
+Page-role clarification: Profit Overview explains the fixed sample profit/cost breakdown; its duplicate simulator has been removed by Paul’s agreement. Scenario Planner alone provides what-if controls. Shared baseline/definitions are unchanged.
+
 Latest completed package: [Profit Overview / Scenario Planner alignment](profit-scenario-alignment.md). Both pages now use the same coherent sample month and calculation model. 51 checks, independent review and local staging verification pass; real financial reporting remains unavailable.
 
 Latest completed package: [Scenario Planner visible impact and corrected sample-month model](scenario-planner-correction.md). This supersedes the earlier preservation of its unvalidated formulas and preset behaviour. 40 checks and local staging verification pass; forecasts and real-source integration remain unfinished.

@@ -446,3 +446,8 @@ Paul approved the final package. Applied the exact guarded script once, verified
 ## Review readiness guidance — 12 September
 
 Completed the agreed screen-only package. Passed responses explain the existing transaction checks; blocked responses explain that issues must be resolved. Independent completeness guidance covers collection gaps/limits, later refunds, exclusions and unresolved adjustments without adding approval rules. The panel clears on period changes and is absent for unavailable/unprepared states. Eight isolated browser groups, frontend type checking and diff checks pass. No database/access/financial-approval/production/Replit changes. See [12 September handover](session-handover-2026-09-12.md).
+
+
+## Reference-ledger comparison prototype — 12 September
+
+Completed the next explicitly approved local package. Two separately handwritten synthetic ledgers exercise identity/component comparison over store-local event dates. Missing/extra events, duplicates, incorrect amounts/VAT/order links and cross-period date shifts are caught; equal totals cannot conceal different events. Nine test groups pass. Every outcome leaves completeness uncertified. No real reference source, UI integration, live writes or new financial policy. See [prototype contract](../experiments/completeness/README.md) and updated 12 September handover.

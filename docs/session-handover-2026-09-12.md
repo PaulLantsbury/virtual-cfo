@@ -19,3 +19,9 @@ Code, tests and this handover are published on the existing codex/restart-baseli
 The 10 September staging state remains the last verified database baseline: C has one original February sale, March/April refunds, two import receipts and three unverified review periods. Paul has C staging membership/reviewer access. The connected preview uses http://localhost:3000/financial-review; the old 3001 tab is stale.
 
 This guidance work is complete. Next agree a bounded package for the actual independent completeness evidence and how reviewed figures feed reporting. The guidance does not itself provide that independent evidence or certify the dataset. Preserve the existing approvals boundary; do not restore completeness or reapply earlier staging packages merely to resume.
+
+## Second approved package — reference-ledger comparison
+
+Paul subsequently approved a separate local comparison prototype. Implemented [normalized reference-ledger comparison](../experiments/completeness/README.md) with separately handwritten synthetic inputs. It catches missing/extra transactions, duplicates, changed amounts/VAT/order links and date shifts, including compensating errors with equal totals. Nine test groups pass. All results explicitly leave coverageCertified false; distinct reference labels do not establish independent provenance. No database, screen, upload or completeness-restoration integration was added.
+
+Both 12 September packages are now complete. The next proposed task is to agree the actual independent reference source/adapter and, if desired, expose a read-only comparison report. Do not claim this prototype proves real source completeness. Existing staging status and approval boundaries are unchanged.

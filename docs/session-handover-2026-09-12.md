@@ -111,3 +111,8 @@ Paul requested clearer UK wording: renamed the sample priority tier “Next Up�
 ## Scenario Planner correction — 12 September 2026
 
 Paul approved visible live sales/profit comparisons, then correction of the sample formulas using one consistent month and orders × AOV. Implemented nine active controls, clear cost/profit bridge and unavailable unsupported forecasts; old presets explicitly declined. Baseline net sales £95,000 and operating profit £21,900. All40 tests, typecheck/build and independent review pass; current-source local staging store A checked and reset. See [implementation, verification and remaining scope](scenario-planner-correction.md). No DB writes, access changes, Replit sync, main merge or production release. Next: Paul walkthrough; further modelling policies need his decision.
+
+
+### Contribution headline follow-up
+
+Paul requested contribution alongside sales and operating profit. Both summary and sticky live panels now show contribution after marketing with its baseline and signed GBP/percentage difference, using the existing model unchanged. The three-column layout fits desktop/mobile. All20 Scenario browser cases pass, including contribution zero/positive/negative changes and visibility; build and whitespace checks pass (existing build warnings unchanged). Mobile screenshot inspected; current local staging store A shows £95,000 sales, £40,900 contribution and £21,900 operating profit. No financial formula, database, Replit or production change.

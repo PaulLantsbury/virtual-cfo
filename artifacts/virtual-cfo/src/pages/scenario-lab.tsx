@@ -21,23 +21,24 @@ function BusinessImpact({ model, title, sticky = false }: { model: Model; title:
     <section aria-label={title} className={cn("rounded-xl border border-primary/30 bg-card p-3 sm:p-4", sticky && "sticky top-0 z-20 shadow-md mb-5")}>
       <h2 className="text-sm font-bold">{title}</h2>
       <p className="text-xs text-muted-foreground mt-1 mb-3">Compared with the sample starting position · one sample month · GBP</p>
-      <div className="grid grid-cols-2 gap-3" aria-live="polite" aria-atomic="true">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3" aria-live="polite" aria-atomic="true">
         {[
           { label: "Sales", baseline: model.baseline.sales, value: model.result.sales },
+          { label: "Contribution", baseline: model.baseline.contribution, value: model.result.contribution },
           { label: "Operating profit", baseline: model.baseline.operatingProfit, value: model.result.operatingProfit },
         ].map(({ label, baseline, value }) => (
-          <div key={label} role="group" aria-label={label} className="min-w-0 rounded-lg bg-secondary/40 p-2 sm:p-3">
+          <div key={label} role="group" aria-label={label} className="min-w-0 rounded-lg bg-secondary/40 p-1.5 sm:p-3">
             <h3 className="text-xs font-semibold">{label}</h3>
             <p className="text-xs text-muted-foreground mt-2">Your scenario</p>
-            <p className="text-lg sm:text-2xl font-bold tabular-nums">{money(value)}</p>
+            <p className="text-sm sm:text-2xl font-bold tabular-nums">{money(value)}</p>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">Sample starting position <span className="tabular-nums">{money(baseline)}</span></p>
-            <p className={cn("text-xs sm:text-sm font-semibold tabular-nums mt-2", value > baseline ? "text-emerald-600 dark:text-emerald-400" : value < baseline ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground")}>
+            <p className={cn("text-[11px] sm:text-sm font-semibold tabular-nums mt-2", value > baseline ? "text-emerald-600 dark:text-emerald-400" : value < baseline ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground")}>
               Change: {changeText(value, baseline)}
             </p>
           </div>
         ))}
       </div>
-      <p className="text-[11px] text-muted-foreground mt-2">Sales = net product sales, excluding VAT and shipping. Sample arithmetic, not a forecast.</p>
+      <p className="text-[11px] text-muted-foreground mt-2">Sales = net product sales, excluding VAT and shipping. Contribution is after marketing. Sample arithmetic, not a forecast.</p>
     </section>
   );
 }

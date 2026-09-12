@@ -26,3 +26,7 @@ Existing isolated acceptance evidence remains 31 first-pilot and 26 reporting-pa
 Paul can now walk through Cash Control, Margin Analysis and Monitoring in this preview. Full-page reloads currently ask him to select a store again; this is an observed usability limitation, not loss of authentication. Financial completeness remains unapproved. Keep reference comparison paused until an agreed real source exists.
 
 No migration, grant, import, main merge, Replit sync or production release occurred. Production remains subject to GitHub/Replit baseline reconciliation and an explicitly approved release/rollback package. The local preview depends on the current computer/process remaining available.
+
+## Walkthrough accepted
+
+Paul subsequently reviewed the previews and said all looked good. This accepts the bounded presentation package only; production and financial completeness remain separately controlled. He approved the next Growth Efficiency/Pricing Optimisation package in docs/growth-pricing-package.md.

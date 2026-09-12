@@ -14,10 +14,8 @@ import { SimulatorSlider } from "@/components/SimulatorSlider";
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
-import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { PeriodImpact } from "@/components/PeriodImpact";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
-import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 import {
   GROSS_REVENUE,
   DISCOUNT_COST,
@@ -26,16 +24,10 @@ import {
 } from "@/lib/data/pricing-metrics";
 import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/analytics/deltaSentiment";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
-import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
-
-// ─── Data period config ────────────────────────────────────────────────────────
-// DEV-ONLY: hardcoded seed store UUID — matches dashboard.tsx, margin-analysis.tsx, etc.
-// Replace with authenticated session store_id before multi-tenant use.
-
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 // Imported from src/lib/data/pricing-metrics.ts — the central source of truth
-// for the scenario/model layer.  The simulator is anchored to these constants.
+// for the sample scenario layer. The simulator is anchored to these constants.
 //
 // IMPORTANT: Do NOT replace these with live monthly values — the simulator
 // coefficients (discountEffect, convEffect, etc.) are calibrated against this
@@ -49,9 +41,7 @@ import { usePhase2Deltas } from "@/lib/analytics/usePhase2Deltas";
 // AVG_DISCOUNT_PCT = 18
 
 // ─── KPI delta values (period-on-period) ──────────────────────────────────────
-// Static fallbacks — shown when Phase 2 delta RPC has not yet resolved or
-// when prior period has no data.
-// @dynamic Replace with live period-over-period differences from Shopify data.
+// Fixed illustrative deltas, never used as source-data fallbacks.
 const KPI_DELTA_AVG_DISCOUNT       =  3;
 const KPI_DELTA_FULL_PRICE_RATIO   = -6;
 const KPI_DELTA_CONTRIB_PER_ORDER  = -2.10;
@@ -89,7 +79,7 @@ const fmt = (n: number) =>
 function InlineCfoInsight({ text }: { text: string }) {
   return (
     <div className="sc-purple rounded-xl px-4 py-3">
-      <p className="text-xs text-indigo-300 font-semibold uppercase tracking-wider mb-1">CFO Insight</p>
+      <p className="text-xs text-indigo-300 font-semibold uppercase tracking-wider mb-1">Sample insight</p>
       <p className="text-sm text-foreground leading-relaxed">{text}</p>
     </div>
   );
@@ -100,7 +90,7 @@ interface KpiCardProps {
   sentiment: DeltaSentiment | null;
   deltaLabel?: string; insight: string;
 }
-function KpiCard({ label, value, delta, sentiment, deltaLabel = "vs prior period", insight }: KpiCardProps) {
+function KpiCard({ label, value, delta, sentiment, deltaLabel = "vs sample prior period", insight }: KpiCardProps) {
   const DeltaIcon = sentiment === null || sentiment === "neutral" ? Zap : sentiment === "positive" ? ArrowUpRight : ArrowDownRight;
   return (
     <div className="bg-card rounded-2xl border border-border/50 shadow-sm px-5 py-4 flex flex-col gap-1.5">
@@ -154,8 +144,8 @@ function DriverTooltip({ active, payload, label }: any) {
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function PricingOptimisation() {
   const PO_STORE_ID = useActiveStore();
-  // ── Phase 1 live data (current calendar month) ────────────────────────────
-  // Resolves to the most recent month with order data.
+  // ── Unverified source data for the resolved reporting period ──────────────
+  // Uses the existing timeline and order-based lookback; this does not prove completeness.
   const { status: reportingStatus,
     phase1:      pricingPhase1,
     dateFrom:    pricingDateFrom,
@@ -164,43 +154,15 @@ export default function PricingOptimisation() {
     loading:     pricingPeriodLoading,
   } = useLatestDataPeriod(PO_STORE_ID);
 
-  // ── Phase 2 MoM deltas ────────────────────────────────────────────────────
-  const {
-    deltas:  phase2Deltas,
-    loading: phase2DeltasLoading,
-  } = usePhase2Deltas(PO_STORE_ID, pricingDateFrom, pricingDateTo);
-
-  // ── Live display values — DISPLAY ONLY, never fed into simulator math ─────
-  //
-  // Naming convention: live* = current-month value from Phase 1/2 RPCs.
-  // The simulator block below uses the imported static constants (GROSS_REVENUE,
-  // BASE_CONTRIBUTION, BASE_NET_REVENUE) which remain on a different scenario
-  // basis.  Do not replace those with these live* variables.
-
-  // Phase 1 raw fields (ratios are [0,1])
-  const liveDiscountDepRatio = (pricingPhase1 !== null && !pricingPhase1.errors.some(e => e.fn === "discount_dependency"))
-    ? pricingPhase1.data.discountDependency : null;
-
-  // Derived live display values (with static fallbacks for pre-load / RPC error)
-  const liveAvgDiscountPctDisplay = liveDiscountDepRatio !== null
-    ? liveDiscountDepRatio * 100 : AVG_DISCOUNT_PCT;
-
-  // ── Phase 2 delta-derived live badge values ───────────────────────────────
-  //
-  // Badge format matches existing pricing page style: "+3pp", "+£14,000".
-  // Local helpers avoid "↑ X.Xpp vs last month" suffix (that's in deltaLabel).
-
-  const fmtPp = (v: number | null, fallback: string): string => {
-    if (v === null || !Number.isFinite(v)) return fallback;
-    return `${v >= 0 ? "+" : ""}${Math.abs(v).toFixed(1)}pp`;
-  };
-  // Avg Discount % — direct from discount_dep_delta_pp
-  const liveAvgDiscountDeltaStr = !phase2DeltasLoading
-    ? fmtPp(phase2Deltas?.discount_dep_delta_pp ?? null, `+${KPI_DELTA_AVG_DISCOUNT}pp`)
-    : `+${KPI_DELTA_AVG_DISCOUNT}pp`;
-  const liveAvgDiscountSentiment = !phase2DeltasLoading
-    ? deltaToSentiment(phase2Deltas?.discount_dep_delta_pp ?? null, DELTA_POLARITY.avgDiscount)
-    : deltaToSentiment(KPI_DELTA_AVG_DISCOUNT, DELTA_POLARITY.avgDiscount);
+  // Keep the legacy source ratio separate from the fixed pricing examples.
+  const sourceDiscount = pricingPhase1?.data.discountDependency;
+  const sourceValue = typeof sourceDiscount === "number" && Number.isFinite(sourceDiscount)
+    ? `${(sourceDiscount * 100).toFixed(2)}%` : "Unavailable";
+  const sourceStatus = reportingStatus === "loading" ? "Source figures loading"
+    : reportingStatus === "error" ? "Source figures unavailable"
+    : reportingStatus === "empty" ? "No source orders found in the reporting search"
+    : reportingStatus === "stale" ? "Unverified source figures: historical period"
+    : "Unverified source figures: latest completed period";
 
   // ── Simulator state ───────────────────────────────────────────────────────
   // !! SIMULATOR GUARD: The five slider states and all maths below reference
@@ -232,10 +194,10 @@ export default function PricingOptimisation() {
 
   const simText =
     projContribution < 150_000
-      ? "This scenario creates pricing risk. Discounting or conversion pressure is likely to reduce contribution materially."
+      ? "This sample falls below the illustrative risk threshold. Actual customer response and pricing risk are unknown."
       : contribDelta >= 0
-        ? "This scenario strengthens contribution because improved pricing more than offsets any volume impact."
-        : "This scenario weakens contribution because volume loss, returns or discounting absorb margin.";
+        ? "This sample increases contribution under fixed assumptions; this is not a recommendation."
+        : "This sample reduces contribution under fixed assumptions; this is not a recommendation.";
 
   const simColor =
     projContribution < 150_000
@@ -252,8 +214,8 @@ export default function PricingOptimisation() {
     <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
       <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
         <div>
-          <h3 className="font-semibold text-lg text-foreground">Pricing Scenario Model</h3>
-          <p className="text-sm text-muted-foreground mt-0.5">See exactly how much profit you could recover before changing a single price.</p>
+          <h3 className="font-semibold text-lg text-foreground">Sample Pricing Scenario Model</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">Explore a fixed example. Outputs are not predictions or pricing advice.</p>
         </div>
         {!isPro && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
       </div>
@@ -261,7 +223,7 @@ export default function PricingOptimisation() {
       {isPro ? (
         <div className="px-6 py-6">
           <div className="mb-5">
-            <InlineCfoInsight text="Contribution is currently most sensitive to discount depth and full-price order mix. Use this tool before changing promotional strategy." />
+            <InlineCfoInsight text="In this sample model, discount depth and full-price order mix change the output. Actual customer response is not modelled." />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-6">
@@ -273,14 +235,14 @@ export default function PricingOptimisation() {
             </div>
 
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">Modelled Scenario Outputs</h4>
+              <h4 className="text-sm font-semibold text-foreground">Sample Scenario Outputs</h4>
               <div className="space-y-2">
                 {[
                   { label: "Scenario Revenue",              value: `£${Math.round(projRevenue).toLocaleString()}`, highlight: true,  isPeriod: false },
                   { label: "Scenario Contribution",         value: fmt(projContribution),                           highlight: true,  isPeriod: false },
                   { label: "Contribution vs Base",          value: "",                                              highlight: true,  isPeriod: true  },
                   { label: "Scenario Contribution Margin",  value: `${projContribMargin.toFixed(1)}%`,              highlight: false, isPeriod: false },
-                  { label: "Scenario Risk Level",           value: pricingRisk,                                     highlight: false, isPeriod: false },
+                  { label: "Illustrative Risk Level",           value: pricingRisk,                                     highlight: false, isPeriod: false },
                 ].map(({ label, value, highlight, isPeriod }) => (
                   <div key={label} className={cn("flex items-center justify-between px-4 py-2.5 rounded-xl",
                     highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30",
@@ -304,7 +266,7 @@ export default function PricingOptimisation() {
               <div className="rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50/60 dark:bg-indigo-950/15 px-4 py-3 flex items-start gap-2.5">
                 <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-0.5">Fastest lever to improve contribution</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 mb-0.5">Example discount assumption</p>
                   <p className="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed">Reducing average discount by 3pp is modelled to improve contribution by approximately £38k.</p>
                 </div>
               </div>
@@ -312,8 +274,8 @@ export default function PricingOptimisation() {
               <div className="rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-950/15 px-4 py-3 flex items-start gap-2.5">
                 <Shield className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Safest lever to improve contribution</p>
-                  <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">Reducing shipping subsidy by 10% improves contribution with lower conversion risk than changing headline discounts.</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Example shipping assumption</p>
+                  <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">The sample shipping coefficient changes contribution when subsidy changes. It does not estimate conversion risk or establish a safest action.</p>
                 </div>
               </div>
 
@@ -327,7 +289,7 @@ export default function PricingOptimisation() {
                   onClick={() => { setDiscountChange(0); setFullPriceChange(0); setConvChange(0); setReturnsChange(0); setShippingChange(0); }}
                   className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline mt-1"
                 >
-                  Reset scenario
+                  Reset sample scenario
                 </button>
               )}
             </div>
@@ -358,7 +320,7 @@ export default function PricingOptimisation() {
           </div>
           <UpgradeCta
             title="Model pricing and discount scenarios"
-            description="Unlock the pricing simulator to test discount changes, conversion risk and profit upside before making the wrong move."
+            description="Pro opens this illustrative simulator; it does not connect actual pricing analysis."
           />
         </div>
       )}
@@ -366,33 +328,44 @@ export default function PricingOptimisation() {
   );
 
   return (
-    <AppLayout>
+    <AppLayout showMonitoring={false}>
       {/* ── Page header ── */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Pricing & Discount Optimisation</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            See whether discounts are protecting profit or quietly giving too much away.
+            Explore a sample pricing model alongside a separate unverified source ratio.
           </p>
-          <DataPeriodLabel status={reportingStatus}
-            periodLabel={pricingPeriodLabel}
-            loading={pricingPeriodLoading}
-            dateFrom={pricingDateFrom}
-            dateTo={pricingDateTo}
-          />
+
         </div>
         <TimelineSelector />
       </div>
 
-      {/* ── CFO Pricing Verdict ── */}
+      <section aria-label="Pricing reporting status" className="rounded-2xl border border-border bg-card p-5 mb-6">
+        <h2 className="font-semibold text-lg">Actual pricing analysis: unavailable</h2>
+        <p className="text-sm text-muted-foreground mt-2">Source figures have not been validated against the agreed financial definitions. They do not establish pricing power, recoverable contribution or recommended actions.</p>
+        <p role="status" className="text-sm mt-3">{sourceStatus}</p>
+        {!pricingPeriodLoading && (reportingStatus === "ready" || reportingStatus === "stale") && <p className="text-xs text-muted-foreground">{pricingPeriodLabel}: {pricingDateFrom} to {pricingDateTo}</p>}
+        <p className="text-sm mt-3">Source discount dependency (unverified)</p>
+        <p className="font-bold text-xl">{sourceValue}</p>
+        <p className="text-xs text-muted-foreground mt-2">This is the existing source ratio, not a verified average discount per order.</p>
+      </section>
+      <section aria-label="Sample pricing model notice" className="rounded-2xl border border-amber-300/40 bg-amber-50/10 p-5 mb-6">
+        <h2 className="font-semibold">Illustrative pricing model — sample data</h2>
+        <p className="text-sm mt-2">All verdicts, amounts, trends, risk and confidence labels, actions and simulator outputs below use fixed sample inputs, not results or recommendations for your business. Sample currency is GBP; it does not establish your store currency. Source figures and selected dates do not change these examples.</p>
+        <p className="text-sm mt-2">The model is not validated against the agreed financial definitions. Supporting examples are separate illustrations and do not reconcile to one financial report. Annualised amounts are simple extrapolations, not forecasts.</p>
+        <p className="text-sm mt-2">Monitoring not active. Upgrading does not validate or connect actual pricing analysis.</p>
+      </section>
+
+      {/* ── Sample Pricing Verdict ── */}
       <div className="sc-purple rounded-2xl shadow-md mb-6 overflow-hidden">
         <div className="sc-purple-header flex items-center gap-3 px-6 py-3">
           <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
-            CFO Pricing Verdict
+            Sample Pricing Verdict
           </span>
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 whitespace-nowrap">
-            Action needed
+            Example only
           </span>
         </div>
 
@@ -400,21 +373,21 @@ export default function PricingOptimisation() {
           <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-5 pb-4 border-b border-primary/15">
             <div>
               <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">
-                You're buying revenue with discounts.
+                Example: heavy discounting reduces contribution.
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-                Sales are still coming in, but too much contribution is being handed back to customers through promotions, weaker full-price sales and returns.
+                This fictional example illustrates promotions, weaker full-price sales and returns reducing contribution. It is not a finding about your store.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Profit available</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Sample recovery estimate</p>
                 <p className="text-2xl font-display font-bold text-foreground leading-none">£52,000</p>
-                <p className="text-xs text-muted-foreground leading-snug mt-1.5">of contribution appears recoverable through tighter pricing control.</p>
+                <p className="text-xs text-muted-foreground leading-snug mt-1.5">illustrative contribution recovery, not measured profit available.</p>
               </div>
               <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-3 py-2.5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Do first</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Example action</p>
                 <p className="text-sm font-bold text-emerald-700 dark:text-emerald-300">Reduce blanket discounts</p>
               </div>
             </div>
@@ -430,11 +403,11 @@ export default function PricingOptimisation() {
         </div>
       </div>
 
-      {/* ── Where The Opportunity Is ── */}
+      {/* ── Sample Pricing Opportunities ── */}
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Where The Opportunity Is</h2>
+        <h2 className="text-xl font-bold text-foreground">Sample Pricing Opportunities</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          The biggest places to recover profit without needing more traffic.
+          Illustrative possibilities, not identified opportunities for your store.
         </p>
       </div>
 
@@ -444,7 +417,7 @@ export default function PricingOptimisation() {
             <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Highest confidence opportunity</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Sample confidence label</p>
                 {isProRec ? (
                   <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">£38,000</span>
                 ) : (
@@ -458,7 +431,7 @@ export default function PricingOptimisation() {
               <p className="text-xs text-muted-foreground leading-relaxed mt-1">
                 {isProRec
                   ? "Tighten broad discounting before changing prices across the store."
-                  : "Upgrade to Pro to see the value of this lever"}
+                  : "Pro opens this sample estimate"}
               </p>
             </div>
           </div>
@@ -468,7 +441,7 @@ export default function PricingOptimisation() {
             <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Additional opportunity</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Additional sample opportunity</p>
                 {isProRec ? (
                   <span className="text-sm font-bold text-amber-700 dark:text-amber-300">£14,000</span>
                 ) : (
@@ -482,18 +455,18 @@ export default function PricingOptimisation() {
               <p className="text-xs text-muted-foreground leading-relaxed mt-1">
                 {isProRec
                   ? "Improve targeted offers, shipping subsidies and returns on discounted sales."
-                  : "Upgrade to Pro to see the value of this lever"}
+                  : "Pro opens this sample estimate"}
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Pricing Recovery Plan ── */}
+      {/* ── Sample Pricing Recovery Plan ── */}
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Pricing Recovery Plan</h2>
+        <h2 className="text-xl font-bold text-foreground">Sample Pricing Recovery Plan</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          The next actions to recover contribution and protect pricing power.
+          Example actions and assumed impact, timing and confidence; not a prioritised plan for your business.
         </p>
       </div>
 
@@ -557,7 +530,7 @@ export default function PricingOptimisation() {
                         <p className="text-base font-bold text-foreground">{action.title}</p>
                         {i === 0 && (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white dark:bg-emerald-500 dark:text-emerald-950 uppercase tracking-wider">
-                            START FIRST
+                            SAMPLE PRIORITY
                           </span>
                         )}
                       </div>
@@ -606,9 +579,9 @@ export default function PricingOptimisation() {
               <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
-              <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Pricing Recovery Plan</p>
+              <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Sample Pricing Recovery Plan</p>
               <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                A clear route exists to recover contribution from pricing leakage. Upgrade to view the prioritised action plan, timing, expected contribution impact and implementation steps.
+                Pro opens an illustrative action plan with sample amounts and assumptions. No recovery opportunity has been verified for your store.
               </p>
             </div>
           </div>
@@ -617,16 +590,16 @@ export default function PricingOptimisation() {
 
       {pricingScenarioModel}
 
-      <AiCfoAskCard pageId="pricing" />
+      <p className="text-sm text-muted-foreground mb-8">Personalised pricing advice is unavailable until validated inputs and analysis are connected.</p>
 
-      {/* ── Supporting Analysis ── */}
+      {/* ── Supporting Sample Analysis ── */}
       <details className="group bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
         <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
+              <h2 className="text-xl font-bold text-foreground">Supporting Sample Analysis</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Essential pricing KPIs, contribution movement and trend evidence.
+                Fictional pricing KPIs, contribution movement and trends; not source evidence.
               </p>
             </div>
             <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
@@ -635,17 +608,17 @@ export default function PricingOptimisation() {
         </summary>
         <div className="px-6 pb-6 pt-2">
 
-      {/* ── Essential KPI Summary ── */}
+      {/* ── Sample KPI Summary ── */}
       <div className="mb-4">
-        <h3 className="font-semibold text-lg text-foreground">Essential KPI Summary</h3>
-        <p className="text-sm text-muted-foreground mt-0.5">The few numbers that explain the pricing diagnosis.</p>
+        <h3 className="font-semibold text-lg text-foreground">Sample KPI Summary</h3>
+        <p className="text-sm text-muted-foreground mt-0.5">Fixed illustrative values, separate from the source ratio above.</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <KpiCard
           label="Discount %"
-          value={`${Math.round(liveAvgDiscountPctDisplay)}%`}
-          delta={liveAvgDiscountDeltaStr}
-          sentiment={liveAvgDiscountSentiment}
+          value={`${AVG_DISCOUNT_PCT}%`}
+          delta="+3pp"
+          sentiment={deltaToSentiment(KPI_DELTA_AVG_DISCOUNT, DELTA_POLARITY.avgDiscount)}
           insight="Average discount given across orders."
         />
         <KpiCard
@@ -671,12 +644,12 @@ export default function PricingOptimisation() {
         />
       </div>
 
-      {/* ── What Moved Contribution — Pro gated ── */}
+      {/* ── Sample Contribution Drivers — Pro gated ── */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
           <div>
-            <h3 className="font-semibold text-lg text-foreground">What Moved Contribution</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Contribution fell by £24k in the current period. These are the main pricing drivers.</p>
+            <h3 className="font-semibold text-lg text-foreground">Sample Contribution Drivers</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">This example shows a £24k contribution decrease and fictional pricing drivers.</p>
           </div>
           {!canAccess("pricing_driver_table") && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
         </div>
@@ -758,19 +731,19 @@ export default function PricingOptimisation() {
               </table>
             </div>
             <UpgradeCta
-              title="Upgrade to Pro to see exactly what moved contribution"
-              description="See every pricing driver with £ impact and a plain-English explanation of what happened."
+              title="View sample contribution drivers on Pro"
+              description="Explore fictional driver amounts and explanations; actual attribution is unavailable."
             />
           </div>
         )}
       </div>
 
-      {/* ── Pricing Trend ── */}
+      {/* ── Sample Pricing Trend ── */}
       <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-8">
         <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between gap-3">
           <div>
-            <h3 className="font-semibold text-lg text-foreground">Pricing Trend</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">Static trend view showing whether the business is becoming more dependent on discounting over time.</p>
+            <h3 className="font-semibold text-lg text-foreground">Sample Pricing Trend</h3>
+            <p className="text-sm text-muted-foreground mt-0.5">Fictional trend showing an example of increased discount dependency.</p>
           </div>
           {!canAccess("pricing_trend_chart") && <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider whitespace-nowrap shrink-0">PRO</span>}
         </div>
@@ -811,7 +784,7 @@ export default function PricingOptimisation() {
             <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-orange-200 dark:border-orange-800/40 bg-orange-50/60 dark:bg-orange-950/15 px-4 py-3">
               <AlertTriangle className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-xs font-bold text-orange-800 dark:text-orange-300 mb-0.5">Promotion frequency increased (Mar–Apr)</p>
+                <p className="text-xs font-bold text-orange-800 dark:text-orange-300 mb-0.5">Sample promotion increase (Mar–Apr)</p>
                 <p className="text-xs text-orange-700/80 dark:text-orange-400/75 leading-relaxed">Discounting began rising faster after promotional activity increased.</p>
               </div>
             </div>
@@ -820,11 +793,11 @@ export default function PricingOptimisation() {
           <div className="px-6 py-5 space-y-4">
             <div className="flex items-center gap-3 px-5 py-3 rounded-xl border border-red-200 dark:border-red-800/40 bg-red-50/50 dark:bg-red-950/15">
               <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
-              <span className="text-sm font-bold text-red-800 dark:text-red-300">Pricing Trend: Weakening</span>
+              <span className="text-sm font-bold text-red-800 dark:text-red-300">Sample Pricing Trend: Weakening</span>
             </div>
             <UpgradeCta
-              title="Upgrade to Pro to see pricing power trends over time"
-              description="Track average discount, full-price order ratio and contribution per order across 6 reporting periods."
+              title="View sample pricing trends on Pro"
+              description="Explore six fictional periods; actual pricing trends are unavailable."
             />
           </div>
         )}
@@ -834,8 +807,8 @@ export default function PricingOptimisation() {
       </details>
 
       <DataBenchmarkAssumptions
-        benchmarkNote="Discount dependency is measured as total discount value divided by gross revenue (value-based ratio). Shipping subsidy and payment fee leakage figures are static estimates — not yet connected to live cost data."
-        dataQualityNote="Discount analysis assumes discounts are recorded using Shopify discount codes or compare-at pricing. Manual price changes may understate discount impact. Returns Impact shows revenue refunded via Shopify; fulfilment cost on returns is not included in the live figure."
+        benchmarkNote="Risk thresholds, confidence labels and simulator coefficients are illustrative assumptions, not verified benchmarks or recommendations for your business."
+        dataQualityNote="Actual pricing analysis is unavailable. The source ratio is unverified; all supporting analysis, recovery estimates and simulator outputs use separate sample inputs."
         className="mb-2"
       />
 

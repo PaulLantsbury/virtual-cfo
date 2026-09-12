@@ -23,3 +23,13 @@ Rebuild with `node experiments/completeness/build-report.mjs`. The browser test 
 ## Versioned reference files
 
 [Format v1](reference-file-format.md) documents the normalized UTF-8 JSON contract, limits and non-certifying validation. `validate-reference-file.mjs` returns field errors or a comparator-compatible ledger. `check-reference-file.mjs` is an explicit local-file CLI that prints a summary, not transaction contents. Valid/faulty synthetic samples are in `samples/`. Nine validator/CLI groups plus nine comparison groups pass. No actual independent source or Shopify export mapping is chosen by this format.
+
+## Local file-selection report
+
+Open `local-comparison.html` in a browser, then select `samples/valid-reference.json` as reference and `samples/valid-imported.json` as imported. Both are synthetic normalized JSON, with distinct evidence references. Compare displays matching March records; selecting `samples/invalid-reference.json` demonstrates validation errors. The preset `comparison-demo.html` remains available separately.
+
+The standalone file bundles the actual validator/comparator using the project's existing Vite dependency on esbuild. Rebuild with `node experiments/completeness/build-local-report.mjs`; no dependency installation is needed. Browser file reads are capped at 1 MiB and strict UTF-8, with existing 10,000-event limits. Both files must validate and match store/currency/timezone/period, with distinct evidence references, before comparison is enabled. Replacements clear prior results; stale file reads cannot restore cleared state. The table shows at most 200 identities and the issue list at most 100, explicitly labelled; comparison itself uses all validated input events. Duplicate IDs fail validation rather than being silently deduplicated.
+
+No upload, database connection, correction, approval or browser persistence is implemented. The generated file has a content security policy blocking network connections and allowing only its bundled script. All file-supplied text is rendered as text, not HTML. It is a standalone local prototype, not an application/staging feature or a Shopify export reader. Successful comparison remains non-certifying.
+
+Three offline browser groups pass: valid/mismatched comparisons and clearing; invalid/duplicate/scope/evidence-reference gating; invalid UTF-8/size and inert markup-like strings. Tests recorded no network traffic, no page errors and no local storage. Full-page layout inspected.

@@ -34,3 +34,7 @@ Do not reapply staging packages or mark figures reviewed to demonstrate progress
 Give concise consolidated updates during active work: completed work, current work, blockers and next check. Continue through agreed steps without repeated “continue” requests. Updates outside active sessions require a separately agreed schedule; none is configured here.
 
 At completion record delivered scope, relevant checks/limitations, documentation links, publication/environment status and next decision. Save the handover before stopping. Assess pilot elapsed work, rework and usefulness; do not promise a speed multiplier or purchase capacity from an estimate.
+
+## Agreed staging cadence — 12 September 2026
+
+After each meaningful completed package, the coordinator updates and verifies the existing staging preview without asking Paul to repeat approval. Confirm the target and tested revision; exercise the combined user journey and record evidence, outstanding limits and a link for Paul. A local frontend connected to staging Supabase must be described as a local staging preview, not a hosted deployment. Existing access and test data may be used; migrations, new grants, hosting/exposure, Replit sync and production retain their separate boundaries. Do not restore financial completeness merely to complete a staging check.

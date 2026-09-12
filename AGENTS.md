@@ -1,6 +1,6 @@
 # Night Scout
 
-Start with `docs/project-brief.md` and `docs/team-working-agreement.md` for the current coordination checkpoint. Paul requested parallel agents within agreed packages: delegate independent bounded work when useful; the coordinator owns integration and publication. The first pilot is complete. Paul approved the next package in `docs/reporting-truthfulness-package.md` on 12 September; keep work within those boundaries.
+Start with `docs/project-brief.md` and `docs/team-working-agreement.md` for the current coordination checkpoint. Paul requested parallel agents within agreed packages: delegate independent bounded work when useful; the coordinator owns integration and publication. The first pilot and reporting-truthfulness package are complete. The current integrated staging checkpoint is `docs/staging-checkpoint-2026-09-12.md`.
 
 Read `docs/README.md`, `docs/restart-sprint.md` and `docs/agreed-financial-definitions.md` before changing the application. Approved financial definitions take precedence over conflicting older proposals; distinguish agreement from implementation. This is a commerce virtual CFO, not the separate Sam personal assistant.
 
@@ -19,3 +19,7 @@ Keep credentials, secrets and real customer data out of public uploads. This sta
 ## Working cadence — 10 September 2026
 
 Paul asked to proceed automatically through agreed implementation and verification steps rather than stopping for repeated “continue” prompts. Continue within established decisions and authorisation; keep concise progress updates. Pause for Paul’s decisions about product behaviour, financial rules, scope, spending or deployment, and retain the database/production approval boundaries above. Prepare concrete packages before asking, and bundle related test/setup actions into one reviewable request when possible.
+
+## Staging cadence — 12 September 2026
+
+Paul approved updating and verifying the existing staging preview after every meaningful completed package. Integrate the package, run appropriate checks, confirm the staging target and record the tested revision, evidence and limits. This covers the existing local staging preview using existing access; it does not authorise migrations, new grants, hosted exposure, Replit synchronisation, main merges or production releases. Bring any such required change to Paul as a concrete decision. Production follows successful staging checks and explicit release approval.

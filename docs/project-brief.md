@@ -12,7 +12,7 @@ Sam is a separate personal AI assistant. Its WhatsApp, Gmail, reminders and Mac 
 
 1. This brief and [team working agreement](team-working-agreement.md): current scope and decision boundaries.
 2. [Agreed financial definitions](agreed-financial-definitions.md): approved rules; distinguish approval from implementation.
-3. [12 September handover](session-handover-2026-09-12.md) and [10 September handover](session-handover-2026-09-10.md): latest local work and last verified staging baseline respectively.
+3. [12 September handover](session-handover-2026-09-12.md) and [integrated staging checkpoint](staging-checkpoint-2026-09-12.md): current local work and staging verification. The [10 September handover](session-handover-2026-09-10.md) remains the earlier baseline.
 4. [Restart sprint](restart-sprint.md): chronological implementation evidence. Earlier unchecked items and next steps may be superseded by later entries.
 5. [Calculation logic](calculation-logic.md), [Opportunity Engine](opportunity-engine-spec.md), [Recommendation Engine](recommendation-engine.md): intended product. Conflicts and unapproved proposals are in [baseline decisions](baseline-decisions.md).
 6. Current code and relevant tests: verify implementation before issuing work. April checklists and the 8 September audit are historical snapshots.
@@ -35,7 +35,7 @@ If sources conflict, use Paul's latest explicit agreement for policy, verify imp
 | Financial rules | Core sales/VAT/pre-refund AOV, refund timing, contribution/profit and cash agreed | Listed edge cases and scoring remain open; approval does not certify legacy SQL |
 | Access/review | Draft authentication, membership-gated screens and restricted review path; 10 September staging flow checked | No production release claim; no new grants or reviews needed merely to resume |
 | Sales/import foundation | Supported synthetic sales/refunds imported; append-only retries checked; evidence-based sales/dashboard path exists in code | Real Shopify connection, operational sync and broader cases incomplete |
-| Store C staging | February £90 product sale; March and April each −£20 product refunds; original links retained | All three periods unverified; last checked 10 September, not rechecked for this brief |
+| Store C staging | February £90 product sale; March and April each −£20 product refunds; original links retained | All three periods unverified; rechecked 12 September; see integrated staging checkpoint |
 | Completeness comparison | Five bounded 12 September packages complete, including offline two-file validation/comparison and review guidance | Synthetic comparisons cannot establish independent real-source completeness |
 | CFO features | Dashboard safeguards/trading work exist; other analysis pages and settings contain prototype content | Costs, profit, cash, shared recommendations and monitoring unfinished |
 | Release | Changes documented on draft branch | Merge, production and Replit reconciliation need separate preparation and approval |
@@ -60,3 +60,5 @@ These are workstreams, not a completion percentage or promised delivery date. Wo
 Paul approved this conversation as the project-management hub with delegated coding/testing. The setup package established shared documentation. Paul subsequently approved both scopes in [parallel pilot](parallel-pilot.md); both are now implemented, independently reviewed and verified in isolated browser tests. See the pilot completion record; production and staging data are unchanged.
 
 The next [Margin Recovery and Monitoring package](reporting-truthfulness-package.md) is complete: source figures are separated from sample margin analysis, Monitoring is explicitly a prototype, and 26 isolated browser checks plus independent review pass. No live financial or deployment change is implied.
+
+The [integrated staging checkpoint](staging-checkpoint-2026-09-12.md) now records the approved local preview against real staging Auth/database. Existing synthetic review periods matched expectations without approving completeness. Stage after every meaningful completed package under the team agreement; production remains separately approved. Next: Paul’s screen walkthrough and any resulting bounded fixes.

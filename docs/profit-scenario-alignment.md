@@ -1,5 +1,7 @@
 # Profit Overview / Scenario Planner alignment
 
+**Current page roles:** Paul subsequently approved removing the overview simulator. Profit Overview now contains the fixed baseline and profit bridge only; what-if controls live in Scenario Planner. See the follow-up at the end. The original simulator delivery below is historical.
+
 Approved 12 September 2026. Paul approved bringing Profit Overview onto the same sample month and agreed financial definitions as Scenario Planner, with three agents for implementation, independent calculation review and browser/cross-page testing. The coordinator integrates, checks current local staging and publishes the code/docs to the existing development branch.
 
 ## Scope and acceptance
@@ -22,3 +24,8 @@ Profit Overview consumes the existing shared model unchanged. Its fixed baseline
 - Desktop/mobile screenshots inspected. Existing local current-source staging at localhost:3000, authenticated store A, displays the four baseline figures above. Orders +30% produces sales £125,000, contribution £56,200, operating profit £37,200 and bridge EBITDA £38,200; fixed baseline remains unchanged. Reset restored the starting values. No database writes or new access.
 
 Code, browser checks and these documents are saved through the authorised GitHub development branch/draft PR workflow. This does not update Replit, main or production. The preview is local staging, not hosted deployment. Actual reporting, real input integration, forecasting and remaining unsupported business response assumptions are unfinished. Other pages’ sample models have not been certified by this work.
+
+
+### Page-role separation — approved follow-up
+
+Paul identified duplication and approved removing the Profit Overview simulator. Profit Overview now explains the fixed sample month through its four headlines and signed profit bridge; Scenario Planner alone holds what-if controls. Added “Explore changes in Scenario Planner”. Shared model/amounts and existing detail gate remain unchanged; actual reporting stays unavailable. Updated browser coverage confirms no overview controls, baseline/bridge reconciliation, source/gate honesty and real navigation to planner on desktop/mobile (12 cases pass); build/whitespace checks pass. Earlier simulator delivery notes above are historical and superseded.

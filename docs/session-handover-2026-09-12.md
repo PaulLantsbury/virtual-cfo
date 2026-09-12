@@ -121,3 +121,8 @@ Paul requested contribution alongside sales and operating profit. Both summary a
 ## Profit Overview / Scenario Planner alignment — 12 September 2026
 
 Three-agent package complete: shared monthly baseline/model, four supported overview controls, signed current profit bridge and clear no-transfer navigation. Fixed baseline £95,000 sales/£40,900 contribution/£21,900 operating profit/£22,900 EBITDA. All51 checks, typecheck/build and independent financial review pass; local staging store A baseline, orders+30% and reset verified. See [package evidence and remaining scope](profit-scenario-alignment.md). Shared model unchanged; no DB writes, grants, Replit/main/production update. Next: Paul walkthrough of Profit Overview; source integration and further model work remain separate decisions.
+
+
+### Page-role separation — approved follow-up
+
+Paul identified duplication and approved removing the Profit Overview simulator. Profit Overview now explains the fixed sample month through its four headlines and signed profit bridge; Scenario Planner alone holds what-if controls. Added “Explore changes in Scenario Planner”. Shared model/amounts and existing detail gate remain unchanged; actual reporting stays unavailable. Updated browser coverage confirms no overview controls, baseline/bridge reconciliation, source/gate honesty and real navigation to planner on desktop/mobile (12 cases pass); build/whitespace checks pass. Earlier simulator delivery notes above are historical and superseded.

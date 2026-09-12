@@ -1,6 +1,6 @@
 # Night Scout
 
-Start with `docs/project-brief.md` and `docs/team-working-agreement.md` for the current coordination checkpoint. Paul requested parallel agents within agreed packages: delegate independent bounded work when useful; the coordinator owns integration and publication. The first pilot and reporting-truthfulness package are complete. The current integrated staging checkpoint is `docs/staging-checkpoint-2026-09-12.md`, with Paul’s walkthrough accepted. The next approved scope is `docs/growth-pricing-package.md`.
+Start with `docs/project-brief.md` and `docs/team-working-agreement.md` for the current coordination checkpoint. Paul requested parallel agents within agreed packages: delegate independent bounded work when useful; the coordinator owns integration and publication. The first pilot and reporting-truthfulness package are complete. The current integrated staging checkpoint is `docs/staging-checkpoint-2026-09-12.md`, with Paul’s walkthrough accepted. The Growth/Pricing and naming packages are complete. The current approved scope is `docs/growth-profit-package.md`.
 
 Read `docs/README.md`, `docs/restart-sprint.md` and `docs/agreed-financial-definitions.md` before changing the application. Approved financial definitions take precedence over conflicting older proposals; distinguish agreement from implementation. This is a commerce virtual CFO, not the separate Sam personal assistant.
 

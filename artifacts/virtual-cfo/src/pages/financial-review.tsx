@@ -7,7 +7,13 @@ import {Button} from '@/components/ui/button';
 type Scope={storeId:string;from:string;to:string};
 type EvidenceRow={id:string;orderId:string;type:'sale'|'refund';date:string;currency:string;productExVat:number;shippingExVat:number;vat:number;cash:number};
 type TransactionEvidence={rows:EvidenceRow[];totalEvents:number;timezone:string;periodSummary?:{currency:string;netProductSales:number;originalOrders:number;hasActivity:boolean}};
-const validEvidence=(v:TransactionEvidence)=>v&&typeof v.timezone==='string'&&Number.isSafeInteger(v.totalEvents)&&v.totalEvents>=v.rows?.length&&Array.isArray(v.rows)&&v.rows.length<=200&&v.rows.every(r=>typeof r.id==='string'&&typeof r.orderId==='string'&&['sale','refund'].includes(r.type)&&/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&/^[A-Z]{3}$/.test(r.currency)&&[r.productExVat,r.shippingExVat,r.vat,r.cash].every(Number.isSafeInteger));
+const validEvidenceDate=(value:unknown)=>{
+ if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;
+ const date=new Date(value+'T00:00:00Z');
+ // Reject both unparseable dates and impossible days that JavaScript normalises.
+ return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===value;
+};
+const validEvidence=(v:TransactionEvidence)=>v&&typeof v.timezone==='string'&&Number.isSafeInteger(v.totalEvents)&&v.totalEvents>=v.rows?.length&&Array.isArray(v.rows)&&v.rows.length<=200&&v.rows.every(r=>typeof r.id==='string'&&typeof r.orderId==='string'&&['sale','refund'].includes(r.type)&&validEvidenceDate(r.date)&&/^[A-Z]{3}$/.test(r.currency)&&[r.productExVat,r.shippingExVat,r.vat,r.cash].every(Number.isSafeInteger));
 const amount=(n:number,currency:string)=>new Intl.NumberFormat('en-GB',{style:'currency',currency}).format(n/100);
 const dateLabel=(v:string)=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(v+'T00:00:00Z'));
 type Packet={status:'blocked'|'awaiting_independent_coverage_review';batchId:string;snapshotDigest:string;scope:Scope;issues:{reason:string}[];transactionEvidence?:TransactionEvidence|null};

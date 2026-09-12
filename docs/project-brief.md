@@ -57,4 +57,4 @@ These are workstreams, not a completion percentage or promised delivery date. Wo
 
 ## Current coordination checkpoint
 
-Paul approved this conversation as the project-management hub with delegated coding/testing. The setup package establishes shared documentation and proposes a pilot. Implementation awaits Paul's agreement to the concrete scopes in [parallel pilot](parallel-pilot.md).
+Paul approved this conversation as the project-management hub with delegated coding/testing. The setup package established shared documentation. Paul subsequently approved both scopes in [parallel pilot](parallel-pilot.md); both are now implemented, independently reviewed and verified in isolated browser tests. See the pilot completion record; production and staging data are unchanged.

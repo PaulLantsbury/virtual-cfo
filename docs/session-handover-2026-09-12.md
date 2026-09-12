@@ -106,3 +106,8 @@ Opportunity Finder / Scenario Planner approved parallel package complete. Existi
 ### Opportunity Finder wording follow-up
 
 Paul requested clearer UK wording: renamed the sample priority tier “Next Up” to “Do next” everywhere on Opportunity Finder. This is a score-based priority band, not an action number; ranking thresholds and ordering are unchanged. The Sample prefix remains. Verified all four tier references updated and git diff whitespace checks passed.
+
+
+## Scenario Planner correction — 12 September 2026
+
+Paul approved visible live sales/profit comparisons, then correction of the sample formulas using one consistent month and orders × AOV. Implemented nine active controls, clear cost/profit bridge and unavailable unsupported forecasts; old presets explicitly declined. Baseline net sales £95,000 and operating profit £21,900. All40 tests, typecheck/build and independent review pass; current-source local staging store A checked and reset. See [implementation, verification and remaining scope](scenario-planner-correction.md). No DB writes, access changes, Replit sync, main merge or production release. Next: Paul walkthrough; further modelling policies need his decision.

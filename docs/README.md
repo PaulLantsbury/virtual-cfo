@@ -1,5 +1,7 @@
 # Current starting point — 12 September 2026
 
+Latest completed package: [Scenario Planner visible impact and corrected sample-month model](scenario-planner-correction.md). This supersedes the earlier preservation of its unvalidated formulas and preset behaviour. 40 checks and local staging verification pass; forecasts and real-source integration remain unfinished.
+
 Read the [current project brief](project-brief.md), [team working agreement](team-working-agreement.md) and [approved parallel pilot](parallel-pilot.md) first. The first pilot is complete, with 31 isolated browser checks passing. The [Margin Recovery and Monitoring package](reporting-truthfulness-package.md) is also complete, with 26 isolated browser checks passing and independent review finished. Real-reference-data comparison work remains paused. The [integrated staging checkpoint](staging-checkpoint-2026-09-12.md) records the latest local staging preview and checks.
 
 The older checkpoint notices below are retained as history. Their “latest”, “next” and “remaining” statements describe the time they were written; use the current brief and dated handovers to resolve later progress.

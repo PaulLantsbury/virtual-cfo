@@ -31,3 +31,9 @@ Both 12 September packages are now complete. The next proposed task is to agree 
 Completed a standalone [read-only synthetic comparison demo](../experiments/completeness/comparison-demo.html), generated from the tested comparator. Eight scenarios show matches and transaction-level issues with reference/imported rows side by side. Offline Chrome verification passed all cases with no network traffic and no write/upload/approval controls; layout inspected. This is an HTML artifact, not a new staging/application route. No financial records or approvals changed.
 
 All three approved 12 September packages are complete. Resume by agreeing the real reference source and adapter before connecting this prototype to merchant data. The demo does not establish independent provenance or completeness.
+
+## Fourth approved package — reference-file format and validator
+
+Completed [versioned JSON reference-file format](../experiments/completeness/reference-file-format.md), validator, local CLI and valid/faulty synthetic sample files. Checks required fields, schema version, store/period/timezone/currency, explicit event timestamps, duplicate transaction IDs, integer minor-unit amounts and component reconciliation. Valid output feeds the existing comparator; every outcome remains uncertified. Limits: 1 MiB, 10,000 events, 100 reported issues. The CLI does not print ledger contents or write/upload data.
+
+18 validator/comparison test groups pass, including file errors, UTF-8, scope mismatch and comparator integration. No real Shopify/reference adapter, upload UI or staging change. All four approved 12 September packages are complete. Next agree the independent reference source and adapter before real-data integration; JSON is an internal normalized contract, not a claimed Shopify export.

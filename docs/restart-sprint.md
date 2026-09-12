@@ -456,3 +456,8 @@ Completed the next explicitly approved local package. Two separately handwritten
 ## Read-only comparison report — 12 September
 
 Completed the approved standalone synthetic report. Eight comparator-backed cases cover matches, missing/duplicate transactions and amount/VAT/date/order-link/identity differences. Offline browser test passed every scenario; no network calls or write controls. Layout inspected. Report and generator saved alongside the prototype; it is not connected to real data or the staging review screen. Handover updated.
+
+
+## Reference-file validation — 12 September
+
+Completed the approved local versioned JSON contract, field-level validator, CLI and synthetic samples. 18 validator/comparison test groups pass; valid output integrates with the comparator. Format validity never certifies source completeness or provenance. No actual Shopify export mapping, application upload, staging write or financial-rule change. [Contract](../experiments/completeness/reference-file-format.md) and 12 September handover updated.

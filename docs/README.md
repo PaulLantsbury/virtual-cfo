@@ -1,3 +1,5 @@
+> Latest local prototype: [reference-ledger comparison](../experiments/completeness/README.md) detects transaction-level differences even when totals match. Nine test groups pass; no completeness certification or database integration.
+
 > Latest checkpoint: [12 September handover](session-handover-2026-09-12.md). Review readiness guidance is implemented and tested; no database or financial approval changes.
 
 > End-of-day checkpoint: [10 September handover](session-handover-2026-09-10.md). Final [March/April staging review package](staging-refund-periods.md) is applied and verified. Both refund-only months show -£20; all three C periods remain unverified. Today’s work is complete.

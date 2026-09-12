@@ -1,0 +1,15 @@
+# Local reference-ledger comparison prototype
+
+Approved 12 September 2026. Pure in-memory comparison; no database, network, upload, UI or certification integration.
+
+`compareLedgers({scope,reference,imported})` compares normalized financial event identities and components. Each ledger must declare the same store, currency, timezone and requested date interval, have a distinct nonempty evidence reference, and supply an events array. Events have type sale/refund, a stable ID within that type, original order ID, explicit-offset timestamp, store/currency and nonnegative integer minor-unit productExVat/shippingExVat/vat/cash magnitudes. Product value is after discounts, before later refunds. Type supplies direction; this is not the UI's signed representation. Components must add up to cash. The prototype performs no source-specific identity mapping or VAT allocation.
+
+Every input row is validated. Duplicate identity on either side is flagged, conservatively including duplicates outside the requested interval. Otherwise an identity is compared when its store-local event date is inside the interval on either side; moving an event across a month boundary cannot hide it. Equivalent timezone offsets normalize to the same instant. Differences report missing/unexpected identities or differing order links, timestamps, dates and financial components. Totals are never used as the acceptance criterion.
+
+Results are matched_supplied_evidence, differences_found or blocked. All return coverageCertified false. An empty match describes only the supplied records and is not a no-trading or completeness claim. Distinct evidence references prevent accidental reuse of a label, but cannot establish independent origin or prove either ledger is complete. No exclusions, eligibility, adjustments, tax-inclusive conversion or manual exceptions are inferred.
+
+`synthetic-ledgers.mjs` contains two separately handwritten API-independent test lists for the existing February/March/April example. Neither is generated from the other or from importer output. They are synthetic testing material, not independent merchant evidence. A real reference acquisition/provenance workflow and policy remain unimplemented.
+
+Run `node --test experiments/completeness/compare-ledgers.test.mjs` using the project Node runtime. Nine groups pass: matching/immutability, missing sale/refund, equal-total identity substitution, duplicates on both sides, amount/VAT/order-link differences, offsetting equal-total errors, store-local date boundary/DST, invalid scope/components/timestamps/reused reference, and empty periods.
+
+Next proposed step is a read-only review report backed by an explicitly agreed reference source and normalized adapter. No existing review/restore workflow calls this prototype and no new approval rule is enforced.

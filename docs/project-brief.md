@@ -53,6 +53,12 @@ Paul endorsed pausing comparison expansion until a suitable Shopify account/expo
 5. Agree remaining opportunity ranking, overlap, confidence and financial edge cases, then implement the shared engines and monitoring.
 6. Complete release checks, reconcile GitHub/Replit and prepare a separately approved production release.
 
+### Deferred: rebuild the marketing budget modeller
+
+Paul agreed to defer this until underlying channel spend and contribution data are connected and validated. The current illustrative model sums percentages of different channel budgets and caps that sum at 30%; the cap has no documented business justification, and the sum is not a valid combined-budget percentage when channel budgets differ.
+
+Delivery order: establish reliable channel spend/contribution inputs; agree the effect of reallocating money, channel limits and uncertainty with Paul; then replace the sample with a model based on actual pounds moved. Resolve both limitations before presenting it as a real planning tool. Do not simply remove the cap or invent replacement coefficients. Keep the current model explicitly illustrative meanwhile. This is a roadmap decision, not approval to implement a new financial model now.
+
 These are workstreams, not a completion percentage or promised delivery date. Work can run in parallel once inputs and decisions are settled.
 
 ## Current coordination checkpoint

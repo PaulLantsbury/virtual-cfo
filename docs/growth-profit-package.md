@@ -1,5 +1,7 @@
 # Growth Quality and Profit Overview — approved package
 
+**Later update:** The Profit Overview model-preservation details below are superseded by the approved [Profit Overview / Scenario Planner alignment](profit-scenario-alignment.md). Growth Quality scope remains unchanged.
+
 Paul approved two parallel implementation workstreams and independent review. Preserve the agreed page names and illustrative arithmetic/gates. Separate unverified source readings from fixed example scores, diagnoses, profit and opportunities; remove invented source fallbacks and misleading business advice/monitoring claims. Missing data must not become zero or examples. No new financial definitions, score policy, model redesign, shared engine, database, Replit or production changes.
 
 Acceptance: source success/zero/missing/error and store/date isolation where applicable; sample model independence; retained simulator/gates; desktop/mobile clarity; typecheck/build and independent review. Update current local staging after checks and publish the package to the authorised GitHub development branch.

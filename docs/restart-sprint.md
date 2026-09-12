@@ -495,3 +495,8 @@ Opportunity Finder / Scenario Planner complete: 22 isolated browser checks and l
 ## Scenario Planner correction — 12 September 2026
 
 Paul approved visible live sales/profit comparisons, then correction of the sample formulas using one consistent month and orders × AOV. Implemented nine active controls, clear cost/profit bridge and unavailable unsupported forecasts; old presets explicitly declined. Baseline net sales £95,000 and operating profit £21,900. All40 tests, typecheck/build and independent review pass; current-source local staging store A checked and reset. See [implementation, verification and remaining scope](scenario-planner-correction.md). No DB writes, access changes, Replit sync, main merge or production release. Next: Paul walkthrough; further modelling policies need his decision.
+
+
+## Profit Overview / Scenario Planner alignment — 12 September 2026
+
+Three-agent package complete: shared monthly baseline/model, four supported overview controls, signed current profit bridge and clear no-transfer navigation. Fixed baseline £95,000 sales/£40,900 contribution/£21,900 operating profit/£22,900 EBITDA. All51 checks, typecheck/build and independent financial review pass; local staging store A baseline, orders+30% and reset verified. See [package evidence and remaining scope](profit-scenario-alignment.md). Shared model unchanged; no DB writes, grants, Replit/main/production update. Next: Paul walkthrough of Profit Overview; source integration and further model work remain separate decisions.

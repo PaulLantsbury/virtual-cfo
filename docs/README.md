@@ -1,5 +1,7 @@
 # Current starting point — 12 September 2026
 
+Latest completed package: [Profit Overview / Scenario Planner alignment](profit-scenario-alignment.md). Both pages now use the same coherent sample month and calculation model. 51 checks, independent review and local staging verification pass; real financial reporting remains unavailable.
+
 Latest completed package: [Scenario Planner visible impact and corrected sample-month model](scenario-planner-correction.md). This supersedes the earlier preservation of its unvalidated formulas and preset behaviour. 40 checks and local staging verification pass; forecasts and real-source integration remain unfinished.
 
 Read the [current project brief](project-brief.md), [team working agreement](team-working-agreement.md) and [approved parallel pilot](parallel-pilot.md) first. The first pilot is complete, with 31 isolated browser checks passing. The [Margin Recovery and Monitoring package](reporting-truthfulness-package.md) is also complete, with 26 isolated browser checks passing and independent review finished. Real-reference-data comparison work remains paused. The [integrated staging checkpoint](staging-checkpoint-2026-09-12.md) records the latest local staging preview and checks.

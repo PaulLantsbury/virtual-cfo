@@ -1,42 +1,10 @@
-import { useActiveStore } from "@/lib/auth/AuthProvider";
-import { useEffect, useState } from "react";
-import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
-import {
-  getMarketingChannelMetrics,
-  type ChannelOpportunity,
-  type BlendedMarketingPerformance,
-} from "@/lib/analytics/marketingChannelMetrics";
+import { useState } from "react";
+import { SHARED_OPPORTUNITIES } from "@/lib/mock-data";
 import { ChevronDown, FlaskConical, Lock, Target } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/plan";
-import { RECOVERABLE_LOW, RECOVERABLE_HIGH } from "@/lib/data/business-snapshot";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
-import { AiCfoAskCard } from "@/components/AiCfoAskCard";
-import { DataPeriodLabel } from "@/components/DataPeriodLabel";
-
-// ─── Data constants ───────────────────────────────────────────────────────────
-
-/** Seed store UUID — shared by all Phase 1, Phase 3, and opportunity_breakdown calls. */
-
-
-/**
- * Static fallback totals — used while Phase 1 RPC is loading or on failure.
- * Live values come from phase1.data.recoverableLow / recoverableHigh which
- * sum SUM(impact_low) / SUM(impact_high) from all active opportunities in DB.
- * These match the recoverable_contribution_range() RPC static snapshot values.
- * @dev-only DEV-ONLY FALLBACK — do not promote to production default.
- */
-const TOTAL_LOW  = RECOVERABLE_LOW;
-const TOTAL_HIGH = RECOVERABLE_HIGH;
-
-/**
- * Capital-free subset: Low-effort opportunities requiring no new budget.
- * opp-a (£12k–18k) + opp-b (£6k–10k) = £18k–28k.
- * @dynamic Recompute as sum of effort=Low opportunity uplift ± uncertainty.
- */
-const CAPITAL_FREE_LOW  = 18_000;
-const CAPITAL_FREE_HIGH = 26_000;
 
 type ImpactLevel = "high" | "medium" | "quick-win";
 type PriorityTier = "Do First" | "High Priority" | "Next Up" | "Watch List";
@@ -64,24 +32,24 @@ function priorityTierFromScore(score: number): PriorityTier {
 
 function freeOpportunityLabel(opp: { label: string; category?: string; impactType?: string }): string {
   const text = `${opp.label} ${opp.category ?? ""}`.toLowerCase();
-  if (opp.impactType === "cash_improvement" || text.includes("inventory") || text.includes("cash")) return "Cash release opportunity identified";
-  if (text.includes("meta") || text.includes("acquisition") || text.includes("marketing")) return "Marketing opportunity identified";
-  if (text.includes("shipping") || text.includes("fulfil") || text.includes("margin")) return "Margin opportunity identified";
-  if (text.includes("discount") || text.includes("full-price") || text.includes("pricing")) return "Pricing opportunity identified";
-  return `${opp.category ?? "Profit"} opportunity identified`;
+  if (opp.impactType === "cash_improvement" || text.includes("inventory") || text.includes("cash")) return "Cash release example";
+  if (text.includes("meta") || text.includes("acquisition") || text.includes("marketing")) return "Marketing example";
+  if (text.includes("shipping") || text.includes("fulfil") || text.includes("margin")) return "Margin example";
+  if (text.includes("discount") || text.includes("full-price") || text.includes("pricing")) return "Pricing example";
+  return `${opp.category ?? "Profit"} example`;
 }
 
 function freeOpportunityRationale(opp: { category?: string; impactType?: string }): string {
-  if (opp.impactType === "cash_improvement") return "Night Scout has found a cash lever that may improve runway.";
-  if (opp.category === "Marketing") return "Night Scout has found a customer acquisition lever worth investigating.";
-  if (opp.category === "Margin") return "Night Scout has found a margin lever worth investigating.";
-  if (opp.category === "Pricing") return "Night Scout has found a pricing lever that may recover contribution.";
-  return "Night Scout has found a controllable opportunity worth investigating.";
+  if (opp.impactType === "cash_improvement") return "This sample illustrates a cash lever that may improve runway.";
+  if (opp.category === "Marketing") return "This sample illustrates a customer acquisition lever worth investigating.";
+  if (opp.category === "Margin") return "This sample illustrates a margin lever worth investigating.";
+  if (opp.category === "Pricing") return "This sample illustrates a pricing lever that may recover contribution.";
+  return "This sample illustrates a controllable opportunity worth investigating.";
 }
 
 /**
  * Maps opportunity card titles to Scenario Planner preset IDs.
- * Only the 3 supported opportunities get an "Open Launchpad" button.
+ * Only the 3 supported opportunities get an "Open Scenario Planner" button.
  */
 const TITLE_TO_PRESET: Record<string, string> = {
   "Reduce average discount depth":   "reduce-discount-depth",
@@ -158,123 +126,63 @@ const OPPORTUNITY_GUIDANCE: Record<string, {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-type OpportunityRow = {
-  id: string;
-  title: string;
-  description: string | null;
-  category: string;
-  confidence: string | null;
-  effort: string | null;
-  timing: string | null;
-  linked_page: string | null;
-  linked_page_label: string | null;
-  impact_type: string | null;
-  impact_low: number | null;
-  impact_high: number | null;
-  impact_mid: number | null;
-  recommended_action: string | null;
-  implementation_type: string | null;
-};
-
 export default function Opportunities() {
-  const STORE_ID = useActiveStore();
-  const [opportunities, setOpportunities] = useState<OpportunityRow[]>([]);
-  const [loading, setLoading] = useState(true);
   const [expandedOppId, setExpandedOppId] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchOpportunities() {
-      try {
-        const res = await fetch(`/api/opportunities`);
-        if (!res.ok) throw new Error(`API ${res.status}`);
-        const data: OpportunityRow[] = await res.json();
-        setOpportunities(data);
-      } catch (err) {
-        console.error("Error fetching opportunities:", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchOpportunities();
-  }, []);
-
-  // ── Phase 1 — period label + recoverable range (no extra fetch) ─────────────
-  const { status: reportingStatus,
-    phase1,
-    dateFrom,
-    dateTo,
-    periodLabel,
-    loading: periodLoading,
-  } = useLatestDataPeriod(STORE_ID);
-
-  // ── Phase 3 — channel opportunities for rationale enrichment ─────────────────
-  // Used for: (a) live "why this matters" rationale on Marketing cards, (b) blended
-  // CM/CAC signals. NOT merged as separate cards — opportunity_breakdown is authoritative.
-  const [channelOpps, setChannelOpps] = useState<ChannelOpportunity[]>([]);
-  const [blendedMets, setBlendedMets] = useState<BlendedMarketingPerformance | null>(null);
-
-  useEffect(() => {
-    if (!dateFrom || !dateTo) return;
-    let cancelled = false;
-    getMarketingChannelMetrics(STORE_ID, dateFrom, dateTo)
-      .then(({ opportunities: opps, blended }) => {
-        if (cancelled) return;
-        setChannelOpps(opps);
-        setBlendedMets(blended);
-      })
-      .catch(() => { /* static fallbacks apply — state stays as initialized */ });
-    return () => { cancelled = true; };
-  }, [dateFrom, dateTo]);
+  // Existing fixtures only: the source endpoint is disabled pending authenticated
+  // store access. Never substitute these examples for failed source responses.
+  const opportunities = SHARED_OPPORTUNITIES.map(o => ({
+    id: o.id, title: o.title, description: o.driverMetric, category: o.category,
+    confidence: o.confidence, effort: o.effort, timing: o.timing,
+    linked_page: o.linkedPage, linked_page_label: o.linkedPageLabel,
+    impact_type: o.impactType, impact_low: o.monthlyImpactLow,
+    impact_high: o.monthlyImpactHigh,
+    impact_mid: (o.monthlyImpactLow + o.monthlyImpactHigh) / 2,
+    recommended_action: o.recommendedAction, implementation_type: "Sample implementation outline",
+  }));
 
   const mappedOpportunities = opportunities.map((o) => {
-    // ── Derive impact level from RPC fields with defensive fallbacks ──────────
-    // Primary: confidence + effort from DB. Fallback: "medium" if either is null.
-    const conf   = (o.confidence ?? "Medium") as string;
-    const eff    = (o.effort     ?? "Medium") as string;
+    const conf = o.confidence;
+    const eff = o.effort;
     const impact: ImpactLevel =
       conf === "High" && eff === "Low" ? "high"
       : eff === "Low"                  ? "quick-win"
       : "medium";
 
-    // ── Derive timeToImpact label from RPC timing field ──────────────────────
-    // Fallback to "Immediate impact (0–30 days)" if timing is null.
-    const timing = (o.timing ?? "Immediate") as string;
+    const timing = o.timing;
     const timeToImpact =
       timing === "Immediate"                                         ? "Immediate impact (0–30 days)"
       : timing === "1–2 weeks" || timing === "2–4 weeks" || timing === "30 days"
                                                                      ? "Short-term impact (1–2 months)"
       : "Structural impact (2–3 months)";
 
-    // ── Source link — from linked_page / linked_page_label RPC fields ────────
-    // Fallback to empty array (hides "See analysis:" row in Pro view) if null.
+    // Links retained from the existing sample fixture.
+    // No source evidence is inferred from a link.
     const sources: { label: string; href: string }[] =
       o.linked_page && o.linked_page_label
         ? [{ label: o.linked_page_label as string, href: o.linked_page as string }]
         : [];
 
     // ── Impact range label — cash vs monthly contribution ────────────────────
-    const impType = (o.impact_type ?? "monthly_contribution") as string;
+    const impType = o.impact_type;
     const impactRangeLabel =
       impType === "cash_improvement"
         ? `£${(Number(o.impact_low) / 1000).toFixed(0)}k–£${(Number(o.impact_high) / 1000).toFixed(0)}k cash`
         : `£${(Number(o.impact_low) / 1000).toFixed(0)}k–£${(Number(o.impact_high) / 1000).toFixed(0)}k/mo`;
 
-    const uplift = Number(o.impact_mid ?? 0);
+    const uplift = o.impact_mid;
 
     return {
       ...o,
       label:              o.title                       as string,
-      // description: use recommended_action from DB when available; fall back
-      // to the stored description column, then category as last resort.
-      description:        (o.recommended_action ?? o.description ?? o.category ?? "") as string,
-      evidenceSummary:    (o.description ?? "") as string,
+      // Illustrative description from the existing sample fixture.
+      description:        o.recommended_action,
+      evidenceSummary:    o.description,
       uplift,
       impact,
       effort:             eff,
       confidence:         conf,
       timing,
-      implementationType: (o.implementation_type ?? "No additional investment required") as string,
+      implementationType: o.implementation_type,
       timeToImpact,
       capitalFree:        eff === "Low",
       sources,
@@ -284,18 +192,11 @@ export default function Opportunities() {
     };
   });
 
-  const capitalFreeLow  = mappedOpportunities.length === 0
-    ? CAPITAL_FREE_LOW
-    : opportunities.filter((o) => o.effort === "Low").reduce((sum, o) => sum + Number(o.impact_low), 0);
-  const capitalFreeHigh = mappedOpportunities.length === 0
-    ? CAPITAL_FREE_HIGH
-    : opportunities.filter((o) => o.effort === "Low").reduce((sum, o) => sum + Number(o.impact_high), 0);
-
   const maxUplift = Math.max(...mappedOpportunities.map((o) => o.uplift), 1);
 
   // ── Internal ordering ────────────────────────────────────────────────────────
   // Internal priority signal: confidence (35%) + effort (25%) + timing (20%) + uplift (20%).
-  // Sorting is deterministic as soon as opportunity_breakdown resolves.
+  // Deterministic ordering of existing sample fixtures only.
   const rankOpp = (opp: (typeof mappedOpportunities)[number]): number => {
     const conf = opp.confidence === "High" ? 100 : opp.confidence === "Medium" ? 60 : 30;
     const eff  = opp.effort === "Low"      ? 100 : opp.effort === "Medium"      ? 60 : 20;
@@ -319,83 +220,22 @@ export default function Opportunities() {
     };
   });
 
-  // ── Live header values ────────────────────────────────────────────────────────
-  // Header "monthly contribution" total: sum impact_low/high from
-  // monthly_contribution cards only — excludes cash_improvement (opp-d is a
-  // one-off working-capital release, not a recurring monthly figure).
-  // Falls back to Phase 1 recoverableLow/High (now also monthly_contribution-only
-  // after migration 20260507000003) then to static constants.
-  const liveContribOpps = mappedOpportunities.filter(
-    (o) => o.impactType === "monthly_contribution",
-  );
-  const liveTotalLow =
-    liveContribOpps.length > 0
-      ? liveContribOpps.reduce((s, o) => s + Number((o as any).impact_low ?? 0), 0)
-      : phase1 && phase1.data.recoverableLow > 0
-        ? phase1.data.recoverableLow
-        : TOTAL_LOW;
-  const liveTotalHigh =
-    liveContribOpps.length > 0
-      ? liveContribOpps.reduce((s, o) => s + Number((o as any).impact_high ?? 0), 0)
-      : phase1 && phase1.data.recoverableHigh > 0
-        ? phase1.data.recoverableHigh
-        : TOTAL_HIGH;
-
-  // "Total estimated uplift" bottom row includes ALL types (monthly + cash release).
-  const liveAllLow =
-    mappedOpportunities.length > 0
-      ? mappedOpportunities.reduce((s, o) => s + Number((o as any).impact_low ?? 0), 0)
-      : liveTotalLow;
-  const liveAllHigh =
-    mappedOpportunities.length > 0
-      ? mappedOpportunities.reduce((s, o) => s + Number((o as any).impact_high ?? 0), 0)
-      : liveTotalHigh;
+  // Existing illustrative sum, not overlap-adjusted or a validated forecast.
+  const sampleContribOpps = mappedOpportunities.filter(o => o.impactType === "monthly_contribution");
+  const sampleTotalLow = sampleContribOpps.reduce((sum, o) => sum + Number(o.impact_low), 0);
+  const sampleTotalHigh = sampleContribOpps.reduce((sum, o) => sum + Number(o.impact_high), 0);
 
   const monthlyQueue = sortedOpportunities.filter((o) => o.impactType === "monthly_contribution");
   const cashReleaseProjects = sortedOpportunities.filter((o) => o.impactType === "cash_improvement");
   const visibleQueue = monthlyQueue.slice(0, 3);
   const topAction = visibleQueue[0] ?? sortedOpportunities[0];
 
-  // ── Live "why this matters" rationale ─────────────────────────────────────────
-  // Derives a concise data-driven sentence from Phase 1 / Phase 3 live signals.
-  // Shown in Pro row only, below the description. Returns null when no live signal
-  // maps to the card's category (rationale is always additive — never blocking).
-  const liveRationale = (opp: (typeof mappedOpportunities)[number]): string | null => {
-    const category = opp.category as string;
-    if (category === "Marketing") {
-      const best = channelOpps.find((co) => co.rationale !== null);
-      if (best?.rationale) return best.rationale;
-      if (blendedMets) {
-        const cm  = blendedMets.blendedContributionMarginPct;
-        const cac = blendedMets.blendedCac;
-        if (cm !== null && cac !== null)
-          return `Blended marketing CM ${(cm * 100).toFixed(1)}%, blended CAC £${cac.toFixed(0)}.`;
-        if (cm !== null)
-          return `Blended marketing contribution margin at ${(cm * 100).toFixed(1)}%.`;
-      }
-      return null;
-    }
-    if (category === "Margin" || category === "Pricing") {
-      const cm = phase1?.data.contributionMarginPct;
-      if (cm != null)
-        return `Live contribution margin ${(cm * 100).toFixed(1)}% — margin recovery is high leverage.`;
-      return null;
-    }
-    if (category === "Retention") {
-      if (!phase1) return null;
-      const rpr = (phase1.data.repeatPurchaseRate * 100).toFixed(1);
-      const dd  = (phase1.data.discountDependency  * 100).toFixed(1);
-      return `Repeat rate ${rpr}%, discount dependency ${dd}% of revenue.`;
-    }
-    return null;
-  };
-
   const getEvidence = (opp: (typeof mappedOpportunities)[number]): string[] => {
     const guidance = OPPORTUNITY_GUIDANCE[opp.label];
     const fallback = [
       opp.evidenceSummary,
       opp.impactRangeLabel,
-      `${opp.confidence} confidence`,
+      `Sample confidence: ${opp.confidence}`,
     ].filter(Boolean);
 
     return guidance?.evidence ?? fallback;
@@ -408,37 +248,39 @@ export default function Opportunities() {
   const hasRecoveryPlan  = showExecPriority && showRowDetail;
 
   return (
-    <AppLayout>
+    <AppLayout showMonitoring={false}>
 
       {/* ── Page header ── */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Opportunity Finder</h1>
           <p className="text-muted-foreground mt-1">
-            Night Scout continuously scans your business for profit, cash and growth opportunities worth pursuing.
+            Explore illustrative actions. Actual store opportunity analysis is unavailable.
           </p>
         </div>
-        <DataPeriodLabel status={reportingStatus}
-          periodLabel={periodLabel}
-          loading={periodLoading}
-          dateFrom={dateFrom}
-          dateTo={dateTo}
-          className="mt-0"
-        />
       </div>
+      <section aria-label="Opportunity reporting status" className="rounded-xl border border-border p-5 mb-6">
+        <h2 className="font-semibold">Actual opportunity analysis: unavailable</h2>
+        <p className="text-sm text-muted-foreground mt-2">Store-specific opportunity data is not connected here. No validated benefit, priority or confidence assessment is available. This does not mean your store has no opportunities.</p>
+      </section>
+      <section aria-label="Sample opportunity model notice" className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5 mb-6">
+        <h2 className="font-semibold">Sample model — not store recommendations</h2>
+        <p className="text-sm text-muted-foreground mt-2">All actions, GBP amounts, evidence, confidence, effort and timing below are fixed examples. They do not use your store data. The existing sample ranking weights confidence (35%), effort (25%), timing (20%) and relative impact (20%); these rules are not validated or agreed for real recommendations.</p>
+        <p className="text-sm text-muted-foreground mt-2">Monthly example amounts are summed without resolving overlapping actions. They are not a forecast or a validated combined benefit. One-off cash examples remain separate. Upgrading does not activate real analysis.</p>
+      </section>
 
       {/* ── CFO verdict ── */}
       <div className="sc-purple rounded-2xl px-6 py-6 mb-10">
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-widest text-indigo-300/80 mb-2">
-              CFO view
+              Sample overview
             </p>
             <h2 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
-              Profit is leaking through controllable decisions, not weak demand.
+              Illustrative opportunities to explore
             </h2>
             <div className="text-xs text-indigo-200/70 mt-2 leading-relaxed">
-              <p>Most opportunity is concentrated in three areas:</p>
+              <p>The example covers three areas:</p>
               <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
                 <span>• Discounting</span>
                 <span>• Customer acquisition efficiency</span>
@@ -446,15 +288,11 @@ export default function Opportunities() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">
-              {topAction
-                ? `Contribution margin is below the healthy range, but the primary issues are discount leakage, rising acquisition costs and fulfilment pressure. Together, the actions below represent approximately ${showHeadline ? `£${(liveTotalLow / 1000).toFixed(0)}k–£${(liveTotalHigh / 1000).toFixed(0)}k per month` : "meaningful monthly contribution"} of recoverable contribution without requiring additional marketing spend.`
-                : loading
-                  ? "Loading the current recovery plan."
-                  : "No active execution actions were found for this period."}
+              This fixed example explores discounting, acquisition and fulfilment. It does not diagnose your store or identify its best next action.
             </p>
             {topAction && hasRecoveryPlan && (
               <div className="mt-4 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Highest impact opportunity</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">First in sample ranking</p>
                 <p className="text-sm font-semibold text-foreground">{topAction.label}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   {OPPORTUNITY_GUIDANCE[topAction.label]?.shortWhy ?? topAction.description}
@@ -463,17 +301,17 @@ export default function Opportunities() {
             )}
             {topAction && !hasRecoveryPlan && (
               <div className="mt-4 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-3">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Highest impact opportunity</p>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-1">First in sample ranking</p>
                 <p className="text-sm font-semibold text-foreground">{freeOpportunityLabel(topAction)}</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                  Upgrade to see the recommended action and expected impact.
+                  Pro preview shows the sample action and illustrative amounts.
                 </p>
               </div>
             )}
             {!hasRecoveryPlan && (
               <div className="flex items-center gap-2 mt-3 text-xs text-indigo-200/70">
                 <Lock className="w-3.5 h-3.5 shrink-0" />
-                <span>Upgrade to unlock quantified value, detailed action steps and deeper evidence.</span>
+                <span>Pro preview includes detailed sample actions and example evidence.</span>
               </div>
             )}
           </div>
@@ -481,24 +319,24 @@ export default function Opportunities() {
           {topAction && (
             <div className="w-full lg:w-[19rem] shrink-0 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-4">
               <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70">
-                {showHeadline ? "Recoverable contribution" : "Recommended focus"}
+                {showHeadline ? "Sample monthly contribution" : "Sample focus"}
               </p>
               {showHeadline ? (
                 <>
                   <p className="text-3xl font-display font-bold text-emerald-300 mt-1">
-                    £{(liveTotalLow / 1000).toFixed(0)}k–£{(liveTotalHigh / 1000).toFixed(0)}k
+                    £{(sampleTotalLow / 1000).toFixed(0)}k–£{(sampleTotalHigh / 1000).toFixed(0)}k
                   </p>
-                  <p className="text-xs text-muted-foreground mt-1">Estimated monthly contribution recovery.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Unadjusted example total, not expected recovery.</p>
                 </>
               ) : (
                 <>
-                  <p className="text-2xl font-display font-bold text-emerald-300 mt-1">Recoverable contribution identified</p>
-                  <p className="text-xs text-muted-foreground mt-1">Upgrade to see the recommended action and expected impact.</p>
+                  <p className="text-2xl font-display font-bold text-emerald-300 mt-1">Sample detail available</p>
+                  <p className="text-xs text-muted-foreground mt-1">Pro preview shows the sample action and illustrative amounts.</p>
                 </>
               )}
               <div className="flex flex-wrap gap-2 mt-3">
-                <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-semibold", priorityTierStyles[topAction.priorityTier])}>{topAction.priorityTier}</span>
-                <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.confidence} confidence</span>
+                <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-semibold", priorityTierStyles[topAction.priorityTier])}>Sample: {topAction.priorityTier}</span>
+                <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">Sample confidence: {topAction.confidence}</span>
                 <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.effort} effort</span>
                 <span className="rounded-full bg-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-100">{topAction.timing}</span>
               </div>
@@ -511,14 +349,14 @@ export default function Opportunities() {
       {visibleQueue.length > 0 ? (
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
           <div className="px-6 py-5 border-b border-border/50">
-            <h3 className="font-semibold text-lg text-foreground">Priority Actions</h3>
+            <h3 className="font-semibold text-lg text-foreground">Sample Actions</h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              The highest-impact profit recovery actions to brief into the team.
+              Illustrative actions in the existing sample order.
             </p>
             <p className="text-xs text-muted-foreground/70 mt-2 leading-relaxed">
-              <span className="font-semibold text-foreground/70">Why these actions? </span>
-              These actions combine management control, confidence, timing and likely impact. Together they represent the fastest route to recovering contribution without increasing marketing spend.
-              {!showHeadline && " Pro adds quantified value, detailed action steps and deeper evidence."}
+              <span className="font-semibold text-foreground/70">About this ordering: </span>
+              The sample score orders examples only; it does not establish the fastest or best route for your store.
+              {!showHeadline && " Pro shows detailed examples; actual recommendations remain unavailable."}
             </p>
           </div>
 
@@ -526,7 +364,7 @@ export default function Opportunities() {
             {visibleQueue.map((opp, idx) => {
               const isExpanded = hasRecoveryPlan && (expandedOppId ? expandedOppId === opp.id : idx === 0);
               const guidance = OPPORTUNITY_GUIDANCE[opp.label];
-              const liveSignal = liveRationale(opp);
+
 
               return (
                 <div key={opp.id} className={cn(
@@ -560,7 +398,7 @@ export default function Opportunities() {
                                 "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
                                 priorityTierStyles[opp.priorityTier],
                               )}>
-                                {opp.priorityTier}
+                                Sample: {opp.priorityTier}
                               </span>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -584,13 +422,13 @@ export default function Opportunities() {
                           <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.category}</span>
                         )}
                         {!showUpliftValues && idx > 0 && (
-                          <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">Estimated value available on Pro</span>
+                          <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">Sample value in Pro preview</span>
                         )}
                         {showUpliftValues && (
                           <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.priorityCopy}</span>
                         )}
                         <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.timing}</span>
-                        <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.confidence} confidence</span>
+                        <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">Sample confidence: {opp.confidence}</span>
                         <span className="rounded-full border border-border/60 bg-secondary/40 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">{opp.effort} effort</span>
                       </div>
                     </div>
@@ -600,11 +438,11 @@ export default function Opportunities() {
                     <div className="space-y-4 mt-4 pt-4 border-t border-border/50">
                       <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-4">
                         <div className="rounded-xl border border-emerald-200/70 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 px-4 py-3">
-                          <p className="text-xs font-bold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-300/70 mb-1">Expected recovery</p>
+                          <p className="text-xs font-bold uppercase tracking-wider text-emerald-700/70 dark:text-emerald-300/70 mb-1">Sample amount</p>
                           <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300">{opp.impactRangeLabel}</p>
                         </div>
                         <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-3">
-                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">How to start</p>
+                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">Example steps</p>
                           <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1.5">
                             {(guidance?.implementation ?? [opp.description]).slice(0, 4).map((step) => (
                               <li key={step} className="flex gap-2 text-sm text-foreground leading-relaxed">
@@ -618,7 +456,7 @@ export default function Opportunities() {
 
                       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-start">
                         <div className="rounded-xl border border-border/50 bg-secondary/20 px-4 py-3">
-                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">Evidence</p>
+                          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-2">Example evidence</p>
                           <div className="flex flex-wrap gap-2">
                             {getEvidence(opp).slice(0, 3).map((item) => (
                               <span key={item} className="rounded-full border border-border/60 bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
@@ -633,17 +471,14 @@ export default function Opportunities() {
                             className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/80 dark:bg-indigo-950/25 px-3 py-2 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                           >
                             <FlaskConical className="w-3.5 h-3.5" />
-                            Open Launchpad
+                            Open Scenario Planner
                           </a>
                         )}
                       </div>
 
                       <div className="rounded-xl border border-border/40 bg-background/60 px-4 py-3">
-                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-1">Why this matters</p>
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground/50 mb-1">Example rationale</p>
                         <p className="text-xs text-muted-foreground leading-relaxed">{guidance?.shortWhy ?? opp.description}</p>
-                        {liveSignal && (
-                          <p className="text-xs text-muted-foreground/60 mt-1 leading-snug italic">{liveSignal}</p>
-                        )}
                       </div>
                     </div>
                   )}
@@ -663,10 +498,10 @@ export default function Opportunities() {
               <div>
                 <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100 uppercase tracking-wide">Opportunity Finder</p>
                 <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-100 mt-1">
-                  No active recommended actions were found for this period.
+                  No sample actions are available. Actual opportunities remain unavailable.
                 </p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  Night Scout will show the next best action here when a controllable opportunity appears.
+                  This does not establish whether your store has opportunities.
                 </p>
               </div>
             </div>
@@ -683,9 +518,9 @@ export default function Opportunities() {
                 <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Unlock the action plan</p>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Explore the sample action plan</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  See the exact action, expected impact, supporting evidence and recommended launch plan.
+                  See example actions, illustrative amounts and sample plans. Real analysis remains unavailable.
                 </p>
               </div>
             </div>
@@ -696,19 +531,19 @@ export default function Opportunities() {
         </div>
       )}
 
-      {/* ── Cash release projects ── */}
+      {/* ── Sample cash release projects ── */}
       {cashReleaseProjects.length > 0 && (
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
           <div className="px-6 py-5 border-b border-border/50 flex items-center gap-3">
             <Target className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <div>
-              <h3 className="font-semibold text-lg text-foreground">Cash release projects</h3>
+              <h3 className="font-semibold text-lg text-foreground">Sample cash release projects</h3>
               <p className="text-sm text-muted-foreground mt-0.5">
-                These actions improve cash runway rather than monthly profit.
+                These are one-off cash examples, separate from monthly contribution.
               </p>
               <p className="text-xs text-muted-foreground/70 mt-1 leading-relaxed">
-                These actions primarily improve cash runway rather than monthly profit by releasing cash already trapped in the business.
-                {showUpliftValues && ` All identified value including cash release is £${(liveAllLow / 1000).toFixed(0)}k–£${(liveAllHigh / 1000).toFixed(0)}k.`}
+                No actual available cash or runway has been calculated.
+
               </p>
             </div>
           </div>
@@ -723,14 +558,14 @@ export default function Opportunities() {
                         "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
                         priorityTierStyles[opp.priorityTier],
                       )}>
-                        {opp.priorityTier}
+                        Sample: {opp.priorityTier}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{opp.implementationType}</p>
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-sm font-bold text-amber-700 dark:text-amber-400">{opp.impactRangeLabel}</span>
-                    <span className="text-xs font-semibold text-muted-foreground">{opp.confidence} confidence</span>
+                    <span className="text-xs font-semibold text-muted-foreground">Sample confidence: {opp.confidence}</span>
                     <span className="text-xs font-semibold text-muted-foreground">{opp.effort} effort</span>
                     <span className="text-xs font-semibold text-muted-foreground">{opp.timing}</span>
                   </div>
@@ -743,18 +578,18 @@ export default function Opportunities() {
                 <div key={opp.id} className="px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-amber-50/40 dark:bg-amber-950/10">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-foreground">Cash release opportunity identified</p>
+                      <p className="text-sm font-semibold text-foreground">Cash release example</p>
                       <span className={cn(
                         "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
                         priorityTierStyles[opp.priorityTier],
                       )}>
-                        {opp.priorityTier}
+                        Sample: {opp.priorityTier}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-xs font-semibold text-muted-foreground">{opp.category}</span>
-                    <span className="text-xs font-semibold text-muted-foreground">{opp.confidence} confidence</span>
+                    <span className="text-xs font-semibold text-muted-foreground">Sample confidence: {opp.confidence}</span>
                     <span className="text-xs font-semibold text-muted-foreground">{opp.effort} effort</span>
                     <span className="text-xs font-semibold text-muted-foreground">{opp.timing}</span>
                   </div>
@@ -765,12 +600,12 @@ export default function Opportunities() {
         </div>
       )}
 
-      <AiCfoAskCard pageId="opportunities" className="mb-10" />
+      <p className="text-sm text-muted-foreground mb-6">Store-specific CFO advice is unavailable. The examples above are not generated advice.</p>
 
       <DataBenchmarkAssumptions
-        benchmarkNote="Recommended actions are ordered by estimated value, confidence, timing and effort."
-        dataQualityNote="Opportunity values are directional estimates based on current connected data quality."
-        confidenceNote="High-confidence opportunities use direct Shopify and cost data. Medium and low confidence use industry benchmarks and trend extrapolation."
+        benchmarkNote="Sample ordering uses unvalidated weights, not an implemented recommendation engine."
+        dataQualityNote="All displayed opportunity amounts and evidence are fixed examples; store data is not connected."
+        confidenceNote="Confidence labels are sample inputs, not verified probabilities or evidence assessments."
         className="mb-2"
       />
 

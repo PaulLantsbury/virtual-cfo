@@ -100,3 +100,7 @@ Older checklists describe earlier snapshots, not current completion. Verify clai
 ## Working together
 
 GitHub is the durable project record. Replit should use a checkout of these same versioned documents; do not maintain a separate authoritative specification there. Draft-branch changes are not automatically present in Replit or main. Keep sprint progress, decisions, validation and remaining work here rather than relying on chat history. A new task can begin by reading this guide and the sprint handover. Keep individual changes scoped and reviewed; preserve the Replit-only specifications when reconciling branches.
+
+## Opportunity and scenario checkpoint
+
+Latest completed package: [Opportunity Finder / Scenario Planner](opportunity-scenario-package.md), with 22 browser checks and local staging verification.

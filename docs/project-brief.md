@@ -72,3 +72,7 @@ The [integrated staging checkpoint](staging-checkpoint-2026-09-12.md) now record
 Current display names are agreed in [page naming](page-naming.md) and applied consistently across the site. Paul requested leaving the existing Replit setup unchanged for now; no migration away from it is approved.
 
 The [Growth Quality / Profit Overview package](growth-profit-package.md) is complete: 31 isolated browser cases, independent review, frontend checks and current-source local staging checks pass. Both pages keep actual analysis unavailable and separate samples. Next: Paul’s walkthrough of these pages.
+
+## Opportunity and scenario checkpoint
+
+The [Opportunity Finder / Scenario Planner package](opportunity-scenario-package.md) is complete: 22 browser checks, frontend checks and independent review pass; local staging handoff verified. Next: Paul’s walkthrough. Actual recommendations/forecasts remain unavailable.

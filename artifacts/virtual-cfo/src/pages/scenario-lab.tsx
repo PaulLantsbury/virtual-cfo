@@ -324,7 +324,7 @@ export default function ScenarioLab() {
         <div>
           <div>
             <h1 className="text-3xl font-display font-bold text-foreground tracking-tight">
-              Profit Launchpad
+              Scenario Planner
             </h1>
             <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed max-w-xl">
               Night Scout’s recommended route to higher profit and stronger cashflow.
@@ -710,7 +710,7 @@ export default function ScenarioLab() {
 
         {/* ══ 7. PROFIT LAUNCHPAD SIMULATOR ══════════════════════════════════ */}
         <SectionHeading
-          title="Profit Launchpad Simulator"
+          title="Scenario Planner Simulator"
           subtitle="Model revenue, margin, marketing, cash and overhead changes before committing resources."
         />
 
@@ -743,10 +743,10 @@ export default function ScenarioLab() {
         </div>
 
         <PremiumBlurPreview
-          title="Profit Launchpad Simulator"
+          title="Scenario Planner Simulator"
           subtitle="18 levers across Growth, Margin, Marketing, Cash and Overheads."
           isPro={isPro}
-          ctaTitle="Unlock the Profit Launchpad Simulator"
+          ctaTitle="Unlock the Scenario Planner Simulator"
           ctaDescription="Test any combination of levers and see the combined financial impact in real time."
           ghostContent={
             <div className="space-y-4">

@@ -141,7 +141,7 @@ const CASH_RECOVERY_ACTIONS = [
     why: "Inventory build is the biggest cash trap and is absorbing cash before trading profit reaches the bank.",
     start: "Review slow-moving SKUs, tighten purchase orders for low-velocity stock, and set a weekly target to bring stock days back below 70.",
     link: "/scenario-lab",
-    linkLabel: "Open Profit Launchpad",
+    linkLabel: "Open Scenario Planner",
   },
   {
     id: "cash2",
@@ -431,7 +431,7 @@ export default function CashControl() {
       {/* ── Page header ── */}
       <div className="mb-6 flex flex-col sm:flex-row items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Cash Control — sample model</h1>
+          <h1 className="text-2xl font-display font-bold text-foreground">Cash Control</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Explore an illustrative cash model using fixed sample figures.
           </p>

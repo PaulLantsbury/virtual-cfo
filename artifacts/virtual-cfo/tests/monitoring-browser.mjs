@@ -49,7 +49,7 @@ async function fixture({ plan = 'pro', viewport = 'desktop' }, run) {
     await page.getByRole('button', { name: 'Sign in', exact: true }).click();
     await page.getByRole('combobox', { name: 'Active store' }).waitFor();
     await page.goto(origin + '/cfo-alerts');
-    await page.getByRole('heading', { name: 'Night Scout Monitoring — prototype', exact: true }).waitFor();
+    await page.getByRole('heading', { name: 'Monitoring', exact: true }).waitFor();
     await run(page);
     assert.deepEqual(errors, [], 'No browser page errors');
     assert.deepEqual(unexpected, [], 'No unexpected API or write requests');

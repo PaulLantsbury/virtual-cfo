@@ -85,3 +85,9 @@ Paul accepted the previous staging walkthrough and approved this next package. T
 ## Roadmap decision — marketing budget modeller
 
 During walkthrough Paul queried the arbitrary 30% combined-shift cap. Inspection confirmed unequal channel-budget percentages are added directly and capped before scaling fixed outputs. Paul agreed to defer rebuilding until reliable channel spend/contribution inputs exist, then agree allocation effects, limits and uncertainty before modelling actual pounds moved. Recorded in project-brief.md and growth-pricing-package.md. Current model stays illustrative; no application/staging/data change accompanies this decision. Do not treat this as approval of replacement financial assumptions.
+
+## Consistent page names and Replit decision
+
+Paul approved the naming set in docs/page-naming.md. Applied it to all ten navigation/page headings, destination references, landing/upgrade feature labels and contextual drawer names. Sample/prototype/unavailable notices remain separate and prominent. Existing URLs, financial calculations and plan gates unchanged. Updated existing browser-test heading selectors. All ten heading/menu pairs checked; frontend typecheck and staging Pricing heading/status checks pass. No new financial testing required for copy-only changes.
+
+Paul asked to leave the Replit setup as it is. No Replit reconciliation, synchronisation or hosting change is part of this work; retain the existing setup until separately agreed.

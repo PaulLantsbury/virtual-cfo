@@ -78,7 +78,7 @@ const ATTENTION_ITEMS: AttentionItem[] = [
     freeTitle: "Marketing efficiency needs attention",
     why: "Paid acquisition is not yet showing enough improvement against the current plan.",
     trend: "Worsening",
-    page: "Review Growth Efficiency",
+    page: "Review Marketing Efficiency",
     href: "/marketing-efficiency",
     tone: "amber",
   },
@@ -96,7 +96,7 @@ const ATTENTION_ITEMS: AttentionItem[] = [
     freeTitle: "Inventory needs attention",
     why: "Stock is still tying up cash that could support the recovery plan.",
     trend: "Watch",
-    page: "Review Profit Launchpad",
+    page: "Review Scenario Planner",
     href: "/scenario-lab",
     tone: "amber",
   },
@@ -213,7 +213,7 @@ export default function CfoAlerts() {
     <AppLayout showMonitoring={false}>
       <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Night Scout Monitoring — prototype</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Monitoring</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Explore illustrative monitoring screens. Automated monitoring is not implemented.
           </p>

@@ -84,3 +84,13 @@ The [Growth Quality / Profit Overview package](growth-profit-package.md) is comp
 ## Opportunity and scenario checkpoint
 
 The [Opportunity Finder / Scenario Planner package](opportunity-scenario-package.md) is complete: 22 browser checks, frontend checks and independent review pass; local staging handoff verified. Next: Paul’s walkthrough. Actual recommendations/forecasts remain unavailable.
+
+
+## Paul’s next priorities — agreed after the end-of-day handover
+
+After the financial-input inventory/mapping, Paul prioritised:
+
+1. One authoritative Supabase dataset feeding every reporting page, with shared metric definitions/calculations and explicit period/store/currency scope. Reconcile figures/results between pages. No hardcoded business amounts/results, invented fallbacks or synthetic values in actual reporting. Missing/incomplete inputs must remain unavailable/incomplete, not zero. Clearly isolated test fixtures may remain for automated testing; approved formula constants are not business results. Scenario assumptions must be explicit and baseline figures sourced from the same underlying data. Define acceptance and implementation scope with Paul before proceeding.
+2. Set up the previously discussed Shopify development environment and feed supported Shopify data through that same import/storage/calculation path. Verify orders, discounts, refunds, pagination/retries and reconciliation; do not create a second reporting source or separate page-specific calculations. Exact account/setup requirements remain to be confirmed when that package begins.
+
+This records priorities, not permission to resume work after today’s stop or to create accounts, incur costs, apply migrations, change access or release production. Earlier proposed roadmap ordering is superseded by this instruction.

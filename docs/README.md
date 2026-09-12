@@ -1,3 +1,5 @@
+> Latest local package: [reference-file format and validator](../experiments/completeness/reference-file-format.md), with valid/faulty JSON samples and local CLI. 18 validator/comparison groups pass; no uploads or completeness approvals.
+
 > Latest demo: [read-only comparison report](../experiments/completeness/comparison-demo.html), with eight selectable synthetic scenarios and side-by-side evidence. Open the downloaded HTML in a browser; no staging connection.
 
 > Latest local prototype: [reference-ledger comparison](../experiments/completeness/README.md) detects transaction-level differences even when totals match. Nine test groups pass; no completeness certification or database integration.

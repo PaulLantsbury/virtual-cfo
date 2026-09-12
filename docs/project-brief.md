@@ -1,5 +1,7 @@
 # Night Scout — current project brief
 
+**Stopped for the day:** Read the [12 September end-of-day checkpoint](end-of-day-2026-09-12.md) first. It records the final state, superseded intermediate work, standing decisions and proposed next steps. No further package is authorised yet.
+
 Page-role clarification: Profit Overview explains the fixed sample profit/cost breakdown; its duplicate simulator has been removed by Paul’s agreement. Scenario Planner alone provides what-if controls. Shared baseline/definitions are unchanged.
 
 Latest completed package: [Profit Overview / Scenario Planner alignment](profit-scenario-alignment.md). Both pages now use the same coherent sample month and calculation model. 51 checks, independent review and local staging verification pass; real financial reporting remains unavailable.

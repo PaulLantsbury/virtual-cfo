@@ -1,5 +1,7 @@
 # Night Scout handover — 12 September 2026
 
+**Stopped for the day:** Read the [12 September end-of-day checkpoint](end-of-day-2026-09-12.md) first. It records the final state, superseded intermediate work, standing decisions and proposed next steps. No further package is authorised yet.
+
 ## Completed bounded work package
 
 Paul approved a short session limited to explaining review readiness on the financial review screen, tests and documentation. A new “What still needs checking?” panel appears after a valid prepare response.

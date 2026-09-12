@@ -9,12 +9,12 @@ import { canAccess } from "@/lib/plan";
 
 
 const ANALYSIS_PAGES = [
-  ["Margin Recovery", "Explore the components of contribution and margin.", "/margin-analysis"],
+  ["Margin Analysis", "Explore the components of contribution and margin.", "/margin-analysis"],
   ["Growth Quality", "Examine sales mix and repeat purchasing.", "/growth-quality"],
-  ["Growth Efficiency", "Explore acquisition and channel performance.", "/marketing-efficiency"],
-  ["Discount Recovery", "Review discounting and pricing scenarios.", "/pricing-optimisation"],
+  ["Marketing Efficiency", "Explore acquisition and channel performance.", "/marketing-efficiency"],
+  ["Pricing & Discounts", "Review discounting and pricing scenarios.", "/pricing-optimisation"],
   ["Cash Control", "Explore cash assumptions and scenarios.", "/cash-control"],
-  ["Profit Launchpad", "Explore possible plans and their assumptions.", "/scenario-lab"],
+  ["Scenario Planner", "Explore possible plans and their assumptions.", "/scenario-lab"],
 ];
 
 export default function Dashboard() {

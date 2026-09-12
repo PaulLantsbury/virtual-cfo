@@ -80,7 +80,7 @@ function freeOpportunityRationale(opp: { category?: string; impactType?: string 
 }
 
 /**
- * Maps opportunity card titles to Profit Launchpad preset IDs.
+ * Maps opportunity card titles to Scenario Planner preset IDs.
  * Only the 3 supported opportunities get an "Open Launchpad" button.
  */
 const TITLE_TO_PRESET: Record<string, string> = {

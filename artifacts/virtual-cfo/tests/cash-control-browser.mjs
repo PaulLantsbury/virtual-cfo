@@ -62,7 +62,7 @@ async function screenshot(page, name) {
   await page.screenshot({ path: join(directory, name + '.png'), fullPage: true });
 }
 async function assertSampleNotice(page) {
-  await page.getByRole('heading', { name: 'Cash Control — sample model', exact: true }).waitFor();
+  await page.getByRole('heading', { name: 'Cash Control', exact: true }).waitFor();
   const notice = page.getByRole('region', { name: 'Sample cash model notice' });
   assert.equal(await notice.isVisible(), true);
   assert.match(await notice.innerText(), /Actual cash reporting is not connected/);
@@ -81,7 +81,7 @@ for (const viewport of Object.keys(viewports)) {
     await fixture({ state, viewport }, async page => {
       await assertSampleNotice(page);
       if (state === 'current') {
-        await page.getByRole('heading', { name: 'Cash Control — sample model', exact: true }).scrollIntoViewIfNeeded();
+        await page.getByRole('heading', { name: 'Cash Control', exact: true }).scrollIntoViewIfNeeded();
         await screenshot(page, viewport + '-overview');
       }
       await page.getByRole('heading', { name: 'Supporting Sample Analysis', exact: true }).click();

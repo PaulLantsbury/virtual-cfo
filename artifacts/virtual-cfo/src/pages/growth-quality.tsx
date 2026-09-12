@@ -166,7 +166,7 @@ const GROWTH_RECOVERY_ACTIONS = [
     why: "Retention is the one improving signal; strengthening it reduces reliance on paid acquisition and blanket promotions.",
     start: "Launch post-purchase email journeys for first-order customers and target repeat rate above 30% before adding more acquisition spend.",
     link: "/scenario-lab",
-    linkLabel: "Open Profit Launchpad",
+    linkLabel: "Open Scenario Planner",
   },
 ] as const;
 
@@ -526,7 +526,7 @@ export default function GrowthQuality() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Growth Quality Analysis
+            Growth Quality
           </h1>
           <p className="text-muted-foreground mt-1">
             Assess whether revenue growth is generating lasting profit — or being bought through discounts and paid spend.

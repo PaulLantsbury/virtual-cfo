@@ -332,7 +332,7 @@ export default function PricingOptimisation() {
       {/* ── Page header ── */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Pricing & Discount Optimisation</h1>
+          <h1 className="text-2xl font-display font-bold text-foreground">Pricing & Discounts</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Explore a sample pricing model alongside a separate unverified source ratio.
           </p>

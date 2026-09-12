@@ -7,26 +7,26 @@ import { canAccess } from "@/lib/plan";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 
 type ImpactLevel = "high" | "medium" | "quick-win";
-type PriorityTier = "Do First" | "High Priority" | "Next Up" | "Watch List";
+type PriorityTier = "Do First" | "High Priority" | "Do next" | "Watch List";
 
 const priorityTierStyles: Record<PriorityTier, string> = {
   "Do First":      "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200/70 dark:border-emerald-800/50",
   "High Priority": "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border-indigo-200/70 dark:border-indigo-800/50",
-  "Next Up":       "bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 border-sky-200/70 dark:border-sky-800/50",
+  "Do next":       "bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 border-sky-200/70 dark:border-sky-800/50",
   "Watch List":    "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200/70 dark:border-amber-800/50",
 };
 
 const priorityTierCopy: Record<PriorityTier, string> = {
   "Do First":      "Start here",
   "High Priority": "Next best action",
-  "Next Up":       "Worth scheduling",
+  "Do next":       "Worth scheduling",
   "Watch List":    "Lower priority for now",
 };
 
 function priorityTierFromScore(score: number): PriorityTier {
   if (score >= 90) return "Do First";
   if (score >= 75) return "High Priority";
-  if (score >= 60) return "Next Up";
+  if (score >= 60) return "Do next";
   return "Watch List";
 }
 

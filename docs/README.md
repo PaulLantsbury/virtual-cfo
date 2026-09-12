@@ -1,6 +1,6 @@
 # Current starting point — 12 September 2026
 
-Read the [current project brief](project-brief.md), [team working agreement](team-working-agreement.md) and [approved parallel pilot](parallel-pilot.md) first. The project-management setup is established; Both approved pilot scopes are complete, with 31 isolated browser checks passing and independent review finished. Real-reference-data comparison work remains paused.
+Read the [current project brief](project-brief.md), [team working agreement](team-working-agreement.md) and [approved parallel pilot](parallel-pilot.md) first. The first pilot is complete, with 31 isolated browser checks passing. The [Margin Recovery and Monitoring package](reporting-truthfulness-package.md) is also complete, with 26 isolated browser checks passing and independent review finished. Real-reference-data comparison work remains paused.
 
 The older checkpoint notices below are retained as history. Their “latest”, “next” and “remaining” statements describe the time they were written; use the current brief and dated handovers to resolve later progress.
 

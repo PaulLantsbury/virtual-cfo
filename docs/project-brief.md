@@ -58,3 +58,5 @@ These are workstreams, not a completion percentage or promised delivery date. Wo
 ## Current coordination checkpoint
 
 Paul approved this conversation as the project-management hub with delegated coding/testing. The setup package established shared documentation. Paul subsequently approved both scopes in [parallel pilot](parallel-pilot.md); both are now implemented, independently reviewed and verified in isolated browser tests. See the pilot completion record; production and staging data are unchanged.
+
+The next [Margin Recovery and Monitoring package](reporting-truthfulness-package.md) is complete: source figures are separated from sample margin analysis, Monitoring is explicitly a prototype, and 26 isolated browser checks plus independent review pass. No live financial or deployment change is implied.

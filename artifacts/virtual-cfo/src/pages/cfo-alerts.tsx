@@ -2,8 +2,6 @@ import { useState } from "react";
 import {
   Activity,
   ArrowRight,
-  CheckCircle2,
-  Clock,
   Eye,
   Mail,
   ShieldCheck,
@@ -11,7 +9,6 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { AiCfoAskCard } from "@/components/AiCfoAskCard";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { canAccess, isProUser } from "@/lib/plan";
 import { cn } from "@/lib/utils";
@@ -187,14 +184,6 @@ const FREE_STATUS = [
   { area: "Inventory", status: "Improving", tone: "green" as const },
 ];
 
-const UNLOCK_BULLETS = [
-  "See which actions are working",
-  "Spot stalled or worsening areas",
-  "Track daily, weekly and monthly progress",
-  "Receive CFO-style monitoring updates",
-  "Know what needs attention next",
-];
-
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="mb-4">
@@ -221,55 +210,35 @@ export default function CfoAlerts() {
   const [delivery, setDelivery] = useState<Delivery>("In-app");
 
   return (
-    <AppLayout>
+    <AppLayout showMonitoring={false}>
       <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Night Scout Monitoring</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Night Scout Monitoring — prototype</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Track whether Night Scout&apos;s recommendations are improving profit, cash and growth.
+            Explore illustrative monitoring screens. Automated monitoring is not implemented.
           </p>
         </div>
       </div>
 
-      {/* ── Monitoring verdict ─────────────────────────────────────────────── */}
-      <div className="sc-purple rounded-2xl px-6 py-6 mb-8">
-        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-          <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-300/80 mb-2">Monitoring verdict</p>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground leading-tight">
-              {isPro
-                ? "Execution is improving. Two priority actions are showing positive movement."
-                : "Plan is improving, but one area still needs attention."}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">
-              {isPro
-                ? "Night Scout is seeing early improvement in contribution quality and inventory discipline. Marketing efficiency still needs attention before the recovery plan can be considered fully on track."
-                : "Night Scout has detected early progress against the recommended plan. Upgrade to see which actions are working, which are stalled and what changed this week."}
-            </p>
-          </div>
-          <div className="w-full lg:w-72 rounded-xl border border-indigo-300/15 bg-indigo-950/20 px-4 py-4">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-300/70 mb-2">Monitoring status</p>
-            <ToneBadge tone="green">Plan improving</ToneBadge>
-            <div className="mt-3 space-y-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>{isPro ? "Profit signals improving" : "One area still needs attention"}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                <span>{isPro ? "Marketing remains under watch" : "Detailed monitoring available on Pro"}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <section aria-label="Monitoring prototype notice" className="sc-purple rounded-2xl px-6 py-6 mb-8">
+        <p className="text-xs font-bold uppercase tracking-widest text-indigo-300/80 mb-2">Prototype only</p>
+        <h2 className="text-2xl font-bold text-foreground">Monitoring is not active</h2>
+        <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">
+          This page has not checked your business or tracked progress against a plan. All statuses,
+          trends, insights and history below are fixed examples, not findings from your connected data.
+        </p>
+        <p className="text-sm text-muted-foreground mt-2 max-w-3xl leading-relaxed">
+          No monitoring checks are scheduled and no email or in-app notifications are sent by this prototype.
+          Pro access does not activate monitoring.
+        </p>
+      </section>
 
       {!isPro && (
         <>
           <section className="mb-8">
             <SectionHeader
-              title="Monitoring Status"
-              subtitle="A high-level read on whether the plan is moving in the right direction."
+              title="Example Monitoring Status"
+              subtitle="Illustrative status cards only; your plan has not been assessed."
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {FREE_STATUS.map((item) => {
@@ -280,7 +249,7 @@ export default function CfoAlerts() {
                       <p className="text-sm font-semibold text-foreground">{item.area}</p>
                       <span className={cn("h-2 w-2 rounded-full", styles.dot)} />
                     </div>
-                    <p className={cn("text-sm font-bold mt-2", styles.text)}>{item.status}</p>
+                    <p className={cn("text-sm font-bold mt-2", styles.text)}>Example: {item.status}</p>
                   </div>
                 );
               })}
@@ -291,32 +260,23 @@ export default function CfoAlerts() {
             <div className="rounded-2xl border border-primary/20 bg-primary/5 px-5 py-5">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
                 <div>
-                  <p className="text-base font-bold text-foreground">Unlock Night Scout Monitoring</p>
+                  <p className="text-base font-bold text-foreground">Explore the Pro monitoring prototype</p>
                   <p className="text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-                    Track whether the recommended plan is working, identify stalled actions and receive proactive CFO monitoring updates.
+                    Pro includes detailed examples and local settings previews. Automated checks, progress
+                    tracking and notification delivery are not implemented on either plan.
                   </p>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-1.5 mt-4">
-                    {UNLOCK_BULLETS.map((item) => (
-                      <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
                 <Link href="/upgrade" className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors shrink-0">
-                  Unlock Monitoring
+                  View Pro options
                 </Link>
               </div>
             </div>
           </section>
 
-          <AiCfoAskCard pageId="alerts" className="mb-8" />
-
           <DataBenchmarkAssumptions
-            benchmarkNote="Monitoring status is based on broad movement across the current Night Scout plan."
-            dataQualityNote="Monitoring commentary uses the same connected business data and mock status layer currently used across the app."
-            confidenceNote="Night Scout prioritises material movement and management-control actions rather than every metric fluctuation."
+            benchmarkNote="All monitoring statuses are fixed examples; no plan assessment has been performed."
+            dataQualityNote="These examples do not use connected business data."
+            confidenceNote="Example trends and priorities are illustrative, not verified business findings."
             className="mb-2"
           />
         </>
@@ -328,8 +288,8 @@ export default function CfoAlerts() {
       {/* ── Actions requiring attention ─────────────────────────────────────── */}
       <section className="mb-8">
         <SectionHeader
-          title="Actions Requiring Attention"
-          subtitle="Highest-priority areas Night Scout is watching right now."
+          title="Example Actions Requiring Attention"
+          subtitle="Fictional priorities showing how a future monitoring view might look."
         />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {ATTENTION_ITEMS.map((item) => {
@@ -338,7 +298,7 @@ export default function CfoAlerts() {
               <div key={item.title} className={cn("rounded-2xl border p-5", styles.panel)}>
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
-                    <p className="text-sm font-bold text-foreground">{item.title}</p>
+                    <p className="text-sm font-bold text-foreground">Example: {item.title}</p>
                     <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.why}</p>
                   </div>
                   <ToneBadge tone={item.tone}>{item.trend}</ToneBadge>
@@ -356,23 +316,23 @@ export default function CfoAlerts() {
       {/* ── Plan progress ──────────────────────────────────────────────────── */}
       <section className="mb-8">
         <SectionHeader
-          title="Plan Progress"
-          subtitle="Progress against the current Night Scout recommendation plan."
+          title="Example Plan Progress"
+          subtitle="Illustrative progress only; no actions have been tracked or evaluated."
         />
         <div className="rounded-2xl border border-border/50 bg-card overflow-hidden">
-          <div className="grid grid-cols-[minmax(0,1.2fr)_0.8fr_0.8fr] gap-3 px-5 py-3 border-b border-border/50 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60">
+          <div className="hidden sm:grid sm:grid-cols-[minmax(0,1.2fr)_0.8fr_0.8fr] gap-3 px-5 py-3 border-b border-border/50 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/60">
             <span>Action</span>
             <span>Status</span>
             <span>Trend</span>
           </div>
           <div className="divide-y divide-border/40">
             {PLAN_PROGRESS.map((item) => (
-              <div key={item.action} className="grid grid-cols-[minmax(0,1.2fr)_0.8fr_0.8fr] gap-3 px-5 py-4 items-center">
+              <div key={item.action} className="grid grid-cols-1 sm:grid-cols-[minmax(0,1.2fr)_0.8fr_0.8fr] gap-3 px-5 py-4 items-center">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-foreground">{isPro ? item.action : item.freeAction}</p>
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{item.detail}</p>
                 </div>
-                <span className="text-sm text-foreground">{item.status}</span>
+                <span className="text-sm text-foreground">Example status: {item.status}</span>
                 <ToneBadge tone={item.tone}>{item.trend}</ToneBadge>
               </div>
             ))}
@@ -382,7 +342,7 @@ export default function CfoAlerts() {
 
       {/* ── Night Scout insights ───────────────────────────────────────────── */}
       <section className="mb-8">
-        <SectionHeader title="Monitoring Insights" subtitle="CFO commentary from the latest monitoring pass." />
+        <SectionHeader title="Example Monitoring Insights" subtitle="Fictional commentary, not output from a completed monitoring check." />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {INSIGHTS.map((insight) => {
             const Icon = insight.tone === "green" ? TrendingUp : Eye;
@@ -393,7 +353,7 @@ export default function CfoAlerts() {
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-foreground">{insight.title}</p>
+                    <p className="text-sm font-bold text-foreground">Example: {insight.title}</p>
                     <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                       {insight.text}
                     </p>
@@ -406,12 +366,12 @@ export default function CfoAlerts() {
       </section>
 
         <section className="mb-8">
-          <SectionHeader title="Monitoring History" subtitle="Recent monitoring events and follow-up checks." />
+          <SectionHeader title="Example Monitoring History" subtitle="Fictional events only; no monitoring checks have been completed by this prototype." />
           <div className="rounded-2xl border border-border/50 bg-card divide-y divide-border/40">
             {ALERT_HISTORY.map((item) => (
               <div key={item} className="flex items-start gap-3 px-5 py-4">
                 <Activity className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <p className="text-sm text-muted-foreground">{item}</p>
+                <p className="text-sm text-muted-foreground">Example: {item}</p>
               </div>
             ))}
           </div>
@@ -423,11 +383,14 @@ export default function CfoAlerts() {
           <details className="rounded-2xl border border-border/50 bg-card px-5 py-5">
             <summary className="cursor-pointer list-none">
               <SectionHeader
-                title="Monitoring Settings"
-                subtitle="Night Scout decides what matters. Choose the CFO update cadence."
+                title="Preview Monitoring Settings"
+                subtitle="Try local selections only. Changes are not saved and reset when you leave or reload this page."
               />
             </summary>
             <div className="space-y-5">
+            <p role="status" className="text-sm text-muted-foreground">
+              Preview selection: {frequency} · {delivery}. Nothing is saved, scheduled or sent.
+            </p>
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Frequency</p>
               <div className="flex flex-wrap gap-2">
@@ -436,6 +399,7 @@ export default function CfoAlerts() {
                     key={option}
                     type="button"
                     onClick={() => setFrequency(option)}
+                    aria-pressed={frequency === option}
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
                       frequency === option
@@ -443,7 +407,7 @@ export default function CfoAlerts() {
                         : "border-border/60 bg-background text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    {option}{option === "Weekly" ? " (recommended)" : ""}
+                    {option}
                   </button>
                 ))}
               </div>
@@ -458,6 +422,7 @@ export default function CfoAlerts() {
                       key={option}
                       type="button"
                       onClick={() => setDelivery(option)}
+                      aria-pressed={delivery === option}
                       className={cn(
                         "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors",
                         delivery === option
@@ -477,16 +442,21 @@ export default function CfoAlerts() {
         </section>
       )}
 
-      <AiCfoAskCard pageId="alerts" className="mb-8" />
-
       <DataBenchmarkAssumptions
-        benchmarkNote="Monitoring status is based on movement across profit, cash, growth and plan-progress indicators."
-        dataQualityNote="Monitoring commentary uses the same connected business data and mock status layer currently used across the app."
-        confidenceNote="Night Scout prioritises material movement and management-control actions rather than every metric fluctuation."
+        benchmarkNote="All monitoring statuses are fixed examples; no plan assessment has been performed."
+        dataQualityNote="These examples do not use connected business data."
+        confidenceNote="Example trends and priorities are illustrative, not verified business findings."
         className="mb-2"
       />
         </>
       )}
+      <section aria-label="Monitoring explanation" className="rounded-2xl border border-border/50 bg-card px-5 py-5 mt-6">
+        <h2 className="text-lg font-bold text-foreground">About this prototype</h2>
+        <p className="text-sm text-muted-foreground mt-2">
+          Business-specific monitoring answers are not available here. The examples demonstrate possible
+          presentation only; they do not establish a diagnosis, priority or recommendation for your business.
+        </p>
+      </section>
     </AppLayout>
   );
 }

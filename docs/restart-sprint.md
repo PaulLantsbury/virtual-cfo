@@ -474,3 +474,7 @@ Established docs/project-brief.md as the current starting point and docs/team-wo
 ## 12 September — first parallel pilot complete
 
 Implemented both subsequently approved scopes: strict review-evidence calendar validation and truthful Cash Control sample presentation. Two developers plus independent reviewer, coordinated integration. 19 review and 12 cash browser checks pass; frontend typecheck/build pass with inherited warnings. See docs/parallel-pilot.md completion record and latest handover. No live data or deployment changes; next package needs Paul's scope decision.
+
+## 12 September — Margin Recovery and Monitoring complete
+
+Second approved parallel package delivered truthful source/sample separation and Monitoring prototype status. 26 isolated browser checks pass on fixed build, frontend typecheck/build pass with inherited warnings, visual checks and independent review complete. See docs/reporting-truthfulness-package.md and latest handover. No database/deployment changes or new financial rules. Next scope remains Paul's decision.

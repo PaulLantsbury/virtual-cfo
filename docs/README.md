@@ -1,5 +1,7 @@
 # Current starting point — 12 September 2026
 
+**Stopped for the day:** Read the [12 September end-of-day checkpoint](end-of-day-2026-09-12.md) first. It records the final state, superseded intermediate work, standing decisions and proposed next steps. No further package is authorised yet.
+
 Latest completed package: [Profit Overview / Scenario Planner alignment](profit-scenario-alignment.md). Both pages now use the same coherent sample month and calculation model. 51 checks, independent review and local staging verification pass; real financial reporting remains unavailable.
 
 Latest completed package: [Scenario Planner visible impact and corrected sample-month model](scenario-planner-correction.md). This supersedes the earlier preservation of its unvalidated formulas and preset behaviour. 40 checks and local staging verification pass; forecasts and real-source integration remain unfinished.

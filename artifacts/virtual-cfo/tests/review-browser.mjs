@@ -78,6 +78,41 @@ test('transaction evidence shows original sale and later refunds without enablin
  await page.getByLabel('From',{exact:true}).fill('2026-03-01');assert.equal(await table.count(),0);
  });
 });
+const zeroEvidenceRow=date=>({id:'sale:zero',orderId:'gid://shopify/Order/zero',type:'sale',date,currency:'GBP',productExVat:0,shippingExVat:0,vat:0,cash:0});
+for(const date of ['2026-13-01','2026-00-01','2026-01-00','2026-01-32','2026-04-31','2026-02-30','2026-02-29','1900-02-29','2026-2-01']){
+ test(`invalid evidence date ${date} safely clears an existing review`,async()=>{
+  let prepares=0;
+  await fixture({stores:[a],review:route=>{
+   assert.ok(route.request().url().endsWith('/prepare'),'Only mocked preparation is expected');
+   return response(route,{...packet(route.request().postDataJSON().scope),transactionEvidence:{rows:[zeroEvidenceRow(++prepares===1?'2026-08-01':date)],totalEvents:1,timezone:'Europe/London'}});
+  }},async page=>{
+   await openReview(page);await page.getByRole('button',{name:'Prepare review',exact:true}).click();
+   await page.getByRole('heading',{name:'Confirm complete history'}).waitFor();
+   await page.getByLabel('Evidence reference').fill('Synthetic complete ledger');await page.getByLabel('What did you check?').fill('Synthetic history checked.');await page.getByRole('checkbox').check();
+   assert.equal(await page.getByRole('button',{name:'Record review and restore figures'}).isEnabled(),true);
+   await page.getByRole('button',{name:'Prepare review',exact:true}).click();
+   await page.getByRole('status').filter({hasText:'The transaction evidence could not be verified. Prepare a new review.'}).waitFor();
+   assert.equal(await page.getByRole('table',{name:'Imported sales and refunds'}).count(),0);
+   assert.equal(await page.getByRole('heading',{name:'What still needs checking?'}).count(),0);
+   assert.equal(await page.getByLabel('Evidence reference').count(),0);assert.equal(await page.getByRole('checkbox').count(),0);
+   assert.equal(await page.getByRole('button',{name:'Record review and restore figures'}).count(),0);
+   assert.equal(prepares,2);
+  });
+ });
+}
+for(const date of ['2024-02-29','2000-02-29']){
+ test(`valid leap date ${date} preserves zero-value evidence without approving completeness`,async()=>{
+  await fixture({stores:[a],review:route=>response(route,{...packet(route.request().postDataJSON().scope),transactionEvidence:{rows:[zeroEvidenceRow(date)],totalEvents:1,timezone:'Europe/London',periodSummary:{currency:'GBP',netProductSales:0,originalOrders:1,hasActivity:true}}})},async page=>{
+   await openReview(page);await page.getByLabel('From',{exact:true}).fill(date.slice(0,8)+'01');await page.getByLabel('To',{exact:true}).fill(date);
+   await page.getByRole('button',{name:'Prepare review',exact:true}).click();await page.getByRole('heading',{name:'Imported transactions — awaiting review'}).waitFor();
+   const table=page.getByRole('table',{name:'Imported sales and refunds'});
+   assert.equal(await table.getByRole('row').count(),2);assert.equal(await table.getByText(`29 Feb ${date.slice(0,4)}`,{exact:true}).count(),1);
+   assert.equal(await table.getByText('£0.00',{exact:true}).count(),4);assert.equal(await table.getByText('Outside selected period').count(),0);
+   assert.equal(await page.getByText('Net product sales: £0.00',{exact:true}).count(),1);
+   assert.equal(await page.getByRole('checkbox').isChecked(),false);assert.equal(await page.getByRole('button',{name:'Record review and restore figures'}).isEnabled(),false);
+  });
+ });
+}
 test('refund-only selected period shows negative sales and activity, with no certification',async()=>{
  await fixture({stores:[a],review:route=>response(route,{...packet(route.request().postDataJSON().scope),transactionEvidence:{rows:[{id:'refund:1',orderId:'gid://shopify/Order/1',type:'refund',date:route.request().postDataJSON().scope.from.slice(0,8)+'05',currency:'GBP',productExVat:-2000,shippingExVat:0,vat:-400,cash:-2400}],totalEvents:1,timezone:'Europe/London',periodSummary:{currency:'GBP',netProductSales:-2000,originalOrders:0,hasActivity:true}}})},async page=>{
  await openReview(page);

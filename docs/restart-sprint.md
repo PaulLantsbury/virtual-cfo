@@ -470,3 +470,7 @@ Completed standalone file-selection report using the actual validator/comparator
 ## 12 September — project-management and parallel-work setup
 
 Established docs/project-brief.md as the current starting point and docs/team-working-agreement.md as the coordination/decision boundary. Two read-only agent reviews informed docs/parallel-pilot.md. The proposed review-date robustness and Cash Control illustration tasks await Paul's agreement; neither is implemented by this setup package. Documentation only, preserving the real-reference-data pause and existing deployment/database boundaries. See the latest handover for the exact resume point.
+
+## 12 September — first parallel pilot complete
+
+Implemented both subsequently approved scopes: strict review-evidence calendar validation and truthful Cash Control sample presentation. Two developers plus independent reviewer, coordinated integration. 19 review and 12 cash browser checks pass; frontend typecheck/build pass with inherited warnings. See docs/parallel-pilot.md completion record and latest handover. No live data or deployment changes; next package needs Paul's scope decision.

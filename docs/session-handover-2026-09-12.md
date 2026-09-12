@@ -101,3 +101,8 @@ Paul approved the package; two developers and an independent reviewer delivered 
 ## Opportunity and scenario checkpoint
 
 Opportunity Finder / Scenario Planner approved parallel package complete. Existing synthetic opportunities are explicit examples; unsupported source endpoint removed, one-off cash separate. Scenario formulas/presets preserved, best-plan claims removed, unused inputs and unavailable saving/comparing disclosed. 22 browser cases, typecheck/build and independent review pass; source/staging unchanged except page code, authenticated preset handoff verified. See docs/opportunity-scenario-package.md for harness corrections and limits. Next: Paul’s walkthrough. No DB/financial approval, Replit/main or production change.
+
+
+### Opportunity Finder wording follow-up
+
+Paul requested clearer UK wording: renamed the sample priority tier “Next Up” to “Do next” everywhere on Opportunity Finder. This is a score-based priority band, not an action number; ranking thresholds and ordering are unchanged. The Sample prefix remains. Verified all four tier references updated and git diff whitespace checks passed.

@@ -1,5 +1,7 @@
 # Night Scout — current project brief
 
+**13 September:** Financial-input and page-source inventory complete. Read the [current handover and proposed shared-sales package](session-handover-2026-09-13.md). No application/database changes; implementation awaits Paul’s scope decision. Older stop/checkpoint entries below are historical.
+
 **Stopped for the day:** Read the [12 September end-of-day checkpoint](end-of-day-2026-09-12.md) first. It records the final state, superseded intermediate work, standing decisions and proposed next steps. No further package is authorised yet.
 
 Page-role clarification: Profit Overview explains the fixed sample profit/cost breakdown; its duplicate simulator has been removed by Paul’s agreement. Scenario Planner alone provides what-if controls. Shared baseline/definitions are unchanged.

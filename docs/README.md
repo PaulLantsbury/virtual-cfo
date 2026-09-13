@@ -1,5 +1,7 @@
 # Current starting point — 12 September 2026
 
+**13 September:** Financial-input and page-source inventory complete. Read the [current handover and proposed shared-sales package](session-handover-2026-09-13.md). No application/database changes; implementation awaits Paul’s scope decision. Older stop/checkpoint entries below are historical.
+
 **Stopped for the day:** Read the [12 September end-of-day checkpoint](end-of-day-2026-09-12.md) first. It records the final state, superseded intermediate work, standing decisions and proposed next steps. No further package is authorised yet.
 
 Latest completed package: [Profit Overview / Scenario Planner alignment](profit-scenario-alignment.md). Both pages now use the same coherent sample month and calculation model. 51 checks, independent review and local staging verification pass; real financial reporting remains unavailable.

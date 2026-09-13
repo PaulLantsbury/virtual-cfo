@@ -1,5 +1,7 @@
 # Expense evidence design — 13 September 2026
 
+**Subsequent decision:** Paul approved the three bounded recommendations on 13 September: actual restock-date recovery, actual-only costs and complete months with independent subtotals. See `agreed-financial-definitions.md`. Earlier proposal wording below is historical; other allocation/correction/FX decisions remain unresolved.
+
 Proposal prepared from the saved repository catalog, financial input inventory, approved definitions and disposable prototype. Not an applied schema or fresh live-data audit. No financial policy, database, app or access change is made here. This scope covers variable expenses, advertising, overheads and depreciation/amortisation; historic product COGS and saleable returns are separate inputs to the same reporting contract.
 
 ## Existing rules to preserve

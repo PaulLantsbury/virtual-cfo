@@ -92,3 +92,13 @@ Current location: recorded on `codex/restart-baseline` in draft PR #1. This is n
 Paul explicitly agreed: count paid/completed original orders, including orders refunded later; exclude unpaid, test and pre-sale-cancelled orders. Use the store timezone and actual sale/refund event timestamps, never import timestamps. Flag ambiguous edits, cancellations and goodwill payments for review instead of guessing. Original payment facts must be evidenced; a current refunded/cancelled status alone cannot reconstruct the original sale.
 
 Implementation status: isolated event-evidence preparation now derives local event dates from explicit-offset timestamps and verified timezone, requires explicit original-order facts and rejects review-required adjustments. Five tests pass covering later refunds, exclusions, month/DST boundaries, missing facts and invalid dates. It is not yet connected to a live importer, evidence writer or dashboard. Tax/currency/coverage verification remains separately required.
+
+## Historical cost and profit rollout decision — 13 September 2026
+
+Paul explicitly agreed all three recommendations in `profit-evidence-package-2026-09-13.md` after the three-agent design review:
+
+- Recognise historical product-cost recovery on the evidenced date goods actually re-enter saleable inventory, independently of refund date. March refund / April restocking reduces March sales and reverses related cost in April. Unknown stock status/date leaves dependent cost results incomplete.
+- The first actual-profit slice uses evidenced actual historical costs and actual expenses only. No current-price or estimate substitution, and no newly invented freight/import allocation. Existing historical landed-cost allocation must be supported.
+- Start with complete calendar months and expose independently supported subtotals. Gross profit requires sales and COGS; Contribution additionally requires variable expenses and advertising; operating profit requires complete classified overheads including D&A; EBITDA additionally requires identified D&A already in those overheads. Missing later inputs do not erase earlier supported subtotals.
+
+These decisions supersede earlier statements that return recognition timing and incremental subtotal availability remain unapproved. They do not approve staging schema application, synthetic imports, source completeness, production release or broader allocation/correction/FX policies. Implementation is being prepared and tested separately; cost figures are not connected to the app yet.

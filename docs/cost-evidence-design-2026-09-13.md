@@ -1,5 +1,7 @@
 # Historical product cost and return evidence — proposed design
 
+**Subsequent decision:** Paul approved the three bounded recommendations on 13 September: actual restock-date recovery, actual-only costs and complete months with independent subtotals. See `agreed-financial-definitions.md`. Earlier proposal wording below is historical; other allocation/correction/FX decisions remain unresolved.
+
 13 September 2026. **Design only; no schema, application or database change.** This proposes a small extension to existing Night Scout source/evidence records, not a second sales dataset. It uses the saved catalog and recorded staging setup; no live schema or customer records were inspected today.
 
 ## Authority and present boundary

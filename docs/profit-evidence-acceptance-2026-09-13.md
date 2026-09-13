@@ -1,5 +1,7 @@
 # Profit evidence acceptance design — 13 September 2026
 
+**Subsequent decision:** Paul approved the three bounded recommendations on 13 September: actual restock-date recovery, actual-only costs and complete months with independent subtotals. See `agreed-financial-definitions.md`. Earlier proposal wording below is historical; other allocation/correction/FX decisions remain unresolved.
+
 Status: preparation only. These are proposed acceptance checks for the next cost/expense connection, not executable tests, implemented behaviour or permission to apply a schema. They reuse Paul’s agreed financial definitions and existing worked cases; unresolved policy is identified rather than invented. No application, calculation, fixture, database or access changes accompany this document.
 
 Coordinator proposal for Paul: begin with **actual costs only, complete calendar months and component-level readiness**; recognise stock recovery on its **actual evidenced restock date**. These are proposed scope/policy decisions, not approvals recorded by this document. If approved, the corresponding checks below become implementation acceptance; weekly allocation and estimate-enabled reporting remain outside the first package.

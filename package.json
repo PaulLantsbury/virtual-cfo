@@ -8,6 +8,7 @@
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
     "test:baseline": "node --experimental-strip-types --test artifacts/virtual-cfo/src/lib/analytics/*.test.ts",
+    "test:profit-evidence": "node --test experiments/financial-v1/profit-evidence*.test.mjs",
     "test:financial": "node --test experiments/financial-v1/calculations.test.mjs",
     "test:financial-db": "node --test experiments/financial-v1/source-adapter.test.mjs",
     "test:financial-cloud": "node --test experiments/financial-v1/cloud-sales-adapter.test.mjs",

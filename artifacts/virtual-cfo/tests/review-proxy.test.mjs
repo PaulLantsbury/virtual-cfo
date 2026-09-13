@@ -27,5 +27,9 @@ test('same-origin review request forwards bearer/body only on the review route',
   assert.deepEqual(received,[{url:'/api/financial-reviews/prepare',auth:'Bearer synthetic-test-token',body:'{"scope":{}}'}]);
   await fetch(origin+'/api/financial-reviews-other');
   assert.equal(received.length,1);
+  await fetch(origin+'/api/profit-reporting?storeId=synthetic',{headers:{authorization:'Bearer synthetic-profit-token'}});
+  assert.equal(received.length,2);assert.equal(received[1].url,'/api/profit-reporting?storeId=synthetic');assert.equal(received[1].auth,'Bearer synthetic-profit-token');
+  await fetch(origin+'/api/profit-reporting-other');
+  assert.equal(received.length,2);
  }finally{await vite?.close();await new Promise(resolve=>api.close(resolve));}
 });

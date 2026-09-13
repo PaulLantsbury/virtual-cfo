@@ -57,7 +57,7 @@ export function evidence(params,{state="sale",currency="GBP"}={}) {
   orders:state==="zero"?[]:[order],
   refunds:state==="refund"?[{id:"80000000-0000-0000-0000-000000000001",store_id:id,order_id:order.id,currency,mapping_state:"verified",day:from,amount:"24.00",product_cash:"24.00",product_vat:"4.00",shipping_cash:"0.00",shipping_vat:"0.00"}]:[]};
 }
-export async function fixture({viewport="desktop",plan="pro",state="sale",settingsMissing=false,twoStores=false,initialStorage={},respond,entry="/dashboard"}={},run) {
+export async function fixture({viewport="desktop",plan="pro",state="sale",settingsMissing=false,twoStores=false,initialStorage={},respond,profitRespond,entry="/dashboard"}={},run) {
  const browser=await chromium.launch({headless:true,executablePath:process.env.NIGHT_SCOUT_CHROME_PATH});
  const context=await browser.newContext({viewport:viewports[viewport],serviceWorkers:"block",timezoneId:"America/Los_Angeles"});
  await context.addInitScript(({plan,origin,initialStorage})=>{if(location.origin===origin){sessionStorage.setItem("userPlan",plan);for(const [k,v]of Object.entries(initialStorage)){if(sessionStorage.getItem(k)===null)sessionStorage.setItem(k,v);}}},{plan,origin,initialStorage});
@@ -68,7 +68,7 @@ export async function fixture({viewport="desktop",plan="pro",state="sale",settin
  await context.route("**/*",async route=>{
   const request=route.request(),url=new URL(request.url());
   const json=(data,status=200)=>route.fulfill({status,contentType:"application/json",body:JSON.stringify(data)});
-  if(url.origin===origin){if(url.pathname.startsWith("/api/")){unexpected.push(url.pathname);return json({error:"Unexpected local API"},503);}return route.continue();}
+  if(url.origin===origin){if(url.pathname==="/api/profit-reporting" && profitRespond && request.method()==="GET"){const result=await profitRespond(Object.fromEntries(url.searchParams),request.headers());return json(result.data,result.status??200);}if(url.pathname.startsWith("/api/")){unexpected.push(url.pathname);return json({error:"Unexpected local API"},503);}return route.continue();}
   if(url.hostname!=="night-scout-test.invalid")return route.abort();
   if(url.pathname==="/auth/v1/token")return json(session);
   if(url.pathname==="/auth/v1/user")return json(user);
@@ -90,7 +90,7 @@ export async function fixture({viewport="desktop",plan="pro",state="sale",settin
   await page.getByRole("button",{name:"Sign in",exact:true}).click();
   if(twoStores)await page.getByRole("button",{name:"Synthetic Store",exact:true}).click();
   await page.getByRole("combobox",{name:"Active store"}).waitFor();
-  if(entry!=="/dashboard")await page.goto(origin+entry);
+  if(entry!=="/dashboard"){await page.goto(origin+entry,{waitUntil:"domcontentloaded"});if(twoStores)await page.getByRole("button",{name:"Synthetic Store",exact:true}).click();}
   await page.getByRole("combobox",{name:"Reporting period",exact:true}).waitFor();
   await run(page,{calls,origin});
   assert.deepEqual(errors,[],"No browser errors");assert.deepEqual(unexpected,[],"No legacy RPCs, lookbacks, unplanned reads or writes");

@@ -1,8 +1,9 @@
+import {createProfitReportingRouter} from './src/routes/profit-reporting.ts';
 import express from 'express';
 import http from 'node:http';
 import {createFinancialReviewRouter} from './src/routes/financial-reviews.ts';
 /** Local-only composition, with no generic database or production route imports. */
-export async function listenLocalReview({service,port,frontendOrigin}){
+export async function listenLocalReview({service,profitService,port,frontendOrigin}){
  const origin=new URL(frontendOrigin);
  if(!['localhost','127.0.0.1'].includes(origin.hostname)||origin.protocol!=='http:'||origin.origin!==frontendOrigin||!Number.isInteger(port)||port<0||port>65535)throw new Error('Invalid local review address');
  const app=express();app.disable('x-powered-by');
@@ -11,6 +12,7 @@ export async function listenLocalReview({service,port,frontendOrigin}){
   next();
  });
  app.use('/api/financial-reviews',createFinancialReviewRouter(service));
+ app.use('/api/profit-reporting',createProfitReportingRouter(profitService));
  const server=http.createServer({headersTimeout:10000,requestTimeout:15000},app);
  server.maxConnections=20;
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});

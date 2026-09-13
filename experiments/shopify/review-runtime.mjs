@@ -1,3 +1,4 @@
+import {createProfitReportingService} from '../financial-v1/profit-reporting-service.mjs';
 import {createReviewerService} from './reviewer-auth.mjs';
 const check=(ok)=>{if(!ok)throw new Error('Review server configuration is invalid');};
 /** Explicit server-only configuration. Direct Supabase connections only for now.
@@ -79,7 +80,7 @@ export async function initialiseReviewRuntime(config,{createPool,createAuthClien
    await tx.query('SELECT reviewer_id FROM ingest_v1.review_authorizations LIMIT 0');
   });
   const supabase=createAuthClient(options.authUrl,options.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},global:{fetch:boundedAuthFetch(options.authUrl,fetchImpl)}});
-  return {service:createReviewerService(database,supabase),close:()=>pool.end()};
+  return {service:createReviewerService(database,supabase),profitService:createProfitReportingService(database,supabase),close:()=>pool.end()};
  }catch{
   try{await pool?.end();}catch{}
   throw new Error('Review server could not be initialised');

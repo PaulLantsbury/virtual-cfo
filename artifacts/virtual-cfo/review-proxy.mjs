@@ -5,12 +5,14 @@ export function localReviewProxy(env) {
  if (!/^[1-9][0-9]{0,4}$/.test(raw) || Number(raw) > 65535 || Number(raw) === Number(env.PORT)) {
   throw new Error('Local review API port must be a distinct valid port');
  }
- return {
-  '^/api/financial-reviews(?:/|$)': {
+ const options = {
    target: `http://127.0.0.1:${raw}`,
    changeOrigin: false,
    timeout: 35000,
    proxyTimeout: 35000,
-  },
+ };
+ return {
+  '^/api/financial-reviews(?:/|$)': {...options},
+  '^/api/profit-reporting(?:\\?|$)': {...options},
  };
 }

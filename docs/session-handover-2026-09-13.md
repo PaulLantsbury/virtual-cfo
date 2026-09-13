@@ -87,3 +87,7 @@ Next: extend the shared profit report into other appropriate actual-reporting pa
 Paul accepted the Profit Overview walkthrough, then approved connecting CFO Briefing and Margin Analysis. Both now use the same scoped profit hook and shared summary, including supported margins. Stale blanket profit-unavailable descriptions were replaced in both pages and Verified Sales. Forecast/cash/recovery advice and sample simulator boundaries remain explicit. No new database permissions or financial formulas.
 
 Frontend typecheck passes; 16/16 new shared-profit browser tests and 4/4 Margin Analysis regressions pass. Live Store D February matches across the new summaries (GP80, contribution60, OP35, EBITDA40, margins41.4%/24.1%); March Margin Analysis matches negative totals and withholds unsupported ratios. See `docs/shared-profit-pages-2026-09-13.md`. Code is updated in existing local staging; GitHub development publication authorised. Next: remaining actual-source migrations and clearer separation/removal of legacy sample models, then Shopify development ingestion per priorities. Do not claim every page is free of samples or every financial input connected.
+
+### Navigation logo colour refresh
+
+Replaced the navigation asset with Paul’s supplied Night Scout Logo (3).png, unchanged. Kept existing desktop/mobile logo dimensions and positioning styles; public home and authentication logos remain unchanged. Verified the blue Scout artwork in the local staging navigation. No calculation or database changes.

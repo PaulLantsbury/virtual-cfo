@@ -11,7 +11,6 @@ const ensure=(ok,message)=>{if(!ok)throw new Error(message);};
 const canonical=value=>JSON.stringify(value,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);
 const revision=value=>createHash('sha256').update(canonical(value)).digest('hex');
 const same=(a,b)=>canonical(a)===canonical(b);
-const day=v=>v instanceof Date?v.toISOString().slice(0,10):String(v).slice(0,10);
 function exact(actual,expected,label){ensure(Array.isArray(expected)&&new Set(expected).size===expected.length&&same([...actual].sort(),[...expected].sort()),`${label} manifest mismatch`);}
 export async function readProfitEvidence(db,{versionId,scope,readSales}) {
  ensure(typeof readSales==='function','Transactional verified-sales reader required');
@@ -22,14 +21,15 @@ export async function readProfitEvidence(db,{versionId,scope,readSales}) {
   const snapshotId=revision({versionId,salesRevision:sales.revision,scope});
   const input={version:PROFIT_EVIDENCE_VERSION,snapshotId,scope,sales:{snapshotId,value:sales.value},costEvidence:null};
   try {
-   const {rows:[v]}=await tx.query('SELECT * FROM finance_v1.profit_evidence_versions WHERE id=$1',[versionId]);
-   ensure(v&&v.store_id===scope.storeId&&v.currency===scope.currency&&day(v.date_from)===scope.from&&day(v.date_to)===scope.to,'Version scope mismatch');
+   const {rows:[versionRow]}=await tx.query('SELECT *,date_from::text scope_from,date_to::text scope_to FROM finance_v1.profit_evidence_versions WHERE id=$1',[versionId]);
+   const {scope_from,scope_to,...v}=versionRow??{};
+   ensure(v&&v.store_id===scope.storeId&&v.currency===scope.currency&&scope_from===scope.from&&scope_to===scope.to,'Version scope mismatch');
    const {rows:[sealed]}=await tx.query('SELECT * FROM finance_v1.profit_component_coverage WHERE version_id=$1',[versionId]);
    ensure(sealed,'Version is not sealed');
    const manifest=v.source_manifest;
    ensure(manifest.version===1&&manifest.salesRevision===sales.revision&&same(manifest,sealed.source_manifest),'Version source manifest stale');
-   const {rows:lines}=await tx.query(`SELECT e.*,to_jsonb(l) current_line FROM finance_v1.line_cost_evidence e JOIN public.order_line_items l ON l.id=e.line_id WHERE e.version_id=$1`,[versionId]);
-   const {rows:returns}=await tx.query('SELECT * FROM finance_v1.stock_return_evidence WHERE version_id=$1',[versionId]);
+   const {rows:lines}=await tx.query(`SELECT e.*,e.sale_date::text sale_day,to_jsonb(l) current_line FROM finance_v1.line_cost_evidence e JOIN public.order_line_items l ON l.id=e.line_id WHERE e.version_id=$1`,[versionId]);
+   const {rows:returns}=await tx.query('SELECT *,saleable_date::text recovery_day FROM finance_v1.stock_return_evidence WHERE version_id=$1',[versionId]);
    const {rows:expenses}=await tx.query('SELECT * FROM finance_v1.expense_evidence WHERE version_id=$1',[versionId]);
    const orderMap=new Map(sales.eligibleOrders.map(o=>[o.id,o]));
    ensure(orderMap.size===sales.eligibleOrders.length,'Duplicate eligible order manifest');
@@ -50,15 +50,15 @@ export async function readProfitEvidence(db,{versionId,scope,readSales}) {
    }catch(error){for(const key of ['variableCosts','advertising','overheads','da'])problem(key,error);}
    const common=(row,current)=>({storeId:scope.storeId,currency:scope.currency,basis:'actual',evidenceRef:row.evidence_ref,sourceRevision:revision(current),observedRevision:revision(current)});
    let mappedLines=[];
-   try { mappedLines=lines.map(l=>{
+   try { mappedLines=lines.map(({sale_day,...l})=>{
     const original=orderMap.get(l.order_id),proof=manifest.lineProofs?.[l.line_id];
-    ensure(original&&original.soldOn===day(l.sale_date)&&l.store_id===scope.storeId&&l.currency===scope.currency&&same(l.observed_line,l.current_line),'Stale line or original sale evidence');
+    ensure(original&&original.soldOn===sale_day&&l.store_id===scope.storeId&&l.currency===scope.currency&&same(l.observed_line,l.current_line),'Stale line or original sale evidence');
     ensure(proof?.historicalLandedCostSupported===true&&typeof proof.documentRef==='string'&&proof.documentRef.trim()&&proof.observedEvidenceRevision===revision(l),'Historical landed-cost proof unavailable');
     const unit=Number(l.historic_unit_cost_pence);ensure(Number.isSafeInteger(unit),'Cost precision unsupported');
     return {...common(l,l.current_line),id:l.line_id,orderId:l.order_id,soldOn:original.soldOn,quantity:l.quantity,unitCostPence:unit,originalEligible:true,landedCostSupported:true};
    });
    }catch(error){problem('productCosts',error);}
-   const mappedReturns=returns.map(r=>({...common(r,r),id:r.source_return_id,lineId:r.line_id,recoveryOn:day(r.saleable_date),quantity:r.quantity,status:'saleable'}));
+   const mappedReturns=returns.map(({recovery_day,...r})=>({...common(r,r),id:r.source_return_id,lineId:r.line_id,recoveryOn:recovery_day,quantity:r.quantity,status:'saleable'}));
    const mappedExpenses=[];
    for(const e of expenses){
     try {

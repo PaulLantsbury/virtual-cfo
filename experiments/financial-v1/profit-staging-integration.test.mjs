@@ -91,3 +91,23 @@ test('Early and late setup failures roll back new store, membership, sources and
   await setup(db);ready((await report(db)).result,{operatingProfit:3500});
  }finally{await db.close();}
 });
+
+test('Calendar dates remain correct when the driver returns UK summer dates as previous-day UTC instants',async()=>{
+ const db=await database();try{
+  await setup(db);
+  const shifted={transaction:fn=>db.transaction(tx=>fn({exec:s=>tx.exec(s),query:async(...args)=>{
+   const r=await tx.query(...args);
+   for(const row of r.rows){
+    if(row.scope_to==='2026-03-31')row.date_to=new Date('2026-03-30T23:00:00Z');
+    if(row.scope_from==='2026-04-01')row.date_from=new Date('2026-03-31T23:00:00Z');
+    if(row.scope_to==='2026-04-30')row.date_to=new Date('2026-04-29T23:00:00Z');
+    if(row.recovery_day==='2026-04-05')row.saleable_date=new Date('2026-04-04T23:00:00Z');
+   }
+   return r;
+  }}))};
+  const march=await report(shifted,1),april=await report(shifted,2);
+  assert.equal(march.readError,null);assert.equal(april.readError,null);
+  ready(march.result,{operatingProfit:-7500});ready(april.result,{recoveredCosts:4000,operatingProfit:4000});
+  assert.equal(april.input.costEvidence.recoveries[0].recoveryOn,'2026-04-05');
+ }finally{await db.close();}
+});

@@ -91,3 +91,5 @@ Frontend typecheck passes; 16/16 new shared-profit browser tests and 4/4 Margin 
 ### Navigation logo colour refresh
 
 Replaced the navigation asset with Paul’s supplied Night Scout Logo (3).png, unchanged. Kept existing desktop/mobile logo dimensions and positioning styles; public home and authentication logos remain unchanged. Verified the blue Scout artwork in the local staging navigation. No calculation or database changes.
+
+Navigation logo follow-up: adjusted the image’s vertical object position from 55% to 48% for the replacement artwork, keeping the existing desktop/mobile dimensions while making room for the dog’s ears.

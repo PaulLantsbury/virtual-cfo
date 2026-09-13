@@ -1,6 +1,6 @@
 # Member-scoped profit reporting service — 13 September 2026
 
-Implementation prepared; applying the accompanying read-access proposal requires separate staging approval. No financial formula changes.
+Implemented and enabled in staging following explicit approval on 13 September. No financial formula changes.
 
 `GET /api/profit-reporting` accepts exactly `storeId`, `from`, `to`, `currency`. Only one complete calendar month and supported two-decimal currency are accepted. Browser-supplied identities, evidence/version selections and extra/repeated parameters are rejected.
 
@@ -29,3 +29,17 @@ Read-only live staging catalog checks confirmed all nine target tables have RLS 
 Combined HTTP/profit-access/review/proxy/runtime checks pass 21/21. These include actual disposable Store D calculations, authentication and cross-store rejection, zero/multiple-version refusal, missing costs, row-level isolation under the real restricted service role, no new writes, and atomic rollback if required RLS is absent. Frontend/backend typechecking passes. Final full isolated browser run passes 9/9, including desktop/mobile, partial costs, month restrictions, safe fallback, mismatched periods and stale-store results. These tests use synthetic HTTP fixtures; the disposable service tests independently verify real database calculations.
 
 The existing local staging server has been restarted with the optional profit service and exact same-origin proxy. Its database reads correctly remain unavailable until the new grant proposal is approved/applied. No actual-profit screen success against live staging is claimed yet. After approval, apply the proposal once in staging, verify grants/policies, then walk through D February/March/April and compare selected-period sales across pages. A live walkthrough with real Supabase Auth remains necessary even after isolated browser tests pass.
+
+## Approved staging rollout and live walkthrough
+
+Paul approved the read-access proposal. Its nine SELECT grants and nine member-scoped policies were applied once through the authenticated SQL console in Night Scout Staging (`bioalckltvkhlczusdvl`), in the approved transaction. SQL was whitespace/comment condensed for the console; statements and targets match the recorded proposal. Postchecks through the existing restricted connection confirm all nine tables have RLS enabled and SELECT available, zero INSERT/UPDATE/DELETE/TRUNCATE permissions on those tables, and nine SELECT policies. No source records or membership changes were part of this rollout.
+
+The existing signed-in account successfully read Store D through the actual local app/server/Supabase path. Live Profit Overview matched:
+
+| Month | Sales | Gross profit | Contribution | Operating profit | EBITDA |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| February 2026 | GBP140 | GBP80 | GBP60 | GBP35 | GBP40 |
+| March 2026 | GBP−70 | GBP−70 | GBP−75 | GBP−75 | GBP−75 |
+| April 2026 | GBP0 | GBP40 | GBP40 | GBP40 | GBP40 |
+
+All three showed supporting evidence complete; March/April correctly had zero original orders and unavailable original AOV. February shared scope was then checked in CFO Briefing, Margin Analysis and Verified Sales: all matched GBP140 net product sales and GBP70 original AOV. This confirms those sales fields for February, not full profit integration on the other pages. Their older profit-unavailable copy remains a follow-up alongside integrating the new report; Scenario Planner is still sample-based. Production and Replit are unchanged. No password was needed or saved for the permission application.

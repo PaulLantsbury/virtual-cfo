@@ -1,4 +1,4 @@
-# Profit evidence — proposed next implementation package
+# Profit evidence — approved implementation scope
 
 13 September 2026. Paul asked to continue after the completed shared-sales package. Three agents reviewed historical product/return costs, expense evidence and acceptance gaps. This package prepares the design and decisions; it does not install schemas or connect actual profit figures.
 
@@ -22,9 +22,9 @@ The old prototype is useful test material, but cannot be wired directly: its pro
 
 First slice proposal: complete calendar months in one evidenced currency; weekly/custom sales remain usable, with profit unavailable until expense allocation/rounding for those periods is agreed and implemented. No exchange-rate conversion, assumed historic costs, estimated actual profit, cash runway or new opportunity ranking.
 
-## Decisions for Paul
+## Decisions approved by Paul — 13 September
 
-These are recommendations, not approved financial policy. Existing definitions are preserved.
+Paul explicitly agreed all three recommendations below. Existing definitions are preserved; database application remains a separate step.
 
 1. **Return timing:** record the historical-cost reversal on the evidenced date goods re-enter saleable inventory, independently of the refund date. A March refund followed by April restocking reduces March sales and reverses the related COGS in April. Unknown stock status/date leaves dependent cost results incomplete.
 2. **Actual versus estimated:** the first actual-profit release uses evidenced historical landed cost and actual expenses only. Require already supported freight/import allocation; do not invent an allocation method. Keep estimates out of actual totals and separately labelled if a later modelling feature uses them.
@@ -40,4 +40,4 @@ This bounded approach defers new freight allocation rules, fractional-penny dail
 
 ## Verification and next checkpoint
 
-This is a documentation/design package. No application, database, grant, data, production or Replit changes; no executable tests needed for these documents. Coordinator reviews the three companion designs for consistency with recorded decisions and checks versioned documentation. Existing shared-sales staging remains the application checkpoint. Dependent financial policy implementation waits for Paul's decisions above.
+This is a documentation/design package. No application, database, grant, data, production or Replit changes; no executable tests needed for these documents. Coordinator reviews the three companion designs for consistency with recorded decisions and checks versioned documentation. Existing shared-sales staging remains the application checkpoint. Paul subsequently approved the three decisions above. Implementation preparation is now active; database application is not authorised by that approval.

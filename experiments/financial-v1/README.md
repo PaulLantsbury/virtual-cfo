@@ -26,3 +26,9 @@ Run `pnpm test:financial` from the repository root. Uses Node's built-in test ru
 F01–F10 assert the fixed monetary outputs, period separation and approved presentation states. Guard tests additionally reject malformed money, ambiguous tax basis, invalid dates/currencies, duplicate events, unknown eligibility, invalid product recovery, incomplete cash history and inconsistent depreciation input.
 
 The [approved definitions](../../docs/agreed-financial-definitions.md) remain authoritative. [Worked cases](../../docs/financial-acceptance-cases.md) list deferred policies; this prototype does not approve them. Test success means local arithmetic conforms to these cases, not that the full product is financially reconciled. No production deployment is appropriate until source adapters, database tests, access controls and UI conformance are verified.
+
+## Monthly actual-profit evidence contract (13 September)
+
+`profit-evidence.mjs` implements the approved actual-only, complete-month cost contract and independently dated saleable-stock recovery, with per-component readiness. Run `pnpm test:profit-evidence` for its independent monetary, evidence and proposed-schema tests.
+
+This module does not replace the existing sales RPC, install cost tables or connect application profit. A future authorised snapshot reader must substantiate source identity, all relevant lines/recovery history, completeness and compatible sales/cost revisions. Caller-supplied manifest or snapshot strings alone are not that proof. The proposed private SQL is under `db-migrations/proposals/20260913_profit_evidence.sql`; see `docs/profit-evidence-implementation-2026-09-13.md` for readiness and remaining integration work.

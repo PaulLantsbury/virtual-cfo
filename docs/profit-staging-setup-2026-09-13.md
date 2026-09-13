@@ -1,6 +1,6 @@
 # Proposed exact profit staging fixture and recovery — 13 September 2026
 
-Prepared helper: `experiments/financial-v1/profit-staging-fixture.mjs`. Read-only preflight: `db-migrations/proposals/profit-preflight-20260913.sql`. **Not remotely applied.** No runtime import, automatic execution, grants or production work. The helper requires the existing source/evidence schema and proposed private profit evidence tables. A controlled existing synthetic reviewer identity must be supplied; no password or user identity is embedded in files.
+Prepared helper: `experiments/financial-v1/profit-staging-fixture.mjs`. Read-only preflight: `db-migrations/proposals/profit-preflight-20260913.sql`. **Applied to staging on 13 September following explicit approval; see execution record below.** No runtime import, automatic execution, grants or production work. The helper requires the existing source/evidence schema and proposed private profit evidence tables. A controlled existing synthetic reviewer identity must be supplied; no password or user identity is embedded in files.
 
 ## Exact planned mutations
 
@@ -70,3 +70,13 @@ Approved-content candidates:
 Schema and fixture use **two separate atomic transactions**, not one combined transaction. A failed fixture can therefore leave the new empty private schema. Post-commit reconciliation failures preserve committed evidence for investigation. Neither case triggers automatic deletion or replay. The plan command and invalid-target checks were verified without connecting.
 
 The combined integration, profit contract/schema, calculation and sales-adapter regression run passed **63/63** tests. Re-run the five staging integration groups using `pnpm test:profit-staging`. No frontend code changed, so no new frontend build or preview deployment is claimed. Actual profit routes, runtime permissions/version selection and page integration are still outstanding.
+
+## Approved staging execution — 13 September
+
+Paul approved the exact schema, synthetic Store D fixture and existing-account membership. The controlled operator connected to the verified staging project with certificate-verified TLS and the privately supplied operator password. Full read-only preflight passed: proposal/guard absent, reserved IDs clear, compatible source constraints and existing account present. The exact recorded schema and fixture hashes were applied once; no replay occurred.
+
+Five private tables and the immutable guard were installed, followed by the complete fixture transaction. Initial post-commit verification passed February but rejected March/April: PostgreSQL DATE values decoded by the driver in UK summer time were converted to UTC and shifted back one calendar day. The reader now requests explicit SQL date text for scope, original sale and recovery comparisons. No financial formula or stored evidence was changed to repair this. A dedicated regression simulates the driver’s previous-day UTC values and verifies March scope and April recovery date.
+
+After the reader correction all expected figures reconcile against live staging for all three months: February operating profit GBP35, March GBP−75, April GBP40. Combined regressions pass 64/64. Read-only postchecks confirm five private tables with RLS, zero client table grants, exactly one membership for the approved existing user, and unchanged A/B/C store settings, order/refund counts and coverage baselines. This comparison is not a full byte-for-byte database snapshot.
+
+The temporary password file was removed after verification; credentials were not committed. No production/Replit changes, public profit endpoint, runtime role grants or financial-review approval were performed. Membership provides Store D access through existing membership-aware features; a profit screen is still pending. Next: prepare the member-scoped profit read API and explicit version selection, then connect the appropriate actual-reporting pages and verify their agreement.

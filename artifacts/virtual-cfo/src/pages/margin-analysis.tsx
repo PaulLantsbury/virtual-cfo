@@ -17,12 +17,12 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { canAccess } from "@/lib/plan";
 import { cn } from "@/lib/utils";
-import { TimelineSelector } from "@/components/TimelineSelector";
+import { SalesReportingPeriod } from "@/components/SalesReportingPeriod";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { PeriodImpact } from "@/components/PeriodImpact";
 import { MONTHLY_CM_PCT } from "@/lib/data/business-snapshot";
 import { CHANNEL_CM_PCT } from "@/lib/data/channel-metrics";
-import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { useSalesReporting } from "@/lib/analytics/useSalesReporting";
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true },
@@ -219,32 +219,16 @@ const SIM_MULTIPLIERS = {
 
 export default function MarginAnalysis() {
   const MA_STORE_ID = useActiveStore();
-  const {
-    status: reportingStatus,
-    phase1,
-    dateFrom,
-    dateTo,
-    periodLabel,
-  } = useLatestDataPeriod(MA_STORE_ID);
-  // Source responses are not certified against the agreed financial definitions.
-  // The period hook clears failed/partial responses; never replace them with samples.
-  const sourceNumber = (value: number | undefined) =>
-    typeof value === "number" && Number.isFinite(value)
-      ? value.toLocaleString("en-GB", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })
+  const reporting = useSalesReporting(MA_STORE_ID);
+  const { data, config } = reporting;
+  const sourceMoney = (value: number | null | undefined) =>
+    value !== null && value !== undefined && config
+      ? new Intl.NumberFormat("en-GB", {style: "currency", currency: config.currency}).format(value / 100)
       : "Unavailable";
-  const sourceStatus =
-    reportingStatus === "loading"
-      ? "Source figures loading"
-      : reportingStatus === "error"
-        ? "Source figures unavailable"
-        : reportingStatus === "empty"
-          ? "No source orders found in the reporting search"
-          : reportingStatus === "stale"
-            ? "Unverified source figures: historical period"
-            : "Unverified source figures: latest completed period";
+  const sourceStatus = reporting.status === "invalid" ? "Choose a valid reporting period."
+    : reporting.loading ? "Checking verified sales…"
+    : data ? "Verified sales figures for the selected period"
+    : "Verified figures unavailable — evidence is missing, incomplete or unavailable.";
 
   // Fixed prototype inputs, independent of source responses and timeline selection.
   // These existing model assumptions are not a validated financial calculation.
@@ -331,7 +315,7 @@ export default function MarginAnalysis() {
             illustrative recovery model below.
           </p>
         </div>
-        <TimelineSelector />
+        <SalesReportingPeriod reporting={reporting} />
       </div>
 
       <section
@@ -342,39 +326,29 @@ export default function MarginAnalysis() {
           Actual margin and recovery: unavailable
         </h2>
         <p className="text-sm text-muted-foreground">
-          Validated sales and cost inputs are not connected to this page. No
-          business-specific margin diagnosis, recovery estimate or recommended
-          action is available.
+          Historic product costs, variable costs and marketing inputs are not connected
+          to actual margin reporting. No business-specific margin diagnosis, recovery
+          estimate or recommended action is available.
         </p>
-        <h3 className="font-semibold">Unverified source figures</h3>
-        <p role="status" className="text-sm text-muted-foreground">
-          {sourceStatus}
-          {phase1 ? ` — ${periodLabel} (${dateFrom} to ${dateTo})` : ""}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          These source-reported revenue and AOV figures have not been validated
-          against the agreed financial definitions. A successful response does
-          not establish completeness or verified financial results. Source
-          currency has not been verified.
-        </p>
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <dt className="text-sm text-muted-foreground">
-              Source-reported revenue
-            </dt>
-            <dd className="text-xl font-bold">
-              {sourceNumber(phase1?.data.grossRevenue)}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">
-              Source-reported AOV
-            </dt>
-            <dd className="text-xl font-bold">
-              {sourceNumber(phase1?.data.averageOrderValue)}
-            </dd>
-          </div>
-        </dl>
+        <section aria-label="Verified sales figures">
+          <h3 className="font-semibold">Verified sales figures</h3>
+          <p role="status" className="text-sm text-muted-foreground mt-2">{sourceStatus}</p>
+          <p className="text-sm text-muted-foreground mt-2">Sales use the agreed event-period rules and verified coverage. No older period or sample amount is substituted. Average order value is after discounts and before later refunds; sales exclude VAT and shipping.</p>
+          {data && <p className="text-sm mt-2">{data.hasRefundActivity && data.originalOrders === 0
+            ? "This period contains refunds from earlier sales, with no new qualifying orders."
+            : data.hasActivity ? `${data.originalOrders} qualifying original orders in this period.`
+            : "Verified coverage shows no sales or refunds in this period."}</p>}
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+            <div role="group" aria-label="Net product sales">
+              <dt className="text-sm text-muted-foreground">Net product sales</dt>
+              <dd className="text-xl font-bold">{sourceMoney(data?.netProductSales)}</dd>
+            </div>
+            <div role="group" aria-label="Original average order value">
+              <dt className="text-sm text-muted-foreground">Original average order value</dt>
+              <dd className="text-xl font-bold">{data && data.aov.value === null ? "Unavailable — no qualifying original orders" : sourceMoney(data?.aov.value)}</dd>
+            </div>
+          </dl>
+        </section>
       </section>
       <section
         aria-label="Sample margin model notice"
@@ -1143,7 +1117,7 @@ export default function MarginAnalysis() {
 
       <DataBenchmarkAssumptions
         benchmarkNote="Thresholds and confidence labels are illustrative assumptions, not verified benchmarks for your business."
-        dataQualityNote="Actual margin reporting is unavailable. Source figures are unverified; every model, scenario and supporting analysis uses separate sample inputs."
+        dataQualityNote="Actual margin reporting is unavailable. The sales panel shows verified figures only when supporting evidence is complete; every model, scenario and supporting analysis uses separate sample inputs."
         className="mb-2"
       />
     </AppLayout>

@@ -1,6 +1,6 @@
-# Night Scout — 13 September resume and inventory
+# Night Scout — 13 September handover
 
-## Completed scope
+## Initial inventory (completed before implementation)
 
 Paul resumed from the 12 September handover and authorised parallel reviews. Three agents reviewed repository data paths, financial input schema evidence and shared reporting contract/acceptance. Coordinator consolidated the findings. This was read-only application/database investigation with versioned documentation outputs. No application, schema, database, grant, account, production or Replit changes. No fresh live Supabase query was made; database conclusions are explicitly based on saved catalog, staging application records and code. Working tree was clean at resume.
 
@@ -10,14 +10,28 @@ Paul resumed from the 12 September handover and authorised parallel reviews. Thr
 - [Financial input map](financial-input-map-2026-09-13.md): existing source structure contains costs/overheads/spend/cash fields, but current product cost does not prove historic sale cost; refunds do not prove saleable stock recovery; sales coverage does not prove cost completeness. Legacy contribution omits COGS and cash runway uses the wrong basis. Proposed prototype fields are not installed cloud tables.
 - [Read-contract review](shared-reporting-contract-review-2026-09-13.md): reuse the existing evidence adapter; common scope, definitions, readiness, provenance and comparison handling. Missing values stay unavailable, valid zeros and negative refund periods survive, no sample results feed actual reporting.
 
-## Proposed first implementation package — awaiting Paul
+## First implementation package — subsequently approved and implemented
 
 Create a shared sales snapshot/read path and consistent store-local period selection for CFO Briefing, Verified Sales and Margin Analysis’s existing source panel. Replace Margin’s legacy gross-sales/AOV path with clearly labelled net product sales and original-order pre-refund AOV from the same evidence used by the briefing; preserve separately named gross product sales if shown. Use one selected reporting period across these pages; never silently walk back to an order-containing period. Surface incomplete/unavailable status consistently, including refund-only periods, and do not unlock margin/profit without cost evidence.
 
-Reuse existing sales definitions, evidence gates, membership checks and calculation code. No new schema/data/grants are needed for this initial code package. Focused tests must prove matching values for identical scopes, missing-vs-zero, negative refund periods, valid date/timezone/currency handling and stale-response isolation. Local staging may still show incomplete periods; do not restore completeness to force a demonstration. Shared period UX and first consumer migration require Paul’s approval before implementation.
+Reuse existing sales definitions, evidence gates, membership checks and calculation code. No new schema/data/grants are needed for this initial code package. Focused tests must prove matching values for identical scopes, missing-vs-zero, negative refund periods, valid date/timezone/currency handling and stale-response isolation. Local staging may still show incomplete periods; do not restore completeness to force a demonstration. Paul subsequently approved this bounded package; implementation and verification are recorded below.
 
 After this foundation: inventory-to-design for historic costs, return recovery and expenses; prepare any schema/population as a separate reviewable proposal; remove remaining page-specific actual calculation paths and hardcoded report values; then Shopify development ingestion through the same evidence pipeline. No new cost allocation or forecasting assumptions without Paul. Cash/opportunities/monitoring remain later workstreams. Shopify setup has not started.
 
 ## Verification and status
 
-Coordinator reviewed all three reports and checked documentation whitespace. No application tests were rerun because no executable code changed. Reports distinguish historical original Supabase snapshot, recorded applied staging schemas, disposable prototypes and live state not inspected today. Routine GitHub development-branch publication is authorised. No implementation package is active yet; next user decision is the bounded sales-snapshot scope above.
+Coordinator reviewed all three reports and checked documentation whitespace. No application tests were rerun because no executable code changed. Reports distinguish historical original Supabase snapshot, recorded applied staging schemas, disposable prototypes and live state not inspected today. Routine GitHub development-branch publication is authorised. This inventory-only checkpoint is superseded by the implementation record below.
+
+## Shared sales package
+
+Implemented by three agents with coordinator integration: a common evidence-aware sales hook, per-store shared month/week/custom selection, strict date validation and store timezone/currency; all three consumers use the same financial calculation adapter. Verified Sales no longer fixes August, and Margin no longer uses the broad legacy aggregate loader or order-only lookback. Margin samples remain separate; actual margin/profit stays unavailable pending historic costs. No database, grant, ingestion, Replit or production changes.
+
+See [shared-sales package](shared-sales-package-2026-09-13.md) for verification, staging evidence and test environment limitations. The normal local staging preview is at localhost:3000 and uses the existing staging Supabase project. It is not a hosted production release. Routine code/docs publication is to the existing GitHub development branch/draft PR.
+
+## Next work
+
+1. Design the historical cost and expense evidence needed to compute actual contribution and operating profit, based on the input inventory and agreed definitions. Identify remaining policy decisions for Paul before implementation; sales completeness cannot certify costs.
+2. Move remaining actual page reads onto the shared scope/evidence foundation, then replace sample/hardcoded business outputs when their real inputs are supported. This sales package does not mean every page is reconciled.
+3. Set up the Shopify development store and connector through the same evidence pipeline. No real Shopify account/feed is connected yet.
+
+Preserve automatic progress through agreed packages, use bounded parallel agents where helpful, update local staging after each meaningful package, and retain explicit decisions for financial policy and production/database changes.

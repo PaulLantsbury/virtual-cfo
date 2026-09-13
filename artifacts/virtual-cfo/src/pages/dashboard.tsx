@@ -3,8 +3,7 @@ import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { Link } from "wouter";
 import { ArrowRight, ArrowUpRight, ArrowDownRight, Minus, Search } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { DataPeriodLabel } from "@/components/DataPeriodLabel";
-import { TimelineSelector } from "@/components/TimelineSelector";
+import { SalesReportingPeriod } from "@/components/SalesReportingPeriod";
 import { canAccess } from "@/lib/plan";
 
 
@@ -19,7 +18,7 @@ const ANALYSIS_PAGES = [
 
 export default function Dashboard() {
   const STORE_ID = useActiveStore();
-  const { period, briefing, comparison, loading } = useVerifiedBriefing(STORE_ID);
+  const { period, briefing, comparison, loading, reporting } = useVerifiedBriefing(STORE_ID);
   const hasFullActionPlan = canAccess("dashboard_full_action_plan");
 
   return <AppLayout showMonitoring={false}>
@@ -27,9 +26,12 @@ export default function Dashboard() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">CFO Briefing</h1>
         <p className="text-muted-foreground mt-1 text-sm">What the trading data shows, what changed, and where to look next.</p>
-        {briefing && <DataPeriodLabel periodLabel={period.label} loading={false} status="ready" dateFrom={period.dateFrom} dateTo={period.dateTo} />}
+        {briefing && <div className="mt-1.5 inline-block rounded-lg bg-secondary px-3 py-2 text-xs">
+          <p className="font-semibold">Using selected reporting period</p>
+          <p className="text-muted-foreground mt-0.5">{period.label}: {period.dateFrom} – {period.dateTo}</p>
+        </div>}
       </div>
-      <TimelineSelector />
+      <SalesReportingPeriod reporting={reporting} />
     </div>
 
     <p className="mb-5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">Test store · This briefing uses development data. Sales use verified evidence for the selected period. Profit and other financial measures remain incomplete.</p>
@@ -70,12 +72,12 @@ export default function Dashboard() {
         </div>
       </section>
 
-      <section className="mb-7">
+      <section aria-label="Verified sales figures" className="mb-7">
         <h2 className="text-lg font-bold mb-1">Key numbers behind the briefing</h2>
         <p className="text-sm text-muted-foreground mb-5">Figures and comparisons use the same reporting periods as the briefing.</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {briefing.metrics.map(metric => <div key={metric.id} className="rounded-2xl bg-card border border-border p-5">
-            <h3 className="text-sm text-muted-foreground">{metric.title}</h3>
+          {briefing.metrics.map(metric => <div role="group" aria-label={metric.id === "averageOrderValue" ? "Original average order value" : metric.title} key={metric.id} className="rounded-2xl bg-card border border-border p-5">
+            <h3 className="text-sm text-muted-foreground">{metric.id === "averageOrderValue" ? "Original average order value" : metric.title}</h3>
             <p className="text-2xl font-bold mt-2 mb-3">{metric.value}</p>
             <p className="flex items-center gap-1 text-xs text-muted-foreground mb-3">
               {metric.direction === "up" ? <ArrowUpRight className="w-3 h-3" />

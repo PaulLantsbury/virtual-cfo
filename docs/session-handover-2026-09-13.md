@@ -35,3 +35,9 @@ See [shared-sales package](shared-sales-package-2026-09-13.md) for verification,
 3. Set up the Shopify development store and connector through the same evidence pipeline. No real Shopify account/feed is connected yet.
 
 Preserve automatic progress through agreed packages, use bounded parallel agents where helpful, update local staging after each meaningful package, and retain explicit decisions for financial policy and production/database changes.
+
+## Subsequent profit-evidence preparation
+
+Paul asked to proceed after shared-sales completion. Three agents prepared cost, expense and acceptance designs; coordinator consolidated [the proposed implementation package and three decisions](profit-evidence-package-2026-09-13.md). Documentation only, reviewed against existing rules and prototype source; no financial policy adopted, no application/database changes or staging refresh required. Shared-sales remains the verified application checkpoint.
+
+At this stop the user decision is: (1) recognise saleable recovery on evidenced actual restock date independently of refund timing; (2) use actual, evidenced historical costs/expenses only in the first actual-profit slice, without inventing freight allocation; (3) begin with complete months and independently available subtotals. Unresolved precision, exceptional/correction accounting, allocation, FX and ratio-denominator cases remain unsupported. On approval, prepare versioned adapter/schema/tests and a concrete staging migration/setup proposal; do not apply it without separate database approval.

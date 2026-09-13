@@ -1,6 +1,6 @@
 # Night Scout — current project brief
 
-**13 September:** Financial-input inventory and the approved shared-sales package are implemented. CFO Briefing, Verified Sales and Margin Analysis now share sales evidence and period selection. Read the [current handover](session-handover-2026-09-13.md) and [package verification](shared-sales-package-2026-09-13.md). Other page migrations and historic cost evidence remain outstanding. Older stop/checkpoint entries below are historical.
+**13 September:** Financial-input inventory and the approved shared-sales package are implemented. CFO Briefing, Verified Sales and Margin Analysis now share sales evidence and period selection. Read the [current handover](session-handover-2026-09-13.md) and [package verification](shared-sales-package-2026-09-13.md). Other page migrations and historic cost evidence remain outstanding. Next: [profit-evidence design and pending decisions](profit-evidence-package-2026-09-13.md), prepared with three agents; no cost implementation or database changes yet. Older stop/checkpoint entries below are historical.
 
 **Stopped for the day:** Read the [12 September end-of-day checkpoint](end-of-day-2026-09-12.md) first. It records the final state, superseded intermediate work, standing decisions and proposed next steps. No further package is authorised yet.
 

@@ -23,6 +23,8 @@ import { PeriodImpact } from "@/components/PeriodImpact";
 import { MONTHLY_CM_PCT } from "@/lib/data/business-snapshot";
 import { CHANNEL_CM_PCT } from "@/lib/data/channel-metrics";
 import { useSalesReporting } from "@/lib/analytics/useSalesReporting";
+import { useProfitReporting } from "@/lib/analytics/useProfitReporting";
+import { VerifiedProfitSummary } from "@/components/VerifiedProfitSummary";
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true },
@@ -221,6 +223,7 @@ export default function MarginAnalysis() {
   const MA_STORE_ID = useActiveStore();
   const reporting = useSalesReporting(MA_STORE_ID);
   const { data, config } = reporting;
+  const profit = useProfitReporting(MA_STORE_ID, reporting);
   const sourceMoney = (value: number | null | undefined) =>
     value !== null && value !== undefined && config
       ? new Intl.NumberFormat("en-GB", {style: "currency", currency: config.currency}).format(value / 100)
@@ -311,7 +314,7 @@ export default function MarginAnalysis() {
             Margin Analysis
           </h1>
           <p className="text-muted-foreground mt-1">
-            Actual margin reporting is unavailable. Explore a separate
+            See supported profit and margin figures for the selected month, with a separate
             illustrative recovery model below.
           </p>
         </div>
@@ -323,12 +326,12 @@ export default function MarginAnalysis() {
         className="rounded-2xl border border-border bg-card p-6 mb-6 space-y-3"
       >
         <h2 className="text-xl font-bold">
-          Actual margin and recovery: unavailable
+          Verified sales and profit evidence
         </h2>
         <p className="text-sm text-muted-foreground">
-          Historic product costs, variable costs and marketing inputs are not connected
-          to actual margin reporting. No business-specific margin diagnosis, recovery
-          estimate or recommended action is available.
+          Profit subtotals and margins are shown only when their supporting evidence is available.
+          Missing costs remain unavailable. Business-specific margin diagnosis, recovery
+          estimates and recommended actions are not yet available.
         </p>
         <section aria-label="Verified sales figures">
           <h3 className="font-semibold">Verified sales figures</h3>
@@ -350,6 +353,7 @@ export default function MarginAnalysis() {
           </dl>
         </section>
       </section>
+      <VerifiedProfitSummary profit={profit} currency={config?.currency} />
       <section
         aria-label="Sample margin model notice"
         className="rounded-2xl border border-primary/30 bg-primary/5 p-6 mb-6"
@@ -568,8 +572,8 @@ export default function MarginAnalysis() {
               </p>
               <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
                 Pro includes the sample plan with illustrative values, timing
-                and steps. Upgrading does not validate or connect actual margin
-                reporting.
+                and steps. Plan access does not supply missing source evidence or
+                validate these illustrative recovery assumptions.
               </p>
             </div>
           </div>
@@ -818,8 +822,8 @@ export default function MarginAnalysis() {
               model.
             </p>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6 leading-relaxed">
-              Pro includes the illustrative simulator controls. Actual margin
-              reporting remains unavailable.
+              Pro includes the illustrative simulator controls. Upgrading does not
+              supply missing profit evidence or validate the sample model.
             </p>
             <a
               href="/upgrade"
@@ -832,8 +836,8 @@ export default function MarginAnalysis() {
       )}
 
       <p className="text-sm text-muted-foreground mb-6">
-        Business-specific AI margin advice is unavailable while validated margin
-        inputs are not connected.
+        Business-specific AI margin advice remains unavailable. Verified period
+        subtotals alone do not establish a diagnosis or a recommended action.
       </p>
 
       <details className="group bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
@@ -1117,7 +1121,7 @@ export default function MarginAnalysis() {
 
       <DataBenchmarkAssumptions
         benchmarkNote="Thresholds and confidence labels are illustrative assumptions, not verified benchmarks for your business."
-        dataQualityNote="Actual margin reporting is unavailable. The sales panel shows verified figures only when supporting evidence is complete; every model, scenario and supporting analysis uses separate sample inputs."
+        dataQualityNote="Sales and profit panels use the selected store and period. Each profit subtotal requires its own supporting evidence; missing amounts are not zero. Every model, scenario and supporting analysis below uses separate sample inputs."
         className="mb-2"
       />
     </AppLayout>

@@ -1,3 +1,5 @@
+import { useProfitReporting } from "@/lib/analytics/useProfitReporting";
+import { VerifiedProfitSummary } from "@/components/VerifiedProfitSummary";
 import { useVerifiedBriefing } from "@/lib/analytics/useVerifiedBriefing";
 import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { Link } from "wouter";
@@ -19,6 +21,7 @@ const ANALYSIS_PAGES = [
 export default function Dashboard() {
   const STORE_ID = useActiveStore();
   const { period, briefing, comparison, loading, reporting } = useVerifiedBriefing(STORE_ID);
+  const profit = useProfitReporting(STORE_ID, reporting);
   const hasFullActionPlan = canAccess("dashboard_full_action_plan");
 
   return <AppLayout showMonitoring={false}>
@@ -34,7 +37,9 @@ export default function Dashboard() {
       <SalesReportingPeriod reporting={reporting} />
     </div>
 
-    <p className="mb-5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">Test store · This briefing uses development data. Sales use verified evidence for the selected period. Profit and other financial measures remain incomplete.</p>
+    <p className="mb-5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">Test store · This briefing uses development data. Sales use verified evidence for the selected period. Profit figures are shown only where the selected month has supporting cost evidence.</p>
+
+    <VerifiedProfitSummary profit={profit} currency={reporting.config?.currency} />
 
     {!briefing ? <section role="status" className="rounded-2xl border bg-card p-6">
       <h2 className="text-xl font-bold">{loading ? "Checking verified trading data" : "Verified figures unavailable"}</h2>
@@ -93,8 +98,8 @@ export default function Dashboard() {
       <p className="mb-7 text-sm text-muted-foreground">Product refunds in this period: {briefing.refunds}. Net shipping revenue: {briefing.shipping}. Both exclude VAT. Refund rate and repeat purchase rate await agreed definitions and verified data.</p>
 
       <section className="mb-7 rounded-2xl border border-border bg-card p-6">
-        <h2 className="font-bold text-lg">Financial estimates awaiting verification</h2>
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-4xl">Contribution margin and profit need a reconciled product-cost and overhead basis. Cash runway needs a dated cash balance and matching expense period. Recoverable profit and cash-release opportunities need separate, supported estimates. These figures are not included in this briefing yet.</p>
+        <h2 className="font-bold text-lg">Cash and recovery estimates awaiting verification</h2>
+        <p className="text-sm text-muted-foreground mt-2 leading-relaxed max-w-4xl">Cash runway needs a dated cash balance and matching expense period. Recoverable profit and cash-release opportunities need separate, supported estimates. These figures are not included in this briefing yet.</p>
         <p className="text-sm text-muted-foreground mt-3">Automated monitoring is not active. Weekly comparisons require their own complete evidence; monthly coverage is not assumed to certify a week.</p>
       </section>
 

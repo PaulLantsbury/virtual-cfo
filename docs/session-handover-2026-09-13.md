@@ -63,3 +63,7 @@ Paul explicitly approved the five private profit tables/guard, Store D three-mon
 ## Approved staging execution completed
 
 The preceding connection block is resolved. Exact approved schema and Store D fixture were applied once to staging and all three months now reconcile. The first postcheck exposed a UK daylight-saving DATE conversion bug; a reader-only SQL date-text fix and regression resolved it without changing sealed evidence. 64/64 tests pass. Five private tables have RLS, no client grants; approved membership exists. Existing A/B/C preflight settings/counts/coverage remain unchanged. Temporary password file removed. See the setup execution record for limits. Next is member-scoped actual-profit API/version selection and page integration; no production release or public profit route exists yet.
+
+## Navigation logo update
+
+Paul supplied the new white/orange dog-and-wordmark PNG. The shared signed-in sidebar and mobile header now select a dedicated navigation asset; the public landing page and authentication artwork retain their existing logo. The supplied PNG is stored unchanged, with CSS framing to omit its transparent margins. Frontend typecheck passes and the mobile staging header was visually checked. No financial behaviour or deployment changed.

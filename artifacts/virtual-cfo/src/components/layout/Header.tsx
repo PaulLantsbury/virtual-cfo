@@ -13,8 +13,9 @@ export function Header({ showMonitoring = true }: { showMonitoring?: boolean }) 
         <Menu className="w-5 h-5" />
       </button>
       <BrandLogo
+        variant="navigation"
         className="md:hidden ml-2"
-        imageClassName="h-12 max-w-[160px]"
+        imageClassName="h-11 w-[143px]"
       />
 
       <div className="flex items-center gap-3 ml-auto">

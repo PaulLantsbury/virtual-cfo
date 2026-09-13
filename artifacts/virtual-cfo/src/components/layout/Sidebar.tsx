@@ -23,8 +23,9 @@ export function Sidebar() {
     <aside className="hidden md:flex flex-col w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border shadow-2xl z-10">
       <div className="h-24 flex items-center justify-center px-6 border-b border-sidebar-border/50">
         <BrandLogo
+          variant="navigation"
           className="group transition-all hover:scale-[1.02]"
-          imageClassName="max-h-16 max-w-[220px]"
+          imageClassName="h-16 w-[208px]"
         />
       </div>
 

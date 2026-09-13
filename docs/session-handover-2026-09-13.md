@@ -1,5 +1,33 @@
 # Night Scout — 13 September handover
 
+## End-of-day checkpoint — authoritative restart summary
+
+Paul stopped for the day after accepting the corrected blue navigation logo, including the full-screen ear clearance. Resume from this section; the chronological entries below include superseded pending approvals and must not be treated as current blockers.
+
+### Completed today
+
+- Shared scoped sales reporting across reporting pages, using the agreed definitions and Supabase evidence.
+- Historical cost/expense evidence foundation, versioned monthly profit calculations, member-scoped reporting API and actual Profit Overview.
+- Explicitly approved staging schema, synthetic Store D and membership setup applied and reconciled; subsequent nine-table read-only access proposal also approved and applied. Do not request these approvals or repeat the installations.
+- CFO Briefing and Margin Analysis now share the actual-profit report and supported margin ratios. Verified Sales wording updated to reflect this capability.
+- New blue navigation logo installed; desktop/mobile dimensions retained and vertical framing corrected to 48%. Paul accepted the final appearance. Public home/authentication logos unchanged.
+
+### Verified state and limits
+
+Foundation: 64 regressions; service/access: 21 checks; Profit Overview: 9 browser checks; shared-page rollout: 16 browser checks plus 4 Margin regressions; relevant typechecks passed. These are separate package runs, not one newly rerun aggregate suite. Live Store D February: net product sales £140, shipping £5, AOV £70, gross profit £80, contribution £60, operating profit £35, EBITDA £40. March refund and April stock recovery verified independently. February sales/AOV agreed across Profit Overview, CFO Briefing, Margin Analysis and Verified Sales.
+
+Code and documentation published to GitHub PaulLantsbury/virtual-cfo, branch codex/restart-baseline, existing draft PR #1. Latest code checkpoint before this handover: local 5424254; remote may have a different commit ID but matching file tree. Existing local staging is http://localhost:3000, using staging Supabase bioalckltvkhlczusdvl and the restricted API. Local preview needs this Mac running; it is not a hosted staging deployment. Production, main branch and Replit are unchanged. Synthetic data only; no live Shopify feed. Sample/legacy outputs still remain on other pages and must not be described as actual results or as fully reconciled.
+
+### Resume sequence
+
+1. Read this checkpoint and the shared-profit-pages record; check repository state and existing preview before edits. Restart the documented local preview if necessary, without exposing credentials. Do not repeat completed migrations or approved grants.
+2. Propose a bounded next package from the remaining page/source inventory: connect remaining actual business outputs to the shared Supabase evidence and definitions, verify cross-page consistency, and remove hardcoded business results or explicitly withhold unsupported metrics. Preserve separately labelled Scenario Planner/sample models until replacement inputs and assumptions are agreed. Do not infer missing costs, marketing effects or forecasts.
+3. After the data consistency foundation, set up the Shopify development store/platform and test ingestion into the same evidence pipeline. Paul has no usable Shopify account connected yet; consult recorded Shopify guidance before recommending setup.
+4. Use parallel agents for independent bounded tasks where helpful. Carry agreed work through implementation, focused checks, documentation, GitHub publication and local staging refresh without repeated continue requests. Ask Paul for new financial/product decisions, database changes or production release approval when needed.
+
+No background work or production release is scheduled. Next session prompt: “Continue Night Scout from the 13 September end-of-day handover.”
+
+
 ## Initial inventory (completed before implementation)
 
 Paul resumed from the 12 September handover and authorised parallel reviews. Three agents reviewed repository data paths, financial input schema evidence and shared reporting contract/acceptance. Coordinator consolidated the findings. This was read-only application/database investigation with versioned documentation outputs. No application, schema, database, grant, account, production or Replit changes. No fresh live Supabase query was made; database conclusions are explicitly based on saved catalog, staging application records and code. Working tree was clean at resume.

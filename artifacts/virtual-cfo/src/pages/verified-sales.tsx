@@ -1,3 +1,4 @@
+import {Link} from "wouter";
 import {AppLayout} from '@/components/layout/AppLayout';
 import {useActiveStore} from '@/lib/auth/AuthProvider';
 import {useSalesReporting} from '@/lib/analytics/useSalesReporting';
@@ -17,7 +18,7 @@ export default function VerifiedSalesPage(){
    <dl className="grid sm:grid-cols-2 gap-4">
     {[['Gross product sales',money(data.grossProductSales)],['Product discounts',money(data.discounts)],['Product refunds',money(data.productRefundExVat)],['Net product sales',money(data.netProductSales)],['Net shipping revenue',money(data.netShipping)],['Original average order value',data.aov.value===null?'Unavailable — no qualifying original orders':money(data.aov.value)]].map(([label,value])=><div role="group" aria-label={label} className="rounded-xl border p-4" key={label}><dt className="text-muted-foreground">{label}</dt><dd className="text-xl mt-2">{value}</dd></div>)}
    </dl>
-   <p className="mt-5 text-sm text-muted-foreground">Sales exclude VAT. Average order value uses original sales after discounts, before later refunds. Profit remains unavailable until historic product costs are verified.</p>
+   <p className="mt-5 text-sm text-muted-foreground">Sales exclude VAT. Average order value uses original sales after discounts, before later refunds. For profit figures where historical costs and expenses are supported, see <Link href="/profit-engine" className="text-primary underline">Profit Overview</Link>.</p>
   </section>}
  </AppLayout>;
 }

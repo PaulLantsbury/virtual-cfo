@@ -1,14 +1,15 @@
+import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { useState, useEffect } from "react";
 import { Sparkles, Lock, SlidersHorizontal, Info, Zap, Shield } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { canAccess } from "@/lib/plan";
-import { useTimeline } from "@/lib/timeline";
+
 import { cn } from "@/lib/utils";
 import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
-import { AiCfoAskCard } from "@/components/AiCfoAskCard";
+
 import { PeriodImpact } from "@/components/PeriodImpact";
 import {
   BLENDED_CAC,
@@ -21,17 +22,29 @@ import {
   CAC_BY_CHANNEL,
   PAYBACK_BY_CHANNEL,
 } from "@/lib/data/channel-metrics";
-import {
-  getMarketingChannelMetrics,
-  findChannel,
-  getCacTrendForChannel,
-  totalOpportunityUplift,
-  type ChannelMonthlyMetrics,
-  type BlendedMarketingPerformance,
-  type ChannelOpportunity,
-  type CacTrendPoint,
-} from "@/lib/analytics/marketingChannelMetrics";
-import { CAC_PAYBACK, CAC_PAYBACK_PREV, DISCOUNT_DEP, REPEAT_RATE } from "@/lib/data/growth-metrics";
+import { supabase } from "@/lib/supabase";
+
+type SourceMarketing = { channels: {period: string; channel: string; cac: number | null; roas: number | null; cacPaybackOrders: number | null}[]; blended: {period: string; blendedCac: number | null; blendedRoas: number | null} | null; errors: string[] };
+const finiteSource = (value: unknown): number | null => {
+  if (typeof value !== "number" && (typeof value !== "string" || value.trim() === "")) return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+};
+async function readMarketingSource(store: string, from: string, to: string): Promise<SourceMarketing> {
+  const params = {p_store_id: store, p_date_from: from, p_date_to: to};
+  const [channels, blended] = await Promise.all([
+    supabase.rpc("channel_metrics_monthly", params),
+    supabase.rpc("blended_marketing_performance", params),
+  ]);
+  const period = (r: Record<string, unknown>) => typeof r.period_start === "string" && typeof r.period_end === "string" ? `${r.period_start} to ${r.period_end}` : "Period not supplied";
+  const row = Array.isArray(blended.data) ? blended.data[0] : blended.data;
+  return {
+    errors: [channels.error ? "channels" : "", blended.error ? "blended" : ""].filter(Boolean),
+    channels: channels.error || !Array.isArray(channels.data) ? [] : channels.data.filter(r => r && typeof r === "object").map(r => ({period: period(r), channel: typeof r.channel === "string" ? r.channel : "Unnamed", cac: finiteSource(r.cac), roas: finiteSource(r.roas), cacPaybackOrders: finiteSource(r.cac_payback_orders)})),
+    blended: blended.error || !row || typeof row !== "object" ? null : {period: period(row), blendedCac: finiteSource(row.blended_cac), blendedRoas: finiteSource(row.blended_roas)},
+  };
+}
+import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
 import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
 import { DataPeriodLabel } from "@/components/DataPeriodLabel";
 import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/analytics/deltaSentiment";
@@ -40,7 +53,7 @@ import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/ana
 // DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx and margin-analysis.tsx.
 // Must be replaced with the authenticated session's store_id before multi-tenant use.
 // Date range is resolved dynamically by useLatestDataPeriod() inside the component.
-const ME_STORE_ID = "10000000-0000-0000-0000-000000000001";
+
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 // BLENDED_CAC, BLENDED_ROAS, CAC_BY_CHANNEL, PAYBACK_BY_CHANNEL, CHANNEL_CM_PCT
@@ -70,7 +83,7 @@ const MKT_CP_CHANGE_LY   = MKT_CP - MKT_CP_LY;     // +3_000 (favourable)
 const ESTIMATED_CONTRIBUTION = 18_200;
 // Channel CM percentages imported from channel-metrics (shared with margin-analysis).
 // Revenue figures remain local — they reflect the marketing-efficiency period basis.
-/** @dynamic Replace with live channel-level margin data from Shopify + ad platforms */
+/** @dynamic Replace with validated channel-level margin data from Shopify + ad platforms */
 const CHANNEL_CM = [
   { channel: "Email",           cm: CHANNEL_CM_PCT.email,          revenue: 18_200 },
   { channel: "Organic",         cm: CHANNEL_CM_PCT.organic,        revenue: 24_800 },
@@ -126,7 +139,7 @@ type Effort     = "low" | "medium" | "high";
 /**
  * Structured opportunity scenarios for the Marketing Efficiency page.
  * Each entry supports Free (name only) and Pro (full breakdown) display.
- * @dynamic Replace with live-computed values from ad platform + Shopify data.
+ * @dynamic Replace with validated computed values from ad platform + Shopify data.
  */
 const ME_OPPORTUNITIES: {
   shortLabel: string;
@@ -291,193 +304,65 @@ function getPaybackBand(payback: number): {
 
 // ─── Timeline framing ─────────────────────────────────────────────────────────
 
-const TIMELINE_FRAMING: Record<string, {
-  upliftPhrase:  string;
-  baselineNote:  string;
-  rowLabel:      string;
-  combinedLabel: string;
-  /** Concise per-row sub-label shown beneath each £ impact figure */
-  impactBasis:   string;
-}> = {
-  last_complete_week: {
-    upliftPhrase:  "based on the latest completed weekly review",
-    baselineNote:  "latest completed week",
-    rowLabel:      "weekly review",
-    combinedLabel: "weekly review if implemented now",
-    impactBasis:   "latest completed week",
-  },
-  last_complete_month: {
-    upliftPhrase:  "based on the latest completed monthly review",
-    baselineNote:  "latest completed month",
-    rowLabel:      "monthly review",
-    combinedLabel: "monthly review if implemented now",
-    impactBasis:   "latest completed month",
-  },
-};
-
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MarketingEfficiency() {
-  const { timeline } = useTimeline();
-  const framing = TIMELINE_FRAMING[timeline] ?? TIMELINE_FRAMING.last_complete_month;
+  const ME_STORE_ID = useActiveStore();
+  const framing = { upliftPhrase: "in this sample monthly model", baselineNote: "sample monthly basis", rowLabel: "sample month", combinedLabel: "sample monthly model", impactBasis: "sample monthly basis" };
 
-  // ── Phase 1: live discount dependency and repeat purchase rate ────────────
+  // ── Phase 1: unverified discount dependency and repeat purchase rate ────────────
   // Walks back from the current month to find the most recent month with data.
   // Only these two fields are used here — all other ME metrics require ad
   // platform data (Meta/Google Ads API) and remain static for now.
-  const { phase1: mktPhase1, periodLabel: mePeriodLabel, loading: mePeriodLoading, dateFrom, dateTo } = useLatestDataPeriod(ME_STORE_ID);
+  const { status: reportingStatus,  phase1: mktPhase1, periodLabel: mePeriodLabel, loading: mePeriodLoading, dateFrom, dateTo } = useLatestDataPeriod(ME_STORE_ID);
 
-  // Live discount dependency % (1 d.p.) — fallback to static DISCOUNT_DEP.
-  const liveDiscountDep = mktPhase1
-    ? (mktPhase1.data.discountDependency * 100).toFixed(1)
-    : DISCOUNT_DEP.toFixed(1);
-
-  // Live repeat purchase rate % (1 d.p.) — fallback to static REPEAT_RATE.
-  const liveRepeatRate = mktPhase1
-    ? (mktPhase1.data.repeatPurchaseRate * 100).toFixed(1)
-    : REPEAT_RATE.toFixed(1);
-
-  // Patch the two Phase-1-adjacent driver cause strings with live values.
-  // Driver, impact, direction, and category remain untouched — only cause text
-  // is updated for the visible commercial driver summary.
-  const liveMeDrivers = ME_DRIVERS.map((d) => {
-    if (d.driver === "Discount-led traffic mix") {
-      return {
-        ...d,
-        cause: `Discount dependency at ${liveDiscountDep}% — higher discount depth shifted order mix toward low-margin SKUs`,
-      };
-    }
-    if (d.driver === "Lower repeat-customer share") {
-      return {
-        ...d,
-        cause: `Repeat purchase rate at ${liveRepeatRate}% — declining repeat share increases reliance on expensive new customer acquisition`,
-      };
-    }
-    return d;
-  });
-
-  // ── Phase 3: live marketing channel metrics ────────────────────────────────
-  // Calls four Supabase RPCs in parallel via getMarketingChannelMetrics().
-  // Individual RPC failures are isolated — other fields remain intact.
-  // All values fall back to static channel-metrics.ts constants if unavailable.
-  const [liveChannels,      setLiveChannels]      = useState<ChannelMonthlyMetrics[]>([]);
-  const [liveBlended,       setLiveBlended]       = useState<BlendedMarketingPerformance | null>(null);
-  const [liveBlendedPrev,   setLiveBlendedPrev]   = useState<BlendedMarketingPerformance | null>(null);
-  const [liveOpportunities, setLiveOpportunities] = useState<ChannelOpportunity[]>([]);
-  const [liveCacTrend,      setLiveCacTrend]      = useState<CacTrendPoint[]>([]);
-
+  // Keep source readings separate from illustrative advice. Most legacy marketing
+  // adapter totals coerce missing values to zero; only nullable metrics are shown.
+  const sourceKey = `${ME_STORE_ID}:${dateFrom}:${dateTo}`;
+  const [source, setSource] = useState<{key: string; data: SourceMarketing | null; failed: boolean} | null>(null);
   useEffect(() => {
-    if (mePeriodLoading) return;
+    if (mePeriodLoading || !mktPhase1) return;
     let cancelled = false;
-    // Derive prior-period date range (one calendar month back) for blended CAC MoM.
-    const d = new Date(dateFrom);
-    d.setMonth(d.getMonth() - 1);
-    const prevMo   = d.getMonth() + 1;
-    const prevYr   = d.getFullYear();
-    const prevFrom = `${prevYr}-${String(prevMo).padStart(2, "0")}-01`;
-    const prevTo   = new Date(prevYr, prevMo, 0).toISOString().slice(0, 10);
-    (async () => {
-      const [curr, prev] = await Promise.all([
-        getMarketingChannelMetrics(ME_STORE_ID, dateFrom, dateTo),
-        getMarketingChannelMetrics(ME_STORE_ID, prevFrom, prevTo),
-      ]);
-      if (cancelled) return;
-      setLiveChannels(curr.channels);
-      setLiveBlended(curr.blended);
-      setLiveBlendedPrev(prev.blended);
-      setLiveOpportunities(curr.opportunities);
-      setLiveCacTrend(curr.cacTrend);
-    })();
+    setSource(null);
+    readMarketingSource(ME_STORE_ID, dateFrom, dateTo).then(data => {
+      if (!cancelled) setSource({ key: sourceKey, data, failed: false });
+    }).catch(() => {
+      if (!cancelled) setSource({ key: sourceKey, data: null, failed: true });
+    });
     return () => { cancelled = true; };
-  }, [mePeriodLoading, dateFrom, dateTo]);
+  }, [ME_STORE_ID, dateFrom, dateTo, mePeriodLoading, mktPhase1, sourceKey]);
+  const currentSource = !mePeriodLoading && mktPhase1 && source?.key === sourceKey ? source : null;
+  const sourceNumber = (value: number | null | undefined, percent = false) =>
+    typeof value === "number" && Number.isFinite(value)
+      ? (value * (percent ? 100 : 1)).toLocaleString("en-GB", {minimumFractionDigits: 2, maximumFractionDigits: 2}) + (percent ? "%" : "")
+      : "Unavailable";
+  const sourceStatus = mePeriodLoading ? "Source figures loading"
+    : reportingStatus === "error" ? "Source figures unavailable"
+    : reportingStatus === "empty" ? "No source orders found in the reporting search"
+    : reportingStatus === "stale" ? "Unverified source figures: historical period"
+    : "Unverified source figures: latest completed period";
+  const marketingStatus = !mktPhase1 && !mePeriodLoading ? "Marketing source figures unavailable"
+    : !currentSource ? "Marketing source figures loading"
+    : currentSource.failed ? "Marketing source figures unavailable"
+    : currentSource.data?.errors.length ? "Some marketing source figures unavailable"
+    : !currentSource.data?.channels.length && !currentSource.data?.blended ? "No marketing source rows returned"
+    : "Unverified marketing source figures";
 
-  // ── Live computed values (Phase 3 — with static fallbacks) ─────────────────
-  // Blended CAC: current and prior period from RPC.
-  const liveBlendedCac     = liveBlended?.blendedCac     ?? BLENDED_CAC;
-  const liveBlendedCacPrev = liveBlendedPrev?.blendedCac ?? BLENDED_CAC_PREV;
-  const liveBlendedCacChange   = +(liveBlendedCac - liveBlendedCacPrev).toFixed(2);
-  const liveBlendedCacChangeLy = +(liveBlendedCac - BLENDED_CAC_LY).toFixed(2);
-
-  // Opportunity uplift total from active scored opportunities.
-  const liveUplift = totalOpportunityUplift(liveOpportunities);
-  const liveEstimatedContribution = liveUplift.high > 0
-    ? Math.round(liveUplift.high)
-    : ESTIMATED_CONTRIBUTION;
-
-  // DB slug → UI display name.
-  const SLUG_TO_NAME: Record<string, string> = {
-    meta: "Meta", google_shopping: "Google Shopping", email: "Email", organic: "Organic",
-  };
-
-  // Efficiency band: strong < 70% of blended · watch < 120% · weak ≥ 120%.
-  const getCacEfficiency = (cac: number, blended: number): EfficiencyRating =>
-    cac < blended * 0.7 ? "strong" :
-    cac < blended * 1.2 ? "watch"  : "weak";
-
-  // Live CAC by channel — falls back to full static array if RPC returns no rows.
-  const liveCacByChannel: typeof CAC_BY_CHANNEL = (() => {
-    if (!liveChannels.length) return CAC_BY_CHANNEL;
-    const blCac = liveBlendedCac;
-    return (["meta", "google_shopping", "email", "organic"] as const).flatMap((slug) => {
-      const ch = findChannel(liveChannels, slug);
-      if (!ch || ch.cac === null) {
-        return CAC_BY_CHANNEL.filter((r) => r.channel === SLUG_TO_NAME[slug]);
-      }
-      const pts    = getCacTrendForChannel(liveCacTrend, slug);
-      const latest = pts[pts.length - 1] ?? null;
-      const mom    = latest?.momChangePct ?? null;
-      const changeLabel =
-        mom === null || mom === 0 ? "Stable" :
-        mom > 0 ? `+${Math.round(mom * 100)}%` : `−${Math.round(Math.abs(mom) * 100)}%`;
-      const change =
-        mom === null || mom === 0 ? null :
-        (mom > 0 ? Math.round(mom * 100) : -Math.round(Math.abs(mom) * 100));
-      return [{ channel: SLUG_TO_NAME[slug] ?? slug, cac: ch.cac, change, changeLabel, efficiency: getCacEfficiency(ch.cac, blCac) }];
-    });
-  })();
-
-  // Live contribution margin % and attributed net sales per channel.
-  const liveChannelCm: { channel: string; cm: number; revenue: number }[] = (() => {
-    if (!liveChannels.length) return CHANNEL_CM;
-    const get = (slug: string, fallbackCm: number, fallbackRev: number) => {
-      const ch = findChannel(liveChannels, slug);
-      return { cm: ch ? ch.contributionMarginPct * 100 : fallbackCm, revenue: ch ? ch.attributedNetSales : fallbackRev };
-    };
-    return [
-      { channel: "Email",           ...get("email",           CHANNEL_CM_PCT.email,          CHANNEL_CM[0].revenue) },
-      { channel: "Organic",         ...get("organic",         CHANNEL_CM_PCT.organic,        CHANNEL_CM[1].revenue) },
-      { channel: "Google Shopping", ...get("google_shopping", CHANNEL_CM_PCT.googleShopping, CHANNEL_CM[2].revenue) },
-      { channel: "Meta",            ...get("meta",            CHANNEL_CM_PCT.meta,           CHANNEL_CM[3].revenue) },
-    ];
-  })();
-
-  // Live contribution profit per channel.
-  const liveChannelCp: { channel: string; cp: number }[] = (() => {
-    if (!liveChannels.length) return CHANNEL_CP;
-    return [
-      { channel: "Email",           cp: findChannel(liveChannels, "email")?.contributionProfit           ?? CHANNEL_CP[0].cp },
-      { channel: "Organic",         cp: findChannel(liveChannels, "organic")?.contributionProfit         ?? CHANNEL_CP[1].cp },
-      { channel: "Google Shopping", cp: findChannel(liveChannels, "google_shopping")?.contributionProfit ?? CHANNEL_CP[2].cp },
-      { channel: "Meta",            cp: findChannel(liveChannels, "meta")?.contributionProfit            ?? CHANNEL_CP[3].cp },
-    ];
-  })();
-
-  // Live CAC payback by channel from cac_payback_orders RPC field.
-  const livePaybackByChannel: { channel: string; payback: number }[] = (() => {
-    if (!liveChannels.length) return PAYBACK_BY_CHANNEL;
-    return (["email", "organic", "google_shopping", "meta"] as const).map((slug) => {
-      const ch       = findChannel(liveChannels, slug);
-      const fallback = PAYBACK_BY_CHANNEL.find((p) => p.channel === SLUG_TO_NAME[slug])?.payback ?? 1.0;
-      return { channel: SLUG_TO_NAME[slug] ?? slug, payback: ch?.cacPaybackOrders ?? fallback };
-    });
-  })();
-
-  // Best/worst CP channels — used in §4 interpretation text (dynamic with live data).
-  const liveCpSortedDesc   = [...liveChannelCp].sort((a, b) => b.cp - a.cp);
-  const liveBestCpChannel  = liveCpSortedDesc[0]?.channel  ?? "Email";
-  const liveWorstCpChannel = liveCpSortedDesc[liveCpSortedDesc.length - 1]?.channel ?? "Meta";
-  const liveBestCpAmt      = liveCpSortedDesc[0]?.cp ?? 0;
-  const liveWorstCpAmt     = liveCpSortedDesc[liveCpSortedDesc.length - 1]?.cp ?? 0;
+  // Fixed examples never inherit source data, attribution or opportunity scores.
+  const sampleMeDrivers = ME_DRIVERS;
+  const sampleBlendedCac = BLENDED_CAC;
+  const sampleBlendedCacChange = +(BLENDED_CAC - BLENDED_CAC_PREV).toFixed(2);
+  const sampleBlendedCacChangeLy = +(BLENDED_CAC - BLENDED_CAC_LY).toFixed(2);
+  const sampleEstimatedContribution = ESTIMATED_CONTRIBUTION;
+  const sampleCacByChannel = CAC_BY_CHANNEL;
+  const sampleChannelCm = CHANNEL_CM;
+  const sampleChannelCp = CHANNEL_CP;
+  const samplePaybackByChannel = PAYBACK_BY_CHANNEL;
+  const sampleCpSortedDesc = [...CHANNEL_CP].sort((a, b) => b.cp - a.cp);
+  const sampleBestCpChannel = sampleCpSortedDesc[0].channel;
+  const sampleWorstCpChannel = sampleCpSortedDesc[sampleCpSortedDesc.length - 1].channel;
+  const sampleBestCpAmt = sampleCpSortedDesc[0].cp;
+  const sampleWorstCpAmt = sampleCpSortedDesc[sampleCpSortedDesc.length - 1].cp;
 
   // ── Budget Reallocation Simulator state ──────────────────────────────────
   const [metaToEmail,    setMetaToEmail]    = useState(0);
@@ -499,7 +384,7 @@ export default function MarketingEfficiency() {
   const isPro = canAccess("marketing_budget_simulator");
 
   return (
-    <AppLayout>
+    <AppLayout showMonitoring={false}>
 
       {/* ── Page header ─────────────────────────────────────────────────────── */}
       <div className="mb-8 flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -508,17 +393,39 @@ export default function MarketingEfficiency() {
             Marketing Efficiency
           </h1>
           <p className="text-muted-foreground mt-1">
-            Which channels are creating profitable customers, and where budget should move next.
+            Explore illustrative channel analysis while source data is being validated.
           </p>
-          <DataPeriodLabel
-            periodLabel={mePeriodLabel}
-            loading={mePeriodLoading}
-            dateFrom={dateFrom}
-            dateTo={dateTo}
-          />
+
         </div>
         <TimelineSelector />
       </div>
+
+      <section aria-label="Growth reporting status" className="rounded-2xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 p-5 mb-6">
+        <h2 className="text-lg font-bold">Actual growth analysis and recovery: unavailable</h2>
+        <p className="text-sm my-2">Sales, marketing costs, attribution and customer definitions have not been validated against the agreed financial definitions. Source currency has not been verified. These readings do not establish completeness or support budget recommendations.</p>
+        <h3 className="font-semibold">Unverified source figures</h3>
+        <p role="status" className="text-sm">{sourceStatus}</p>
+        <DataPeriodLabel status={reportingStatus} periodLabel={mePeriodLabel} loading={mePeriodLoading} dateFrom={dateFrom} dateTo={dateTo} />
+        <dl className="grid sm:grid-cols-2 gap-3 my-3">
+          <div><dt>Source-reported discount dependency</dt><dd>{sourceNumber(mktPhase1?.data.discountDependency, true)}</dd></div>
+          <div><dt>Source-reported repeat purchase rate</dt><dd>{sourceNumber(mktPhase1?.data.repeatPurchaseRate, true)}</dd></div>
+        </dl>
+        <p role="status" className="text-sm">{marketingStatus}</p>
+        <p className="text-xs">Returned blended snapshot: {currentSource?.data?.blended?.period ?? "Unavailable"}. Snapshot dates may differ from the source search above.</p>
+        <dl className="grid sm:grid-cols-2 gap-3 my-3">
+          <div><dt>Source-reported blended CAC</dt><dd>{sourceNumber(currentSource?.data?.blended?.blendedCac)}</dd></div>
+          <div><dt>Source-reported blended ROAS</dt><dd>{sourceNumber(currentSource?.data?.blended?.blendedRoas)}</dd></div>
+        </dl>
+        {currentSource?.data?.channels.map((channel, i) => <div key={`${channel.channel}-${i}`} className="border-t py-2 text-sm break-words">
+          <p className="font-semibold">Source channel: {channel.channel || "Unnamed"}</p><p>Returned snapshot: {channel.period}</p>
+          <p>CAC: {sourceNumber(channel.cac)} · ROAS: {sourceNumber(channel.roas)} · Payback (orders): {sourceNumber(channel.cacPaybackOrders)}</p>
+        </div>)}
+        <p className="text-xs">Source contribution totals, trends and opportunity scores are withheld pending validation. Missing channel rows and missing values are not replaced with examples.</p>
+      </section>
+      <section aria-label="Sample growth model notice" className="rounded-2xl border border-border bg-secondary/40 p-5 mb-6">
+        <h2 className="text-lg font-bold">Illustrative growth model — sample data</h2>
+        <p className="text-sm mt-2">Everything below uses fixed sample inputs, not results or recommendations for your business. Source figures and the selected reporting period do not change these examples. Money is illustrative GBP. Channel snapshots and simulator outputs are separate, unvalidated examples, not a reconciled forecast. Confidence and risk bands are sample assumptions.</p>
+      </section>
 
       {/* ══════════════════════════════════════════════════════════════════════
           §1  CFO CHANNEL VERDICT
@@ -529,10 +436,10 @@ export default function MarketingEfficiency() {
         <div className="sc-purple-header flex items-center gap-3 px-6 py-3">
           <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
           <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
-            CFO Channel Verdict
+            Sample Channel Scenario
           </span>
           <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-destructive/15 text-destructive whitespace-nowrap">
-            {isPro ? "Budget shift recommended" : "Opportunity identified"}
+            {isPro ? "Example budget shift" : "Sample opportunity"}
           </span>
         </div>
 
@@ -540,14 +447,14 @@ export default function MarketingEfficiency() {
           <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_0.85fr] gap-6 mb-5 pb-5 border-b border-primary/15">
             <div className="space-y-3">
               <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">
-                Email and Organic are creating the most profitable customers. Meta is now the weakest channel and is pulling blended acquisition efficiency down.
+                In this fictional example, Email and Organic are creating the most profitable customers. Meta is now the weakest channel and is pulling blended acquisition efficiency down.
               </p>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 {isPro
                   ? "The commercial move is to shift 15-25% of Meta spend toward lifecycle, Email and Organic activity before adding new budget."
                   : "The commercial issue is clear: weaker paid acquisition is absorbing budget that could be working harder elsewhere."}{" "}
-                That gives the business a route to recover approximately{" "}
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{liveEstimatedContribution.toLocaleString()}</span>{" "}
+                This example assumes potential recovery of approximately{" "}
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">£{sampleEstimatedContribution.toLocaleString()}</span>{" "}
                 {framing.upliftPhrase}.
               </p>
             </div>
@@ -555,23 +462,23 @@ export default function MarketingEfficiency() {
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-emerald-100/80 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700/60 px-4 py-3">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Strongest channel</p>
-                <p className="text-xl font-display font-bold text-emerald-900 dark:text-emerald-200">{liveBestCpChannel}</p>
+                <p className="text-xl font-display font-bold text-emerald-900 dark:text-emerald-200">{sampleBestCpChannel}</p>
                 <p className="text-xs text-emerald-700/70 dark:text-emerald-400/70 mt-1">
-                  £{liveBestCpAmt.toLocaleString()} contribution
+                  £{sampleBestCpAmt.toLocaleString()} contribution
                 </p>
               </div>
               <div className="rounded-xl bg-red-50/80 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 px-4 py-3">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 mb-1">Weakening channel</p>
-                <p className="text-xl font-display font-bold text-red-700 dark:text-red-300">{liveWorstCpChannel}</p>
+                <p className="text-xl font-display font-bold text-red-700 dark:text-red-300">{sampleWorstCpChannel}</p>
                 <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-1">
-                  £{liveWorstCpAmt.toLocaleString()} contribution
+                  £{sampleWorstCpAmt.toLocaleString()} contribution
                 </p>
               </div>
               <div className="col-span-2 rounded-xl bg-secondary/50 border border-border/50 px-4 py-3">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Recoverable contribution</p>
                 <div className="flex items-end gap-3">
                   <p className="text-3xl font-display font-bold text-emerald-600 dark:text-emerald-400 leading-none">
-                    £{liveEstimatedContribution.toLocaleString()}
+                    £{sampleEstimatedContribution.toLocaleString()}
                   </p>
                   <p className="text-xs text-muted-foreground pb-0.5">
                     {framing.rowLabel} · +{ME_TOTAL_PP.toFixed(1)}pp margin
@@ -591,7 +498,7 @@ export default function MarketingEfficiency() {
               <p className="text-sm text-foreground leading-snug">
                 {isPro
                   ? "Tighten Meta spend first, then move budget toward owned and organic demand."
-                  : "A prioritised recovery plan has been identified."}
+                  : "A fictional recovery plan is shown below."}
               </p>
             </div>
             <div className="rounded-xl bg-secondary/30 border border-primary/10 px-4 py-3">
@@ -608,9 +515,9 @@ export default function MarketingEfficiency() {
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Start Here</h2>
+        <h2 className="text-xl font-bold text-foreground">Sample Actions</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          The first three budget moves your CFO would make from this channel mix.
+          Example budget actions for the fictional channel mix below.
         </p>
       </div>
 
@@ -701,15 +608,15 @@ export default function MarketingEfficiency() {
                 <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Marketing Recovery Plan</p>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Sample Marketing Recovery Plan</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  3 prioritised actions identified worth approximately £{liveEstimatedContribution.toLocaleString()} contribution recovery. Upgrade to view the action plan, recommended budget moves and implementation steps.
+                  3 sample actions with an illustrative total of £{sampleEstimatedContribution.toLocaleString()} contribution recovery. Pro shows the sample action plan and example implementation steps; actual analysis remains unavailable.
                 </p>
               </div>
             </div>
             <div className="shrink-0 md:text-right">
               <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 mb-1">Estimated contribution recovery</p>
-              <p className="text-2xl font-display font-bold text-indigo-900 dark:text-indigo-100">£{liveEstimatedContribution.toLocaleString()}</p>
+              <p className="text-2xl font-display font-bold text-indigo-900 dark:text-indigo-100">£{sampleEstimatedContribution.toLocaleString()}</p>
               <a href="/upgrade" className="text-xs font-semibold text-indigo-600 dark:text-indigo-300 hover:underline mt-1 inline-block">
                 Upgrade to Pro →
               </a>
@@ -723,7 +630,7 @@ export default function MarketingEfficiency() {
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Which Channels Create Profitable Customers?</h2>
+        <h2 className="text-xl font-bold text-foreground">Sample Channel Comparisons</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
           Channel ranking by contribution profit, with CAC and margin evidence kept compact.
         </p>
@@ -731,11 +638,11 @@ export default function MarketingEfficiency() {
 
       <div className="rounded-2xl border border-border/60 shadow-sm mb-8 overflow-hidden bg-card">
         <div className="divide-y divide-border/40">
-          {[...liveChannelCp].sort((a, b) => b.cp - a.cp).map((row, i) => {
-            const cm = liveChannelCm.find((c) => c.channel === row.channel)?.cm ?? 0;
-            const cac = liveCacByChannel.find((c) => c.channel === row.channel)?.cac;
-            const isBest = row.channel === liveBestCpChannel;
-            const isWorst = row.channel === liveWorstCpChannel;
+          {[...sampleChannelCp].sort((a, b) => b.cp - a.cp).map((row, i) => {
+            const cm = sampleChannelCm.find((c) => c.channel === row.channel)?.cm ?? 0;
+            const cac = sampleCacByChannel.find((c) => c.channel === row.channel)?.cac;
+            const isBest = row.channel === sampleBestCpChannel;
+            const isWorst = row.channel === sampleWorstCpChannel;
             return (
               <div key={row.channel} className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-4 px-6 py-4 items-center">
                 <div className="flex items-start gap-3">
@@ -780,7 +687,7 @@ export default function MarketingEfficiency() {
       <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 shadow-sm mb-8 px-6 py-5">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
           <div>
-            <h2 className="text-xl font-bold text-foreground">What This Could Recover</h2>
+            <h2 className="text-xl font-bold text-foreground">Illustrative Recovery</h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
               These actions recover contribution by moving existing spend toward channels that already generate better customer economics.
             </p>
@@ -788,8 +695,8 @@ export default function MarketingEfficiency() {
           <div className="flex flex-wrap items-end gap-6">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Contribution recovery</p>
-              <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">£{liveEstimatedContribution.toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground mt-1">{framing.rowLabel} · £{(liveEstimatedContribution * 12).toLocaleString()} annualised</p>
+              <p className="text-4xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">£{sampleEstimatedContribution.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground mt-1">{framing.rowLabel} · £{(sampleEstimatedContribution * 12).toLocaleString()} annualised example, not a forecast</p>
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Margin upside</p>
@@ -805,14 +712,14 @@ export default function MarketingEfficiency() {
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Why This Is Happening</h2>
+        <h2 className="text-xl font-bold text-foreground">Sample Driver Explanations</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
           The main commercial reasons marketing contribution is leaking.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        {liveMeDrivers.slice(0, 3).map((driver) => (
+        {sampleMeDrivers.slice(0, 3).map((driver) => (
           <div key={driver.driver} className="rounded-2xl border border-border/60 bg-card px-5 py-4 shadow-sm">
             <p className="text-sm font-semibold text-foreground mb-1">{driver.driver}</p>
             <p className="text-xs text-muted-foreground leading-relaxed mb-3">{driver.cause}</p>
@@ -821,7 +728,7 @@ export default function MarketingEfficiency() {
         ))}
       </div>
 
-      <AiCfoAskCard pageId="marketing" />
+      <p className="text-sm text-muted-foreground mb-6">Business-specific AI advice is unavailable while marketing inputs are unverified.</p>
 
       {/* ══════════════════════════════════════════════════════════════════════
           §6  MODEL THE BUDGET SHIFT
@@ -829,9 +736,9 @@ export default function MarketingEfficiency() {
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Model The Budget Shift</h2>
+        <h2 className="text-xl font-bold text-foreground">Model A Sample Budget Shift</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Optional modelling for the recommended move: reduce inefficient paid spend and redirect it toward higher-contribution channels.
+          Explore fixed assumptions for a fictional budget shift. This model is not a recommendation to change your spend.
         </p>
       </div>
 
@@ -853,6 +760,7 @@ export default function MarketingEfficiency() {
 
         <div className="px-6 pt-6 pb-5">
 
+          <button type="button" className="text-sm text-primary mb-4" onClick={() => {setMetaToEmail(0); setMetaToOrganic(0); setGoogleToEmail(0); setGoogleToOrganic(0);}}>Reset sample scenario</button>
           {/* ── Sliders ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
 
@@ -957,7 +865,7 @@ export default function MarketingEfficiency() {
                   <span className="font-semibold">Medium confidence</span>&ensp;£{simMedConf.toLocaleString()}
                 </p>
               </div>
-              <ConfidenceBadge level="Medium" helper="Based on channel-level attribution and recent trend data." />
+              <ConfidenceBadge level="Medium" helper="Illustrative confidence only; not based on validated source data." />
             </div>
           ) : (
             <div className="relative rounded-xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/30 px-5 py-4 mb-5 overflow-hidden">
@@ -977,7 +885,7 @@ export default function MarketingEfficiency() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-indigo-900 dark:text-indigo-200 leading-snug">
-                      Upgrade to Pro to unlock channel reallocation impact modelling
+                      Pro includes sample channel reallocation modelling
                     </p>
                     <a href="/upgrade" className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline mt-0.5 inline-block">
                       Upgrade to Pro →
@@ -1050,7 +958,7 @@ export default function MarketingEfficiency() {
               <div className="absolute inset-0 flex items-center justify-center">
                 <a href="/upgrade" className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full shadow-lg transition-colors">
                   <Lock className="w-3.5 h-3.5" />
-                  Upgrade to Pro to unlock budget reallocation modelling
+                  Pro includes sample budget reallocation modelling
                 </a>
               </div>
             </div>
@@ -1061,7 +969,7 @@ export default function MarketingEfficiency() {
             <div className="flex items-center gap-2 mb-2">
               <Zap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <p className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                Recommended model preset
+                Example model preset
               </p>
             </div>
             <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200 leading-relaxed">
@@ -1070,7 +978,7 @@ export default function MarketingEfficiency() {
             <div className="flex items-center gap-3 mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-700/30">
               <div className="flex items-center gap-1.5">
                 <Shield className="w-3 h-3 text-emerald-600/70 dark:text-emerald-400/60" />
-                <span className="text-xs text-emerald-700/70 dark:text-emerald-400/60">Low implementation risk</span>
+                <span className="text-xs text-emerald-700/70 dark:text-emerald-400/60">Sample risk: Low</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Zap className="w-3 h-3 text-emerald-600/70 dark:text-emerald-400/60" />
@@ -1108,9 +1016,9 @@ export default function MarketingEfficiency() {
         <summary className="list-none cursor-pointer px-6 py-4 hover:bg-secondary/20 transition-colors">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
+              <h2 className="text-xl font-bold text-foreground">Supporting Sample Analysis</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                The key proof points behind the budget recommendation.
+                Illustrative supporting detail for the sample budget scenario.
               </p>
             </div>
             <span className="text-sm font-semibold text-muted-foreground shrink-0">View details ▼</span>
@@ -1124,9 +1032,9 @@ export default function MarketingEfficiency() {
           ══════════════════════════════════════════════════════════════════════ */}
 
           <div className="mb-4 pt-2">
-            <h3 className="text-lg font-bold text-foreground">Key Numbers Behind The Verdict</h3>
+            <h3 className="text-lg font-bold text-foreground">Sample Numbers Behind The Scenario</h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              The core metrics supporting the channel allocation recommendation.
+              Fixed illustrative metrics supporting the example scenario.
             </p>
           </div>
 
@@ -1156,17 +1064,17 @@ export default function MarketingEfficiency() {
         {/* 2 — Blended CAC */}
         <div className="bg-card rounded-2xl p-5 shadow-sm border border-border/50">
           <p className="text-sm font-medium text-muted-foreground mb-1">Blended CAC</p>
-          <p className="text-3xl font-display font-bold text-foreground mb-2">£{liveBlendedCac.toFixed(2)}</p>
+          <p className="text-3xl font-display font-bold text-foreground mb-2">£{sampleBlendedCac.toFixed(2)}</p>
           <div className="space-y-0.5 mb-2">
             <VarLine
               label="vs last month"
-              value={`↑ £${Math.abs(liveBlendedCacChange).toFixed(2)}`}
-              sentiment={deltaToSentiment(liveBlendedCacChange, DELTA_POLARITY.blendedCac)}
+              value={`↑ £${Math.abs(sampleBlendedCacChange).toFixed(2)}`}
+              sentiment={deltaToSentiment(sampleBlendedCacChange, DELTA_POLARITY.blendedCac)}
             />
             <VarLine
               label="vs 12-month avg"
-              value={`↑ £${Math.abs(liveBlendedCacChangeLy).toFixed(2)}`}
-              sentiment={deltaToSentiment(liveBlendedCacChangeLy, DELTA_POLARITY.blendedCac)}
+              value={`↑ £${Math.abs(sampleBlendedCacChangeLy).toFixed(2)}`}
+              sentiment={deltaToSentiment(sampleBlendedCacChangeLy, DELTA_POLARITY.blendedCac)}
             />
           </div>
           <p className="text-xs text-muted-foreground leading-snug">Average cost to acquire one customer across all channels</p>
@@ -1220,9 +1128,9 @@ export default function MarketingEfficiency() {
       ══════════════════════════════════════════════════════════════════════ */}
 
       <div className="mb-4">
-        <h2 className="text-xl font-bold text-foreground">Channel Evidence</h2>
+        <h2 className="text-xl font-bold text-foreground">Sample Channel Detail</h2>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Deeper channel diagnostics for founders who want to inspect the recommendation.
+          Fictional channel diagnostics for exploring the sample scenario.
         </p>
       </div>
 
@@ -1320,7 +1228,7 @@ export default function MarketingEfficiency() {
           <div className="flex items-center gap-3">
             <span className="text-xs text-muted-foreground">
               Blended avg:{" "}
-              <span className="font-semibold text-foreground tabular-nums">£{liveBlendedCac.toFixed(2)}</span>
+              <span className="font-semibold text-foreground tabular-nums">£{sampleBlendedCac.toFixed(2)}</span>
             </span>
             <span className="text-xs text-muted-foreground border-l border-border/50 pl-3">vs last month</span>
           </div>
@@ -1340,16 +1248,16 @@ export default function MarketingEfficiency() {
             <span className="text-xs font-semibold text-muted-foreground">Blended Average</span>
           </div>
           <span className="text-sm font-bold text-muted-foreground tabular-nums text-right">
-            £{liveBlendedCac.toFixed(2)}
+            £{sampleBlendedCac.toFixed(2)}
           </span>
           <span className="text-xs text-muted-foreground/50 text-right">—</span>
           <span className="text-xs text-muted-foreground/50 text-right">—</span>
         </div>
 
         <div className="divide-y divide-border/40">
-          {liveCacByChannel.map((row) => {
+          {sampleCacByChannel.map((row) => {
             const cfg = EFFICIENCY_CONFIG[row.efficiency];
-            const cacDiff = +(row.cac - liveBlendedCac).toFixed(2);
+            const cacDiff = +(row.cac - sampleBlendedCac).toFixed(2);
             const absCacDiff = Math.abs(cacDiff).toFixed(2);
             const cacDiffLabel = cacDiff > 0
               ? `+£${absCacDiff} vs blended avg`
@@ -1409,7 +1317,7 @@ export default function MarketingEfficiency() {
         </div>
 
         <div className="divide-y divide-border/40">
-          {[...livePaybackByChannel].sort((a, b) => a.payback - b.payback).map((row, i) => {
+          {[...samplePaybackByChannel].sort((a, b) => a.payback - b.payback).map((row, i) => {
             const band = getPaybackBand(row.payback);
             return (
               <div key={row.channel} className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-4 px-6 py-3.5 items-center">
@@ -1449,9 +1357,9 @@ export default function MarketingEfficiency() {
                 <Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Supporting analysis available on Pro</p>
+                <p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Supporting sample analysis available on Pro</p>
                 <p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">
-                  Unlock the detailed channel evidence behind the recommendation, including CAC, payback and contribution-per-order comparisons.
+                  Explore detailed sample CAC, payback and contribution-per-order comparisons. Pro does not activate validated growth analysis.
                 </p>
               </div>
             </div>
@@ -1487,8 +1395,8 @@ export default function MarketingEfficiency() {
        */}
 
       <DataBenchmarkAssumptions
-        benchmarkNote="Meta CAC payback is 2.1 orders, above the safe range of <1.2 orders."
-        dataQualityNote="Channel contribution estimates rely on revenue attribution from Google and Meta. Cross-channel attribution differences may affect comparisons."
+        benchmarkNote="Thresholds and confidence labels are illustrative assumptions, not verified benchmarks for your business."
+        dataQualityNote="All analysis below the source panel is sample data. No channel attribution or contribution forecast has been validated."
         className="mb-2"
       />
 

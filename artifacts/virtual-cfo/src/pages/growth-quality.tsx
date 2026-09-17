@@ -8,8 +8,6 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { canAccess } from "@/lib/plan";
-import { useTimeline } from "@/lib/timeline";
-import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import {
   REPEAT_RATE,
@@ -19,7 +17,9 @@ import {
   CAC_PAYBACK,
   CAC_PAYBACK_PREV,
 } from "@/lib/data/growth-metrics";
-import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { useSalesReporting } from "@/lib/analytics/useSalesReporting";
+import { SalesReportingPeriod } from "@/components/SalesReportingPeriod";
+import { VerifiedSalesSummary } from "@/components/VerifiedSalesSummary";
 // ─── Data constants ──────────────────────────────────────────────────────────
 // REPEAT_RATE, DISCOUNT_DEP, CAC_PAYBACK imported from
 // src/lib/data/growth-metrics.ts — shared fixed illustrative growth metrics.
@@ -203,16 +203,8 @@ const STATUS_CONFIG: Record<ScoreStatus, { label: string; bar: string; badge: st
 
 export default function GrowthQuality() {
   const GQ_STORE_ID = useActiveStore();
-  useTimeline();
 
-  // Source ratios are displayed separately; the illustrative model never consumes them.
-  const { status: reportingStatus, phase1: gqPhase1, dateFrom: gqDateFrom, dateTo: gqDateTo, periodLabel: gqPeriodLabel, loading: gqPeriodLoading } = useLatestDataPeriod(GQ_STORE_ID);
-  const sourcePercent = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? `${(value * 100).toFixed(2)}%` : "Unavailable";
-  const sourceStatus = reportingStatus === "loading" ? "Source figures loading"
-    : reportingStatus === "error" ? "Source figures unavailable"
-    : reportingStatus === "empty" ? "No source orders found in the reporting search"
-    : reportingStatus === "stale" ? "Unverified source figures: historical period"
-    : "Unverified source figures: latest completed period";
+  const reporting = useSalesReporting(GQ_STORE_ID);
   // Preserve the existing example inputs and scoring arithmetic, without source-data fallbacks.
   const sampleRepeatRate = REPEAT_RATE.toFixed(1);
   const sampleRepeatRateNum = REPEAT_RATE;
@@ -415,27 +407,22 @@ export default function GrowthQuality() {
             Growth Quality
           </h1>
           <p className="text-muted-foreground mt-1">
-            Explore a sample growth quality model alongside separate unverified source ratios.
+            Explore a sample growth quality model alongside shared verified sales context.
           </p>
         </div>
-        <TimelineSelector />
+
       </div>
 
+      <SalesReportingPeriod reporting={reporting} />
+      <VerifiedSalesSummary reporting={reporting} />
       <section aria-label="Growth quality reporting status" className="rounded-2xl border border-border bg-card p-6 mb-6">
         <h2 className="text-xl font-bold">Actual growth quality analysis: unavailable</h2>
-        <p className="text-sm text-muted-foreground mt-2">Customer eligibility, channel costs and scoring rules still need validation. These existing source ratios do not establish growth quality, contribution or recoverable profit.</p>
-        <p role="status" className="text-sm mt-3">{sourceStatus}</p>
-        {!gqPeriodLoading && (reportingStatus === "ready" || reportingStatus === "stale") && <p className="text-xs text-muted-foreground">{gqPeriodLabel}: {gqDateFrom} to {gqDateTo}</p>}
-        <div className="grid sm:grid-cols-2 gap-4 mt-4">
-          <div><p className="text-sm">Unverified repeat purchase ratio</p><p className="text-xl font-bold">{sourcePercent(gqPhase1?.data.repeatPurchaseRate)}</p></div>
-          <div><p className="text-sm">Source-reported discount dependency (unverified value rate)</p><p className="text-xl font-bold">{sourcePercent(gqPhase1?.data.discountDependency)}</p></div>
-        </div>
-        <p className="text-xs text-muted-foreground mt-3">The source discount ratio reports discount value against gross sales, not the share of orders using a code. Its inputs are not yet validated against the agreed financial definitions. Repeat-customer definitions remain unresolved.</p>
+        <p className="text-sm text-muted-foreground mt-2">Verified sales and product discounts provide context above. Customer identity, acquisition costs and scoring rules are not yet supported, so repeat purchase rates, growth scores and recoverable profit remain unavailable.</p>
       </section>
       <section aria-label="Sample growth quality model notice" className="rounded-2xl border border-amber-300 bg-amber-50/50 dark:bg-amber-950/20 p-6 mb-6">
         <h2 className="text-xl font-bold">Illustrative growth quality model</h2>
         <p className="text-sm mt-2">All scores, trends, diagnoses, recovery amounts and actions below use fixed sample inputs. They do not change with the selected store or reporting period. Amounts are sample GBP; targets and confidence labels are unvalidated examples, not advice or forecasts for your business.</p>
-        <p className="text-sm mt-2">The score, trend chart and narrative are separate examples and may not reconcile. The sample discount measure counts fictional orders with codes; it differs from the value-based source ratio above. Actual monitoring and personalised CFO advice are unavailable here.</p>
+        <p className="text-sm mt-2">The score, trend chart and narrative are separate examples and may not reconcile. The sample discount measure counts fictional orders with codes; it differs from the product discount amounts above. Actual monitoring and personalised CFO advice are unavailable here.</p>
       </section>
       {/* ── Sample Growth Verdict ── */}
       <div className="sc-purple rounded-2xl shadow-md mb-6 overflow-hidden">

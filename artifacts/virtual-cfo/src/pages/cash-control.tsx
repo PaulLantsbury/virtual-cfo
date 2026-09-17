@@ -12,11 +12,12 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SimulatorSlider } from "@/components/SimulatorSlider";
 import { cn } from "@/lib/utils";
-import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
 import { PeriodImpact } from "@/components/PeriodImpact";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
-import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { useSalesReporting } from "@/lib/analytics/useSalesReporting";
+import { SalesReportingPeriod } from "@/components/SalesReportingPeriod";
+import { VerifiedSalesSummary } from "@/components/VerifiedSalesSummary";
 import {
   CASH_BALANCE,
   CASH_RUNWAY,
@@ -282,10 +283,7 @@ function DriverTooltip({ active, payload, label }: any) {
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function CashControl() {
   const CASH_STORE_ID = useActiveStore();
-  const { status: reportingStatus,
-    periodLabel: cashPeriodLabel,
-    loading: cashPeriodLoading,
-  } = useLatestDataPeriod(CASH_STORE_ID);
+  const reporting = useSalesReporting(CASH_STORE_ID);
 
   const [revChange,       setRevChange]       = useState(0);
   const [inventoryChange, setInventoryChange] = useState(0);
@@ -436,20 +434,17 @@ export default function CashControl() {
             Explore an illustrative cash model using fixed sample figures.
           </p>
           <p className="text-xs text-muted-foreground mt-3">Sales reporting context only — these dates do not describe the cash samples below.</p>
-          <p className="text-xs text-muted-foreground mt-1" role="status">
-            {cashPeriodLoading ? "Sales context: checking availability. Cash samples remain illustrative."
-              : reportingStatus === "ready" ? `Sales context: latest completed period (${cashPeriodLabel}). Cash samples are unrelated.`
-              : reportingStatus === "stale" ? `Sales context: historical period (${cashPeriodLabel}); newer data needed. Cash samples are unrelated.`
-              : reportingStatus === "empty" ? "Sales context: no trading data found. Cash samples remain illustrative."
-              : "Sales context: trading data unavailable. Cash samples remain illustrative."}
-          </p>
+
         </div>
-        <TimelineSelector />
+
       </div>
+
+      <SalesReportingPeriod reporting={reporting} />
+      <VerifiedSalesSummary reporting={reporting} />
 
       <section aria-label="Sample cash model notice" className="rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 px-5 py-4 mb-6">
         <h2 className="font-semibold text-foreground">Actual cash reporting is not connected</h2>
-        <p className="text-sm text-muted-foreground mt-1">All balances, comparisons, charts, diagnoses and scenarios on this page are illustrative samples, not results or recommendations for your business. Changing the reporting period does not load actual cash figures.</p>
+        <p className="text-sm text-muted-foreground mt-1">All cash balances, comparisons, charts, diagnoses and scenarios below are illustrative samples, not results or recommendations for your business. Changing the reporting period does not load actual cash figures.</p>
         <p className="text-sm text-muted-foreground mt-2">The sample runway model does not use measured cash burn over the last three complete months. It is not a cash runway estimate based on your actual cash flows.</p>
       </section>
 

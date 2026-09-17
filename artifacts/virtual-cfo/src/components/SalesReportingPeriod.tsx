@@ -20,7 +20,7 @@ export function SalesReportingPeriod({ reporting }: { reporting: ReturnType<type
       </>}
     </div>
     <p className="text-sm text-muted-foreground mt-3">{period.label}{period.dateFrom && `: ${period.dateFrom} – ${period.dateTo}`}</p>
-    <p className="text-xs text-muted-foreground mt-1">{config ? `Store timezone: ${config.timezone} · Currency: ${config.currency}` : 'Store timezone and currency unavailable.'} This store’s selection is shared across CFO Briefing, Verified Sales, Margin Analysis and Profit Overview.</p>
+    <p className="text-xs text-muted-foreground mt-1">{config ? `Store timezone: ${config.timezone} · Currency: ${config.currency}` : 'Store timezone and currency unavailable.'} This store’s selection is shared across reporting pages.</p>
     {reporting.status === 'invalid' && <p role="alert" className="text-sm mt-2">Choose real calendar dates with From on or before To. Figures are unavailable until the dates are valid.</p>}
     {selection.mode === 'custom' && <p className="text-xs text-muted-foreground mt-2">Previous-period comparisons are unavailable for custom dates.</p>}
   </section>;

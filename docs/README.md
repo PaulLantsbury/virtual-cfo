@@ -4,6 +4,8 @@ Start with the [17 September handover](session-handover-2026-09-17.md), [current
 
 The [13 September handover](session-handover-2026-09-13.md) records the latest application/staging verification: shared sales and actual profit reporting, approved Store D evidence and restricted reads, and shared CFO Briefing/Margin Analysis figures. Profit Overview no longer uses its old sample model. Scenario Planner and other unfinished areas still contain explicitly labelled samples. No real Shopify feed, Xero reconciliation or production release is complete.
 
+Latest connection work: [live Shopify connection](shopify-live-connection-2026-09-17.md) verifies private authentication, both history scopes and an empty-store read; no orders imported.
+
 Latest application work: [Package 2](package-2-2026-09-17.md) adds shared sales context across four further pages and factual CFO observations; [Shopify readiness](shopify-connection-readiness-2026-09-17.md) is tested preparation, not a live connection.
 
 Package 1 references: [metrics](metrics-dictionary-2026-09-17.md), [pages and decisions](dashboard-decision-spec-2026-09-17.md), [data sources and backlog](data-source-plan-2026-09-17.md). Preserve the [approved financial definitions](agreed-financial-definitions.md). Documentation review does not reverify a live environment.

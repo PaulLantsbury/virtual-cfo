@@ -500,3 +500,8 @@ Paul approved visible live sales/profit comparisons, then correction of the samp
 ## Profit Overview / Scenario Planner alignment — 12 September 2026
 
 Three-agent package complete: shared monthly baseline/model, four supported overview controls, signed current profit bridge and clear no-transfer navigation. Fixed baseline £95,000 sales/£40,900 contribution/£21,900 operating profit/£22,900 EBITDA. All51 checks, typecheck/build and independent financial review pass; local staging store A baseline, orders+30% and reset verified. See [package evidence and remaining scope](profit-scenario-alignment.md). Shared model unchanged; no DB writes, grants, Replit/main/production update. Next: Paul walkthrough of Profit Overview; source integration and further model work remain separate decisions.
+
+
+## Restricted Shopify candidate intake — 17 September 2026
+
+Three-agent preparation complete: scoped setup proposal/private login, existing-pipeline operator runtime, independent permission review and rollback-only lock checker. 33 focused checks passed. Read-only staging inventory confirmed expected protections and no duplicate store. No live setup/intake writes. First exercise is TEST_ORDER-excluded candidate-only, not financial import or completeness. See [delivery and concrete approval](shopify-intake-package-2026-09-17.md); live locking precedes candidate recording after approval.

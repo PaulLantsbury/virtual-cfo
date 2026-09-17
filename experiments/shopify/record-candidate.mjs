@@ -17,7 +17,9 @@ export async function recordShopifyCandidate(db,extraction,scope){
  const versions=sourceVersions(extraction.orders);
  requireValue(['mapped_for_review','blocked'].includes(mapped.status),'Invalid candidate result');
  return db.transaction(async tx=>{
-  const {rows}=await tx.query('SELECT id,shopify_domain,shopify_store_id,currency_code,timezone FROM public.stores WHERE id=$1 FOR UPDATE',[scope.storeId]);
+  // Restricted intake uses a fixed-store lock helper without granting store UPDATE.
+  if(db.lockCandidateStore)await db.lockCandidateStore(tx,scope.storeId);
+  const {rows}=await tx.query('SELECT id,shopify_domain,shopify_store_id,currency_code,timezone FROM public.stores WHERE id=$1'+(db.lockCandidateStore?'':' FOR UPDATE'),[scope.storeId]);
   const store=rows[0];
   requireValue(store&&store.shopify_domain===settings.domain&&[settings.shopId,settings.shopId.split('/').at(-1)].includes(store.shopify_store_id),'Configured store does not match Shopify source');
   requireValue(store.currency_code.trim()===settings.currency&&store.timezone===settings.timezone,'Store settings changed; recollect before intake');

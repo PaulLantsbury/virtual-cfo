@@ -1,6 +1,8 @@
 # PocketLaunchpad1 staging intake proposal — 17 September 2026
 
-Status: code-backed proposal only. No database query, migration, permission grant, store creation, source collection or application change was performed in this review. The coordinator subsequently verified read-only live API context: Shop `gid://shopify/Shop/95601983836`, domain `pocketlaunchpad1.myshopify.com`, GBP, `Europe/London`, both `read_orders` and `read_all_orders`, and response API version `2026-07`. The existing collector completed one page with zero orders. This is a successful read-only connection check, not a data import or test-transaction exercise.
+Status: executable candidate-only preparation now available; **not applied**. See [package and approval scope](shopify-intake-package-2026-09-17.md) and [independent acceptance review](shopify-intake-acceptance-2026-09-17.md). Live Shopify test checkout/refund checks supersede the original empty-store result. Read-only staging inventory found no duplicate store and confirmed expected RLS. The first exercise retains excluded test data as an unverified candidate only: no finance import, user membership, reviewer grant or completeness certification is included.
+
+The design below records the wider pipeline and later access requirements. Its original future-tense setup and empty-store statements are historical; the package document governs the concrete next action.
 
 ## Reuse the existing pipeline
 
@@ -16,7 +18,7 @@ If and when staging intake is approved, prepare a new `public.stores` row using 
 
 | Column | Proposed value / prerequisite |
 | --- | --- |
-| `id` | Fresh UUID generated once in the reviewed setup script; do not use an existing synthetic UUID |
+| `id` | `56d92f8a-746e-4b4f-b408-81fc98c4aa17`; fixed in reviewed setup/runtime |
 | `shopify_domain` | `pocketlaunchpad1.myshopify.com` (live API verified) |
 | `shopify_store_id` | `95601983836` (live API GID `gid://shopify/Shop/95601983836`); app/organisation IDs are not substitutes |
 | `name` | `PocketLaunchpad1 — Shopify development store` |

@@ -1,5 +1,10 @@
 # Night Scout — 17 September handover
 
+## Latest checkpoint — live development test order
+
+Completed test checkout #1001 with two sample items (£1,899.90) and a one-item simulated refund (£949.95). Live summary/detail reader succeeded, matching admin amounts; mapper excluded TEST_ORDER with zero financial events. Before/after fingerprint changed and repeat reads were identical. No Supabase writes or completeness certification. See [test evidence and next step](shopify-test-order-2026-09-17.md). This supersedes earlier empty-store statements below. Next is preparing/testing the precise staging intake proposal, not treating this test activity as actual revenue. Paul requests regular progress updates while work is active.
+
+
 ## Latest checkpoint — Shopify installation
 
 Paul authorised necessary Shopify setup changes. Night Scout Development (app 424626651137) is installed on development store PocketLaunchpad1 (`pocketlaunchpad1.myshopify.com`) in organisation 185032893. The active version is `night-scout-full-history-readonly` (1132636897281), requesting `read_orders` and `read_all_orders`, API version 2026-07. Store currency is GBP and its timezone was changed to London. Installation was verified in Shopify admin; the app still displays its default example.com embedded placeholder, not the Night Scout interface.

@@ -1,9 +1,10 @@
+import {eventDay} from '../financial-v1/event-evidence.mjs';
 // PREPARATION ONLY: not used by the live collector, importer or browser.
 // No network call, credential lookup, database write or repeat-customer calculation.
 export const CUSTOMER_IDENTITY_QUERY='query NightScoutCustomerIdentity($id: ID!) { order(id: $id) { id updatedAt customer { id } } }';
 const requireValue=(ok,message)=>{if(!ok)throw Error(message);};
 const gid=(value,type)=>typeof value==='string'&&new RegExp(`^gid://shopify/${type}/[1-9][0-9]*$`).test(value);
-const instant=value=>typeof value==='string'&&/^\d{4}-\d\d-\d\dT.*(?:Z|[+-]\d\d:\d\d)$/.test(value)&&Number.isFinite(Date.parse(value));
+const instant=value=>{try{eventDay(value,'UTC');return true;}catch{return false;}};
 /** Caller must independently authenticate/verify this store's Shopify connection.
  * Explicit source null means no identifier was supplied, not a synthetic guest ID.
  * Missing customer selection is incomplete collection and cannot become null.

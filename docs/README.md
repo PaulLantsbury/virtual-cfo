@@ -1,5 +1,8 @@
 # Night Scout — current starting point, 17 September 2026
 
+- [Customer identifier package: prepared, approval pending](customer-identity-package-2026-09-17.md) — 22 checks passed; no live identity collection yet.
+- [Independent customer identifier review](customer-identity-review-2026-09-17.md)
+
 Start with the [17 September handover](session-handover-2026-09-17.md), [current project brief](project-brief.md), [17 September roadmap](roadmap-2026-09-17.md) and [team working agreement](team-working-agreement.md). Paul approved the revised CFO direction and Package 1 specification work. New financial policies are separately identified in the specification; earlier pending approvals must not be repeated.
 
 The [13 September handover](session-handover-2026-09-13.md) records the latest application/staging verification: shared sales and actual profit reporting, approved Store D evidence and restricted reads, and shared CFO Briefing/Margin Analysis figures. Profit Overview no longer uses its old sample model. Scenario Planner and other unfinished areas still contain explicitly labelled samples. No real Shopify feed, Xero reconciliation or production release is complete.

@@ -22,3 +22,7 @@ test('separate identity observations preserve existing financial source hashes; 
  const naivelyExtended={...order,customer:{id:'gid://shopify/Customer/100'}};
  assert.equal(compareSourceVersions(previous,sourceVersions([naivelyExtended])).status,'conflicting_source');
 });
+
+test('invalid source calendar dates and unknown offsets are rejected before normalisation',()=>{
+ for(const date of ['2026-02-30T12:00:00Z','2026-09-17T24:00:00Z','2026-09-17T12:00:00-00:00']){const i=input();i.data.order.updatedAt=date;assert.throws(()=>prepare(i),/Incomplete/);assert.throws(()=>prepare({...input(),observedAt:date}),/Invalid identity/);}
+});

@@ -1,8 +1,14 @@
 # Latest cloud activation checkpoint
 
-See `docs/cloud-worker-activation-2026-09-17.md`: separate staging Scheduled worker PUBLISHED; nightly schema APPLIED; restricted authenticated readiness passed from Replit; deployment build/bundle/promotion passed. No runs yet. Europe/London was selected, but published overview says GMT: verify the first trigger's actual timezone before claiming overnight success. Runner retains its 02:00–02:15 London guard and fixed 17 September reporting period. Production unchanged. Earlier prepared-only statements below are historical, superseded by this checkpoint. Do not reapply the migration or repeat activation approval. Settings activation wording remains to be connected to actual per-store status.
+See `docs/cloud-worker-activation-2026-09-17.md`: separate staging Scheduled worker PUBLISHED; nightly schema APPLIED; restricted authenticated readiness passed from Replit; deployment build/bundle/promotion passed. No runs yet. Saved Europe/London timezone is now verified by the selected menu checkmark; GMT is Replit’s group label. Verify the first actual trigger before claiming overnight success. Runner retains its 02:00–02:15 London guard and fixed 17 September reporting period. Production unchanged. Earlier prepared-only statements below are historical, superseded by this checkpoint. Do not reapply the migration or repeat activation approval. Settings now has an explicitly dated, exact project/store deployment acknowledgement and live saved collection records; no live scheduler telemetry. Follow docs/first-overnight-verification-2026-09-18.md next.
 
 # Night Scout — 17 September handover
+
+## Final focused closeout
+
+Timezone discrepancy resolved through the saved London selection; no republish needed. Settings staging update implemented and browser-verified, with separate dated schedule acknowledgement, dynamic last successful collection, existing failure warnings and explicit financial-verification limits. Four focused checks and frontend typecheck passed. Store A correctly has no acknowledged deployment. No new database changes, customer data or production release. Tomorrow follow `first-overnight-verification-2026-09-18.md`, then agree coverage/catch-up policy before broader reconciliation and CFO implementation. Starting account allowance for this final package was 10%; end reading recorded in the final response.
+
+## Historical package stages
 
 ## Cloud worker prepared; activation pending
 

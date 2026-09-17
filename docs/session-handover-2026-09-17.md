@@ -1,6 +1,10 @@
 # Night Scout — 17 September handover
 
-## Latest checkpoint — live development test order
+## Latest checkpoint — restricted candidate intake prepared
+
+Three-agent package prepares exact staging store/service policies, private login provisioning, bounded operator runner and independent security review. [Delivery and next approval](shopify-intake-package-2026-09-17.md) is the current starting point. This package is candidate-only: the all-test checkout/refund must remain excluded and cannot enter the finance importer. No membership/reviewer grants are needed. Live staging catalog was inspected read-only; no setup or intake writes have occurred. Apply only after the concrete staging approval, verify the restricted connection and locking, then record/replay the 17 September candidate. Keep progress updates frequent. Production/Replit/main remain unchanged.
+
+## Earlier checkpoint — live development test order
 
 Completed test checkout #1001 with two sample items (£1,899.90) and a one-item simulated refund (£949.95). Live summary/detail reader succeeded, matching admin amounts; mapper excluded TEST_ORDER with zero financial events. Before/after fingerprint changed and repeat reads were identical. No Supabase writes or completeness certification. See [test evidence and next step](shopify-test-order-2026-09-17.md). This supersedes earlier empty-store statements below. Next is preparing/testing the precise staging intake proposal, not treating this test activity as actual revenue. Paul requests regular progress updates while work is active.
 

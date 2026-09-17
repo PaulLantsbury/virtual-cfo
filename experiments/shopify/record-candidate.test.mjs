@@ -101,3 +101,13 @@ test('refund versions and changed store settings independently prevent stale ava
  await db.query("UPDATE stores SET timezone='UTC'");assert.equal((await candidatePeriodState(db,scope)).figures,null);
  }finally{await db.close();}
 });
+test('restricted lock hook runs inside transaction before identity read and cannot be bypassed on failure',async()=>{
+ const {db,data}=await setup();try{
+ let locked=false,locks=0;
+ const restricted={lockCandidateStore:async(tx,id)=>{assert.equal(id,store);locks++;await tx.query('SELECT id FROM public.stores WHERE id=$1 FOR UPDATE',[id]);locked=true;},transaction:fn=>db.transaction(tx=>fn({query:(sql,args)=>{assert.ok(locked||sql==='SELECT id FROM public.stores WHERE id=$1 FOR UPDATE');if(sql.startsWith('SELECT id,shopify_domain'))assert.ok(!sql.endsWith('FOR UPDATE'));return tx.query(sql,args);}}))};
+ const first=await recordShopifyCandidate(restricted,data,scope);assert.equal(first.status,'recorded_requires_review');assert.equal(locks,1);
+ const failure={transaction:restricted.transaction,lockCandidateStore:async()=>{throw Error('store lock denied');}};
+ await assert.rejects(recordShopifyCandidate(failure,data,scope),/store lock denied/);
+ assert.equal((await db.query('SELECT count(*)::int n FROM ingest_v1.batches')).rows[0].n,1);
+ }finally{await db.close();}
+});

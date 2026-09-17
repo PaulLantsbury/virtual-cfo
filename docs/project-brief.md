@@ -1,6 +1,6 @@
 # Night Scout — current project brief
 
-Updated 17 September 2026. Paul approved the revised roadmap approach and Metrics and Decision Specification package after reviewing “Compare Sweet Analytics Night Scout”.
+Updated 17 September 2026. [Package 2](package-2-2026-09-17.md) is now implemented: four further pages use shared sales, CFO observations consume existing profit evidence, and Shopify connection preparation is tested. Live account/installation remains outstanding. Paul approved the revised roadmap approach and Metrics and Decision Specification package after reviewing “Compare Sweet Analytics Night Scout”.
 
 ## Product and priority
 

@@ -1,4 +1,9 @@
-# Night Scout — 17 September Package 1 handover
+# Night Scout — 17 September handover
+
+## Latest checkpoint — Package 2 implementation
+
+Paul approved Package 2. See [delivery record](package-2-2026-09-17.md) for migrated shared sales pages, factual CFO observations, Shopify readiness code, tests and live staging checks. Package 1 entries below are history; their proposed-package approval is superseded. Shopify account/installation and authorised live intake remain outstanding; no new database grants, production or Replit changes. Current local staging reflects application changes. Final combined existing browser regressions: 20/20 passed after correcting an asynchronous assertion race; new workstream checks are in the delivery record.
+
 
 ## Completed
 

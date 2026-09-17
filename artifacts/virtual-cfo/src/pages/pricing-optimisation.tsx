@@ -12,7 +12,6 @@ import {
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SimulatorSlider } from "@/components/SimulatorSlider";
 import { cn } from "@/lib/utils";
-import { TimelineSelector } from "@/components/TimelineSelector";
 import { canAccess } from "@/lib/plan";
 import { PeriodImpact } from "@/components/PeriodImpact";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
@@ -23,7 +22,9 @@ import {
   AVG_DISCOUNT_PCT,
 } from "@/lib/data/pricing-metrics";
 import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/analytics/deltaSentiment";
-import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
+import { useSalesReporting } from "@/lib/analytics/useSalesReporting";
+import { SalesReportingPeriod } from "@/components/SalesReportingPeriod";
+import { VerifiedSalesSummary } from "@/components/VerifiedSalesSummary";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 // Imported from src/lib/data/pricing-metrics.ts — the central source of truth
@@ -144,25 +145,7 @@ function DriverTooltip({ active, payload, label }: any) {
 // ─── Main page component ──────────────────────────────────────────────────────
 export default function PricingOptimisation() {
   const PO_STORE_ID = useActiveStore();
-  // ── Unverified source data for the resolved reporting period ──────────────
-  // Uses the existing timeline and order-based lookback; this does not prove completeness.
-  const { status: reportingStatus,
-    phase1:      pricingPhase1,
-    dateFrom:    pricingDateFrom,
-    dateTo:      pricingDateTo,
-    periodLabel: pricingPeriodLabel,
-    loading:     pricingPeriodLoading,
-  } = useLatestDataPeriod(PO_STORE_ID);
-
-  // Keep the legacy source ratio separate from the fixed pricing examples.
-  const sourceDiscount = pricingPhase1?.data.discountDependency;
-  const sourceValue = typeof sourceDiscount === "number" && Number.isFinite(sourceDiscount)
-    ? `${(sourceDiscount * 100).toFixed(2)}%` : "Unavailable";
-  const sourceStatus = reportingStatus === "loading" ? "Source figures loading"
-    : reportingStatus === "error" ? "Source figures unavailable"
-    : reportingStatus === "empty" ? "No source orders found in the reporting search"
-    : reportingStatus === "stale" ? "Unverified source figures: historical period"
-    : "Unverified source figures: latest completed period";
+  const reporting = useSalesReporting(PO_STORE_ID);
 
   // ── Simulator state ───────────────────────────────────────────────────────
   // !! SIMULATOR GUARD: The five slider states and all maths below reference
@@ -334,21 +317,18 @@ export default function PricingOptimisation() {
         <div>
           <h1 className="text-2xl font-display font-bold text-foreground">Pricing & Discounts</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Explore a sample pricing model alongside a separate unverified source ratio.
+            Explore a sample pricing model alongside shared verified sales and discount amounts.
           </p>
 
         </div>
-        <TimelineSelector />
+
       </div>
 
+      <SalesReportingPeriod reporting={reporting} />
+      <VerifiedSalesSummary reporting={reporting} />
       <section aria-label="Pricing reporting status" className="rounded-2xl border border-border bg-card p-5 mb-6">
         <h2 className="font-semibold text-lg">Actual pricing analysis: unavailable</h2>
-        <p className="text-sm text-muted-foreground mt-2">Source figures have not been validated against the agreed financial definitions. They do not establish pricing power, recoverable contribution or recommended actions.</p>
-        <p role="status" className="text-sm mt-3">{sourceStatus}</p>
-        {!pricingPeriodLoading && (reportingStatus === "ready" || reportingStatus === "stale") && <p className="text-xs text-muted-foreground">{pricingPeriodLabel}: {pricingDateFrom} to {pricingDateTo}</p>}
-        <p className="text-sm mt-3">Source discount dependency (unverified)</p>
-        <p className="font-bold text-xl">{sourceValue}</p>
-        <p className="text-xs text-muted-foreground mt-2">This is the existing source ratio, not a verified average discount per order.</p>
+        <p className="text-sm text-muted-foreground mt-2">Verified product discounts are shown above. These amounts do not establish price sensitivity, full-price order mix, recoverable contribution or recommended pricing actions.</p>
       </section>
       <section aria-label="Sample pricing model notice" className="rounded-2xl border border-amber-300/40 bg-amber-50/10 p-5 mb-6">
         <h2 className="font-semibold">Illustrative pricing model — sample data</h2>
@@ -611,7 +591,7 @@ export default function PricingOptimisation() {
       {/* ── Sample KPI Summary ── */}
       <div className="mb-4">
         <h3 className="font-semibold text-lg text-foreground">Sample KPI Summary</h3>
-        <p className="text-sm text-muted-foreground mt-0.5">Fixed illustrative values, separate from the source ratio above.</p>
+        <p className="text-sm text-muted-foreground mt-0.5">Fixed illustrative values, separate from the verified sales and discount amounts above.</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <KpiCard
@@ -808,7 +788,7 @@ export default function PricingOptimisation() {
 
       <DataBenchmarkAssumptions
         benchmarkNote="Risk thresholds, confidence labels and simulator coefficients are illustrative assumptions, not verified benchmarks or recommendations for your business."
-        dataQualityNote="Actual pricing analysis is unavailable. The source ratio is unverified; all supporting analysis, recovery estimates and simulator outputs use separate sample inputs."
+        dataQualityNote="Actual pricing analysis is unavailable. Shared sales and discounts are evidence-backed where available; all supporting analysis, recovery estimates and simulator outputs use separate sample inputs."
         className="mb-2"
       />
 

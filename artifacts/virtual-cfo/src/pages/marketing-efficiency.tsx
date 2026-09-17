@@ -1,12 +1,11 @@
 import { useActiveStore } from "@/lib/auth/AuthProvider";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Sparkles, Lock, SlidersHorizontal, Info, Zap, Shield } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { canAccess } from "@/lib/plan";
 
 import { cn } from "@/lib/utils";
-import { TimelineSelector } from "@/components/TimelineSelector";
 import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 
@@ -22,38 +21,11 @@ import {
   CAC_BY_CHANNEL,
   PAYBACK_BY_CHANNEL,
 } from "@/lib/data/channel-metrics";
-import { supabase } from "@/lib/supabase";
-
-type SourceMarketing = { channels: {period: string; channel: string; cac: number | null; roas: number | null; cacPaybackOrders: number | null}[]; blended: {period: string; blendedCac: number | null; blendedRoas: number | null} | null; errors: string[] };
-const finiteSource = (value: unknown): number | null => {
-  if (typeof value !== "number" && (typeof value !== "string" || value.trim() === "")) return null;
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
-};
-async function readMarketingSource(store: string, from: string, to: string): Promise<SourceMarketing> {
-  const params = {p_store_id: store, p_date_from: from, p_date_to: to};
-  const [channels, blended] = await Promise.all([
-    supabase.rpc("channel_metrics_monthly", params),
-    supabase.rpc("blended_marketing_performance", params),
-  ]);
-  const period = (r: Record<string, unknown>) => typeof r.period_start === "string" && typeof r.period_end === "string" ? `${r.period_start} to ${r.period_end}` : "Period not supplied";
-  const row = Array.isArray(blended.data) ? blended.data[0] : blended.data;
-  return {
-    errors: [channels.error ? "channels" : "", blended.error ? "blended" : ""].filter(Boolean),
-    channels: channels.error || !Array.isArray(channels.data) ? [] : channels.data.filter(r => r && typeof r === "object").map(r => ({period: period(r), channel: typeof r.channel === "string" ? r.channel : "Unnamed", cac: finiteSource(r.cac), roas: finiteSource(r.roas), cacPaybackOrders: finiteSource(r.cac_payback_orders)})),
-    blended: blended.error || !row || typeof row !== "object" ? null : {period: period(row), blendedCac: finiteSource(row.blended_cac), blendedRoas: finiteSource(row.blended_roas)},
-  };
-}
 import { CAC_PAYBACK, CAC_PAYBACK_PREV } from "@/lib/data/growth-metrics";
-import { useLatestDataPeriod } from "@/lib/analytics/useLatestDataPeriod";
-import { DataPeriodLabel } from "@/components/DataPeriodLabel";
+import { useSalesReporting } from "@/lib/analytics/useSalesReporting";
+import { SalesReportingPeriod } from "@/components/SalesReportingPeriod";
+import { VerifiedSalesSummary } from "@/components/VerifiedSalesSummary";
 import { deltaToSentiment, DELTA_POLARITY, type DeltaSentiment } from "@/lib/analytics/deltaSentiment";
-
-// ── Phase 1 metrics config ────────────────────────────────────────────────────
-// DEV-ONLY — hardcoded seed store UUID. Matches dashboard.tsx and margin-analysis.tsx.
-// Must be replaced with the authenticated session's store_id before multi-tenant use.
-// Date range is resolved dynamically by useLatestDataPeriod() inside the component.
-
 
 // ─── Data constants ───────────────────────────────────────────────────────────
 // BLENDED_CAC, BLENDED_ROAS, CAC_BY_CHANNEL, PAYBACK_BY_CHANNEL, CHANNEL_CM_PCT
@@ -310,43 +282,7 @@ export default function MarketingEfficiency() {
   const ME_STORE_ID = useActiveStore();
   const framing = { upliftPhrase: "in this sample monthly model", baselineNote: "sample monthly basis", rowLabel: "sample month", combinedLabel: "sample monthly model", impactBasis: "sample monthly basis" };
 
-  // ── Phase 1: unverified discount dependency and repeat purchase rate ────────────
-  // Walks back from the current month to find the most recent month with data.
-  // Only these two fields are used here — all other ME metrics require ad
-  // platform data (Meta/Google Ads API) and remain static for now.
-  const { status: reportingStatus,  phase1: mktPhase1, periodLabel: mePeriodLabel, loading: mePeriodLoading, dateFrom, dateTo } = useLatestDataPeriod(ME_STORE_ID);
-
-  // Keep source readings separate from illustrative advice. Most legacy marketing
-  // adapter totals coerce missing values to zero; only nullable metrics are shown.
-  const sourceKey = `${ME_STORE_ID}:${dateFrom}:${dateTo}`;
-  const [source, setSource] = useState<{key: string; data: SourceMarketing | null; failed: boolean} | null>(null);
-  useEffect(() => {
-    if (mePeriodLoading || !mktPhase1) return;
-    let cancelled = false;
-    setSource(null);
-    readMarketingSource(ME_STORE_ID, dateFrom, dateTo).then(data => {
-      if (!cancelled) setSource({ key: sourceKey, data, failed: false });
-    }).catch(() => {
-      if (!cancelled) setSource({ key: sourceKey, data: null, failed: true });
-    });
-    return () => { cancelled = true; };
-  }, [ME_STORE_ID, dateFrom, dateTo, mePeriodLoading, mktPhase1, sourceKey]);
-  const currentSource = !mePeriodLoading && mktPhase1 && source?.key === sourceKey ? source : null;
-  const sourceNumber = (value: number | null | undefined, percent = false) =>
-    typeof value === "number" && Number.isFinite(value)
-      ? (value * (percent ? 100 : 1)).toLocaleString("en-GB", {minimumFractionDigits: 2, maximumFractionDigits: 2}) + (percent ? "%" : "")
-      : "Unavailable";
-  const sourceStatus = mePeriodLoading ? "Source figures loading"
-    : reportingStatus === "error" ? "Source figures unavailable"
-    : reportingStatus === "empty" ? "No source orders found in the reporting search"
-    : reportingStatus === "stale" ? "Unverified source figures: historical period"
-    : "Unverified source figures: latest completed period";
-  const marketingStatus = !mktPhase1 && !mePeriodLoading ? "Marketing source figures unavailable"
-    : !currentSource ? "Marketing source figures loading"
-    : currentSource.failed ? "Marketing source figures unavailable"
-    : currentSource.data?.errors.length ? "Some marketing source figures unavailable"
-    : !currentSource.data?.channels.length && !currentSource.data?.blended ? "No marketing source rows returned"
-    : "Unverified marketing source figures";
+  const reporting = useSalesReporting(ME_STORE_ID);
 
   // Fixed examples never inherit source data, attribution or opportunity scores.
   const sampleMeDrivers = ME_DRIVERS;
@@ -397,30 +333,14 @@ export default function MarketingEfficiency() {
           </p>
 
         </div>
-        <TimelineSelector />
+
       </div>
 
+      <SalesReportingPeriod reporting={reporting} />
+      <VerifiedSalesSummary reporting={reporting} />
       <section aria-label="Growth reporting status" className="rounded-2xl border border-amber-300 bg-amber-50 dark:bg-amber-950/20 p-5 mb-6">
-        <h2 className="text-lg font-bold">Actual growth analysis and recovery: unavailable</h2>
-        <p className="text-sm my-2">Sales, marketing costs, attribution and customer definitions have not been validated against the agreed financial definitions. Source currency has not been verified. These readings do not establish completeness or support budget recommendations.</p>
-        <h3 className="font-semibold">Unverified source figures</h3>
-        <p role="status" className="text-sm">{sourceStatus}</p>
-        <DataPeriodLabel status={reportingStatus} periodLabel={mePeriodLabel} loading={mePeriodLoading} dateFrom={dateFrom} dateTo={dateTo} />
-        <dl className="grid sm:grid-cols-2 gap-3 my-3">
-          <div><dt>Source-reported discount dependency</dt><dd>{sourceNumber(mktPhase1?.data.discountDependency, true)}</dd></div>
-          <div><dt>Source-reported repeat purchase rate</dt><dd>{sourceNumber(mktPhase1?.data.repeatPurchaseRate, true)}</dd></div>
-        </dl>
-        <p role="status" className="text-sm">{marketingStatus}</p>
-        <p className="text-xs">Returned blended snapshot: {currentSource?.data?.blended?.period ?? "Unavailable"}. Snapshot dates may differ from the source search above.</p>
-        <dl className="grid sm:grid-cols-2 gap-3 my-3">
-          <div><dt>Source-reported blended CAC</dt><dd>{sourceNumber(currentSource?.data?.blended?.blendedCac)}</dd></div>
-          <div><dt>Source-reported blended ROAS</dt><dd>{sourceNumber(currentSource?.data?.blended?.blendedRoas)}</dd></div>
-        </dl>
-        {currentSource?.data?.channels.map((channel, i) => <div key={`${channel.channel}-${i}`} className="border-t py-2 text-sm break-words">
-          <p className="font-semibold">Source channel: {channel.channel || "Unnamed"}</p><p>Returned snapshot: {channel.period}</p>
-          <p>CAC: {sourceNumber(channel.cac)} · ROAS: {sourceNumber(channel.roas)} · Payback (orders): {sourceNumber(channel.cacPaybackOrders)}</p>
-        </div>)}
-        <p className="text-xs">Source contribution totals, trends and opportunity scores are withheld pending validation. Missing channel rows and missing values are not replaced with examples.</p>
+        <h2 className="text-lg font-bold">Actual marketing analysis and recovery: unavailable</h2>
+        <p className="text-sm my-2">Verified sales and product discounts provide context above. Reconciled channel spend, attribution and customer definitions are not yet supported. CAC, ROAS, payback and budget recommendations remain unavailable; no legacy snapshot is substituted.</p>
       </section>
       <section aria-label="Sample growth model notice" className="rounded-2xl border border-border bg-secondary/40 p-5 mb-6">
         <h2 className="text-lg font-bold">Illustrative growth model — sample data</h2>

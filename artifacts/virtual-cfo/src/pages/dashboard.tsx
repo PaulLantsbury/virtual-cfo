@@ -1,4 +1,5 @@
 import { useProfitReporting } from "@/lib/analytics/useProfitReporting";
+import { ProfitObservations } from "@/components/ProfitObservations";
 import { VerifiedProfitSummary } from "@/components/VerifiedProfitSummary";
 import { useVerifiedBriefing } from "@/lib/analytics/useVerifiedBriefing";
 import { useActiveStore } from "@/lib/auth/AuthProvider";
@@ -40,6 +41,7 @@ export default function Dashboard() {
     <p className="mb-5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">Test store · This briefing uses development data. Sales use verified evidence for the selected period. Profit figures are shown only where the selected month has supporting cost evidence.</p>
 
     <VerifiedProfitSummary profit={profit} currency={reporting.config?.currency} />
+    <ProfitObservations profit={profit} scope={{ storeId: STORE_ID, currency: reporting.config?.currency ?? "", from: period.dateFrom, to: period.dateTo }} />
 
     {!briefing ? <section role="status" className="rounded-2xl border bg-card p-6">
       <h2 className="text-xl font-bold">{loading ? "Checking verified trading data" : "Verified figures unavailable"}</h2>

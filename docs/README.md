@@ -1,6 +1,6 @@
 # Night Scout — current starting point, 17 September 2026
 
-- [Customer identifier package: prepared, approval pending](customer-identity-package-2026-09-17.md) — 22 checks passed; no live identity collection yet.
+- [Customer identifier package: applied and live-verified](customer-identity-package-2026-09-17.md) — 22 preparation checks passed; one live observation and unchanged replay verified, financial evidence unchanged.
 - [Independent customer identifier review](customer-identity-review-2026-09-17.md)
 
 Start with the [17 September handover](session-handover-2026-09-17.md), [current project brief](project-brief.md), [17 September roadmap](roadmap-2026-09-17.md) and [team working agreement](team-working-agreement.md). Paul approved the revised CFO direction and Package 1 specification work. New financial policies are separately identified in the specification; earlier pending approvals must not be repeated.

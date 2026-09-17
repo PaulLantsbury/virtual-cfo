@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, HelpCircle, TrendingDown, BarChart2, Megaphone, Cpu, Wallet, Tag, FlaskConical, Target, Bell } from "lucide-react";
+import { LayoutDashboard, HelpCircle, TrendingDown, BarChart2, Megaphone, Cpu, Wallet, Tag, FlaskConical, Target, Bell, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/BrandLogo";
 
@@ -14,6 +14,7 @@ const navItems = [
   { icon: Target,          label: "Opportunity Finder",     href: "/profit-opportunities"   },
   { icon: FlaskConical,    label: "Scenario Planner",       href: "/scenario-lab"           },
   { icon: Bell,            label: "Monitoring", href: "/monitoring"             },
+  { icon: Settings,        label: "Settings", href: "/settings"               },
 ];
 
 export function Sidebar() {

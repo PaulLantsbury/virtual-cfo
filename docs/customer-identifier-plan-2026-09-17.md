@@ -1,5 +1,16 @@
 # Customer identifiers — approved principle and safe implementation plan
 
+## Customer identifier connection — applied and live-verified
+
+Paul approved the complete enablement package. Applied the exact private `shopify_identity_v1.order_observations` staging table and fixed-store SELECT/column-INSERT grants to the existing intake service. Restricted readiness passed. Released Shopify development version `night-scout-customer-id-readonly` (1133059112961) and updated installed-store consent for `read_customers` alongside existing order scopes. The collector verified actual grants and shop context before and after reading. No separate protected-data configuration change was needed for this custom development app; this is not approval/readiness for a future public app.
+
+Live collection: **1 observation collected, 1 inserted** with an identifier. Explicit unchanged replay: **1 collected, 0 inserted, 1 replayed**. Only expected identifier/timestamp/version columns exist. Before/after fingerprints across seven relations (candidate batches/heads, orders, refunds and three financial evidence tables) and the current candidate inspection are unchanged. Test-order exclusion, two retained candidates, needs-recheck and zero mapped financial events remain. No contact fields collected; actual customer IDs and private verification files remain excluded from GitHub.
+
+Settings now appears after Monitoring in the shared left navigation, using the existing route and selected styling. Frontend typecheck passed; signed-in staging browser navigation from Profit Overview to Settings succeeded. Existing localhost:3000 preview reflects the change.
+
+**Next:** agree repeat-purchase metric definitions, guest/unknown treatment, identity conflicts and deletion/retention behaviour before implementing customer analysis. The separate ID collection is an explicit private operator action, not scheduled or part of the existing sales-sync status. Do not reapply the schema, repeat scope approval or create another test purchase/refund. No production/main/Replit changes.
+
+
 Paul approved retaining a customer identifier to support future repeat-customer reporting, without shopper names, email addresses, addresses or phone numbers. This approves the identifier principle, not guest matching, cross-store identity merging or repeat-customer formulas. Those remain separate decisions.
 
 ## Current implementation
@@ -32,7 +43,7 @@ A separate observation path can preserve the established financial objects and f
 
 Prepare a store-scoped identity observation schema and least-privilege writer; preserve historical observations, distinguish unknown versus explicit-null identity, and define how changed/deleted customer references affect later analysis. Authenticate the source store before collection, retain only projected fields, and test pagination, retries and identity updates without changing financial history. Review the concrete schema/access proposal before staging application. Then agree repeat-customer eligibility, reporting period/cohort meaning and guest treatment before displaying a repeat metric. No contact fields are needed simply to identify repeat orders where Shopify supplies a stable customer ID.
 
-## Customer identifier package — prepared, awaiting enablement
+## Earlier checkpoint — customer identifier preparation
 
 Implemented and independently reviewed separate minimal Shopify customer-ID collection, a private staging observation-table proposal, restricted atomic writer and private operator launcher. **22/22 combined checks passed** against synthetic responses and disposable PostgreSQL, including unchanged financial evidence. See [package and concrete enablement steps](customer-identity-package-2026-09-17.md) and [independent review](customer-identity-review-2026-09-17.md).
 

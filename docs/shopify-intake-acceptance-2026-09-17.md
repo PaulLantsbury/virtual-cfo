@@ -50,3 +50,8 @@ The remaining contention gate is precise: in a disposable real PostgreSQL cluste
 `experiments/shopify/intake-lock-check.mjs` exports `checkIntakeStoreLock(config, {createPool, confirmTarget})`. It requires the existing strict private staging intake configuration and explicit `bioalckltvkhlczusdvl/56d92f8a-746e-4b4f-b408-81fc98c4aa17` acknowledgement. After approved provisioning, it opens two restricted connections, holds the first store lock, requires the second to fail with PostgreSQL lock timeout `55P03`, rolls back the first, and proves the second can then acquire the same lock. Both sessions are rolled back and closed; it inserts no rows. Its mock sequencing/error/cleanup tests passed (2 tests); the live check has not run.
 
 Run this before recording the first candidate. Passing proves same-helper row-lock contention and release, not candidate replay across concurrent requests, disconnect recovery or original-recorder interoperability. Those remain the broader independent-connection checks above.
+
+
+## Coordinator application checkpoint
+
+Paul subsequently approved application. Dedicated staging readiness, two-connection lock/release check, candidate recording and unchanged same-batch replay passed. One test-order/refund source remains excluded, zero financial events, coverage false, other-store fingerprints unchanged. See [live result](shopify-intake-package-2026-09-17.md). This supersedes earlier pending narrow live-lock/setup gates; the wider concurrency/recovery matrix remains outstanding.

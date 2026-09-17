@@ -1,8 +1,10 @@
 # Night Scout — 17 September handover
 
-## Latest checkpoint — restricted candidate intake prepared
+## Latest checkpoint — restricted Shopify staging intake applied
 
-Three-agent package prepares exact staging store/service policies, private login provisioning, bounded operator runner and independent security review. [Delivery and next approval](shopify-intake-package-2026-09-17.md) is the current starting point. This package is candidate-only: the all-test checkout/refund must remain excluded and cannot enter the finance importer. No membership/reviewer grants are needed. Live staging catalog was inspected read-only; no setup or intake writes have occurred. Apply only after the concrete staging approval, verify the restricted connection and locking, then record/replay the 17 September candidate. Keep progress updates frequent. Production/Replit/main remain unchanged.
+Paul approved the prepared package. Applied the fixed development store, service policies/lock helper and private restricted login to staging only. Dedicated readiness and live two-connection rollback-only locking passed. The 17 September Shopify test order/refund recorded once; repeat returned the same batch. One TEST_ORDER exclusion, zero financial events, no coverage certification, finance import or memberships. All other-store fingerprints unchanged. Temporary administrator password file removed; private intake credentials remain ignored/owner-only. [Full result and limits](shopify-intake-package-2026-09-17.md).
+
+The final verifier initially included derived monthly-view rows in a zero-stored-transactions assertion; corrected that distinction and all checks passed. No application or data fix was needed. Do not reapply setup or request its approval again. Next is bounded changed-source/replay and recovery validation, then an agreed eligible-data reporting test route; actual Shopify tests must remain excluded. No production/Replit/main changes, scheduled sync or merchant-facing connection panel. Keep progress updates frequent.
 
 ## Earlier checkpoint — live development test order
 

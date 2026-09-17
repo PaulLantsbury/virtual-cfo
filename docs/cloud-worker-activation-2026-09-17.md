@@ -2,6 +2,11 @@
 
 ## Current status
 
+Update after secure entry: eight worker settings are saved in Replit. A fresh Replit shell passed authenticated cloud --check through the session pooler, with fixed project/store/date scope and financeImported=false. Deployment attempts are currently failing at Replit's automatic pnpm install (ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY); schedule is NOT active. Explicit worker-only export packaging is being prepared.
+
+Automatic approval initially rejected publishing due to the database checkbox. Verified the new worker's default Replit development database has no tables, the copy-development-data checkbox is off, and the UI states database creation occurs only if development data exists. A subsequent reviewed publish was accepted; no override. A duplicate-section edit was also rejected and replaced with an idempotent configuration edit. No original website or Supabase production change.
+
+
 Paul approved the separate private Replit staging worker, restricted staging/development credentials, nightly-claims schema, 02:00 Europe/London infrastructure trial with [02:00,02:15) startup window, fixed 2026-09-17 reporting period and US$5/month planning allowance. Production and the existing published website are outside this activation.
 
 Created Night Scout Staging Nightly at https://replit.com/@pjlantsbury/Night-Scout-Staging-Nightly (project dc5f1a04-2e7d-482e-b3ed-19fc86cfd6d0). Invite access shows Paul as sole owner; no join link created or collaborators invited. Imported reviewed GitHub commit 311a88eea958283aa5c0227f097fcbea16807e1d, excluding the website .replit/replit.nix configuration. New Node 24 worker configuration only. Pooler adaptation and setup record published in GitHub development commit 9af392d65c91dd899e035cf3e2113dbc7bee26d9, then imported into Replit; smoke check passed again.

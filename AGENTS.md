@@ -1,6 +1,6 @@
 # Latest cloud activation checkpoint
 
-See `docs/cloud-worker-activation-2026-09-17.md`: final setup approved; separate worker created; nightly schema APPLIED; restricted session-pooler support tested; worker remains UNPUBLISHED pending secure credential entry and cloud readiness. Earlier prepared-only statements below are historical. Do not reapply migration or request the same activation approval.
+See `docs/cloud-worker-activation-2026-09-17.md`: separate staging Scheduled worker PUBLISHED; nightly schema APPLIED; restricted authenticated readiness passed from Replit; deployment build/bundle/promotion passed. No runs yet. Europe/London was selected, but published overview says GMT: verify the first trigger's actual timezone before claiming overnight success. Runner retains its 02:00–02:15 London guard and fixed 17 September reporting period. Production unchanged. Earlier prepared-only statements below are historical, superseded by this checkpoint. Do not reapply the migration or repeat activation approval. Settings activation wording remains to be connected to actual per-store status.
 
 # Night Scout
 

@@ -1,6 +1,6 @@
 # Shopify connection readiness — 17 September 2026
 
-Package 2 preparation, not a connected Shopify store. No external collection, account installation, staging write, new grant or production change was performed. The new `experiments/shopify/connection-readiness.mjs` is an executable server-only integration seam: existing fixed-query HTTP reader → bounded full-history collector → detail loader → existing persistent candidate recorder. It does not introduce another importer, financial calculator, retry ledger or review shortcut.
+For the subsequent Shopify installation and permission checkpoint, see [the current handover](session-handover-2026-09-17.md). The following records Package 2 preparation, not a connected Shopify data feed. No external collection, account installation, staging write, new grant or production change was performed. The new `experiments/shopify/connection-readiness.mjs` is an executable server-only integration seam: existing fixed-query HTTP reader → bounded full-history collector → detail loader → existing persistent candidate recorder. It does not introduce another importer, financial calculator, retry ledger or review shortcut.
 
 ## Runnable verification
 

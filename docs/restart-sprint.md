@@ -505,3 +505,8 @@ Three-agent package complete: shared monthly baseline/model, four supported over
 ## Restricted Shopify candidate intake — 17 September 2026
 
 Three-agent preparation complete: scoped setup proposal/private login, existing-pipeline operator runtime, independent permission review and rollback-only lock checker. 33 focused checks passed. Read-only staging inventory confirmed expected protections and no duplicate store. No live setup/intake writes. First exercise is TEST_ORDER-excluded candidate-only, not financial import or completeness. See [delivery and concrete approval](shopify-intake-package-2026-09-17.md); live locking precedes candidate recording after approval.
+
+
+## Shopify staging intake application — 17 September 2026
+
+Paul approved; exact store/service/login applied, restricted readiness and live locking passed, one test-order/refund candidate recorded and replayed without duplication. Financial events zero, completeness false, other-store fingerprints unchanged. Corrected verification-only base-table/view distinction; no data changes needed. Admin password file removed. [Result and next work](shopify-intake-package-2026-09-17.md).

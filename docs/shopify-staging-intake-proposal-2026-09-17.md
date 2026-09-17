@@ -1,6 +1,6 @@
 # PocketLaunchpad1 staging intake proposal — 17 September 2026
 
-Status: executable candidate-only preparation now available; **not applied**. See [package and approval scope](shopify-intake-package-2026-09-17.md) and [independent acceptance review](shopify-intake-acceptance-2026-09-17.md). Live Shopify test checkout/refund checks supersede the original empty-store result. Read-only staging inventory found no duplicate store and confirmed expected RLS. The first exercise retains excluded test data as an unverified candidate only: no finance import, user membership, reviewer grant or completeness certification is included.
+Status: exact candidate-only package subsequently approved, applied to staging and verified. See [package and approval scope](shopify-intake-package-2026-09-17.md) and [independent acceptance review](shopify-intake-acceptance-2026-09-17.md). Live Shopify test checkout/refund checks supersede the original empty-store result. Read-only staging inventory found no duplicate store and confirmed expected RLS. The first exercise retains excluded test data as an unverified candidate only: no finance import, user membership, reviewer grant or completeness certification is included.
 
 The design below records the wider pipeline and later access requirements. Its original future-tense setup and empty-store statements are historical; the package document governs the concrete next action.
 

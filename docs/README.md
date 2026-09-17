@@ -4,7 +4,7 @@ Start with the [17 September handover](session-handover-2026-09-17.md), [current
 
 The [13 September handover](session-handover-2026-09-13.md) records the latest application/staging verification: shared sales and actual profit reporting, approved Store D evidence and restricted reads, and shared CFO Briefing/Margin Analysis figures. Profit Overview no longer uses its old sample model. Scenario Planner and other unfinished areas still contain explicitly labelled samples. No real Shopify feed, Xero reconciliation or production release is complete.
 
-Latest prepared package: [restricted Shopify candidate intake](shopify-intake-package-2026-09-17.md), with executable proposal, private runner and permission tests. Awaiting staging application approval; no financial import or live setup claimed.
+Latest staging package: [restricted Shopify candidate intake](shopify-intake-package-2026-09-17.md), applied after approval with private restricted access, live locking and same-batch replay verified. Test transactions remain excluded; no financial import.
 
 Latest live test: [development checkout and partial refund](shopify-test-order-2026-09-17.md) read successfully and excluded as test activity; no financial import.
 

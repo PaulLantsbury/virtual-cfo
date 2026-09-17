@@ -4,7 +4,7 @@
 
 Paul approved the separate private Replit staging worker, restricted staging/development credentials, nightly-claims schema, 02:00 Europe/London infrastructure trial with [02:00,02:15) startup window, fixed 2026-09-17 reporting period and US$5/month planning allowance. Production and the existing published website are outside this activation.
 
-Created Night Scout Staging Nightly at https://replit.com/@pjlantsbury/Night-Scout-Staging-Nightly (project dc5f1a04-2e7d-482e-b3ed-19fc86cfd6d0). Invite access shows Paul as sole owner; no join link created or collaborators invited. Imported reviewed GitHub commit 311a88eea958283aa5c0227f097fcbea16807e1d, excluding the website .replit/replit.nix configuration. New Node 24 worker configuration only. Code adaptation below still needs publication/synchronisation.
+Created Night Scout Staging Nightly at https://replit.com/@pjlantsbury/Night-Scout-Staging-Nightly (project dc5f1a04-2e7d-482e-b3ed-19fc86cfd6d0). Invite access shows Paul as sole owner; no join link created or collaborators invited. Imported reviewed GitHub commit 311a88eea958283aa5c0227f097fcbea16807e1d, excluding the website .replit/replit.nix configuration. New Node 24 worker configuration only. Pooler adaptation and setup record published in GitHub development commit 9af392d65c91dd899e035cf3e2113dbc7bee26d9, then imported into Replit; smoke check passed again.
 
 Applied db-migrations/proposals/shopify-nightly-claims-2026-09-17.sql to staging after confirming table absent; SQL editor reported success. Do not reapply. Local restricted read-only cloud readiness check through the session pooler passed after this application. No scheduled collection has run.
 
@@ -16,7 +16,7 @@ Replit publishing form prepared as Scheduled, daily 02:00 Europe/London, six-min
 
 ## Remaining before activation
 
-Securely enter only the eight approved worker settings, synchronise reviewed pooler support, run authenticated cloud --check, verify saved build/run commands and schedule, then publish within approved budget. Final publication is still authorised; no fresh approval needed for unchanged scope. Never start website, seed or push database. No administrator/reviewer credentials.
+Worker-only build and nightly run commands have been written to the new .replit. Securely enter only the eight approved worker settings, run authenticated cloud --check, verify saved build/run commands and schedule, then publish within approved budget. Latest Replit --check returned disabled/writeAttempted=false: secrets are not yet available. Final publication is still authorised; no fresh approval needed for unchanged scope. Never start website, seed or push database. No administrator/reviewer credentials.
 
 Credential values were accidentally pasted into the conversation during secure-entry handoff. Do not reproduce them in documentation, logs or GitHub. Replacement of the restricted database password and Shopify app secret should be completed before expanding beyond this development trial, coordinating all existing consumers.
 

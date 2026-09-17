@@ -2,11 +2,14 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {nightlyPlan} from './nightly-plan.mjs';
 import {parseNightlyArguments} from './nightly-development.mjs';
 import {INTAKE_TARGET} from './intake-runtime.mjs';
-test('London 02:00 moves with DST and admits only the scheduled minute',()=>{
+test('London 02:00 moves with DST and admits the approved fifteen-minute startup window',()=>{
  for(const [at,wanted] of [['2026-09-17T01:00:00Z','2026-09-17T01:00:00.000Z'],['2026-12-17T02:00:00Z','2026-12-17T02:00:00.000Z'],['2026-03-29T01:00:00Z','2026-03-29T01:00:00.000Z'],['2026-10-25T02:00:00Z','2026-10-25T02:00:00.000Z']]){const r=nightlyPlan(at,'Europe/London');assert.equal(r.scheduledAt,wanted);assert.equal(r.due,true);}
  assert.equal(nightlyPlan('2026-09-17T00:59:59Z','Europe/London').due,false);
  assert.equal(nightlyPlan('2026-09-17T01:00:59Z','Europe/London').due,true);
- assert.equal(nightlyPlan('2026-09-17T01:01:00Z','Europe/London').due,false);
+ assert.equal(nightlyPlan('2026-09-17T01:01:00Z','Europe/London').due,true);
+ assert.equal(nightlyPlan('2026-09-17T01:14:59.999Z','Europe/London').due,true);
+ assert.equal(nightlyPlan('2026-09-17T01:15:00Z','Europe/London').due,false);
+ for(const [start,end] of [['2026-03-29T01:14:59.999Z','2026-03-29T01:15:00Z'],['2026-10-25T02:14:59.999Z','2026-10-25T02:15:00Z']]){assert.equal(nightlyPlan(start,'Europe/London').due,true);assert.equal(nightlyPlan(end,'Europe/London').due,false);}
  assert.equal(nightlyPlan('2026-09-17T15:00:00Z','Europe/London').due,false);
 });
 test('missing local 02:00 chooses next valid minute; repeated 02:00 only first occurrence',()=>{

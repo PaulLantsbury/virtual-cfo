@@ -1,5 +1,13 @@
 # Night Scout — 17 September handover
 
+## Cloud worker prepared; activation pending
+
+Paul agreed cloud preparation, the 02:00–02:15 startup window and US$5/month planning allowance. Prepared server-only environment bootstrap creates temporary restricted config/CA files, reuses the existing bounded runner, suppresses raw child output and cleans up after execution. No secrets uploaded, worker project created or schedule activated. [Preparation and tests](cloud-worker-preparation-2026-09-17.md); [deployment runbook](../deployments/nightly-staging/README.md).
+
+Local import/dependency smoke and actual disabled-default CLI passed without network access. Nine updated nightly tests cover the startup window and persistent once-date lock. Bootstrap-specific checks are recorded in its package document. The explicit first infrastructure trial uses the existing 17 September test reporting period; rolling historical coverage is still separate work. Cloud networking and an actual overnight run remain unverified until approved setup.
+
+Next concrete activation proposal: separate private Replit staging worker; restricted staging intake and Shopify development credentials only; apply nightly-claims table/grants; read-only cloud connectivity check; fixed-period controlled collection and first overnight observation, within the agreed planning allowance and with final platform price checked. No existing website republish, production data, admin credentials or financial approval.
+
 ## Cloud hosting direction confirmed
 
 Paul chose cloud-hosted nightly execution; no Mac needs to stay awake. The earlier computer-choice question is withdrawn. [Cloud staging plan](cloud-nightly-staging-plan-2026-09-17.md) records read-only Replit inspection, current tariff, separate worker recommendation and exact remaining work. Existing Replit is public Autoscale and is not updated by development-branch GitHub saves. No Replit settings/secrets/deployment or live database changes were made. Cloud adapter, delayed-start/coverage policy and concrete activation approval remain; no schedule is running.

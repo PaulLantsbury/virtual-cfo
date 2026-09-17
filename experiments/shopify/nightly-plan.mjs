@@ -1,6 +1,7 @@
 /** Once per store-local calendar date, at 02:00. Pure preparation, no timers.
  * On a missing 02:00 use the first valid minute after it; on an overlap use
- * its first occurrence. The runner only admits this minute (no daytime catch-up).
+ * its first occurrence. The runner admits a 15-minute startup window from that instant;
+ * no daytime catch-up and no second automatic collection for a claimed day.
  */
 export function nightlyPlan(now,timezone){
  const instant=new Date(now);if(!Number.isFinite(instant.getTime()))throw Error('Invalid schedule clock');
@@ -13,5 +14,5 @@ export function nightlyPlan(now,timezone){
   const q=parts(new Date(t));if(`${q.year}-${q.month}-${q.day}`===localDate&&`${q.hour}:${q.minute}`>='02:00'){scheduledAt=new Date(t);break;}
  }
  if(!scheduledAt)throw Error('Local schedule unavailable');
- return Object.freeze({localDate,timezone,localTime:'02:00',scheduledAt:scheduledAt.toISOString(),due:instant>=scheduledAt&&instant.getTime()<scheduledAt.getTime()+60000});
+ return Object.freeze({localDate,timezone,localTime:'02:00',scheduledAt:scheduledAt.toISOString(),due:instant>=scheduledAt&&instant.getTime()<scheduledAt.getTime()+15*60000});
 }

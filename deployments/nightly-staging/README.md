@@ -2,6 +2,16 @@
 
 Paul approved the separate staging worker setup on 17 September. The worker project has been created; see docs/cloud-worker-activation-2026-09-17.md for current activation status. This folder does not deploy anything. Do not republish or replace the existing Virtual C F O website. Use the reviewed GitHub development-branch revision and retain the repository directory layout because runtime imports cross experiments/shopify and experiments/financial-v1.
 
+## Worker export preparation
+
+In a separate Git archive export only, copy `deployments/nightly-staging/replit-worker.toml` to `.replit`, then run:
+
+```sh
+node deployments/nightly-staging/prepare-export.mjs --export-dir /home/runner/workspace --confirm-staging-export bioalckltvkhlczusdvl
+```
+
+This narrows workspace discovery to lib/db and configures plain pnpm installs for locked runtime-only dependencies, disabled lifecycle scripts and non-interactive CI. It refuses Git checkouts and non-staging worker configurations. Never run on the website/source checkout. Replit can run an automatic plain install despite the documented enabledForHosting=false setting, so this export policy is required. Verified with pnpm 10.26.1 first/repeated installs and in the Replit workspace. Re-importing the original workspace manifests requires running preparation again.
+
 ## Build and inactive check
 
 Use Node 24 and the project's pnpm lockfile. In the new worker project only, install locked dependencies without lifecycle scripts:

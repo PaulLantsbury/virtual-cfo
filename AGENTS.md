@@ -1,3 +1,5 @@
+> Cross-chat continuity: read the latest handover addition first. Xero integration and a Xero test account/demo organisation are explicit roadmap requirements, not completed work. Verify access in a new chat before edits.
+
 # Resume instruction — 17 September end of day
 
 Read the end-of-day decisions at the top of docs/session-handover-2026-09-17.md and docs/roadmap-2026-09-17.md. First verify the actual overnight run using docs/first-overnight-verification-2026-09-18.md. Then agree ongoing coverage and prepare controlled daily test data. Paul added conversational Ask Night Scout alongside proactive CFO briefings, after trustworthy shared calculations. Do not confuse proposals with installed features or claim the first overnight run succeeded before checking. Preserve financial/test-order rules and production boundaries.

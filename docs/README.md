@@ -4,6 +4,8 @@ Start with the [17 September handover](session-handover-2026-09-17.md), [current
 
 The [13 September handover](session-handover-2026-09-13.md) records the latest application/staging verification: shared sales and actual profit reporting, approved Store D evidence and restricted reads, and shared CFO Briefing/Margin Analysis figures. Profit Overview no longer uses its old sample model. Scenario Planner and other unfinished areas still contain explicitly labelled samples. No real Shopify feed, Xero reconciliation or production release is complete.
 
+Latest reporting verification: [eligible synthetic pipeline and cross-page consistency](synthetic-reporting-package-2026-09-17.md), using disposable eligible evidence and separate read-only checks of the existing synthetic staging store. No additional Shopify test purchases or live data writes.
+
 Latest completed batch: [Shopify change detection and recovery](shopify-recovery-package-2026-09-17.md): 23 checks passed, live second test refund detected, prior history retained and unchanged replay verified; private read-only inspector added.
 
 Latest staging package: [restricted Shopify candidate intake](shopify-intake-package-2026-09-17.md), applied after approval with private restricted access, live locking and same-batch replay verified. Test transactions remain excluded; no financial import.

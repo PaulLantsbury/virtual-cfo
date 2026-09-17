@@ -2,9 +2,8 @@ import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 export const BRAND_ASSETS = {
-  logo: "nightscout-logo.png",
+  logo: "nightscout-navigation.png",
   navigation: "nightscout-navigation.png",
-  mascot: "nightscout-mascot.png",
 } as const;
 
 type BrandLogoVariant = keyof typeof BRAND_ASSETS;
@@ -34,7 +33,7 @@ export function BrandLogo({
       <img
         src={`${import.meta.env.BASE_URL}${BRAND_ASSETS[variant]}`}
         alt="Night Scout logo"
-        className={cn(variant === "navigation" ? "object-cover object-[50%_48%]" : "w-auto object-contain", imageClassName)}
+        className={cn("object-cover object-[50%_48%]", imageClassName)}
       />
     </Link>
   );

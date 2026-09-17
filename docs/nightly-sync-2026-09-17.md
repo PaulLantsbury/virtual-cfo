@@ -1,5 +1,9 @@
 # Nightly Shopify collection — 17 September 2026
 
+## Cloud hosting direction confirmed
+
+Paul chose cloud-hosted nightly execution; no Mac needs to stay awake. The earlier computer-choice question is withdrawn. [Cloud staging plan](cloud-nightly-staging-plan-2026-09-17.md) records read-only Replit inspection, current tariff, separate worker recommendation and exact remaining work. Existing Replit is public Autoscale and is not updated by development-branch GitHub saves. No Replit settings/secrets/deployment or live database changes were made. Cloud adapter, delayed-start/coverage policy and concrete activation approval remain; no schedule is running.
+
 ## Agreed product behaviour
 
 Paul agreed one automatic refresh per day, overnight at **02:00 in each store's local timezone**. Failed collection must not invent replacement figures: retain prior recorded data, flag the unsuccessful refresh, and do not present it as freshly verified. Existing evidence invalidation still applies when source data changes; retaining historical records does not authorise showing invalidated figures as current.

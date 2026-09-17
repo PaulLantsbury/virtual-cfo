@@ -13,6 +13,8 @@ Paul has now agreed **one overnight refresh per day at 02:00 in each store's loc
 
 ## Current package evidence
 
+- [Cloud-hosted nightly staging plan](cloud-nightly-staging-plan-2026-09-17.md) — Mac-independent direction, Replit inspection and proposed costs; not deployed.
+
 - [Nightly runner and activation boundaries](nightly-sync-2026-09-17.md)
 - [Independent calculation acceptance](calculation-acceptance-2026-09-17.md)
 - [CFO-layer acceptance requirements](cfo-layer-acceptance-2026-09-17.md)

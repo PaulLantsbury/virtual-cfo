@@ -525,3 +525,8 @@ Three-agent package: independently invented eligible sale/refund pipeline throug
 ## Private operator sync — 17 September 2026
 
 Three-agent package completed: fixed-scope private loopback screen/controller/launcher, manual single-flight collection, safe status, uncertainty blocking and graceful shutdown. 34 focused checks pass. Live staging button returned unchanged replay, preserving two versions, one excluded test order/two refunds and zero financial events. No new schema/grants or production release. [Delivery and remaining merchant/durable-history work](operator-sync-package-2026-09-17.md).
+
+
+## Durable sync/status preparation and customer-identifier decision — 17 September
+
+Prepared/tested persistent journal, member-only status RPC, optional private operator integration and honest signed-in Settings; 37 checks plus frontend typecheck passed. Staging preview shows unavailable until proposed schema is applied. New schema and fixed-store membership await concrete approval; no production or identifier-feed activation. [Package](durable-sync-package-2026-09-17.md), [customer-data decision](customer-data-architecture-2026-09-17.md).

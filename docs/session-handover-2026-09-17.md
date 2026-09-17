@@ -1,6 +1,14 @@
 # Night Scout — 17 September handover
 
-## Latest checkpoint — private operator sync screen
+## Latest checkpoint — durable sync/status prepared; staging approval pending
+
+Prepared metadata-only persistent sync journal, restart uncertainty protection, authenticated member-scoped status RPC, optional operator journal integration and signed-in Settings status. Three agents plus coordinator; 37 focused checks and frontend typecheck passed. Live local Settings shows honest unavailable state while the new RPC is absent. [Prepared package and exact enablement proposal](durable-sync-package-2026-09-17.md). Schema/access not applied, no production/Replit change. Existing operator on 5190 remains process-only; merchant preview 3000 has updated Settings.
+
+Paul also agreed no shopper contact data and a store-specific customer identifier for repeat-purchase reporting. [Architecture/decision](customer-data-architecture-2026-09-17.md) and [identifier preparation](customer-identifier-plan-2026-09-17.md) explain the separate observation path needed to preserve financial fingerprints. Active queries unchanged; customer identity storage/feed and repeat metrics are not implemented. Do not treat approval of the principle as deployed collection or approval of retention/guest/cohort formulas.
+
+Next: request/apply the concrete staging sync-history schema plus Paul's fixed-store read membership, then enable journal mode, verify one replay and persisted status after restart. These are new grants/schema and still require approval. No financial reviewer grant or figure approval is proposed. Customer identity storage is a separate subsequent package.
+
+## Earlier checkpoint — private operator sync screen
 
 Three-agent package implemented and independently reviewed; 34 checks passed. A private loopback screen now reads the fixed development-store candidate and runs one explicit collection at a time, with safe errors, uncertain-outcome retry blocking and graceful shutdown. Live staging button test returned unchanged replay: two retained versions, one test order, two refunds, zero mapped financial events, needs-recheck preserved. Local operator screen on port 5190 is left open; existing merchant preview remains on port 3000. [Delivery, access and repeatable checks](operator-sync-package-2026-09-17.md).
 

@@ -6,11 +6,14 @@ export function intakeConnectionOptions(config){
  try{
  const {projectRef,databaseUrl,scope}=config;
  valid(projectRef===INTAKE_TARGET.projectRef);
- const url=new URL(databaseUrl);
- valid(['postgres:','postgresql:'].includes(url.protocol)&&url.hostname===`db.${projectRef}.supabase.co`&&(!url.port||url.port==='5432')&&url.pathname==='/postgres'&&!url.search&&!url.hash&&decodeURIComponent(url.username)==='night_scout_intake_login'&&url.password.length>0);
+ const url=new URL(databaseUrl),user=decodeURIComponent(url.username);
+ // Only the dashboard-verified staging SESSION pooler is allowed (never transaction port 6543).
+ const direct=url.hostname===`db.${projectRef}.supabase.co`&&user==='night_scout_intake_login';
+ const session=url.hostname==='aws-1-eu-west-1.pooler.supabase.com'&&user===`night_scout_intake_login.${projectRef}`;
+ valid(['postgres:','postgresql:'].includes(url.protocol)&&(direct||session)&&(!url.port||url.port==='5432')&&url.pathname==='/postgres'&&!url.search&&!url.hash&&url.password.length>0);
  const day=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
  valid(scope?.storeId===INTAKE_TARGET.storeId&&scope.shopId===INTAKE_TARGET.shopId&&day(scope.from)&&day(scope.to)&&scope.from<=scope.to);
- return {scope:Object.freeze({storeId:scope.storeId,shopId:scope.shopId,from:scope.from,to:scope.to}),pool:{host:url.hostname,port:5432,database:'postgres',user:'night_scout_intake_login',password:decodeURIComponent(url.password),ssl:{rejectUnauthorized:true},max:1,connectionTimeoutMillis:5000,statement_timeout:30000,idle_in_transaction_session_timeout:15000}};
+ return {scope:Object.freeze({storeId:scope.storeId,shopId:scope.shopId,from:scope.from,to:scope.to}),pool:{host:url.hostname,port:5432,database:'postgres',user,password:decodeURIComponent(url.password),ssl:{rejectUnauthorized:true},max:1,connectionTimeoutMillis:5000,statement_timeout:30000,idle_in_transaction_session_timeout:15000}};
  }catch{throw Error('Intake configuration is invalid');}
 }
 export function intakeDatabase(pool){return {

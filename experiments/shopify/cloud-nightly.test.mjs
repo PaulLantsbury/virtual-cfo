@@ -41,3 +41,10 @@ test('real synthetic Node child receives CA at startup and can read restricted f
  return execute(executable,['-e',script,path],{env:childEnv,timeout:Math.min(timeoutMs,5000),maxBuffer,encoding:'utf8'});
  }});assert.equal(result.state,'prepared_not_installed');await assert.rejects(access(directory));
 });
+
+test('cloud bootstrap accepts only the verified staging session pooler and passes it unchanged to the child',async()=>{
+ const env=environment();env.NIGHT_SCOUT_INTAKE_DATABASE_URL=`postgresql://night_scout_intake_login.${target.projectRef}:synthetic@aws-1-eu-west-1.pooler.supabase.com:5432/postgres`;
+ const result=await runCloudNightly({env},{runChild:async({args})=>{const c=JSON.parse(await readFile(args[2],'utf8'));assert.equal(c.databaseUrl,env.NIGHT_SCOUT_INTAKE_DATABASE_URL);return {stdout:JSON.stringify(check()),stderr:''};}});
+ assert.equal(result.state,'prepared_not_installed');
+ for(const databaseUrl of [env.NIGHT_SCOUT_INTAKE_DATABASE_URL.replace(':5432',':6543'),env.NIGHT_SCOUT_INTAKE_DATABASE_URL.replace(target.projectRef,'futkktdebdygsdrcknpr'),env.NIGHT_SCOUT_INTAKE_DATABASE_URL+'?sslmode=disable'])await assert.rejects(runCloudNightly({env:{...env,NIGHT_SCOUT_INTAKE_DATABASE_URL:databaseUrl}},{runChild:()=>assert.fail()}),/unconfirmed/);
+});

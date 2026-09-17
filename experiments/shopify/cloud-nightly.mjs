@@ -29,7 +29,7 @@ function configuration(env){
  const scope={storeId:INTAKE_TARGET.storeId,shopId:INTAKE_TARGET.shopId,from:env.NIGHT_SCOUT_REPORT_FROM,to:env.NIGHT_SCOUT_REPORT_TO};
  ensure(day(scope.from)&&day(scope.to)&&scope.from<=scope.to&&(Date.parse(scope.to)-Date.parse(scope.from))/86400000<31);
  const config={projectRef:INTAKE_TARGET.projectRef,databaseUrl:env.NIGHT_SCOUT_INTAKE_DATABASE_URL,scope};
- intakeConnectionOptions(config); // Pins direct staging host and dedicated login, validated TLS.
+ intakeConnectionOptions(config); // Pins staging direct/session endpoint and dedicated login, validated TLS.
  const pem=env.NIGHT_SCOUT_STAGING_CA_PEM;ensure(typeof pem==='string'&&pem.length<=32768);
  const certs=pem.match(/-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g);
  ensure(certs?.length>0&&certs.length<=8&&certs.reduce((s,c)=>s.replace(c,''),pem).trim()==='');

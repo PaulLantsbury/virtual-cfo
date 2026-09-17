@@ -1,13 +1,13 @@
 # Replit staging nightly worker — prepared runbook
 
-Create a separate private worker project only after the final cloud setup approval. This folder does not deploy anything. Do not republish or replace the existing Virtual C F O website. Use the reviewed GitHub development-branch revision and retain the repository directory layout because runtime imports cross experiments/shopify and experiments/financial-v1.
+Paul approved the separate staging worker setup on 17 September. The worker project has been created; see docs/cloud-worker-activation-2026-09-17.md for current activation status. This folder does not deploy anything. Do not republish or replace the existing Virtual C F O website. Use the reviewed GitHub development-branch revision and retain the repository directory layout because runtime imports cross experiments/shopify and experiments/financial-v1.
 
 ## Build and inactive check
 
 Use Node 24 and the project's pnpm lockfile. In the new worker project only, install locked dependencies without lifecycle scripts:
 
 ```sh
-pnpm install --frozen-lockfile --ignore-scripts
+pnpm --filter @workspace/db --prod install --frozen-lockfile --ignore-scripts
 node deployments/nightly-staging/smoke.mjs
 ```
 
@@ -33,7 +33,7 @@ In Replit Scheduled publishing choose daily 02:00, Europe/London, a timeout slig
 
 - NIGHT_SCOUT_CLOUD_ENABLED: explicit true only after approved configuration; omitted/false means disabled.
 - NIGHT_SCOUT_STAGING_PROJECT_REF: fixed staging project reference.
-- NIGHT_SCOUT_INTAKE_DATABASE_URL: existing restricted staging login, direct verified-TLS endpoint only. Cloud connectivity must be checked; pooler support is not silently enabled.
+- NIGHT_SCOUT_INTAKE_DATABASE_URL: existing restricted staging login, verified-TLS direct endpoint or the exact dashboard-verified staging session pooler aws-1-eu-west-1.pooler.supabase.com:5432, with project-qualified restricted login. Transaction pooling is rejected.
 - NIGHT_SCOUT_SHOPIFY_CLIENT_ID and NIGHT_SCOUT_SHOPIFY_CLIENT_SECRET: existing development app credentials, never browser variables.
 - NIGHT_SCOUT_STAGING_CA_PEM: trusted staging CA certificate, materialised only for the child process.
 - NIGHT_SCOUT_REPORT_FROM and NIGHT_SCOUT_REPORT_TO: explicit ISO calendar dates, maximum 31 days. Proposed infrastructure trial uses 2026-09-17 for both. This is not a rolling financial-feed design.

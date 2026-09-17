@@ -1,3 +1,7 @@
+# Latest cloud activation checkpoint
+
+See `docs/cloud-worker-activation-2026-09-17.md`: final setup approved; separate worker created; nightly schema APPLIED; restricted session-pooler support tested; worker remains UNPUBLISHED pending secure credential entry and cloud readiness. Earlier prepared-only statements below are historical. Do not reapply migration or request the same activation approval.
+
 # Night Scout — 17 September handover
 
 ## Cloud worker prepared; activation pending

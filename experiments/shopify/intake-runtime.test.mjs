@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {INTAKE_TARGET as target,intakeConnectionOptions,intakeDatabase,initialiseIntakeRuntime} from './intake-runtime.mjs';
 const config={projectRef:target.projectRef,databaseUrl:`postgresql://night_scout_intake_login:synthetic@db.${target.projectRef}.supabase.co/postgres`,scope:{storeId:target.storeId,shopId:target.shopId,from:'2026-09-17',to:'2026-09-17'}};
-function poolFixture({badRole=false,wrongStore=false,commitFailure=false}={}){
+function poolFixture({badRole=false,badLogin=false,wrongStore=false,commitFailure=false}={}){
  const queries=[];let closed=false,discard;
  return {queries,get closed(){return closed;},get discard(){return discard;},end:async()=>{closed=true;},connect:async()=>({release:v=>{discard=v;},query:async(sql,args)=>{
  queries.push([sql,args]);
  if(sql==='COMMIT'&&commitFailure)throw Error('secret database error');
- if(sql.includes('AS safe_login'))return {rows:[{role:badRole?'postgres':'night_scout_intake_service',safe_login:true,safe_role:true,unsafe_writes:false,unsafe_membership:false,lock_ready:true}]};
+ if(sql.includes('AS safe_login'))return {rows:[{role:badRole?'postgres':'night_scout_intake_service',safe_login:!badLogin,safe_role:true,unsafe_writes:false,unsafe_membership:false,lock_ready:true}]};
  if(sql.startsWith('SELECT id,'))return {rows:[{id:target.storeId,shopify_domain:wrongStore?'other.myshopify.com':target.domain,shopify_store_id:'95601983836',currency_code:'GBP',timezone:'Europe/London'}]};
  return {rows:[]};
  }})};
@@ -39,4 +39,21 @@ test('initialisation is read-only; explicit confirmation gates credential resolu
  await assert.rejects(runtime.run(),/Explicit staging/);assert.equal(credentials,0);
  await assert.rejects(runtime.run({confirmTarget:`${target.projectRef}/${target.storeId}`}),e=>e.message==='Intake outcome unconfirmed; inspect candidate state before retrying');assert.equal(credentials,1);
  await runtime.close();assert.equal(pool.closed,true);await assert.rejects(runtime.run({confirmTarget:`${target.projectRef}/${target.storeId}`}),/closed/);
+});
+
+const sessionUrl=`postgresql://night_scout_intake_login.${target.projectRef}:synthetic@aws-1-eu-west-1.pooler.supabase.com:5432/postgres`;
+test('verified session pooler uses project-qualified wire login and retains TLS, bounds and database role checks',async()=>{
+ const sessionConfig={...config,databaseUrl:sessionUrl},options=intakeConnectionOptions(sessionConfig);
+ assert.equal(options.pool.host,'aws-1-eu-west-1.pooler.supabase.com');
+ assert.equal(options.pool.user,`night_scout_intake_login.${target.projectRef}`);
+ assert.equal(options.pool.port,5432);assert.deepEqual(options.pool.ssl,{rejectUnauthorized:true});
+ assert.equal(options.pool.max,1);assert.equal(options.pool.statement_timeout,30000);
+ const pool=poolFixture();const runtime=await initialiseIntakeRuntime(sessionConfig,{createPool:o=>{assert.deepEqual(o,options.pool);return pool;},resolveCredential:async()=>assert.fail()});
+ const roleQuery=pool.queries.find(([sql])=>sql.includes('AS safe_login'))[0];
+ assert.ok(roleQuery.includes("rolname='night_scout_intake_login'"));assert.ok(roleQuery.includes('WHERE rolname=session_user'));
+ await runtime.close();
+ const bad=poolFixture({badLogin:true});await assert.rejects(initialiseIntakeRuntime(sessionConfig,{createPool:()=>bad,resolveCredential:async()=>assert.fail()}),/could not be initialised/);assert.equal(bad.closed,true);
+});
+test('session pooler rejects transaction mode, unrelated hosts, projects, broad logins and TLS overrides',()=>{
+ for(const databaseUrl of [sessionUrl.replace(':5432',':6543'),sessionUrl.replace('aws-1-eu-west-1','aws-0-eu-west-1'),sessionUrl.replace('supabase.com','supabase.com.evil.test'),sessionUrl.replace(target.projectRef,'futkktdebdygsdrcknpr'),sessionUrl.replace(`.${target.projectRef}`,''),sessionUrl.replace('night_scout_intake_login','postgres'),sessionUrl+'?sslmode=disable',sessionUrl+'#fragment',sessionUrl.replace('/postgres','/other'),config.databaseUrl.replace('night_scout_intake_login',`night_scout_intake_login.${target.projectRef}`)])assert.throws(()=>intakeConnectionOptions({...config,databaseUrl}),/configuration is invalid/);
 });

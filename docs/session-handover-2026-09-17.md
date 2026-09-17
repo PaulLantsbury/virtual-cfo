@@ -1,5 +1,15 @@
 # Night Scout — 17 September handover
 
+## Latest checkpoint — Shopify installation
+
+Paul authorised necessary Shopify setup changes. Night Scout Development (app 424626651137) is installed on development store PocketLaunchpad1 (`pocketlaunchpad1.myshopify.com`) in organisation 185032893. The active version is `night-scout-full-history-readonly` (1132636897281), requesting `read_orders` and `read_all_orders`, API version 2026-07. Store currency is GBP and its timezone was changed to London. Installation was verified in Shopify admin; the app still displays its default example.com embedded placeholder, not the Night Scout interface.
+
+Paul approved Custom distribution for this development app; selected and confirmed in Shopify. A separate customer-facing app is planned later. Submitted the full-history request explaining historical sales reconciliation and later refunds. Shopify Partners now states “Your app can access the full order history for a store.” Dev Dashboard initially rejected the new scope while its configuration form was stale, and automatic approval review correctly blocked a repeat submission. A freshly loaded scope selector subsequently offered `read_all_orders`; selected it, verified both read scopes and no validation error, then released `night-scout-full-history-readonly`. Verified Active in Versions. The earlier block is resolved through verified UI state, not an override. Installed-store consent/token scopes still need API verification; configuration release alone does not prove the token grants both scopes.
+
+Credentials/provider, live context query, candidate store mapping and authorised database intake remain outstanding. No live Shopify data has been imported or financial coverage certified. No secrets are recorded here.
+
+Next: configure private credentials, complete any installed-store permission update, and verify read-only shop context and actual token scopes. Review the exact staging store mapping/intake permissions before any database changes. Keep test orders excluded under the agreed financial rules. See shopify-connection-readiness-2026-09-17.md for remaining runtime gates.
+
 ## Latest checkpoint — Package 2 implementation
 
 Paul approved Package 2. See [delivery record](package-2-2026-09-17.md) for migrated shared sales pages, factual CFO observations, Shopify readiness code, tests and live staging checks. Package 1 entries below are history; their proposed-package approval is superseded. Shopify account/installation and authorised live intake remain outstanding; no new database grants, production or Replit changes. Current local staging reflects application changes. Final combined existing browser regressions: 20/20 passed after correcting an asynchronous assertion race; new workstream checks are in the delivery record.

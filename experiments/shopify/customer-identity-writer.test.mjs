@@ -23,7 +23,7 @@ test('strict projected facts replay once; explicit null and changed/same-version
 });
 test('uncollected, malformed, foreign-scope or contact-bearing inputs rejected before transaction',async()=>{
  const db={transaction:()=>assert.fail('validation must precede transaction')},o=observation();const missing={...o};delete missing.shopifyCustomerId;
- for(const bad of [missing,{...o,shopifyCustomerId:undefined},{...o,email:'private@example.invalid'},{...o,storeId:A},{...o,shopId:'gid://shopify/Shop/2'},{...o,shopifyCustomerId:'gid://shopify/Order/10'},{...o,identityCollectionVersion:2},{...o,observedAt:'not-a-date'},{...o,observedAt:'2026-02-30T12:00:00Z'},{...o,sourceOrderUpdatedAt:'2026-09-17'}])await assert.rejects(record(db,[bad]),/Invalid customer/);
+ for(const bad of [missing,{...o,shopifyCustomerId:undefined},{...o,email:'private@example.invalid'},{...o,storeId:A},{...o,shopId:'gid://shopify/Shop/2'},{...o,shopifyCustomerId:'gid://shopify/Order/10'},{...o,identityCollectionVersion:2},{...o,observedAt:'not-a-date'},{...o,observedAt:'2026-09-17T24:00:00Z'},{...o,sourceOrderUpdatedAt:'2026-09-17T12:00:00-00:00'},{...o,observedAt:'2026-02-30T12:00:00Z'},{...o,sourceOrderUpdatedAt:'2026-09-17'}])await assert.rejects(record(db,[bad]),/Invalid customer/);
  await assert.rejects(record(db,Array(1001).fill(o)),/Invalid/);
 });
 test('identity rows cannot be edited/deleted/read by browsers or inserted across stores; recording grants expose no new finance writes',async()=>{

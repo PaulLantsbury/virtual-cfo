@@ -25,3 +25,14 @@ export function parseShopifyStatus(value: unknown, storeId: string): ConnectionS
  const count=(v:unknown)=>v==null?null:Number.isSafeInteger(v)&&Number(v)>=0?Number(v):failure();
  return {state:raw.state as ConnectionStatus['state'],storeId,latestAttempt,latestSuccessfulCollection,candidate:{state:c.state as ConnectionStatus['candidate']['state'],from,to,orderCount:count(c.orderCount),refundCount:count(c.refundCount),mappedEventCount:count(c.mappedEventCount),testExcludedCount:count(c.testExcludedCount)},financialVerification:'not_assessed'};
 }
+
+/** Reports evidence uncertainty only; it does not infer freshness from a clock or certify figures. */
+export function collectionWarning(data: ConnectionStatus): string | null {
+ if(data.state !== 'available')return null;
+ const a=data.latestAttempt;
+ if(!a)return 'No collection has been recorded. Data freshness is unknown.';
+ if(a.state === 'running')return 'The latest collection has not finished. It may still be running or may have been interrupted. Newer data is not confirmed.';
+ if(a.state === 'unconfirmed')return 'The latest collection could not be confirmed. Displayed figures may be out of date; check the last completed collection.';
+ if(['missing_source','stale_source','conflicting_source','historical_replay'].includes(a.resultCode ?? ''))return 'The latest attempt did not establish a newer current collection. Previously verified figures may be out of date; investigation is needed.';
+ return null;
+}

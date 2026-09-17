@@ -1,10 +1,8 @@
+import {eventDay} from '../financial-v1/event-evidence.mjs';
 import {INTAKE_TARGET as target} from './intake-runtime.mjs';
 const keys=['identityCollectionVersion','storeId','shopId','shopifyOrderId','shopifyCustomerId','sourceOrderUpdatedAt','observedAt'].sort().join(',');
 const gid=(value,type)=>typeof value==='string'&&new RegExp(`^gid://shopify/${type}/[1-9][0-9]*$`).test(value);
-const instant=value=>{
- if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)||!Number.isFinite(Date.parse(value)))return false;
- const date=value.slice(0,10);return new Date(date+'T00:00:00Z').toISOString().slice(0,10)===date;
-};
+const instant=value=>{try{eventDay(value,'UTC');return true;}catch{return false;}};
 const valid=ok=>{if(!ok)throw Error('Invalid customer identity observation');};
 /** Server-only append-only sidecar. Caller must verify Shopify identity before
  * collection and inject the authorised intakeDatabase capability. No collector,

@@ -1,3 +1,7 @@
+# Resume instruction — 17 September end of day
+
+Read the end-of-day decisions at the top of docs/session-handover-2026-09-17.md and docs/roadmap-2026-09-17.md. First verify the actual overnight run using docs/first-overnight-verification-2026-09-18.md. Then agree ongoing coverage and prepare controlled daily test data. Paul added conversational Ask Night Scout alongside proactive CFO briefings, after trustworthy shared calculations. Do not confuse proposals with installed features or claim the first overnight run succeeded before checking. Preserve financial/test-order rules and production boundaries.
+
 # Latest cloud activation checkpoint
 
 See `docs/cloud-worker-activation-2026-09-17.md`: separate staging Scheduled worker PUBLISHED; nightly schema APPLIED; restricted authenticated readiness passed from Replit; deployment build/bundle/promotion passed. No runs yet. Saved Europe/London timezone is now verified by the selected menu checkmark; GMT is Replit’s group label. Verify the first actual trigger before claiming overnight success. Runner retains its 02:00–02:15 London guard and fixed 17 September reporting period. Production unchanged. Earlier prepared-only statements below are historical, superseded by this checkpoint. Do not reapply the migration or repeat activation approval. Settings now has an explicitly dated, exact project/store deployment acknowledgement and live saved collection records; no live scheduler telemetry. Follow docs/first-overnight-verification-2026-09-18.md next.

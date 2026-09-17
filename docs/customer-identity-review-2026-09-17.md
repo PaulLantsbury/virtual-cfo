@@ -1,5 +1,7 @@
 # Customer identity sidecar — independent review
 
+Review below describes preparation. Approved live enablement subsequently passed; see [applied evidence](customer-identity-package-2026-09-17.md#customer-identifier-connection--applied-and-live-verified).
+
 ## Source permission check
 
 Checked official Shopify documentation on 17 September 2026. The current Admin GraphQL [Customer object](https://shopify.dev/docs/api/admin-graphql/latest/objects/Customer) requires `read_customers`; [access scopes](https://shopify.dev/docs/api/usage/access-scopes) maps that scope to Customer access. [Order](https://shopify.dev/docs/api/admin-graphql/latest/objects/Order) requires an order scope, with `read_all_orders` for older history. No documented exception allowing an ID-only Customer selection with order scopes alone was found. Consequently, do not assume the installed order-only token can collect `customer { id }`; verify its actual grants before enabling this path. This is a conservative inference from object/scope documentation, not a live permission test.

@@ -510,3 +510,8 @@ Three-agent preparation complete: scoped setup proposal/private login, existing-
 ## Shopify staging intake application — 17 September 2026
 
 Paul approved; exact store/service/login applied, restricted readiness and live locking passed, one test-order/refund candidate recorded and replayed without duplication. Financial events zero, completeness false, other-store fingerprints unchanged. Corrected verification-only base-table/view distinction; no data changes needed. Admin password file removed. [Result and next work](shopify-intake-package-2026-09-17.md).
+
+
+## Shopify change detection and recovery — 17 September 2026
+
+Three-agent batch delivered private read-only inspector, recovery tests and independent review; 23 combined tests pass. Live remaining test refund detected, two candidates retained with current recheck flag, repeat replay without duplicates, no financial events. Existing restricted access only. [Delivery and handover](shopify-recovery-package-2026-09-17.md).

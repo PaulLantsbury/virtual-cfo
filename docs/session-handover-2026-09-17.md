@@ -1,6 +1,12 @@
 # Night Scout — 17 September handover
 
-## Latest checkpoint — restricted Shopify staging intake applied
+## Latest checkpoint — change detection and recovery batch completed
+
+Three-agent batch complete: read-only private inspector, eight restricted-pipeline recovery tests and independent review. 23 combined tests passed. Live second simulated refund completed; Shopify order #1001 is fully refunded and remains test=true. Staging detected the change, retained/superseded the old candidate, set needs_recheck and replayed the new batch without a duplicate. Current state: two retained batches, one current head, one order/two refunds, zero financial events, coverage false. Twelve fully visible other-store relation fingerprints unchanged; no new grants/migrations or production/Replit/main changes. [Delivery, exact checkpoint and limits](shopify-recovery-package-2026-09-17.md).
+
+Do not refund again or rerun setup. Next proposed package is a clearly separated eligible synthetic reporting test route; do not reclassify Shopify test purchases or assume costs. Read-only inspector is available after uncertain outcomes. Real remote disconnect/concurrent commit tests, scheduled sync and merchant-facing connection status remain outstanding. Keep periodic progress updates.
+
+## Earlier checkpoint — restricted Shopify staging intake applied
 
 Paul approved the prepared package. Applied the fixed development store, service policies/lock helper and private restricted login to staging only. Dedicated readiness and live two-connection rollback-only locking passed. The 17 September Shopify test order/refund recorded once; repeat returned the same batch. One TEST_ORDER exclusion, zero financial events, no coverage certification, finance import or memberships. All other-store fingerprints unchanged. Temporary administrator password file removed; private intake credentials remain ignored/owner-only. [Full result and limits](shopify-intake-package-2026-09-17.md).
 

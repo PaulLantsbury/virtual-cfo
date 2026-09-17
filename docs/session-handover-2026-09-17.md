@@ -1,6 +1,12 @@
 # Night Scout — 17 September handover
 
-## Latest checkpoint — durable sync/status prepared; staging approval pending
+## Latest checkpoint — durable sync/status applied and restart-verified
+
+Paul approved and staging enablement is complete. Applied the reviewed journal/status schema and Paul's fixed Shopify development-store membership through the authenticated Supabase dashboard. One membership, zero reviewer grants. Enabled durable operator history, performed exactly one unchanged replay, restarted and verified the saved attempt and correct 17 September reporting dates survive. Signed-in Settings now shows the real development-store collection and 1 order / 2 refunds / 0 financial events / 1 test exclusion; needs-recheck remains. [Application evidence](durable-sync-package-2026-09-17.md#applied-and-verified-in-staging--17-september-2026).
+
+Fixed a date-only driver conversion discovered live; journal reads dates as text. Eleven journal/recovery checks plus the new calendar-date regression passed. Existing operator runs at 127.0.0.1:5190 with durable history; merchant app remains localhost:3000, Settings selected development store. No production/Replit changes, new financial-review authority, identity collection or schedule. Do not reapply schema/membership or request their approval again. Next is the separate customer-identifier observation storage/writer package, preserving financial fingerprints and excluding contact fields. New identity schema application remains a later concrete approval.
+
+## Earlier checkpoint — durable sync/status prepared; staging approval pending
 
 Prepared metadata-only persistent sync journal, restart uncertainty protection, authenticated member-scoped status RPC, optional operator journal integration and signed-in Settings status. Three agents plus coordinator; 37 focused checks and frontend typecheck passed. Live local Settings shows honest unavailable state while the new RPC is absent. [Prepared package and exact enablement proposal](durable-sync-package-2026-09-17.md). Schema/access not applied, no production/Replit change. Existing operator on 5190 remains process-only; merchant preview 3000 has updated Settings.
 

@@ -2,7 +2,7 @@
 
 ## Decision record
 
-Sales definitions v1 — approved by Paul Lantsbury on 8 September 2026, including pre-refund AOV and refund-event timing. Status: **approved requirements; implementation pending**. Contribution, profit and cash definitions v1 were subsequently approved by Paul on 8 September 2026, including all recommendations below. Both decisions are approved requirements with implementation pending. Existing SQL, seed data and screens are not certified by this approval. Opportunity ranking/scoring remains unapproved.
+Sales definitions v1 were approved by Paul on 8 September 2026, including pre-refund AOV and refund-event timing. Contribution, profit and cash definitions v1 were also approved that day. Implementation checkpoint: by 13 September the supported monthly sales/profit evidence path was implemented and staging-verified; cash reporting and broader cases remain unfinished. See [current handover](session-handover-2026-09-13.md) and [17 September dictionary](metrics-dictionary-2026-09-17.md). Approval does not certify all legacy SQL, seed data or screens. Opportunity ranking/scoring remains unapproved. This status correction does not change the approved rules.
 
 This document takes precedence over conflicting financial definitions in older dictionaries, audit snapshots and proposed calculation notes. Preserve those documents as history. Record future agreed changes here with their approval date and implementation status.
 

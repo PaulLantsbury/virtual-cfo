@@ -1,20 +1,12 @@
-# Current starting point — 12 September 2026
+# Night Scout — current starting point, 17 September 2026
 
-**13 September:** Financial-input inventory and the approved shared-sales package are implemented. CFO Briefing, Verified Sales and Margin Analysis now share sales evidence and period selection. Read the [current handover](session-handover-2026-09-13.md) and [package verification](shared-sales-package-2026-09-13.md). Other page migrations and historic cost evidence remain outstanding. Paul approved the [profit-evidence scope](profit-evidence-package-2026-09-13.md); see [implementation preparation](profit-evidence-implementation-2026-09-13.md) for the tested contract/schema and integration limits. The [transactional sales and exact staging setup package](profit-staging-setup-2026-09-13.md) is approved and applied to staging; all three months reconcile, with 64 regression tests passing. The [Profit Overview service and UI](profit-reporting-service-2026-09-13.md) are now implemented and tested; server read permissions are approved/applied and Profit Overview is verified live in staging for all three Store D months. [CFO Briefing and Margin Analysis now share these profit figures](shared-profit-pages-2026-09-13.md), with 20 browser checks passing. Other legacy/sample page integrations remain outstanding. Older stop/checkpoint entries below are historical.
+Start with the [17 September handover](session-handover-2026-09-17.md), [current project brief](project-brief.md), [17 September roadmap](roadmap-2026-09-17.md) and [team working agreement](team-working-agreement.md). Paul approved the revised CFO direction and Package 1 specification work. New financial policies are separately identified in the specification; earlier pending approvals must not be repeated.
 
-**Stopped for the day:** Read the [12 September end-of-day checkpoint](end-of-day-2026-09-12.md) first. It records the final state, superseded intermediate work, standing decisions and proposed next steps. No further package is authorised yet.
+The [13 September handover](session-handover-2026-09-13.md) records the latest application/staging verification: shared sales and actual profit reporting, approved Store D evidence and restricted reads, and shared CFO Briefing/Margin Analysis figures. Profit Overview no longer uses its old sample model. Scenario Planner and other unfinished areas still contain explicitly labelled samples. No real Shopify feed, Xero reconciliation or production release is complete.
 
-Latest completed package: [Profit Overview / Scenario Planner alignment](profit-scenario-alignment.md). Both pages now use the same coherent sample month and calculation model. 51 checks, independent review and local staging verification pass; real financial reporting remains unavailable.
+Package 1 references: [metrics](metrics-dictionary-2026-09-17.md), [pages and decisions](dashboard-decision-spec-2026-09-17.md), [data sources and backlog](data-source-plan-2026-09-17.md). Preserve the [approved financial definitions](agreed-financial-definitions.md). Documentation review does not reverify a live environment.
 
-Latest completed package: [Scenario Planner visible impact and corrected sample-month model](scenario-planner-correction.md). This supersedes the earlier preservation of its unvalidated formulas and preset behaviour. 40 checks and local staging verification pass; forecasts and real-source integration remain unfinished.
-
-Read the [current project brief](project-brief.md), [team working agreement](team-working-agreement.md) and [approved parallel pilot](parallel-pilot.md) first. The first pilot is complete, with 31 isolated browser checks passing. The [Margin Recovery and Monitoring package](reporting-truthfulness-package.md) is also complete, with 26 isolated browser checks passing and independent review finished. Real-reference-data comparison work remains paused. The [integrated staging checkpoint](staging-checkpoint-2026-09-12.md) records the latest local staging preview and checks.
-
-The older checkpoint notices below are retained as history. Their “latest”, “next” and “remaining” statements describe the time they were written; use the current brief and dated handovers to resolve later progress.
-
-The [Growth Efficiency and Pricing package](growth-pricing-package.md) is complete: 55 isolated browser checks and real staging page checks passed. Paul accepted the preceding walkthrough; these two pages are ready for his next review.
-
-The [Growth Quality / Profit Overview package](growth-profit-package.md) is complete with 31 browser checks and local staging verification.
+The notices below are historical snapshots, not current instructions or blockers.
 
 ## Historical checkpoint notices
 

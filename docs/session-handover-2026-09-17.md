@@ -1,6 +1,12 @@
 # Night Scout — 17 September handover
 
-## Latest checkpoint — change detection and recovery batch completed
+## Latest checkpoint — eligible synthetic reporting verification
+
+Paul approved a separately labelled synthetic reporting test route. New disposable eligible fixture exercises existing collection/candidate/import/independent-review/authenticated-reporting; it never changes actual Shopify test eligibility. SQL-backed browser consistency checks cover CFO Briefing, Verified sales preview, Margin Analysis and Profit Overview. Coordinator additionally read the existing live staging Store D: February sales £140/contribution £60/operating profit £35, March refund-period loss £75, April stock-cost recovery £40. Preview restarted and left on Store D February Profit Overview. No live database writes/new permissions, Shopify mutations or financial formula changes. [Full verification record and remaining scope](synthetic-reporting-package-2026-09-17.md).
+
+No more Shopify test transactions are needed for this arithmetic/reporting stage. Later targeted Shopify cases can check source shape (discounts/shipping/tax) but must remain excluded from merchant sales. Next recommended implementation is operator sync visibility/repeatable ingestion, then a store-scoped merchant connection-status panel; schedule/exposure/new database requirements need concrete decisions when prepared. No production or Replit release is implied.
+
+## Earlier checkpoint — change detection and recovery batch completed
 
 Three-agent batch complete: read-only private inspector, eight restricted-pipeline recovery tests and independent review. 23 combined tests passed. Live second simulated refund completed; Shopify order #1001 is fully refunded and remains test=true. Staging detected the change, retained/superseded the old candidate, set needs_recheck and replayed the new batch without a duplicate. Current state: two retained batches, one current head, one order/two refunds, zero financial events, coverage false. Twelve fully visible other-store relation fingerprints unchanged; no new grants/migrations or production/Replit/main changes. [Delivery, exact checkpoint and limits](shopify-recovery-package-2026-09-17.md).
 

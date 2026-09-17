@@ -515,3 +515,8 @@ Paul approved; exact store/service/login applied, restricted readiness and live 
 ## Shopify change detection and recovery — 17 September 2026
 
 Three-agent batch delivered private read-only inspector, recovery tests and independent review; 23 combined tests pass. Live remaining test refund detected, two candidates retained with current recheck flag, repeat replay without duplicates, no financial events. Existing restricted access only. [Delivery and handover](shopify-recovery-package-2026-09-17.md).
+
+
+## Eligible synthetic reporting verification — 17 September 2026
+
+Three-agent package: independently invented eligible sale/refund pipeline through restricted import and separate reviews; SQL-backed desktop/mobile reporting checks; read-only live Store D walkthrough. Ten test groups passed (seven database/pipeline, three browser). No extra Shopify transactions, live DB changes or formula fixes required. [Delivery and limitations](synthetic-reporting-package-2026-09-17.md).

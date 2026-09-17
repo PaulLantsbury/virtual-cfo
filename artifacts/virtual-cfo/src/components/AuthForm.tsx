@@ -41,7 +41,7 @@ export function AuthForm({ signup = false }: { signup?: boolean }) {
     <div className="flex flex-col justify-center p-8 sm:p-12">
       <Link href="/" className="mb-8 text-sm text-primary">← Back to home</Link>
       <div className="w-full max-w-md mx-auto">
-        <BrandLogo className="mb-8" imageClassName="h-20" />
+        <BrandLogo className="mb-8" imageClassName="h-20 w-[260px]" />
         {signup && awaitingConfirmation ? <section role="status" aria-live="polite">
           <h1 className="text-3xl font-display font-bold mb-3">Check your email</h1>
           <p className="text-muted-foreground mb-6">Follow the confirmation link in your email, then sign in to Night Scout.</p>

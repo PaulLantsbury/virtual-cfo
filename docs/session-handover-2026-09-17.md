@@ -1,5 +1,11 @@
 # Night Scout — 17 September handover
 
+## Brand consistency update
+
+Paul requested the dashboard's current blue logo on the public selling page and anywhere the old logo appeared. Shared BrandLogo now uses nightscout-navigation.png for both default and navigation variants. Homepage header/hero/footer, authentication forms and favicon now reference the current asset; removed the obsolete mascot variant. Dashboard crop/position is unchanged. Responsive dimensions preserve the full ears and wordmark; homepage header spacing accommodates smaller screens. Existing legacy image files remain as unused assets, not displayed branding.
+
+Frontend typecheck and whitespace checks passed. Live localhost homepage screenshot verified updated header/hero with full ears visible; source audit found no remaining old-logo/mascot/dog-mark references under application artifacts. Local staging updated; no production/Replit release.
+
 ## Customer identifier connection — applied and live-verified
 
 Paul approved the complete enablement package. Applied the exact private `shopify_identity_v1.order_observations` staging table and fixed-store SELECT/column-INSERT grants to the existing intake service. Restricted readiness passed. Released Shopify development version `night-scout-customer-id-readonly` (1133059112961) and updated installed-store consent for `read_customers` alongside existing order scopes. The collector verified actual grants and shop context before and after reading. No separate protected-data configuration change was needed for this custom development app; this is not approval/readiness for a future public app.

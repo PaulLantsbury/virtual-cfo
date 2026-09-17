@@ -1,7 +1,7 @@
 import {useQuery} from '@tanstack/react-query';
 import {useAuth,useActiveStore} from '@/lib/auth/AuthProvider';
 import {supabase} from '@/lib/supabase';
-import {parseShopifyStatus,type Attempt} from '@/lib/connections/shopifyStatus';
+import {parseShopifyStatus,collectionWarning,type Attempt} from '@/lib/connections/shopifyStatus';
 const resultLabels: Record<string,string> = {recorded_requires_review:'Candidate received — review needed',changed_requires_review:'Changed candidate received — review needed',replay:'Unchanged collection — no new candidate',historical_replay:'Historical replay — not a new current collection',missing_source:'Source history is missing',stale_source:'Older source was refused',conflicting_source:'Source versions conflict'};
 const timestamp=(value:string|null|undefined)=>value?new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short',timeZone:'UTC'}).format(new Date(value))+' UTC':'Not recorded';
 function AttemptDetails({attempt}:{attempt:Attempt|null}){return !attempt?<p>No attempt has been recorded.</p>:<dl className="grid gap-3 sm:grid-cols-2"><div><dt>Outcome</dt><dd>{attempt.state==='running'?'Unfinished attempt — may have been interrupted':attempt.state==='unconfirmed'?'Outcome unconfirmed — needs investigation':resultLabels[attempt.resultCode??'']}</dd></div><div><dt>Reporting period</dt><dd>{attempt.from} to {attempt.to}</dd></div><div><dt>Started</dt><dd>{timestamp(attempt.startedAt)}</dd></div><div><dt>Finished</dt><dd>{timestamp(attempt.finishedAt)}</dd></div></dl>;}
@@ -10,9 +10,12 @@ export function ShopifyConnectionStatus(){
  const query=useQuery({queryKey:['shopify-connection-status',auth.userId,storeId,auth.revision],enabled:auth.status==='ready'&&!!auth.userId,retry:false,refetchOnWindowFocus:false,placeholderData:undefined,
  queryFn:async({signal})=>{const {data,error}=await supabase.rpc('shopify_connection_status',{p_store_id:storeId}).abortSignal(signal);if(error)throw Error('Shopify connection status is unavailable');return parseShopifyStatus(data,storeId);}});
  const data=query.isSuccess&&query.data.storeId===storeId?query.data:null;
+ const warning=data?collectionWarning(data):null;
  const names={not_assessed:'Candidate state has not been assessed',unavailable:'No current candidate for this attempt’s reporting period',current_unverified:'Current candidate — not financially verified',needs_recheck:'Candidate needs rechecking'};
  return <section aria-label="Shopify connection status" className="rounded-2xl border bg-card p-6 sm:p-8 space-y-6">
  <div><h2 className="text-xl font-semibold">Shopify connection status</h2><p className="mt-2 text-muted-foreground">Store: {auth.stores.find(s=>s.id===storeId)?.name??'Selected store'}</p><p className="mt-2 text-sm text-muted-foreground">Read-only connection records for your selected store. A completed collection does not mean its sales or profit figures have been verified.</p></div>
+ <section aria-label="Nightly refresh plan" className="rounded-xl border p-4"><h3 className="font-semibold">Nightly refresh</h3><p className="text-sm mt-2">Planned: once a day at 2am in the store’s local timezone. Automatic collection is not enabled yet.</p><p className="text-sm mt-2 text-muted-foreground">Refreshing this screen only checks saved status; it does not collect new Shopify data.</p></section>
+ {warning&&<p role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">{warning}</p>}
  <button className="rounded-lg bg-primary px-4 py-2 text-primary-foreground disabled:opacity-50" disabled={query.isFetching} onClick={()=>void query.refetch()}>Refresh connection status</button>
  {query.isPending?<p role="status">Checking connection records…</p>:!data?<p role="status">Connection status unavailable. The records may not be set up yet, or could not be read. No connection or successful collection is assumed.</p>:data.state==='not_configured'?<p role="status">No Shopify connection records are configured for this store. This does not check the store’s Shopify account.</p>:<>
  <section aria-label="Latest recorded collection attempt" className="space-y-3"><h3 className="font-semibold">Latest recorded collection attempt</h3><AttemptDetails attempt={data.latestAttempt}/><p className="text-sm text-muted-foreground">An unfinished record does not prove a process is still running.</p></section>

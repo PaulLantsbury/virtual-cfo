@@ -1,5 +1,18 @@
 # Restart sprint — Reliable Night Scout baseline
 
+## Nightly reliability, calculation acceptance and CFO specification
+
+Paul agreed **one refresh overnight at 02:00 in each store’s local timezone**, retaining previously supported figures after a failed collection and flagging uncertain freshness. The agreed implementation sequence is reliable source collection → reconciled site-wide figures → evidence-backed CFO advice. Richer customer analysis and merchant onboarding do not block core reliability. Documentation is updated automatically and routine package code/tests/docs are saved to the existing GitHub development branch; private data remains excluded.
+
+This parallel package prepares a once-per-local-date runner with durable reservations and restart/uncertain-outcome protection, five independent hand-worked calculation cases, and a CFO-layer acceptance specification. The new nightly table is a **proposal only**; no scheduler installed or automatic refresh enabled. Scope remains the explicit existing development reporting period, not an agreed rolling history/backfill strategy. Host and activation choices remain pending. See [nightly design](nightly-sync-2026-09-17.md), [calculation evidence](calculation-acceptance-2026-09-17.md) and [CFO acceptance](cfo-layer-acceptance-2026-09-17.md).
+
+Settings now shows the planned 2am cadence and explicitly says it is not enabled; status refresh only rereads saved records. Evidence-based warnings cover unfinished, unconfirmed, refused and historical-only attempts without declaring financial verification. This does not yet detect a completely missing scheduled run or implement an immutable stale financial snapshot. Direct identity-writer timestamps now reuse the strict event-date validator, including rejecting 24:00 and unknown offsets; no live identity mutation.
+
+Local signed-in Settings walkthrough passed and frontend typecheck passed. Coordinator combined regression: 24/24 checks passed (new calculation/status cases, identity validation, durable journal/recovery). Calculation agent additionally passed 7 existing disposable financial/pipeline checks; the new ledger has not yet been rendered in website pages. No new financial rule, live schema/grant, production/main/Replit change or live collection in this package. Nightly-specific verification is recorded in its package document.
+
+Next: choose the overnight trial host, agree the historical recheck/reporting-window strategy and catch-up behaviour, prepare a concrete activation proposal, and run the independent ledger through the full site reporting journey. Do not claim that test-only Shopify activity proves eligible merchant revenue or completeness.
+
+
 ## Customer identifier connection — applied and live-verified
 
 Paul approved the complete enablement package. Applied the exact private `shopify_identity_v1.order_observations` staging table and fixed-store SELECT/column-INSERT grants to the existing intake service. Restricted readiness passed. Released Shopify development version `night-scout-customer-id-readonly` (1133059112961) and updated installed-store consent for `read_customers` alongside existing order scopes. The collector verified actual grants and shop context before and after reading. No separate protected-data configuration change was needed for this custom development app; this is not approval/readiness for a future public app.

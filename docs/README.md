@@ -5,25 +5,29 @@
 
 Start with the [17 September handover](session-handover-2026-09-17.md), [current project brief](project-brief.md), [17 September roadmap](roadmap-2026-09-17.md) and [team working agreement](team-working-agreement.md). Paul approved the revised CFO direction and Package 1 specification work. New financial policies are separately identified in the specification; earlier pending approvals must not be repeated.
 
-The [13 September handover](session-handover-2026-09-13.md) records the latest application/staging verification: shared sales and actual profit reporting, approved Store D evidence and restricted reads, and shared CFO Briefing/Margin Analysis figures. Profit Overview no longer uses its old sample model. Scenario Planner and other unfinished areas still contain explicitly labelled samples. No real Shopify feed, Xero reconciliation or production release is complete.
+## Current position
 
-Latest applied package: [durable sync and signed-in status](durable-sync-package-2026-09-17.md), staging-enabled after approval and verified through a collection, restart and signed-in walkthrough. [Customer identifier decision](customer-data-architecture-2026-09-17.md) is recorded; live identifier collection is not yet implemented.
+Shopify development authentication, restricted candidate intake, changed-order/refund detection, unchanged replay, durable sales-sync history, signed-in connection status and separate ID-only customer observations are implemented and staging-verified. Shopify test purchases remain excluded from financial results. Shared supported sales/profit reporting and synthetic pipeline checks exist; broader production reconciliation is not complete. No production/main/Replit release is implied.
 
-Latest operator package: [private Shopify sync screen](operator-sync-package-2026-09-17.md), with 34 passing checks and live unchanged replay; persistent attempt history and merchant-facing access remain next.
+Paul has now agreed **one overnight refresh per day at 02:00 in each store's local timezone**, retaining prior supported figures after failed collection and clearly flagging uncertain freshness. The current parallel package prepares the nightly runner, expands independent calculation acceptance checks and specifies the evidence-backed CFO layer. Automatic collection is not yet deployed. Repeat/customer economics rules remain later decisions; richer customer analysis does not block reliable sales sync.
 
-Latest reporting verification: [eligible synthetic pipeline and cross-page consistency](synthetic-reporting-package-2026-09-17.md), using disposable eligible evidence and separate read-only checks of the existing synthetic staging store. No additional Shopify test purchases or live data writes.
+## Current package evidence
 
-Latest completed batch: [Shopify change detection and recovery](shopify-recovery-package-2026-09-17.md): 23 checks passed, live second test refund detected, prior history retained and unchanged replay verified; private read-only inspector added.
+- [Nightly runner and activation boundaries](nightly-sync-2026-09-17.md)
+- [Independent calculation acceptance](calculation-acceptance-2026-09-17.md)
+- [CFO-layer acceptance requirements](cfo-layer-acceptance-2026-09-17.md)
 
-Latest staging package: [restricted Shopify candidate intake](shopify-intake-package-2026-09-17.md), applied after approval with private restricted access, live locking and same-batch replay verified. Test transactions remain excluded; no financial import.
+## Delivery records (earlier wording records the state at that time)
 
-Latest live test: [development checkout and partial refund](shopify-test-order-2026-09-17.md) read successfully and excluded as test activity; no financial import.
+- [Customer identity connection](customer-identity-package-2026-09-17.md): applied minimal private observations and live replay; no contact fields.
+- [Durable sync and signed-in status](durable-sync-package-2026-09-17.md): applied, restart-verified history and Settings status.
+- [Private operator screen](operator-sync-package-2026-09-17.md): explicit operator collection; not a scheduler.
+- [Synthetic reporting verification](synthetic-reporting-package-2026-09-17.md): independent eligible test route and shared-page consistency checks.
+- [Change detection and recovery](shopify-recovery-package-2026-09-17.md): changed refund history, retained versions and repeat/recovery checks.
+- [Restricted staging intake](shopify-intake-package-2026-09-17.md), [development checkout](shopify-test-order-2026-09-17.md), [initial connection](shopify-live-connection-2026-09-17.md).
+- [Application Package 2](package-2-2026-09-17.md), [metric dictionary](metrics-dictionary-2026-09-17.md), [dashboard specification](dashboard-decision-spec-2026-09-17.md), [data-source plan](data-source-plan-2026-09-17.md).
 
-Latest connection work: [live Shopify connection](shopify-live-connection-2026-09-17.md) verifies private authentication, both history scopes and an empty-store read; no orders imported.
-
-Latest application work: [Package 2](package-2-2026-09-17.md) adds shared sales context across four further pages and factual CFO observations; [Shopify readiness](shopify-connection-readiness-2026-09-17.md) is tested preparation, not a live connection.
-
-Package 1 references: [metrics](metrics-dictionary-2026-09-17.md), [pages and decisions](dashboard-decision-spec-2026-09-17.md), [data sources and backlog](data-source-plan-2026-09-17.md). Preserve the [approved financial definitions](agreed-financial-definitions.md). Documentation review does not reverify a live environment.
+Maintain this index, package evidence and session handover automatically after each completed package; distinguish agreed, prepared, applied and live-verified work. Never publish private credentials or customer identifiers.
 
 The notices below are historical snapshots, not current instructions or blockers.
 

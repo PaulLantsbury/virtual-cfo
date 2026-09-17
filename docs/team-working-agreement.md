@@ -38,3 +38,7 @@ At completion record delivered scope, relevant checks/limitations, documentation
 ## Agreed staging cadence — 12 September 2026
 
 After each meaningful completed package, the coordinator updates and verifies the existing staging preview without asking Paul to repeat approval. Confirm the target and tested revision; exercise the combined user journey and record evidence, outstanding limits and a link for Paul. A local frontend connected to staging Supabase must be described as a local staging preview, not a hosted deployment. Existing access and test data may be used; migrations, new grants, hosting/exposure, Replit sync and production retain their separate boundaries. Do not restore financial completeness merely to complete a staging check.
+
+## Larger packages — 17 September
+
+Paul approved the revised roadmap and Package 1. Use outcome-based briefs and up to three supporting agents where independent work helps, with the coordinator integrating. Complete all authorised stages without repeated continue requests; consolidate new financial/product decisions. Preserve the approval boundaries above. Specification approval is not blanket approval of still-unresolved formulas or later database/production changes. Measure verified delivery and rework before claiming speed gains. No unattended schedule or hosted execution has been configured.

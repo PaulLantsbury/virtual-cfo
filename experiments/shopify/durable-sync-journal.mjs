@@ -16,7 +16,7 @@ export function createDurableSyncJournal(db,{scope}){
  return Object.freeze({scope:fixed,
  async begin(){return query(async tx=>{const {rows}=await tx.query('INSERT INTO ingest_v1.sync_attempts(store_id,date_from,date_to) VALUES($1,$2,$3) RETURNING id',[fixed.storeId,fixed.from,fixed.to]);valid(rows.length===1);return rows[0].id;});},
  async finish(id,{state,resultCode=null}){valid(['completed','unconfirmed'].includes(state)&&(state==='completed'?states.includes(resultCode):resultCode===null));return query(async tx=>{const {rows}=await tx.query('UPDATE ingest_v1.sync_attempts SET state=$1,result_code=$2 WHERE id=$3 AND store_id=$4 AND date_from=$5 AND date_to=$6 AND state=\'running\' RETURNING id',[state,resultCode,id,fixed.storeId,fixed.from,fixed.to]);valid(rows.length===1);});},
- async latest(){return query(async tx=>{const {rows}=await tx.query('SELECT id,state,started_at,finished_at,date_from,date_to,result_code FROM ingest_v1.sync_attempts WHERE store_id=$1 ORDER BY started_at DESC,id DESC LIMIT 1',[fixed.storeId]);return project(rows[0]);});},
+ async latest(){return query(async tx=>{const {rows}=await tx.query('SELECT id,state,started_at,finished_at,date_from::text AS date_from,date_to::text AS date_to,result_code FROM ingest_v1.sync_attempts WHERE store_id=$1 ORDER BY started_at DESC,id DESC LIMIT 1',[fixed.storeId]);return project(rows[0]);});},
  });
 }
 /** Optional wrapper; without a journal preserves the current process-only service.

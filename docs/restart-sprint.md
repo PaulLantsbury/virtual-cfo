@@ -530,3 +530,8 @@ Three-agent package completed: fixed-scope private loopback screen/controller/la
 ## Durable sync/status preparation and customer-identifier decision — 17 September
 
 Prepared/tested persistent journal, member-only status RPC, optional private operator integration and honest signed-in Settings; 37 checks plus frontend typecheck passed. Staging preview shows unavailable until proposed schema is applied. New schema and fixed-store membership await concrete approval; no production or identifier-feed activation. [Package](durable-sync-package-2026-09-17.md), [customer-data decision](customer-data-architecture-2026-09-17.md).
+
+
+## Durable sync staging enablement — 17 September
+
+Approved journal/status schema and fixed-store read membership applied; zero reviewer grants. One live replay persisted through restart, real signed-in Settings matched counts. Corrected local-time date display using SQL date-text selection; 11 regression checks plus new calendar-date check passed. No financial evidence changes, identity feed or production release. See [application record](durable-sync-package-2026-09-17.md).

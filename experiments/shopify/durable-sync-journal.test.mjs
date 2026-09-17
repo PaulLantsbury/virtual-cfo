@@ -68,3 +68,10 @@ test('member status counts come from the scoped candidate without returning sour
  const result=await rpc(f.db,scope.storeId);assert.equal(result.candidate.orderCount,1);assert.equal(result.candidate.refundCount,2);assert.equal(result.candidate.mappedEventCount,0);assert.equal(result.candidate.testExcludedCount,1);assert.equal(result.candidate.state,'needs_recheck');assert.ok(!JSON.stringify(result).includes('privateMarker'));
  }finally{await f.close();}
 });
+test('journal reads calendar dates as text, avoiding local-timezone conversion to the previous UTC day',async()=>{
+ const journal=createDurableSyncJournal({transaction:fn=>fn({query:async query=>{
+ assert.match(query,/date_from::text AS date_from,date_to::text AS date_to/);
+ return {rows:[{id:'11111111-1111-4111-8111-111111111111',state:'completed',date_from:'2026-09-17',date_to:'2026-09-17',started_at:new Date('2026-09-17T15:31:07Z'),finished_at:new Date('2026-09-17T15:31:09Z'),result_code:'replay'}]};
+ }})},{scope});
+ const result=await journal.latest();assert.equal(result.from,'2026-09-17');assert.equal(result.to,'2026-09-17');
+});

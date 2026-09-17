@@ -4,7 +4,7 @@ Start with the [17 September handover](session-handover-2026-09-17.md), [current
 
 The [13 September handover](session-handover-2026-09-13.md) records the latest application/staging verification: shared sales and actual profit reporting, approved Store D evidence and restricted reads, and shared CFO Briefing/Margin Analysis figures. Profit Overview no longer uses its old sample model. Scenario Planner and other unfinished areas still contain explicitly labelled samples. No real Shopify feed, Xero reconciliation or production release is complete.
 
-Latest prepared package: [durable sync and signed-in status](durable-sync-package-2026-09-17.md), tested but awaiting staging schema/access approval. [Customer identifier decision](customer-data-architecture-2026-09-17.md) is recorded; live identifier collection is not yet implemented.
+Latest applied package: [durable sync and signed-in status](durable-sync-package-2026-09-17.md), staging-enabled after approval and verified through a collection, restart and signed-in walkthrough. [Customer identifier decision](customer-data-architecture-2026-09-17.md) is recorded; live identifier collection is not yet implemented.
 
 Latest operator package: [private Shopify sync screen](operator-sync-package-2026-09-17.md), with 34 passing checks and live unchanged replay; persistent attempt history and merchant-facing access remain next.
 

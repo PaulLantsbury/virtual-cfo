@@ -1,5 +1,12 @@
 # Night Scout — 17 September handover
 
+## Customer identifier package — prepared, awaiting enablement
+
+Implemented and independently reviewed separate minimal Shopify customer-ID collection, a private staging observation-table proposal, restricted atomic writer and private operator launcher. **22/22 combined checks passed** against synthetic responses and disposable PostgreSQL, including unchanged financial evidence. See [package and concrete enablement steps](customer-identity-package-2026-09-17.md) and [independent review](customer-identity-review-2026-09-17.md).
+
+Not live: no identity table/grants applied, no Shopify customer scope enabled, no live customer query. Next decision is one bundled approval for the exact staging proposal, Shopify `read_customers`/non-contact access and one bounded collection plus replay. No contact fields, repeat metrics or current-identity resolution. Existing durable sales sync remains applied and restart-verified. No production, main or Replit change.
+
+
 ## Latest checkpoint — durable sync/status applied and restart-verified
 
 Paul approved and staging enablement is complete. Applied the reviewed journal/status schema and Paul's fixed Shopify development-store membership through the authenticated Supabase dashboard. One membership, zero reviewer grants. Enabled durable operator history, performed exactly one unchanged replay, restarted and verified the saved attempt and correct 17 September reporting dates survive. Signed-in Settings now shows the real development-store collection and 1 order / 2 refunds / 0 financial events / 1 test exclusion; needs-recheck remains. [Application evidence](durable-sync-package-2026-09-17.md#applied-and-verified-in-staging--17-september-2026).

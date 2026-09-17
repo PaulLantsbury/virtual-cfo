@@ -28,3 +28,9 @@ Paul agreed: no shopper names, emails, addresses or phone numbers; add a custome
 - Check all storage/access paths before live rollout. The restricted connector and store-membership checks are implemented in specific paths; a complete privacy, retention and deletion implementation has not been certified.
 
 There is no new customer-contact collection, data export, deletion policy or production release in the durable-sync package.
+
+## Customer identifier package — prepared, awaiting enablement
+
+Implemented and independently reviewed separate minimal Shopify customer-ID collection, a private staging observation-table proposal, restricted atomic writer and private operator launcher. **22/22 combined checks passed** against synthetic responses and disposable PostgreSQL, including unchanged financial evidence. See [package and concrete enablement steps](customer-identity-package-2026-09-17.md) and [independent review](customer-identity-review-2026-09-17.md).
+
+Not live: no identity table/grants applied, no Shopify customer scope enabled, no live customer query. Next decision is one bundled approval for the exact staging proposal, Shopify `read_customers`/non-contact access and one bounded collection plus replay. No contact fields, repeat metrics or current-identity resolution. Existing durable sales sync remains applied and restart-verified. No production, main or Replit change.

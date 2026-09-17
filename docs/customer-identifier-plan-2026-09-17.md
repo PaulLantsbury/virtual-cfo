@@ -31,3 +31,9 @@ A separate observation path can preserve the established financial objects and f
 ## Next complete package
 
 Prepare a store-scoped identity observation schema and least-privilege writer; preserve historical observations, distinguish unknown versus explicit-null identity, and define how changed/deleted customer references affect later analysis. Authenticate the source store before collection, retain only projected fields, and test pagination, retries and identity updates without changing financial history. Review the concrete schema/access proposal before staging application. Then agree repeat-customer eligibility, reporting period/cohort meaning and guest treatment before displaying a repeat metric. No contact fields are needed simply to identify repeat orders where Shopify supplies a stable customer ID.
+
+## Customer identifier package — prepared, awaiting enablement
+
+Implemented and independently reviewed separate minimal Shopify customer-ID collection, a private staging observation-table proposal, restricted atomic writer and private operator launcher. **22/22 combined checks passed** against synthetic responses and disposable PostgreSQL, including unchanged financial evidence. See [package and concrete enablement steps](customer-identity-package-2026-09-17.md) and [independent review](customer-identity-review-2026-09-17.md).
+
+Not live: no identity table/grants applied, no Shopify customer scope enabled, no live customer query. Next decision is one bundled approval for the exact staging proposal, Shopify `read_customers`/non-contact access and one bounded collection plus replay. No contact fields, repeat metrics or current-identity resolution. Existing durable sales sync remains applied and restart-verified. No production, main or Replit change.

@@ -9,13 +9,13 @@ Start with the [17 September handover](session-handover-2026-09-17.md), [current
 
 Shopify development authentication, restricted candidate intake, changed-order/refund detection, unchanged replay, durable sales-sync history, signed-in connection status and separate ID-only customer observations are implemented and staging-verified. Shopify test purchases remain excluded from financial results. Shared supported sales/profit reporting and synthetic pipeline checks exist; broader production reconciliation is not complete. No production/main/Replit release is implied.
 
-Paul has now agreed **one overnight refresh per day at 02:00 in each store's local timezone**, retaining prior supported figures after failed collection and clearly flagging uncertain freshness. The current parallel package prepares the nightly runner, expands independent calculation acceptance checks and specifies the evidence-backed CFO layer. Automatic collection is not yet deployed. Repeat/customer economics rules remain later decisions; richer customer analysis does not block reliable sales sync.
+Paul has now agreed **one overnight refresh per day at 02:00 in each store's local timezone**, retaining prior supported figures after failed collection and clearly flagging uncertain freshness. The current parallel package prepares the nightly runner, expands independent calculation acceptance checks and specifies the evidence-backed CFO layer. The separate staging cloud worker is now published for the fixed 17 September test period; saved London timezone confirmed, first overnight execution still pending. See [activation evidence](cloud-worker-activation-2026-09-17.md) and [next-run checklist](first-overnight-verification-2026-09-18.md). Repeat/customer economics rules remain later decisions; richer customer analysis does not block reliable sales sync.
 
 ## Current package evidence
 
-- [Cloud worker preparation](cloud-worker-preparation-2026-09-17.md) and [deployment runbook](../deployments/nightly-staging/README.md) — disabled by default, no deployment yet.
+- [Cloud worker preparation](cloud-worker-preparation-2026-09-17.md) and [deployment runbook](../deployments/nightly-staging/README.md) — bootstrap disabled by default; approved separate staging deployment now published.
 
-- [Cloud-hosted nightly staging plan](cloud-nightly-staging-plan-2026-09-17.md) — Mac-independent direction, Replit inspection and proposed costs; not deployed.
+- [Cloud-hosted nightly staging plan](cloud-nightly-staging-plan-2026-09-17.md) — Mac-independent direction and cost rationale; superseded by the activation evidence above.
 
 - [Nightly runner and activation boundaries](nightly-sync-2026-09-17.md)
 - [Independent calculation acceptance](calculation-acceptance-2026-09-17.md)

@@ -4,7 +4,7 @@
 
 The separate Replit Scheduled staging worker is PUBLISHED. Build, bundle and promotion completed on 17 September. Replit Overview reports published; Schedule reports **No runs yet**. Eight approved settings are saved and included in deployment. A fresh Replit shell passed authenticated cloud `--check` through the restricted session pooler, with fixed project/store/date scope and `financeImported=false`.
 
-The configured cron is `0 2 * * *`, six-minute hosting timeout, Europe hosting region. Europe/London was selected in the setup timezone menu, but the published overview labels the timezone **GMT** and the post-publish settings omit timezone. Actual London-time execution is therefore not yet verified. Check the first trigger against 01:00 UTC / 02:00 BST on 18 September; if it instead triggers at 02:00 UTC, the runner will safely refuse collection outside its London startup window. Resolve the host timezone before declaring the nightly trial successful. Do not weaken the runner window or fake the clock.
+The configured cron is `0 2 * * *`, six-minute hosting timeout, Europe hosting region. Saved timezone **Europe/London is verified**: the published Adjust Settings timezone dropdown visibly marks Europe, London with a checkmark. Replit groups that option under Greenwich Mean Time (GMT), explaining its abbreviated overview label. The selector was absent from the accessibility tree but present in the rendered editor. No timing change, fixed UTC offset or republish was needed. First expected trigger is 18 September 01:00 UTC / 02:00 BST; actual execution remains to be verified. Runner retains its [02:00,02:15) London guard and once-date lock.
 
 Replit automatic non-interactive dependency installation initially failed. Export-only preparation now narrows workspace installation to `lib/db`, retains the locked catalog, and adds runtime-only, frozen-lockfile, scripts-disabled and CI settings. Exact pnpm 10.26.1 first/repeated installs, smoke check and two export guard/preservation tests passed. The published worker combines source revision 9af392d65c91dd899e035cf3e2113dbc7bee26d9 with deployment preparation from d8ac46bf939da86123c06ddcbc140f7f1a8f552f and the documented export transformation. Main repository dependency manifests were not narrowed.
 
@@ -27,7 +27,7 @@ Published as a Scheduled worker, with no public HTTP URL. Machine price: 1 vCPU 
 1. Inspect the first actual scheduled trigger and its London-time alignment, runner receipt and durable journal; distinguish a successful deployment from successful source collection.
 2. Verify once-date reservation and unchanged financial invariants. No manual daytime run was requested or performed.
 3. Agree historical rolling coverage/backfill and catch-up behaviour; this worker still rechecks only the explicit 17 September development period.
-4. Add missing-run monitoring and connect truthful per-store activation/freshness status to Settings (which still describes the earlier prepared-only state).
+4. Add live per-store nightly telemetry and missing-run monitoring. Settings now shows an explicitly dated, project/store-scoped deployment acknowledgement and the existing dynamic collection journal; it does not pretend to poll Replit or identify scheduled attempts from manual ones.
 5. Continue site-wide calculation acceptance, then the evidence-backed CFO layer. Production release remains separate.
 
 Do not reapply the claims migration or request the same activation approval. Never start the website, seed or push a database from this worker. No administrator/reviewer credentials are deployed.
@@ -35,3 +35,11 @@ Do not reapply the claims migration or request the same activation approval. Nev
 Credential values were accidentally pasted into the conversation during secure-entry handoff. Do not reproduce them in documentation, logs or GitHub. Replacement of the restricted database password and Shopify app secret should be completed before expanding beyond this development trial, coordinating all existing consumers.
 
 After activation, inspect the first actual overnight journal and financial invariants before declaring a Mac-independent successful refresh. Historical rolling coverage/backfill, missed-slot alerts and production readiness remain separate unfinished work.
+
+## Final focused package
+
+Settings now distinguishes the acknowledged staging schedule, outstanding first overnight verification, last successful saved collection and existing failure/uncertain-outcome warnings. The acknowledgement is scoped to the exact staging Supabase host and Shopify development store. Other stores/environments do not inherit it. It contains operational configuration, not hardcoded financial results. It explicitly states that status refresh reads saved collection records, does not run Shopify collection, and does not check Replit live. No schema/grant changes or financial approvals.
+
+See [first overnight verification checklist](first-overnight-verification-2026-09-18.md). Replit failure notifications were observed disabled; enabling notifications is separate from this UI package. Existing internal uncertain-outcome locks remain active.
+
+Verification: four focused connection checks and frontend TypeScript check passed. Signed-in Settings browser review confirmed the correct staging trial, 15:31 UTC manual collection receipt, one excluded test order, two refunds and zero mapped events. Switching to Store A removed the deployment acknowledgement immediately; no shared-store success leaked. Scope tests reject another project, store, malformed URL, non-HTTPS host, credentials, and non-default port. No new data collection or financial writes were performed.

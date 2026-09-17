@@ -1,3 +1,5 @@
+> Current 17 September closeout: the separate cloud staging worker is published, saved Europe/London schedule verified, and Settings shows its scoped deployment acknowledgement separately from collection/financial status. First overnight execution remains unverified. See [activation](cloud-worker-activation-2026-09-17.md) and [next-run checklist](first-overnight-verification-2026-09-18.md). Prepared-only wording below records earlier package stages.
+
 # Restart sprint — Reliable Night Scout baseline
 
 ## Nightly reliability, calculation acceptance and CFO specification

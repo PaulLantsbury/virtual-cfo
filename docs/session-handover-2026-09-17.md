@@ -1,6 +1,12 @@
 # Night Scout — 17 September handover
 
-## Latest checkpoint — eligible synthetic reporting verification
+## Latest checkpoint — private operator sync screen
+
+Three-agent package implemented and independently reviewed; 34 checks passed. A private loopback screen now reads the fixed development-store candidate and runs one explicit collection at a time, with safe errors, uncertain-outcome retry blocking and graceful shutdown. Live staging button test returned unchanged replay: two retained versions, one test order, two refunds, zero mapped financial events, needs-recheck preserved. Local operator screen on port 5190 is left open; existing merchant preview remains on port 3000. [Delivery, access and repeatable checks](operator-sync-package-2026-09-17.md).
+
+Attempt history is process-local, not a durable sync log. No merchant membership, financial approval, schema/grants, scheduler, public exposure or production/Replit change. Next package: design and prepare persistent sync history and a store-scoped merchant status panel with concrete access/migration proposals before applying them. No more test transactions are needed for that work. Do not reapply intake setup, repeat the refund or clear test exclusions. The private access link must not be committed; reopening requires the current owner-only access file.
+
+## Earlier checkpoint — eligible synthetic reporting verification
 
 Paul approved a separately labelled synthetic reporting test route. New disposable eligible fixture exercises existing collection/candidate/import/independent-review/authenticated-reporting; it never changes actual Shopify test eligibility. SQL-backed browser consistency checks cover CFO Briefing, Verified sales preview, Margin Analysis and Profit Overview. Coordinator additionally read the existing live staging Store D: February sales £140/contribution £60/operating profit £35, March refund-period loss £75, April stock-cost recovery £40. Preview restarted and left on Store D February Profit Overview. No live database writes/new permissions, Shopify mutations or financial formula changes. [Full verification record and remaining scope](synthetic-reporting-package-2026-09-17.md).
 

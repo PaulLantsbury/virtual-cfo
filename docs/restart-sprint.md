@@ -520,3 +520,8 @@ Three-agent batch delivered private read-only inspector, recovery tests and inde
 ## Eligible synthetic reporting verification — 17 September 2026
 
 Three-agent package: independently invented eligible sale/refund pipeline through restricted import and separate reviews; SQL-backed desktop/mobile reporting checks; read-only live Store D walkthrough. Ten test groups passed (seven database/pipeline, three browser). No extra Shopify transactions, live DB changes or formula fixes required. [Delivery and limitations](synthetic-reporting-package-2026-09-17.md).
+
+
+## Private operator sync — 17 September 2026
+
+Three-agent package completed: fixed-scope private loopback screen/controller/launcher, manual single-flight collection, safe status, uncertainty blocking and graceful shutdown. 34 focused checks pass. Live staging button returned unchanged replay, preserving two versions, one excluded test order/two refunds and zero financial events. No new schema/grants or production release. [Delivery and remaining merchant/durable-history work](operator-sync-package-2026-09-17.md).

@@ -7,7 +7,7 @@ async function fixture(){const {db}=await setup();await db.exec(sql('proposals/s
 test('concurrent ticks and recreated runner collect at most once per local day, later day allowed',async()=>{
  const f=await fixture();try{let calls=0;const options={db:f.restricted,scope,now,runIntake:async()=>{calls++;return receipt();}};
  const results=await Promise.all([createNightlyRunner(options).tick(),createNightlyRunner(options).tick()]);assert.equal(calls,1);assert.deepEqual(results.map(x=>x.state).sort(),['already_claimed','completed']);
- assert.equal((await createNightlyRunner(options).tick()).state,'already_claimed');
+ assert.equal((await createNightlyRunner({...options,now:()=>new Date('2026-09-17T01:14:59Z')}).tick()).state,'already_claimed');
  const next=await createNightlyRunner({...options,now:()=>new Date('2026-09-18T01:00:10Z')}).tick();assert.equal(next.state,'completed');assert.equal(calls,2);
  assert.equal((await f.db.query('SELECT count(*)::int n FROM ingest_v1.sync_attempts')).rows[0].n,2);
  }finally{await f.db.close();}

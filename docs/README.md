@@ -13,6 +13,8 @@ Paul has now agreed **one overnight refresh per day at 02:00 in each store's loc
 
 ## Current package evidence
 
+- [Cloud worker preparation](cloud-worker-preparation-2026-09-17.md) and [deployment runbook](../deployments/nightly-staging/README.md) — disabled by default, no deployment yet.
+
 - [Cloud-hosted nightly staging plan](cloud-nightly-staging-plan-2026-09-17.md) — Mac-independent direction, Replit inspection and proposed costs; not deployed.
 
 - [Nightly runner and activation boundaries](nightly-sync-2026-09-17.md)

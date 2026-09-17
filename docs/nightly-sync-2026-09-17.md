@@ -2,11 +2,11 @@
 
 ## Cloud hosting direction confirmed
 
-Paul chose cloud-hosted nightly execution; no Mac needs to stay awake. The earlier computer-choice question is withdrawn. [Cloud staging plan](cloud-nightly-staging-plan-2026-09-17.md) records read-only Replit inspection, current tariff, separate worker recommendation and exact remaining work. Existing Replit is public Autoscale and is not updated by development-branch GitHub saves. No Replit settings/secrets/deployment or live database changes were made. Cloud adapter, delayed-start/coverage policy and concrete activation approval remain; no schedule is running.
+Paul chose cloud-hosted nightly execution; no Mac needs to stay awake. The earlier computer-choice question is withdrawn. [Cloud staging plan](cloud-nightly-staging-plan-2026-09-17.md) records read-only Replit inspection, current tariff, separate worker recommendation and exact remaining work. Existing Replit is public Autoscale and is not updated by development-branch GitHub saves. No Replit settings/secrets/deployment or live database changes were made. Cloud adapter, reporting-coverage policy and concrete activation approval remain; no schedule is running.
 
 ## Agreed product behaviour
 
-Paul agreed one automatic refresh per day, overnight at **02:00 in each store's local timezone**. Failed collection must not invent replacement figures: retain prior recorded data, flag the unsuccessful refresh, and do not present it as freshly verified. Existing evidence invalidation still applies when source data changes; retaining historical records does not authorise showing invalidated figures as current.
+Paul agreed one automatic refresh per day, overnight at **02:00 in each store's local timezone**, with a **15-minute startup allowance: 02:00 inclusive to 02:15 exclusive**. A worker starting within that window can collect once; a process restart or repeated invocation cannot collect again for the same local date. Failed collection must not invent replacement figures: retain prior recorded data, flag the unsuccessful refresh, and do not present it as freshly verified. Existing evidence invalidation still applies when source data changes; retaining historical records does not authorise showing invalidated figures as current.
 
 ## Prepared implementation; not activated
 
@@ -20,10 +20,10 @@ A new SQL proposal adds only `ingest_v1.nightly_claims` with fixed-store RLS, co
 
 ## Decisions needed before activation
 
-1. **Execution host:** an always-on worker is required; the existing local Mac preview is not a hosted nightly service. No host, billable service, OS scheduler or deployment has been installed.
+1. **Execution host:** cloud execution is agreed; the separate cloud worker still needs preparation, review and explicit deployment activation. No billable service or scheduler has been installed.
 2. **Reporting period:** the launcher deliberately preserves the explicitly configured intake period (at most 31 calendar days). The source collector reads available order history but produces a candidate only for this configured period. It does **not** silently advance dates, decide month-boundary behaviour, certify history coverage or implement a complete rolling financial feed. Agree the daily/monthly evidence scope before scheduled activation.
-3. **Missed execution:** prepared runner admits only the scheduled minute and never catches up during the day. This conservative implementation preserves overnight-only execution but is not an agreed missed-run recovery policy. Decide whether to skip, allow a bounded overnight catch-up, or explicitly rerun. Existing network-read retries remain bounded inside a single attempt; uncertain writes require inspection.
-4. **Apply proposal and wire the host:** SQL/grants require approval before staging application. The caller should invoke the prepared tick at the due minute; no service is running merely because this code exists.
+3. **Startup window implemented:** the approved runner accepts a start from 02:00 inclusive until 02:15 exclusive. At or after 02:15 it skips collection rather than catching up during the day. The unique local-date claim still prevents duplicate starts throughout the window. Existing network-read retries remain bounded inside a single attempt; uncertain writes require inspection. Generic missing/repeated-hour planner behaviour is tested but wider non-London timezone activation remains outside this staging proposal.
+4. **Apply proposal and wire the host:** SQL/grants require approval before staging application. The caller should invoke the prepared tick within the approved startup window; no service is running merely because this code exists.
 
 After those decisions and approval, run the read-only check, one controlled due-time integration exercise, concurrency/restart verification and an overnight observation before describing the feature as enabled.
 
@@ -31,7 +31,7 @@ After those decisions and approval, run the read-only check, one controlled due-
 
 **9/9 focused planner, runner and launcher tests passed.** Independent review fixes for receipt validation, terminal timestamps and safe cleanup errors were included before the final pass.
 
-Synthetic disposable PostgreSQL-compatible tests cover local-time DST planning, duplicate/concurrent/restarted ticks, next-day progression, unresolved-outcome blocking, lost commit acknowledgements, denied browser/cross-store/history mutation, no off-minute work, strict receipt validation and unchanged pre-existing financial rows on failure. The launcher is exercised against that disposable database with a synthetic intake callback; this does not prove a real overnight Shopify run or unattended-host availability.
+Synthetic disposable PostgreSQL-compatible tests cover local-time DST planning, duplicate/concurrent/restarted ticks, next-day progression, unresolved-outcome blocking, lost commit acknowledgements, denied browser/cross-store/history mutation, no work outside the startup window, strict receipt validation and unchanged pre-existing financial rows on failure. The launcher is exercised against that disposable database with a synthetic intake callback; this does not prove a real overnight Shopify run or unattended-host availability.
 
 Commands (explicitly prepared, not executed against staging):
 

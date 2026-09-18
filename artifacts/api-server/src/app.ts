@@ -4,6 +4,8 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import {createFinancialReviewRouter, type ReviewService} from "./routes/financial-reviews";
 import { logger } from "./lib/logger";
+import {xeroOAuthRuntime} from './lib/xero-oauth';
+import {createXeroRouter} from './routes/xero';
 
 export function createApp(reviewService?: ReviewService): Express {
 const app: Express = express();
@@ -32,6 +34,7 @@ app.use(cors());
 app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/xero',createXeroRouter(xeroOAuthRuntime(process.env)));
 
 app.use("/api", router);
 

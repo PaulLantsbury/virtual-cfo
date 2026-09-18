@@ -27,6 +27,7 @@ import Settings from "@/pages/settings";
 import Upgrade from "@/pages/upgrade";
 import ScenarioLab from "@/pages/scenario-lab";
 import CfoAlerts from "@/pages/cfo-alerts";
+import XeroCallback from "@/pages/xero-callback";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -72,6 +73,7 @@ function App() {
               <Route path="/" component={Landing} />
               <Route path="/login" component={Login} />
               <Route path="/signup" component={Signup} />
+              <Route path="/xero/callback" component={XeroCallback} />
               <Route>
                 <StoreAccessGate>
                   <TimelineProvider>

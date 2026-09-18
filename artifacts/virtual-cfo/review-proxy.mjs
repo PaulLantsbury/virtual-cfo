@@ -14,5 +14,6 @@ export function localReviewProxy(env) {
  return {
   '^/api/financial-reviews(?:/|$)': {...options},
   '^/api/profit-reporting(?:\\?|$)': {...options},
- };
+  '^/api/xero(?:/|$)': {...options},
+};
 }

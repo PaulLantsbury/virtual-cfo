@@ -8,7 +8,7 @@ export function createXeroRouter(runtime:XeroRuntime){
  router.post('/callback',expressCallback(runtime));
  return router;
 }
-function expressCallback(runtime:XeroRuntime){return (req:any,res:any)=>{
+function expressCallback(runtime:XeroRuntime){return async (req:any,res:any)=>{
  if(!runtime||typeof req.body?.code!=='string'||req.body.code.length<8||req.body.code.length>4096||!runtime.accept(req.body.state))return res.status(400).json({error:'Xero authorisation unavailable'});
- res.set('Cache-Control','no-store').json({status:'authorisation_code_validated',next:'No token was exchanged or retained.'});
+ try{const tenant=await runtime.exchange(req.body.code);res.set('Cache-Control','no-store').json({status:'tenant_discovered',tenant});}catch{res.status(502).json({error:'Xero tenant discovery unavailable'});}
 };}

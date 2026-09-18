@@ -3,9 +3,14 @@ import {resolve,join,dirname} from 'node:path';
 import {pathToFileURL} from 'node:url';
 const target='bioalckltvkhlczusdvl';
 const exists=async path=>{try{await lstat(path);return true;}catch(e){if(e.code==='ENOENT')return false;throw e;}};
-/** Do not follow links while discovering deployment metadata in an export. */
+/** Inspect Replit's artifacts tree only; unrelated runtime links are not
+ * deployment metadata. Never follow a linked artifacts root or descendant. */
 export async function workerArtifactManifests(root){
  const found=[];
+ const artifacts=join(root,'artifacts');let stat;
+ try{stat=await lstat(artifacts);}catch(error){if(error.code==='ENOENT')return found;throw error;}
+ if(stat.isSymbolicLink())throw Error('Refusing linked export paths');
+ if(!stat.isDirectory())throw Error('Expected regular artifacts directory');
  async function walk(directory){
   for(const entry of await readdir(directory,{withFileTypes:true})){
    if(['node_modules','.git'].includes(entry.name))continue;
@@ -18,7 +23,7 @@ export async function workerArtifactManifests(root){
    }
   }
  }
- await walk(root);return found.sort();
+ await walk(artifacts);return found.sort();
 }
 /** Operates only on an explicitly acknowledged, separate scheduled-worker export. */
 export async function prepareWorkerExport(directory,confirmation){

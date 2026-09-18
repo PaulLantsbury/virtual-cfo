@@ -12,6 +12,14 @@ export async function readLocalXeroAccountDirectory(path,{fs={readFile}}={}){
  return Object.freeze({source:'xero',tenantId:directory.tenantId,retrievedAt:directory.retrievedAt,accounts:Object.freeze(directory.accounts.map(account=>Object.freeze({...account})))});
 }
 
+/** Reads the deliberately value-free evidence header from a completed local test. */
+export async function readLocalXeroEvidenceHeader(path,{fs={readFile}}={}){
+ if(typeof path!=='string'||!path.endsWith('.json'))throw Error('Xero evidence header is unavailable');
+ let evidence;try{evidence=JSON.parse(await fs.readFile(path,'utf8'));}catch{throw Error('Xero evidence header is unavailable');}
+ if(!validEvidence(evidence))throw Error('Xero evidence header is unavailable');
+ return Object.freeze({source:'xero',reportDate:evidence.reportDate,retrievedAt:evidence.retrievedAt,baseCurrency:evidence.baseCurrency,reports:Object.freeze({...evidence.reports}),shopifyComparison:'not_requested'});
+}
+
 /** Produces a review-only local preview. It never changes or infers a mapping. */
 export function buildXeroMappingPreview({accounts,mapping}={}){
  if(!Array.isArray(accounts)||!accounts.every(validAccount))throw Error('Xero mapping preview is unavailable');
@@ -28,4 +36,5 @@ export function buildXeroMappingPreview({accounts,mapping}={}){
 }
 
 function validDirectory(value){return value&&Object.getPrototypeOf(value)===Object.prototype&&value.source==='xero'&&typeof value.tenantId==='string'&&value.tenantId.trim()!==''&&typeof value.retrievedAt==='string'&&Number.isFinite(Date.parse(value.retrievedAt))&&Array.isArray(value.accounts)&&value.accounts.every(validAccount);}
+function validEvidence(value){const reportKeys=['profitAndLoss','balanceSheet','trialBalance','bankSummary'];return value&&Object.getPrototypeOf(value)===Object.prototype&&Object.keys(value).sort().join(',')==='baseCurrency,reportDate,reports,retrievedAt,shopifyComparison,source,tenantId'&&value.source==='xero'&&typeof value.tenantId==='string'&&value.tenantId.trim()!==''&&typeof value.reportDate==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value.reportDate)&&typeof value.retrievedAt==='string'&&Number.isFinite(Date.parse(value.retrievedAt))&&typeof value.baseCurrency==='string'&&value.baseCurrency.trim()!==''&&value.shopifyComparison==='not_requested'&&value.reports&&Object.getPrototypeOf(value.reports)===Object.prototype&&Object.keys(value.reports).sort().join(',')===reportKeys.slice().sort().join(',')&&reportKeys.every(key=>typeof value.reports[key]==='string'&&value.reports[key].trim()!=='');}
 function validAccount(account){return account&&Object.getPrototypeOf(account)===Object.prototype&&Object.keys(account).sort().join(',')==='id,name,status,type'&&['id','name','type','status'].every(key=>typeof account[key]==='string'&&account[key].trim()!=='');}

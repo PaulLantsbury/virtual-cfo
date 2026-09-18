@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildXeroMappingPreview,readLocalXeroAccountDirectory} from './mapping-preview.mjs';
+import {buildXeroMappingPreview,readLocalXeroAccountDirectory,readLocalXeroEvidenceHeader} from './mapping-preview.mjs';
 
 const accounts=[
  {id:'sales',name:'Sales',type:'REVENUE',status:'ACTIVE'},
@@ -27,4 +27,10 @@ test('reads only the expected redacted directory shape',async()=>{
  const directory=await readLocalXeroAccountDirectory('/tmp/xero.json',{fs:{readFile:async()=>JSON.stringify({source:'xero',tenantId:'tenant',retrievedAt:'2026-09-18T12:00:00.000Z',accounts})}});
  assert.equal(directory.accounts.length,7);
  await assert.rejects(readLocalXeroAccountDirectory('/tmp/xero.json',{fs:{readFile:async()=>JSON.stringify({source:'xero',tenantId:'tenant',retrievedAt:'2026-09-18T12:00:00.000Z',accounts:[{...accounts[0],balance:100}]})}}));
+});
+test('reads a value-free completed-test evidence header',async()=>{
+ const evidence={source:'xero',tenantId:'tenant',reportDate:'2026-09-18',retrievedAt:'2026-09-18T12:00:00.000Z',baseCurrency:'GBP',reports:{profitAndLoss:'Profit and Loss',balanceSheet:'Balance Sheet',trialBalance:'Trial Balance',bankSummary:'Bank Summary'},shopifyComparison:'not_requested'};
+ const header=await readLocalXeroEvidenceHeader('/tmp/xero-evidence.json',{fs:{readFile:async()=>JSON.stringify(evidence)}});
+ assert.deepEqual(header,{source:'xero',reportDate:'2026-09-18',retrievedAt:'2026-09-18T12:00:00.000Z',baseCurrency:'GBP',reports:evidence.reports,shopifyComparison:'not_requested'});
+ await assert.rejects(readLocalXeroEvidenceHeader('/tmp/xero-evidence.json',{fs:{readFile:async()=>JSON.stringify({...evidence,amount:1})}}));
 });

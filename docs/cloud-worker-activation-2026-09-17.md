@@ -1,6 +1,6 @@
 # Cloud staging worker activation — 17 September 2026
 
-> 18 September update: first scheduled execution **failed before collection** because the exported website artifact manifests caused Replit to launch the website API service. No nightly claim or new journal entry; financial fingerprints unchanged. A guarded worker-export correction is tested but not republished. See [actual overnight evidence and next action](first-overnight-verification-2026-09-18.md). The publication/readiness record below is historical and does not imply successful execution.
+> 18 September update: first scheduled execution **failed before collection** because the exported website artifact manifests caused Replit to launch the website API service. No nightly claim or new journal entry; financial fingerprints unchanged. Paul approved the worker-only correction; Replit deployment `6c765555` was successfully published 18 September at 10:14:45 UTC. Hosted smoke and workspace read-only readiness passed; actual corrected scheduled execution remains unverified. Next expected run is 19 September 02:00 BST, still reporting 17 September. See [actual overnight evidence and next action](first-overnight-verification-2026-09-18.md). The publication/readiness record below is historical and does not imply successful execution.
 
 ## Current status — published, first overnight execution pending
 

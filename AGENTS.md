@@ -1,3 +1,5 @@
+> 18 September latest checkpoint: first overnight run failed before collection; approved worker-only correction was successfully republished at 10:14:45 UTC (Replit deployment `6c765555`). Hosted smoke and workspace read-only readiness passed; corrected scheduled execution remains unverified. Next expected run 19 September 02:00 BST, fixed reporting date 17 September. Read the latest handover/overnight record before historical activation statements below. No Run now, fake time, reservation clearing or repeated publication approval.
+
 > Cross-chat continuity: read the latest handover addition first. Xero integration and a Xero test account/demo organisation are explicit roadmap requirements, not completed work. Verify access in a new chat before edits.
 
 # Resume instruction — 17 September end of day

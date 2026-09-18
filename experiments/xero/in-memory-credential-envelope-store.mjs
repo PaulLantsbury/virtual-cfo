@@ -1,0 +1,23 @@
+/** Local/staging server-only encrypted-envelope boundary. No browser/read surface returns ciphertext. */
+const reasons=new Set(['invalid_grant','provider_unavailable','refresh_failed','scope_changed','tenant_unavailable']);
+export function createInMemoryXeroCredentialEnvelopeStore({writerId='xero-consent-writer',workerId='xero-refresh-worker',now=()=>new Date().toISOString(),leaseMilliseconds=120000}={}){
+ const records=[],audits=[];let sequence=0;
+ const stamp=()=>{const value=now();if(!timestamp(value))throw Error('Credential store unavailable');return value;};
+ const event=(record,action,reason)=>audits.push(Object.freeze({id:`credential-audit-${++sequence}`,connectionId:record.connectionId,storeId:record.storeId,action,recordedAt:stamp(),...(reason?{reason}:{})}));
+ function create({callerId,connectionId,storeId,tenantId,envelope}={}){if(callerId!==writerId||!identifier(connectionId)||!identifier(storeId)||!identifier(tenantId)||!validEnvelope(envelope)||records.some(x=>x.connectionId===connectionId)||records.some(x=>x.tenantId===tenantId&&x.storeId!==storeId))throw Error('Credential store unavailable');const record={connectionId,storeId,tenantId,envelope:freeze(envelope),version:1,createdAt:stamp(),rotatedAt:null,lease:null};records.push(record);event(record,'credential_stored');return view(record);}
+ async function refresh({callerId,connectionId,decrypt,providerRefresh,encrypt}={}){
+  if(callerId!==workerId||!identifier(connectionId)||typeof decrypt!=='function'||typeof providerRefresh!=='function'||typeof encrypt!=='function')throw Error('Credential refresh forbidden');const record=records.find(x=>x.connectionId===connectionId);if(!record||leased(record))throw Error('Credential refresh unavailable');record.lease={id:`lease-${++sequence}`,expiresAt:new Date(Date.parse(stamp())+leaseMilliseconds).toISOString()};
+  try{const material=await decrypt(freeze(record.envelope));const rotated=await providerRefresh({connectionId:record.connectionId,tenantId:record.tenantId,material});const envelope=await encrypt(rotated);if(!validEnvelope(envelope))throw safeFailure('refresh_failed');record.envelope=freeze(envelope);record.version+=1;record.rotatedAt=stamp();event(record,'credential_rotated');return view(record);}catch(error){const reason=reasons.has(error?.safeReason)?error.safeReason:'refresh_failed';event(record,'credential_refresh_failed',reason);throw Error('Credential refresh unavailable');}finally{record.lease=null;}
+ }
+ function discard({callerId,connectionId,storeId}={}){if(callerId!==writerId||!identifier(connectionId)||!identifier(storeId))throw Error('Credential store unavailable');const index=records.findIndex(x=>x.connectionId===connectionId&&x.storeId===storeId);if(index<0)return false;const [record]=records.splice(index,1);event(record,'credential_deleted');return true;}
+ function readMetadata({callerId,connectionId,storeId}={}){if(callerId!==workerId||!identifier(connectionId)||!identifier(storeId))throw Error('Credential metadata forbidden');const record=records.find(x=>x.connectionId===connectionId&&x.storeId===storeId);return record?view(record):null;}
+ function inspect(){return Object.freeze({credentials:Object.freeze(records.map(view)),audits:Object.freeze(audits.map(x=>Object.freeze({...x})))});}
+ function leased(record){return record.lease&&Date.parse(record.lease.expiresAt)>Date.parse(stamp());}
+ return Object.freeze({create,refresh,discard,readMetadata,inspect});
+}
+function identifier(value){return typeof value==='string'&&/^[A-Za-z0-9_-]{1,100}$/.test(value)}
+function timestamp(value){return typeof value==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value)&&Number.isFinite(Date.parse(value))}
+function validEnvelope(value){return value&&Object.getPrototypeOf(value)===Object.prototype&&Object.keys(value).sort().join(',')==='algorithm,ciphertext,encryptedDek,keyVersion'&&value.algorithm==='AES-256-GCM'&&typeof value.ciphertext==='string'&&value.ciphertext.startsWith('sealed:')&&value.ciphertext.length<=4096&&typeof value.encryptedDek==='string'&&value.encryptedDek.startsWith('wrapped:')&&value.encryptedDek.length<=4096&&identifier(value.keyVersion)}
+function freeze(value){return Object.freeze({ciphertext:value.ciphertext,encryptedDek:value.encryptedDek,keyVersion:value.keyVersion,algorithm:value.algorithm})}
+function view(value){return Object.freeze({connectionId:value.connectionId,storeId:value.storeId,tenantId:value.tenantId,version:value.version,keyVersion:value.envelope.keyVersion,algorithm:value.envelope.algorithm,createdAt:value.createdAt,rotatedAt:value.rotatedAt})}
+function safeFailure(safeReason){const error=new Error('safe');error.safeReason=safeReason;return error}

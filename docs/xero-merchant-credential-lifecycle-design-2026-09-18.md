@@ -87,9 +87,9 @@ All implementation tests must use in-memory fakes or disposable databases. No te
 
 1. Define value-free connection, credential-envelope and audit contracts plus fake KMS, provider and clock.
 2. Implement consent-attempt and tenant-pinning service with exhaustive mock tests.
-3. Implement encrypted credential repository, lease/refresh worker and disconnect path with isolation and failure tests.
+3. Implement encrypted credential repository, lease/refresh worker and disconnect path with isolation and failure tests. **The local in-memory envelope store now proves the repository boundary, rotation lease, store/tenant pinning and ciphertext-free observability.** It accepts a four-part envelope (ciphertext, wrapped data-encryption key, key version and algorithm), rather than the deliberately simplified lifecycle mock envelope.
 4. Add server-only routes and Settings connection states; retain the current local preview as a separate test artefact.
-5. Submit the schema/migration and credential-runtime configuration for a separate live review. Only after approval and configured secret infrastructure may real merchant consent be enabled.
+5. Submit the schema/migration and credential-runtime configuration for a separate live review. [The disposable credential-store proposal](../db-migrations/proposals/xero-credential-store-2026-09-18.sql) has no browser grants or policies; it must only be applied after a separate environment/key-service review. Only after that review may real merchant consent be enabled.
 
 ## Agreed policy inputs and remaining boundaries
 

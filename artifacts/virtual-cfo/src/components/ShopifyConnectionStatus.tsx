@@ -19,11 +19,12 @@ export function ShopifyConnectionStatus(){
  <section aria-label="Nightly refresh plan" className="rounded-xl border p-4 space-y-2">
  <h3 className="font-semibold">Nightly refresh</h3>
  {deployment?<>
- <p className="text-sm font-medium">Staging trial scheduled — overnight verification outstanding</p>
+ <p role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm font-medium">First scheduled run failed before collection</p>
  <p className="text-sm">Deployment recorded on {deployment.acknowledgedOn}. Intended refresh: once daily at {deployment.intendedLocalTime} ({deployment.timezone}), with a {deployment.startupWindow} local start window.</p>
- <p className="text-sm">{deployment.scheduleVerification==='confirmed'?'The scheduler timing has been checked. The first overnight collection still needs verification.':'The scheduler’s timezone still needs verification. A published worker does not yet prove that an overnight collection has succeeded.'}</p>
+ <p className="text-sm">Checked on {deployment.firstRunObservation.checkedOn}: the {deployment.firstRunObservation.scheduledLocalDate} run scheduled for {deployment.firstRunObservation.scheduledLocalTime} ({deployment.timezone}) failed before collection started. No nightly collection was recorded for this run. The last successful collection below may be manual.</p>
+ <p className="text-sm">{deployment.scheduleVerification==='confirmed'?'The scheduler timing has been checked. A successful overnight collection has not been verified.':'The scheduler’s timezone still needs verification. A published worker does not yet prove that an overnight collection has succeeded.'}</p>
  <p className="text-sm">Trial reporting period: {deployment.reportFrom} to {deployment.reportTo}. This is a fixed test period, not an automatically advancing daily report.</p>
- <p className="text-sm text-muted-foreground">This is a dated deployment record, not a live scheduler check. Collection records below include manual and automatic attempts; they cannot confirm the overnight schedule by themselves.</p>
+ <p className="text-sm text-muted-foreground">This is a dated deployment and run observation, not a live scheduler check. It does not establish the outcome of later runs. Collection records below include manual and automatic attempts; they cannot confirm the overnight schedule by themselves.</p>
  </>:<p className="text-sm">Planned: once daily at 2am in the store’s local timezone. No deployment acknowledgement is available for this store and environment; automatic collection is not assumed.</p>}
  <p className="text-sm text-muted-foreground">Refreshing this screen only reads saved collection status. It does not collect Shopify data or check the cloud scheduler. Collection success does not verify sales or profit figures.</p>
  </section>

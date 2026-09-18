@@ -1,5 +1,29 @@
 # First overnight verification — 18 September 2026
 
+## Actual first run — failed before collection; correction prepared
+
+Read-only verification on 18 September at approximately 10:01 UTC established:
+
+- Replit Schedule shows one run for **18 September 02:00**, duration **93.428 seconds**, status **Failed**, run suffix `26tl7`, deployment `29dc6de0`. These are displayed host times; an exact UTC trigger/end timestamp was not separately exported. The saved London schedule was verified on 17 September; no timezone or schedule change was made today.
+- Runtime logs at displayed 02:01:26 report discovery of three `artifacts/**/.replit-artifact/artifact.toml` manifests, artifact mode with one static and one runnable service, and startup of `artifacts/api-server` on port 8080. They report missing `artifacts/virtual-cfo/dist/public`, `/api` healthcheck failures, and `Cannot find module '/home/runner/workspace/artifacts/api-server/dist/index.mjs'`.
+- This establishes a website-artifact startup failure in the scheduled worker bundle. It is not evidence of a Shopify no-change collection or a Shopify authentication failure. No safe nightly receipt was observed.
+- Authenticated staging READ ONLY transactions at 10:01 UTC found **zero nightly claims**, including none for 18 September, and only the previous manual journal entry: completed `replay`, 17 September 15:31:07.851–15:31:09.346 UTC, reporting period 17 September. No running/unconfirmed attempt or reservation was present.
+- Fresh candidate inspection still showed one TEST_ORDER-excluded order, two refunds, two retained candidates, `needs_recheck`, zero mapped events and coverage false. All seven candidate/financial count-and-content fingerprints matched the private pre-run baseline. No collection, retry, reservation clearing, financial review, source mutation or live database change was performed.
+
+### Prepared correction and verification
+
+Worker-export preparation now removes website artifact manifests **only from an acknowledged separate worker export**. It refuses Git checkouts (including nested paths), unexpected worker configuration and linked export paths. Website source/manifests remain in the main repository. The worker smoke check rejects any remaining artifact manifests so this failure cannot pass unnoticed through the same build check.
+
+Four focused export tests passed. A realistic temporary export failed smoke with a residual API manifest, then passed after preparation, using the existing PostgreSQL dependency and no network/collection. Five focused connection-status checks and frontend typecheck passed. Settings now records the dated first-run failure for the exact staging project/store, separately from saved manual collection history and financial verification. This remains a dated observation, not live monitoring.
+
+The existing local staging preview was restored after it stopped responding. Signed-in Store B Settings was browser-checked: it correctly has no staging deployment acknowledgement. The available browser account only has Store B membership, so the PocketLaunchpad1 display/journal walkthrough remains unverified; no access grant or account change was made.
+
+### Concrete next action requiring worker publication approval
+
+Apply the tested export preparation to a separate corrected worker bundle and republish **Night Scout Staging Nightly only**. Preserve the restricted secrets, fixed 17 September reporting period, 02:00 Europe/London schedule, six-minute timeout and existing planning allowance. Run smoke and the read-only cloud readiness check, then verify that published runtime uses the nightly command rather than website artifacts. Do not build/start or republish the original website. Do not click Run now, fake the time, widen permissions or clear reservations. Observe the next genuine due run and correlate its host receipt, claim and journal before claiming success. A workspace readiness check alone does not certify the deployed runtime or Shopify authentication.
+
+This correction is prepared locally and in the development branch, **not yet applied to Replit or republished**. The existing scheduled deployment remains unchanged and may repeat the same failure until corrected. Historical/daily test activity is specified in [the testing proposal](testing-programme-proposal-2026-09-18.md), not activated.
+
 ## Approved trial and expected result
 
 - Worker: Night Scout Staging Nightly in Replit; production website unchanged.

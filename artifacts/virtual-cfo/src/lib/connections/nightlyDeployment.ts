@@ -12,6 +12,13 @@ export const nightlyDeployment = {
   reportFrom: '2026-09-17',
   reportTo: '2026-09-17',
   scheduleVerification: 'confirmed' as 'pending' | 'confirmed',
+  firstRunObservation: {
+    checkedOn: '2026-09-18',
+    scheduledLocalDate: '2026-09-18',
+    scheduledLocalTime: '02:00',
+    outcome: 'failed_before_collection' as const,
+    collectionRecorded: false,
+  },
 };
 
 export function deploymentForStore(supabaseUrl: string | undefined, storeId: string | null | undefined) {

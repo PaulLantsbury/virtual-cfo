@@ -15,3 +15,14 @@ test('acknowledgement is dated and explicitly limited to a fixed test period, no
  assert.equal('lastSuccessfulRun' in nightlyDeployment,false);
  assert.equal('financialVerification' in nightlyDeployment,false);
 });
+test('first-run observation records failure without claiming automatic collection or freshness',()=>{
+ const observation=deploymentForStore(`https://${nightlyDeployment.projectRef}.supabase.co`,nightlyDeployment.storeId)?.firstRunObservation;
+ assert.equal(observation?.checkedOn,'2026-09-18');
+ assert.equal(observation?.scheduledLocalDate,'2026-09-18');
+ assert.equal(observation?.scheduledLocalTime,'02:00');
+ assert.equal(observation?.outcome,'failed_before_collection');
+ assert.equal(observation?.collectionRecorded,false);
+ assert.equal(nightlyDeployment.scheduleVerification,'confirmed');
+ assert.equal(nightlyDeployment.reportFrom,'2026-09-17');
+ assert.equal(nightlyDeployment.reportTo,'2026-09-17');
+});

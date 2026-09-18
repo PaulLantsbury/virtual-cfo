@@ -56,3 +56,50 @@ export function cfoEvidenceView(input: CfoEvidenceInput): CfoEvidenceView {
       return { state: input.state, title: "Figures unavailable", message: `Evidence for ${period} is missing, incomplete or unavailable. Missing amounts are not treated as zero.${detail}`, isRetained: false, showFigures: false };
   }
 }
+
+/**
+ * Transport-agnostic freshness signals that a connector may provide later.
+ * This deliberately contains no snapshot values: the caller must explicitly
+ * supply same-scope retention before a stale result can remain visible.
+ */
+export type CfoEvidenceFreshnessSignal =
+  | { state: "stale"; detail?: string | null; dataThrough?: string | null; evidenceVersion?: string | null; retainedScope?: CfoEvidenceScope | null }
+  | { state: "invalidated"; detail?: string | null; evidenceVersion?: string | null }
+  | { state: "denied"; detail?: string | null }
+  | { state: "unavailable"; detail?: string | null };
+
+export type CfoEvidenceAdapterInput = {
+  scope: CfoEvidenceScope;
+  /** The active source request is in flight; it is never evidence. */
+  loading: boolean;
+  /** True only for a result already validated for the visible scope. */
+  hasSupportedEvidence: boolean;
+  /** Optional future connector signal. It cannot introduce retained figures. */
+  freshness?: CfoEvidenceFreshnessSignal | null;
+  detail?: string | null;
+};
+
+/**
+ * Converts reporting/query state into the presentation contract shared by CFO
+ * pages. Freshness controls win over a successful request so a source change
+ * or access loss cannot be presented as current evidence.
+ */
+export function cfoEvidenceFromReporting(input: CfoEvidenceAdapterInput): CfoEvidenceInput {
+  const freshness = input.freshness;
+  if (freshness) {
+    return {
+      state: freshness.state,
+      scope: input.scope,
+      retainedScope: freshness.state === "stale" ? freshness.retainedScope ?? null : null,
+      dataThrough: freshness.state === "stale" ? freshness.dataThrough ?? null : null,
+      evidenceVersion: "evidenceVersion" in freshness ? freshness.evidenceVersion ?? null : null,
+      detail: freshness.detail ?? input.detail ?? null,
+    };
+  }
+  if (input.loading) return { state: "unavailable", scope: input.scope, detail: input.detail ?? "Evidence for the selected scope is still being checked." };
+  return {
+    state: input.hasSupportedEvidence ? "supported" : "unavailable",
+    scope: input.scope,
+    detail: input.detail ?? null,
+  };
+}

@@ -26,6 +26,7 @@ import { useSalesReporting } from "@/lib/analytics/useSalesReporting";
 import { useProfitReporting } from "@/lib/analytics/useProfitReporting";
 import { VerifiedProfitSummary } from "@/components/VerifiedProfitSummary";
 import { CfoEvidenceStatus } from "@/components/CfoEvidenceStatus";
+import { cfoEvidenceFromReporting } from "@/lib/analytics/cfoEvidence";
 
 const TREND_DATA = [
   { month: "Mar '25", margin: 48.2, highlighted: true },
@@ -355,11 +356,12 @@ export default function MarginAnalysis() {
         </section>
       </section>
       <VerifiedProfitSummary profit={profit} currency={config?.currency} />
-      <div className="mb-6"><CfoEvidenceStatus evidence={{
-        state: data ? "supported" : "unavailable",
+      <div className="mb-6"><CfoEvidenceStatus evidence={cfoEvidenceFromReporting({
         scope: { storeId: MA_STORE_ID, currency: config?.currency ?? "", from: reporting.period.dateFrom, to: reporting.period.dateTo },
+        loading: reporting.loading,
+        hasSupportedEvidence: !!data,
         detail: profit.loading ? "Profit evidence is still being checked." : profit.reason ?? null,
-      }} /></div>
+      })} /></div>
       <section
         aria-label="Sample margin model notice"
         className="rounded-2xl border border-primary/30 bg-primary/5 p-6 mb-6"

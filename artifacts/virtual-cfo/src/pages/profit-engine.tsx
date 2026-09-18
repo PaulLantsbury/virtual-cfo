@@ -6,6 +6,7 @@ import { useSalesReporting } from '@/lib/analytics/useSalesReporting';
 import { useProfitReporting, type ProfitMetric, type ProfitReport } from '@/lib/analytics/useProfitReporting';
 import { canAccess } from '@/lib/plan';
 import { CfoEvidenceStatus } from '@/components/CfoEvidenceStatus';
+import { cfoEvidenceFromReporting } from '@/lib/analytics/cfoEvidence';
 
 const costRows: readonly [string, keyof Pick<ProfitReport, 'originalCosts' | 'recoveredCosts' | 'cogs' | 'grossProfit' | 'variableCosts' | 'contributionBeforeMarketing' | 'advertising' | 'contribution' | 'overheads' | 'operatingProfit' | 'da' | 'ebitda'>, number, string][] = [
   ['Historical product costs', 'originalCosts', -1, 'Supported landed costs when the original goods were sold'],
@@ -46,11 +47,12 @@ export default function ProfitGrowth() {
         <p className="text-sm">Sales means net product sales excluding VAT and shipping. Contribution is after marketing. Missing costs remain unavailable, while earlier supported subtotals stay visible.</p>
         <p role="status" className="text-sm">{profit.loading ? 'Checking profit evidence…' : report?.state === 'complete' ? 'All profit subtotals have supporting evidence for this month.' : report ? 'Some profit subtotals are unavailable. See the reasons alongside each figure.' : profit.reason ?? 'Profit evidence unavailable.'}</p>
       </section>
-      <CfoEvidenceStatus evidence={{
-        state: reporting.data ? 'supported' : 'unavailable',
+      <CfoEvidenceStatus evidence={cfoEvidenceFromReporting({
         scope: { storeId, currency: reporting.config?.currency ?? '', from: reporting.period.dateFrom, to: reporting.period.dateTo },
+        loading: reporting.loading,
+        hasSupportedEvidence: !!reporting.data,
         detail: profit.loading ? 'Profit evidence is still being checked.' : profit.reason ?? null,
-      }} />
+      })} />
       <SalesReportingPeriod reporting={reporting} />
       <section aria-label="Verified profit overview" aria-live="polite" className="rounded-xl border border-border bg-card p-4">
         <h2 className="text-lg font-bold">Selected period results</h2>

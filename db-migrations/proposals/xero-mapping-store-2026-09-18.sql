@@ -34,7 +34,10 @@ CREATE TABLE xero_v1.mapping_versions (
  supersedes_id uuid REFERENCES xero_v1.mapping_versions(id),
  created_at timestamptz NOT NULL DEFAULT now(),
  UNIQUE(connection_id,version),
- CHECK ((version=1 AND supersedes_id IS NULL) OR (version>1 AND supersedes_id IS NOT NULL))
+ UNIQUE(id,connection_id),
+ UNIQUE(supersedes_id),
+ CHECK ((version=1 AND supersedes_id IS NULL) OR (version>1 AND supersedes_id IS NOT NULL)),
+ FOREIGN KEY(supersedes_id,connection_id) REFERENCES xero_v1.mapping_versions(id,connection_id)
 );
 CREATE TABLE xero_v1.mapping_selections (
  mapping_version_id uuid NOT NULL REFERENCES xero_v1.mapping_versions(id),

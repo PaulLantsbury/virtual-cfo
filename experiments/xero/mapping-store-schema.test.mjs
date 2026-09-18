@@ -1,0 +1,14 @@
+import test,{beforeEach,afterEach} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {PGlite} from '@electric-sql/pglite';
+
+const proposal=readFileSync(new URL('../../db-migrations/proposals/xero-mapping-store-2026-09-18.sql',import.meta.url),'utf8');
+const a='10000000-0000-4000-8000-000000000001',b='10000000-0000-4000-8000-000000000002',alice='20000000-0000-4000-8000-000000000001',bob='20000000-0000-4000-8000-000000000002';
+let db;
+beforeEach(async()=>{db=new PGlite();await db.exec(`CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN; CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid PRIMARY KEY); CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; CREATE TABLE public.stores(id uuid PRIMARY KEY); CREATE TABLE public.store_memberships(user_id uuid,store_id uuid,PRIMARY KEY(user_id,store_id)); GRANT USAGE ON SCHEMA auth,public TO authenticated; GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated; GRANT SELECT ON public.store_memberships TO authenticated;`);await db.query('INSERT INTO auth.users VALUES ($1),($2)',[alice,bob]);await db.query('INSERT INTO public.stores VALUES ($1),($2)',[a,b]);await db.query('INSERT INTO public.store_memberships VALUES ($1,$2),($3,$4)',[alice,a,bob,b]);await db.exec(proposal);});
+afterEach(async()=>db.close());
+async function asUser(id,fn){await db.query("SELECT set_config('request.jwt.claim.sub',$1,false)",[id]);await db.exec('SET ROLE authenticated');try{return await fn();}finally{await db.exec('RESET ROLE');}}
+async function seed(){await db.query(`INSERT INTO xero_v1.connections(id,store_id,tenant_id) VALUES ('30000000-0000-4000-8000-000000000001',$1,'tenant-a'),('30000000-0000-4000-8000-000000000002',$2,'tenant-b')`,[a,b]);}
+test('proposal compiles with value-free relations and browser roles cannot write',async()=>{const columns=(await db.query("SELECT column_name FROM information_schema.columns WHERE table_schema='xero_v1'")).rows.map(r=>r.column_name).join(',');assert.doesNotMatch(columns,/token|secret|report|balance|amount|transaction|shopify/i);await asUser(alice,async()=>await assert.rejects(db.exec(`INSERT INTO xero_v1.connections(store_id,tenant_id) VALUES ('${a}','forged')`),e=>e.code==='42501'));});
+test('membership isolates connections and revocation removes visibility',async()=>{await seed();await asUser(alice,async()=>assert.deepEqual((await db.query('SELECT store_id FROM xero_v1.connections ORDER BY store_id')).rows,[{store_id:a}]));await asUser(bob,async()=>assert.deepEqual((await db.query('SELECT store_id FROM xero_v1.connections ORDER BY store_id')).rows,[{store_id:b}]));await db.query('DELETE FROM public.store_memberships WHERE user_id=$1',[alice]);await asUser(alice,async()=>assert.equal((await db.query('SELECT * FROM xero_v1.connections')).rows.length,0));});

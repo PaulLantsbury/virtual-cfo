@@ -15,13 +15,17 @@ const port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
+const localBind=process.env["NIGHT_SCOUT_LOCAL_BIND"];
+if(localBind!==undefined&&localBind!=="127.0.0.1"){
+  throw new Error('Invalid local bind address');
+}
 
 const runtime = await startReviewRuntime(process.env).catch(() => {
   logger.error("Financial review configuration failed; server startup stopped");
   process.exit(1);
 });
 const app=createApp(runtime?.service);
-const server=app.listen(port, (err) => {
+const server=app.listen(port, localBind, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
     process.exit(1);

@@ -1,3 +1,5 @@
+> 18 September latest: the first nightly run failed before collection; approved staging correction published successfully at 10:14:45 UTC. Next genuine run expected 19 September 02:00 BST, fixed reporting date 17 September. [Actual evidence](first-overnight-verification-2026-09-18.md). [Historical/daily test preparation](testing-programme-preparation-2026-09-18.md) is local/disposable only; no generator activated. Earlier checkpoints below are historical.
+
 # Night Scout — current starting point, 17 September 2026
 
 - [Customer identifier package: applied and live-verified](customer-identity-package-2026-09-17.md) — 22 preparation checks passed; one live observation and unchanged replay verified, financial evidence unchanged.

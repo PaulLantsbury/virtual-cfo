@@ -1,6 +1,8 @@
 # Historical and daily testing programme — 18 September 2026
 
-Status: **proposal, not an installed generator or new staging dataset**. Paul requested preparation of historical comparative data and a recurring handful of development transactions. This document makes that package reviewable; it does not authorise source mutations, new credentials, database application or recurring activation. First-night verification is recorded separately by the coordinator.
+Status: **proposal, not an installed generator or new staging dataset**. The deterministic manifest/action-plan preparation and disposable checks are now implemented; see [delivery and limits](testing-programme-preparation-2026-09-18.md). Paul requested preparation of historical comparative data and a recurring handful of development transactions. This document makes that package reviewable; it does not authorise source mutations, new credentials, database application or recurring activation. First-night verification is recorded separately by the coordinator.
+
+> 18 September decision: Paul approved preparing a trailing 31 completed London-day reporting window, with missed days included in the next regular window and older gaps/uncertain outcomes separately reviewed. Tonight’s fixed-date deployment is unchanged. See the delivery record for implementation limits.
 
 ## Recommended split
 

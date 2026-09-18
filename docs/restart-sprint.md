@@ -1,3 +1,5 @@
+> 18 September latest: the first nightly run failed before collection; approved staging correction published successfully at 10:14:45 UTC. Next genuine run expected 19 September 02:00 BST, fixed reporting date 17 September. [Actual evidence](first-overnight-verification-2026-09-18.md). [Historical/daily test preparation](testing-programme-preparation-2026-09-18.md) is local/disposable only; no generator activated. Earlier checkpoints below are historical.
+
 > Current 17 September closeout: the separate cloud staging worker is published, saved Europe/London schedule verified, and Settings shows its scoped deployment acknowledgement separately from collection/financial status. First overnight execution remains unverified. See [activation](cloud-worker-activation-2026-09-17.md) and [next-run checklist](first-overnight-verification-2026-09-18.md). Prepared-only wording below records earlier package stages.
 
 # Restart sprint — Reliable Night Scout baseline

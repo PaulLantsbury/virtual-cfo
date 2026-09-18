@@ -4,7 +4,7 @@ Paul approved the separate staging worker setup on 17 September. The worker proj
 
 ## Worker export preparation
 
-18 September correction: the first actual run discovered the website artifact manifests and attempted to start its missing API build instead of collecting. Preparation must also remove `artifacts/**/.replit-artifact/artifact.toml` metadata from the separate export. It preserves source files and refuses Git checkout/linked paths. The smoke check now rejects residual manifests. Never remove these manifests from the website/source checkout. This correction is tested, not yet republished; see `docs/first-overnight-verification-2026-09-18.md`.
+18 September correction: the first actual run discovered the website artifact manifests and attempted to start its missing API build instead of collecting. Preparation must also remove `artifacts/**/.replit-artifact/artifact.toml` metadata from the separate export. It preserves source files and refuses Git checkout/linked paths. The smoke check now rejects residual manifests. Never remove these manifests from the website/source checkout. Paul approved and the staging-only correction was published on 18 September at 10:14:45 UTC (deployment `6c765555`); the next genuine overnight execution remains to be verified; see `docs/first-overnight-verification-2026-09-18.md`.
 
 In a separate Git archive export only, copy `deployments/nightly-staging/replit-worker.toml` to `.replit`, then run:
 

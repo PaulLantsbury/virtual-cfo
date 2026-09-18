@@ -2,7 +2,7 @@ import {createHmac,randomBytes,timingSafeEqual} from 'node:crypto';
 
 export const XERO_REDIRECT_URI='http://localhost:3000/xero/callback';
 export const XERO_READ_SCOPES=Object.freeze([
- 'accounting.settings.read','accounting.invoices.read','accounting.payments.read','accounting.banktransactions.read','accounting.manualjournals.read',
+ 'accounting.settings.read',
  'accounting.reports.profitandloss.read','accounting.reports.balancesheet.read','accounting.reports.trialbalance.read','accounting.reports.banksummary.read',
 ]);
 const authorize='https://login.xero.com/identity/connect/authorize',id=/^[0-9a-f-]{20,}$/i;
@@ -25,4 +25,24 @@ export function verifyAuthorizationState(state,{now=Date.now(),stateKey}={}){
  const expected=createHmac('sha256',stateKey).update(`${expires}.${nonce}`).digest('base64url');
  const supplied=Buffer.from(signature),known=Buffer.from(expected);
  return supplied.length===known.length&&timingSafeEqual(supplied,known)&&Number(expires)>=now;
+}
+
+/** Keeps signed authorisation states one-time-use in the local consent process. */
+export function createSingleUseStateGuard({stateKey,now=()=>Date.now()}={}){
+ if(typeof stateKey!=='string'||stateKey.length<32||typeof now!=='function')throw Error('Xero authorisation setup is invalid');
+ const issued=new Map();
+ return Object.freeze({
+  issue(config,options={}){
+   const made=createAuthorization(config,{...options,now:options.now??now(),stateKey});
+   issued.set(made.state,Number(made.state.split('.',1)[0]));
+   return made;
+  },
+  consume(state,{at=now()}={}){
+   const expires=issued.get(state);
+   if(!Number.isSafeInteger(expires)||expires<at||!verifyAuthorizationState(state,{now:at,stateKey}))return false;
+   issued.delete(state);
+   for(const [candidate,candidateExpiry] of issued)if(candidateExpiry<at)issued.delete(candidate);
+   return true;
+  },
+ });
 }

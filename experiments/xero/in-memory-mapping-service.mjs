@@ -20,12 +20,28 @@ export function createInMemoryXeroMappingService({memberships=[],connections=[],
   versions.push(Object.freeze(version));audits.push(Object.freeze({connectionId:conn.id,mappingVersionId:version.id,action:'confirmed',actorId:context.userId,occurredAt:version.confirmedAt}));return view(version,readiness);
  }
  function readCurrentMapping(context,{storeId,connectionId,asOf=now().slice(0,10)}={}){if(!validDate(asOf))throw Error('Invalid mapping request');requireAccess(context,storeId);const conn=connection(storeId,connectionId);if(!conn)throw Error('Xero connection unavailable');const version=versions.filter(x=>x.connectionId===conn.id&&x.effectiveFrom<=asOf).sort((a,b)=>a.effectiveFrom.localeCompare(b.effectiveFrom)||a.version-b.version).at(-1);if(!version)return null;const directory=latestDirectory(conn.id);const readiness=!directory?{available:false,reason:'account_directory_unavailable'}:snapshotId(directory)!==version.directorySnapshotId?{available:false,reason:'account_directory_changed'}:assessXeroMappingReadiness({accounts:directory.accounts,mapping:version.mapping});return view(version,readiness);}
+ /**
+  * A member may inspect their connection's confirmed history before choosing a
+  * replacement mapping. This deliberately returns the same value-free view as
+  * the current read: no directory payload, audit actor, snapshot identifier,
+  * or internal lineage fields escape this disposable boundary.
+  */
+ function readMappingHistory(context,{storeId,connectionId}={}){
+  requireAccess(context,storeId);
+  const conn=connection(storeId,connectionId);if(!conn)throw Error('Xero connection unavailable');
+  const directory=latestDirectory(conn.id);
+  const history=versions.filter(x=>x.connectionId===conn.id).sort((a,b)=>a.version-b.version).map(version=>{
+   const readiness=!directory?{available:false,reason:'account_directory_unavailable'}:snapshotId(directory)!==version.directorySnapshotId?{available:false,reason:'account_directory_changed'}:assessXeroMappingReadiness({accounts:directory.accounts,mapping:version.mapping});
+   return view(version,readiness);
+  });
+  return Object.freeze(history);
+ }
  function recordDirectorySnapshot(directory){
   const canonical=canonicalDirectory(directory);if(!connections.some(x=>x.id===canonical.connectionId))throw Error('Xero connection unavailable');
   const latest=latestDirectory(canonical.connectionId);if(latest&&canonical.retrievedAt<=latest.retrievedAt)throw Error('Xero directory timestamp changed');
   directories.push(canonical);return Object.freeze({connectionId:canonical.connectionId,retrievedAt:canonical.retrievedAt,directorySnapshotId:snapshotId(canonical)});
  }
- return Object.freeze({confirmMapping,readCurrentMapping,recordDirectorySnapshot,inspect:()=>Object.freeze({versions:Object.freeze([...versions]),audits:Object.freeze([...audits])})});
+ return Object.freeze({confirmMapping,readCurrentMapping,readMappingHistory,recordDirectorySnapshot,inspect:()=>Object.freeze({versions:Object.freeze([...versions]),audits:Object.freeze([...audits])})});
 }
 function view(version,readiness){return parseXeroMappingView({storeId:version.storeId,connectionId:version.connectionId,tenantId:version.tenantId,mappingVersionId:version.id,effectiveFrom:version.effectiveFrom,confirmedAt:version.confirmedAt,mapping:version.mapping,readiness:{available:readiness.available,reason:readiness.reason},shopifyComparison:'not_requested'});}
 function freezeMapping(mapping){return Object.freeze(Object.fromEntries(Object.entries(mapping).map(([key,value])=>[key,Object.freeze(Array.isArray(value)?[...value]:[value])])));}

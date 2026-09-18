@@ -14,3 +14,22 @@ test('directory snapshots are canonical and reject duplicate timestamps or accou
  assert.throws(()=>createInMemoryXeroMappingService({directories:[{connectionId:ids.connectionA,retrievedAt:'2026-09-18T00:00:00Z',accounts:[...accounts,accounts[0]]}]}),/account/);
 });
 test('a newer directory snapshot requires mapping review even when selected accounts still exist',()=>{const s=service();s.confirmMapping({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA,effectiveFrom:'2026-09-18',mapping});s.recordDirectorySnapshot({connectionId:ids.connectionA,retrievedAt:'2026-09-19T00:00:00Z',accounts:[...accounts].reverse()});const current=s.readCurrentMapping({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA,asOf:'2026-09-19'});assert.deepEqual(current.readiness,{available:false,reason:'account_directory_changed'});assert.throws(()=>s.recordDirectorySnapshot({connectionId:ids.connectionA,retrievedAt:'2026-09-19T00:00:00Z',accounts}),/timestamp/);});
+test('mapping history is member-scoped, immutable, chronological and value-free',()=>{
+ const s=service();
+ s.confirmMapping({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA,effectiveFrom:'2026-09-18',mapping});
+ s.confirmMapping({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA,effectiveFrom:'2026-10-01',mapping});
+ const history=s.readMappingHistory({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA});
+ assert.equal(history.length,2);assert.deepEqual(history.map(entry=>entry.effectiveFrom),['2026-09-18','2026-10-01']);
+ assert.equal(Object.isFrozen(history),true);assert.equal(Object.isFrozen(history[0]),true);assert.equal(Object.isFrozen(history[0].mapping.revenue),true);
+ assert.equal(JSON.stringify(history).match(/directorySnapshot|supersedes|confirmedBy|actor|audit|amount|token|report/i),null);
+ assert.throws(()=>s.readMappingHistory({userId:'bob'},{storeId:ids.storeA,connectionId:ids.connectionA}),/access/);
+ assert.throws(()=>s.readMappingHistory({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionB}),/connection/);
+});
+test('mapping history marks all superseded views as review-required after a directory refresh',()=>{
+ const s=service();
+ s.confirmMapping({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA,effectiveFrom:'2026-09-18',mapping});
+ s.confirmMapping({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA,effectiveFrom:'2026-10-01',mapping});
+ s.recordDirectorySnapshot({connectionId:ids.connectionA,retrievedAt:'2026-09-19T00:00:00Z',accounts});
+ const history=s.readMappingHistory({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA});
+ assert.deepEqual(history.map(entry=>entry.readiness),[{available:false,reason:'account_directory_changed'},{available:false,reason:'account_directory_changed'}]);
+});

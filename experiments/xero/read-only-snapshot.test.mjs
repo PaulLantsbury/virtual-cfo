@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFixedXeroSnapshot,readXeroSnapshotDate} from './read-only-snapshot.mjs';
+test('fixed snapshot uses only five pinned GET endpoints with tenant binding',async()=>{const calls=[];const out=await readFixedXeroSnapshot({accessToken:'a'.repeat(20),tenantId:'t-1',date:'2026-09-17',fetchImpl:async(u,o)=>{calls.push([u.toString(),o]);return new Response(JSON.stringify({ok:true}));}});assert.equal(calls.length,5);assert.ok(calls.every(([,o])=>o.method==='GET'&&o.headers['xero-tenant-id']==='t-1'&&o.redirect==='error'));assert.match(calls[1][0],/ProfitAndLoss\?date=2026-09-17/);assert.match(calls[4][0],/BankSummary\?toDate=2026-09-17/);assert.equal(out.date,'2026-09-17');});
+test('invalid scopes and upstream errors fail safely',async()=>{await assert.rejects(readFixedXeroSnapshot({accessToken:'x',tenantId:'t',date:'bad'}),/invalid/);await assert.rejects(readFixedXeroSnapshot({accessToken:'a'.repeat(20),tenantId:'t',date:'2026-09-17',fetchImpl:async()=>new Response('secret',{status:403})}),e=>e.message==='Xero snapshot unavailable');});
+test('snapshot date must be explicit, real, and no later than today',()=>{
+ assert.equal(readXeroSnapshotDate('2026-09-18',{today:'2026-09-18'}),'2026-09-18');
+ for(const value of [undefined,'2026-02-30','2026-09-19','2026-9-18'])assert.throws(()=>readXeroSnapshotDate(value,{today:'2026-09-18'}),/invalid/);
+});

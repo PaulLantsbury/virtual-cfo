@@ -39,3 +39,28 @@ test('rejects nested checkout exports and linked artifact paths before mutating 
   await assert.rejects(prepareWorkerExport(join(dir,'nested'),target),/Git checkout/);
  }finally{await rm(dir,{recursive:true,force:true});await rm(outside,{recursive:true,force:true});}
 });
+test('ignores unrelated runtime links and supports exports without artifacts',async()=>{
+ const dir=await fixture();
+ try{
+  await mkdir(join(dir,'.runtime'));await symlink('/unavailable-runtime-target',join(dir,'.runtime/cache'));
+  assert.deepEqual(await workerArtifactManifests(dir),[]);
+  assert.equal((await prepareWorkerExport(dir,target)).artifactManifestsRemoved,0);
+  await mkdir(join(dir,'artifacts/example/.replit-artifact'),{recursive:true});
+  await writeFile(join(dir,'artifacts/example/.replit-artifact/artifact.toml'),'kind = "api"');
+  assert.equal((await prepareWorkerExport(dir,target)).artifactManifestsRemoved,1);
+  assert.deepEqual(await workerArtifactManifests(dir),[]);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+test('rejects linked artifacts root and linked manifest files',async()=>{
+ const dir=await fixture();const outside=await mkdtemp(join(tmpdir(),'night-scout-linked-artifacts-'));
+ try{
+  await writeFile(join(outside,'artifact.toml'),'preserve external');
+  await symlink(outside,join(dir,'artifacts'));
+  await assert.rejects(prepareWorkerExport(dir,target),/linked export/);
+  await rm(join(dir,'artifacts'));await mkdir(join(dir,'artifacts/example/.replit-artifact'),{recursive:true});
+  await symlink(join(outside,'artifact.toml'),join(dir,'artifacts/example/.replit-artifact/artifact.toml'));
+  await assert.rejects(prepareWorkerExport(dir,target),/linked export/);
+  assert.equal(await readFile(join(outside,'artifact.toml'),'utf8'),'preserve external');
+  assert.equal(await readFile(join(dir,'pnpm-workspace.yaml'),'utf8'),await readFile(join(source,'pnpm-workspace.yaml'),'utf8'));
+ }finally{await rm(dir,{recursive:true,force:true});await rm(outside,{recursive:true,force:true});}
+});

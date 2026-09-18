@@ -26,6 +26,18 @@ The first report comparison should expect original product revenue £100, produc
 
 Create or select test-only accounts for sales, VAT liability, payment-processing fees, advertising, software/overheads, bank/payment clearing, and owner/financing if the Xero trial requires it. Record the exact account names and tax rates in the test evidence. Do not map inventory/COGS, financing, restricted funds, or foreign currency into the first result unless they are intentionally included and separately tested.
 
+## Manual Xero entry checklist
+
+Use the standard UK 20% VAT treatment for this isolated synthetic month. Create a test customer/supplier only if Xero requires one; do not use real customer contact details.
+
+1. Create a 5 October sales invoice with product line £100 net and shipping line £6 net, both standard VAT. Mark its £127.20 payment as received into the selected included payment account.
+2. Create an 8 October credit note/refund with one £20 net product line at standard VAT. Mark the £24 refund against the same selected payment account.
+3. Enter the 10 October £3 processing fee, 12 October £20 advertising payment, and 15 October £50 software payment, each to its dedicated test account and standard VAT only where Xero’s tax treatment requires it. Record any VAT separation rather than silently netting it into expense.
+4. Transfer £1,000 on 20 October between the two explicitly included test accounts. Do not call this revenue, expenditure or a cash-movement driver.
+5. At 31 October, note the balances of the included accounts, plus any restricted or unsettled accounts kept outside available cash.
+
+Use the exact actual Xero account/tax labels in the evidence record. If the trial organisation’s tax configuration lacks an appropriate standard UK rate, stop before entering anything; do not improvise a tax rate.
+
 ## Acceptance checks
 
 1. The selected Xero reports identify the correct organisation, report date, base currency and report title.

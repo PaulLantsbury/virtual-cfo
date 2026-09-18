@@ -57,3 +57,13 @@ No broad administrator/service-role credential is required. Never copy .local, s
 After approved project/credential setup, run the read-only cloud check first. Verify TLS/network reachability and fixed staging role/store. A failure is not grounds to disable TLS or broaden database grants. Then exercise the due path under a controlled test; inspect durable records before repeating any uncertain outcome. Observe an actual overnight run with the Mac offline before claiming Mac-independent live success. Financial rows, prior candidates and test-order exclusion must remain intact. Check billable runtime against the US$5/month planning allowance; this is not an enforced cap.
 
 Disable the schedule to stop future invocations; disabling does not cancel an in-flight write. Inspect its journal/claim before retrying. Do not remove claim/history rows to force another run. Existing reviewed financial data remains separate. Historical coverage/backfill, missed-slot alerting and production readiness still need completion.
+
+## Staging Xero scheduled worker
+
+`replit-xero-worker.toml` is a **separate** scheduled-worker manifest for the
+staging Xero test tenant. It must only be used after a retained test-tenant
+connection and owner-confirmed mapping have created the fixed connection and
+mapping-version identifiers. It requires the staging-only variables validated
+by `xero-worker.mjs`, including the restricted database URL, CA, Xero client
+credentials, envelope master key, fixed IDs, approved mapping JSON and bounded
+GBP report scope. It must never replace the Shopify worker or website manifest.

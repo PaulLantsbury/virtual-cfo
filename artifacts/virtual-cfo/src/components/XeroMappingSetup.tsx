@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { xeroMerchantSetupState } from '@/lib/xeroMerchantConnection';
 
 const labels: Record<string, string> = { revenue: 'Booked revenue', processingFee: 'Processing fees', advertising: 'Advertising', software: 'Software', includedCash: 'Included cash' };
 type Account = { id: string; name: string; type: string; status: string };
@@ -31,6 +32,7 @@ export function XeroMappingSetup() {
         ? `Mapping review required: ${readableReason(readiness?.reason)}. No accounting result is assumed.`
         : 'The local test mapping preview is unavailable. No Xero connection or mapping is assumed.';
 
+  const merchantSetup=xeroMerchantSetupState(null,false);
   return <section aria-labelledby="xero-mapping-heading" className="space-y-5 rounded-2xl border bg-card p-6 sm:p-8">
     <div>
       <h2 id="xero-mapping-heading" className="text-xl font-semibold">Xero account mapping</h2>
@@ -53,5 +55,9 @@ export function XeroMappingSetup() {
     </div>
     {status === 'unavailable' && <button className="w-fit text-sm font-medium text-primary underline underline-offset-4" onClick={() => query.refetch()} type="button">Try the local preview again</button>}
     <p className="text-sm text-muted-foreground">Local test preview only. Suggestions remain for review and do not change the confirmed mapping. Mappings stay separate from Shopify trading data. An unmapped account remains unavailable; Night Scout does not assume a zero value.</p>
+    <div className="rounded-lg border bg-muted/30 p-4" aria-live="polite">
+      <h3 className="font-medium">{merchantSetup.title}</h3>
+      <p className="mt-1 text-sm text-muted-foreground">{merchantSetup.detail}</p>
+    </div>
   </section>;
 }

@@ -8,11 +8,12 @@ export function createInMemoryXeroMappingService({memberships=[],connections=[],
  assertUniqueDirectoryTimestamps(directories);
  const versions=[],audits=[];
  const member=(userId,storeId)=>memberships.some(x=>x.userId===userId&&x.storeId===storeId);
+ const owner=(userId,storeId)=>memberships.some(x=>x.userId===userId&&x.storeId===storeId&&x.role==='owner');
  const connection=(storeId,connectionId)=>connections.find(x=>x.storeId===storeId&&x.id===connectionId&&x.retired!==true);
  const latestDirectory=connectionId=>directories.filter(x=>x.connectionId===connectionId).sort((a,b)=>b.retrievedAt.localeCompare(a.retrievedAt))[0];
  const requireAccess=(context,storeId)=>{if(!context?.userId)throw Error('Sign-in required');if(!member(context.userId,storeId))throw Error('Mapping access unavailable');};
  function confirmMapping(context,command){
-  if(!validXeroMappingConfirmation(command))throw Error('Invalid mapping request');requireAccess(context,command.storeId);
+  if(!validXeroMappingConfirmation(command))throw Error('Invalid mapping request');requireAccess(context,command.storeId);if(!owner(context.userId,command.storeId))throw Error('Mapping access unavailable');
   const conn=connection(command.storeId,command.connectionId);if(!conn)throw Error('Xero connection unavailable');
   const directory=latestDirectory(conn.id);if(!directory)throw Error('Xero directory review required');
   const readiness=assessXeroMappingReadiness({accounts:directory.accounts,mapping:command.mapping});if(!readiness.available)throw Error('Xero mapping review required');

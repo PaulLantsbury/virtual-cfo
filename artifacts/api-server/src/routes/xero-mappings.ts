@@ -7,7 +7,8 @@ import {Router, json, type ErrorRequestHandler, type IRouter} from 'express';
  */
 export type XeroMappingCommand={storeId:string;connectionId:string;effectiveFrom:string;mapping:Record<string,unknown>};
 export type XeroMappingRead={storeId:string;connectionId:string;asOf?:string};
-export type XeroMappingIdentity={userId:string};
+/** Role is derived by trusted server code.  The browser never supplies it. */
+export type XeroMappingIdentity={userId:string;isOwner:boolean};
 export type XeroMappingService={
  readCurrentMapping(identity:XeroMappingIdentity,request:XeroMappingRead):Promise<unknown>|unknown;
  confirmMapping(identity:XeroMappingIdentity,command:XeroMappingCommand):Promise<unknown>|unknown;
@@ -49,7 +50,7 @@ export function createXeroMappingRouter(dependencies:XeroMappingRouterDependenci
  router.use(json({limit:'16kb',strict:true,type:'application/json'}));
  const identity=async(authorization:unknown):Promise<XeroMappingIdentity|null>=>{
   if(!bearer(authorization))return null;
-  try{const result=await authenticate!(authorization);return plain(result)&&typeof result.userId==='string'&&result.userId.trim().length>0&&result.userId.length<=256?{userId:result.userId}:null;}catch{return null;}
+  try{const result=await authenticate!(authorization);return plain(result)&&typeof result.userId==='string'&&result.userId.trim().length>0&&result.userId.length<=256&&typeof result.isOwner==='boolean'?{userId:result.userId,isOwner:result.isOwner}:null;}catch{return null;}
  };
  router.get('/current',async(req,res)=>{
   const request=readRequest(req.query);if(!request){res.status(400).json({error:'Invalid mapping request'});return;}
@@ -60,6 +61,7 @@ export function createXeroMappingRouter(dependencies:XeroMappingRouterDependenci
   if(!req.is('application/json')){res.status(415).json({error:'JSON request required'});return;}
   const request=command(req.body);if(!request){res.status(400).json({error:'Invalid mapping request'});return;}
   const user=await identity(req.headers.authorization);if(!user){res.status(401).json({error:'Mapping sign-in required'});return;}
+  if(!user.isOwner){res.status(403).json({error:'Mapping access unavailable'});return;}
   try{res.status(200).json(await service!.confirmMapping(user,request));}catch(error){safeFailure(error,res);}
  });
  const parserErrors:ErrorRequestHandler=(error,_req,res,_next)=>res.status(error?.type==='entity.too.large'?413:400).json({error:error?.type==='entity.too.large'?'Mapping request is too large':'Invalid JSON request'});

@@ -14,7 +14,7 @@ export function extractSelectedAccountTotals({profitAndLoss,balanceSheet,mapping
 
 function totalsFromReport(payload,reportId,ids){
  const report=payload?.Reports?.[0];
- if(!report||report.ReportID!==reportId||!Array.isArray(report.Rows)||Object.keys(payload).length!==1)fail();
+ if(!report||report.ReportID!==reportId||!Array.isArray(report.Rows))fail();
  const found=new Map();
  for(const row of flatten(report.Rows)){
   const id=accountId(row.Cells);if(!id||!ids.includes(id))continue;

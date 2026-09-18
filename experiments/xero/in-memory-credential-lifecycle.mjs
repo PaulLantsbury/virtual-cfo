@@ -14,7 +14,7 @@ export function createInMemoryXeroCredentialLifecycle({memberships=[],workerId='
  }
  function receiveConsent(context,{attemptId,tenants,envelope}={}){
   const attempt=attempts.find(x=>x.id===attemptId);if(!attempt||!member(context,attempt.storeId)||attempt.userId!==context.userId||attempt.status!=='authorization_pending')throw Error('Xero consent unavailable');
-  if(!Array.isArray(tenants)||tenants.length===0||!tenants.every(validTenant)||!validEnvelope(envelope))throw Error('Xero consent unavailable');
+  if(!Array.isArray(tenants)||tenants.length===0||!tenants.every(validTenant)||new Set(tenants.map(tenant=>tenant.id)).size!==tenants.length||!validEnvelope(envelope))throw Error('Xero consent unavailable');
   attempt.status='tenant_selection_required';attempt.tenants=Object.freeze(tenants.map(x=>Object.freeze({id:x.id,name:x.name})));attempt.envelope=freezeEnvelope(envelope);return attemptView(attempt);
  }
  function rejectConsent(context,{attemptId,reason='consent_denied'}={}){
@@ -44,7 +44,11 @@ export function createInMemoryXeroCredentialLifecycle({memberships=[],workerId='
 }
 function id(value){return typeof value==='string'&&/^[A-Za-z0-9_-]{1,100}$/.test(value)}
 function validContext(value){return value&&typeof value==='object'&&id(value.userId)}
-function validTimestamp(value){return typeof value==='string'&&Number.isFinite(Date.parse(value))}
+function validTimestamp(value){
+ const match=typeof value==='string'&&value.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.\d{1,3})?Z$/);
+ if(!match)return false;
+ const parsed=new Date(value);return Number.isFinite(parsed.getTime())&&parsed.toISOString().slice(0,19)===match[1];
+}
 function validTenant(value){return value&&Object.getPrototypeOf(value)===Object.prototype&&id(value.id)&&typeof value.name==='string'&&value.name.trim()!==''&&value.name.length<=120}
 function validEnvelope(value){return value&&Object.getPrototypeOf(value)===Object.prototype&&Object.keys(value).sort().join(',')==='ciphertext,keyVersion'&&typeof value.ciphertext==='string'&&value.ciphertext.startsWith('sealed:')&&value.ciphertext.length<=1000&&id(value.keyVersion)}
 function freezeEnvelope(value){return Object.freeze({ciphertext:value.ciphertext,keyVersion:value.keyVersion})}

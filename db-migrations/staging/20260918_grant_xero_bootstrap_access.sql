@@ -26,15 +26,13 @@ BEGIN
      OR to_regclass('auth.users') IS NULL THEN
     RAISE EXCEPTION 'Xero staging schema is incomplete; stop and review the one-shot installer first';
   END IF;
-  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='night_scout_xero_bootstrap_login') THEN
-    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='night_scout_xero_bootstrap_login'
-      AND rolcanlogin AND NOT rolinherit AND NOT rolsuper AND NOT rolcreatedb
-      AND NOT rolcreaterole AND NOT rolreplication AND NOT rolbypassrls AND rolconnlimit=1) THEN
-      RAISE EXCEPTION 'existing Xero bootstrap login has unsafe attributes';
-    END IF;
-  ELSE
-    CREATE ROLE night_scout_xero_bootstrap_login LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS CONNECTION LIMIT 1 PASSWORD NULL;
+  IF to_regprocedure('xero_v1.bootstrap_create_initial_connection(uuid,text,uuid,date,timestamptz,jsonb,jsonb,bytea,bytea,text,text)') IS NOT NULL THEN
+    RAISE EXCEPTION 'Xero bootstrap function already exists; stop and review instead of replacing it';
   END IF;
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname='night_scout_xero_bootstrap_login') THEN
+    RAISE EXCEPTION 'Xero bootstrap login already exists; stop and review instead of adopting an existing principal';
+  END IF;
+  CREATE ROLE night_scout_xero_bootstrap_login LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS CONNECTION LIMIT 1 PASSWORD NULL;
 END
 $$;
 
@@ -42,14 +40,14 @@ $$;
 -- directory, mapping v1, its immutable selections, and an encrypted refresh
 -- envelope. Inputs are bounded metadata/ciphertext only: neither OAuth codes,
 -- plaintext tokens, raw reports nor financial values are accepted or stored.
-CREATE OR REPLACE FUNCTION xero_v1.bootstrap_create_initial_connection(
+CREATE FUNCTION xero_v1.bootstrap_create_initial_connection(
   p_store_id uuid, p_tenant_id text, p_owner_id uuid, p_effective_from date,
   p_directory_retrieved_at timestamptz, p_accounts jsonb, p_mapping jsonb,
   p_ciphertext bytea, p_encrypted_dek bytea, p_key_version text, p_algorithm text
 ) RETURNS TABLE(connection_id uuid,mapping_version_id uuid)
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = pg_catalog, public, xero_v1
+SET search_path = pg_catalog, xero_v1
 AS $$
 DECLARE v_connection uuid; v_mapping uuid; v_account jsonb; v_selection jsonb;
         v_category text; v_account_id text; v_directory_count integer:=0;
@@ -64,6 +62,8 @@ BEGIN
   IF p_store_id IS NULL OR p_owner_id IS NULL OR p_effective_from IS NULL
      OR p_directory_retrieved_at IS NULL OR p_accounts IS NULL OR p_mapping IS NULL
      OR jsonb_typeof(p_accounts) <> 'array' OR jsonb_typeof(p_mapping) <> 'array'
+     OR jsonb_array_length(p_accounts) NOT BETWEEN 1 AND 1000
+     OR jsonb_array_length(p_mapping) NOT BETWEEN 5 AND 100
      OR length(trim(coalesce(p_tenant_id,''))) NOT BETWEEN 1 AND 256
      OR p_algorithm <> 'AES-256-GCM'
      OR octet_length(p_ciphertext) NOT BETWEEN 1 AND 16384
@@ -87,7 +87,7 @@ BEGIN
   FOR v_account IN SELECT value FROM jsonb_array_elements(p_accounts) LOOP
     IF jsonb_typeof(v_account)<>'object'
        OR (v_account ?& ARRAY['accountId','accountName','accountType','accountStatus']) IS FALSE
-       OR jsonb_object_length(v_account)<>4
+       OR (SELECT count(*) FROM jsonb_object_keys(v_account))<>4
        OR length(trim(coalesce(v_account->>'accountId',''))) NOT BETWEEN 1 AND 256
        OR length(trim(coalesce(v_account->>'accountName',''))) NOT BETWEEN 1 AND 256
        OR length(trim(coalesce(v_account->>'accountType',''))) NOT BETWEEN 1 AND 64
@@ -104,18 +104,18 @@ BEGIN
     VALUES(v_connection,1,p_effective_from,p_owner_id,now(),p_directory_retrieved_at) RETURNING id INTO v_mapping;
   FOR v_selection IN SELECT value FROM jsonb_array_elements(p_mapping) LOOP
     IF jsonb_typeof(v_selection)<>'object' OR (v_selection ?& ARRAY['category','accountId']) IS FALSE
-       OR jsonb_object_length(v_selection)<>2 THEN RAISE EXCEPTION 'invalid Xero mapping selection'; END IF;
+       OR (SELECT count(*) FROM jsonb_object_keys(v_selection))<>2 THEN RAISE EXCEPTION 'invalid Xero mapping selection'; END IF;
     v_category:=v_selection->>'category'; v_account_id:=trim(coalesce(v_selection->>'accountId',''));
     IF v_category NOT IN ('revenue','processingFee','advertising','software','includedCash')
        OR length(v_account_id) NOT BETWEEN 1 AND 256
-       OR NOT EXISTS (SELECT 1 FROM xero_v1.account_directories WHERE connection_id=v_connection AND retrieved_at=p_directory_retrieved_at AND account_id=v_account_id AND account_status='ACTIVE') THEN
+       OR NOT EXISTS (SELECT 1 FROM xero_v1.account_directories ad WHERE ad.connection_id=v_connection AND ad.retrieved_at=p_directory_retrieved_at AND ad.account_id=v_account_id AND ad.account_status='ACTIVE') THEN
       RAISE EXCEPTION 'invalid active Xero mapping selection';
     END IF;
     INSERT INTO xero_v1.mapping_selections(mapping_version_id,category,account_id) VALUES(v_mapping,v_category,v_account_id);
     v_mapping_count:=v_mapping_count+1;
   END LOOP;
   IF v_mapping_count<5 OR v_mapping_count>100
-     OR (SELECT count(DISTINCT category) FROM xero_v1.mapping_selections WHERE mapping_version_id=v_mapping)<>5 THEN
+     OR (SELECT count(DISTINCT ms.category) FROM xero_v1.mapping_selections ms WHERE ms.mapping_version_id=v_mapping)<>5 THEN
     RAISE EXCEPTION 'complete Xero mapping required';
   END IF;
   INSERT INTO xero_v1.mapping_audit(connection_id,mapping_version_id,action,actor_id)

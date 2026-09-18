@@ -570,3 +570,6 @@ Prepared/tested persistent journal, member-only status RPC, optional private ope
 ## Durable sync staging enablement — 17 September
 
 Approved journal/status schema and fixed-store read membership applied; zero reviewer grants. One live replay persisted through restart, real signed-in Settings matched counts. Corrected local-time date display using SQL date-text selection; 11 regression checks plus new calendar-date check passed. No financial evidence changes, identity feed or production release. See [application record](durable-sync-package-2026-09-17.md).
+# 18 September — Xero bootstrap migration ready for staging owner
+
+The staging-only initial-connection bootstrap migration is corrected, executable-database tested and independently security-reviewed. It remains unapplied and requires Paul to run `db-migrations/staging/20260918_grant_xero_bootstrap_access.sql`, followed by `db-migrations/staging/verify-xero-bootstrap-access-2026-09-18.sql`, in Night Scout Staging only. The migration creates a separate inert bootstrap login with a null password, no memberships and no Xero table grants. It does not alter the existing restricted worker role, its sole `night_scout_import_service` membership, or its four Xero worker RPC grants. Hosted OAuth callback/runtime wiring is a separate post-application step and must not be claimed complete yet.

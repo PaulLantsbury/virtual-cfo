@@ -10,7 +10,7 @@ export function validXeroMappingConfirmation(value){
 export function parseXeroMappingView(value){
  if(!plain(value)||!exactKeys(value,['storeId','connectionId','tenantId','mappingVersionId','effectiveFrom','confirmedAt','mapping','readiness','shopifyComparison']))return null;
  if(!uuid.test(value.storeId)||!uuid.test(value.connectionId)||!uuid.test(value.mappingVersionId)||!identifier(value.tenantId)||!date(value.effectiveFrom)||!timestamp(value.confirmedAt)||value.shopifyComparison!=='not_requested')return null;
- const mapping=validateXeroAccountMapping(value.mapping);if(!mapping||!plain(value.readiness)||!exactKeys(value.readiness,['available','reason'])||typeof value.readiness.available!=='boolean'||!(value.readiness.reason===null||['account_directory_unavailable','account_mapping_incomplete','mapped_account_missing','mapped_account_inactive','mapped_account_wrong_type'].includes(value.readiness.reason)))return null;
+ const mapping=validateXeroAccountMapping(value.mapping);if(!mapping||!plain(value.readiness)||!exactKeys(value.readiness,['available','reason'])||typeof value.readiness.available!=='boolean'||!(value.readiness.reason===null||['account_directory_unavailable','account_directory_changed','account_mapping_incomplete','mapped_account_missing','mapped_account_inactive','mapped_account_wrong_type'].includes(value.readiness.reason)))return null;
  return Object.freeze({...value,mapping,readiness:Object.freeze({...value.readiness})});
 }
 const plain=value=>value!==null&&typeof value==='object'&&Object.getPrototypeOf(value)===Object.prototype;

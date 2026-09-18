@@ -12,4 +12,5 @@ test('parses only a value-free separate-source mapping view',()=>{
  const view=parseXeroMappingView({...ids,tenantId:'tenant-1',effectiveFrom:'2026-09-18',confirmedAt:'2026-09-18T12:00:00Z',mapping,readiness:{available:true,reason:null},shopifyComparison:'not_requested'});
  assert.ok(view);assert.equal(JSON.stringify(view).match(/amount|balance|token|shopifyNet/i),null);
  assert.equal(parseXeroMappingView({...view,amount:100}),null);
+ assert.deepEqual(parseXeroMappingView({...view,readiness:{available:false,reason:'account_directory_changed'}})?.readiness,{available:false,reason:'account_directory_changed'});
 });

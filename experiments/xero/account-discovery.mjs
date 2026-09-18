@@ -1,6 +1,7 @@
 const endpoint='https://api.xero.com/api.xro/2.0/Accounts';
 
 const identifier=value=>typeof value==='string'&&value.trim()!==''&&value.length<=256;
+const validAccessToken=value=>typeof value==='string'&&value.length>=16&&value.length<=8192;
 const text=value=>typeof value==='string'&&value.trim()!==''&&value.length<=256?value.trim():null;
 const unavailable=(reason='invalid_request')=>{const error=Error('Xero account discovery unavailable');error.safeReason=reason;throw error;};
 
@@ -24,7 +25,7 @@ export function parseXeroAccountDirectory(payload){
 
 /** Reads the pinned tenant's Xero chart of accounts through the sole GET endpoint. */
 export async function discoverXeroAccounts({accessToken,tenantId,pinnedTenantId,fetchImpl=fetch}={}){
- if(!identifier(accessToken)||accessToken.length<16||!identifier(tenantId)||!identifier(pinnedTenantId)||tenantId!==pinnedTenantId||typeof fetchImpl!=='function')unavailable('invalid_request');
+ if(!validAccessToken(accessToken)||!identifier(tenantId)||!identifier(pinnedTenantId)||tenantId!==pinnedTenantId||typeof fetchImpl!=='function')unavailable('invalid_request');
  let response;
  try{response=await fetchImpl(endpoint,{method:'GET',headers:{authorization:`Bearer ${accessToken}`,'xero-tenant-id':tenantId,accept:'application/json'},redirect:'error'});}catch{unavailable('network_failure');}
  if(!response?.ok)unavailable('upstream_refused');

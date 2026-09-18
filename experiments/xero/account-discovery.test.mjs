@@ -17,6 +17,11 @@ test('uses one pinned, tenant-bound GET request and retains only account directo
  assert.equal(Object.isFrozen(accounts),true);assert.equal(Object.isFrozen(accounts[0]),true);
 });
 
+test('accepts a normal long OAuth access token while retaining short token rejection',async()=>{
+ const accounts=await discoverXeroAccounts({accessToken:'a'.repeat(1500),tenantId,pinnedTenantId:tenantId,fetchImpl:async()=>new Response(JSON.stringify(payload()))});
+ assert.equal(accounts.length,2);
+});
+
 test('refuses changed tenant, invalid request values, and upstream failures without exposing payloads',async()=>{
  for(const input of [
   {accessToken:'short',tenantId,pinnedTenantId:tenantId},

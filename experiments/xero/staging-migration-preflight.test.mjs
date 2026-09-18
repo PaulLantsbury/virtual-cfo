@@ -9,6 +9,7 @@ const sha256 = text => createHash('sha256').update(text).digest('hex');
 const preflight = read('db-migrations/staging/preflight-xero-staging-2026-09-18.sql');
 const mapping = read('db-migrations/proposals/xero-mapping-store-2026-09-18.sql');
 const credential = read('db-migrations/proposals/xero-credential-store-2026-09-18.sql');
+const evidence = read('db-migrations/proposals/xero-accounting-evidence-store-2026-09-18.sql');
 const guide = read('docs/xero-staging-application-2026-09-18.md');
 
 test('Xero staging preflight is read-only and checks the required isolation boundary', () => {
@@ -25,6 +26,7 @@ test('Xero staging preflight is read-only and checks the required isolation boun
 test('application record pins the reviewed proposal contents and applies mapping first', () => {
   assert.match(guide, new RegExp(sha256(mapping)));
   assert.match(guide, new RegExp(sha256(credential)));
+  assert.match(guide, new RegExp(sha256(evidence)));
   assert.ok(guide.indexOf('Mapping store proposal') < guide.indexOf('Credential envelope proposal'));
   assert.match(guide, /not applied by this repository checkout/i);
 });

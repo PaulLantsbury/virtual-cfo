@@ -30,16 +30,15 @@ apply it.
 ## Exact approved artefacts and order
 
 1. [Mapping store proposal](../db-migrations/proposals/xero-mapping-store-2026-09-18.sql) — SHA-256
-   `8b1e8b5e8d39e7f842714ec685c6625b71971b9771f6f0d68241add2ca8c28f3`
+   `e69b9503c0b100a6cf2c093e0dbedf65f096d3b00be1520ec3e9b8a6451ac77d`
 2. [Credential envelope proposal](../db-migrations/proposals/xero-credential-store-2026-09-18.sql) — SHA-256
    `03b53c860f71407d653d8dbf6c05e587ba271b875f4df102c5f1a8e09593ec48`
+3. [Bounded accounting evidence proposal](../db-migrations/proposals/xero-accounting-evidence-store-2026-09-18.sql) — SHA-256
+   `4fa26b3e2f32cf584a229cdc6f7354c8d929c53404361a210eabd5bfe8ac8bf3`
 
-Each proposal has its own transaction. Apply the mapping proposal first; it
-creates `xero_v1.connections`, which the credential proposal references. Stop
-on an error; do not strip transaction boundaries, edit the proposal in the SQL
-editor, or retry a partially successful statement.
+The one-shot installer embeds the exact reviewed structure of all three proposals inside one atomic transaction. It is the only approved staging application artefact. Do not run individual proposals separately, strip transaction boundaries, edit SQL in the editor, or retry after an error.
 
-Both proposals are additive: they create a new private schema and new tables,
+All three proposals are additive: they create a new private schema and new tables,
 enable RLS, revoke browser writes, and do not alter existing commerce or finance
 rows. The credential proposal stores envelope metadata and ciphertext only. It
 does not store an Xero client secret, access token, report, balance, transaction
@@ -69,10 +68,11 @@ ORDER BY table_name, grantee, privilege_type;
 ```
 
 Expected tables: `connections`, `account_directories`, `mapping_versions`,
-`mapping_selections`, `mapping_audit`, `credential_envelopes`, and
-`credential_audit`. Every table must have RLS. `anon` receives no grant;
-`authenticated` has read-only access to the mapping tables only; neither browser
-role receives access to either credential table. A result that differs is a
+`mapping_selections`, `mapping_audit`, `credential_envelopes`, `credential_audit`,
+`accounting_evidence`, and `accounting_evidence_audit`. Every table must have RLS.
+`anon` receives no grant; `authenticated` has read-only access to the mapping
+tables only. Neither browser role receives access to credential or accounting
+evidence tables; the server returns scoped DTOs after membership checks. A result that differs is a
 security failure, not a condition to work around by broadening grants.
 
 ## Remaining configuration boundary

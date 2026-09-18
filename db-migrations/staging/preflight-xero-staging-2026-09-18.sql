@@ -10,6 +10,7 @@
 -- true and no xero_v1 relation exists:
 --   1. ../proposals/xero-mapping-store-2026-09-18.sql
 --   2. ../proposals/xero-credential-store-2026-09-18.sql
+--   3. ../proposals/xero-accounting-evidence-store-2026-09-18.sql
 -- Their SHA-256 values are documented in xero-staging-application-2026-09-18.md.
 
 SELECT

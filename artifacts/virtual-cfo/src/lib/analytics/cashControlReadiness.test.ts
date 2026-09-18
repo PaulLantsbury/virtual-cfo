@@ -22,8 +22,17 @@ test('a stale cash snapshot can only be retained for the same store and is never
 });
 
 test('ready state describes methodology without deriving a cash figure', () => {
-  const view = cashControlReadinessView({ state: 'ready', storeId: 'store-a' });
+  const view = cashControlReadinessView({ state: 'ready', storeId: 'store-a', asOf: '2026-09-18T09:00:00.000Z' });
   assert.equal(view.canShowActualCash, true);
   assert.match(view.message, /dated, unrestricted balances/);
   assert.doesNotMatch(view.message, /£/);
+});
+
+test('actual or retained cash requires a valid dated balance and unknown state fails closed', () => {
+  for (const input of [
+    { state: 'ready' as const, storeId: 'store-a' },
+    { state: 'ready' as const, storeId: 'store-a', asOf: 'not-a-date' },
+    { state: 'stale' as const, storeId: 'store-a', retainedStoreId: 'store-a', asOf: 'not-a-date' },
+    { state: 'unknown' as any, storeId: 'store-a' },
+  ]) assert.equal(cashControlReadinessView(input).canShowActualCash, false);
 });

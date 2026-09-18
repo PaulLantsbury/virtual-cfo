@@ -7,7 +7,7 @@ const connection={id:'connection_1',storeId:'store_1',tenantId:'tenant_1',status
 test('merchant connection parser only accepts value-free, exact read-only connection views',()=>{
  const parsed=parseXeroMerchantConnection(connection);
  assert.equal(parsed?.status,'active');assert.equal(Object.isFrozen(parsed),true);
- for(const unsafe of [{...connection,token:'secret'},{...connection,scopeVersion:'write-v1'},{...connection,status:'unknown'},{...connection,lastSuccessAt:'not-a-time'}])assert.equal(parseXeroMerchantConnection(unsafe),null);
+ for(const unsafe of [{...connection,token:'secret'},{...connection,scopeVersion:'write-v1'},{...connection,status:'unknown'},{...connection,lastSuccessAt:'not-a-time'},{...connection,createdAt:'2026-09-18'},{...connection,lastSuccessAt:'2026-09-17T12:00:00.000Z'}])assert.equal(parseXeroMerchantConnection(unsafe),null);
 });
 
 test('connection setup states stay disabled until an environment explicitly enables merchant flow',()=>{

@@ -19,7 +19,7 @@ export type XeroMerchantSetupState = Readonly<{
 }>;
 
 const id = (value: unknown) => typeof value === 'string' && /^[A-Za-z0-9_-]{1,100}$/.test(value);
-const timestamp = (value: unknown) => typeof value === 'string' && Number.isFinite(Date.parse(value));
+const timestamp = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value) && Number.isFinite(Date.parse(value));
 const plain = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype;
 
 /**
@@ -29,6 +29,7 @@ const plain = (value: unknown): value is Record<string, unknown> => value !== nu
 export function parseXeroMerchantConnection(value: unknown): XeroMerchantConnection | null {
   if (!plain(value) || Object.keys(value).sort().join(',') !== 'createdAt,id,lastFailureAt,lastSuccessAt,mappingReviewRequired,scopeVersion,status,storeId,tenantId') return null;
   if (!id(value.id) || !id(value.storeId) || !id(value.tenantId) || !['active', 'reauthorization_required', 'disconnected'].includes(String(value.status)) || value.scopeVersion !== 'read-only-v1' || !timestamp(value.createdAt) || !(value.lastSuccessAt === null || timestamp(value.lastSuccessAt)) || !(value.lastFailureAt === null || timestamp(value.lastFailureAt)) || typeof value.mappingReviewRequired !== 'boolean') return null;
+  if ((value.lastSuccessAt !== null && Date.parse(value.lastSuccessAt as string) < Date.parse(value.createdAt as string)) || (value.lastFailureAt !== null && Date.parse(value.lastFailureAt as string) < Date.parse(value.createdAt as string))) return null;
   return Object.freeze({ id: value.id as string, storeId: value.storeId as string, tenantId: value.tenantId as string, status: value.status as XeroMerchantConnection['status'], scopeVersion: 'read-only-v1', createdAt: value.createdAt as string, lastSuccessAt: value.lastSuccessAt as string | null, lastFailureAt: value.lastFailureAt as string | null, mappingReviewRequired: value.mappingReviewRequired });
 }
 

@@ -4,8 +4,8 @@ type XeroRuntime=ReturnType<typeof xeroOAuthRuntime>;
 
 export function createXeroRouter(runtime:XeroRuntime){
  const router=Router();
- router.get('/start',(_req,res)=>{if(!runtime)return res.status(404).json({error:'Xero test connection unavailable'});res.set('Cache-Control','no-store').redirect(302,runtime.start().url);});
- router.get('/mapping-preview',async(_req,res)=>{if(!runtime||typeof runtime.mappingPreview!=='function')return res.status(404).json({error:'Xero local mapping preview unavailable'});try{res.set('Cache-Control','no-store').json(await runtime.mappingPreview());}catch{res.status(503).json({error:'Xero local mapping preview unavailable'});}});
+ router.get('/start',(_req,res)=>{if(!runtime){res.status(404).json({error:'Xero test connection unavailable'});return;}res.set('Cache-Control','no-store').redirect(302,runtime.start().url);});
+ router.get('/mapping-preview',async(_req,res)=>{if(!runtime||typeof runtime.mappingPreview!=='function'){res.status(404).json({error:'Xero local mapping preview unavailable'});return;}try{res.set('Cache-Control','no-store').json(await runtime.mappingPreview());}catch{res.status(503).json({error:'Xero local mapping preview unavailable'});}});
  router.post('/callback',expressCallback(runtime));
  return router;
 }

@@ -25,7 +25,7 @@ const runtime = await startReviewRuntime(process.env).catch(() => {
   process.exit(1);
 });
 const app=createApp(runtime?.service);
-const server=app.listen(port, localBind, (err) => {
+const server=app.listen(port, localBind ?? "0.0.0.0", (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
     process.exit(1);

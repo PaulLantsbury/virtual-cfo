@@ -3,6 +3,8 @@ import {fileURLToPath} from 'node:url';
 import {access} from 'node:fs/promises';
 import {runNightlyDevelopment} from '../../experiments/shopify/nightly-development.mjs';
 import {nightlyPlan} from '../../experiments/shopify/nightly-plan.mjs';
+import {workerArtifactManifests} from './prepare-export.mjs';
+if((await workerArtifactManifests(fileURLToPath(new URL('../../',import.meta.url)))).length)throw Error('Website artifact manifests remain; prepare the separate worker export before deployment');
 const require=createRequire(new URL('../../lib/db/package.json',import.meta.url));
 if(Number(process.versions.node.split('.')[0])<24)throw Error('Node 24 or later required');
 if(typeof require('pg').Pool!=='function'||typeof runNightlyDevelopment!=='function')throw Error('Worker dependency missing');

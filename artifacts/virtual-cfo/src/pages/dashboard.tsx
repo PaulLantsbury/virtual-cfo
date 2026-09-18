@@ -7,6 +7,7 @@ import { Link } from "wouter";
 import { ArrowRight, ArrowUpRight, ArrowDownRight, Minus, Search } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { SalesReportingPeriod } from "@/components/SalesReportingPeriod";
+import { CfoEvidenceStatus } from "@/components/CfoEvidenceStatus";
 import { canAccess } from "@/lib/plan";
 
 
@@ -39,6 +40,12 @@ export default function Dashboard() {
     </div>
 
     <p className="mb-5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">Test store · This briefing uses development data. Sales use verified evidence for the selected period. Profit figures are shown only where the selected month has supporting cost evidence.</p>
+
+    <div className="mb-5"><CfoEvidenceStatus evidence={{
+      state: reporting.data ? "supported" : "unavailable",
+      scope: { storeId: STORE_ID, currency: reporting.config?.currency ?? "", from: period.dateFrom, to: period.dateTo },
+      detail: loading ? "The selected scope is still being checked." : null,
+    }} /></div>
 
     <VerifiedProfitSummary profit={profit} currency={reporting.config?.currency} />
     <ProfitObservations profit={profit} scope={{ storeId: STORE_ID, currency: reporting.config?.currency ?? "", from: period.dateFrom, to: period.dateTo }} />

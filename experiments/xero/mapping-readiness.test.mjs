@@ -18,6 +18,9 @@ test('requires review when a confirmed account disappears or becomes inactive',(
  assert.deepEqual(assessXeroMappingReadiness({accounts:accounts.filter(account=>account.id!=='ads'),mapping}),{available:false,reason:'mapped_account_missing',shopifyComparison:'not_requested'});
  assert.deepEqual(assessXeroMappingReadiness({accounts:accounts.map(account=>account.id==='bank'?{...account,status:'ARCHIVED'}:account),mapping}),{available:false,reason:'mapped_account_inactive',shopifyComparison:'not_requested'});
 });
+test('requires each category to use an appropriate account type',()=>{
+ assert.deepEqual(assessXeroMappingReadiness({accounts,mapping:{...mapping,revenue:'bank',includedCash:'sales'}}),{available:false,reason:'mapped_account_wrong_type',shopifyComparison:'not_requested'});
+});
 test('does not infer an incomplete mapping or accept Shopify input',()=>{
  assert.deepEqual(assessXeroMappingReadiness({accounts,mapping:{...mapping,software:[]},shopifyNetSales:12300}),{available:false,reason:'account_mapping_incomplete',shopifyComparison:'not_requested'});
 });

@@ -10,7 +10,7 @@ import {runStagingXeroRefresh} from '../../../../experiments/xero/staging-refres
  * variables happen to be present.
  */
 export type XeroRefreshConnection={id:string;tenantId:string};
-export type XeroRefreshScope={from:string;to:string;currency:string};
+export type XeroRefreshScope={from:string;to:string;currency:string;closedPeriod?:boolean};
 export type XeroRefreshJob={connection:XeroRefreshConnection;scope:XeroRefreshScope;mapping:Record<string,unknown>};
 export type XeroRefreshCredentialPort={
   /** A worker-only port. It must acquire/rotate credentials internally and must never return token material. */

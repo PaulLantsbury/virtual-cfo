@@ -10,7 +10,7 @@ export function validateXeroAccountMapping(mapping){
  if(!plainObject(mapping)||!exactKeys(mapping,categories))return null;
  const normalized={};
  for(const category of categories){
-  const ids=category==='includedCash'?mapping[category]:[mapping[category]];
+  const ids=Array.isArray(mapping[category])?mapping[category]:[mapping[category]];
   if(!Array.isArray(ids)||ids.length===0||!ids.every(accountId))return null;
   normalized[category]=Object.freeze([...ids]);
  }

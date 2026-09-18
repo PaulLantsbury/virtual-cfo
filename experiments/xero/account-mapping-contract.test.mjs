@@ -10,6 +10,12 @@ test('maps the five explicitly selected Xero accounting categories by account id
  assert.deepEqual(xeroAccountingView({mapping,accountTotals:totals}),{available:true,reason:null,revenue:10320,processingFee:-300,advertising:-2000,software:-5000,includedCash:100000,shopifyComparison:'not_requested'});
 });
 
+test('allows multiple approved revenue accounts while rejecting overlaps',()=>{
+ const combined={...mapping,revenue:['sales','shipping']};
+ assert.deepEqual(validateXeroAccountMapping(combined).revenue,['sales','shipping']);
+ assert.equal(validateXeroAccountMapping({...combined,software:['shipping']}),null);
+});
+
 test('mapping absence makes every accounting value unavailable',()=>{
  assert.deepEqual(xeroAccountingView({accountTotals:totals}),{available:false,reason:'account_mapping_incomplete',revenue:null,processingFee:null,advertising:null,software:null,includedCash:null,shopifyComparison:'not_requested'});
 });

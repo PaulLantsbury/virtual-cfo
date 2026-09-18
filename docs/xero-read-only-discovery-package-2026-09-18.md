@@ -24,18 +24,18 @@ Each collection is a dated source snapshot, not proof that accounting is complet
 
 ## Reconciliation boundary
 
-Night Scout’s Shopify financial ledger remains the source for commerce-event sales, refunds, VAT components and product-cost evidence. Xero supplies accounting and cash evidence. The first version must not add the two revenue totals together.
+Night Scout’s Shopify financial ledger remains the source for commerce-event sales, refunds, VAT components and product-cost evidence. Xero supplies separate accounting and cash views. The first version must not add, match, compare, explain variances between, or otherwise reconcile the two sales totals. A future reconciliation feature would require its own explicit scope and financial definitions.
 
 | Question | Initial treatment |
 | --- | --- |
-| Sales/refunds | Compare Shopify net sales to selected Xero revenue accounts for the same local accounting period; present differences and reasons, never sum them. |
+| Sales/refunds | Present Shopify net sales and Xero booked sales as separately sourced measures. Do not calculate a difference or assert correspondence. |
 | VAT | Retain Shopify VAT components and compare only after a documented tax-basis and settlement-date decision. |
 | Fees, advertising, payroll, overheads | Use selected Xero accounts only after an account mapping; classify each as operating cost, variable cost, financing, tax, exceptional or excluded. |
 | Cash/runway | Use an explicit included-account list and dated balances. Transfers between included accounts do not count as movement. Restricted/unsettled accounts remain separately labelled. |
 | Inventory/COGS | Keep the existing cost-evidence model authoritative until stock valuation, accounting method and adjustment policy are agreed. |
 | Journal timing | Retain both Xero transaction date and retrieval timestamp. Do not turn report-period summary values into transaction-level evidence. |
 
-The connector must surface unmatched revenue, settlement timing, fees netted by payment processors, manual journals, VAT timing, currency differences, duplicate channels and cash-account exclusions as reconciliation differences. A match can support a stated comparison only; it does not certify either source as complete.
+The connector must retain each source’s report date, scope and freshness. Settlement timing, fees netted by payment processors, manual journals, VAT timing, currency differences, duplicate channels and cash-account exclusions are accounting interpretation concerns only if a later feature explicitly requests them; they are not reconciliation differences in this scope.
 
 ## Deterministic demo fixtures and acceptance
 

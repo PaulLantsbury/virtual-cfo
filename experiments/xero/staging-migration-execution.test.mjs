@@ -20,3 +20,7 @@ test('installer keeps credential envelopes browser-inaccessible and mapping read
   for(const table of ['connections','account_directories','mapping_versions','mapping_selections','mapping_audit']) assert.match(sql,new RegExp(`GRANT SELECT ON [^;]*${table}`));
   assert.match(sql,/xero_connection_member_read[\s\S]*store_memberships/);
 });
+
+test('installer prevents an active tenant from being attached to two stores',()=>{
+  assert.match(sql,/CREATE UNIQUE INDEX xero_connections_active_tenant_unique\s+ON xero_v1\.connections \(tenant_id\) WHERE retired_at IS NULL/);
+});

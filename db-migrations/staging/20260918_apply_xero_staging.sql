@@ -50,6 +50,11 @@ CREATE TABLE xero_v1.connections (
  UNIQUE (store_id,tenant_id),
  CHECK (retired_at IS NULL OR retired_at>=created_at)
 );
+-- A tenant may be connected to only one active Night Scout store.  Retiring a
+-- connection frees that tenant for an explicitly new staging connection while
+-- preserving the old mapping/audit provenance.
+CREATE UNIQUE INDEX xero_connections_active_tenant_unique
+ ON xero_v1.connections (tenant_id) WHERE retired_at IS NULL;
 CREATE TABLE xero_v1.account_directories (
  connection_id uuid NOT NULL REFERENCES xero_v1.connections(id),
  retrieved_at timestamptz NOT NULL,

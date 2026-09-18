@@ -14,6 +14,10 @@ CREATE TABLE xero_v1.connections (
  UNIQUE (store_id,tenant_id),
  CHECK (retired_at IS NULL OR retired_at>=created_at)
 );
+-- Prevent the same active Xero tenant from being attached to another Night
+-- Scout store. A retired connection keeps provenance but is not active.
+CREATE UNIQUE INDEX xero_connections_active_tenant_unique
+ ON xero_v1.connections (tenant_id) WHERE retired_at IS NULL;
 CREATE TABLE xero_v1.account_directories (
  connection_id uuid NOT NULL REFERENCES xero_v1.connections(id),
  retrieved_at timestamptz NOT NULL,

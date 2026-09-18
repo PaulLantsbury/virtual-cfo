@@ -18,8 +18,7 @@ import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions"
 import { useSalesReporting } from "@/lib/analytics/useSalesReporting";
 import { SalesReportingPeriod } from "@/components/SalesReportingPeriod";
 import { VerifiedSalesSummary } from "@/components/VerifiedSalesSummary";
-import { CashControlReadiness } from "@/components/CashControlReadiness";
-import { cashControlReadinessFromXeroMerchant } from "@/lib/analytics/cashControlReadiness";
+import { CashControlXeroReadiness } from "@/components/CashControlXeroReadiness";
 import {
   CASH_BALANCE,
   CASH_RUNWAY,
@@ -444,7 +443,7 @@ export default function CashControl() {
       <SalesReportingPeriod reporting={reporting} />
       <VerifiedSalesSummary reporting={reporting} />
 
-      <CashControlReadiness readiness={cashControlReadinessFromXeroMerchant(null, false, CASH_STORE_ID ?? "no-active-store")} />
+      <CashControlXeroReadiness />
 
       <section aria-label="Sample cash model notice" className="rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 px-5 py-4 mb-6">
         <h2 className="font-semibold text-foreground">Actual cash reporting is not connected</h2>

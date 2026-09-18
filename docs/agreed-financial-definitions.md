@@ -59,6 +59,12 @@ Approved by Paul on 8 September 2026 after reviewing all the definitions and rec
 
 Runway is based on actual cash burn, not overheads alone. Available cash must be dated, and the three-month measurement period must be explicit.
 
+## Xero accounting prototype policy — 18 September 2026
+
+Paul approved the Xero prototype policy record in [consolidated-decision-pack-2026-09-18.md](consolidated-decision-pack-2026-09-18.md). Xero accounting performance uses accrual/P&L and shows cash separately. Xero amounts are presented as Xero reports them, without conversion to or blending with Shopify sales figures. Completed periods retain their last supported same-scope snapshot if refresh fails, and later postings require review.
+
+For Cash Control, available cash remains the dated, unrestricted balance of explicitly mapped included bank/payment accounts; transfers between included accounts are excluded from cash movement and unsettled processor funds are presented separately. The first implementation must show incomplete/review rather than infer account eligibility, restrictions, settlement status or a missing balance date. This approval does not change the approved Shopify sales definitions or create reconciliation between Shopify and Xero.
+
 ## Worked acceptance cases
 
 [Financial acceptance cases v1](financial-acceptance-cases.md) translates these approved rules into ten worked examples, with integer-pence fixtures in `tests/fixtures/financial-acceptance-v1.json`. Deferred policy choices are explicitly excluded from asserted outcomes. These examples do not change the approved definitions or the application.

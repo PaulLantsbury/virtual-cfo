@@ -1,6 +1,6 @@
 # Xero merchant credential lifecycle design — 18 September 2026
 
-Status: **design and mock-test plan only.** This document does not authorise a production OAuth application, retention of credentials, database migration, recurrent collection, or access to any merchant data.
+Status: **approved for development/staging prototype implementation.** The design and mock-test plan may now be implemented against local, disposable or verified staging infrastructure. It does not authorise a production OAuth application, production database migration, production recurrent collection, use of real merchant credentials, or access to/display of real merchant financial data.
 
 ## Purpose and boundary
 
@@ -91,6 +91,8 @@ All implementation tests must use in-memory fakes or disposable databases. No te
 4. Add server-only routes and Settings connection states; retain the current local preview as a separate test artefact.
 5. Submit the schema/migration and credential-runtime configuration for a separate live review. Only after approval and configured secret infrastructure may real merchant consent be enabled.
 
-## Open business decisions, kept out of this design
+## Agreed policy inputs and remaining boundaries
 
-This lifecycle does not decide VAT presentation, accounting basis, refund/discount/shipping treatment, cash timing, included cash accounts, processor settlement treatment, financial retention duration or which accounting figures Night Scout may show. Those decisions remain a consolidated product/accounting decision pack and block financial presentation, not the reversible credential architecture above.
+The 18 September prototype approvals in [agreed Xero prototype policies](consolidated-decision-pack-2026-09-18.md) set the accounting basis (accrual/P&L with separate cash), Xero tax presentation (Xero-reported only), closed-period handling, cash-account/unsettled-fund treatment, owner-only mapping authority, append-only mappings, and staging-only retained credential authority. This lifecycle therefore supports only read-only staging collection and must keep Shopify and Xero data independent.
+
+It does not decide financing and one-off cash-flow treatment in burn/runway, foreign-exchange methodology, customer economics, accounting categories outside the initial mapping matrix, or a production credential-retention policy. These remain outside the credential architecture and must be shown as incomplete/review rather than inferred.

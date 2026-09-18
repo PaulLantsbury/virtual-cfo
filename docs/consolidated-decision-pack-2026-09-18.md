@@ -1,23 +1,37 @@
-# Consolidated merchant and accounting decision pack — 18 September 2026
+# Agreed Xero prototype policies — 18 September 2026
 
-This is the single holding pack for decisions that code cannot safely invent. The current Shopify sales definitions remain approved in [agreed-financial-definitions.md](agreed-financial-definitions.md). Shopify sales analysis and Xero accounting analysis remain independent: no matching, reconciliation or variance is proposed here.
+Paul approved the following policies on 18 September 2026. They are Night Scout's prototype contract for the Xero connection, mapping and accounting-reader work. This record supersedes the pending-decision wording previously held here.
 
-## Decisions needed before accounting figures are shown
+The approved Shopify sales definitions remain in [agreed-financial-definitions.md](agreed-financial-definitions.md). Shopify sales analysis and Xero accounting analysis are independent sources: Night Scout must not match, reconcile or calculate variances between them.
 
-| Decision | Why it matters | Options and material implication | Recommended default | Work unblocked |
-| --- | --- | --- | --- | --- |
-| Accounting view basis | Determines the period and meaning of Xero figures. | **Accrual/P&L:** recognised accounting activity by period; **cash basis:** cash receipts/payments; **both:** more complete but needs two clearly separate views. | Start with an accrual P&L view and keep cash separate, matching the approved distinction between profit and cash. | Report-field contract, accounting-period reader and first accounting overview. |
-| Tax presentation | Prevents a misleading blend of VAT-inclusive and VAT-exclusive figures. | **Tax-exclusive**, **tax-inclusive**, or **both** with explicit labels. | Display Xero-reported amounts without converting or blending them with Shopify. Choose tax-exclusive as the primary reporting presentation only if it matches the organisation's accounting reports. | Report normalisation and labels. |
-| Cut-off, freshness and closed-period corrections | Controls whether later postings rewrite historical results. | **Closed completed periods only**, **rolling periods subject to correction**, or **formal close/restate workflow**. | Use completed periods; retain the last supported same-scope snapshot when a refresh fails; require review on a late posting or changed mapping. | Freshness status, snapshot retention and correction workflow. |
-| Included cash accounts and unsettled funds | Defines available cash accurately. | Select named bank/payment accounts; decide whether processor balances are unrestricted cash, separately presented unsettled funds, or excluded. | Apply the already approved definition: unrestricted dated balances only; show unsettled processor funds separately; exclude transfers between included accounts. | Cash-account mapping and cash-control reader. |
-| Mapping authority | Limits who may configure financial classifications. | **Owner only**, **owner plus finance delegates**, or a custom role. | Owner-only for the prototype; add delegated finance roles after audit and invitation controls are in place. | Authorisation rules for mapping confirmation and disconnect. |
-| Effective-date corrections | Determines historic mapping behaviour. | Allow backdating, prohibit it, or allow a controlled restatement workflow. | Append-only mapping versions effective no earlier than the preceding version; treat historic correction as a later explicit restatement workflow. | Merchant mapping confirmation and version-selection rules. |
-| Credential retention and live connection | Needs a live owner authorisation and operational retention choice. | One-time local test only, retained refresh credential for scheduled reads, or connection via a later managed worker. | Retained server-only refresh credential with encrypted envelope, rotation, revocation and owner disconnect, as designed in [the credential lifecycle](xero-merchant-credential-lifecycle-design-2026-09-18.md). | Applied credential store, production-ready OAuth flow and scheduled Xero refresh. |
+## Approved policies
+
+| Policy | Agreed prototype rule | Implementation consequence |
+| --- | --- | --- |
+| Accounting basis | Use accrual/P&L for accounting performance. Show cash separately. | Accounting-reader views must label P&L and cash as different measures and must not infer one from the other. |
+| Xero tax presentation | Use Xero-reported amounts without conversion or blending with Shopify. | Preserve Xero report semantics and labels. Do not apply Shopify VAT normalisation to Xero figures. |
+| Closed periods and corrections | Report completed periods; retain a same-scope supported snapshot after a failed refresh; flag later postings for review. | A failed refresh never creates zeroes or silently replaces evidence. A changed closed period requires a visible review state. |
+| Available cash and unsettled funds | Available cash is dated, unrestricted balances in the owner-confirmed included bank/payment accounts. Exclude transfers between included accounts. Show unsettled processor balances separately, never as available cash. | The Cash Control reader must require an explicit account mapping, dated evidence and a separate unsettled category. It must not treat all Xero accounts or report totals as cash. |
+| Mapping authority | Only the store owner may confirm mappings, reconnect or disconnect for the prototype. | Server-side authorisation derives the actor/store and rejects delegates. A later role-delegation package needs separate invitation/audit controls. |
+| Mapping history | Mapping versions are append-only. Do not backdate mappings. Historic correction will be a later explicit restatement workflow. | A changed account directory or tenant forces review; historical versions remain attributable to their directory snapshot. |
+| Credential retention and scheduled reads | Development/staging may use a retained, server-only encrypted refresh credential for scheduled read-only Xero updates. | Implement the lifecycle in [xero-merchant-credential-lifecycle-design-2026-09-18.md](xero-merchant-credential-lifecycle-design-2026-09-18.md), using a separate credential store and audit trail. No credential or accounting value belongs in mapping records. |
+
+## Authority boundary
+
+The credential-store/database-migration authority applies **only to the development/staging prototype environment**. It does not authorise production database changes, production OAuth activation, production scheduled reads, use of real merchant credentials, or display of real merchant financial figures. Each of those needs Paul's explicit later approval.
+
+This approval permits reversible code, mock/disposable-database tests, schema and migration preparation, and staging-only configuration once its non-production environment is verified. It does not permit connecting the existing local test flow to a merchant tenant.
+
+## Cash methodology
+
+For the prototype, cash control follows the existing approved financial definition: available cash is the total of balances that are both dated and unrestricted at the stated reporting time. The owner selects the included accounts through mapping; Night Scout records that selection and its effective mapping version. Transfers between two included accounts do not count as cash movement. Processor funds still awaiting settlement are labelled **Unsettled funds** and displayed outside available cash. Missing balance dates, unclear restrictions, or unmapped accounts result in incomplete/review status rather than an estimated cash total.
+
+The remaining later policy questions are financing and one-off cash-flow treatment in burn/runway, currency treatment where a merchant has multiple currencies, and any exception to the ordinary processor-settlement distinction. These do not block the prototype reader; they must be surfaced as incomplete/review rather than guessed.
+
+## Work now unblocked
+
+The approved policies unblock a staging/local merchant-facing Xero connection workflow, owner-only mapping confirmation, append-only mapping persistence, a read-only accounting-period reader, and a Cash Control read model. The proposed data shape remains in [xero-mapping-store-proposal-2026-09-18.md](xero-mapping-store-proposal-2026-09-18.md); it must be applied only to a verified non-production environment.
 
 ## Decisions intentionally deferred
 
-Customer-cohort policy, CAC/payback definitions, opportunity scoring thresholds, cash forecast assumptions, treatment of financing and one-off cash flows, and any accounting categories outside the initial mapping matrix remain separate product packages. Their absence does not block the local safety, mapping, evidence or UX work already under way.
-
-## What is safe to complete first
-
-Before these answers, Night Scout can complete credential lifecycle mocks, a value-free mapping API and Settings workflow, account-directory refresh validation, evidence/freshness models, local fixture-based CFO screens, and disposable schema tests. It must not display live accounting totals, persist a real credential, activate scheduled Xero reads, apply a database migration, or make Shopify/Xero comparisons.
+Customer-cohort policy, CAC/payback definitions, opportunity scoring thresholds, cash forecast assumptions, treatment of financing and one-off cash flows, foreign-exchange methodology, and accounting categories outside the initial mapping matrix remain separate product packages. Their absence must not block local safety, mapping, evidence or UX work, but it does block any calculation that depends on them.

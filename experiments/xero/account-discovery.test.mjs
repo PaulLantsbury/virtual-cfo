@@ -26,7 +26,8 @@ test('refuses changed tenant, invalid request values, and upstream failures with
  for(const fetchImpl of [async()=>new Response('secret response',{status:403}),async()=>{throw Error('network secret');},async()=>new Response('not json')])await assert.rejects(discoverXeroAccounts({accessToken,tenantId,pinnedTenantId:tenantId,fetchImpl}),error=>error.message==='Xero account discovery unavailable');
 });
 
-test('rejects malformed account records and duplicate account identities',()=>{
- const invalid=[null,{}, {Accounts:{}},{Accounts:[null]}, {Accounts:[{AccountID:'id',Name:'Name',Type:'REVENUE'}]}, {Accounts:[{AccountID:'id',Name:'Name',Type:'REVENUE',Status:'ACTIVE'},{AccountID:'id',Name:'Other',Type:'EXPENSE',Status:'ACTIVE'}]}];
+test('retains an explicit unavailable status and rejects malformed account records and duplicate account identities',()=>{
+ assert.deepEqual(parseXeroAccountDirectory({Accounts:[{AccountID:'id',Name:'Name',Type:'REVENUE'}]}),[{id:'id',name:'Name',type:'REVENUE',status:'Unavailable'}]);
+ const invalid=[null,{}, {Accounts:{}},{Accounts:[null]}, {Accounts:[{AccountID:'id',Name:'Name'}]}, {Accounts:[{AccountID:'id',Name:'Name',Type:'REVENUE',Status:'ACTIVE'},{AccountID:'id',Name:'Other',Type:'EXPENSE',Status:'ACTIVE'}]}];
  for(const value of invalid)assert.throws(()=>parseXeroAccountDirectory(value),/Xero account discovery unavailable/);
 });

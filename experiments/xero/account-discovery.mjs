@@ -14,8 +14,8 @@ export function parseXeroAccountDirectory(payload){
  const seen=new Set();
  const accounts=payload.Accounts.map(row=>{
   if(!row||typeof row!=='object')unavailable();
-  const id=text(row.AccountID),name=text(row.Name),type=text(row.Type),status=text(row.Status);
-  if(!id||!name||!type||!status||seen.has(id))unavailable();
+  const id=text(row.AccountID),name=text(row.Name),type=text(row.Type),status=text(row.Status)??'Unavailable';
+  if(!id||!name||!type||seen.has(id))unavailable();
   seen.add(id);
   return Object.freeze({id,name,type,status});
  });

@@ -7,7 +7,12 @@ import { rollingReportingScope } from './rolling-reporting-scope.mjs';
 const failure = () => new Error('Explicit trustworthy nightly status evidence is required');
 const DAY = 86_400_000;
 const date = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(`${value}T00:00:00Z`)) && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
-const instant = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value) && Number.isFinite(Date.parse(value));
+const instant = value => {
+  const match = typeof value === 'string' && value.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.\d{1,3})?Z$/);
+  if (!match) return false;
+  const parsed = new Date(value);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 19) === match[1];
+};
 const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 
 function exactObject(value, allowed) {

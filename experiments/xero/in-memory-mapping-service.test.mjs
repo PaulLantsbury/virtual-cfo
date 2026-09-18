@@ -11,7 +11,14 @@ test('directory snapshots are canonical and reject duplicate timestamps or accou
  const reversed=[...accounts].reverse();const first=createInMemoryXeroMappingService({connections:[{id:ids.connectionA,storeId:ids.storeA,tenantId:'tenant-a'}],directories:[{connectionId:ids.connectionA,retrievedAt:'2026-09-18T00:00:00Z',accounts}]}).recordDirectorySnapshot({connectionId:ids.connectionA,retrievedAt:'2026-09-19T00:00:00Z',accounts:reversed});
  const second=createInMemoryXeroMappingService({connections:[{id:ids.connectionA,storeId:ids.storeA,tenantId:'tenant-a'}],directories:[{connectionId:ids.connectionA,retrievedAt:'2026-09-18T00:00:00Z',accounts:reversed}]}).recordDirectorySnapshot({connectionId:ids.connectionA,retrievedAt:'2026-09-19T00:00:00Z',accounts});assert.equal(first.directorySnapshotId,second.directorySnapshotId);
  assert.throws(()=>createInMemoryXeroMappingService({directories:[{connectionId:ids.connectionA,retrievedAt:'2026-09-18T00:00:00Z',accounts},{connectionId:ids.connectionA,retrievedAt:'2026-09-18T00:00:00Z',accounts}]}),/timestamp/);
+ assert.throws(()=>createInMemoryXeroMappingService({directories:[{connectionId:ids.connectionA,retrievedAt:'2026-02-30T00:00:00Z',accounts}]}),/Invalid/);
  assert.throws(()=>createInMemoryXeroMappingService({directories:[{connectionId:ids.connectionA,retrievedAt:'2026-09-18T00:00:00Z',accounts:[...accounts,accounts[0]]}]}),/account/);
+});
+test('directory timestamps normalize equivalent UTC spellings before ordering and duplicate checks',()=>{
+ const s=createInMemoryXeroMappingService({connections:[{id:ids.connectionA,storeId:ids.storeA,tenantId:'tenant-a'}],directories:[{connectionId:ids.connectionA,retrievedAt:'2026-09-18T00:00:00Z',accounts}]});
+ assert.throws(()=>s.recordDirectorySnapshot({connectionId:ids.connectionA,retrievedAt:'2026-09-18T00:00:00.000Z',accounts}),/timestamp/);
+ const snapshot=s.recordDirectorySnapshot({connectionId:ids.connectionA,retrievedAt:'2026-09-18T00:00:00.001Z',accounts});
+ assert.equal(snapshot.retrievedAt,'2026-09-18T00:00:00.001Z');
 });
 test('a newer directory snapshot requires mapping review even when selected accounts still exist',()=>{const s=service();s.confirmMapping({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA,effectiveFrom:'2026-09-18',mapping});s.recordDirectorySnapshot({connectionId:ids.connectionA,retrievedAt:'2026-09-19T00:00:00Z',accounts:[...accounts].reverse()});const current=s.readCurrentMapping({userId:'alice'},{storeId:ids.storeA,connectionId:ids.connectionA,asOf:'2026-09-19'});assert.deepEqual(current.readiness,{available:false,reason:'account_directory_changed'});assert.throws(()=>s.recordDirectorySnapshot({connectionId:ids.connectionA,retrievedAt:'2026-09-19T00:00:00Z',accounts}),/timestamp/);});
 test('mapping history is member-scoped, immutable, chronological and value-free',()=>{

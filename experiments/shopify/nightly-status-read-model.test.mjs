@@ -38,5 +38,7 @@ test('rejects omitted, malformed or untrustworthy inputs rather than presenting 
   assert.throws(() => projectNightlyStatus({ now, timezone: 'Europe/London', historyState: 'available', claim: null }));
   assert.throws(() => projectNightlyStatus(input({ claim: { ...claim(), scheduledAt: '2026-09-19T02:00:00.000Z' } })));
   assert.throws(() => projectNightlyStatus(input({ claim: null, latestAttempt: { ...completed, resultCode: null } })));
+  assert.throws(() => projectNightlyStatus(input({ claim: { ...claim(), scheduledAt: '2026-02-30T01:00:00.000Z' } })));
+  assert.throws(() => projectNightlyStatus(input({ claim: null, latestAttempt: { ...completed, finishedAt: '2026-02-30T01:01:00.000Z' } })));
   assert.throws(() => projectNightlyStatus(input({ historyState: 'unavailable', claim: claim() })));
 });

@@ -2,6 +2,12 @@
 
 Status: **prepared only**. No Xero app, demo company, OAuth credential, organisation connection, data read, write-back, database table, recurring job or deployment has been created.
 
+## Local consent boundary — prepared, not connected
+
+`experiments/xero/read-only-oauth.mjs` now defines the first local OAuth boundary. Its three focused checks pass. It is disabled by default and only accepts the exact callback `http://localhost:3000/xero/callback`; `127.0.0.1`, HTTPS substitutions and arbitrary URLs are rejected. The authorisation request uses Xero’s documented granular read scopes for organisation settings, invoices, payments, bank transactions, manual journals and the four first reports (Profit and Loss, Balance Sheet, Trial Balance and Bank Summary). It deliberately does **not** request `offline_access`, so it cannot create a retained refresh-token connection at this stage.
+
+When the browser callback/runtime is added, the local-only configuration will contain `NIGHT_SCOUT_XERO_ENABLED=true`, the app’s client ID, its client secret, and a randomly generated state-signing key of at least 32 characters. Keep that configuration in an ignored `.local` file with owner-only permissions. Do not paste any of those values into chat, source files, browser settings or Git. The code signs a ten-minute OAuth state and rejects malformed, replaced, wrong-key and expired returns before any token exchange. No callback route, token exchange, tenant read or browser control is enabled by this preparation.
+
 ## Verified current test route
 
 Xero’s documented development route is a free Xero account, its Demo Company and a separate OAuth 2.0 test app. The Demo Company can be connected to an application in the same way as another organisation, but is reset automatically after 28 days and must be reconnected after a reset. A trial organisation is the alternative when a longer-lived, blank ledger or multiple invited users are needed. New test apps created after 2 March 2026 use granular scopes by default. See Xero’s [development-account guidance](https://developer.xero.com/documentation/development-accounts/), [getting-started guide](https://developer.xero.com/documentation/getting-started-guide/) and [current granular-scope FAQ](https://developer.xero.com/faq).

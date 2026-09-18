@@ -23,7 +23,9 @@ This design turns the account-mapping matrix into a safe merchant onboarding cap
 
 ## Current implementation evidence
 
-The local test path now displays a value-free, owner-confirmed mapping matrix and the completed test’s report identity. The reusable readiness check accepts only complete mappings of active directory accounts and returns explicit review reasons for incomplete, missing or inactive selections. It performs no Xero request, writes no mapping, produces no financial values and does not accept Shopify input.
+The local test path now displays a value-free, owner-confirmed mapping matrix and the completed test’s report identity. The reusable readiness check accepts only complete mappings of active directory accounts with suitable account types and returns explicit review reasons for incomplete, missing, inactive or wrong-type selections. It performs no Xero request, writes no mapping, produces no financial values and does not accept Shopify input.
+
+The code also defines a persistence-agnostic immutable mapping-version contract: version ID, Night Scout store ID, pinned Xero tenant ID, effective date, confirmer identity/time and the selected account IDs. It normalises every selection to an account-ID list and refuses raw reports, credentials, financial values, Shopify data or a version outside its exact store/tenant scope. This is preparation only; it does not create a database record or authorise a merchant-facing endpoint.
 
 ## Before a merchant-facing release
 

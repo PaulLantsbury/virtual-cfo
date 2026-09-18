@@ -30,6 +30,25 @@ export type CashControlReadinessView = {
   isRetained: boolean;
 };
 
+/**
+ * Bridges the value-free Xero connection/evidence status into Cash Control.
+ * A ready accounting period is deliberately still insufficient for cash: the
+ * accounting reader must separately provide dated account eligibility and
+ * settlement classification before this adapter can return `ready`.
+ */
+export function cashControlReadinessFromXeroMerchant(
+  readiness: { connection: { status: string; mappingReviewRequired: boolean } | null; evidenceState: string | null } | null,
+  enabled: boolean,
+  storeId: string,
+): CashControlReadinessInput {
+  if (!enabled || !readiness?.connection) return { state: 'not_connected', storeId };
+  if (readiness.connection.status !== 'active' || readiness.connection.mappingReviewRequired) return { state: 'mapping_incomplete', storeId };
+  if (readiness.evidenceState === 'denied') return { state: 'denied', storeId };
+  if (readiness.evidenceState === 'stale') return { state: 'stale', storeId, detail: 'The accounting refresh is stale; a dated cash snapshot still requires an explicit same-store eligibility check.' };
+  if (readiness.evidenceState === 'review_required') return { state: 'review_required', storeId };
+  return { state: 'evidence_incomplete', storeId, detail: 'Accounting readiness alone does not establish a dated, eligible cash balance.' };
+}
+
 const methodology = " Available cash requires dated, unrestricted balances from owner-confirmed included bank or payment accounts. Unsettled processor funds stay separate and transfers between included accounts are excluded from cash movement.";
 const timestamp = (value: string | null | undefined) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value) && Number.isFinite(Date.parse(value));
 

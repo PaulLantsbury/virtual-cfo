@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cashControlReadinessView } from './cashControlReadiness.ts';
+import { cashControlReadinessFromXeroMerchant, cashControlReadinessView } from './cashControlReadiness.ts';
 
 test('Cash Control never treats an incomplete mapping or missing evidence as a zero cash balance', () => {
   for (const state of ['not_connected', 'mapping_incomplete', 'evidence_incomplete', 'review_required', 'denied'] as const) {
@@ -35,4 +35,15 @@ test('actual or retained cash requires a valid dated balance and unknown state f
     { state: 'stale' as const, storeId: 'store-a', retainedStoreId: 'store-a', asOf: 'not-a-date' },
     { state: 'unknown' as any, storeId: 'store-a' },
   ]) assert.equal(cashControlReadinessView(input).canShowActualCash, false);
+});
+
+test('Xero accounting readiness cannot by itself unlock a cash figure', () => {
+  const connection = { status: 'active', mappingReviewRequired: false };
+  for (const evidenceState of ['checking', 'ready', 'unavailable', null]) {
+    const readiness = cashControlReadinessFromXeroMerchant({ connection, evidenceState }, true, 'store-a');
+    assert.equal(readiness.state, 'evidence_incomplete');
+    assert.equal(cashControlReadinessView(readiness).canShowActualCash, false);
+  }
+  assert.equal(cashControlReadinessFromXeroMerchant({ connection, evidenceState: 'denied' }, true, 'store-a').state, 'denied');
+  assert.equal(cashControlReadinessFromXeroMerchant({ connection, evidenceState: 'ready' }, false, 'store-a').state, 'not_connected');
 });

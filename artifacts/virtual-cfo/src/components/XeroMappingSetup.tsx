@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { xeroMerchantSetupState } from '@/lib/xeroMerchantConnection';
+import { xeroMerchantReadinessView } from '@/lib/xeroMerchantReadiness';
 
 const labels: Record<string, string> = { revenue: 'Booked revenue', processingFee: 'Processing fees', advertising: 'Advertising', software: 'Software', includedCash: 'Included cash' };
 type Account = { id: string; name: string; type: string; status: string };
@@ -33,6 +34,10 @@ export function XeroMappingSetup() {
         : 'The local test mapping preview is unavailable. No Xero connection or mapping is assumed.';
 
   const merchantSetup=xeroMerchantSetupState(null,false);
+  // A server-provided, value-free staging readiness view will be passed here
+  // only after the authenticated endpoint is enabled. Do not infer readiness
+  // from this local preview or expose its account values in the browser.
+  const merchantReadiness=xeroMerchantReadinessView(null,false);
   return <section aria-labelledby="xero-mapping-heading" className="space-y-5 rounded-2xl border bg-card p-6 sm:p-8">
     <div>
       <h2 id="xero-mapping-heading" className="text-xl font-semibold">Xero account mapping</h2>
@@ -58,6 +63,10 @@ export function XeroMappingSetup() {
     <div className="rounded-lg border bg-muted/30 p-4" aria-live="polite">
       <h3 className="font-medium">{merchantSetup.title}</h3>
       <p className="mt-1 text-sm text-muted-foreground">{merchantSetup.detail}</p>
+    </div>
+    <div className="rounded-lg border bg-muted/30 p-4" aria-live="polite">
+      <h3 className="font-medium">{merchantReadiness.title}</h3>
+      <p className="mt-1 text-sm text-muted-foreground">{merchantReadiness.detail}</p>
     </div>
   </section>;
 }

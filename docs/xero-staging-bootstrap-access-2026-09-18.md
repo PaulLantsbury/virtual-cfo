@@ -1,6 +1,8 @@
 # Staging Xero initial-connection bootstrap capability
 
-Status: reviewed staging-only migration; requires manual application by the staging migration owner.
+Status: applied and verified in Night Scout Staging on 24 September 2026.
+
+Paul applied the reviewed migration in Supabase project `bioalckltvkhlczusdvl`. The consolidated post-application verification returned `true` for all eight checks: safe attributes for both service logins, null/disabled bootstrap password, zero bootstrap memberships, unchanged worker membership, zero Xero table grants, exactly one bootstrap RPC, exactly four worker RPCs, and zero bootstrap-owned objects. The function catalog also showed `SECURITY DEFINER`, owner `postgres`, fixed `search_path=pg_catalog, xero_v1`, and an ACL granting execution only to the bootstrap login. The bootstrap role remains inert until a password is provisioned through the staging administration channel.
 
 The scheduled reader remains `night_scout_import_login`, which has only four refresh/evidence RPCs. It cannot create a connection or write mapping records. `20260918_grant_xero_bootstrap_access.sql` adds a **separate**, no-inheritance, one-connection login named `night_scout_xero_bootstrap_login`. It has no Xero table grants and its only Xero routine grant is `xero_v1.bootstrap_create_initial_connection`.
 

@@ -41,7 +41,7 @@ export function readStagingXeroWorkerConfig(env={}){
   };
   const mapping=typeof config.mappingJson==='string'&&config.mappingJson.length<=4096?validateXeroAccountMapping(JSON.parse(config.mappingJson)):null;
   if(!mapping||!uuid(config.connectionId)||!uuid(config.mappingVersionId)||!date(config.from)||!date(config.to)||config.from>config.to||(Date.parse(config.to)-Date.parse(config.from))/86400000>=31||config.currency!=='GBP'||!database(config.databaseUrl)||typeof config.caPem!=='string'||config.caPem.length<100||config.caPem.length>32768||!text(config.clientId,20,256)||!text(config.clientSecret,24,2048)||!text(config.envelopeKey,32,512)||!text(config.envelopeKeyVersion,1,128))throw unavailable();
-  return Object.freeze({connectionId:config.connectionId,mappingVersionId:config.mappingVersionId,mapping,scope:Object.freeze({from:config.from,to:config.to,currency:config.currency}),projectRef:INTAKE_TARGET.projectRef});
+  return Object.freeze({connectionId:config.connectionId,mappingVersionId:config.mappingVersionId,mapping,envelopeKeyVersion:config.envelopeKeyVersion,scope:Object.freeze({from:config.from,to:config.to,currency:config.currency}),projectRef:INTAKE_TARGET.projectRef});
  } catch { throw unavailable(); }
 }
 /**

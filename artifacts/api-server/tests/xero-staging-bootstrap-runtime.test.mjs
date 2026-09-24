@@ -1,0 +1,29 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createXeroStagingBootstrapRuntime,readXeroStagingBootstrapConfig} from '../src/lib/xero-staging-bootstrap-runtime.ts';
+
+const owner='11111111-1111-4111-8111-111111111111',store='22222222-2222-4222-8222-222222222222';
+const tenant='33333333-3333-4333-8333-333333333333';
+const ids={revenue:'400',processingFee:'404',advertising:'410',software:'420',includedCash:'090'};
+function environment(overrides={}){return {
+ NIGHT_SCOUT_XERO_STAGING_BOOTSTRAP_ENABLED:'true',NIGHT_SCOUT_RUNTIME_ENV:'staging',NIGHT_SCOUT_XERO_STAGING_PROJECT_REF:'bioalckltvkhlczusdvl',
+ NIGHT_SCOUT_XERO_CLIENT_ID:'44444444-4444-4444-8444-444444444444',NIGHT_SCOUT_XERO_CLIENT_SECRET:'s'.repeat(32),
+ NIGHT_SCOUT_REVIEW_AUTH_URL:'https://bioalckltvkhlczusdvl.supabase.co',NIGHT_SCOUT_REVIEW_PUBLIC_KEY:'public-key-material-value',
+ NIGHT_SCOUT_XERO_BOOTSTRAP_DATABASE_URL:'postgresql://night_scout_xero_bootstrap_login:secret@db.bioalckltvkhlczusdvl.supabase.co:5432/postgres',
+ NIGHT_SCOUT_STAGING_CA_PEM:'-----BEGIN CERTIFICATE-----\nTEST\n-----END CERTIFICATE-----',NIGHT_SCOUT_XERO_STAGING_OWNER_ID:owner,NIGHT_SCOUT_XERO_STAGING_STORE_ID:store,
+ NIGHT_SCOUT_XERO_STAGING_TENANT_ID:tenant,NIGHT_SCOUT_XERO_STATE_KEY:'k'.repeat(32),NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY:'m'.repeat(32),NIGHT_SCOUT_XERO_ENVELOPE_KEY_VERSION:'staging-v1',
+ NIGHT_SCOUT_XERO_REDIRECT_URI:'https://night-scout-xero-staging.replit.app/api/xero/staging/callback',NIGHT_SCOUT_XERO_MAPPING_EFFECTIVE_FROM:'2026-09-24',NIGHT_SCOUT_XERO_STAGING_MAPPING_JSON:JSON.stringify(Object.fromEntries(Object.entries(ids).map(([key,value])=>[key,[value]]))),...overrides};}
+
+test('bootstrap config is disabled by default and fails closed outside exact staging boundary',()=>{assert.equal(readXeroStagingBootstrapConfig({}),undefined);assert.throws(()=>readXeroStagingBootstrapConfig(environment({NIGHT_SCOUT_RUNTIME_ENV:'production'})),/unavailable/);assert.throws(()=>readXeroStagingBootstrapConfig(environment({NIGHT_SCOUT_XERO_BOOTSTRAP_DATABASE_URL:'postgresql://night_scout_xero_bootstrap_login:x@other.example/postgres'})),/unavailable/);});
+
+test('runtime binds owner state, provider tenant, envelope and caller UUID into one RPC',async()=>{const calls=[];let ended=false;const responses=[
+ new Response(JSON.stringify({access_token:'a'.repeat(24),refresh_token:'r'.repeat(32)}),{status:200}),
+ new Response(JSON.stringify([{tenantId:tenant}]),{status:200}),
+ new Response(JSON.stringify({Accounts:Object.entries(ids).map(([name,AccountID])=>({AccountID,Name:name,Type:'EXPENSE',Status:'ACTIVE'}))}),{status:200}),
+];
+ const runtime=createXeroStagingBootstrapRuntime(environment(),{now:()=>1_000,fetchImpl:async(url,options)=>{calls.push({url:String(url),options});return responses.shift();},createAuthClient:()=>({auth:{getUser:async token=>token==='owner-token'?{data:{user:{id:owner}},error:null}:{data:{user:null},error:{message:'bad'}}}}),createPool:()=>({query:async(sql,values)=>{calls.push({sql,values});return {rows:[{connection_id:values[0]}]};},end:async()=>{ended=true;}})});
+ assert.ok(runtime);await assert.rejects(runtime.authenticate('Bearer wrong'),/unavailable/);const principal=await runtime.authenticate('Bearer owner-token');const started=await runtime.service.start(principal);const state=new URL(started.url).searchParams.get('state');assert.ok(state);const receipt=await runtime.service.complete({state,code:'c'.repeat(24)});assert.equal(receipt.status,'connected');
+ const db=calls.find(call=>call.sql);assert.match(db.sql,/bootstrap_create_initial_connection\(\$1,\$2/);assert.equal(db.values[1],store);assert.equal(db.values[2],tenant);assert.equal(db.values[3],owner);assert.equal(db.values[10],'staging-v1');assert.equal(db.values[11],'AES-256-GCM');assert.ok(Buffer.isBuffer(db.values[8]));assert.ok(Buffer.isBuffer(db.values[9]));await assert.rejects(runtime.service.complete({state,code:'c'.repeat(24)}),/unavailable/);await runtime.close();assert.equal(ended,true);
+});
+
+test('tenant mismatch consumes state and never reaches persistence',async()=>{let queries=0;const runtime=createXeroStagingBootstrapRuntime(environment(),{fetchImpl:async url=>String(url).includes('/connect/token')?new Response(JSON.stringify({access_token:'a'.repeat(24),refresh_token:'r'.repeat(32)}),{status:200}):new Response(JSON.stringify([{tenantId:'55555555-5555-4555-8555-555555555555'}]),{status:200}),createAuthClient:()=>({auth:{getUser:async()=>({data:{user:{id:owner}},error:null})}}),createPool:()=>({query:async()=>{queries++;return {rows:[]};},end:async()=>{}})});const principal=await runtime.authenticate('Bearer owner-token'),state=new URL((await runtime.service.start(principal)).url).searchParams.get('state');await assert.rejects(runtime.service.complete({state,code:'c'.repeat(24)}),/unavailable/);assert.equal(queries,0);await runtime.close();});

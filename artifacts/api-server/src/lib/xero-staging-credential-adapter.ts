@@ -8,8 +8,9 @@ export type RefreshFailure='invalid_grant'|'provider_unavailable'|'refresh_faile
 const algorithm='AES-256-GCM' as const, reasons=new Set<RefreshFailure>(['invalid_grant','provider_unavailable','refresh_failed','scope_changed','tenant_unavailable']);
 const fail=()=>Error('Xero staging credential unavailable');
 const validId=(v:unknown):v is string=>typeof v==='string'&&v.length>0&&v.length<=200;
+const validKeyVersion=(v:unknown):v is string=>typeof v==='string'&&/^[A-Za-z0-9._-]{1,128}$/.test(v);
 const validVersion=(v:unknown):v is number=>Number.isInteger(v)&&(v as number)>0;
-function context(connectionId:string,tenantId:string,keyVersion:string){if(!validId(connectionId)||!validId(tenantId)||!validId(keyVersion))throw fail();return Buffer.from(`night-scout/xero/staging/v1|${connectionId}|${tenantId}|${keyVersion}`);}
+function context(connectionId:string,tenantId:string,keyVersion:string){if(!validId(connectionId)||!validId(tenantId)||!validKeyVersion(keyVersion))throw fail();return Buffer.from(`night-scout/xero/staging/v1|${connectionId}|${tenantId}|${keyVersion}`);}
 function packed(nonce:Buffer,tag:Buffer,body:Buffer){return Buffer.concat([Buffer.from([1]),nonce,tag,body]);}
 function unpacket(payload:Buffer){if(payload.length<30||payload[0]!==1)throw fail();return {nonce:payload.subarray(1,13),tag:payload.subarray(13,29),body:payload.subarray(29)};}
 function seal(key:Buffer,plain:Buffer,aad:Buffer){const nonce=randomBytes(12),cipher=createCipheriv('aes-256-gcm',key,nonce,{authTagLength:16});cipher.setAAD(aad);const body=Buffer.concat([cipher.update(plain),cipher.final()]);return packed(nonce,cipher.getAuthTag(),body);}
@@ -17,9 +18,9 @@ function open(key:Buffer,payload:Buffer,aad:Buffer){const {nonce,tag,body}=unpac
 function bytea(v:unknown):Buffer|null{if(Buffer.isBuffer(v))return Buffer.from(v);if(v instanceof Uint8Array)return Buffer.from(v);if(typeof v==='string'&&/^\\x[0-9a-f]*$/i.test(v)&&v.length%2===0)return Buffer.from(v.slice(2),'hex');return null;}
 
 export function createXeroEnvelopeCrypto(masterMaterial:string|Buffer,keyVersion='staging-v1'){
- const input=typeof masterMaterial==='string'?Buffer.from(masterMaterial):Buffer.from(masterMaterial);if(input.length<32||!validId(keyVersion))throw fail();const kek=createHash('sha256').update(input).digest();
+ const input=typeof masterMaterial==='string'?Buffer.from(masterMaterial):Buffer.from(masterMaterial);if(input.length<32||!validKeyVersion(keyVersion))throw fail();const kek=createHash('sha256').update(input).digest();
  return Object.freeze({
-  encrypt(connectionId:string,tenantId:string,refreshToken:string):XeroEnvelope{if(!validId(refreshToken)||Buffer.byteLength(refreshToken)>8192)throw fail();const aad=context(connectionId,tenantId,keyVersion),dek=randomBytes(32);try{return Object.freeze({ciphertext:seal(dek,Buffer.from(refreshToken),aad),encryptedDek:seal(kek,dek,aad),keyVersion,algorithm});}finally{dek.fill(0);}},
+  encrypt(connectionId:string,tenantId:string,refreshToken:string):XeroEnvelope{if(typeof refreshToken!=='string'||refreshToken.length<16||Buffer.byteLength(refreshToken)>8192)throw fail();const aad=context(connectionId,tenantId,keyVersion),dek=randomBytes(32);try{return Object.freeze({ciphertext:seal(dek,Buffer.from(refreshToken),aad),encryptedDek:seal(kek,dek,aad),keyVersion,algorithm});}finally{dek.fill(0);}},
   decrypt(input:XeroEnvelope&{connectionId:string;tenantId:string}):string{if(input.algorithm!==algorithm||input.keyVersion!==keyVersion)throw fail();let dek:Buffer|undefined;try{const aad=context(input.connectionId,input.tenantId,input.keyVersion);dek=open(kek,input.encryptedDek,aad);if(dek.length!==32)throw fail();const plain=open(dek,input.ciphertext,aad);if(!plain.length||plain.length>8192)throw fail();return plain.toString('utf8');}catch{throw fail();}finally{dek?.fill(0);}}
  });
 }

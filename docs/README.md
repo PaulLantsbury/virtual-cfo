@@ -2,6 +2,8 @@
 
 # Night Scout — current starting point, 17 September 2026
 
+- [Xero staging connection-bound bootstrap](xero-staging-connection-bound-bootstrap-2026-09-24.md) — verified least-privilege migration plus owner-only non-retained discovery, same-origin hosted Settings flow, pinned session-pooler support and final retained-bootstrap runbook; production remains untouched.
+
 - [Customer identifier package: applied and live-verified](customer-identity-package-2026-09-17.md) — 22 preparation checks passed; one live observation and unchanged replay verified, financial evidence unchanged.
 - [Independent customer identifier review](customer-identity-review-2026-09-17.md)
 

@@ -2,6 +2,7 @@ import {createApp} from "./app";
 import {startReviewRuntime} from "./lib/review-startup";
 import { logger } from "./lib/logger";
 import {createXeroStagingBootstrapRuntime} from './lib/xero-staging-bootstrap-runtime';
+import {resolve} from 'node:path';
 
 const rawPort = process.env["PORT"];
 
@@ -31,7 +32,8 @@ try{xeroBootstrap=createXeroStagingBootstrapRuntime(process.env);}catch{
   await runtime?.close();
   process.exit(1);
 }
-const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined);
+const webRoot=process.env.NIGHT_SCOUT_RUNTIME_ENV==='staging'?resolve(process.cwd(),'artifacts/virtual-cfo/dist/public'):undefined;
+const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined,webRoot);
 const server=app.listen(port, localBind ?? "0.0.0.0", (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");

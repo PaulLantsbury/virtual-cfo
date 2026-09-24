@@ -10,7 +10,9 @@ export type XeroBootstrapIdentity=Readonly<{userId:string;isOwner:boolean}>;
 export type XeroBootstrapAuthenticator=(authorization:string)=>Promise<XeroBootstrapIdentity>|XeroBootstrapIdentity;
 export type XeroBootstrapService=Readonly<{
  start(identity:XeroBootstrapIdentity):Promise<Readonly<{url:string}>>|Readonly<{url:string}>;
+ startDiscovery(identity:XeroBootstrapIdentity):Promise<Readonly<{url:string}>>|Readonly<{url:string}>;
  complete(input:Readonly<{state:string;code:string}>):Promise<unknown>|unknown;
+ readDiscovery(identity:XeroBootstrapIdentity,handle:string):Promise<unknown>|unknown;
 }>;
 export type XeroBootstrapRouterDependencies=Readonly<{service?:XeroBootstrapService;authenticate?:XeroBootstrapAuthenticator}>;
 const bearer=(value:unknown):value is string=>typeof value==='string'&&value.length<=8192&&/^Bearer [^\s,]+$/i.test(value);
@@ -39,11 +41,20 @@ export function createXeroStagingBootstrapRouter(dependencies:XeroBootstrapRoute
   const principal=await owner(req.headers.authorization);if(!principal){res.status(401).json({error:'Xero bootstrap sign-in required'});return;}
   try { const result=await service!.start(principal);if(typeof result?.url!=='string'||result.url.length>8192||!result.url.startsWith('https://login.xero.com/'))throw Error('Xero bootstrap unavailable');res.status(200).json({url:result.url}); } catch(error){safe(error,res);}
  });
+ router.post('/discover',async(req,res)=>{
+  const principal=await owner(req.headers.authorization);if(!principal){res.status(401).json({error:'Xero bootstrap sign-in required'});return;}
+  try { const result=await service!.startDiscovery(principal);if(typeof result?.url!=='string'||result.url.length>8192||!result.url.startsWith('https://login.xero.com/'))throw Error('Xero bootstrap unavailable');res.status(200).json({url:result.url}); } catch(error){safe(error,res);}
+ });
+ router.get('/discovery/:handle',async(req,res)=>{
+  const principal=await owner(req.headers.authorization);if(!principal){res.status(401).json({error:'Xero bootstrap sign-in required'});return;}
+  if(!state(req.params.handle)){res.status(400).json({error:'Xero staging connection unavailable'});return;}
+  try { res.status(200).json(await service!.readDiscovery(principal,req.params.handle)); } catch(error){safe(error,res);}
+ });
  router.get('/callback',async(req,res)=>{
   const query=req.query as Record<string,unknown>;
   const input=query!==null&&typeof query==='object'&&!Array.isArray(query)&&Object.keys(query).length===2&&state(query.state)&&code(query.code)?{state:query.state,code:query.code}:null;
   if(!input){res.status(400).type('text/plain').send('Xero authorisation unavailable');return;}
-  try { const result=await service!.complete(Object.freeze(input));res.status(200).type('text/plain').send((result as any)?.status==='connected'?'Xero connected. You can close this window.':'Xero staging connection unavailable'); } catch(error){safe(error,res);}
+  try { const result:any=await service!.complete(Object.freeze(input));if(result?.status==='received'&&state(result?.handle)){res.redirect(303,`/settings?xeroDiscovery=${encodeURIComponent(result.handle)}`);return;}res.status(200).type('text/plain').send('Xero authorisation received. You can close this window.'); } catch(error){safe(error,res);}
  });
  const parserErrors:ErrorRequestHandler=(error,_req,res,_next)=>res.status(error?.type==='entity.too.large'?413:400).json({error:error?.type==='entity.too.large'?'Xero authorisation unavailable':'Invalid JSON request'});
  router.use(parserErrors);

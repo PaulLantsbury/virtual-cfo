@@ -4,6 +4,35 @@
 
 # Restart sprint — Reliable Night Scout baseline
 
+## Xero staging discovery and hosted bootstrap preparation — 24 September 2026
+
+Added a staging-only, owner-authenticated discovery consent before the retained
+Xero bootstrap. Discovery requests only `accounting.settings.read`, consumes a
+hashed one-time state, returns an opaque one-time handle, and exposes only a
+bounded test-tenant/account directory to the authenticated Settings page. It
+does not construct a database pool, encrypt or retain credentials, or trust its
+result as final-bootstrap authority. A second retained consent still re-reads
+and validates the pinned tenant and owner-confirmed active mapping before the
+atomic RPC.
+
+The single-instance Reserved VM staging artifact now builds and serves the Virtual CFO SPA and API
+on one origin, supports only the fixed staging direct endpoint or verified
+Supabase session pooler for the dedicated bootstrap login, and rejects the
+transaction pooler, alternate projects and role crossover. Provider reads have
+ten-second timeouts and streaming response bounds. Final RPC payloads retain
+the exact four-key directory contract. An independent synthetic acceptance
+test covers database-bound context, fenced credential lease/rotation, all five
+report reads and supported evidence persistence without retaining tokens or raw
+reports.
+
+Validation: 186 API/Xero/worker tests passed; frontend TypeScript passed; the
+combined hosted SPA/API build passed with the existing bundle-size and tooltip
+sourcemap warnings. Independent security re-review is recorded separately
+before publication. No production access, production release, live Xero call
+or database mutation was made by this package. Next live step is one single-instance staging
+publication and owner discovery consent, followed by owner mapping confirmation
+and the separate final retained consent.
+
 ## Nightly reliability, calculation acceptance and CFO specification
 
 Paul agreed **one refresh overnight at 02:00 in each store’s local timezone**, retaining previously supported figures after a failed collection and flagging uncertain freshness. The agreed implementation sequence is reliable source collection → reconciled site-wide figures → evidence-backed CFO advice. Richer customer analysis and merchant onboarding do not block core reliability. Documentation is updated automatically and routine package code/tests/docs are saved to the existing GitHub development branch; private data remains excluded.

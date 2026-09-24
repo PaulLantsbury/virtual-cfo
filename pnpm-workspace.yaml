@@ -1,6 +1,7 @@
 packages:
   - artifacts/*
   - lib/*
+  - '!lib/api-spec'
   - lib/integrations/*
   - scripts
 

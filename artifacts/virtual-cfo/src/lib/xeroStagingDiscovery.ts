@@ -14,9 +14,19 @@ export type XeroDiscoveryAccount = Readonly<{
 export type XeroDiscovery = Readonly<{
   handle: string;
   status: 'pending' | 'ready';
+  selectionHandle?: string;
   tenant?: Readonly<{ id: string; name: string }>;
   accounts?: readonly XeroDiscoveryAccount[];
 }>;
+
+export const XERO_MAPPING_CATEGORIES = ['revenue', 'processingFee', 'advertising', 'software', 'includedCash'] as const;
+export type XeroMappingCategory = typeof XERO_MAPPING_CATEGORIES[number];
+export type XeroBootstrapMapping = Readonly<Record<XeroMappingCategory, readonly string[]>>;
+export type XeroBootstrapSelection = Readonly<{selectionHandle:string;effectiveFrom:string;mapping:XeroBootstrapMapping}>;
+const ALLOWED_TYPES: Readonly<Record<XeroMappingCategory, ReadonlySet<string>>> = Object.freeze({
+  revenue: new Set(['REVENUE', 'SALES']), processingFee: new Set(['OVERHEADS', 'EXPENSE']),
+  advertising: new Set(['OVERHEADS', 'EXPENSE']), software: new Set(['OVERHEADS', 'EXPENSE']), includedCash: new Set(['BANK']),
+});
 
 const plain = (value: unknown): value is Record<string, unknown> => value !== null
   && typeof value === 'object'
@@ -35,13 +45,13 @@ export function parseXeroDiscoveryStart(value: unknown): Readonly<{ url: string 
 
 export function parseXeroDiscovery(value: unknown, expectedHandle: string): XeroDiscovery | null {
   if (!HANDLE.test(expectedHandle) || !plain(value)) return null;
-  if (Object.keys(value).some(key => !['handle', 'status', 'tenant', 'accounts'].includes(key))) return null;
+  if (Object.keys(value).some(key => !['handle', 'status', 'selectionHandle', 'tenant', 'accounts'].includes(key))) return null;
   if (value.handle !== expectedHandle || (value.status !== 'pending' && value.status !== 'ready')) return null;
   if (value.status === 'pending') {
-    if ('tenant' in value || 'accounts' in value) return null;
+    if ('selectionHandle' in value || 'tenant' in value || 'accounts' in value) return null;
     return Object.freeze({ handle: expectedHandle, status: 'pending' });
   }
-  if (!plain(value.tenant) || Object.keys(value.tenant).some(key => !['id', 'name'].includes(key))
+  if (!HANDLE.test(String(value.selectionHandle)) || !plain(value.tenant) || Object.keys(value.tenant).some(key => !['id', 'name'].includes(key))
     || !UUID.test(String(value.tenant.id)) || !text(value.tenant.name, 256) || !Array.isArray(value.accounts)
     || value.accounts.length > 500) return null;
   const accounts: XeroDiscoveryAccount[] = [];
@@ -54,9 +64,39 @@ export function parseXeroDiscovery(value: unknown, expectedHandle: string): Xero
   return Object.freeze({
     handle: expectedHandle,
     status: 'ready',
+    selectionHandle: String(value.selectionHandle),
     tenant: Object.freeze({ id: String(value.tenant.id), name: value.tenant.name }),
     accounts: Object.freeze(accounts),
   });
+}
+
+function day(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.valueOf()) && date.toISOString().slice(0, 10) === value
+    && value >= '2000-01-01' && value <= new Date().toISOString().slice(0, 10);
+}
+
+export function accountCanMapTo(account: XeroDiscoveryAccount, category: XeroMappingCategory): boolean {
+  return account.status === 'ACTIVE' && ALLOWED_TYPES[category].has(account.type);
+}
+
+export function validateXeroBootstrapSelection(discovery: XeroDiscovery, effectiveFrom: string, mapping: Record<XeroMappingCategory, readonly string[]>): XeroBootstrapSelection | null {
+  if (discovery.status !== 'ready' || !HANDLE.test(discovery.selectionHandle ?? '') || !discovery.accounts || !day(effectiveFrom)) return null;
+  const directory = new Map(discovery.accounts.map(account => [account.id, account]));
+  const used = new Set<string>();
+  const result = {} as Record<XeroMappingCategory, readonly string[]>;
+  for (const category of XERO_MAPPING_CATEGORIES) {
+    const ids = mapping[category];
+    if (!Array.isArray(ids) || ids.length < 1 || ids.length > 20 || new Set(ids).size !== ids.length) return null;
+    for (const id of ids) {
+      const account = directory.get(id);
+      if (!account || used.has(id) || !accountCanMapTo(account, category)) return null;
+      used.add(id);
+    }
+    result[category] = Object.freeze([...ids]);
+  }
+  return Object.freeze({ selectionHandle: discovery.selectionHandle!, effectiveFrom, mapping: Object.freeze(result) });
 }
 
 function bearer(accessToken: string): Record<string, string> {
@@ -82,5 +122,17 @@ export async function fetchXeroStagingDiscovery(handle: string, accessToken: str
   if (!response.ok) throw Error(response.status === 401 || response.status === 403 ? 'Xero discovery owner sign-in required' : 'Xero discovery unavailable');
   const parsed = parseXeroDiscovery(await response.json(), handle);
   if (!parsed) throw Error('Xero discovery unavailable');
+  return parsed;
+}
+
+export async function startXeroStagingBootstrap(selection: XeroBootstrapSelection, accessToken: string, fetcher: Fetcher = fetch): Promise<Readonly<{url:string}>> {
+  if (!HANDLE.test(selection.selectionHandle) || !day(selection.effectiveFrom)) throw Error('Xero mapping is incomplete');
+  const response = await fetcher('/api/xero/staging/connect', {
+    method: 'POST', credentials: 'include', cache: 'no-store',
+    headers: { ...bearer(accessToken), 'content-type': 'application/json' }, body: JSON.stringify(selection),
+  });
+  if (!response.ok) throw Error(response.status === 401 || response.status === 403 ? 'Xero connection owner sign-in required' : 'Xero connection unavailable');
+  const parsed = parseXeroDiscoveryStart(await response.json());
+  if (!parsed) throw Error('Xero connection unavailable');
   return parsed;
 }

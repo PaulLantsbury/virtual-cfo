@@ -20,7 +20,7 @@ const tenant=/^[0-9a-f-]{20,}$/i;
 const canonical=/^[A-Za-z0-9._-]{1,128}$/;
 const unavailable=()=>Error('Xero bootstrap unavailable');
 const expiredSelection=()=>Error('Xero bootstrap selection expired');
-type BootstrapDiagnostic=Readonly<{event:'xero_staging_bootstrap_failed';phase:'selection'|'db_connect'|'db_identity';reason:'missing_or_expired'|'invalid'|'unavailable'|'mismatch'}>;
+type BootstrapDiagnostic=Readonly<{event:'xero_staging_bootstrap_failed';phase:'config'|'selection'|'db_connect'|'db_identity';reason:'missing_or_expired'|'invalid'|'unavailable'|'mismatch'}>;
 type Mapping=Readonly<Record<(typeof categories)[number],readonly string[]>>;
 type Binding=Readonly<{phase:'bootstrap';userId:string;storeId:string;expectedTenantId:string;effectiveFrom:string;mapping:Mapping;expectedScopes:readonly string[];expires:number}>|Readonly<{phase:'discovery';userId:string;expectedScopes:readonly string[];expires:number}>;
 type Account=Readonly<{accountId:string;accountCode:string|null;accountName:string;accountType:string;accountStatus:string}>;
@@ -59,9 +59,10 @@ export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fe
   const userId=data?.user?.id;if(error||typeof userId!=='string'||userId!==config.ownerId)throw unavailable();
   return Object.freeze({userId,isOwner:true});
  };
- const service:XeroBootstrapService=Object.freeze({
+  const service:XeroBootstrapService=Object.freeze({
   async start(identity:XeroBootstrapIdentity,input){
-   if(!config.bootstrapReady||!identity.isOwner||identity.userId!==config.ownerId)throw unavailable();
+   if(!config.bootstrapReady){report('config','unavailable');throw unavailable();}
+   if(!identity.isOwner||identity.userId!==config.ownerId)throw unavailable();
    const selectionKey=digest(input.selectionHandle),selection=selections.get(selectionKey);selections.delete(selectionKey);prune(selections,now());
    if(!selection||selection.expires<now()||selection.userId!==identity.userId){report('selection','missing_or_expired');throw expiredSelection();}
    if(!validDay(input.effectiveFrom,now())){report('selection','invalid');throw unavailable();}

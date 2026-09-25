@@ -1,0 +1,47 @@
+services:
+  - type: web
+    runtime: node
+    name: night-scout-xero-staging
+    repo: https://github.com/PaulLantsbury/virtual-cfo.git
+    branch: codex/restart-baseline
+    region: frankfurt
+    plan: 0.5c-512mb
+    numInstances: 1
+    autoDeployTrigger: 'off'
+    healthCheckPath: /api/healthz
+    buildCommand: corepack enable && corepack prepare pnpm@10.26.1 --activate && node artifacts/api-server/build-hosted.mjs
+    startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: NODE_VERSION
+        value: 24.21.0
+      - key: NODE_ENV
+        value: production
+      - key: NIGHT_SCOUT_RUNTIME_ENV
+        value: staging
+      - key: NIGHT_SCOUT_XERO_STAGING_BOOTSTRAP_ENABLED
+        value: 'true'
+      - key: NIGHT_SCOUT_XERO_STAGING_PROJECT_REF
+        value: bioalckltvkhlczusdvl
+      - key: NIGHT_SCOUT_XERO_REDIRECT_URI
+        value: https://night-scout-xero-staging.onrender.com/api/xero/staging/callback
+      - key: VITE_SUPABASE_URL
+        value: https://bioalckltvkhlczusdvl.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: NIGHT_SCOUT_XERO_CLIENT_ID
+        sync: false
+      - key: NIGHT_SCOUT_XERO_CLIENT_SECRET
+        sync: false
+      - key: NIGHT_SCOUT_XERO_STAGING_OWNER_ID
+        sync: false
+      - key: NIGHT_SCOUT_XERO_STAGING_STORE_ID
+        sync: false
+      - key: NIGHT_SCOUT_XERO_BOOTSTRAP_DATABASE_URL
+        sync: false
+      - key: NIGHT_SCOUT_STAGING_CA_PEM
+        sync: false
+      - key: NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY
+        sync: false
+      - key: NIGHT_SCOUT_XERO_ENVELOPE_KEY_VERSION
+        sync: false

@@ -23,18 +23,18 @@ The build command installs only the API/frontend dependency closure through
 `artifacts/virtual-cfo/dist/public`, and bundles Express into
 `artifacts/api-server/dist/index.mjs`. Render supplies `PORT`; do not set it.
 
-## Mandatory code gate before creation
+## Exact callback gate
 
-The current bootstrap runtime still hard-codes the Replit callback URL in its
-staging allow-list and Xero token exchange. Merely setting
-`NIGHT_SCOUT_XERO_REDIRECT_URI` to the Render URL will therefore fail startup.
-Before creating the service, a separately reviewed code change must replace the
-hard-coded callback with an exact staging allow-list that accepts the configured
-Render URL and uses that same value for authorisation and token exchange. It
-must continue to reject arbitrary hosts, HTTP, production URLs and path changes.
+The reviewed runtime accepts exactly the existing Replit staging callback and
+the proposed Render staging callback. It retains the configured value and uses
+that byte-identical URI for both authorisation and token exchange; arbitrary
+hosts, HTTP, production URLs and path changes remain rejected.
 
-Do not work around this gate with a Replit redirect, proxy, wildcard callback,
-or relaxed hostname validation.
+Initial Blueprint creation is only to reserve the hostname and deploy inert
+staging. Do not edit the Xero app or begin consent during service creation. If
+Render assigns any hostname other than the exact value below, stop and update
+the allow-list, Blueprint and tests together. Do not use a redirect, proxy,
+wildcard callback or relaxed hostname validation.
 
 The proposed Render hostname is:
 
@@ -57,10 +57,10 @@ Replit project without printing it in a shell, chat or deployment log:
 - `NIGHT_SCOUT_XERO_CLIENT_SECRET`
 - `NIGHT_SCOUT_XERO_STAGING_OWNER_ID`
 - `NIGHT_SCOUT_XERO_STAGING_STORE_ID`
-- `NIGHT_SCOUT_XERO_BOOTSTRAP_DATABASE_URL`
-- `NIGHT_SCOUT_STAGING_CA_PEM`
-- `NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY`
-- `NIGHT_SCOUT_XERO_ENVELOPE_KEY_VERSION`
+
+Do not add the bootstrap database URL, staging CA, envelope master key or key
+version during initial creation. Discovery does not require them, and omitting
+them keeps retained bootstrap fail-closed.
 
 The following values are intentionally omitted from the initial Blueprint
 because discovery has not established them. Add them together in Render only
@@ -69,6 +69,10 @@ after owner review of the returned test-tenant directory:
 - `NIGHT_SCOUT_XERO_STAGING_TENANT_ID`
 - `NIGHT_SCOUT_XERO_MAPPING_EFFECTIVE_FROM`
 - `NIGHT_SCOUT_XERO_STAGING_MAPPING_JSON`
+
+At that same later, separately reviewed step, add the dedicated staging-only
+bootstrap database URL, staging CA, envelope master key and key version. Remove
+them again immediately after the retained connection is verified.
 
 Use the existing dedicated, staging-only bootstrap session-pooler URL. Do not
 substitute the importer login, `postgres`, a service-role key, transaction

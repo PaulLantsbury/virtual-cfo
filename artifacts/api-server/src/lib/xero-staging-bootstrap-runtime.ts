@@ -15,7 +15,7 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const tenant=/^[0-9a-f-]{20,}$/i;
 const canonical=/^[A-Za-z0-9._-]{1,128}$/;
 const unavailable=()=>Error('Xero bootstrap unavailable');
-type Binding=Readonly<{phase:'bootstrap';userId:string;storeId:string;expectedTenantId:string;expires:number}>|Readonly<{phase:'discovery';userId:string;expires:number}>;
+type Binding=Readonly<{phase:'bootstrap';userId:string;storeId:string;expectedTenantId:string;expectedScopes:readonly string[];expires:number}>|Readonly<{phase:'discovery';userId:string;expectedScopes:readonly string[];expires:number}>;
 type Account=Readonly<{accountId:string;accountCode:string|null;accountName:string;accountType:string;accountStatus:string}>;
 type Discovery=Readonly<{userId:string;expires:number;value:Readonly<{tenantId:string;tenantName:string;retrievedAt:string;accounts:readonly Account[]}>}>;
 
@@ -54,17 +54,18 @@ export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fe
  const service:XeroBootstrapService=Object.freeze({
   start(identity:XeroBootstrapIdentity){
    if(!config.bootstrapReady||!identity.isOwner||identity.userId!==config.ownerId)throw unavailable();
-   const raw=`b_${randomBytes(32).toString('base64url')}`,key=digest(raw);boundedSet(states,key,Object.freeze({phase:'bootstrap',userId:identity.userId,storeId:config.storeId,expectedTenantId:config.expectedTenantId!,expires:now()+600_000}),now());
+   const raw=`b_${randomBytes(32).toString('base64url')}`,key=digest(raw);boundedSet(states,key,Object.freeze({phase:'bootstrap',userId:identity.userId,storeId:config.storeId,expectedTenantId:config.expectedTenantId!,expectedScopes:Object.freeze([...SCOPES]),expires:now()+600_000}),now());
    const url=new URL('https://login.xero.com/identity/connect/authorize');url.searchParams.set('response_type','code');url.searchParams.set('client_id',config.clientId);url.searchParams.set('redirect_uri',REDIRECT);url.searchParams.set('scope',SCOPES.join(' '));url.searchParams.set('state',raw);return Object.freeze({url:url.toString()});
   },
   startDiscovery(identity:XeroBootstrapIdentity){
    if(!identity.isOwner||identity.userId!==config.ownerId)throw unavailable();
-   const raw=`d_${randomBytes(32).toString('base64url')}`,key=digest(raw);boundedSet(states,key,Object.freeze({phase:'discovery',userId:identity.userId,expires:now()+600_000}),now());
+   const raw=`d_${randomBytes(32).toString('base64url')}`,key=digest(raw);boundedSet(states,key,Object.freeze({phase:'discovery',userId:identity.userId,expectedScopes:Object.freeze([...DISCOVERY_SCOPES]),expires:now()+600_000}),now());
    const url=new URL('https://login.xero.com/identity/connect/authorize');url.searchParams.set('response_type','code');url.searchParams.set('client_id',config.clientId);url.searchParams.set('redirect_uri',REDIRECT);url.searchParams.set('scope',DISCOVERY_SCOPES.join(' '));url.searchParams.set('state',raw);return Object.freeze({url:url.toString()});
   },
   async complete(input){
    const key=digest(input.state),binding=states.get(key);states.delete(key);prune(states,now());
    if(!binding||binding.expires<now()||binding.userId!==config.ownerId)throw unavailable();
+   if(input.scope!==undefined&&!matchesScopes(input.scope,binding.expectedScopes))throw unavailable();
    if(binding.phase==='discovery'){
     const provider=await exchangeAndDiscover({code:input.code,config,fetchImpl,requireRefresh:false});
     const handle=randomBytes(32).toString('base64url');boundedSet(discoveries,digest(handle),Object.freeze({userId:binding.userId,expires:now()+300_000,value:Object.freeze({tenantId:provider.tenantId,tenantName:provider.tenantName,retrievedAt:provider.retrievedAt,accounts:provider.accounts})}),now());
@@ -95,6 +96,7 @@ export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fe
 function readMapping(raw:string|undefined){try{const value=JSON.parse(raw??'');if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).sort().join(',')!==[...categories].sort().join(','))return null;const out:Record<string,string[]>=Object.create(null);for(const category of categories){const ids=(value as any)[category];if(!Array.isArray(ids)||ids.length<1||ids.length>20||ids.some(id=>typeof id!=='string'||id.length<1||id.length>256))return null;out[category]=[...new Set(ids)];}return Object.freeze(out);}catch{return null;}}
 function materialiseMapping(mapping:Record<string,string[]>,accounts:readonly Account[]){const active=new Map(accounts.filter(a=>a.accountStatus==='ACTIVE').map(a=>[a.accountId,a])),used=new Set<string>(),rows:any[]=[];for(const category of categories)for(const accountId of mapping[category]){const account=active.get(accountId);if(!account||!allowedTypes[category].has(account.accountType as never)||used.has(accountId))throw unavailable();used.add(accountId);rows.push(Object.freeze({category,accountId}));}return Object.freeze(rows);}
 function digest(value:string){return createHash('sha256').update(value).digest('base64url');}
+function matchesScopes(raw:string,expected:readonly string[]){const values=raw.split(' ');return values.length===new Set(values).size&&values.length===expected.length&&values.slice().sort().every((value,index)=>value===[...expected].sort()[index]);}
 function prune<T extends {expires:number}>(states:Map<string,T>,at:number){for(const [key,value] of states)if(value.expires<at)states.delete(key);}
 function boundedSet<T extends {expires:number}>(items:Map<string,T>,key:string,value:T,at:number){prune(items,at);if(items.size>=32)throw unavailable();items.set(key,value);}
 async function exchangeAndDiscover({code,config,fetchImpl,requireRefresh}:{code:string;config:any;fetchImpl:typeof fetch;requireRefresh:boolean}){

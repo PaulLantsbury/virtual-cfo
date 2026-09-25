@@ -9,7 +9,7 @@ services:
     numInstances: 1
     autoDeployTrigger: 'off'
     healthCheckPath: /api/healthz
-    buildCommand: corepack enable && corepack prepare pnpm@10.26.1 --activate && node artifacts/api-server/build-hosted.mjs
+    buildCommand: node artifacts/api-server/build-hosted.mjs
     startCommand: node --enable-source-maps artifacts/api-server/dist/index.mjs
     maxShutdownDelaySeconds: 30
     envVars:

@@ -31,6 +31,7 @@ function safe(error:unknown,res:any){
  const message=error instanceof Error?error.message:'';
  if(message==='Xero bootstrap sign-in required')return res.status(401).json({error:message});
  if(message==='Xero bootstrap owner required')return res.status(403).json({error:'Xero bootstrap owner required'});
+ if(message==='Xero bootstrap selection expired')return res.status(409).json({error:'Xero mapping session expired. Discover Xero again.'});
  if(message==='Xero bootstrap unavailable')return res.status(503).json({error:'Xero staging connection unavailable'});
  return res.status(503).json({error:'Xero staging connection unavailable'});
 }

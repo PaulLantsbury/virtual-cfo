@@ -3,6 +3,7 @@ import pg from 'pg';
 import {createClient} from '@supabase/supabase-js';
 import {createXeroEnvelopeCrypto} from './xero-staging-credential-adapter.ts';
 import {isPinnedStagingDatabaseUrl} from './staging-database-target.ts';
+import {logger} from './logger.ts';
 import type {XeroBootstrapAuthenticator,XeroBootstrapIdentity,XeroBootstrapService} from '../routes/xero-staging-bootstrap.ts';
 
 const PROJECT='bioalckltvkhlczusdvl';
@@ -18,6 +19,8 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const tenant=/^[0-9a-f-]{20,}$/i;
 const canonical=/^[A-Za-z0-9._-]{1,128}$/;
 const unavailable=()=>Error('Xero bootstrap unavailable');
+const expiredSelection=()=>Error('Xero bootstrap selection expired');
+type BootstrapDiagnostic=Readonly<{event:'xero_staging_bootstrap_failed';phase:'selection'|'db_connect'|'db_identity';reason:'missing_or_expired'|'invalid'|'unavailable'|'mismatch'}>;
 type Mapping=Readonly<Record<(typeof categories)[number],readonly string[]>>;
 type Binding=Readonly<{phase:'bootstrap';userId:string;storeId:string;expectedTenantId:string;effectiveFrom:string;mapping:Mapping;expectedScopes:readonly string[];expires:number}>|Readonly<{phase:'discovery';userId:string;expectedScopes:readonly string[];expires:number}>;
 type Account=Readonly<{accountId:string;accountCode:string|null;accountName:string;accountType:string;accountStatus:string}>;
@@ -43,10 +46,12 @@ export function readXeroStagingBootstrapConfig(env:NodeJS.ProcessEnv){
  return Object.freeze({clientId:clientId!,clientSecret,redirectUri:redirectUri!,authUrl,publishableKey,databaseUrl:bootstrapReady?databaseUrl!:undefined,ca:bootstrapReady?ca:undefined,ownerId:ownerId!,storeId:storeId!,masterKey:bootstrapReady?masterKey:undefined,keyVersion:bootstrapReady?keyVersion!:undefined,bootstrapReady});
 }
 
-export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fetchImpl?:typeof fetch;now?:()=>number;createPool?:(options:pg.PoolConfig)=>pg.Pool;createAuthClient?:typeof createClient}={}):XeroStagingBootstrapRuntime|undefined{
+export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fetchImpl?:typeof fetch;now?:()=>number;createPool?:(options:pg.PoolConfig)=>pg.Pool;createAuthClient?:typeof createClient;diagnostic?:(event:BootstrapDiagnostic)=>void}={}):XeroStagingBootstrapRuntime|undefined{
  const config=readXeroStagingBootstrapConfig(env);if(!config)return undefined;
  const fetchImpl=deps.fetchImpl??fetch,now=deps.now??Date.now;
- const pool=config.bootstrapReady?(deps.createPool??(options=>new pg.Pool(options)))({connectionString:config.databaseUrl,ssl:{ca:config.ca,rejectUnauthorized:true},max:1}):undefined;
+ const diagnostic=deps.diagnostic??((event:BootstrapDiagnostic)=>logger.warn(event,'Xero staging bootstrap failed'));
+ const report=(phase:BootstrapDiagnostic['phase'],reason:BootstrapDiagnostic['reason'])=>{try{diagnostic(Object.freeze({event:'xero_staging_bootstrap_failed',phase,reason}));}catch{/* diagnostics must never alter the security boundary */}};
+ const pool=config.bootstrapReady?(deps.createPool??(options=>new pg.Pool(options)))({connectionString:config.databaseUrl,ssl:{ca:config.ca,rejectUnauthorized:true},max:1,connectionTimeoutMillis:10_000,query_timeout:10_000}):undefined;
  const auth=(deps.createAuthClient??createClient)(config.authUrl,config.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
  const crypto=config.bootstrapReady?createXeroEnvelopeCrypto(config.masterKey!,config.keyVersion!):undefined,states=new Map<string,Binding>(),discoveries=new Map<string,Discovery>(),selections=new Map<string,Selection>();
  const authenticate:XeroBootstrapAuthenticator=async authorization=>{
@@ -55,11 +60,15 @@ export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fe
   return Object.freeze({userId,isOwner:true});
  };
  const service:XeroBootstrapService=Object.freeze({
-  start(identity:XeroBootstrapIdentity,input){
+  async start(identity:XeroBootstrapIdentity,input){
    if(!config.bootstrapReady||!identity.isOwner||identity.userId!==config.ownerId)throw unavailable();
    const selectionKey=digest(input.selectionHandle),selection=selections.get(selectionKey);selections.delete(selectionKey);prune(selections,now());
-   if(!selection||selection.expires<now()||selection.userId!==identity.userId||!validDay(input.effectiveFrom,now()))throw unavailable();
-   const selected=normaliseMapping(input.mapping);materialiseMapping(selected,selection.value.accounts);
+   if(!selection||selection.expires<now()||selection.userId!==identity.userId){report('selection','missing_or_expired');throw expiredSelection();}
+   if(!validDay(input.effectiveFrom,now())){report('selection','invalid');throw unavailable();}
+   let selected:Mapping;try{selected=normaliseMapping(input.mapping);materialiseMapping(selected,selection.value.accounts);}catch{report('selection','invalid');throw unavailable();}
+   let identityRow:Record<string,unknown>|undefined;
+   try{const result=await pool!.query('SELECT session_user::text AS session_user, current_user::text AS current_user');if(result.rows.length===1)identityRow=result.rows[0];}catch{report('db_connect','unavailable');throw unavailable();}
+   if(identityRow?.session_user!=='night_scout_xero_bootstrap_login'||identityRow?.current_user!=='night_scout_xero_bootstrap_login'){report('db_identity','mismatch');throw unavailable();}
    const raw=`b_${randomBytes(32).toString('base64url')}`,key=digest(raw);boundedSet(states,key,Object.freeze({phase:'bootstrap',userId:identity.userId,storeId:config.storeId,expectedTenantId:selection.value.tenantId,effectiveFrom:input.effectiveFrom,mapping:selected,expectedScopes:Object.freeze([...SCOPES]),expires:now()+600_000}),now());
    const url=new URL('https://login.xero.com/identity/connect/authorize');url.searchParams.set('response_type','code');url.searchParams.set('client_id',config.clientId);url.searchParams.set('redirect_uri',config.redirectUri);url.searchParams.set('scope',SCOPES.join(' '));url.searchParams.set('state',raw);return Object.freeze({url:url.toString()});
   },

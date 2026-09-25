@@ -7,9 +7,7 @@
  * return value or error.
  */
 import {INTAKE_TARGET} from '../../experiments/shopify/intake-runtime.mjs';
-import {validateXeroAccountMapping} from '../../experiments/xero/account-mapping-contract.mjs';
 const unavailable=()=>Error('Xero staging worker configuration is invalid');
-const uuid=value=>typeof value==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 const date=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(`${value}T00:00:00.000Z`))&&new Date(`${value}T00:00:00.000Z`).toISOString().slice(0,10)===value;
 const text=(value,min,max)=>typeof value==='string'&&value.length>=min&&value.length<=max&&!/[\x00-\x20\x7f]/.test(value);
 function database(url){
@@ -22,12 +20,10 @@ function database(url){
  } catch { return false; }
 }
 /** Only accepts the fixed staging target and pre-agreed non-production scope. */
-export function readStagingXeroWorkerConfig(env={}){
+export function readStagingXeroWorkerConfig(env={},clock=()=>new Date()){
  try {
   if(env.NIGHT_SCOUT_RUNTIME_ENV!=='staging'||env.NIGHT_SCOUT_XERO_STAGING_REFRESH_ENABLED!=='true'||env.NIGHT_SCOUT_XERO_STAGING_PROJECT_REF!==INTAKE_TARGET.projectRef)throw unavailable();
   const config={
-   connectionId:env.NIGHT_SCOUT_XERO_STAGING_CONNECTION_ID,
-   mappingVersionId:env.NIGHT_SCOUT_XERO_STAGING_MAPPING_VERSION_ID,
    from:env.NIGHT_SCOUT_XERO_REPORT_FROM,
    to:env.NIGHT_SCOUT_XERO_REPORT_TO,
    currency:env.NIGHT_SCOUT_XERO_CURRENCY,
@@ -37,11 +33,10 @@ export function readStagingXeroWorkerConfig(env={}){
    clientSecret:env.NIGHT_SCOUT_XERO_CLIENT_SECRET,
    envelopeKey:env.NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY,
    envelopeKeyVersion:env.NIGHT_SCOUT_XERO_ENVELOPE_KEY_VERSION,
-   mappingJson:env.NIGHT_SCOUT_XERO_STAGING_MAPPING_JSON,
   };
-  const mapping=typeof config.mappingJson==='string'&&config.mappingJson.length<=4096?validateXeroAccountMapping(JSON.parse(config.mappingJson)):null;
-  if(!mapping||!uuid(config.connectionId)||!uuid(config.mappingVersionId)||!date(config.from)||!date(config.to)||config.from>config.to||(Date.parse(config.to)-Date.parse(config.from))/86400000>=31||config.currency!=='GBP'||!database(config.databaseUrl)||typeof config.caPem!=='string'||config.caPem.length<100||config.caPem.length>32768||!text(config.clientId,20,256)||!text(config.clientSecret,24,2048)||!text(config.envelopeKey,32,512)||!text(config.envelopeKeyVersion,1,128))throw unavailable();
-  return Object.freeze({connectionId:config.connectionId,mappingVersionId:config.mappingVersionId,mapping,envelopeKeyVersion:config.envelopeKeyVersion,scope:Object.freeze({from:config.from,to:config.to,currency:config.currency}),projectRef:INTAKE_TARGET.projectRef});
+  const current=clock(),today=current instanceof Date&&Number.isFinite(current.valueOf())?current.toISOString().slice(0,10):null;
+  if(!today||!date(config.from)||!date(config.to)||config.from>config.to||config.to>today||(Date.parse(config.to)-Date.parse(config.from))/86400000>=31||config.currency!=='GBP'||!database(config.databaseUrl)||typeof config.caPem!=='string'||config.caPem.length<100||config.caPem.length>32768||!text(config.clientId,20,256)||!text(config.clientSecret,24,2048)||!text(config.envelopeKey,32,512)||!text(config.envelopeKeyVersion,1,128))throw unavailable();
+  return Object.freeze({envelopeKeyVersion:config.envelopeKeyVersion,scope:Object.freeze({from:config.from,to:config.to,currency:config.currency}),projectRef:INTAKE_TARGET.projectRef});
  } catch { throw unavailable(); }
 }
 /**

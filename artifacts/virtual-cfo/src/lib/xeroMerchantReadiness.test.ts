@@ -18,6 +18,13 @@ test('merchant readiness fails closed until enabled, mapped and supported',()=>{
  assert.equal(xeroMerchantReadinessView(parseXeroMerchantReadiness(ready),true).canUseAccountingEvidence,true);
 });
 
+test('first refresh pending and failure are distinguished without expanding the API contract',()=>{
+ const pending=xeroMerchantReadinessView(parseXeroMerchantReadiness({...ready,evidenceState:'unavailable',evidenceRetrievedAt:null}),true);
+ assert.match(pending.title,/waiting to start/i);assert.equal(pending.canUseAccountingEvidence,false);
+ const failed=xeroMerchantReadinessView(parseXeroMerchantReadiness({...ready,connection:{...connection,lastFailureAt:'2026-09-18T13:00:00.000Z'},evidenceState:'unavailable',evidenceRetrievedAt:null}),true);
+ assert.match(failed.title,/did not complete/i);assert.equal(failed.canUseAccountingEvidence,false);
+});
+
 test('readiness messages do not disclose financial amounts',()=>{
  for(const state of ['checking','ready','stale','review_required','unavailable','denied'] as const){
   const value=parseXeroMerchantReadiness({...ready,evidenceState:state,evidenceRetrievedAt:state==='ready'?'2026-09-18T12:00:00.000Z':null});

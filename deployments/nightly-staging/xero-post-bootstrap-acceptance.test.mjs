@@ -21,10 +21,11 @@ test('post-bootstrap worker refreshes, rotates and persists bounded supported ev
  const db={version:1,ciphertext:initial.ciphertext,encryptedDek:initial.encryptedDek,lease:null,evidence:[],audits:[]};
  const lease=new Date(Date.now()+300_000);let refreshes=0,reportReads=0;
  const query=async(sql,params)=>{
+  if(sql.includes('worker_get_single_refresh_job'))return {rows:db.evidence.length===0?[{connection_id:connectionId,mapping_version_id:mappingVersionId}]:[]};
   if(sql.includes('worker_get_refresh_context'))return {rows:[{connection_id:connectionId,tenant_id:tenantId,mapping_version_id:mappingVersionId,mapping,ciphertext:db.ciphertext,encrypted_dek:db.encryptedDek,key_version:keyVersion,algorithm:'AES-256-GCM',version:db.version,lease_expires_at:db.lease}]};
   if(sql.includes('worker_acquire_refresh_lease')){assert.equal(params[1],1);assert.equal(params[2],300);db.lease=lease;return {rows:[{lease_expires_at:lease}]};}
-  if(sql.includes('worker_store_refresh_envelope_leased')){assert.equal(params[5],1);assert.equal(params[6],2);assert.equal(params[7],lease);db.ciphertext=params[1];db.encryptedDek=params[2];db.version=2;db.lease=null;db.audits.push('credential_rotated');return {rows:[{rotated:true}]};}
-  if(sql.includes('worker_record_accounting_evidence')){db.evidence.push(params);return {rows:[{worker_record_accounting_evidence:'evidence-1'}]};}
+  if(sql.includes('worker_store_refresh_envelope_leased')){assert.equal(params[5],1);assert.equal(params[6],2);assert.equal(params[7],lease);db.ciphertext=params[1];db.encryptedDek=params[2];db.version=2;db.audits.push('credential_rotated');return {rows:[{rotated:true}]};}
+  if(sql.includes('worker_record_accounting_evidence_leased')){assert.equal(db.lease,lease);assert.equal(params[16],2);assert.equal(params[17],lease);db.evidence.push(params.slice(0,16));db.lease=null;return {rows:[{evidence_id:'evidence-1'}]};}
   if(sql.includes('worker_get_latest_supported_evidence'))return {rows:[]};
   if(sql.includes('worker_record_credential_refresh_failure')){db.audits.push(params[1]);return {rows:[{}]};}
   if(sql.includes('worker_release_refresh_lease'))throw Error('successful rotation must clear the lease atomically');
@@ -43,4 +44,6 @@ test('post-bootstrap worker refreshes, rotates and persists bounded supported ev
  assert.deepEqual(saved.slice(0,11),[connectionId,mappingVersionId,'2026-09-01','2026-09-24','GBP',false,'supported',null,'2026-09-24','2026-09-25T02:00:00.000Z',saved[10]]);assert.match(saved[10],/^[a-f0-9]{64}$/);
  assert.deepEqual(saved.slice(11),[8000,-300,-2000,-5000,10320]);
  assert.doesNotMatch(JSON.stringify(db.evidence),/access-token|refresh-token|Reports|ProfitAndLoss/);
+ await assert.rejects(createStagingXeroRefreshJob({env,query,fetchImpl})(),/invalid/);
+ assert.equal(refreshes,1);assert.equal(reportReads,5);assert.equal(db.version,2);assert.equal(db.evidence.length,1);
 });

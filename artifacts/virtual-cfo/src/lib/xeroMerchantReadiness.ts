@@ -47,6 +47,8 @@ export function xeroMerchantReadinessView(readiness: XeroMerchantReadiness | nul
     case 'stale': return Object.freeze({ title: 'Xero evidence may be out of date', detail: 'The latest refresh did not complete. A retained same-store snapshot must not be presented as current.', tone: 'warning', canUseAccountingEvidence: false });
     case 'review_required': return Object.freeze({ title: 'Xero evidence needs review', detail: 'A later posting, mapping change or source change requires review before accounting figures can be presented as current.', tone: 'warning', canUseAccountingEvidence: false });
     case 'denied': return Object.freeze({ title: 'Xero evidence is not accessible', detail: 'You do not have access to this store’s accounting evidence. Evidence from another store is never substituted.', tone: 'warning', canUseAccountingEvidence: false });
-    default: return Object.freeze({ title: 'Xero accounting evidence is unavailable', detail: 'No supported accounting evidence is available for this store. Missing figures are not treated as zero.', tone: 'warning', canUseAccountingEvidence: false });
+    default: return readiness.connection.lastFailureAt
+      ? Object.freeze({ title: 'Xero refresh did not complete', detail: 'No current accounting evidence is available. Missing figures are not treated as zero, and a controlled retry is required.', tone: 'warning', canUseAccountingEvidence: false })
+      : Object.freeze({ title: 'First Xero refresh is waiting to start', detail: 'The read-only connection and mapping are saved. Accounting figures remain unavailable until the first refresh completes.', tone: 'neutral', canUseAccountingEvidence: false });
   }
 }

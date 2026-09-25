@@ -1,528 +1,80 @@
-import { useState } from "react";
-import {
-  Sparkles, TrendingUp, TrendingDown, AlertTriangle, Lock,
-} from "lucide-react";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { SimulatorSlider } from "@/components/SimulatorSlider";
-import { cn } from "@/lib/utils";
-import { TimelineSelector } from "@/components/TimelineSelector";
-import { canAccess } from "@/lib/plan";
-import { AiCfoAskCard } from "@/components/AiCfoAskCard";
-import { PeriodImpact } from "@/components/PeriodImpact";
-import { DataBenchmarkAssumptions } from "@/components/DataBenchmarkAssumptions";
-import {
-  ANNUAL_REVENUE as BASE_REVENUE,
-  CONTRIBUTION,
-  BASE_EBITDA,
-} from "@/lib/data/business-snapshot";
-import { MONTHLY_FIXED_COSTS as BASE_FIXED_COSTS } from "@/lib/data/cash-snapshot";
+import { Fragment } from 'react';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { SalesReportingPeriod } from '@/components/SalesReportingPeriod';
+import { useActiveStore, useAuth } from '@/lib/auth/AuthProvider';
+import { useSalesReporting } from '@/lib/analytics/useSalesReporting';
+import { useProfitReporting, type ProfitMetric, type ProfitReport } from '@/lib/analytics/useProfitReporting';
+import { canAccess } from '@/lib/plan';
+import { CfoEvidenceStatus } from '@/components/CfoEvidenceStatus';
+import { cfoEvidenceFromReporting } from '@/lib/analytics/cfoEvidence';
 
-// ─── Base data constants ─────────────────────────────────────────────────────
-// Values imported from central mock data layer (src/lib/data/business-snapshot.ts
-// and src/lib/data/cash-snapshot.ts). Replace those files with live Xero/Shopify
-// feeds when integrations are connected.
-//
-// BASE_REVENUE     = 520,000  (ANNUAL_REVENUE)
-// CONTRIBUTION     = 198,000  (derived: net revenue − variable costs)
-// BASE_FIXED_COSTS = 120,000  (MONTHLY_FIXED_COSTS from cash-snapshot)
-// BASE_EBITDA      = 78,000   (derived: CONTRIBUTION − BASE_FIXED_COSTS)
-
-// Derived percentages
-const CONTRIBUTION_MARGIN_PCT   = CONTRIBUTION / BASE_REVENUE;                          // ≈ 38.08%
-
-// ─── Bridge table rows ───────────────────────────────────────────────────────
-const BRIDGE_TABLE = [
-  { step: "Revenue",        amount:  520_000, pct:  100.0, meaning: "Gross sales before discounts and returns",              isTotal: false, isResult: false, positive: true  },
-  { step: "Discounts",      amount: -82_000,  pct:  -15.8, meaning: "Discounting takes 15.8% off the top line",              isTotal: false, isResult: false, positive: false },
-  { step: "Returns",        amount: -41_000,  pct:   -7.9, meaning: "Returned orders reduce revenue and add fulfilment cost", isTotal: false, isResult: false, positive: false },
-  { step: "Net Revenue",    amount:  397_000, pct:   76.3, meaning: "Revenue remaining after discounts and returns",          isTotal: true,  isResult: false, positive: true  },
-  { step: "Variable Costs", amount: -199_000, pct:  -38.3, meaning: "Product, fulfilment and payment processing costs",      isTotal: false, isResult: false, positive: false },
-  { step: "Contribution",   amount:  198_000, pct:   38.0, meaning: "What remains to pay overheads and create profit",       isTotal: true,  isResult: false, positive: true  },
-  { step: "Fixed Costs",    amount: -120_000, pct:  -23.1, meaning: "Payroll, software, rent and other overheads",           isTotal: false, isResult: false, positive: false },
-  { step: "Profit",         amount:   78_000, pct:   15.0, meaning: "Operating profit (EBITDA) after all costs",             isTotal: true,  isResult: true,  positive: true  },
+const costRows: readonly [string, keyof Pick<ProfitReport, 'originalCosts' | 'recoveredCosts' | 'cogs' | 'grossProfit' | 'variableCosts' | 'contributionBeforeMarketing' | 'advertising' | 'contribution' | 'overheads' | 'operatingProfit' | 'da' | 'ebitda'>, number, string][] = [
+  ['Historical product costs', 'originalCosts', -1, 'Supported landed costs when the original goods were sold'],
+  ['Saleable stock cost recovery', 'recoveredCosts', 1, 'Recognised when goods actually returned to saleable inventory, independently of refund date'],
+  ['Net cost of goods sold', 'cogs', -1, 'Subtotal of historical product costs less stock cost recovery'],
+  ['Gross profit', 'grossProfit', 1, 'Net product sales less net cost of goods sold'],
+  ['Variable operating costs', 'variableCosts', -1, 'Actual processing, fulfilment, packaging, shipping and return-handling expenses'],
+  ['Contribution before marketing', 'contributionBeforeMarketing', 1, 'Gross profit plus net shipping revenue less variable operating costs'],
+  ['Advertising expenditure', 'advertising', -1, 'Actual period advertising expense, deducted once'],
+  ['Contribution', 'contribution', 1, 'Contribution after marketing'],
+  ['Operating overheads', 'overheads', -1, 'Includes depreciation and amortisation; excludes interest and corporation tax'],
+  ['Operating profit', 'operatingProfit', 1, 'Contribution less operating overheads'],
+  ['Add back depreciation and amortisation', 'da', 1, 'Identified amounts already included in operating overheads'],
+  ['EBITDA', 'ebitda', 1, 'Operating profit plus depreciation and amortisation'],
 ];
 
-// ─── Driver data — corrected to net +£18,000 ────────────────────────────────
-// Revenue growth (+9) + Better margin (+18) + Lower returns (+4) + Higher overheads (-13) = +18
-const DRIVER_DATA = [
-  { driver: "Revenue growth",   impact:  9_000,  explanation: "Sales growth added more contribution" },
-  { driver: "Better margin",    impact: 18_000,  explanation: "Pricing, discounting and product mix improved" },
-  { driver: "Lower returns",    impact:  4_000,  explanation: "Fewer returns protected net revenue" },
-  { driver: "Higher overheads", impact: -13_000, explanation: "Payroll and software costs increased" },
-];
-
-const PROFIT_LOSS_AREAS = [
-  {
-    title: "Discounting",
-    explanation: "Promotions are reducing retained profit.",
-    value: 18_000,
-    freeLabel: "Largest Opportunity",
-  },
-  {
-    title: "Fixed Costs",
-    explanation: "Overheads are rising faster than profit capacity.",
-    value: 13_000,
-    freeLabel: "Material Opportunity",
-  },
-  {
-    title: "Returns & Leakage",
-    explanation: "Returns and leakage reduce profit after the sale.",
-    value: 4_000,
-    freeLabel: "Secondary Opportunity",
-  },
-];
-
-const PROFIT_GROWTH_ACTIONS = [
-  {
-    title: "Reduce discount dependency",
-    impact: 18_000,
-    confidence: "High",
-    effort: "Low",
-    timing: "Immediate",
-    why: "Discounting is still reducing retained profit and weakening the quality of revenue growth.",
-    start: "Set a tighter discount ceiling, remove blanket codes first, and monitor profit per order daily before widening the change.",
-  },
-  {
-    title: "Improve contribution margin",
-    impact: 12_000,
-    confidence: "Medium",
-    effort: "Medium",
-    timing: "2-4 weeks",
-    why: "More revenue needs to survive product, fulfilment and payment costs before it can become profit.",
-    start: "Review the lowest-margin SKU and channel combinations, then shift spend toward products with stronger contribution per order.",
-  },
-  {
-    title: "Slow overhead growth",
-    impact: 13_000,
-    confidence: "Medium",
-    effort: "Low",
-    timing: "1-2 weeks",
-    why: "Rising fixed costs reduce operating leverage and make profit more sensitive to revenue slowdowns.",
-    start: "Pause discretionary hiring and software additions, then review the two fastest-growing overhead lines for deferral or renegotiation.",
-  },
-  {
-    title: "Improve returns performance",
-    impact: 4_000,
-    confidence: "Medium",
-    effort: "Medium",
-    timing: "3-6 weeks",
-    why: "Returns reduce net revenue and add operational cost after the sale has already been made.",
-    start: "Identify the highest-return SKUs, update sizing and product guidance, and route repeat return issues into merchandising review.",
-  },
-];
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-const fmt = (n: number, decimals = 0) =>
-  (n < 0 ? "-" : "") + "£" + Math.abs(Math.round(n)).toLocaleString("en-GB", { maximumFractionDigits: decimals });
-
-const fmtPct = (n: number, decimals = 1) => (n * 100).toFixed(decimals) + "%";
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function InlineCfoInsight({ text }: { text: string }) {
-  return (
-    <div className="sc-purple rounded-xl px-4 py-3">
-      <p className="text-xs text-indigo-300 font-semibold uppercase tracking-wider mb-1">CFO Insight</p>
-      <p className="text-sm text-foreground leading-relaxed">{text}</p>
-    </div>
-  );
-}
-
-// ─── Main page component ─────────────────────────────────────────────────────
 export default function ProfitGrowth() {
-  // Simulator state
-  const [revChange,      setRevChange]      = useState(0);
-  const [discountChange, setDiscountChange] = useState(0);
-  const [returnsChange,  setReturnsChange]  = useState(0);
-  const [varCostChange,  setVarCostChange]  = useState(0);
-  const [fixedChange,    setFixedChange]    = useState(0);
-
-  // Simulator calculations
-  const adjRevenue       = BASE_REVENUE * (1 + revChange / 100);
-  const adjContribMargin = CONTRIBUTION_MARGIN_PCT
-                           - discountChange / 100
-                           - returnsChange / 100
-                           - varCostChange / 100;
-  const projContrib      = adjRevenue * adjContribMargin;
-  const projFixed        = BASE_FIXED_COSTS * (1 + fixedChange / 100);
-  const projEBITDA       = projContrib - projFixed;
-  const projEBITDAMargin = adjRevenue > 0 ? projEBITDA / adjRevenue : 0;
-  const ebitdaMovement   = projEBITDA - BASE_EBITDA;
-
-  const simInterpretation = projEBITDA < 0
-    ? "This scenario pushes the business below break-even. Focus on margin recovery or reducing overheads before growing further."
-    : ebitdaMovement >= 0
-      ? "This scenario strengthens profit because contribution growth more than offsets any overhead movement."
-      : "This scenario weakens profit because margin pressure or rising overheads absorbs too much contribution.";
-
-  const simColor = projEBITDA < 0
-    ? "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/40 text-red-700 dark:text-red-400"
-    : ebitdaMovement >= 0
-      ? "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40 text-emerald-700 dark:text-emerald-400"
-      : "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400";
-
-  const SimIcon = projEBITDA < 0 ? AlertTriangle : ebitdaMovement >= 0 ? TrendingUp : TrendingDown;
-
-  return (
-    <AppLayout>
-      {/* ── Page header ── */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-display font-bold text-foreground">Profit Growth</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            See how much profit is available, where it is leaking, and what to fix first.
-          </p>
+  const storeId = useActiveStore();
+  const auth = useAuth();
+  const storeName = auth.status === 'ready' ? auth.stores.find(store => store.id === storeId)?.name : null;
+  const reporting = useSalesReporting(storeId);
+  const profit = useProfitReporting(storeId, reporting);
+  const { report } = profit;
+  // Prefer the sales from the same transaction as costs. Independently verified sales remain visible if profit evidence is unavailable.
+  const sales = report?.sales ?? reporting.data;
+  const money = (value: number) => reporting.config ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: reporting.config.currency }).format(value / 100) : 'Unavailable';
+  const value = (metric: ProfitMetric | undefined, sign = 1) => metric?.state === 'ready' && metric.value !== null ? money(metric.value * sign) : 'Unavailable';
+  const missing = (metric: ProfitMetric | undefined) => metric?.state === 'unavailable' ? metric.reason : !report ? profit.reason ?? 'Verified cost evidence is unavailable.' : null;
+  const bridgeAvailable = canAccess('profit_driver_table');
+  const headlines: [string, ProfitMetric | undefined][] = [['Gross profit', report?.grossProfit], ['Contribution', report?.contribution], ['Operating profit', report?.operatingProfit], ['EBITDA', report?.ebitda]];
+  const row = (label: string, amount: string, meaning: string, reason?: string | null) => <tr key={label} className="border-t border-border/40"><th scope="row" className="py-3 pr-3 text-left font-medium">{label}<span className="block text-xs font-normal text-muted-foreground mt-1">{meaning}</span>{bridgeAvailable && reason && <span className="block text-xs font-normal text-muted-foreground mt-1">{reason}</span>}</th><td className="text-right font-semibold tabular-nums whitespace-nowrap">{bridgeAvailable ? amount : 'Locked'}</td></tr>;
+  return <AppLayout showMonitoring={false}>
+    <div className="max-w-5xl mx-auto space-y-6">
+      <header><h1 className="text-3xl font-display font-bold">Profit Overview</h1><p className="text-sm text-muted-foreground mt-2">See where the money goes, from sales through costs to contribution and operating profit.</p></header>
+      <section aria-label="Profit reporting status" className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 space-y-2">
+        <h2 className="font-bold">{import.meta.env.DEV ? 'Staging evidence preview' : 'Verified evidence preview'} · {storeName ?? 'Selected store'}</h2>
+        <p className="text-sm">Synthetic staging stores contain test transactions, not merchant trading results. Figures below come from the selected store’s verified evidence; no sample profit model is substituted.</p>
+        <p className="text-sm">Sales means net product sales excluding VAT and shipping. Contribution is after marketing. Missing costs remain unavailable, while earlier supported subtotals stay visible.</p>
+        <p role="status" className="text-sm">{profit.loading ? 'Checking profit evidence…' : report?.state === 'complete' ? 'All profit subtotals have supporting evidence for this month.' : report ? 'Some profit subtotals are unavailable. See the reasons alongside each figure.' : profit.reason ?? 'Profit evidence unavailable.'}</p>
+      </section>
+      <CfoEvidenceStatus evidence={cfoEvidenceFromReporting({
+        scope: { storeId, currency: reporting.config?.currency ?? '', from: reporting.period.dateFrom, to: reporting.period.dateTo },
+        loading: reporting.loading,
+        hasSupportedEvidence: !!reporting.data,
+        detail: profit.loading ? 'Profit evidence is still being checked.' : profit.reason ?? null,
+      })} />
+      <SalesReportingPeriod reporting={reporting} />
+      <section aria-label="Verified profit overview" aria-live="polite" className="rounded-xl border border-border bg-card p-4">
+        <h2 className="text-lg font-bold">Selected period results</h2>
+        <p className="text-xs text-muted-foreground mt-1 mb-4">{reporting.period.dateFrom} – {reporting.period.dateTo} · {reporting.config?.currency ?? 'Currency unavailable'}</p>
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          <div role="group" aria-label="Sales" className="rounded-lg bg-secondary/40 p-3"><h3 className="text-xs font-semibold">Sales</h3><p className="text-xl font-bold tabular-nums mt-2">{sales ? money(sales.netProductSales) : 'Unavailable'}</p><p className="text-xs text-muted-foreground mt-2">Net product sales, excluding VAT and shipping</p></div>
+          {headlines.map(([label, metric]) => <div key={label} role="group" aria-label={label} className="rounded-lg bg-secondary/40 p-3 min-w-0"><h3 className="text-xs font-semibold">{label}</h3><p className="text-xl font-bold tabular-nums mt-2">{value(metric)}</p>{missing(metric) && <p className="text-xs text-muted-foreground mt-2">{missing(metric)}</p>}</div>)}
         </div>
-        <TimelineSelector />
-      </div>
-
-      {/* ── 1. CFO Profit Verdict ── */}
-      <div className="sc-purple rounded-2xl shadow-md mb-5 overflow-hidden">
-        <div className="sc-purple-header flex items-center gap-3 px-6 py-3">
-          <Sparkles className="w-4 h-4 text-indigo-300 shrink-0" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-300">CFO Profit Verdict</span>
-          <span className="ml-auto inline-flex items-center text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 whitespace-nowrap">Action required</span>
-        </div>
-        <div className="px-6 py-4">
-          <p className="text-lg sm:text-xl font-bold text-foreground leading-snug">Profit is improving, but £18,000/month remains trapped in discounts and overheads.</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 pb-3 border-b border-primary/15">
-            <div className="rounded-xl bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50 px-3 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">Profit Available</p>
-              <p className="text-3xl font-display font-bold text-emerald-700 dark:text-emerald-300 leading-none">£18,000</p>
-              <p className="text-xs text-emerald-700/75 dark:text-emerald-300/75 leading-snug mt-1">additional monthly profit identified.</p>
-            </div>
-            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Current Profit</p>
-              <p className="text-xl font-display font-bold text-foreground leading-none">£{BASE_EBITDA.toLocaleString()}</p>
-              <p className="text-[11px] text-muted-foreground leading-snug mt-1">15% of revenue.</p>
-            </div>
-            <div className="rounded-xl bg-secondary/30 border border-primary/10 px-3 py-2.5">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Do First</p>
-              {canAccess("profit_recommendations") ? (
-                <p className="text-sm font-bold text-foreground leading-snug">Reduce discount dependency before adding more overhead.</p>
-              ) : (
-                <p className="text-sm font-bold text-foreground leading-snug">Upgrade to Pro to view the prioritised profit growth plan.</p>
-              )}
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground leading-relaxed mt-3">Current profit is positive and profit quality is improving, but discounting and overhead growth are still limiting how much revenue converts into profit.</p>
-          <div className="pt-3 flex flex-wrap gap-2">
-            {["Discount leakage", "Overhead pressure", "Revenue quality"].map((signal) => (
-              <span key={signal} className="rounded-full bg-secondary/30 border border-primary/10 px-3 py-1.5 text-xs font-semibold text-foreground">{signal}</span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── 2. Biggest Profit Leaks ── */}
-      <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Biggest Profit Leaks</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">The biggest recoverable leaks before adding more revenue.</p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-        {PROFIT_LOSS_AREAS.map((area) => (
-          <div key={area.title} className="rounded-xl border border-border/60 bg-card px-4 py-3 shadow-sm">
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Profit leak</p>
-                <p className="text-sm font-semibold text-foreground leading-snug">{area.title}</p>
-              </div>
-              {canAccess("profit_recommendations") ? (
-                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">£{area.value.toLocaleString()}</p>
-              ) : (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">{area.freeLabel}</span>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">{area.explanation}</p>
-            {!canAccess("profit_recommendations") && (
-              <p className="text-xs text-primary font-semibold mt-2">Upgrade to Pro to see the value of this lever</p>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* ── 3. Profit Growth Plan ── */}
-      <div className="mb-2">
-        <h2 className="text-xl font-bold text-foreground">Profit Growth Plan</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">The priority actions to increase profit and protect scalability.</p>
-      </div>
-      {canAccess("profit_recommendations") ? (
-        <div className="space-y-4 mb-8">
-          {PROFIT_GROWTH_ACTIONS.map((action, i) => (
-            <details key={action.title} open={i === 0} className={cn("group rounded-2xl border bg-card shadow-sm overflow-hidden", i === 0 ? "border-emerald-300 dark:border-emerald-700/60 bg-emerald-50/50 dark:bg-emerald-950/10" : "border-border/60")}>
-              <summary className={cn("list-none cursor-pointer px-6 py-5 transition-colors", i === 0 ? "hover:bg-emerald-50 dark:hover:bg-emerald-950/20" : "hover:bg-secondary/20")}>
-                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-5 items-start">
-                  <div className="flex items-start gap-3 min-w-0">
-                    <span className={cn("flex items-center justify-center w-8 h-8 rounded-full shrink-0 text-xs font-bold", i === 0 ? "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300" : "bg-secondary text-muted-foreground")}>{i + 1}</span>
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-base font-bold text-foreground">{action.title}</p>
-                        {i === 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-600 text-white dark:bg-emerald-500 dark:text-emerald-950 uppercase tracking-wider">START FIRST</span>}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1 leading-snug">{action.why}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto_auto_auto_auto] gap-2 lg:justify-end">
-                    <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/70 dark:border-emerald-700/40 px-3 py-2"><p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-0.5">Impact</p><p className="text-sm font-bold text-emerald-700 dark:text-emerald-300 tabular-nums">£{action.impact.toLocaleString()}</p></div>
-                    <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2"><p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Confidence</p><p className="text-sm font-semibold text-foreground">{action.confidence}</p></div>
-                    <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2"><p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Effort</p><p className="text-sm font-semibold text-foreground">{action.effort}</p></div>
-                    <div className="rounded-lg bg-secondary/40 border border-border/50 px-3 py-2"><p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Timing</p><p className="text-sm font-semibold text-foreground">{action.timing}</p></div>
-                  </div>
-                </div>
-              </summary>
-              <div className="px-6 pb-5 -mt-1"><div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-4 pl-11"><div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3"><p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Why it matters</p><p className="text-sm text-foreground leading-relaxed">{action.why}</p></div><div className="rounded-xl bg-secondary/30 border border-border/50 px-4 py-3"><p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">How to start</p><p className="text-sm text-foreground leading-relaxed">{action.start}</p></div></div></div>
-            </details>
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-indigo-200 dark:border-indigo-700/50 bg-indigo-50/70 dark:bg-indigo-950/25 shadow-sm mb-8 px-6 py-5"><div className="flex items-start gap-3"><div className="flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 shrink-0"><Lock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /></div><div><p className="text-sm font-bold text-indigo-950 dark:text-indigo-100">Your Profit Growth Plan</p><p className="text-sm text-indigo-800/80 dark:text-indigo-200/80 mt-1">A clear route exists to increase profit through revenue quality, margin improvement and overhead discipline. Upgrade to view priorities, timing, impact and implementation steps.</p></div></div></div>
-      )}
-
-      {/* ── 4. Profit Growth Simulator ── */}
-      <div className="mb-2"><h2 className="text-xl font-bold text-foreground">Profit Growth Simulator</h2><p className="text-sm text-muted-foreground mt-0.5">See exactly how much additional profit you could create before making a single operational change.</p></div>
-      {canAccess("profit_simulator") ? (
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 p-6 mb-8">
-
-        <div className="mb-5">
-          <InlineCfoInsight text="Profit is currently most sensitive to discounting and overhead changes. Use this tool before making pricing, marketing or hiring decisions." />
-        </div>
-
-        <div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Sliders */}
-            <div className="space-y-6">
-              <SimulatorSlider
-                label="Revenue Change"
-                value={revChange}
-                min={-20} max={30} step={1}
-                unit="%" showSign
-                onChange={(v) => setRevChange(v)}
-                description={`Adjusted revenue: ${fmt(adjRevenue)}`}
-              />
-              <SimulatorSlider
-                label="Discount Rate Change"
-                value={discountChange}
-                min={-5} max={8} step={0.5}
-                unit="pp" showSign
-                onChange={(v) => setDiscountChange(v)}
-                description="Impact on margin from discounting"
-                positiveIsGood={false}
-              />
-              <SimulatorSlider
-                label="Returns Rate Change"
-                value={returnsChange}
-                min={-5} max={5} step={0.5}
-                unit="pp" showSign
-                onChange={(v) => setReturnsChange(v)}
-                description="Impact on margin from returns"
-                positiveIsGood={false}
-              />
-              <SimulatorSlider
-                label="Variable Cost Change"
-                value={varCostChange}
-                min={-5} max={5} step={0.5}
-                unit="pp" showSign
-                onChange={(v) => setVarCostChange(v)}
-                description="Impact on margin from variable costs"
-                positiveIsGood={false}
-              />
-              <SimulatorSlider
-                label="Overhead Change"
-                value={fixedChange}
-                min={-20} max={20} step={1}
-                unit="%" showSign
-                onChange={(v) => setFixedChange(v)}
-                description={`Projected overheads: ${fmt(projFixed)}`}
-                positiveIsGood={false}
-              />
-            </div>
-
-            {/* Results */}
-            <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">Projected Outcomes</h4>
-              <div className="space-y-2">
-                {[
-                  { label: "Projected Revenue",                      value: fmt(adjRevenue),          highlight: false, isPeriod: false },
-                  { label: "Projected Gross Profit Before Overheads", value: fmt(projContrib),         highlight: false, isPeriod: false },
-                  { label: "Projected Overheads",                    value: fmt(projFixed),            highlight: false, isPeriod: false },
-                  { label: "Projected Profit",                       value: fmt(projEBITDA),           highlight: true,  isPeriod: false },
-                  { label: "Profit Movement vs Base",                value: "",                        highlight: true,  isPeriod: true  },
-                  { label: "Projected Profit Margin",                value: fmtPct(projEBITDAMargin),  highlight: false, isPeriod: false },
-                ].map(({ label, value, highlight, isPeriod }) => (
-                  <div
-                    key={label}
-                    className={cn(
-                      "flex items-center justify-between px-4 py-2.5 rounded-xl",
-                      highlight ? "bg-secondary/60 border border-border/50" : "bg-secondary/30",
-                    )}
-                  >
-                    <span className={cn("text-xs", highlight ? "font-semibold text-foreground" : "text-muted-foreground")}>
-                      {label}
-                    </span>
-                    {isPeriod ? (
-                      <PeriodImpact value={ebitdaMovement} className="items-end" />
-                    ) : (
-                      <span className={cn(
-                        "text-sm font-bold tabular-nums",
-                        highlight
-                          ? projEBITDA < 0
-                            ? "text-red-600 dark:text-red-400"
-                            : ebitdaMovement >= 0
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-amber-600 dark:text-amber-400"
-                          : "text-foreground",
-                      )}>
-                        {value}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Interpretation */}
-              <div className={cn("rounded-xl border px-4 py-3 mt-2 flex items-start gap-2.5", simColor)}>
-                <SimIcon className="w-4 h-4 shrink-0 mt-0.5" />
-                <p className="text-xs leading-relaxed font-medium">{simInterpretation}</p>
-              </div>
-
-              {/* Reset */}
-              {(revChange !== 0 || discountChange !== 0 || returnsChange !== 0 || varCostChange !== 0 || fixedChange !== 0) && (
-                <button
-                  onClick={() => {
-                    setRevChange(0);
-                    setDiscountChange(0);
-                    setReturnsChange(0);
-                    setVarCostChange(0);
-                    setFixedChange(0);
-                  }}
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-2 hover:underline mt-1"
-                >
-                  Reset to base case
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-primary/20 bg-card shadow-sm mb-8 overflow-hidden"><div className="px-6 py-8 text-center"><div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-4"><Lock className="w-4 h-4 text-primary" /></div><p className="text-base font-semibold text-foreground mb-2">Unlock the Profit Growth Simulator</p><p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6 leading-relaxed">Model revenue, discounting, returns, variable costs and overhead changes before committing resources.</p><a href="/upgrade" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm">Unlock Simulator</a></div></div>
-      )}
-
-      <AiCfoAskCard pageId="profit" />
-
-      {/* ── 6. Supporting Analysis ── */}
-      <details className="group bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
-        <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Supporting Analysis</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Profit bridge, sensitivity, overheads, staff efficiency and trend evidence.</p>
-            </div>
-            <span className="text-xs font-semibold text-primary group-open:hidden">Expand</span>
-            <span className="text-xs font-semibold text-primary hidden group-open:inline">Collapse</span>
-          </div>
-        </summary>
-        <div className="px-6 pb-6 pt-2">
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Profit bridge</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">Why this matters: revenue is healthy, but discounts, returns and fixed costs decide how much reaches profit.</p>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <tbody className="divide-y divide-border/40">
-                    {BRIDGE_TABLE.filter((row) => ["Revenue", "Discounts", "Returns", "Contribution", "Fixed Costs", "Profit"].includes(row.step)).map((row) => (
-                      <tr key={row.step}>
-                        <td className="py-2 pr-3 font-medium text-foreground">{row.step}</td>
-                        <td className={cn("py-2 text-right font-semibold tabular-nums", row.amount < 0 ? "text-red-600 dark:text-red-400" : row.isResult ? "text-indigo-600 dark:text-indigo-400" : "text-foreground")}>
-                          {canAccess("profit_driver_table")
-                            ? row.amount < 0
-                              ? `(£${Math.abs(row.amount).toLocaleString()})`
-                              : `£${row.amount.toLocaleString()}`
-                            : "Locked"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Profit sensitivity ranking</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">What to watch next: the levers that move profit fastest if they drift in the wrong direction.</p>
-              <ol className="space-y-2">
-                {(canAccess("profit_recommendations")
-                  ? PROFIT_GROWTH_ACTIONS.map((item) => ({ title: item.title, impact: item.impact }))
-                  : [
-                      { title: "Revenue Quality", impact: null },
-                      { title: "Cost Structure", impact: null },
-                      { title: "Operational Efficiency", impact: null },
-                      { title: "Customer Retention", impact: null },
-                    ]
-                ).map((item, i) => (
-                  <li key={item.title} className="flex items-center gap-3">
-                    <span className="w-5 h-5 rounded-full bg-background border border-border/60 flex items-center justify-center text-[11px] font-bold text-muted-foreground shrink-0">{i + 1}</span>
-                    <span className="text-xs font-medium text-foreground">{item.title}</span>
-                    <span className="ml-auto text-xs font-semibold text-foreground tabular-nums">
-                      {item.impact !== null ? `£${item.impact.toLocaleString()}` : "Pro"}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-              {!canAccess("profit_recommendations") && (
-                <p className="text-xs text-primary font-semibold mt-3">Upgrade to view ranked profit drivers and opportunity values.</p>
-              )}
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Profit trend / movement</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">What moved profit: margin and revenue quality improved, while overhead growth absorbed part of the gain.</p>
-              <div className="space-y-2">
-                {DRIVER_DATA.map((row) => (
-                  <div key={row.driver} className="flex items-start gap-3">
-                    <span className={cn("mt-1.5 w-1.5 h-1.5 rounded-full shrink-0", row.impact >= 0 ? "bg-emerald-500" : "bg-red-500")} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs font-medium text-foreground">{row.driver}</p>
-                        <span className={cn("text-xs font-semibold tabular-nums", row.impact >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")}>
-                          {canAccess("profit_driver_table") ? row.impact >= 0 ? `+£${row.impact.toLocaleString()}` : `(£${Math.abs(row.impact).toLocaleString()})` : "Locked"}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground leading-snug">{row.explanation}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border/60 bg-secondary/20 px-4 py-3">
-              <h3 className="text-sm font-bold text-foreground">Staff cost efficiency</h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3">What to watch next: team costs are converting into profit more efficiently, but overhead discipline still matters.</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {[
-                  { label: "Efficiency", value: "£2.80", note: canAccess("profit_staff_cost_trend") ? "per £1 staff cost" : "staff efficiency detail" },
-                  { label: "Staff cost ratio", value: "18.5%", note: canAccess("profit_staff_cost_trend") ? "of revenue" : "overhead discipline" },
-                  { label: "Trend", value: "Improving", note: canAccess("profit_staff_cost_trend") ? "4 periods" : "trend evidence" },
-                ].map((item) => (
-                  <div key={item.label} className="rounded-lg bg-background/60 border border-border/50 px-3 py-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{item.label}</p>
-                    <p className="text-sm font-bold text-foreground mt-1">{canAccess("profit_staff_cost_trend") ? item.value : "Pro"}</p>
-                    <p className="text-[11px] text-muted-foreground leading-snug">{item.note}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </details>
-
-      <DataBenchmarkAssumptions
-        benchmarkNote="Profit health is assessed using contribution margin, overhead load and break-even distance."
-        dataQualityNote="Profit analysis depends on accurate fixed cost, contribution and overhead mapping."
-        className="mb-2"
-      />
-
-    </AppLayout>
-  );
+        {sales && <p className="text-xs text-muted-foreground mt-3">{sales.originalOrders} qualifying original orders · Original AOV: {sales.aov.value === null ? 'Unavailable — no qualifying original orders' : money(sales.aov.value)}. Later refunds affect their own event month.</p>}
+      </section>
+      <section className="rounded-xl border border-border bg-card p-4"><h2 className="text-lg font-bold">Detailed profit bridge</h2><p className="text-xs text-muted-foreground mt-1 mb-4">Deductions have negative signs. Subtotals summarise the preceding components and are not additional deductions. Stock recovery can produce profit in a month without new sales.</p>
+        <div className="overflow-x-auto"><table className="w-full text-sm"><caption className="sr-only">Verified profit bridge</caption><thead><tr><th scope="col" className="text-left py-2 pr-3">Component</th><th scope="col" className="text-right py-2">Selected period {reporting.config?.currency}</th></tr></thead><tbody>
+          {row('Gross product sales', sales ? money(sales.grossProductSales) : 'Unavailable', 'Before product discounts and refunds, excluding VAT')}
+          {row('Product discounts', sales ? money(-sales.discounts) : 'Unavailable', 'Product discounts deducted once')}
+          {row('Product refunds', sales ? money(-sales.productRefundExVat) : 'Unavailable', 'Refund events in the selected period, excluding VAT')}
+          {row('Sales', sales ? money(sales.netProductSales) : 'Unavailable', 'Net product sales, excluding VAT and shipping')}
+          {costRows.map(([label, key, sign, meaning]) => <Fragment key={key}>{key === 'variableCosts' && row('Net shipping revenue', sales ? money(sales.netShipping) : 'Unavailable', 'Shipping charges less discounts and refunds, excluding VAT')}{row(label, value(report?.[key], sign), meaning, missing(report?.[key]))}</Fragment>)}
+        </tbody></table></div>
+        {!bridgeAvailable && <p className="text-xs text-muted-foreground mt-3">Detailed amounts are available in the Pro preview.</p>}
+      </section>
+      <a href="/scenario-lab" className="inline-flex font-semibold text-primary underline">Explore the separate sample model in Scenario Planner</a>
+      <p className="text-sm text-muted-foreground">Scenario Planner still uses a labelled sample month. Its starting figures are not connected to these store results. Store-specific recommendations and forecasts remain unavailable.</p>
+    </div>
+  </AppLayout>;
 }

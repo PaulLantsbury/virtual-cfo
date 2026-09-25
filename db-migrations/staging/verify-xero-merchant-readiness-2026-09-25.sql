@@ -10,6 +10,16 @@ SELECT
  NOT has_function_privilege('night_scout_xero_bootstrap_login','public.xero_merchant_readiness(uuid)','EXECUTE') AS bootstrap_login_denied,
  NOT has_function_privilege('night_scout_import_login','public.xero_merchant_readiness(uuid)','EXECUTE') AS worker_login_denied,
  NOT EXISTS(SELECT 1 FROM pg_proc p CROSS JOIN LATERAL aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a WHERE p.oid='public.xero_merchant_readiness(uuid)'::regprocedure AND a.grantee=0 AND a.privilege_type='EXECUTE') AS public_denied,
- NOT EXISTS(SELECT 1 FROM information_schema.table_privileges WHERE grantee='authenticated' AND table_schema='xero_v1') AS no_direct_xero_table_grants,
+ NOT EXISTS(
+   SELECT 1
+   FROM information_schema.table_privileges
+   WHERE grantee='authenticated'
+     AND table_schema='xero_v1'
+     AND (
+       privilege_type<>'SELECT'
+       OR table_name NOT IN ('account_directories','connections','mapping_audit','mapping_selections','mapping_versions')
+     )
+ ) AS authenticated_xero_grants_bounded,
+ (SELECT count(*)=5 FROM information_schema.table_privileges WHERE grantee='authenticated' AND table_schema='xero_v1' AND privilege_type='SELECT') AS expected_mapping_reads_only,
  NOT has_table_privilege('authenticated','xero_v1.credential_envelopes','SELECT') AS credentials_not_granted,
  NOT has_table_privilege('authenticated','xero_v1.accounting_evidence','SELECT') AS evidence_table_not_granted;

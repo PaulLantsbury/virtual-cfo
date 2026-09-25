@@ -11,7 +11,7 @@ export type XeroBootstrapAuthenticator=(authorization:string)=>Promise<XeroBoots
 export type XeroBootstrapService=Readonly<{
  start(identity:XeroBootstrapIdentity):Promise<Readonly<{url:string}>>|Readonly<{url:string}>;
  startDiscovery(identity:XeroBootstrapIdentity):Promise<Readonly<{url:string}>>|Readonly<{url:string}>;
- complete(input:Readonly<{state:string;code:string}>):Promise<unknown>|unknown;
+ complete(input:Readonly<{state:string;code:string;scope?:string}>):Promise<unknown>|unknown;
  readDiscovery(identity:XeroBootstrapIdentity,handle:string):Promise<unknown>|unknown;
 }>;
 export type XeroBootstrapRouterDependencies=Readonly<{service?:XeroBootstrapService;authenticate?:XeroBootstrapAuthenticator}>;
@@ -19,6 +19,7 @@ const bearer=(value:unknown):value is string=>typeof value==='string'&&value.len
 const plain=(value:unknown):value is Record<string,unknown>=>value!==null&&typeof value==='object'&&!Array.isArray(value)&&Object.getPrototypeOf(value)===Object.prototype;
 const state=(value:unknown):value is string=>typeof value==='string'&&value.length>=16&&value.length<=4096&&/^[A-Za-z0-9._~-]+$/.test(value);
 const code=(value:unknown):value is string=>typeof value==='string'&&value.length>=8&&value.length<=4096&&/^[A-Za-z0-9._~-]+$/.test(value);
+const scope=(value:unknown):value is string=>typeof value==='string'&&value.length>=1&&value.length<=2048&&/^[A-Za-z0-9._:-]+(?: [A-Za-z0-9._:-]+)*$/.test(value);
 function identity(value:unknown):XeroBootstrapIdentity|null{return plain(value)&&typeof value.userId==='string'&&value.userId.length>0&&value.userId.length<=256&&typeof value.isOwner==='boolean'?Object.freeze({userId:value.userId,isOwner:value.isOwner}):null;}
 function safe(error:unknown,res:any){
  const message=error instanceof Error?error.message:'';
@@ -52,7 +53,9 @@ export function createXeroStagingBootstrapRouter(dependencies:XeroBootstrapRoute
  });
  router.get('/callback',async(req,res)=>{
   const query=req.query as Record<string,unknown>;
-  const input=query!==null&&typeof query==='object'&&!Array.isArray(query)&&Object.keys(query).length===2&&state(query.state)&&code(query.code)?{state:query.state,code:query.code}:null;
+  const keys=query!==null&&typeof query==='object'&&!Array.isArray(query)?Object.keys(query).sort():[];
+  const shape=keys.join(',');
+  const input=(shape==='code,state'||shape==='code,scope,state')&&state(query.state)&&code(query.code)&&(query.scope===undefined||scope(query.scope))?{state:query.state,code:query.code,...(query.scope===undefined?{}:{scope:query.scope})}:null;
   if(!input){res.status(400).type('text/plain').send('Xero authorisation unavailable');return;}
   try { const result:any=await service!.complete(Object.freeze(input));if(result?.status==='received'&&state(result?.handle)){res.redirect(303,`/settings?xeroDiscovery=${encodeURIComponent(result.handle)}`);return;}res.status(200).type('text/plain').send('Xero authorisation received. You can close this window.'); } catch(error){safe(error,res);}
  });

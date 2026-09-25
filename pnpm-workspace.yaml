@@ -6,7 +6,6 @@ packages:
   - scripts
 
 autoInstallPeers: false
-confirmModulesPurge: false
 
 catalog:
   '@replit/vite-plugin-cartographer': ^0.5.1

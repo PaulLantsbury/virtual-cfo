@@ -19,7 +19,7 @@ export async function runStagingXeroRefresh({connection,scope,mapping,readSnapsh
  let snapshot,attempts=0;
  while(attempts<maxAttempts){
   attempts+=1;
-  try { snapshot=await readSnapshot(Object.freeze({tenantId:connection.tenantId,date:scope.to}));break; }
+  try { snapshot=await readSnapshot(Object.freeze({tenantId:connection.tenantId,from:scope.from,to:scope.to}));break; }
   catch { /* bounded retry: the persisted failure records the final outcome only. */ }
  }
  if(!snapshot)return recordFailure({connection,scope,persist,retrievedAt,reason:'source_refresh_failed',attempts});

@@ -25,7 +25,7 @@ test('runs only through the worker credential port and persists bounded evidence
  const deps=dependencies();const runtime=createXeroStagingRefreshRuntime(env,deps);
  const result=await runtime.run(job);
  assert.equal(result.state,'supported');
- assert.deepEqual(deps.calls[0],['credential',{connectionId:'connection-test',tenantId:'tenant-test',date:'2026-10-31'}]);
+ assert.deepEqual(deps.calls[0],['credential',{connectionId:'connection-test',tenantId:'tenant-test',from:'2026-10-01',to:'2026-10-31'}]);
  assert.equal(deps.calls[1][0],'supported');
  assert.doesNotMatch(JSON.stringify(deps.calls[1][1]),/access[_-]?token|refresh[_-]?token|secret/i);
 });

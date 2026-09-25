@@ -42,9 +42,19 @@ test('returns stale only for exact persisted supported evidence after refresh fa
  const h=harness({latest:[prior]}),result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl:invalidGrant,now:()=> '2026-09-19T02:00:00.000Z'})();
  assert.equal(result.state,'stale');assert.equal(result.scope.to,'2026-09-18');assert.equal(h.calls.filter(call=>call.sql.includes('worker_release_refresh_lease')).length,0);
 });
-test('a fenced rotation retains ownership through terminal evidence and report failure cannot refresh twice',async()=>{
- const h=harness();let tokenCalls=0;
- const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token'){tokenCalls+=1;return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough'})};}throw Error('report unavailable');};
+test('a fenced rotation retains ownership and bounded report retry reuses one access token',async()=>{
+ const h=harness();let tokenCalls=0,reportCalls=0;
+ const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token'){tokenCalls+=1;return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough'})};}reportCalls+=1;throw Error('report unavailable');};
  const result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl,now:()=> '2026-09-19T02:00:00.000Z'})();
- assert.equal(result.state,'failed');assert.equal(tokenCalls,1);assert.equal(h.calls.filter(call=>call.sql.includes('worker_store_refresh_envelope_leased')).length,1);const evidence=h.calls.find(call=>call.sql.includes('worker_record_accounting_evidence_leased'));assert.equal(evidence.params[16],2);assert.equal(h.calls.filter(call=>call.sql.includes('worker_release_refresh_lease')).length,0);
+ assert.equal(result.state,'failed');assert.equal(tokenCalls,1);assert.equal(reportCalls,2);assert.equal(h.calls.filter(call=>call.sql.includes('worker_store_refresh_envelope_leased')).length,1);const evidence=h.calls.find(call=>call.sql.includes('worker_record_accounting_evidence_leased'));assert.equal(evidence.params[16],2);assert.equal(h.calls.filter(call=>call.sql.includes('worker_release_refresh_lease')).length,0);
+});
+
+test('successful report requests use the configured accounting period after one rotation',async()=>{
+ const h=harness();let tokenCalls=0;const urls=[];
+ const empty={Reports:[{ReportTitles:['Empty'],Rows:[]}]};
+ const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token'){tokenCalls+=1;return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough'})};}urls.push(url.toString());return {ok:true,json:async()=>url.toString().includes('/Organisation')?{Organisations:[{BaseCurrency:'GBP'}]}:empty};};
+ const result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl,now:()=> '2026-09-19T02:00:00.000Z'})();
+ assert.equal(result.state,'failed');assert.equal(tokenCalls,1);assert.equal(urls.length,5);
+ assert.match(urls[1],/ProfitAndLoss\?fromDate=2026-09-01&toDate=2026-09-18$/);
+ assert.match(urls[4],/BankSummary\?fromDate=2026-09-01&toDate=2026-09-18$/);
 });

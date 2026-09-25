@@ -8,6 +8,8 @@ type Dependencies = {
   verify: (token: string) => Promise<string>;
   stores: (userId: string) => Promise<Store[]>;
   clear: () => void;
+  preferredStore?: (userId: string) => string | null;
+  rememberStore?: (userId: string, storeId: string | null) => void;
   now?: () => number;
 };
 
@@ -43,7 +45,11 @@ export function createSessionAccess(deps: Dependencies) {
         if (request !== version) return;
         if (now() >= expiresAt) { reset('signed-out'); return; }
         if (stores.some(s => !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s.id)) || new Set(stores.map(s => s.id)).size !== stores.length) throw new Error('Invalid membership result');
-        publish({ status: stores.length === 1 ? 'ready' : stores.length ? 'choose-store' : 'no-store', userId, stores, storeId: stores.length === 1 ? stores[0].id : null, revision: request });
+        let preferred: string | null = null;
+        try { preferred = deps.preferredStore?.(userId) ?? null; } catch { preferred = null; }
+        const selected = stores.length === 1 ? stores[0] : stores.find(store => store.id === preferred) ?? null;
+        if (preferred && !stores.some(store => store.id === preferred)) { try { deps.rememberStore?.(userId, null); } catch { /* storage must not affect access */ } }
+        publish({ status: selected ? 'ready' : stores.length ? 'choose-store' : 'no-store', userId, stores, storeId: selected?.id ?? null, revision: request });
       } catch {
         if (request === version) reset('error');
       }
@@ -51,6 +57,7 @@ export function createSessionAccess(deps: Dependencies) {
     select(storeId: string) {
       if (!expiresAt || now() >= expiresAt) { reset('signed-out'); return; }
       if (!state.userId || !state.stores.some(s => s.id === storeId)) throw new Error('Store is not authorised');
+      try { deps.rememberStore?.(state.userId, storeId); } catch { /* storage must not affect access */ }
       deps.clear(); version++;
       publish({ ...state, status: 'ready', storeId, revision: version });
     },

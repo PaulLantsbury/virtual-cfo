@@ -5,6 +5,16 @@ import { createSessionAccess, type AccessState, type SessionInput } from './sess
 
 type AuthContextValue = AccessState & { select: (id: string) => void; retry: () => void; signOut: () => Promise<void>; signOutError: boolean; beginSignIn: () => void };
 const AuthContext = createContext<AuthContextValue | null>(null);
+const selectedStoreKey = (userId: string) => `night-scout:selected-store:${userId}`;
+const preferredStore = (userId: string) => {
+  try { return window.sessionStorage.getItem(selectedStoreKey(userId)); } catch { return null; }
+};
+const rememberStore = (userId: string, storeId: string | null) => {
+  try {
+    if (storeId) window.sessionStorage.setItem(selectedStoreKey(userId), storeId);
+    else window.sessionStorage.removeItem(selectedStoreKey(userId));
+  } catch { /* access remains governed by freshly verified memberships */ }
+};
 export function AuthProvider({ children }: { children: ReactNode }) {
   const cache = useQueryClient();
   const blocked = useRef(false);
@@ -25,6 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { id: row.store_id, name: store.name || 'Your store' };
       });
     },
+    preferredStore,
+    rememberStore,
   }), [cache]);
   const state = useSyncExternalStore(access.subscribe, access.getSnapshot, access.getSnapshot);
   useEffect(() => {

@@ -8,8 +8,9 @@ import {xeroOAuthRuntime} from './lib/xero-oauth';
 import {createXeroRouter} from './routes/xero';
 import {createXeroStagingBootstrapRouter, type XeroBootstrapRouterDependencies} from './routes/xero-staging-bootstrap';
 import {mountStagingSpa} from './lib/mount-staging-spa.ts';
+import {createXeroMerchantReadinessRouter,type XeroReadinessDependencies} from './routes/xero-merchant-readiness.ts';
 
-export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string): Express {
+export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies): Express {
 const app: Express = express();
 
 app.use(
@@ -35,6 +36,7 @@ app.use(cors());
 // Mount before general body parsing so review limits and safe errors apply.
 app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
 app.use('/api/xero/staging',createXeroStagingBootstrapRouter(xeroBootstrap));
+app.use('/api/xero',createXeroMerchantReadinessRouter(xeroReadiness));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api/xero',createXeroRouter(xeroOAuthRuntime(process.env)));

@@ -68,7 +68,7 @@ export function createXeroStagingBootstrapRouter(dependencies:XeroBootstrapRoute
   const shape=keys.join(',');
   const input=(shape==='code,state'||shape==='code,scope,state')&&state(query.state)&&code(query.code)&&(query.scope===undefined||scope(query.scope))?{state:query.state,code:query.code,...(query.scope===undefined?{}:{scope:query.scope})}:null;
   if(!input){res.status(400).type('text/plain').send('Xero authorisation unavailable');return;}
-  try { const result:any=await service!.complete(Object.freeze(input));if(result?.status==='received'&&state(result?.handle)){res.redirect(303,`/settings?xeroDiscovery=${encodeURIComponent(result.handle)}`);return;}res.status(200).type('text/plain').send('Xero authorisation received. You can close this window.'); } catch(error){safe(error,res);}
+  try { const result:any=await service!.complete(Object.freeze(input));if(result?.status==='received'&&state(result?.handle)){res.redirect(303,`/settings?xeroDiscovery=${encodeURIComponent(result.handle)}`);return;}if(result?.status==='connected'){res.redirect(303,'/settings?xeroConnected=1');return;}res.status(200).type('text/plain').send('Xero authorisation received. You can close this window.'); } catch(error){safe(error,res);}
  });
  const parserErrors:ErrorRequestHandler=(error,_req,res,_next)=>res.status(error?.type==='entity.too.large'?413:400).json({error:error?.type==='entity.too.large'?'Xero authorisation unavailable':'Invalid JSON request'});
  router.use(parserErrors);

@@ -3,6 +3,7 @@ import {startReviewRuntime} from "./lib/review-startup";
 import { logger } from "./lib/logger";
 import {createXeroStagingBootstrapRuntime} from './lib/xero-staging-bootstrap-runtime';
 import {resolve} from 'node:path';
+import {createXeroMerchantReadinessRuntime} from './lib/xero-merchant-readiness-runtime.ts';
 
 const rawPort = process.env["PORT"];
 
@@ -32,8 +33,14 @@ try{xeroBootstrap=createXeroStagingBootstrapRuntime(process.env);}catch{
   await runtime?.close();
   process.exit(1);
 }
+let xeroReadiness;
+try{xeroReadiness=createXeroMerchantReadinessRuntime(process.env);}catch{
+  logger.error("Xero merchant readiness configuration failed; server startup stopped");
+  await Promise.all([runtime?.close(),xeroBootstrap?.close()]);
+  process.exit(1);
+}
 const webRoot=process.env.NIGHT_SCOUT_RUNTIME_ENV==='staging'?resolve(process.cwd(),'artifacts/virtual-cfo/dist/public'):undefined;
-const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined,webRoot);
+const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined,webRoot,xeroReadiness);
 const server=app.listen(port, localBind ?? "0.0.0.0", (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");

@@ -21,6 +21,8 @@ services:
         value: staging
       - key: NIGHT_SCOUT_XERO_STAGING_BOOTSTRAP_ENABLED
         value: 'true'
+      - key: NIGHT_SCOUT_XERO_MERCHANT_READINESS_ENABLED
+        value: 'true'
       - key: NIGHT_SCOUT_XERO_STAGING_PROJECT_REF
         value: bioalckltvkhlczusdvl
       - key: NIGHT_SCOUT_XERO_REDIRECT_URI

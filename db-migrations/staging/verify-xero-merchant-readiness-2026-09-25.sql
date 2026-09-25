@@ -1,0 +1,15 @@
+SELECT
+ to_regprocedure('public.xero_merchant_readiness(uuid)') IS NOT NULL AS readiness_present,
+ (SELECT p.prosecdef FROM pg_proc p WHERE p.oid='public.xero_merchant_readiness(uuid)'::regprocedure) AS security_definer,
+ (SELECT p.prorettype='jsonb'::regtype FROM pg_proc p WHERE p.oid='public.xero_merchant_readiness(uuid)'::regprocedure) AS jsonb_return,
+ (SELECT p.proconfig=ARRAY['search_path=pg_catalog, public, xero_v1'] FROM pg_proc p WHERE p.oid='public.xero_merchant_readiness(uuid)'::regprocedure) AS fixed_search_path,
+ (SELECT r.rolname NOT IN ('anon','authenticated','service_role','night_scout_xero_bootstrap_login','night_scout_import_login') FROM pg_proc p JOIN pg_roles r ON r.oid=p.proowner WHERE p.oid='public.xero_merchant_readiness(uuid)'::regprocedure) AS reviewed_owner_class,
+ has_function_privilege('authenticated','public.xero_merchant_readiness(uuid)','EXECUTE') AS authenticated_execute,
+ NOT has_function_privilege('anon','public.xero_merchant_readiness(uuid)','EXECUTE') AS anon_denied,
+ NOT has_function_privilege('service_role','public.xero_merchant_readiness(uuid)','EXECUTE') AS service_role_denied,
+ NOT has_function_privilege('night_scout_xero_bootstrap_login','public.xero_merchant_readiness(uuid)','EXECUTE') AS bootstrap_login_denied,
+ NOT has_function_privilege('night_scout_import_login','public.xero_merchant_readiness(uuid)','EXECUTE') AS worker_login_denied,
+ NOT EXISTS(SELECT 1 FROM pg_proc p CROSS JOIN LATERAL aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a WHERE p.oid='public.xero_merchant_readiness(uuid)'::regprocedure AND a.grantee=0 AND a.privilege_type='EXECUTE') AS public_denied,
+ NOT EXISTS(SELECT 1 FROM information_schema.table_privileges WHERE grantee='authenticated' AND table_schema='xero_v1') AS no_direct_xero_table_grants,
+ NOT has_table_privilege('authenticated','xero_v1.credential_envelopes','SELECT') AS credentials_not_granted,
+ NOT has_table_privilege('authenticated','xero_v1.accounting_evidence','SELECT') AS evidence_table_not_granted;

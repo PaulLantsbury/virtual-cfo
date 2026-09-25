@@ -35,22 +35,31 @@ export function parseCashControlReadiness(value: unknown): CashControlReadinessI
   });
 }
 
-async function read(path: string, signal?: AbortSignal): Promise<unknown> {
-  const response = await fetch(path, { credentials: 'include', cache: 'no-store', signal, headers: { accept: 'application/json' } });
+type ReadDependencies = Readonly<{fetcher?:typeof fetch;accessToken?:()=>Promise<string>}>;
+async function currentAccessToken():Promise<string>{
+  const {supabase}=await import('./supabase.ts');
+  const {data,error}=await supabase.auth.getSession();const session=data.session;
+  if(error||!session?.access_token||!session.expires_at||session.expires_at*1000<=Date.now())throw Error('Xero readiness unavailable');
+  return session.access_token;
+}
+async function read(path: string, signal?: AbortSignal, dependencies:ReadDependencies={}): Promise<unknown> {
+  const token=await (dependencies.accessToken??currentAccessToken)();
+  if(typeof token!=='string'||token.length<1||token.length>8192||/\s/.test(token))throw Error('Xero readiness unavailable');
+  const response = await (dependencies.fetcher??fetch)(path, { credentials: 'include', cache: 'no-store', signal, headers: { accept: 'application/json', authorization:`Bearer ${token}` } });
   if (!response.ok) throw Error('Xero readiness unavailable');
   return response.json();
 }
 
-export async function fetchXeroMerchantReadiness(activeStoreId: string, signal?: AbortSignal): Promise<XeroMerchantReadiness> {
+export async function fetchXeroMerchantReadiness(activeStoreId: string, signal?: AbortSignal, dependencies:ReadDependencies={}): Promise<XeroMerchantReadiness> {
   if (!storeId(activeStoreId)) throw Error('Xero readiness unavailable');
-  const parsed = parseXeroMerchantReadiness(await read(`/api/xero/merchant-readiness?storeId=${encodeURIComponent(activeStoreId)}`, signal));
+  const parsed = parseXeroMerchantReadiness(await read(`/api/xero/merchant-readiness?storeId=${encodeURIComponent(activeStoreId)}`, signal,dependencies));
   if (!parsed || parsed.storeId !== activeStoreId) throw Error('Xero readiness unavailable');
   return parsed;
 }
 
-export async function fetchCashControlReadiness(activeStoreId: string, signal?: AbortSignal): Promise<CashControlReadinessInput> {
+export async function fetchCashControlReadiness(activeStoreId: string, signal?: AbortSignal, dependencies:ReadDependencies={}): Promise<CashControlReadinessInput> {
   if (!storeId(activeStoreId)) throw Error('Xero readiness unavailable');
-  const parsed = parseCashControlReadiness(await read(`/api/xero/cash-readiness?storeId=${encodeURIComponent(activeStoreId)}`, signal));
+  const parsed = parseCashControlReadiness(await read(`/api/xero/cash-readiness?storeId=${encodeURIComponent(activeStoreId)}`, signal,dependencies));
   if (!parsed || parsed.storeId !== activeStoreId) throw Error('Xero readiness unavailable');
   return parsed;
 }

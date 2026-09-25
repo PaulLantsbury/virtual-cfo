@@ -1,4 +1,4 @@
-import { parseXeroMerchantConnection, type XeroMerchantConnection } from './xeroMerchantConnection.ts';
+export type XeroReadinessConnection = Readonly<{status:'active'|'reauthorization_required'|'disconnected';scopeVersion:'read-only-v1';createdAt:string;lastSuccessAt:string|null;lastFailureAt:string|null;mappingReviewRequired:boolean}>;
 
 /**
  * The only Xero evidence shape allowed into the browser before accounting
@@ -10,9 +10,9 @@ export type XeroMerchantEvidenceState = 'checking' | 'ready' | 'stale' | 'review
 
 export type XeroMerchantReadiness = Readonly<{
   storeId: string;
-  connection: XeroMerchantConnection | null;
+  connection: XeroReadinessConnection | null;
   evidenceState: XeroMerchantEvidenceState | null;
-  evidenceAsOf: string | null;
+  evidenceRetrievedAt: string | null;
 }>;
 
 export type XeroMerchantReadinessView = Readonly<{
@@ -28,11 +28,11 @@ const plain = (value: unknown): value is Record<string, unknown> => value !== nu
 
 /** Rejects extra fields so a future server cannot accidentally add values or credentials to this browser boundary. */
 export function parseXeroMerchantReadiness(value: unknown): XeroMerchantReadiness | null {
-  if (!plain(value) || Object.keys(value).sort().join(',') !== 'connection,evidenceAsOf,evidenceState,storeId') return null;
-  if (!id(value.storeId) || !(value.connection === null || parseXeroMerchantConnection(value.connection)) || !(value.evidenceState === null || ['checking', 'ready', 'stale', 'review_required', 'unavailable', 'denied'].includes(String(value.evidenceState))) || !(value.evidenceAsOf === null || timestamp(value.evidenceAsOf))) return null;
-  if (value.connection !== null && parseXeroMerchantConnection(value.connection)!.storeId !== value.storeId) return null;
-  if (value.evidenceState === 'ready' && !timestamp(value.evidenceAsOf)) return null;
-  return Object.freeze({ storeId: value.storeId as string, connection: value.connection === null ? null : parseXeroMerchantConnection(value.connection)!, evidenceState: value.evidenceState as XeroMerchantEvidenceState | null, evidenceAsOf: value.evidenceAsOf as string | null });
+  if (!plain(value) || Object.keys(value).sort().join(',') !== 'connection,evidenceRetrievedAt,evidenceState,storeId') return null;
+  if (!id(value.storeId) || !(value.evidenceState === null || ['checking', 'ready', 'stale', 'review_required', 'unavailable', 'denied'].includes(String(value.evidenceState))) || !(value.evidenceRetrievedAt === null || timestamp(value.evidenceRetrievedAt))) return null;
+  let connection:XeroReadinessConnection|null=null;if(value.connection!==null){if(!plain(value.connection)||Object.keys(value.connection).sort().join(',')!=='createdAt,lastFailureAt,lastSuccessAt,mappingReviewRequired,scopeVersion,status'||!['active','reauthorization_required','disconnected'].includes(String(value.connection.status))||value.connection.scopeVersion!=='read-only-v1'||!timestamp(value.connection.createdAt)||!(value.connection.lastSuccessAt===null||timestamp(value.connection.lastSuccessAt))||!(value.connection.lastFailureAt===null||timestamp(value.connection.lastFailureAt))||typeof value.connection.mappingReviewRequired!=='boolean')return null;connection=Object.freeze(value.connection as XeroReadinessConnection);}
+  if (value.evidenceState === 'ready' && !timestamp(value.evidenceRetrievedAt)) return null;
+  return Object.freeze({ storeId: value.storeId as string, connection, evidenceState: value.evidenceState as XeroMerchantEvidenceState | null, evidenceRetrievedAt: value.evidenceRetrievedAt as string | null });
 }
 
 /** Fail closed: an active, owner-confirmed mapping and current dated evidence are all required. */
@@ -42,7 +42,7 @@ export function xeroMerchantReadinessView(readiness: XeroMerchantReadiness | nul
   if (readiness.connection.status !== 'active') return Object.freeze({ title: 'Xero needs reconnection', detail: 'The read-only Xero connection is not active. Accounting and cash figures remain unavailable.', tone: 'warning', canUseAccountingEvidence: false });
   if (readiness.connection.mappingReviewRequired) return Object.freeze({ title: 'Review Xero mapping', detail: 'An owner must confirm the current mapping before Night Scout can use accounting evidence.', tone: 'warning', canUseAccountingEvidence: false });
   switch (readiness.evidenceState) {
-    case 'ready': return Object.freeze({ title: 'Xero accounting evidence is available', detail: `Current dated evidence is available as of ${readiness.evidenceAsOf}. Xero-reported accounting amounts remain separate from Shopify.`, tone: 'positive', canUseAccountingEvidence: true });
+    case 'ready': return Object.freeze({ title: 'Xero accounting evidence is available', detail: `Current dated evidence was retrieved at ${readiness.evidenceRetrievedAt}. Xero-reported accounting amounts remain separate from Shopify.`, tone: 'positive', canUseAccountingEvidence: true });
     case 'checking': return Object.freeze({ title: 'Checking Xero accounting evidence', detail: 'Accounting and cash figures remain unavailable until the refresh and scope checks complete.', tone: 'neutral', canUseAccountingEvidence: false });
     case 'stale': return Object.freeze({ title: 'Xero evidence may be out of date', detail: 'The latest refresh did not complete. A retained same-store snapshot must not be presented as current.', tone: 'warning', canUseAccountingEvidence: false });
     case 'review_required': return Object.freeze({ title: 'Xero evidence needs review', detail: 'A later posting, mapping change or source change requires review before accounting figures can be presented as current.', tone: 'warning', canUseAccountingEvidence: false });

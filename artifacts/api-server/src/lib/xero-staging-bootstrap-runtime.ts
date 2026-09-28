@@ -11,8 +11,9 @@ const REDIRECTS=new Set([
  'https://night-scout-xero-staging.replit.app/api/xero/staging/callback',
  'https://night-scout-xero-staging.onrender.com/api/xero/staging/callback'
 ]);
-const SCOPES=['accounting.settings.read','accounting.reports.profitandloss.read','accounting.reports.balancesheet.read','accounting.reports.trialbalance.read','accounting.reports.banksummary.read','offline_access'];
-const DISCOVERY_SCOPES=['accounting.settings.read'];
+const IDENTITY_SCOPES=['openid','profile','email'];
+const SCOPES=[...IDENTITY_SCOPES,'accounting.settings.read','accounting.reports.profitandloss.read','accounting.reports.balancesheet.read','accounting.reports.trialbalance.read','accounting.reports.banksummary.read','offline_access'];
+const DISCOVERY_SCOPES=[...IDENTITY_SCOPES,'accounting.settings.read'];
 const categories=['revenue','processingFee','advertising','software','includedCash'] as const;
 const allowedTypes={revenue:new Set(['REVENUE','SALES']),processingFee:new Set(['OVERHEADS','EXPENSE']),advertising:new Set(['OVERHEADS','EXPENSE']),software:new Set(['OVERHEADS','EXPENSE']),includedCash:new Set(['BANK'])} as const;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -83,14 +84,14 @@ export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fe
    if(!binding||binding.expires<now()||binding.userId!==config.ownerId)throw unavailable();
    if(input.scope!==undefined&&!matchesScopes(input.scope,binding.expectedScopes))throw unavailable();
    if(binding.phase==='discovery'){
-    const provider=await exchangeAndDiscover({code:input.code,config,fetchImpl,requireRefresh:false});
+    const provider=await exchangeAndDiscover({code:input.code,config,fetchImpl,requireRefresh:false,expectedScopes:binding.expectedScopes});
     const handle=randomBytes(32).toString('base64url');boundedSet(discoveries,digest(handle),Object.freeze({userId:binding.userId,expires:now()+300_000,value:Object.freeze({tenantId:provider.tenantId,tenantName:provider.tenantName,retrievedAt:provider.retrievedAt,accounts:provider.accounts})}),now());
     return Object.freeze({status:'received',handle});
    }
    if(!config.bootstrapReady||binding.storeId!==config.storeId)throw unavailable();
    let refresh='';
    try{
-    const provider=await exchangeAndDiscover({code:input.code,config,fetchImpl,requireRefresh:true});
+    const provider=await exchangeAndDiscover({code:input.code,config,fetchImpl,requireRefresh:true,expectedScopes:binding.expectedScopes});
     if(provider.tenantId!==binding.expectedTenantId)throw unavailable();
     refresh=provider.refreshToken;const connectionId=randomUUID();
     const envelope=crypto!.encrypt(connectionId,provider.tenantId,refresh),mapping=materialiseMapping(binding.mapping,provider.accounts);
@@ -117,9 +118,9 @@ function classifyDatabaseError(error:unknown):'authentication'|'tls'|'network'|'
 function matchesScopes(raw:string,expected:readonly string[]){const values=raw.split(' ');return values.length===new Set(values).size&&values.length===expected.length&&values.slice().sort().every((value,index)=>value===[...expected].sort()[index]);}
 function prune<T extends {expires:number}>(states:Map<string,T>,at:number){for(const [key,value] of states)if(value.expires<at)states.delete(key);}
 function boundedSet<T extends {expires:number}>(items:Map<string,T>,key:string,value:T,at:number){prune(items,at);if(items.size>=32)throw unavailable();items.set(key,value);}
-async function exchangeAndDiscover({code,config,fetchImpl,requireRefresh}:{code:string;config:any;fetchImpl:typeof fetch;requireRefresh:boolean}){
+async function exchangeAndDiscover({code,config,fetchImpl,requireRefresh,expectedScopes}:{code:string;config:any;fetchImpl:typeof fetch;requireRefresh:boolean;expectedScopes:readonly string[]}){
  const tokenBody:any=await requestJson(fetchImpl,'https://identity.xero.com/connect/token',{method:'POST',redirect:'error',headers:{authorization:`Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:config.redirectUri}).toString()},32_768);
- const accessToken=tokenBody?.access_token,refreshToken=tokenBody?.refresh_token;if(typeof accessToken!=='string'||accessToken.length<16||(requireRefresh&&(typeof refreshToken!=='string'||refreshToken.length<16||refreshToken.length>8192)))throw unavailable();
+ const accessToken=tokenBody?.access_token,refreshToken=tokenBody?.refresh_token;if(typeof accessToken!=='string'||accessToken.length<16||typeof tokenBody?.scope!=='string'||!matchesScopes(tokenBody.scope,expectedScopes)||(requireRefresh&&(typeof refreshToken!=='string'||refreshToken.length<16||refreshToken.length>8192)))throw unavailable();
  const tenants:any=await requestJson(fetchImpl,'https://api.xero.com/connections',{redirect:'error',headers:{authorization:`Bearer ${accessToken}`}},65_536);if(!Array.isArray(tenants)||tenants.length!==1||!uuid.test(tenants[0]?.tenantId??'')||typeof tenants[0]?.tenantName!=='string'||tenants[0].tenantName.length<1||tenants[0].tenantName.length>256)throw unavailable();
  const accountBody:any=await requestJson(fetchImpl,'https://api.xero.com/api.xro/2.0/Accounts',{redirect:'error',headers:{authorization:`Bearer ${accessToken}`,'xero-tenant-id':tenants[0].tenantId,accept:'application/json'}},1_048_576);if(!Array.isArray(accountBody?.Accounts)||accountBody.Accounts.length<1||accountBody.Accounts.length>500)throw unavailable();
  const accounts=accountBody.Accounts.map((row:any)=>{const value={accountId:row.AccountID,accountCode:row.Code==null||row.Code===''?null:row.Code,accountName:row.Name,accountType:row.Type,accountStatus:row.Status};if(typeof value.accountId!=='string'||value.accountId.length<1||value.accountId.length>256||value.accountCode!==null&&(typeof value.accountCode!=='string'||value.accountCode.length>256)||[value.accountName,value.accountType,value.accountStatus].some(v=>typeof v!=='string'||v.length<1||v.length>256))throw unavailable();return Object.freeze(value) as Account;});

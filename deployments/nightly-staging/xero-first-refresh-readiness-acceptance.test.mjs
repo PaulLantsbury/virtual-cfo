@@ -10,6 +10,7 @@ const mappingVersionId='44444444-4444-4444-8444-444444444444';
 const tenantId='55555555-5555-4555-8555-555555555555';
 const projectRef='bioalckltvkhlczusdvl';
 const mapping={revenue:['sales'],processingFee:['fees'],advertising:['ads'],software:['software'],includedCash:['bank']};
+const scopes='accounting.settings.read accounting.reports.profitandloss.read accounting.reports.balancesheet.read accounting.reports.trialbalance.read accounting.reports.banksummary.read offline_access';
 const masterKey='m'.repeat(43),keyVersion='staging-v1';
 const workerEnv=Object.freeze({
  NIGHT_SCOUT_RUNTIME_ENV:'staging',NIGHT_SCOUT_XERO_STAGING_REFRESH_ENABLED:'true',
@@ -52,10 +53,10 @@ test('bootstrap-persisted connection becomes ready only after the first bounded 
   if(sql.includes('worker_get_latest_supported_evidence'))return {rows:[]};
   throw Error(`unexpected SQL: ${sql}`);
  };
- const fetchImpl=async url=>{const value=String(url);if(value==='https://identity.xero.com/connect/token'){events.push('provider_token_refresh');return new Response(JSON.stringify({access_token:'access-token-long-enough',refresh_token:'rotated-refresh-token-long-enough'}),{status:200});}const name=Object.keys(reports).find(key=>value.includes(key));assert.ok(name,`unexpected Xero URL ${value}`);assert.equal(db.lease,lease,'the durable fence must remain held for every report read');events.push(`provider_report_${name}`);return new Response(JSON.stringify(reports[name]),{status:200});};
+ const fetchImpl=async url=>{const value=String(url);if(value==='https://identity.xero.com/connect/token'){events.push('provider_token_refresh');return new Response(JSON.stringify({access_token:'access-token-long-enough',refresh_token:'rotated-refresh-token-long-enough',scope:scopes}),{status:200});}if(value==='https://api.xero.com/connections'){events.push('provider_connection_preflight');return new Response(JSON.stringify([{tenantId}]),{status:200});}const name=Object.keys(reports).find(key=>value.includes(key));assert.ok(name,`unexpected Xero URL ${value}`);assert.equal(db.lease,lease,'the durable fence must remain held for every report read');events.push(`provider_report_${name}`);return new Response(JSON.stringify(reports[name]),{status:200});};
  const outcome=await createStagingXeroRefreshJob({env:workerEnv,query,fetchImpl,now:()=> '2026-09-25T16:00:00.000Z'})();
  assert.equal(outcome.state,'supported');assert.equal(db.version,2);assert.equal(db.lease,null);assert.equal(db.evidence.length,1);
- assert.equal(events[0],'lease_acquired');assert.equal(events[1],'provider_token_refresh');assert.equal(events[2],'credential_rotated_fence_retained');assert.equal(events.at(-1),'evidence_persisted_fence_cleared');assert.equal(events.filter(event=>event.startsWith('provider_report_')).length,5);
+ assert.equal(events[0],'lease_acquired');assert.equal(events[1],'provider_token_refresh');assert.equal(events[2],'credential_rotated_fence_retained');assert.equal(events[3],'provider_connection_preflight');assert.equal(events.at(-1),'evidence_persisted_fence_cleared');assert.equal(events.filter(event=>event.startsWith('provider_report_')).length,5);
  const saved=db.evidence[0];assert.deepEqual(saved.slice(11),[8000,-300,-2000,-500,10320]);
  const after=await read('valid');assert.equal(after.connection.status,'active');assert.equal(after.connection.mappingReviewRequired,false);assert.equal(after.evidenceState,'ready');assert.equal(after.evidenceRetrievedAt,'2026-09-25T16:00:00.000Z');
  assert.doesNotMatch(JSON.stringify(after),/tenant|mappingVersion|credential|token|booked|revenue|cash/i);

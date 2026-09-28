@@ -16,6 +16,7 @@ test('AES-GCM envelope is bound to connection, tenant, key version and master ma
 });
 
 const mapping={revenue:['sales'],processingFee:['fees'],advertising:['ads'],software:['software'],includedCash:['cash']};
+const scopes='accounting.settings.read accounting.reports.profitandloss.read accounting.reports.balancesheet.read accounting.reports.trialbalance.read accounting.reports.banksummary.read offline_access';
 const env=Object.freeze({NIGHT_SCOUT_RUNTIME_ENV:'staging',NIGHT_SCOUT_XERO_STAGING_REFRESH_ENABLED:'true',NIGHT_SCOUT_XERO_STAGING_PROJECT_REF:'bioalckltvkhlczusdvl',NIGHT_SCOUT_XERO_STAGING_CONNECTION_ID:binding.connectionId,NIGHT_SCOUT_XERO_STAGING_MAPPING_VERSION_ID:'22222222-2222-4222-8222-222222222222',NIGHT_SCOUT_XERO_REPORT_FROM:'2026-09-01',NIGHT_SCOUT_XERO_REPORT_TO:'2026-09-18',NIGHT_SCOUT_XERO_CURRENCY:'GBP',NIGHT_SCOUT_INTAKE_DATABASE_URL:'postgresql://night_scout_import_login:password@db.bioalckltvkhlczusdvl.supabase.co:5432/postgres',NIGHT_SCOUT_STAGING_CA_PEM:`-----BEGIN CERTIFICATE-----\n${'A'.repeat(120)}\n-----END CERTIFICATE-----`,NIGHT_SCOUT_XERO_CLIENT_ID:'12345678-1234-1234-1234-123456789abc',NIGHT_SCOUT_XERO_CLIENT_SECRET:'x'.repeat(32),NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY:'m'.repeat(43),NIGHT_SCOUT_XERO_ENVELOPE_KEY_VERSION:binding.keyVersion,NIGHT_SCOUT_XERO_STAGING_MAPPING_JSON:JSON.stringify(mapping)});
 function harness({contextMapping=mapping,keyVersion=binding.keyVersion,leaseExpiresAt=null,acquire=true,latest=[]}={}){
  const envelope=encryptStagingEnvelope(env.NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY,binding,'refresh-token-that-is-long-enough'),calls=[];
@@ -44,7 +45,7 @@ test('returns stale only for exact persisted supported evidence after refresh fa
 });
 test('a fenced rotation retains ownership and bounded report retry reuses one access token',async()=>{
  const h=harness();let tokenCalls=0,reportCalls=0;
- const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token'){tokenCalls+=1;return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough'})};}reportCalls+=1;throw Error('report unavailable');};
+ const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token'){tokenCalls+=1;return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough',scope:scopes})};}if(url==='https://api.xero.com/connections')return {ok:true,json:async()=>[{tenantId:binding.tenantId}]};reportCalls+=1;throw Error('report unavailable');};
  const result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl,now:()=> '2026-09-19T02:00:00.000Z'})();
  assert.equal(result.state,'failed');assert.equal(tokenCalls,1);assert.equal(reportCalls,2);assert.equal(h.calls.filter(call=>call.sql.includes('worker_store_refresh_envelope_leased')).length,1);const evidence=h.calls.find(call=>call.sql.includes('worker_record_accounting_evidence_leased'));assert.equal(evidence.params[16],2);assert.equal(h.calls.filter(call=>call.sql.includes('worker_release_refresh_lease')).length,0);
 });
@@ -52,9 +53,23 @@ test('a fenced rotation retains ownership and bounded report retry reuses one ac
 test('successful report requests use the configured accounting period after one rotation',async()=>{
  const h=harness();let tokenCalls=0;const urls=[];
  const empty={Reports:[{ReportTitles:['Empty'],Rows:[]}]};
- const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token'){tokenCalls+=1;return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough'})};}urls.push(url.toString());return {ok:true,json:async()=>url.toString().includes('/Organisation')?{Organisations:[{BaseCurrency:'GBP'}]}:empty};};
+ const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token'){tokenCalls+=1;return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough',scope:scopes})};}if(url==='https://api.xero.com/connections')return {ok:true,json:async()=>[{tenantId:binding.tenantId}]};urls.push(url.toString());return {ok:true,json:async()=>url.toString().includes('/Organisation')?{Organisations:[{BaseCurrency:'GBP'}]}:empty};};
  const result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl,now:()=> '2026-09-19T02:00:00.000Z'})();
  assert.equal(result.state,'failed');assert.equal(tokenCalls,1);assert.equal(urls.length,5);
  assert.match(urls[1],/ProfitAndLoss\?fromDate=2026-09-01&toDate=2026-09-18$/);
  assert.match(urls[4],/BankSummary\?fromDate=2026-09-01&toDate=2026-09-18$/);
+});
+
+test('rotates the refresh credential but safely refuses a token missing required scopes',async()=>{
+ const h=harness(),events=[];let connections=0;
+ const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token')return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough',scope:'accounting.settings.read offline_access'})};connections+=1;throw Error('must not inspect connections');};
+ const result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl,diagnose:event=>events.push(event),now:()=> '2026-09-19T02:00:00.000Z'})();
+ assert.equal(result.state,'failed');assert.equal(connections,0);assert.deepEqual(events,[{event:'xero_source_refresh_failed',phase:'token',reason:'insufficient_scope'}]);assert.equal(h.calls.filter(call=>call.sql.includes('worker_store_refresh_envelope_leased')).length,1);assert.equal(h.calls.filter(call=>call.sql.includes('worker_record_credential_refresh_failure')).length,0);
+});
+
+test('classifies an absent persisted tenant as reconnect required without leaking provider rows',async()=>{
+ const h=harness(),events=[];let reports=0;
+ const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token')return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough',scope:scopes})};if(url==='https://api.xero.com/connections')return {ok:true,json:async()=>[{tenantId:'different-private-tenant'}]};reports+=1;throw Error('must not read reports');};
+ const result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl,diagnose:event=>events.push(event),now:()=> '2026-09-19T02:00:00.000Z'})();
+ assert.equal(result.state,'failed');assert.equal(reports,0);assert.deepEqual(events,[{event:'xero_source_refresh_failed',phase:'connection',reason:'reconnect_required'}]);assert.doesNotMatch(JSON.stringify(events),/different-private-tenant|tenant-test/);assert.equal(h.calls.filter(call=>call.sql.includes('worker_store_refresh_envelope_leased')).length,1);
 });

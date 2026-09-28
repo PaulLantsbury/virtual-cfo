@@ -61,3 +61,41 @@ test('retry capability is private and verifier is status-only',()=>{
  assert.doesNotMatch(verifier,/AS\s+evidence_id|SELECT\s+ae\.id/i);
  assert.doesNotMatch(verifier,/booked_revenue|tenant_id|ciphertext|encrypted_dek/i);
 });
+
+test('second reviewed retry preserves the consumed authorization and arms only the newest failure',async()=>{
+ const {db,mappingId}=await preparedDb();
+ try {
+  await db.exec(migration('20260925_xero_reviewed_failed_scope_retry.sql'));
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  await db.query(`SELECT * FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`);
+  const lease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,1,300) lease',[connection])).rows[0].lease;
+  await db.query(`SELECT xero_v1.worker_record_accounting_evidence_leased($1,$2,'2026-09-01','2026-09-25','GBP',false,'failed','source_refresh_failed',NULL,clock_timestamp(),NULL,NULL,NULL,NULL,NULL,NULL,1,$3)`,[connection,mappingId,lease]);
+  await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+
+  await db.exec(migration('20260928_xero_second_reviewed_failed_scope_retry.sql'));
+  const status=(await db.query(migration('verify-xero-second-reviewed-retry-2026-09-28.sql'))).rows[0];
+  assert.deepEqual(status,{
+   exactly_two_reviewed_retries:true,
+   exactly_one_retry_consumed:true,
+   exactly_one_retry_unconsumed:true,
+   current_latest_failure_authorized:true
+  });
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  assert.equal((await db.query(`SELECT count(*)::int count FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`)).rows[0].count,1);
+  await assert.rejects(db.query(`SELECT * FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`),/job unavailable|retry unavailable/i);
+ } finally {await db.close();}
+});
+
+test('second reviewed retry fails closed while an earlier authorization is unconsumed',async()=>{
+ const {db}=await preparedDb();
+ try {
+  await db.exec(migration('20260925_xero_reviewed_failed_scope_retry.sql'));
+  await assert.rejects(db.exec(migration('20260928_xero_second_reviewed_failed_scope_retry.sql')),/prior Xero retry authorization unavailable/i);
+ } finally {await db.close();}
+});
+
+test('second retry verifier remains status-only',()=>{
+ const verifier=migration('verify-xero-second-reviewed-retry-2026-09-28.sql');
+ assert.doesNotMatch(verifier,/AS\s+evidence_id|SELECT\s+ae\.id\s+AS/i);
+ assert.doesNotMatch(verifier,/booked_revenue|tenant_id|ciphertext|encrypted_dek/i);
+});

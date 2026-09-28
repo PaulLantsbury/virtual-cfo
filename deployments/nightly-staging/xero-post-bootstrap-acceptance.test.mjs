@@ -4,6 +4,7 @@ import {createStagingXeroRefreshJob,decryptStagingEnvelope,encryptStagingEnvelop
 
 const connectionId='11111111-1111-4111-8111-111111111111',mappingVersionId='22222222-2222-4222-8222-222222222222',tenantId='33333333-3333-4333-8333-333333333333';
 const mapping={revenue:['sales'],processingFee:['fees'],advertising:['ads'],software:['software'],includedCash:['bank']};
+const scopes='accounting.settings.read accounting.reports.profitandloss.read accounting.reports.balancesheet.read accounting.reports.trialbalance.read accounting.reports.banksummary.read offline_access';
 const master='m'.repeat(43),keyVersion='staging-v1';
 const env=Object.freeze({NIGHT_SCOUT_RUNTIME_ENV:'staging',NIGHT_SCOUT_XERO_STAGING_REFRESH_ENABLED:'true',NIGHT_SCOUT_XERO_STAGING_PROJECT_REF:'bioalckltvkhlczusdvl',NIGHT_SCOUT_XERO_STAGING_CONNECTION_ID:connectionId,NIGHT_SCOUT_XERO_STAGING_MAPPING_VERSION_ID:mappingVersionId,NIGHT_SCOUT_XERO_REPORT_FROM:'2026-09-01',NIGHT_SCOUT_XERO_REPORT_TO:'2026-09-24',NIGHT_SCOUT_XERO_CURRENCY:'GBP',NIGHT_SCOUT_INTAKE_DATABASE_URL:'postgresql://night_scout_import_login:password@db.bioalckltvkhlczusdvl.supabase.co:5432/postgres',NIGHT_SCOUT_STAGING_CA_PEM:`-----BEGIN CERTIFICATE-----\n${'A'.repeat(120)}\n-----END CERTIFICATE-----`,NIGHT_SCOUT_XERO_CLIENT_ID:'44444444-4444-4444-8444-444444444444',NIGHT_SCOUT_XERO_CLIENT_SECRET:'s'.repeat(32),NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY:master,NIGHT_SCOUT_XERO_ENVELOPE_KEY_VERSION:keyVersion,NIGHT_SCOUT_XERO_STAGING_MAPPING_JSON:JSON.stringify(mapping)});
 const row=(id,value)=>({RowType:'Row',Cells:[{Value:id,Attributes:[{Id:'account',Value:id}]},{Value:value}]});
@@ -33,7 +34,8 @@ test('post-bootstrap worker refreshes, rotates and persists bounded supported ev
  };
  const fetchImpl=async url=>{
   const value=String(url);
-  if(value==='https://identity.xero.com/connect/token'){refreshes+=1;return new Response(JSON.stringify({access_token:'access-token-long-enough',refresh_token:'rotated-refresh-token-long-enough'}),{status:200});}
+  if(value==='https://identity.xero.com/connect/token'){refreshes+=1;return new Response(JSON.stringify({access_token:'access-token-long-enough',refresh_token:'rotated-refresh-token-long-enough',scope:scopes}),{status:200});}
+  if(value==='https://api.xero.com/connections')return new Response(JSON.stringify([{tenantId}]),{status:200});
   const name=Object.keys(responses).find(key=>value.includes(key));assert.ok(name,`unexpected Xero URL ${value}`);reportReads+=1;return new Response(JSON.stringify(responses[name]),{status:200});
  };
  const result=await createStagingXeroRefreshJob({env,query,fetchImpl,now:()=> '2026-09-25T02:00:00.000Z'})();

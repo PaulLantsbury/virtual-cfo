@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchXeroStagingDiscovery, parseXeroDiscovery, parseXeroDiscoveryStart, startXeroStagingBootstrap, startXeroStagingDiscovery, validateXeroBootstrapSelection } from './xeroStagingDiscovery.ts';
+import { fetchXeroStagingDiscovery, parseXeroDiscovery, parseXeroDiscoveryStart, startXeroStagingBootstrap, startXeroStagingDiscovery, startXeroStagingReauthorization, validateXeroBootstrapSelection } from './xeroStagingDiscovery.ts';
 
 const handle = 'abcdefghijklmnopqrstuvwxyz012345';
 const selectionHandle = 'selection_abcdefghijklmnopqrstuvwxyz';
@@ -79,4 +79,15 @@ test('retained bootstrap posts only the reviewed mapping and redirects only to X
   assert.equal((request?.headers as Record<string,string>).authorization,'Bearer signed-token');
   assert.equal((request?.headers as Record<string,string>)['content-type'],'application/json');
   assert.deepEqual(JSON.parse(String(request?.body)),selection);
+});
+
+test('reauthorization posts only the opaque selection handle', async () => {
+  let request: RequestInit | undefined;
+  const fetcher = async (input: RequestInfo | URL, init?: RequestInit) => {
+    assert.equal(input, '/api/xero/staging/reauthorize'); request=init;
+    return new Response(JSON.stringify({url:'https://login.xero.com/identity/connect/authorize?reauthorize=1'}),{status:200,headers:{'content-type':'application/json'}});
+  };
+  assert.deepEqual(await startXeroStagingReauthorization(selectionHandle,'signed-token',fetcher),{url:'https://login.xero.com/identity/connect/authorize?reauthorize=1'});
+  assert.deepEqual(JSON.parse(String(request?.body)),{selectionHandle});
+  assert.equal((request?.headers as Record<string,string>).authorization,'Bearer signed-token');
 });

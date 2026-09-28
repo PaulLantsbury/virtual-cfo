@@ -10,6 +10,7 @@ export type XeroBootstrapIdentity=Readonly<{userId:string;isOwner:boolean}>;
 export type XeroBootstrapAuthenticator=(authorization:string)=>Promise<XeroBootstrapIdentity>|XeroBootstrapIdentity;
 export type XeroBootstrapService=Readonly<{
  start(identity:XeroBootstrapIdentity,input:Readonly<{selectionHandle:string;effectiveFrom:string;mapping:Record<string,readonly string[]>}>):Promise<Readonly<{url:string}>>|Readonly<{url:string}>;
+ reauthorize(identity:XeroBootstrapIdentity,input:Readonly<{selectionHandle:string}>):Promise<Readonly<{url:string}>>|Readonly<{url:string}>;
  startDiscovery(identity:XeroBootstrapIdentity):Promise<Readonly<{url:string}>>|Readonly<{url:string}>;
  complete(input:Readonly<{state:string;code:string;scope?:string}>):Promise<unknown>|unknown;
  readDiscovery(identity:XeroBootstrapIdentity,handle:string):Promise<unknown>|unknown;
@@ -56,6 +57,13 @@ export function createXeroStagingBootstrapRouter(dependencies:XeroBootstrapRoute
   if(!sameOrigin(req.headers.origin)){res.status(403).json({error:'Xero bootstrap owner required'});return;}
   const principal=await owner(req.headers.authorization);if(!principal){res.status(401).json({error:'Xero bootstrap sign-in required'});return;}
   try { const result=await service!.startDiscovery(principal);if(typeof result?.url!=='string'||result.url.length>8192||!result.url.startsWith('https://login.xero.com/'))throw Error('Xero bootstrap unavailable');res.status(200).json({url:result.url}); } catch(error){safe(error,res);}
+ });
+ router.post('/reauthorize',async(req,res)=>{
+  if(!sameOrigin(req.headers.origin)){res.status(403).json({error:'Xero bootstrap owner required'});return;}
+  const principal=await owner(req.headers.authorization);if(!principal){res.status(401).json({error:'Xero bootstrap sign-in required'});return;}
+  const body=req.body,input=plain(body)&&Object.keys(body).join(',')==='selectionHandle'&&state(body.selectionHandle)?Object.freeze({selectionHandle:body.selectionHandle}):null;
+  if(!input){res.status(400).json({error:'Xero staging connection unavailable'});return;}
+  try { const result=await service!.reauthorize(principal,input);if(typeof result?.url!=='string'||result.url.length>8192||!result.url.startsWith('https://login.xero.com/'))throw Error('Xero bootstrap unavailable');res.status(200).json({url:result.url}); } catch(error){safe(error,res);}
  });
  router.get('/discovery/:handle',async(req,res)=>{
   const principal=await owner(req.headers.authorization);if(!principal){res.status(401).json({error:'Xero bootstrap sign-in required'});return;}

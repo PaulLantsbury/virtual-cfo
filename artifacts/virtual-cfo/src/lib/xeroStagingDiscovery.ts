@@ -136,3 +136,15 @@ export async function startXeroStagingBootstrap(selection: XeroBootstrapSelectio
   if (!parsed) throw Error('Xero connection unavailable');
   return parsed;
 }
+
+export async function startXeroStagingReauthorization(selectionHandle: string, accessToken: string, fetcher: Fetcher = fetch): Promise<Readonly<{url:string}>> {
+  if (!HANDLE.test(selectionHandle)) throw Error('Xero reconnection is unavailable');
+  const response = await fetcher('/api/xero/staging/reauthorize', {
+    method: 'POST', credentials: 'include', cache: 'no-store',
+    headers: { ...bearer(accessToken), 'content-type': 'application/json' }, body: JSON.stringify({ selectionHandle }),
+  });
+  if (!response.ok) throw Error(response.status === 401 || response.status === 403 ? 'Xero reconnection owner sign-in required' : 'Xero reconnection is unavailable');
+  const parsed = parseXeroDiscoveryStart(await response.json());
+  if (!parsed) throw Error('Xero reconnection is unavailable');
+  return parsed;
+}

@@ -2,18 +2,15 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, useSyn
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { createSessionAccess, type AccessState, type SessionInput } from './sessionAccess';
+import { readStorePreference, writeStorePreference } from './storePreference';
 
 type AuthContextValue = AccessState & { select: (id: string) => void; retry: () => void; signOut: () => Promise<void>; signOutError: boolean; beginSignIn: () => void };
 const AuthContext = createContext<AuthContextValue | null>(null);
-const selectedStoreKey = (userId: string) => `night-scout:selected-store:${userId}`;
 const preferredStore = (userId: string) => {
-  try { return window.sessionStorage.getItem(selectedStoreKey(userId)); } catch { return null; }
+  return readStorePreference(window.localStorage, userId);
 };
 const rememberStore = (userId: string, storeId: string | null) => {
-  try {
-    if (storeId) window.sessionStorage.setItem(selectedStoreKey(userId), storeId);
-    else window.sessionStorage.removeItem(selectedStoreKey(userId));
-  } catch { /* access remains governed by freshly verified memberships */ }
+  writeStorePreference(window.localStorage, userId, storeId);
 };
 export function AuthProvider({ children }: { children: ReactNode }) {
   const cache = useQueryClient();

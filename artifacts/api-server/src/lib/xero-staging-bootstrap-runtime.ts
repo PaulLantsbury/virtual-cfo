@@ -23,7 +23,7 @@ const unavailable=()=>Error('Xero bootstrap unavailable');
 const expiredSelection=()=>Error('Xero bootstrap selection expired');
 type BootstrapDiagnostic=Readonly<{event:'xero_staging_bootstrap_failed';phase:'config'|'selection'|'db_connect'|'db_identity';reason:'missing_or_expired'|'invalid'|'authentication'|'tls'|'network'|'timeout'|'unavailable'|'mismatch'}>;
 type Mapping=Readonly<Record<(typeof categories)[number],readonly string[]>>;
-type Binding=Readonly<{phase:'bootstrap';userId:string;storeId:string;expectedTenantId:string;effectiveFrom:string;mapping:Mapping;expectedScopes:readonly string[];expires:number}>|Readonly<{phase:'discovery';userId:string;expectedScopes:readonly string[];expires:number}>;
+type Binding=Readonly<{phase:'bootstrap';userId:string;storeId:string;expectedTenantId:string;effectiveFrom:string;mapping:Mapping;expectedScopes:readonly string[];expires:number}>|Readonly<{phase:'reauthorize';userId:string;storeId:string;expectedTenantId:string;connectionId:string;credentialVersion:number;expectedScopes:readonly string[];expires:number}>|Readonly<{phase:'discovery';userId:string;expectedScopes:readonly string[];expires:number}>;
 type Account=Readonly<{accountId:string;accountCode:string|null;accountName:string;accountType:string;accountStatus:string}>;
 type Discovery=Readonly<{userId:string;expires:number;value:Readonly<{tenantId:string;tenantName:string;retrievedAt:string;accounts:readonly Account[]}>}>;
 type Selection=Readonly<{userId:string;expires:number;value:Discovery['value']}>;
@@ -79,6 +79,17 @@ export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fe
    const raw=`d_${randomBytes(32).toString('base64url')}`,key=digest(raw);boundedSet(states,key,Object.freeze({phase:'discovery',userId:identity.userId,expectedScopes:Object.freeze([...DISCOVERY_SCOPES]),expires:now()+600_000}),now());
    const url=new URL('https://login.xero.com/identity/connect/authorize');url.searchParams.set('response_type','code');url.searchParams.set('client_id',config.clientId);url.searchParams.set('redirect_uri',config.redirectUri);url.searchParams.set('scope',DISCOVERY_SCOPES.join(' '));url.searchParams.set('state',raw);return Object.freeze({url:url.toString()});
   },
+  async reauthorize(identity:XeroBootstrapIdentity,input){
+   if(!config.bootstrapReady||!identity.isOwner||identity.userId!==config.ownerId)throw unavailable();
+   const selectionKey=digest(input.selectionHandle),selection=selections.get(selectionKey);selections.delete(selectionKey);prune(selections,now());
+   if(!selection||selection.expires<now()||selection.userId!==identity.userId){report('selection','missing_or_expired');throw expiredSelection();}
+   let identityRow:Record<string,unknown>|undefined;
+   try{const result=await pool!.query('SELECT session_user::text AS session_user, current_user::text AS current_user');if(result.rows.length===1)identityRow=result.rows[0];}catch(error){report('db_connect',classifyDatabaseError(error));throw unavailable();}
+   if(identityRow?.session_user!=='night_scout_xero_bootstrap_login'||identityRow?.current_user!=='night_scout_xero_bootstrap_login'){report('db_identity','mismatch');throw unavailable();}
+   const target=await readReauthorizationTarget(pool!,config.storeId,selection.value.tenantId,identity.userId);if(!target)throw unavailable();
+   const raw=`r_${randomBytes(32).toString('base64url')}`,key=digest(raw);boundedSet(states,key,Object.freeze({phase:'reauthorize',userId:identity.userId,storeId:config.storeId,expectedTenantId:selection.value.tenantId,connectionId:target.connectionId,credentialVersion:target.credentialVersion,expectedScopes:Object.freeze([...SCOPES]),expires:now()+600_000}),now());
+   const url=new URL('https://login.xero.com/identity/connect/authorize');url.searchParams.set('response_type','code');url.searchParams.set('client_id',config.clientId);url.searchParams.set('redirect_uri',config.redirectUri);url.searchParams.set('scope',SCOPES.join(' '));url.searchParams.set('state',raw);return Object.freeze({url:url.toString()});
+  },
   async complete(input){
    const key=digest(input.state),binding=states.get(key);states.delete(key);prune(states,now());
    if(!binding||binding.expires<now()||binding.userId!==config.ownerId)throw unavailable();
@@ -93,9 +104,22 @@ export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fe
    try{
     const provider=await exchangeAndDiscover({code:input.code,config,fetchImpl,requireRefresh:true,expectedScopes:binding.expectedScopes});
     if(provider.tenantId!==binding.expectedTenantId)throw unavailable();
-    refresh=provider.refreshToken;const connectionId=randomUUID();
+    if(binding.phase==='reauthorize'){
+     refresh=provider.refreshToken;const envelope=crypto!.encrypt(binding.connectionId,provider.tenantId,refresh);
+     const result=await pool!.query('SELECT * FROM xero_v1.bootstrap_reauthorize_connection($1,$2,$3,$4,$5,$6,$7,$8,$9)',[binding.connectionId,binding.storeId,provider.tenantId,binding.userId,binding.credentialVersion,envelope.ciphertext,envelope.encryptedDek,envelope.keyVersion,envelope.algorithm]);
+     if(result.rows.length!==1||result.rows[0]?.connection_id!==binding.connectionId||result.rows[0]?.credential_version!==binding.credentialVersion+1)throw unavailable();
+     return Object.freeze({connectionId:binding.connectionId,storeId:binding.storeId,tenantId:provider.tenantId,status:'connected'});
+    }
+    refresh=provider.refreshToken;
+    const target=await readReauthorizationTarget(pool!,binding.storeId,provider.tenantId,binding.userId);
+    const connectionId=target?.connectionId??randomUUID();
     const envelope=crypto!.encrypt(connectionId,provider.tenantId,refresh),mapping=materialiseMapping(binding.mapping,provider.accounts);
-    const directory=provider.accounts.map(({accountId,accountName,accountType,accountStatus})=>Object.freeze({accountId,accountName,accountType,accountStatus}));
+    if(target){
+     const result=await pool!.query('SELECT * FROM xero_v1.bootstrap_reauthorize_connection($1,$2,$3,$4,$5,$6,$7,$8,$9)',[connectionId,binding.storeId,provider.tenantId,binding.userId,target.credentialVersion,envelope.ciphertext,envelope.encryptedDek,envelope.keyVersion,envelope.algorithm]);
+     if(result.rows.length!==1||result.rows[0]?.connection_id!==connectionId||result.rows[0]?.credential_version!==target.credentialVersion+1)throw unavailable();
+     return Object.freeze({connectionId,storeId:binding.storeId,tenantId:provider.tenantId,status:'connected'});
+    }
+    const directory=provider.accounts.map((account:Account)=>Object.freeze({accountId:account.accountId,accountName:account.accountName,accountType:account.accountType,accountStatus:account.accountStatus}));
     const values=[connectionId,binding.storeId,provider.tenantId,binding.userId,binding.effectiveFrom,provider.retrievedAt,JSON.stringify(directory),JSON.stringify(mapping),envelope.ciphertext,envelope.encryptedDek,envelope.keyVersion,envelope.algorithm];
     const result=await pool!.query('SELECT * FROM xero_v1.bootstrap_create_initial_connection($1,$2,$3,$4,$5,$6,$7::jsonb,$8::jsonb,$9,$10,$11,$12)',values);
     if(result.rows.length!==1||result.rows[0]?.connection_id!==connectionId)throw unavailable();
@@ -108,6 +132,14 @@ export function createXeroStagingBootstrapRuntime(env:NodeJS.ProcessEnv,deps:{fe
   },
  });
  return Object.freeze({service,authenticate,close:async()=>{states.clear();discoveries.clear();selections.clear();if(pool)await pool.end();}});
+}
+
+async function readReauthorizationTarget(pool:pg.Pool,storeId:string,tenantId:string,ownerId:string):Promise<{connectionId:string;credentialVersion:number}|null>{
+ const result=await pool.query('SELECT * FROM xero_v1.bootstrap_get_reauthorization_target($1,$2,$3)',[storeId,tenantId,ownerId]);
+ if(result.rows.length===0)return null;
+ const row=result.rows[0];
+ if(result.rows.length!==1||!uuid.test(row?.connection_id??'')||!Number.isSafeInteger(row?.credential_version)||row.credential_version<1)throw unavailable();
+ return Object.freeze({connectionId:row.connection_id,credentialVersion:row.credential_version});
 }
 
 function normaliseMapping(value:Record<string,readonly string[]>):Mapping{if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).sort().join(',')!==[...categories].sort().join(','))throw unavailable();const out:any=Object.create(null),used=new Set<string>();for(const category of categories){const ids=value[category];if(!Array.isArray(ids)||ids.length<1||ids.length>20)throw unavailable();out[category]=Object.freeze(ids.map(id=>{if(typeof id!=='string'||!uuid.test(id)||used.has(id))throw unavailable();used.add(id);return id;}));}return Object.freeze(out);}

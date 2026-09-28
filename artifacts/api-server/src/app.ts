@@ -9,6 +9,7 @@ import {createXeroRouter} from './routes/xero';
 import {createXeroStagingBootstrapRouter, type XeroBootstrapRouterDependencies} from './routes/xero-staging-bootstrap';
 import {mountStagingSpa} from './lib/mount-staging-spa.ts';
 import {createXeroMerchantReadinessRouter,type XeroReadinessDependencies} from './routes/xero-merchant-readiness.ts';
+import {safeRequestPath} from './lib/safe-request-path.ts';
 
 export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies): Express {
 const app: Express = express();
@@ -21,7 +22,7 @@ app.use(
         return {
           id: req.id,
           method: req.method,
-          url: req.url?.split("?")[0],
+          url: safeRequestPath(req.url),
         };
       },
       res(res) {

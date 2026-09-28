@@ -21,6 +21,8 @@ const plain=(value:unknown):value is Record<string,unknown>=>value!==null&&typeo
 const state=(value:unknown):value is string=>typeof value==='string'&&value.length>=16&&value.length<=4096&&/^[A-Za-z0-9._~-]+$/.test(value);
 const code=(value:unknown):value is string=>typeof value==='string'&&value.length>=8&&value.length<=4096&&/^[A-Za-z0-9._~-]+$/.test(value);
 const scope=(value:unknown):value is string=>typeof value==='string'&&value.length>=1&&value.length<=2048&&/^[A-Za-z0-9._:-]+(?: [A-Za-z0-9._:-]+)*$/.test(value);
+const sessionState=(value:unknown):value is string=>typeof value==='string'&&value.length>=1&&value.length<=4096&&/^[A-Za-z0-9._~-]+$/.test(value);
+const callbackKeys=new Set(['code','scope','session_state','state']);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const categories=['revenue','processingFee','advertising','software','includedCash'] as const;
 const origins=new Set(['https://night-scout-xero-staging.replit.app','https://night-scout-xero-staging.onrender.com']);
@@ -72,9 +74,10 @@ export function createXeroStagingBootstrapRouter(dependencies:XeroBootstrapRoute
  });
  router.get('/callback',async(req,res)=>{
   const query=req.query as Record<string,unknown>;
-  const keys=query!==null&&typeof query==='object'&&!Array.isArray(query)?Object.keys(query).sort():[];
-  const shape=keys.join(',');
-  const input=(shape==='code,state'||shape==='code,scope,state')&&state(query.state)&&code(query.code)&&(query.scope===undefined||scope(query.scope))?{state:query.state,code:query.code,...(query.scope===undefined?{}:{scope:query.scope})}:null;
+  const keys=query!==null&&typeof query==='object'&&!Array.isArray(query)?Object.keys(query):[];
+  const known=keys.length>=2&&keys.every(key=>callbackKeys.has(key));
+  const optionalValid=(query.scope===undefined||scope(query.scope))&&(query.session_state===undefined||sessionState(query.session_state));
+  const input=known&&state(query.state)&&code(query.code)&&optionalValid?{state:query.state,code:query.code,...(typeof query.scope==='string'?{scope:query.scope}:{})}:null;
   if(!input){res.status(400).type('text/plain').send('Xero authorisation unavailable');return;}
   try { const result:any=await service!.complete(Object.freeze(input));if(result?.status==='received'&&state(result?.handle)){res.redirect(303,`/settings?xeroDiscovery=${encodeURIComponent(result.handle)}`);return;}if(result?.status==='connected'){res.redirect(303,'/settings?xeroConnected=1');return;}res.status(200).type('text/plain').send('Xero authorisation received. You can close this window.'); } catch(error){safe(error,res);}
  });

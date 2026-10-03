@@ -99,3 +99,115 @@ test('second retry verifier remains status-only',()=>{
  assert.doesNotMatch(verifier,/AS\s+evidence_id|SELECT\s+ae\.id\s+AS/i);
  assert.doesNotMatch(verifier,/booked_revenue|tenant_id|ciphertext|encrypted_dek/i);
 });
+
+test('third reviewed retry appends one authorization for the newest failure only',async()=>{
+ const {db,mappingId}=await preparedDb();
+ try {
+  await db.exec(migration('20260925_xero_reviewed_failed_scope_retry.sql'));
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  await db.query(`SELECT * FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`);
+  let lease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,1,300) lease',[connection])).rows[0].lease;
+  await db.query(`SELECT xero_v1.worker_record_accounting_evidence_leased($1,$2,'2026-09-01','2026-09-25','GBP',false,'failed','source_refresh_failed',NULL,clock_timestamp(),NULL,NULL,NULL,NULL,NULL,NULL,1,$3)`,[connection,mappingId,lease]);
+  await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+  await db.exec(migration('20260928_xero_second_reviewed_failed_scope_retry.sql'));
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  await db.query(`SELECT * FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`);
+  lease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,1,300) lease',[connection])).rows[0].lease;
+  await db.query(`SELECT xero_v1.worker_record_accounting_evidence_leased($1,$2,'2026-09-01','2026-09-25','GBP',false,'failed','source_refresh_failed',NULL,clock_timestamp(),NULL,NULL,NULL,NULL,NULL,NULL,1,$3)`,[connection,mappingId,lease]);
+  await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+
+  await db.exec(migration('20261003_xero_third_reviewed_failed_scope_retry.sql'));
+  const status=(await db.query(migration('verify-xero-third-reviewed-retry-2026-10-03.sql'))).rows[0];
+  assert.deepEqual(status,{
+   exactly_three_reviewed_retries:true,
+   exactly_two_retries_consumed:true,
+   exactly_one_retry_unconsumed:true,
+   current_latest_failure_authorized:true
+  });
+  assert.equal((await db.query('SELECT count(*)::int count FROM xero_v1.accounting_evidence')).rows[0].count,3,'all failures remain append-only');
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  assert.equal((await db.query(`SELECT count(*)::int count FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`)).rows[0].count,1);
+  await assert.rejects(db.query(`SELECT * FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`),/job unavailable|retry unavailable/i);
+  await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+  await assert.rejects(db.exec(migration('20261003_xero_third_reviewed_failed_scope_retry.sql')),/prior Xero retry authorizations unavailable|already authorized/i,'migration replay cannot re-arm the consumed authorization');
+ } finally {await db.close();}
+});
+
+test('third reviewed retry fails closed until both earlier authorizations are consumed',async()=>{
+ const {db}=await preparedDb();
+ try {
+  await db.exec(migration('20260925_xero_reviewed_failed_scope_retry.sql'));
+  await assert.rejects(db.exec(migration('20261003_xero_third_reviewed_failed_scope_retry.sql')),/prior Xero retry authorizations unavailable/i);
+ } finally {await db.close();}
+});
+
+test('third retry verifier remains status-only',()=>{
+ const migrationSql=migration('20261003_xero_third_reviewed_failed_scope_retry.sql');
+ const verifier=migration('verify-xero-third-reviewed-retry-2026-10-03.sql');
+ assert.match(migrationSql,/authorization_count<>2 OR consumed_count<>authorization_count/);
+ assert.match(migrationSql,/INSERT INTO xero_v1\.accounting_evidence_retry_authorizations/);
+ assert.doesNotMatch(migrationSql,/UPDATE\s+xero_v1\.accounting_evidence_retry_authorizations|DELETE\s+FROM\s+xero_v1\.accounting_evidence_retry_authorizations/i);
+ assert.doesNotMatch(verifier,/AS\s+evidence_id|SELECT\s+ae\.id\s+AS/i);
+ assert.doesNotMatch(verifier,/booked_revenue|tenant_id|ciphertext|encrypted_dek/i);
+});
+
+test('fourth reviewed retry requires a newer supported preflight for the current credential',async()=>{
+ const {db,mappingId}=await preparedDb();
+ try {
+  const failure=async()=>{
+   await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+   const lease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,1,300) lease',[connection])).rows[0].lease;
+   await db.query(`SELECT xero_v1.worker_record_accounting_evidence_leased($1,$2,'2026-09-01','2026-09-25','GBP',false,'failed','source_refresh_failed',NULL,clock_timestamp(),NULL,NULL,NULL,NULL,NULL,NULL,1,$3)`,[connection,mappingId,lease]);
+   await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+  };
+  for(const file of ['20260925_xero_reviewed_failed_scope_retry.sql','20260928_xero_second_reviewed_failed_scope_retry.sql','20261003_xero_third_reviewed_failed_scope_retry.sql']){
+   await db.exec(migration(file));
+   await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+   await db.query(`SELECT * FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`);
+   await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+   await failure();
+  }
+  await db.exec(migration('20261003_xero_connection_preflight_evidence.sql'));
+  await assert.rejects(db.exec(migration('20261003_xero_fourth_reviewed_failed_scope_retry.sql')),/successful Xero connection preflight required/i);
+  await db.exec('ROLLBACK');
+
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  const lease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,1,300) lease',[connection])).rows[0].lease;
+  assert.equal((await db.query(`SELECT xero_v1.worker_record_connection_preflight($1,1,'connected','organisation','ok',NULL,true,$2) recorded`,[connection,lease])).rows[0].recorded,true);
+  await db.query('SELECT xero_v1.worker_release_refresh_lease($1,1,$2)',[connection,lease]);
+  await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+
+  await db.exec(migration('20261003_xero_fourth_reviewed_failed_scope_retry.sql'));
+  assert.deepEqual((await db.query(migration('verify-xero-fourth-reviewed-retry-2026-10-03.sql'))).rows[0],{
+   exactly_four_reviewed_retries:true,exactly_three_retries_consumed:true,
+   exactly_one_retry_unconsumed:true,current_latest_failure_authorized:true,
+   current_credential_preflight_supported:true
+  });
+  assert.equal((await db.query('SELECT count(*)::int count FROM xero_v1.accounting_evidence')).rows[0].count,4);
+ } finally {await db.close();}
+});
+
+test('preflight evidence is private, bounded, append-only and exact-lease protected',async()=>{
+ const {db}=await preparedDb();
+ try {
+  await db.exec(migration('20261003_xero_connection_preflight_evidence.sql'));
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  const version=1;
+  await assert.rejects(db.query(`SELECT xero_v1.worker_record_connection_preflight($1,$2,'connected','organisation','ok',NULL,true,now())`,[connection,version]),/lease unavailable/i);
+  const lease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,$2,300) lease',[connection,version])).rows[0].lease;
+  await assert.rejects(db.query(`SELECT xero_v1.worker_record_connection_preflight($1,$2,'connected','connection','ok',NULL,true,$3)`,[connection,version,lease]));
+  await assert.rejects(db.query(`SELECT xero_v1.worker_record_connection_preflight($1,$2,'connected','organisation','ok',200,true,$3)`,[connection,version,lease]));
+  assert.equal((await db.query(`SELECT xero_v1.worker_record_connection_preflight($1,$2,'failed','connection','forbidden',403::smallint,NULL,$3) recorded`,[connection,version,lease])).rows[0].recorded,true);
+  await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+  assert.equal((await db.query('SELECT count(*)::int count FROM xero_v1.connection_preflight_evidence')).rows[0].count,1);
+ } finally {await db.close();}
+ const sql=migration('20261003_xero_connection_preflight_evidence.sql');
+ const fourth=migration('20261003_xero_fourth_reviewed_failed_scope_retry.sql');
+ const verifier=migration('verify-xero-fourth-reviewed-retry-2026-10-03.sql');
+ assert.match(sql,/REVOKE ALL ON xero_v1\.connection_preflight_evidence\s+FROM PUBLIC,anon,authenticated/);
+ assert.doesNotMatch(sql,/UPDATE\s+xero_v1\.connection_preflight_evidence|DELETE\s+FROM\s+xero_v1\.connection_preflight_evidence/i);
+ assert.match(fourth,/credential_version=current_credential_version/);
+ assert.match(fourth,/checked_at>latest_failure_at/);
+ assert.doesNotMatch(fourth,/UPDATE\s+xero_v1\.accounting_evidence_retry_authorizations|DELETE\s+FROM\s+xero_v1\.accounting_evidence_retry_authorizations/i);
+ assert.doesNotMatch(verifier,/AS\s+evidence_id|tenant_id|ciphertext|encrypted_dek|provider_status\s+AS/i);
+});

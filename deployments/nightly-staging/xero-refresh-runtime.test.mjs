@@ -73,3 +73,10 @@ test('classifies an absent persisted tenant as reconnect required without leakin
  const result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl,diagnose:event=>events.push(event),now:()=> '2026-09-19T02:00:00.000Z'})();
  assert.equal(result.state,'failed');assert.equal(reports,0);assert.deepEqual(events,[{event:'xero_source_refresh_failed',phase:'connection',reason:'reconnect_required'}]);assert.doesNotMatch(JSON.stringify(events),/different-private-tenant|tenant-test/);assert.equal(h.calls.filter(call=>call.sql.includes('worker_store_refresh_envelope_leased')).length,1);
 });
+
+test('classifies a provider 403 as forbidden rather than reconnect required',async()=>{
+ const h=harness(),events=[];
+ const fetchImpl=async url=>url==='https://identity.xero.com/connect/token'?new Response(JSON.stringify({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough',scope:scopes}),{status:200}):new Response('private provider response',{status:403});
+ const result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl,diagnose:event=>events.push(event),now:()=> '2026-09-19T02:00:00.000Z'})();
+ assert.equal(result.state,'failed');assert.deepEqual(events,[{event:'xero_source_refresh_failed',phase:'connection',reason:'forbidden'}]);assert.doesNotMatch(JSON.stringify(events),/private provider response/);
+});

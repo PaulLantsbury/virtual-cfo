@@ -1,3 +1,31 @@
+# Xero non-consuming connection preflight package — 3 October 2026
+
+Prepared a replacement for the repeated one-use accounting diagnostic cycle.
+The connection-only staging command refreshes and durably rotates the encrypted
+credential under an exact lease, enforces the retained read-only scope
+allowlist, checks the pinned tenant and probes Organisation capability without
+selecting or consuming an accounting retry. Provider JSON is size-bounded and
+safe diagnostics distinguish unauthorized, forbidden, rate-limited, upstream,
+network, malformed and genuinely missing-tenant outcomes. A successful result
+creates a private append-only receipt; the prepared fourth September retry is
+guarded on the newest receipt being later than the latest failure and matching
+the current credential version. All three earlier retry records remain consumed
+and immutable. No migration has been applied and no live preflight or fourth
+refresh has run.
+
+Validation: 28 focused runtime/acceptance tests and 244 broad Xero tests passed;
+11 focused disposable database tests passed. Relevant Virtual CFO and API
+builds passed with existing sourcemap/bundle-size warnings. Repository-wide
+typecheck remains blocked by pre-existing missing declarations for historical
+`.mjs` experiment imports. The worker smoke check correctly refuses the source
+checkout because website artifact manifests are present; run it only against a
+prepared separate worker export.
+
+Next live sequence: deploy the package, apply only the preflight-evidence
+migration, run the preflight once with a command-level flag override, inspect
+its bounded result, and only after `connected/organisation/ok` apply and verify
+the fourth retry before one accounting refresh. Keep the stored cron flag false.
+
 ## 18 September continuation — guarded historical staging package blocked safely
 
 The historical synthetic staging package is prepared locally in commits `b02d39f` and `3095ae8`, but is **not applied** and remains unpublished because this recovered session has no GitHub authentication. Read [the package and read-only preflight record](historical-staging-package-2026-09-18.md) before any continuation. The reserved target is empty and the approved reviewer has membership/review authorisation; the restricted role cannot confirm `auth.users` or consistently retrieve column metadata. It can retrieve 95 constraints and 10 active target-table triggers. Therefore live schema compatibility is unverified and the guarded package must not be rehearsed or applied. Eight focused local checks passed together on 18 September: two source-to-review historical-path checks, three immutable-profit checks and three package checks. The only external requirements before an application-ready proposal are GitHub authentication to publish the commits and a TLS-verified, read-only staging session with the minimum metadata visibility needed to confirm the target schema and approved reviewer. No new product or financial decision is requested.

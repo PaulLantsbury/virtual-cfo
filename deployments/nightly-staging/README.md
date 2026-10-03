@@ -67,3 +67,25 @@ mapping-version identifiers. It requires the staging-only variables validated
 by `xero-worker.mjs`, including the restricted database URL, CA, Xero client
 credentials, envelope master key, fixed IDs, approved mapping JSON and bounded
 GBP report scope. It must never replace the Shopify worker or website manifest.
+
+### Connection preflight before an accounting retry
+
+Install `db-migrations/staging/20261003_xero_connection_preflight_evidence.sql`
+before using the connection-only preflight. The preflight refreshes and durably
+rotates the credential under the existing exact lease, validates the strict
+retained read-only scope allowlist, confirms the pinned tenant is present and
+probes the pinned Organisation endpoint. It never selects an accounting job,
+consumes a retry authorization, reads reports or writes accounting evidence.
+
+Keep the stored refresh flag disabled and use a command-level override:
+
+```sh
+NIGHT_SCOUT_XERO_STAGING_REFRESH_ENABLED=true \
+node deployments/nightly-staging/run-xero-connection-preflight.mjs
+```
+
+Only a bounded `connected/organisation/ok` result writes a private success
+receipt. A fourth September accounting retry may be installed only afterwards,
+using `20261003_xero_fourth_reviewed_failed_scope_retry.sql`; verify it with
+`verify-xero-fourth-reviewed-retry-2026-10-03.sql` before one accounting run.
+Do not apply the fourth retry after a failed preflight.

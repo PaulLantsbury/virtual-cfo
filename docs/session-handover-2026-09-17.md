@@ -44,6 +44,14 @@ Paul created a separate Xero test app and UK trial organisation. Local, loopback
 
 The chat is not reliably synchronising between desktop and web. Use the GitHub development branch and dated repository handover as durable continuity. A new chat must verify its own tool/repository access; do not assume inherited local browser sessions, secrets, running processes or the full old conversation. Never paste credentials into a handover prompt. Latest dated evidence takes precedence over older prepared-only historical paragraphs.
 
+## Xero connection-preflight follow-up — 3 October 2026
+
+The non-consuming Xero connection preflight was deployed and its evidence migration was applied, but the first Render shell invocation returned `Xero staging preflight unavailable` before contacting Xero. Safe environment-name inspection established that the service intentionally had no connection or mapping ID variables. The failure did not rotate a token, write a preflight receipt, consume an accounting retry authorization or run accounting collection.
+
+Prepared follow-up adds `20261003_xero_connection_preflight_job.sql`: a worker-only, `SECURITY DEFINER` lookup that fails closed unless exactly one active encrypted connection has a current complete five-category mapping whose selected accounts remain active in its pinned directory. It returns only the two opaque IDs needed by the existing private refresh-context capability; browser, bootstrap and optional service roles remain denied. Runtime no longer depends on separate ID environment variables and validates both returned UUIDs before reading refresh context. Focused runtime/database coverage passes 24/24 and independent security review found the boundary suitable.
+
+This lookup migration is prepared, not yet applied. Next: publish the follow-up commit, allow the Render cron service to deploy it, apply only `20261003_xero_connection_preflight_job.sql` to staging, then rerun the connection preflight command. Apply the already-prepared fourth reviewed retry migration and run accounting refresh only after an exact `connected/organisation/ok` preflight. The stored refresh flag remains disabled and all three earlier accounting retry authorizations remain consumed.
+
 ## End-of-day decisions and next session — 17 September
 
 Paul asked to stop and resume tomorrow. Start by reading `docs/first-overnight-verification-2026-09-18.md` and inspect the first real Replit nightly run before new collection or retries. The staging worker is published; saved Europe/London timing verified. First run has NOT yet been verified. Fixed reporting period remains 17 September. Settings distinguishes dated schedule acknowledgement from saved collection results and financial verification. Production unchanged. Code, tests and evidence were saved in GitHub development commit 24326d0df56dc21a1f4d383d5ac48c2f55be4c37 before this documentation addition.

@@ -71,7 +71,12 @@ GBP report scope. It must never replace the Shopify worker or website manifest.
 ### Connection preflight before an accounting retry
 
 Install `db-migrations/staging/20261003_xero_connection_preflight_evidence.sql`
-before using the connection-only preflight. The preflight refreshes and durably
+and `db-migrations/staging/20261003_xero_connection_preflight_job.sql` before
+using the connection-only preflight. The latter exposes a worker-only,
+fail-closed lookup for the single active connection and its current complete
+mapping, so the Render service does not need separate connection or mapping ID
+environment variables. It returns no credential, tenant, accounting-evidence
+or retry-authorization data. The preflight refreshes and durably
 rotates the credential under the existing exact lease, validates the strict
 retained read-only scope allowlist, confirms the pinned tenant is present and
 probes the pinned Organisation endpoint. It never selects an accounting job,

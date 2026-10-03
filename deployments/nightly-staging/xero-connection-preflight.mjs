@@ -11,11 +11,14 @@ const blockedLease=value=>{if(value===null)return false;const at=value instanceo
 
 export function createStagingXeroConnectionPreflight({env=process.env,query,fetchImpl=fetch}={}){
  const config=readStagingXeroWorkerConfig(env);
- const connectionId=env.NIGHT_SCOUT_XERO_STAGING_CONNECTION_ID,mappingVersionId=env.NIGHT_SCOUT_XERO_STAGING_MAPPING_VERSION_ID;
- if(!uuid(connectionId)||!uuid(mappingVersionId)||typeof query!=='function'||typeof fetchImpl!=='function')throw unavailable();
+ if(typeof query!=='function'||typeof fetchImpl!=='function')throw unavailable();
  const rpc=async(sql,params)=>{try{return (await query(sql,params)).rows;}catch{throw unavailable();}};
  const boundedFetch=(url,options={})=>fetchImpl(url,{...options,signal:AbortSignal.timeout(30_000)});
  return async()=>{
+  const jobs=await rpc('SELECT * FROM xero_v1.worker_get_single_connection_preflight_job()',[]);
+  if(jobs.length!==1)throw unavailable();
+  const {connection_id:connectionId,mapping_version_id:mappingVersionId}=jobs[0];
+  if(!uuid(connectionId)||!uuid(mappingVersionId))throw unavailable();
   const rows=await rpc('SELECT * FROM xero_v1.worker_get_refresh_context($1,$2)',[connectionId,mappingVersionId]);
   if(rows.length!==1)throw unavailable();
   const row=rows[0];

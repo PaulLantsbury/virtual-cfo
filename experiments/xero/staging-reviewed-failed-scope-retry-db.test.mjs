@@ -211,3 +211,33 @@ test('preflight evidence is private, bounded, append-only and exact-lease protec
  assert.doesNotMatch(fourth,/UPDATE\s+xero_v1\.accounting_evidence_retry_authorizations|DELETE\s+FROM\s+xero_v1\.accounting_evidence_retry_authorizations/i);
  assert.doesNotMatch(verifier,/AS\s+evidence_id|tenant_id|ciphertext|encrypted_dek|provider_status\s+AS/i);
 });
+
+test('connection preflight discovery is worker-only, fail-closed, and independent of accounting retries',async()=>{
+ const {db,mappingId}=await preparedDb();
+ try {
+  await db.exec(migration('20261003_xero_connection_preflight_job.sql'));
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  assert.deepEqual((await db.query('SELECT * FROM xero_v1.worker_get_single_connection_preflight_job()')).rows,
+   [{connection_id:connection,mapping_version_id:mappingId}]);
+  await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION authenticated');
+  await assert.rejects(db.query('SELECT * FROM xero_v1.worker_get_single_connection_preflight_job()'),/permission denied|worker capability/i);
+  await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+  await db.query('INSERT INTO xero_v1.connections(id,store_id,tenant_id) VALUES($1,$2,$3)',
+   ['40000000-0000-4000-8000-000000000001',store,'tenant-2']);
+  await db.query(`INSERT INTO xero_v1.credential_envelopes(connection_id,ciphertext,encrypted_dek,key_version,algorithm,version)
+   VALUES($1,$2,$3,'staging-v1','AES-256-GCM',1)`,['40000000-0000-4000-8000-000000000001',new Uint8Array([1]),new Uint8Array([2])]);
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  // The second connection has no complete mapping, so it is not a candidate.
+  assert.equal((await db.query('SELECT count(*)::int count FROM xero_v1.worker_get_single_connection_preflight_job()')).rows[0].count,1);
+  await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+  await db.query('UPDATE xero_v1.connections SET retired_at=clock_timestamp() WHERE id=$1',[connection]);
+  await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+  await assert.rejects(db.query('SELECT * FROM xero_v1.worker_get_single_connection_preflight_job()'),/preflight job unavailable/i);
+ } finally {await db.close();}
+ const sql=migration('20261003_xero_connection_preflight_job.sql');
+ assert.doesNotMatch(sql,/accounting_evidence(?:_retry_authorizations)?/i);
+ assert.match(sql,/account_status='ACTIVE'/);
+ assert.match(sql,/candidate_count<>1/);
+ assert.match(sql,/REVOKE ALL ON FUNCTION xero_v1\.worker_get_single_connection_preflight_job\(\)/);
+ assert.match(sql,/rolname='service_role'/);
+});

@@ -1,0 +1,15 @@
+import {createRequire} from 'node:module';
+import {fileURLToPath} from 'node:url';
+import {access} from 'node:fs/promises';
+import {runNightlyDevelopment} from '../../experiments/shopify/nightly-development.mjs';
+import {nightlyPlan} from '../../experiments/shopify/nightly-plan.mjs';
+import {workerArtifactManifests} from './prepare-export.mjs';
+if((await workerArtifactManifests(fileURLToPath(new URL('../../',import.meta.url)))).length)throw Error('Website artifact manifests remain; prepare the separate worker export before deployment');
+const require=createRequire(new URL('../../lib/db/package.json',import.meta.url));
+if(Number(process.versions.node.split('.')[0])<24)throw Error('Node 24 or later required');
+if(typeof require('pg').Pool!=='function'||typeof runNightlyDevelopment!=='function')throw Error('Worker dependency missing');
+await access(fileURLToPath(new URL('../../experiments/shopify/cloud-nightly.mjs',import.meta.url)));
+const summer=nightlyPlan('2026-09-18T01:14:59Z','Europe/London');
+const winter=nightlyPlan('2026-12-18T02:14:59Z','Europe/London');
+if(!summer.due||!winter.due||nightlyPlan('2026-09-18T01:15:00Z','Europe/London').due)throw Error('Unexpected nightly window');
+console.log('Worker imports and London scheduling passed; no network connection or collection attempted.');

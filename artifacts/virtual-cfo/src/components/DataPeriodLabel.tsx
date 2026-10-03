@@ -1,9 +1,11 @@
+import type { PeriodStatus } from "@/lib/analytics/reportingPeriod";
 import { Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DataPeriodLabelProps {
   periodLabel: string;
   loading: boolean;
+  status?: PeriodStatus;
   dateFrom?: string;
   dateTo?: string;
   variant?: "using" | "based";
@@ -45,6 +47,7 @@ function formatTradingDateRange(dateFrom: string, dateTo: string): string {
 export function DataPeriodLabel({
   periodLabel,
   loading,
+  status,
   dateFrom,
   dateTo,
   variant = "using",
@@ -52,7 +55,10 @@ export function DataPeriodLabel({
 }: DataPeriodLabelProps) {
   const hasDateRange = Boolean(dateFrom && dateTo);
   const tradingPeriodRange = dateFrom && dateTo ? formatTradingDateRange(dateFrom, dateTo) : null;
-  const trustStatement = variant === "based"
+  const trustStatement = status === "stale" ? "Historical period — newer data needed"
+    : status === "empty" ? "No trading data found"
+    : status === "error" ? "Trading data unavailable"
+    : variant === "based"
     ? "Based on latest completed period"
     : "Using latest completed period";
 
@@ -67,7 +73,7 @@ export function DataPeriodLabel({
             {loading ? "Checking latest trading data" : trustStatement}
           </p>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            {loading ? "Loading data basis" : `${periodLabel}: ${tradingPeriodRange}`}
+            {loading ? "Loading data basis" : status === "empty" || status === "error" ? "Reporting period could not be verified" : `${periodLabel}: ${tradingPeriodRange}`}
           </p>
         </div>
       </div>

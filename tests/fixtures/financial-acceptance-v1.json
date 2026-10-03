@@ -1,0 +1,281 @@
+{
+  "version": 1,
+  "status": "expected-results-only; application implementation pending",
+  "currency": "GBP",
+  "moneyUnit": "pence",
+  "source": "docs/agreed-financial-definitions.md",
+  "caseGuide": "docs/financial-acceptance-cases.md",
+  "cases": [
+    {
+      "id": "F01",
+      "given": {
+        "grossProductInclusive": 12000,
+        "grossProductVat": 2000,
+        "discountInclusive": 1200,
+        "discountVat": 200,
+        "shippingInclusive": 600,
+        "shippingVat": 100,
+        "eligibleOrders": 1
+      },
+      "expected": {
+        "grossProductExVat": 10000,
+        "discountExVat": 1000,
+        "netProductSales": 9000,
+        "netShipping": 500,
+        "productVat": 1800,
+        "shippingVat": 100,
+        "aov": 9000,
+        "customerCharge": 11400,
+        "discountRateNumerator": 1000,
+        "discountRateDenominator": 10000
+      }
+    },
+    {
+      "id": "F02",
+      "given": {
+        "grossProduct": 10000,
+        "recordedVat": 0,
+        "eligibleOrders": 1
+      },
+      "expected": {
+        "netProductSales": 10000,
+        "aov": 10000,
+        "vat": 0
+      }
+    },
+    {
+      "id": "F03",
+      "given": {
+        "period": "2026-02",
+        "orders": [
+          {
+            "id": "synthetic-A",
+            "eligible": true,
+            "grossProductExVat": 10000,
+            "discountExVat": 1000,
+            "productVat": 1800,
+            "netShipping": 500,
+            "shippingVat": 100,
+            "historicCost": 4000
+          },
+          {
+            "id": "synthetic-B",
+            "eligible": true,
+            "grossProductExVat": 5000,
+            "discountExVat": 0,
+            "productVat": 0,
+            "netShipping": 0,
+            "shippingVat": 0,
+            "historicCost": 2000
+          }
+        ],
+        "variableCosts": {
+          "payment": 300,
+          "fulfilment": 400,
+          "packaging": 200,
+          "outboundShipping": 600
+        },
+        "advertising": 1000,
+        "overheads": {
+          "agency": 500,
+          "salaries": 1000,
+          "software": 500,
+          "depreciationAmortisation": 500
+        }
+      },
+      "expected": {
+        "grossProductSales": 15000,
+        "discounts": 1000,
+        "netProductSales": 14000,
+        "originalOrders": 2,
+        "aov": 7000,
+        "netShipping": 500,
+        "revenueDenominator": 14500,
+        "cogs": 6000,
+        "grossProfit": 8000,
+        "variableCosts": 1500,
+        "contributionBeforeMarketing": 7000,
+        "contribution": 6000,
+        "operatingProfit": 3500,
+        "ebitda": 4000,
+        "customerCharges": 16400,
+        "contributionMarginDisplay": "41.38%",
+        "operatingMarginDisplay": "24.14%"
+      }
+    },
+    {
+      "id": "F04",
+      "given": {
+        "period": "2026-03",
+        "originalCase": "F03",
+        "newOrders": 0,
+        "refunds": [
+          {
+            "originalOrder": "synthetic-A",
+            "productCash": 2400,
+            "productVat": 400,
+            "shippingCash": 600,
+            "shippingVat": 100,
+            "saleableReturn": false,
+            "costReversal": 0
+          },
+          {
+            "originalOrder": "synthetic-B",
+            "productCash": 5000,
+            "productVat": 0,
+            "shippingCash": 0,
+            "shippingVat": 0,
+            "saleableReturn": true,
+            "costReversal": 2000
+          }
+        ],
+        "returnHandling": 400,
+        "advertising": 0,
+        "overheadIncludingDA": 2500,
+        "depreciationAmortisation": 500
+      },
+      "expected": {
+        "productRefundExVat": 7000,
+        "productRefundVat": 400,
+        "shippingRefundExVat": 500,
+        "shippingRefundVat": 100,
+        "cashRefunded": 8000,
+        "netProductSales": -7000,
+        "netShipping": -500,
+        "cogs": -2000,
+        "grossProfit": -5000,
+        "contributionBeforeMarketing": -5900,
+        "contribution": -5900,
+        "operatingProfit": -8400,
+        "ebitda": -7900,
+        "hasRefundActivity": true,
+        "februaryNetProductSalesUnchanged": 14000,
+        "februaryAovUnchanged": 7000,
+        "februaryOrderCountUnchanged": 2
+      },
+      "unasserted": [
+        "March AOV presentation",
+        "negative-revenue margin presentation",
+        "cross-period restocking timing"
+      ]
+    },
+    {
+      "id": "F05",
+      "given": {
+        "unitsSold": 2,
+        "historicUnitCost": 2000,
+        "currentUnitCost": 3000,
+        "saleableUnitsReturned": 1
+      },
+      "expected": {
+        "originalCogs": 4000,
+        "saleableCostReversal": 2000,
+        "netCogs": 2000,
+        "unrecoveredRefundCostReversal": 0
+      }
+    },
+    {
+      "id": "F06",
+      "given": {
+        "netProductSales": 9000,
+        "eligibleOrders": 1,
+        "historicCost": null
+      },
+      "expected": {
+        "netProductSales": 9000,
+        "aov": 9000,
+        "profitDataState": "incomplete",
+        "unavailableMetrics": [
+          "cogs",
+          "grossProfit",
+          "contribution",
+          "operatingProfit",
+          "ebitda"
+        ]
+      }
+    },
+    {
+      "id": "F07",
+      "given": {
+        "januaryOverhead": 310000,
+        "januaryDays": 31,
+        "februaryOverhead": 280000,
+        "februaryDays": 28,
+        "weekJanuaryDays": 6,
+        "weekFebruaryDays": 1
+      },
+      "expected": {
+        "januaryDailyAllocation": 10000,
+        "februaryDailyAllocation": 10000,
+        "weekOverhead": 70000,
+        "allocationLabelRequired": true
+      }
+    },
+    {
+      "id": "F08",
+      "given": {
+        "asOf": "2026-04-30",
+        "bank": 800000,
+        "settledPaymentAccount": 200000,
+        "restricted": 50000,
+        "unsettled": 30000,
+        "completeMonths": [
+          {
+            "period": "2026-02",
+            "externalInflows": 400000,
+            "externalOutflows": 600000
+          },
+          {
+            "period": "2026-03",
+            "externalInflows": 400000,
+            "externalOutflows": 600000
+          },
+          {
+            "period": "2026-04",
+            "externalInflows": 400000,
+            "externalOutflows": 600000
+          }
+        ],
+        "aprilInternalTransfer": 100000,
+        "aprilOpeningCash": 1200000
+      },
+      "expected": {
+        "availableCash": 1000000,
+        "monthlyNetMovement": -200000,
+        "averageMonthlyBurn": 200000,
+        "runwayMonths": 5,
+        "internalTransferConsolidatedMovement": 0,
+        "restrictedShownSeparately": 50000,
+        "unsettledShownSeparately": 30000
+      }
+    },
+    {
+      "id": "F09",
+      "given": {
+        "availableCash": 1000000,
+        "completeMonths": 3,
+        "monthlyExternalInflows": 600000,
+        "monthlyExternalOutflows": 500000
+      },
+      "expected": {
+        "monthlyNetGeneration": 100000,
+        "runwayState": "Not currently burning cash",
+        "numericRunwayRequired": false
+      }
+    },
+    {
+      "id": "F10",
+      "given": {
+        "oneOffInventoryCashRelease": 500000,
+        "recurringMonthlyContributionImprovement": 20000,
+        "cashReleaseRealised": false
+      },
+      "expected": {
+        "oneOffCashRelease": 500000,
+        "monthlyContributionImprovement": 20000,
+        "additionToAvailableCash": 0,
+        "combinedMonthlyImpactAllowed": false
+      }
+    }
+  ]
+}

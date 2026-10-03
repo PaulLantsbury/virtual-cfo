@@ -26,17 +26,17 @@ test('connection preflight rotates under an exact lease, proves capability, pers
  assert.doesNotMatch(JSON.stringify(out),new RegExp(`${connectionId}|${tenantId}|access-token|refresh-token`));
 });
 
-for(const [status,reason] of [[401,'unauthorized'],[403,'forbidden'],[429,'rate_limited'],[503,'upstream_unavailable']])test(`connections HTTP ${status} is ${reason} without a success receipt`,async()=>{
+for(const [status,reason] of [[401,'unauthorized'],[403,'forbidden'],[429,'rate_limited'],[503,'upstream_unavailable']])test(`connections HTTP ${status} is ${reason} with a safe failure receipt`,async()=>{
  const h=harness({connections:new Response('provider-private-body',{status})}),out=await createStagingXeroConnectionPreflight({env,query:h.query,fetchImpl:h.fetchImpl})();
  assert.deepEqual(out,{event:'xero_connection_preflight',state:'failed',phase:'connection',reason});
- assert.equal(h.calls.some(call=>call.sql.includes('worker_record_connection_preflight')),false);
+ assert.deepEqual(h.calls.find(call=>call.sql.includes('worker_record_connection_preflight')).params,[connectionId,5,'failed','connection',reason,null,null,h.lease]);
  assert.doesNotMatch(JSON.stringify(out),/provider-private-body/);
 });
 
 test('only an absent pinned tenant means reconnect required',async()=>{
  const h=harness({connections:new Response(JSON.stringify([{tenantId:'44444444-4444-4444-8444-444444444444'}]),{status:200})}),out=await createStagingXeroConnectionPreflight({env,query:h.query,fetchImpl:h.fetchImpl})();
  assert.deepEqual(out,{event:'xero_connection_preflight',state:'failed',phase:'connection',reason:'reconnect_required'});
- assert.equal(h.calls.some(call=>call.sql.includes('worker_record_connection_preflight')),false);
+ assert.deepEqual(h.calls.find(call=>call.sql.includes('worker_record_connection_preflight')).params,[connectionId,5,'failed','connection','reconnect_required',null,false,h.lease]);
 });
 
 test('connection transport failures remain a bounded network diagnostic',async()=>{
@@ -45,13 +45,13 @@ test('connection transport failures remain a bounded network diagnostic',async()
  const out=await createStagingXeroConnectionPreflight({env,query:h.query,fetchImpl})();
  assert.deepEqual(out,{event:'xero_connection_preflight',state:'failed',phase:'connection',reason:'network_failure'});
  assert.doesNotMatch(JSON.stringify(out),/private network detail/);
- assert.equal(h.calls.some(call=>call.sql.includes('worker_record_connection_preflight')),false);
+ assert.deepEqual(h.calls.find(call=>call.sql.includes('worker_record_connection_preflight')).params,[connectionId,5,'failed','connection','provider_unavailable',null,null,h.lease]);
 });
 
-test('organisation capability is independently classified and cannot create a success receipt',async()=>{
+test('organisation capability is independently classified in a safe failure receipt',async()=>{
  const h=harness({organisation:new Response('private',{status:403})}),out=await createStagingXeroConnectionPreflight({env,query:h.query,fetchImpl:h.fetchImpl})();
  assert.deepEqual(out,{event:'xero_connection_preflight',state:'failed',phase:'organisation',reason:'forbidden'});
- assert.equal(h.calls.some(call=>call.sql.includes('worker_record_connection_preflight')),false);
+ assert.deepEqual(h.calls.find(call=>call.sql.includes('worker_record_connection_preflight')).params,[connectionId,5,'failed','organisation','forbidden',null,null,h.lease]);
 });
 
 test('a false exact-lease release prevents a connected receipt from being reported to the operator',async()=>{
@@ -66,7 +66,7 @@ test('scope validation accepts only the canonical retained read-only allowlist',
 test('oversized connection bodies fail safely without parsing or persistence',async()=>{
  const h=harness({connections:new Response(JSON.stringify([{tenantId,padding:'x'.repeat(70_000)}]),{status:200})}),out=await createStagingXeroConnectionPreflight({env,query:h.query,fetchImpl:h.fetchImpl})();
  assert.deepEqual(out,{event:'xero_connection_preflight',state:'failed',phase:'connection',reason:'malformed_response'});
- assert.equal(h.calls.some(call=>call.sql.includes('worker_record_connection_preflight')),false);
+ assert.deepEqual(h.calls.find(call=>call.sql.includes('worker_record_connection_preflight')).params,[connectionId,5,'failed','connection','malformed_response',null,null,h.lease]);
 });
 
 test('database discovery must return two opaque UUIDs before context is read',async()=>{

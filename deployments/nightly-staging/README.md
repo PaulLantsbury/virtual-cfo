@@ -94,3 +94,19 @@ receipt. A fourth September accounting retry may be installed only afterwards,
 using `20261003_xero_fourth_reviewed_failed_scope_retry.sql`; verify it with
 `verify-xero-fourth-reviewed-retry-2026-10-03.sql` before one accounting run.
 Do not apply the fourth retry after a failed preflight.
+
+### Reviewed second reauthorization
+
+If the connection preflight returns `failed/connection/reconnect_required`, use
+the reviewed second-reauthorization package rather than consuming another
+accounting retry. The current runtime first persists that bounded failure under
+the exact rotated-credential lease. Apply
+`20261003_xero_second_reviewed_reauthorization.sql` only after that receipt
+exists, then run its status-only verifier. The migration is one-shot, pins the
+current credential version and owner/tenant/store, rejects an active worker
+lease, and preserves the existing connection, mapping and evidence history.
+
+Complete both consent stages from the Render `/settings` page without changing
+origin or rerunning the preflight between migration and consent. After Settings
+reports `Xero reconnected`, rerun the connection preflight. Continue to the
+fourth accounting retry only after exact `connected/organisation/ok` output.

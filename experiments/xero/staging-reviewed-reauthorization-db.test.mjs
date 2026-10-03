@@ -30,3 +30,44 @@ test('reviewed reauthorization rotates in place once and preserves provenance',a
  }finally{await db.close();}});
 
 test('reauthorization is bootstrap-only, tenant pinned, and verifier status-only',()=>{const migration=sql('20260928_xero_reviewed_reauthorization.sql'),verify=sql('verify-xero-reviewed-reauthorization-2026-09-28.sql');assert.match(migration,/session_user<>'night_scout_xero_bootstrap_login'/);assert.match(migration,/c\.tenant_id=trim\(p_tenant_id\)/);assert.match(migration,/ra\.allowed_owner_id=p_owner_id/);assert.match(migration,/store_memberships/);assert.match(migration,/consumed_at=clock_timestamp\(\)/);assert.match(migration,/WHEN v_reauthorization THEN 'reauthorization_required'/);assert.match(migration,/CREATE OR REPLACE FUNCTION public\.xero_merchant_readiness/);assert.doesNotMatch(verify,/failure_evidence_id|allowed_owner_id|ciphertext|tenant_id/i);});
+
+test('second reviewed reauthorization is version-pinned, one-shot and preserves history',async()=>{const {db,mappingId}=await prepared();try{
+ await db.exec(sql('20260928_xero_reviewed_reauthorization.sql'));
+ await db.exec('SET SESSION AUTHORIZATION night_scout_xero_bootstrap_login');
+ await db.query('SELECT * FROM xero_v1.bootstrap_reauthorize_connection($1,$2,$3,$4,1,$5::bytea,$6::bytea,$7,$8)',[connection,store,'tenant-1',owner,new Uint8Array([7]),new Uint8Array([8]),'staging-v1','AES-256-GCM']);
+ await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+ await db.exec(sql('20261003_xero_third_reviewed_failed_scope_retry.sql'));
+ await db.exec(sql('20261003_xero_connection_preflight_evidence.sql'));
+ await db.exec(sql('20261003_xero_connection_preflight_job.sql'));
+ await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+ await db.query(`SELECT * FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`);
+ const lease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,2,300) lease',[connection])).rows[0].lease;
+ await db.query(`SELECT xero_v1.worker_record_accounting_evidence_leased($1,$2,'2026-09-01','2026-09-25','GBP',false,'failed','source_refresh_failed',NULL,clock_timestamp(),NULL,NULL,NULL,NULL,NULL,NULL,2,$3)`,[connection,mappingId,lease]);
+ const preflightLease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,2,300) lease',[connection])).rows[0].lease;
+ await db.query(`SELECT xero_v1.worker_store_refresh_envelope_leased($1,$2::bytea,$3::bytea,$4,$5,2,3,$6)`,[connection,new Uint8Array([11]),new Uint8Array([12]),'staging-v1','AES-256-GCM',preflightLease]);
+ await db.query(`SELECT xero_v1.worker_record_connection_preflight($1,3,'failed','connection','reconnect_required',NULL,false,$2)`,[connection,preflightLease]);
+ await db.query('SELECT xero_v1.worker_release_refresh_lease($1,3,$2)',[connection,preflightLease]);
+ await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+ await db.exec(sql('20261003_xero_second_reviewed_reauthorization.sql'));
+ assert.deepEqual((await db.query(sql('verify-xero-second-reviewed-reauthorization-2026-10-03.sql'))).rows[0],{exactly_one_authorization:true,authorization_unconsumed:true,no_replacement_recorded:true,readiness_uses_second_authorization:true,bootstrap_lookup_execute:true,bootstrap_replace_execute:true,authenticated_lookup_denied:true,worker_replace_denied:true});
+ await db.exec('SET SESSION AUTHORIZATION night_scout_xero_bootstrap_login');
+ assert.deepEqual((await db.query('SELECT * FROM xero_v1.bootstrap_get_reauthorization_target($1,$2,$3)',[store,'tenant-1',owner])).rows,[{connection_id:connection,credential_version:3}]);
+ await assert.rejects(db.query('SELECT * FROM xero_v1.bootstrap_reauthorize_connection($1,$2,$3,$4,2,$5::bytea,$6::bytea,$7,$8)',[connection,store,'tenant-1',owner,new Uint8Array([13]),new Uint8Array([14]),'staging-v1','AES-256-GCM']),/reauthorization unavailable/i);
+ await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION night_scout_import_login');
+ const activeLease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,3,300) lease',[connection])).rows[0].lease;
+ await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION night_scout_xero_bootstrap_login');
+ assert.equal((await db.query('SELECT count(*)::int n FROM xero_v1.bootstrap_get_reauthorization_target($1,$2,$3)',[store,'tenant-1',owner])).rows[0].n,0);
+ await assert.rejects(db.query('SELECT * FROM xero_v1.bootstrap_reauthorize_connection($1,$2,$3,$4,3,$5::bytea,$6::bytea,$7,$8)',[connection,store,'tenant-1',owner,new Uint8Array([13]),new Uint8Array([14]),'staging-v1','AES-256-GCM']),/reauthorization unavailable/i);
+ await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION night_scout_import_login');await db.query('SELECT xero_v1.worker_release_refresh_lease($1,3,$2)',[connection,activeLease]);
+ await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION night_scout_xero_bootstrap_login');
+ assert.deepEqual((await db.query('SELECT * FROM xero_v1.bootstrap_reauthorize_connection($1,$2,$3,$4,3,$5::bytea,$6::bytea,$7,$8)',[connection,store,'tenant-1',owner,new Uint8Array([13]),new Uint8Array([14]),'staging-v1','AES-256-GCM'])).rows,[{connection_id:connection,credential_version:4}]);
+ await assert.rejects(db.query('SELECT * FROM xero_v1.bootstrap_reauthorize_connection($1,$2,$3,$4,3,$5::bytea,$6::bytea,$7,$8)',[connection,store,'tenant-1',owner,new Uint8Array([15]),new Uint8Array([16]),'staging-v1','AES-256-GCM']),/reauthorization unavailable/i);
+ await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+ assert.equal((await db.query('SELECT count(*)::int n FROM xero_v1.connections')).rows[0].n,1);
+ assert.equal((await db.query('SELECT count(*)::int n FROM xero_v1.mapping_versions')).rows[0].n,1);
+ assert.equal((await db.query('SELECT count(*)::int n FROM xero_v1.accounting_evidence')).rows[0].n,4);
+ assert.equal((await db.query('SELECT count(*)::int n FROM xero_v1.xero_reauthorization_authorizations')).rows[0].n,1);
+ assert.equal((await db.query('SELECT version FROM xero_v1.credential_envelopes')).rows[0].version,4);
+ }finally{await db.close();}});
+
+test('second reauthorization remains bootstrap-only and verifier is status-only',()=>{const migration=sql('20261003_xero_second_reviewed_reauthorization.sql'),verify=sql('verify-xero-second-reviewed-reauthorization-2026-10-03.sql');assert.match(migration,/target_credential_version=p_expected_version/);assert.match(migration,/ce\.version=ra\.target_credential_version/);assert.match(migration,/session_user<>'night_scout_xero_bootstrap_login'/);assert.match(migration,/REVOKE ALL[\s\S]*service_role/);assert.doesNotMatch(verify,/failure_evidence_id|allowed_owner_id|ciphertext|tenant_id|connection_id/i);});

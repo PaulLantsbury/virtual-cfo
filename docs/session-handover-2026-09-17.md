@@ -52,6 +52,25 @@ Prepared follow-up adds `20261003_xero_connection_preflight_job.sql`: a worker-o
 
 This lookup migration is prepared, not yet applied. Next: publish the follow-up commit, allow the Render cron service to deploy it, apply only `20261003_xero_connection_preflight_job.sql` to staging, then rerun the connection preflight command. Apply the already-prepared fourth reviewed retry migration and run accounting refresh only after an exact `connected/organisation/ok` preflight. The stored refresh flag remains disabled and all three earlier accounting retry authorizations remain consumed.
 
+Subsequent live result: the lookup migration was applied and the Render
+preflight reached Xero, rotated the credential safely, then returned exact
+`failed/connection/reconnect_required`. This proves the lookup/runtime path is
+working but the pinned tenant is absent from Xero's current connection list.
+Do not apply the fourth accounting retry.
+
+Prepared recovery persists bounded failed-preflight receipts under the exact
+credential lease and adds a second reviewed one-shot reauthorization bound to
+the latest exact `reconnect_required` receipt/current credential version. It
+preserves the connection, mapping, accounting/preflight evidence and prior
+authorizations; only the bootstrap login may use it, and active leases, wrong
+versions and replay are rejected. Because the first live failure occurred
+before failure persistence was deployed, publish this follow-up and rerun the
+preflight once to create the durable receipt; then apply the second
+reauthorization migration and verifier and complete both consent stages from
+the Render Settings origin. Do not rerun preflight between migration and
+consent. After `Xero reconnected`, rerun preflight and require exact
+`connected/organisation/ok` before the fourth retry.
+
 ## End-of-day decisions and next session — 17 September
 
 Paul asked to stop and resume tomorrow. Start by reading `docs/first-overnight-verification-2026-09-18.md` and inspect the first real Replit nightly run before new collection or retries. The staging worker is published; saved Europe/London timing verified. First run has NOT yet been verified. Fixed reporting period remains 17 September. Settings distinguishes dated schedule acknowledgement from saved collection results and financial verification. Production unchanged. Code, tests and evidence were saved in GitHub development commit 24326d0df56dc21a1f4d383d5ac48c2f55be4c37 before this documentation addition.

@@ -27,7 +27,7 @@ export function createStagingXeroConnectionPreflight({env=process.env,query,fetc
   const acquired=await rpc('SELECT xero_v1.worker_acquire_refresh_lease($1,$2,$3) AS lease_expires_at',[connectionId,pinned.version,300]);
   if(acquired.length!==1||acquired[0].lease_expires_at===null)throw unavailable();
   const leaseExpiresAt=acquired[0].lease_expires_at;
-  let leaseVersion=pinned.version,releaseValid=false,plain,outcome;
+  let leaseVersion=pinned.version,releaseValid=false,plain,outcome,receiptRecorded=false;
   try {
    plain=decryptStagingEnvelope(env.NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY,pinned);
    let fresh;
@@ -44,11 +44,17 @@ export function createStagingXeroConnectionPreflight({env=process.env,query,fetc
    catch(error){const reason=allowedReasons.has(error?.safeReason)?error.safeReason:'provider_unavailable';outcome=result('failed','organisation',reason);return outcome;}
    const receipt=await rpc('SELECT xero_v1.worker_record_connection_preflight($1,$2,$3,$4,$5,$6,$7,$8) AS recorded',[connectionId,leaseVersion,'connected','organisation','ok',null,true,leaseExpiresAt]);
    if(receipt.length!==1||receipt[0].recorded!==true)throw unavailable();
-   outcome=result('connected','organisation','ok');return outcome;
+   receiptRecorded=true;outcome=result('connected','organisation','ok');return outcome;
   } finally {
    plain?.fill(0);
+   if(outcome?.state==='failed'&&!receiptRecorded){
+    const evidenceReason=outcome.reason==='network_failure'?'provider_unavailable':outcome.reason;
+    const receipt=await rpc('SELECT xero_v1.worker_record_connection_preflight($1,$2,$3,$4,$5,$6,$7,$8) AS recorded',[connectionId,leaseVersion,'failed',outcome.phase,evidenceReason,null,outcome.reason==='reconnect_required'?false:null,leaseExpiresAt]);
+    if(receipt.length!==1||receipt[0].recorded!==true)throw unavailable();
+    receiptRecorded=true;
+   }
    try{const released=await rpc('SELECT xero_v1.worker_release_refresh_lease($1,$2,$3) AS released',[connectionId,leaseVersion,leaseExpiresAt]);releaseValid=released.length===1&&released[0].released===true;}catch{releaseValid=false;}
-   if(!releaseValid&&outcome?.state==='connected')throw unavailable();
+   if(!releaseValid&&outcome)throw unavailable();
   }
  };
 }

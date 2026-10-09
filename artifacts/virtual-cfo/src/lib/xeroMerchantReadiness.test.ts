@@ -31,3 +31,10 @@ test('readiness messages do not disclose financial amounts',()=>{
   assert.doesNotMatch(xeroMerchantReadinessView(value,true).detail,/£|USD|GBP|revenue|balance/i);
  }
 });
+
+ test('saved evidence never claims the credential can currently refresh',()=>{
+ const view=xeroMerchantReadinessView(parseXeroMerchantReadiness(ready),true);
+ assert.match(view.title,/snapshot is saved/);assert.match(view.detail,/does not verify that the connection can refresh now/);
+ const reconnect=xeroMerchantReadinessView(parseXeroMerchantReadiness({...ready,connection:{...connection,status:'reauthorization_required'}}),true);
+ assert.equal(reconnect.canUseAccountingEvidence,false);assert.match(reconnect.title,/needs reconnection/);
+ });

@@ -7,6 +7,7 @@
  * return value or error.
  */
 import {INTAKE_TARGET} from '../../experiments/shopify/intake-runtime.mjs';
+import {planCompletedXeroPeriods} from './xero-completed-periods.mjs';
 const unavailable=()=>Error('Xero staging worker configuration is invalid');
 const date=value=>typeof value==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(`${value}T00:00:00.000Z`))&&new Date(`${value}T00:00:00.000Z`).toISOString().slice(0,10)===value;
 const text=(value,min,max)=>typeof value==='string'&&value.length>=min&&value.length<=max&&!/[\x00-\x20\x7f]/.test(value);
@@ -23,9 +24,23 @@ function database(url){
 export function readStagingXeroWorkerConfig(env={},clock=()=>new Date()){
  try {
   if(env.NIGHT_SCOUT_RUNTIME_ENV!=='staging'||env.NIGHT_SCOUT_XERO_STAGING_REFRESH_ENABLED!=='true'||env.NIGHT_SCOUT_XERO_STAGING_PROJECT_REF!==INTAKE_TARGET.projectRef)throw unavailable();
+  const current=clock();
+  const mode=env.NIGHT_SCOUT_XERO_PERIOD_MODE??'fixed';
+  if(!['fixed','completed_month_to_date','last_complete_month'].includes(mode))throw unavailable();
+  let planned;
+  if(mode!=='fixed'){
+   // Remove fixed date variables explicitly when activating rolling mode. A
+   // stale date configuration must not be silently overridden on the host.
+   if(env.NIGHT_SCOUT_XERO_REPORT_FROM||env.NIGHT_SCOUT_XERO_REPORT_TO)throw unavailable();
+   const plan=planCompletedXeroPeriods(current);
+   planned=plan.scopes.find(scope=>scope.purpose===(mode==='last_complete_month'?'last_complete_month':'current_month_completed_days'));
+   // The first local day has no completed current-month period. The host
+   // planner can report the intentional skip without selecting a DB job.
+   if(!planned)throw unavailable();
+  }
   const config={
-   from:env.NIGHT_SCOUT_XERO_REPORT_FROM,
-   to:env.NIGHT_SCOUT_XERO_REPORT_TO,
+   from:planned?.from??env.NIGHT_SCOUT_XERO_REPORT_FROM,
+   to:planned?.to??env.NIGHT_SCOUT_XERO_REPORT_TO,
    currency:env.NIGHT_SCOUT_XERO_CURRENCY,
    databaseUrl:env.NIGHT_SCOUT_INTAKE_DATABASE_URL,
    caPem:env.NIGHT_SCOUT_STAGING_CA_PEM,
@@ -34,7 +49,7 @@ export function readStagingXeroWorkerConfig(env={},clock=()=>new Date()){
    envelopeKey:env.NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY,
    envelopeKeyVersion:env.NIGHT_SCOUT_XERO_ENVELOPE_KEY_VERSION,
   };
-  const current=clock(),today=current instanceof Date&&Number.isFinite(current.valueOf())?current.toISOString().slice(0,10):null;
+  const today=current instanceof Date&&Number.isFinite(current.valueOf())?(mode==='fixed'?current.toISOString().slice(0,10):planCompletedXeroPeriods(current).today):null;
   if(!today||!date(config.from)||!date(config.to)||config.from>config.to||config.to>today||(Date.parse(config.to)-Date.parse(config.from))/86400000>=31||config.currency!=='GBP'||!database(config.databaseUrl)||typeof config.caPem!=='string'||config.caPem.length<100||config.caPem.length>32768||!text(config.clientId,20,256)||!text(config.clientSecret,24,2048)||!text(config.envelopeKey,32,512)||!text(config.envelopeKeyVersion,1,128))throw unavailable();
   return Object.freeze({envelopeKeyVersion:config.envelopeKeyVersion,scope:Object.freeze({from:config.from,to:config.to,currency:config.currency}),projectRef:INTAKE_TARGET.projectRef});
  } catch { throw unavailable(); }

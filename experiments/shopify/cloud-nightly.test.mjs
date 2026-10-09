@@ -48,3 +48,15 @@ test('cloud bootstrap accepts only the verified staging session pooler and passe
  assert.equal(result.state,'prepared_not_installed');
  for(const databaseUrl of [env.NIGHT_SCOUT_INTAKE_DATABASE_URL.replace(':5432',':6543'),env.NIGHT_SCOUT_INTAKE_DATABASE_URL.replace(target.projectRef,'futkktdebdygsdrcknpr'),env.NIGHT_SCOUT_INTAKE_DATABASE_URL+'?sslmode=disable'])await assert.rejects(runCloudNightly({env:{...env,NIGHT_SCOUT_INTAKE_DATABASE_URL:databaseUrl}},{runChild:()=>assert.fail()}),/unconfirmed/);
 });
+
+test('rolling opt-in freezes 31 completed London dates into private intake config and safe receipt',async()=>{
+ for(const [at,from,to] of [['2026-10-09T01:00:00Z','2026-09-08','2026-10-08'],['2026-10-25T02:00:00Z','2026-09-24','2026-10-24'],['2026-03-29T01:00:00Z','2026-02-26','2026-03-28']]){
+  const env=environment();delete env.NIGHT_SCOUT_REPORT_FROM;delete env.NIGHT_SCOUT_REPORT_TO;env.NIGHT_SCOUT_REPORT_SCOPE='rolling-31-completed-days';
+  let clocks=0;
+  const r=await runCloudNightly({env},{now:()=>{clocks++;return new Date(at);},runChild:async({args})=>{const c=JSON.parse(await readFile(args[2],'utf8'));assert.deepEqual(c.scope,{storeId:target.storeId,shopId:target.shopId,from,to});return {stdout:JSON.stringify({state:'prepared_not_installed',from,to,financeImported:false}),stderr:''};}});
+  assert.equal(clocks,1);assert.equal(r.from,from);assert.equal(r.to,to);
+ }
+});
+test('rolling refuses mixed fixed dates or unknown policy before child launch',async()=>{
+ for(const patch of [{NIGHT_SCOUT_REPORT_SCOPE:'rolling-31-completed-days'},{NIGHT_SCOUT_REPORT_SCOPE:'last-month'}])await assert.rejects(runCloudNightly({env:{...environment(),...patch}},{runChild:()=>assert.fail()}),/unconfirmed/);
+});

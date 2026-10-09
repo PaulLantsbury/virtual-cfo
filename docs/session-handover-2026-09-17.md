@@ -1,3 +1,7 @@
+## 9 October live-feed batch — preparation and current blockers
+
+User prioritised live Shopify/Xero feeds and ongoing automatic provider test data before detailed dashboard revision. [Batch evidence and activation gates](live-feeds-batch-2026-10-09.md): actual Shopify nightly replay still uses 17 September; fresh Shopify source read passes (one excluded test order/two refunds, capacity headroom confirmed). Xero annual cron is parked and current connection preflight returns reconnect_required. Rolling scopes, independent accounting UI and a guarded provider generator are implemented/prepared; current financial source feeds and ongoing writers are not yet activated. New writer permissions/member reader installation remain reviewed proposals. Keep customer-friendly Xero mapping and later per-dashboard review in the existing roadmap, with separate evidence gates for source collection and verified financial figures.
+
 ## 9 October live current-data acceptance complete
 
 Staging deployment `dep-db4h1p2d0e5s73ev5f2g` is Live at revision `58e02a59fccd4af657053cb13b97f6427a44a8fb`. Coordinator independently verified full 980-row UTC postflight through the dedicated member-bound reporting role. Owner-applied fixture is now applied and live-verified; do not rerun its guarded operator SQL.

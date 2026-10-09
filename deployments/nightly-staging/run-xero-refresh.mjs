@@ -1,12 +1,17 @@
 import {createStagingXeroRefreshJob} from './xero-refresh-runtime.mjs';
 import {readStagingXeroWorkerConfig} from './xero-worker.mjs';
 import {createRequire} from 'node:module';
+import {skipEmptyXeroMonth} from './xero-completed-periods.mjs';
 const failure='Xero staging worker unavailable';
 let pool;
 try {
  if(process.env.NIGHT_SCOUT_XERO_STAGING_REFRESH_ENABLED!=='true'){
   process.stdout.write('{"state":"disabled"}\n');
   process.exitCode=0;
+ } else if(skipEmptyXeroMonth(process.env)){
+ // On the first local day there are no completed current-month dates. Do not
+ // create a pool, select a job, rotate a credential or manufacture coverage.
+ process.stdout.write('{"state":"skipped","reason":"no_completed_current_month_days"}\n');
  } else {
  const config=readStagingXeroWorkerConfig(process.env);
  // pg is owned by the database workspace. Resolve it from that package rather

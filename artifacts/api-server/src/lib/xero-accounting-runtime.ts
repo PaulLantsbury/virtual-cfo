@@ -8,7 +8,9 @@ export function createXeroAccountingRuntime(env:NodeJS.ProcessEnv,deps:{createAu
  if(env.NIGHT_SCOUT_XERO_ACCOUNTING_READER_ENABLED!=='true')return undefined;
  const url=env.NIGHT_SCOUT_REVIEW_AUTH_URL??env.VITE_SUPABASE_URL,key=env.NIGHT_SCOUT_REVIEW_PUBLIC_KEY??env.VITE_SUPABASE_ANON_KEY;
  if(env.NIGHT_SCOUT_RUNTIME_ENV!=='staging'||env.NIGHT_SCOUT_XERO_STAGING_PROJECT_REF!==PROJECT||url!==`https://${PROJECT}.supabase.co`||typeof key!=='string'||key.length<20)throw unavailable();
- const auth=(deps.createAuthClient??createClient)(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}),fetchImpl=deps.fetchImpl??fetch,tokens=new WeakMap<object,string>();
+ const fetchImpl=deps.fetchImpl??fetch;
+ const boundedAuthFetch:typeof fetch=(input,init)=>fetchImpl(input,{...init,signal:init?.signal?AbortSignal.any([init.signal,AbortSignal.timeout(10_000)]):AbortSignal.timeout(10_000)});
+ const auth=(deps.createAuthClient??createClient)(url,key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},global:{fetch:boundedAuthFetch}}),tokens=new WeakMap<object,string>();
  return {
   authenticate:async authorization=>{const token=authorization.replace(/^Bearer\s+/i,'');const {data,error}=await auth.auth.getUser(token);if(error||typeof data?.user?.id!=='string')throw unavailable();const identity=Object.freeze({userId:data.user.id});tokens.set(identity,token);return identity;},
   read:async(identity,scope)=>{

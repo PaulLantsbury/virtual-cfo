@@ -37,12 +37,16 @@ export async function checkDevelopmentConnection({configPath,readOrders=false,fe
   const verified=await verifyShopifyConnection({connection,resolveCredential:provider.resolveCredential,fetchImpl});
   if(!readOrders)return verified;
   const read=createShopifyReader({domain:connection.domain,accessToken:await provider.resolveCredential(connection),fetchImpl});
+  const started=performance.now();
   const extracted=await collectShopifyOrders(read,connection);
+  const collectionDurationMs=Math.ceil(performance.now()-started);
   if(['domain','shopId','currency','timezone'].some(key=>extracted.settings[key]!==connection[key]))throw new Error(message);
   return {...verified,status:'order_summaries_read',ordersCollected:true,
    sourceOrderCount:extracted.orders.length,testOrderCount:extracted.orders.filter(order=>order.test).length,
    sourceRefundCount:extracted.orders.reduce((sum,order)=>sum+order.refunds.length,0),
    reviewFlagCount:extracted.review.length,pageCount:extracted.pages.length,
+   capacity:{pageLimit:100,timeoutMs:60000,collectionDurationMs,remainingPageCapacity:100-extracted.pages.length,
+    fourteenDayAdditionalOrderCap:10,hasTrialPageHeadroom:extracted.pages.length+10<=100},
    financialEligibilityAssessed:false,detailMappingCompleted:false,
    limitations:['NOT_SNAPSHOT_ISOLATED','SUMMARY_ONLY','SOURCE_RECONCILIATION_PENDING']};
  }catch{throw new Error(message);}finally{provider?.invalidate();}

@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { XeroAccountingSnapshot } from '@/components/XeroAccountingSnapshot';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { SalesReportingPeriod } from '@/components/SalesReportingPeriod';
 import { useActiveStore, useAuth } from '@/lib/auth/AuthProvider';
@@ -74,6 +75,7 @@ export default function ProfitGrowth() {
         </tbody></table></div>
         {!bridgeAvailable && <p className="text-xs text-muted-foreground mt-3">Detailed amounts are available in the Pro preview.</p>}
       </section>
+      <XeroAccountingSnapshot scope={{storeId, from: reporting.period.dateFrom, to: reporting.period.dateTo, currency: reporting.config?.currency ?? ''}} />
       <a href="/scenario-lab" className="inline-flex font-semibold text-primary underline">Explore the separate sample model in Scenario Planner</a>
       <p className="text-sm text-muted-foreground">Scenario Planner still uses a labelled sample month. Its starting figures are not connected to these store results. Store-specific recommendations and forecasts remain unavailable.</p>
     </div>

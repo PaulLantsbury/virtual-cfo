@@ -6,6 +6,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {X509Certificate} from 'node:crypto';
 import {INTAKE_TARGET,intakeConnectionOptions} from './intake-runtime.mjs';
+import {rollingReportingScope} from './rolling-reporting-scope.mjs';
 const execute=promisify(execFile);
 const target=`${INTAKE_TARGET.projectRef}/${INTAKE_TARGET.storeId}`;
 const missed='Cloud nightly start was outside the allowed nightly window. No collection was attempted; inspect the schedule before another run.';
@@ -24,9 +25,14 @@ export function parseCloudNightlyArguments(args){
  ensure(mode==='tick'?confirmTarget===target:confirmTarget===undefined);
  return {mode,confirmTarget};
 }
-function configuration(env){
+function configuration(env,now){
  ensure(env.NIGHT_SCOUT_STAGING_PROJECT_REF===INTAKE_TARGET.projectRef&&bounded(env.NIGHT_SCOUT_INTAKE_DATABASE_URL,4096)&&bounded(env.NIGHT_SCOUT_SHOPIFY_CLIENT_ID,256)&&bounded(env.NIGHT_SCOUT_SHOPIFY_CLIENT_SECRET,4096));
- const scope={storeId:INTAKE_TARGET.storeId,shopId:INTAKE_TARGET.shopId,from:env.NIGHT_SCOUT_REPORT_FROM,to:env.NIGHT_SCOUT_REPORT_TO};
+ ensure([undefined,'fixed','rolling-31-completed-days'].includes(env.NIGHT_SCOUT_REPORT_SCOPE));
+ const rolling=env.NIGHT_SCOUT_REPORT_SCOPE==='rolling-31-completed-days';
+ // Refuse competing fixed dates rather than silently ignoring a stale deployment setting.
+ ensure(!rolling||(env.NIGHT_SCOUT_REPORT_FROM===undefined&&env.NIGHT_SCOUT_REPORT_TO===undefined));
+ const period=rolling?rollingReportingScope({now:now().toISOString(),timezone:INTAKE_TARGET.timezone}):{from:env.NIGHT_SCOUT_REPORT_FROM,to:env.NIGHT_SCOUT_REPORT_TO};
+ const scope={storeId:INTAKE_TARGET.storeId,shopId:INTAKE_TARGET.shopId,from:period.from,to:period.to};
  ensure(day(scope.from)&&day(scope.to)&&scope.from<=scope.to&&(Date.parse(scope.to)-Date.parse(scope.from))/86400000<31);
  const config={projectRef:INTAKE_TARGET.projectRef,databaseUrl:env.NIGHT_SCOUT_INTAKE_DATABASE_URL,scope};
  intakeConnectionOptions(config); // Pins staging direct/session endpoint and dedicated login, validated TLS.
@@ -56,13 +62,13 @@ function safeReceipt(r,mode,scope){
  * child output is never forwarded. Timeout/exit/cleanup failures are uncertain.
  * This module neither uploads secrets nor installs a scheduler/deployment.
  */
-export async function runCloudNightly({env=process.env,mode='check',confirmTarget}={}, {runChild=async({executable,args,environment,timeoutMs,maxBuffer})=>execute(executable,args,{env:environment,timeout:timeoutMs,maxBuffer,killSignal:'SIGKILL',encoding:'utf8'})}={}){
+export async function runCloudNightly({env=process.env,mode='check',confirmTarget}={}, {now=()=>new Date(),runChild=async({executable,args,environment,timeoutMs,maxBuffer})=>execute(executable,args,{env:environment,timeout:timeoutMs,maxBuffer,killSignal:'SIGKILL',encoding:'utf8'})}={}){
  let directory;
  try{
  ensure(['check','tick'].includes(mode)&&(mode==='tick'?confirmTarget===target:confirmTarget===undefined));
  ensure([undefined,'false','true'].includes(env.NIGHT_SCOUT_CLOUD_ENABLED));
  if(env.NIGHT_SCOUT_CLOUD_ENABLED!=='true')return {state:'disabled',executionMode:mode,writeAttempted:false};
- const {config,shop,pem}=configuration(env);
+ const {config,shop,pem}=configuration(env,now);
  directory=await mkdtemp(join(tmpdir(),'night-scout-cloud-'));await chmod(directory,0o700);
  const configPath=join(directory,'intake.json'),shopifyConfigPath=join(directory,'shopify.json'),caPath=join(directory,'staging-ca.pem');
  await writeFile(caPath,pem,{mode:0o600,flag:'wx'});await writeFile(shopifyConfigPath,JSON.stringify(shop),{mode:0o600,flag:'wx'});await writeFile(configPath,JSON.stringify({...config,shopifyConfigPath}),{mode:0o600,flag:'wx'});

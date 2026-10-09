@@ -61,11 +61,18 @@ export function reviewDatabase(pool){
 /** Factories are trusted server dependencies (pg Pool and Supabase createClient).
  * No application route is enabled by this function alone.
  */
-export async function initialiseReviewRuntime(config,{createPool,createAuthClient,fetchImpl=fetch}){
+export async function initialiseReviewRuntime(config,{createPool,createAuthClient,fetchImpl=fetch,onPoolIdleError=()=>{console.warn('Review database idle connection became unavailable');}}){
  const options=reviewConnectionOptions(config);
  let pool,phase='database_connect';
  try{
-  pool=createPool(options.pool);const database=reviewDatabase(pool);
+  pool=createPool(options.pool);
+  // pg emits idle-client failures outside a request. An unhandled EventEmitter
+  // error crashes Node and may print the raw client/socket and credentials.
+  // pg already removes the failed idle client; do not replay work or reconnect.
+  pool.on?.('error',()=>{
+   try{onPoolIdleError(Object.freeze({phase:'database_idle',code:'CONNECTION_UNAVAILABLE'}));}catch{}
+  });
+  const database=reviewDatabase(pool);
   await database.transaction(async tx=>{
    phase='database_readiness';
    const {rows}=await tx.query(`SELECT current_user AS role,

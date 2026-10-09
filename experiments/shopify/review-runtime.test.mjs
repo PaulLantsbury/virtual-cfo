@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {EventEmitter} from 'node:events';
 import {reviewConnectionOptions,boundedAuthFetch,reviewDatabase,initialiseReviewRuntime} from './review-runtime.mjs';
 const ref='abcdefghijklmnopqrst';
 const config={projectRef:ref,authUrl:`https://${ref}.supabase.co`,publishableKey:'sb_publishable_synthetic',databaseUrl:`postgresql://night_scout_review_login:synthetic-password@db.${ref}.supabase.co:5432/postgres`};
@@ -32,6 +33,28 @@ function factories(overrides={}){
 }
 test('runtime becomes usable only after permission readiness succeeds',async()=>{
  const f=factories();const runtime=await initialiseReviewRuntime(config,f);assert.equal(typeof runtime.service.prepare,'function');assert.equal(f.calls.auth,1);assert.equal(f.calls.released,1);await runtime.close();assert.equal(f.calls.ended,1);
+});
+test('idle pool errors are handled without exposing client details, reconnecting or breaking close',async()=>{
+ const f=factories(),pool=new EventEmitter(),notices=[];
+ const stub=f.createPool(reviewConnectionOptions(config).pool);
+ Object.assign(pool,stub);
+ let creates=0;
+ const runtime=await initialiseReviewRuntime(config,{...f,createPool:()=>{creates++;return pool;},onPoolIdleError:notice=>{notices.push(notice);}});
+ const secret='private-password-host-query';
+ const error=Object.assign(new Error(secret),{detail:secret,client:{password:secret}}),client={connectionParameters:{password:secret},socket:{private:secret}};
+ assert.doesNotThrow(()=>pool.emit('error',error,client));
+ assert.deepEqual(notices,[{phase:'database_idle',code:'CONNECTION_UNAVAILABLE'}]);
+ assert.equal(JSON.stringify(notices).includes(secret),false);
+ assert.equal(creates,1);assert.equal(f.calls.released,1);
+ await runtime.close();assert.equal(f.calls.ended,1);
+ // Keep a safe listener for late driver notifications during shutdown.
+ assert.doesNotThrow(()=>pool.emit('error',error,client));
+});
+test('an idle-error diagnostic callback failure cannot become another unhandled pool error',async()=>{
+ const f=factories(),pool=new EventEmitter();Object.assign(pool,f.createPool(reviewConnectionOptions(config).pool));
+ const runtime=await initialiseReviewRuntime(config,{...f,createPool:()=>pool,onPoolIdleError:()=>{throw new Error('diagnostic failed');}});
+ assert.doesNotThrow(()=>pool.emit('error',new Error('private details'),{password:'private'}));
+ await runtime.close();assert.equal(f.calls.ended,1);
 });
 test('unsafe or incomplete permissions close the pool without creating Auth client',async()=>{
  for(const override of [{unsafe_login:true},{unsafe_writes:true},{lock_ready:false},{role:'postgres'}]){

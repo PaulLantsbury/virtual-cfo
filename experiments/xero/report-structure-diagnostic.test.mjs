@@ -28,3 +28,21 @@ test('classifies the exact current extractor gates without exposing their conten
  const output=JSON.stringify(result);for(const secret of ['other-private-id','SECRET MONEY'])assert.doesNotMatch(output,new RegExp(secret,'i'));
 });
 test('malformed envelopes remain structural booleans rather than raw payloads',()=>{const result=diagnoseXeroReportStructure({snapshot:{...snapshot,trialBalance:{Reports:[{private:'SECRET'},{private:'SECRET'}]}},mapping});assert.deepEqual(result.reports.trialBalance.envelope,{reports:2,singleReport:false,reportIdMatches:false,rowsArray:false});assert.doesNotMatch(JSON.stringify(result),/SECRET/);});
+
+test('describes the live two, three and five-cell report shapes and omitted selected accounts',()=>{
+ const shaped=(id,count)=>({RowType:'Row',Cells:Array.from({length:count},(_,index)=>({Value:index===0?'SECRET':index===1?'123.45':'0.00',Attributes:[{Id:'account',Value:id}]}))});
+ const result=diagnoseXeroReportStructure({mapping,snapshot:{
+  profitAndLoss:report('ProfitAndLoss',[shaped('sales',2)]),
+  balanceSheet:report('BalanceSheet',[shaped('bank1',3),shaped('bank2',3)]),
+  trialBalance:report('TrialBalance',[shaped('unselected-trial',5)]),
+  bankSummary:report('BankSummary',[shaped('unselected-bank',5)])
+ }});
+ assert.deepEqual(result.reports.profitAndLoss.shape.cellCounts,undefined);
+ assert.equal(result.reports.profitAndLoss.shape.minCells,2);assert.equal(result.reports.profitAndLoss.shape.maxCells,2);
+ assert.deepEqual(result.reports.profitAndLoss.selected.revenue,{expected:2,found:1,missing:1,duplicate:0,occurrences:1,extractorEligible:1,consistentAccountAttributes:1,conflictingAccountAttributes:0,usableMoney:1,noValue:0,malformedValue:0,minCells:2,maxCells:2});
+ for(const category of ['processingFee','advertising','software'])assert.equal(result.reports.profitAndLoss.selected[category].missing,1);
+ assert.equal(result.reports.balanceSheet.shape.minCells,3);assert.equal(result.reports.balanceSheet.shape.maxCells,3);assert.equal(result.reports.balanceSheet.selected.includedCash.usableMoney,2);
+ assert.equal(result.reports.trialBalance.shape.minCells,5);assert.equal(result.reports.trialBalance.shape.maxCells,5);
+ assert.equal(result.reports.bankSummary.shape.minCells,5);assert.equal(result.reports.bankSummary.shape.maxCells,5);
+ assert.doesNotMatch(JSON.stringify(result),/unselected|SECRET/);
+});

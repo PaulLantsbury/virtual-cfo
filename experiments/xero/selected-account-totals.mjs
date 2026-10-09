@@ -7,12 +7,16 @@ import {validateXeroAccountMapping} from './account-mapping-contract.mjs';
 export function extractSelectedAccountTotals({profitAndLoss,balanceSheet,mapping}={}){
  const selected=validateXeroAccountMapping(mapping);
  if(!selected)throw Error('Xero selected account totals are unavailable');
- const profitIds=[...selected.revenue,...selected.processingFee,...selected.advertising,...selected.software];
- const cashIds=selected.includedCash;
- return Object.freeze({...totalsFromReport(profitAndLoss,'ProfitAndLoss',profitIds),...totalsFromReport(balanceSheet,'BalanceSheet',cashIds)});
+ return Object.freeze({
+  ...totalsFromReport(profitAndLoss,'ProfitAndLoss',selected.revenue),
+  ...totalsFromReport(profitAndLoss,'ProfitAndLoss',selected.processingFee,{missingValue:0}),
+  ...totalsFromReport(profitAndLoss,'ProfitAndLoss',selected.advertising,{missingValue:0}),
+  ...totalsFromReport(profitAndLoss,'ProfitAndLoss',selected.software,{missingValue:0}),
+  ...totalsFromReport(balanceSheet,'BalanceSheet',selected.includedCash)
+ });
 }
 
-function totalsFromReport(payload,reportId,ids){
+function totalsFromReport(payload,reportId,ids,{missingValue}={}){
  const report=payload?.Reports?.[0];
  if(!report||report.ReportID!==reportId||!Array.isArray(report.Rows))fail();
  const found=new Map();
@@ -21,7 +25,10 @@ function totalsFromReport(payload,reportId,ids){
   if(found.has(id))fail();
   found.set(id,money(row.Cells));
  }
- if(found.size!==ids.length)fail();
+ if(found.size!==ids.length){
+  if(missingValue===undefined)fail();
+  for(const id of ids)if(!found.has(id))found.set(id,missingValue);
+ }
  return Object.freeze(Object.fromEntries(found));
 }
 

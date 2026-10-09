@@ -22,6 +22,10 @@ export function SalesReportingPeriod({ reporting }: { reporting: ReturnType<type
     <p className="text-sm text-muted-foreground mt-3">{period.label}{period.dateFrom && `: ${period.dateFrom} – ${period.dateTo}`}</p>
     <p className="text-xs text-muted-foreground mt-1">{config ? `Store timezone: ${config.timezone} · Currency: ${config.currency}` : 'Store timezone and currency unavailable.'} This store’s selection is shared across reporting pages.</p>
     {reporting.status === 'invalid' && <p role="alert" className="text-sm mt-2">Choose real calendar dates with From on or before To. Figures are unavailable until the dates are valid.</p>}
+    {reporting.status === 'unavailable' && <div role="status" className="text-sm mt-2">
+      <p>{reporting.reason}</p>
+      <button type="button" className="mt-2 underline underline-offset-4" onClick={reporting.retry}>Retry sales evidence check</button>
+    </div>}
     {selection.mode === 'custom' && <p className="text-xs text-muted-foreground mt-2">Previous-period comparisons are unavailable for custom dates.</p>}
   </section>;
 }

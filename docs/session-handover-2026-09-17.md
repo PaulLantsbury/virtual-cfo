@@ -1,3 +1,7 @@
+# Dashboard recovery batch — 9 October 2026
+
+Start with [the recovery batch](dashboard-recovery-batch-2026-10-09.md) and [the existing roadmap](roadmap-2026-09-17.md). Paul authorized large multi-agent batches with minimum intervention. Profit API hosted composition fixed, truthful failure diagnostics and mapping selection usability improved, historical/daily artifacts prepared and focused checks run. No live deployment/data activation. Next requires authenticated hosted/configuration/schema inspection and concrete staging packages; do not recreate completed Xero consent or apply fixture identities. Earlier dated entries below are historical.
+
 # Xero non-consuming connection preflight package — 3 October 2026
 
 Prepared a replacement for the repeated one-use accounting diagnostic cycle.

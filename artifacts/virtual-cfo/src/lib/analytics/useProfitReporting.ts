@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../supabase';
 import { useAuth } from '../auth/AuthProvider';
+import { profitHttpFailure } from './reportingAvailability';
 import type { useSalesReporting } from './useSalesReporting';
 import type { VerifiedSales } from '../../../../../experiments/financial-v1/rpc-sales-adapter.mjs';
 
@@ -46,7 +47,7 @@ export function useProfitReporting(storeId: string, reporting: ReturnType<typeof
       const response = await fetch(`/api/profit-reporting?${new URLSearchParams(scope)}`, {
         headers: { Authorization: `Bearer ${data.session.access_token}` }, signal,
       });
-      if (!response.ok) throw new Error(response.status === 403 ? 'Profit evidence is not accessible for this store.' : 'Profit evidence could not be checked.');
+      if (!response.ok) throw new Error(profitHttpFailure(response.status));
       const result = await response.json() as ProfitResponse;
       if (result.state === 'unavailable' && typeof result.reason === 'string') return result;
       if (result.state !== 'ready' || !profitReportMatches(result.report, scope)) throw new Error('Profit evidence does not match this reporting period.');

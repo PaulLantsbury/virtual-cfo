@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../supabase';
+import { salesAvailabilityReason } from './reportingAvailability';
 import {
   parseStoreReporting, storeReportingPeriod, isValidReportingRange,
   restoreSalesReportingSelection, type SalesReportingSelection,
@@ -76,10 +77,14 @@ export function useSalesReporting(storeId: string) {
   const invalidCustom = selection.mode === 'custom' && !valid;
   const loading = !invalidCustom && !!storeId && (settings.isPending || (canRead && current.isPending));
   const status = invalidCustom ? 'invalid' : loading ? 'loading' : data ? 'ready' : 'unavailable';
+  const reason = status !== 'unavailable' ? null : !config
+    ? 'Store timezone and currency could not be checked.'
+    : salesAvailabilityReason(current.error?.message);
   const comparisonStatus = selection.mode === 'custom' ? 'error' : previousData ? 'ready' :
     !data || previous.isPending ? 'loading' : 'error';
   return {
-    period, prior, config, settings, data, previousData, valid, loading, status,
+    period, prior, config, settings, data, previousData, valid, loading, status, reason,
+    retry: () => { if (!config) void settings.refetch(); else void current.refetch(); },
     comparison: { status: comparisonStatus as 'loading' | 'ready' | 'error', period: prior },
     selection,
     setRange: (from: string, to: string) => select(storeId, { mode: 'custom', from, to }),

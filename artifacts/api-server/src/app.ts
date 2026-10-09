@@ -10,8 +10,9 @@ import {createXeroStagingBootstrapRouter, type XeroBootstrapRouterDependencies} 
 import {mountStagingSpa} from './lib/mount-staging-spa.ts';
 import {createXeroMerchantReadinessRouter,type XeroReadinessDependencies} from './routes/xero-merchant-readiness.ts';
 import {safeRequestPath} from './lib/safe-request-path.ts';
+import {createProfitReportingRouter,type ProfitReportingService} from './routes/profit-reporting.ts';
 
-export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies): Express {
+export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService): Express {
 const app: Express = express();
 
 app.use(
@@ -36,6 +37,7 @@ app.use(
 app.use(cors());
 // Mount before general body parsing so review limits and safe errors apply.
 app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
+app.use('/api/profit-reporting',createProfitReportingRouter(profitReporting));
 app.use('/api/xero/staging',createXeroStagingBootstrapRouter(xeroBootstrap));
 app.use('/api/xero',createXeroMerchantReadinessRouter(xeroReadiness));
 app.use(express.json());

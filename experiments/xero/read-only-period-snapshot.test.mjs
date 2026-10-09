@@ -8,8 +8,8 @@ test('period snapshot applies bounded period and point-in-time parameters',async
  assert.equal(calls.length,5);
  assert.ok(calls.every(([,options])=>options.method==='GET'&&options.redirect==='error'&&options.headers['xero-tenant-id']==='tenant-test'));
  assert.match(calls[0][0],/Organisation$/);
- assert.match(calls[1][0],/ProfitAndLoss\?fromDate=2026-09-01&toDate=2026-09-25$/);
- assert.match(calls[2][0],/BalanceSheet\?date=2026-09-25$/);
+ assert.match(calls[1][0],/ProfitAndLoss\?fromDate=2026-09-01&toDate=2026-09-25&standardLayout=true$/);
+ assert.match(calls[2][0],/BalanceSheet\?date=2026-09-25&standardLayout=true$/);
  assert.match(calls[3][0],/TrialBalance\?date=2026-09-25$/);
  assert.match(calls[4][0],/BankSummary\?fromDate=2026-09-01&toDate=2026-09-25$/);
  assert.deepEqual({date:snapshot.date,from:snapshot.from,to:snapshot.to},{date:'2026-09-25',from:'2026-09-01',to:'2026-09-25'});

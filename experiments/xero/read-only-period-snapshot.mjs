@@ -24,6 +24,9 @@ export async function readFixedXeroPeriodSnapshot({accessToken,tenantId,from,to,
   const url=new URL(`${base}/${path}`);
   if(kind==='period'){url.searchParams.set('fromDate',from);url.searchParams.set('toDate',to);}
   if(kind==='point')url.searchParams.set('date',to);
+  // Custom Xero report layouts can reorder or repeat account rows.  The
+  // selected-account parser is intentionally bound to Xero's standard layout.
+  if(path==='Reports/ProfitAndLoss'||path==='Reports/BalanceSheet')url.searchParams.set('standardLayout','true');
   let response;try{response=await fetchImpl(url,{method:'GET',headers,redirect:'error'});}catch{fail(phase,'network_failure',diagnose);}
   if(!response.ok)fail(phase,statusReason(response.status),diagnose);
   let body;try{body=await response.json();}catch{fail(phase,'malformed_response',diagnose);}

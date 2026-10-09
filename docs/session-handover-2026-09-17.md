@@ -1,3 +1,7 @@
+## 9 October final batch receipt
+
+Staging web revision d834ddf18a8e026d124e821130b80e1ec56403b6 is Live (55.2s), including the integrated current-fixture/saved-mapping package and safe idle-database-error handling. Deployed schema CLI confirms compatible=true, PostgreSQL17, zero mismatches. Coordinator verified Store D February figures across CFO Briefing/Margin/Profit Overview with preserved filters. Private 980-row current synthetic operator file is prepared/bound to the sole existing reviewer but unapplied; owner SQL-editor action is the remaining write-access blocker. No IDs/keys need lookup. See staging-rollout-checkpoint-2026-10-09.md for exact evidence and current-dashboard-test-package-2026-10-09.md for guards. Saved mapping RPC/default-off activation and ongoing source generation remain pending. Follow existing roadmap; next is current fixture postflight and page reconciliation, then Paul's detailed dashboard review.
+
 ## 9 October latest — multi-agent takeover after reporting recovery
 
 Use the existing roadmap. Owner confirms successful hosted build after dedicated review configuration, exact session pooler and Supabase CA file recovery. Coordinator independently verified Store D February Profit Overview £140 sales / £80 gross profit / £60 contribution / £35 operating profit / £40 EBITDA. Current development-store September remains unsupported; no current-data load is claimed.

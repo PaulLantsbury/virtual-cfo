@@ -1,6 +1,6 @@
 # Shared dashboard acceptance — 9 October 2026
 
-Paul confirmed the hosted Store D February 2026 results after reporting configuration and TLS certificate correction: sales £140, gross profit £80, contribution after marketing £60, operating profit £35 and EBITDA £40. This is confirmation of that selected fixture period, not of September, current coverage, other pages or recurring refresh.
+Paul confirmed, and the coordinator subsequently independently verified across CFO Briefing, Margin Analysis and Profit Overview, the hosted Store D February 2026 results after reporting configuration and TLS certificate correction: sales £140, gross profit £80, contribution after marketing £60, operating profit £35 and EBITDA £40. This verifies the selected fixture period on those three pages, not September/current coverage, other dashboards or recurring refresh.
 
 ## Shared reader acceptance
 
@@ -27,6 +27,6 @@ The following exact expected values come from the prepared current synthetic pac
 
 ## Evidence limits
 
-- Store D February confirmation is user-reported live evidence. Current September/October fixture arithmetic is independently disposable-database tested, not evidence of current hosted application.
+- Store D February has both user-reported and coordinator-observed authenticated live evidence on three shared financial pages. Current September/October fixture arithmetic is independently disposable-database tested, not evidence of current hosted application.
 - Shared browser acceptance scripts exist under `artifacts/virtual-cfo/tests/`; browser execution was blocked in this environment by missing Chromium and failed downloads. No loopback browser pass is claimed.
 - This package improves explanations and safe read recovery. It does not enable data generation, alter financial definitions, publish a release or grant database access.

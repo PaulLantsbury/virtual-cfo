@@ -1,3 +1,15 @@
+## Final hosted batch receipt — 9 October
+
+Staging web revision `d834ddf18a8e026d124e821130b80e1ec56403b6` is **Live**, deployment `dep-db4gdotg1s2s739bq680`, duration 55.2 seconds. It includes the integrated package `924828885ee6f794f0396eb6b665c93cb55f5301` plus handling for idle PostgreSQL pool errors. Idle failures no longer crash the process or print raw clients/sockets; nine focused runtime checks and API build pass. TLS and transaction/replay behaviour remain intact.
+
+The deployed read-only CLI passed against actual staging: server major 17, expected catalog major 18, zero column/constraint/trigger/nullability mismatches, compatible=true. Constraint type counts: check46, foreign-key24, primary15, unique10. It explicitly reports applicationAuthorized=false; compatibility is diagnostic rather than data-application approval.
+
+Authenticated Store D February was independently verified across CFO Briefing, Margin Analysis and Profit Overview. Store/date/currency persist on fresh page navigation and all show £140 sales, £80 gross profit, £60 contribution, £35 operating profit and £40 EBITDA (original AOV £70, two orders where shown). This is historical shared-reader evidence, not current fixture acceptance or all-dashboard completion.
+
+The exact private current fixture is prepared, not applied: one labelled synthetic store and one membership for the existing verified reviewer, 980 rows, 141 orders, two refunds, 16 sales scopes, 14 complete profit versions. Its operator transaction guards target/auth/schema, preserves existing Store D fingerprints across 16 relations and refuses replay. Apply SHA-256 `e1a3847d2e446c318383c2e7e2fada8eb0fc78adc3929d3c51436e142fce2a3b`. Reviewer-bound SQL and identities stay outside GitHub.
+
+Remaining immediate blocker: protected SQL-editor entry and absence of insert privileges on the dedicated reporting login. The owner can run the single reviewed operator file in **Night Scout Staging**; no ID/key lookup is required. After successful application, coordinator verifies postflight and current September/elapsed-October across the supported pages. New Xero saved-mapping RPC remains unapplied/default-off; ongoing source writers and detailed page revision remain roadmap work.
+
 ## Latest verified state — reporting startup recovered
 
 The owner confirms successful deployment following dedicated review configuration, exact staging session pooler and CA-file repair. Coordinator independently verified signed-in Store D February Profit Overview: sales £140, gross profit £80, contribution £60, operating profit £35, EBITDA £40. Earlier absent-configuration statements below describe the first deployment, not current readiness.

@@ -63,10 +63,11 @@ export function reviewDatabase(pool){
  */
 export async function initialiseReviewRuntime(config,{createPool,createAuthClient,fetchImpl=fetch}){
  const options=reviewConnectionOptions(config);
- let pool;
+ let pool,phase='database_connect';
  try{
   pool=createPool(options.pool);const database=reviewDatabase(pool);
   await database.transaction(async tx=>{
+   phase='database_readiness';
    const {rows}=await tx.query(`SELECT current_user AS role,
     (SELECT rolsuper OR rolbypassrls OR rolcreaterole OR rolcreatedb OR rolreplication OR rolinherit FROM pg_roles WHERE rolname=session_user) AS unsafe_login,
     has_any_column_privilege(current_user,'public.orders','INSERT,UPDATE') OR
@@ -81,10 +82,14 @@ export async function initialiseReviewRuntime(config,{createPool,createAuthClien
    await tx.query('SELECT batch_id FROM ingest_v1.heads LIMIT 0');
    await tx.query('SELECT reviewer_id FROM ingest_v1.review_authorizations LIMIT 0');
   });
+  phase='auth_client';
   const supabase=createAuthClient(options.authUrl,options.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},global:{fetch:boundedAuthFetch(options.authUrl,fetchImpl)}});
   return {service:createReviewerService(database,supabase),profitService:createProfitReportingService(database,supabase),close:()=>pool.end()};
- }catch{
+ }catch(cause){
   try{await pool?.end();}catch{}
-  throw new Error('Review server could not be initialised');
+  const codes=new Set(['ENETUNREACH','EHOSTUNREACH','ENOTFOUND','ECONNREFUSED','ETIMEDOUT','28P01','28000','42501','42P01','42883','SELF_SIGNED_CERT_IN_CHAIN','DEPTH_ZERO_SELF_SIGNED_CERT','UNABLE_TO_VERIFY_LEAF_SIGNATURE','UNABLE_TO_GET_ISSUER_CERT_LOCALLY','CERT_HAS_EXPIRED']);
+  const error=new Error('Review server could not be initialised');
+  error.safeDiagnostic=Object.freeze({phase,code:codes.has(cause?.code)?cause.code:'CHECK_FAILED'});
+  throw error;
  }
 }

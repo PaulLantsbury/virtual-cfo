@@ -46,3 +46,12 @@ test('verified staging session pooler retains dedicated project login, TLS and c
  for(const databaseUrl of [c.databaseUrl.replace(':5432',':6543'),c.databaseUrl.replace('aws-1','aws-0'),c.databaseUrl.replace('night_scout_review_login.','postgres.'),c.databaseUrl.replace(`night_scout_review_login.${projectRef}`,'night_scout_review_login'),c.databaseUrl+'?sslmode=disable',c.databaseUrl.replace(projectRef,'abcdefghijklmnopqrst'),c.databaseUrl.replace(':5432','')])assert.throws(()=>reviewConnectionOptions({...c,databaseUrl}));
  assert.throws(()=>reviewConnectionOptions({...c,projectRef:'abcdefghijklmnopqrst',authUrl:'https://abcdefghijklmnopqrst.supabase.co'}));
 });
+
+test('startup diagnostic exposes allowlisted stage/code without provider secrets',async()=>{
+ const secret='private-password-host-query';
+ for(const [code,expected] of [['SELF_SIGNED_CERT_IN_CHAIN','SELF_SIGNED_CERT_IN_CHAIN'],['28P01','28P01'],[secret,'CHECK_FAILED']]){
+  const cause=Object.assign(new Error(secret),{code,detail:secret});
+  await assert.rejects(initialiseReviewRuntime(config,{createPool:()=>({connect:async()=>{throw cause;},end:async()=>{}}),createAuthClient:()=>assert.fail()}),e=>{assert.deepEqual(e.safeDiagnostic,{phase:'database_connect',code:expected});assert.equal(JSON.stringify(e).includes(secret),false);assert.equal(e.message.includes(secret),false);return true;});
+ }
+ const f=factories({unsafe_writes:true});await assert.rejects(initialiseReviewRuntime(config,f),e=>e.safeDiagnostic.phase==='database_readiness'&&e.safeDiagnostic.code==='CHECK_FAILED');
+});

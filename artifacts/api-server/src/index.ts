@@ -26,7 +26,11 @@ if(localBind!==undefined&&localBind!=="127.0.0.1"){
 }
 
 logger.info(reportingConfigReadiness(process.env),'Web reporting readiness');
-const runtime = await startReviewRuntime(process.env).catch(() => {
+const runtime = await startReviewRuntime(process.env).catch((error:unknown) => {
+  const diagnostic=(error as {safeDiagnostic?:{phase?:string;code?:string}})?.safeDiagnostic;
+  const phases=["database_connect","database_readiness","auth_client"];
+  const codes=["ENETUNREACH","EHOSTUNREACH","ENOTFOUND","ECONNREFUSED","ETIMEDOUT","28P01","28000","42501","42P01","42883","SELF_SIGNED_CERT_IN_CHAIN","DEPTH_ZERO_SELF_SIGNED_CERT","UNABLE_TO_VERIFY_LEAF_SIGNATURE","UNABLE_TO_GET_ISSUER_CERT_LOCALLY","CERT_HAS_EXPIRED","CHECK_FAILED"];
+  logger.error({event:"web_reporting_startup_failure",phase:phases.includes(diagnostic?.phase??"")?diagnostic?.phase:"configuration",code:codes.includes(diagnostic?.code??"")?diagnostic?.code:"CHECK_FAILED"},"Reporting startup diagnostic");
   logger.error("Financial review configuration failed; server startup stopped");
   process.exit(1);
 });

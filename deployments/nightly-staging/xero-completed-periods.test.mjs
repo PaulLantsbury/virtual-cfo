@@ -24,4 +24,5 @@ test('only exact staging rolling configuration skips an empty local month',()=>{
  const env={NIGHT_SCOUT_RUNTIME_ENV:'staging',NIGHT_SCOUT_XERO_STAGING_PROJECT_REF:'bioalckltvkhlczusdvl',NIGHT_SCOUT_XERO_PERIOD_MODE:'completed_month_to_date'},first=new Date('2026-06-30T23:05:00Z');
  assert.equal(skipEmptyXeroMonth(env,first),true);assert.equal(skipEmptyXeroMonth(env,new Date('2026-07-02T02:00:00Z')),false);
  for(const changed of [{...env,NIGHT_SCOUT_RUNTIME_ENV:'production'},{...env,NIGHT_SCOUT_XERO_STAGING_PROJECT_REF:'other'},{...env,NIGHT_SCOUT_XERO_PERIOD_MODE:'fixed'},{...env,NIGHT_SCOUT_XERO_REPORT_FROM:'2026-06-01'}])assert.equal(skipEmptyXeroMonth(changed,first),false);
+ assert.equal(skipEmptyXeroMonth({...env,NIGHT_SCOUT_XERO_PERIOD_MODE:'daily_completed_period'},first),false);
 });

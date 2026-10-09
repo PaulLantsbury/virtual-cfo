@@ -1,3 +1,21 @@
+## 9 October continuation — recurring scope fix prepared
+
+The newly tested `daily_completed_period` mode selects the prior complete month on the first London day and current month through yesterday on other days. Existing modes, closed-period flags, no-replay rules and fixed-date rejection remain unchanged. Twenty-one focused boundary/configuration/fenced-refresh tests passed (DST, Oct31/Nov1/Nov2, year-end and leap February); coordinator diff review passed. This code does not itself enable the parked cron.
+
+The exact staging Supabase project was verified in the SQL Editor. Browser credential protection blocked the aggregate mapping-date query paste; one documented recovery navigation remained blocked. No query execution or schema change is claimed. Current feed activation therefore awaits that read-only mapping-effective-date check; the dedicated writer password/apps/credentials are still unprovisioned. Reconnection itself is independently verified by the successful worker organisation preflight.
+
+## 9 October fresh reconnect verification
+
+Fresh dedicated Render staging worker preflight returned connected / organisation / ok after the owner reconnect. A separate BEGIN READ ONLY transaction verified one eligible job for GBP 2026-10-01 through 2026-10-08 and rolled back; no retry authorization was consumed and no accounting import was run. Existing cron remains annual/parked. Saved-mapping review is still disabled/unapplied and the Settings expansion reports unavailable, so mapping effectiveness at the period start is not independently confirmed here. Do not borrow privileged credentials or backdate mappings to bypass this check.
+
+Scheduling review identified a month-end gap: completed_month_to_date skips day one and therefore does not finalize the previous month's last day. Add a guarded first-day last-complete-month finalizer before claiming complete recurring coverage. Current credential refresh succeeded; current accounting amounts and unattended provider writers remain separate outstanding acceptance work.
+
+## 9 October owner reconnect completed — verify fresh worker next
+
+Paul reports completing both Xero reconnect stages. Fresh signed-in Settings on PocketLaunchpad1 shows **Xero connection saved**, with no reconnect/continuation actions and the preserved supported snapshot retrieved at 2026-10-09T13:23:22.463Z. That historical snapshot is not a new refresh receipt. No schema reapplication or account mapping replacement was performed.
+
+Paul explicitly requested a smoother flow before launch. The canonical roadmap now requires one primary action per stage, an explanation of both consents, clear completion and automatic status refresh, preserving the organisation/mapping/history. Next: current dedicated-worker connection preflight, then current-period scope/readiness and daily feed activation. Provider test writers remain disabled pending isolated credentials and verified demo/development targets.
+
 ## 9 October activation applied — Xero reader enabled; reconnect handoff
 
 Paul supplied the final successful operator CSV: state=staging_readers_and_disabled_writer_installed, member_readers=2, enabled_writer_programmes=0, provider_actions=0, reconnect_uses_fourth_authorization=true. Combined transaction applied; do not rerun it. This is the operator's committed receipt, not an independently repeated admin inspection.

@@ -26,14 +26,18 @@ export function readStagingXeroWorkerConfig(env={},clock=()=>new Date()){
   if(env.NIGHT_SCOUT_RUNTIME_ENV!=='staging'||env.NIGHT_SCOUT_XERO_STAGING_REFRESH_ENABLED!=='true'||env.NIGHT_SCOUT_XERO_STAGING_PROJECT_REF!==INTAKE_TARGET.projectRef)throw unavailable();
   const current=clock();
   const mode=env.NIGHT_SCOUT_XERO_PERIOD_MODE??'fixed';
-  if(!['fixed','completed_month_to_date','last_complete_month'].includes(mode))throw unavailable();
+  if(!['fixed','completed_month_to_date','last_complete_month','daily_completed_period'].includes(mode))throw unavailable();
   let planned;
   if(mode!=='fixed'){
    // Remove fixed date variables explicitly when activating rolling mode. A
    // stale date configuration must not be silently overridden on the host.
    if(env.NIGHT_SCOUT_XERO_REPORT_FROM||env.NIGHT_SCOUT_XERO_REPORT_TO)throw unavailable();
    const plan=planCompletedXeroPeriods(current);
-   planned=plan.scopes.find(scope=>scope.purpose===(mode==='last_complete_month'?'last_complete_month':'current_month_completed_days'));
+   const purpose=mode==='last_complete_month'?'last_complete_month':'current_month_completed_days';
+   planned=plan.scopes.find(scope=>scope.purpose===purpose);
+   // A first-local-day finalizer includes the previous month's final day.
+   // Calendar completion never asserts accounting closure or grants replay.
+   if(mode==='daily_completed_period'&&!planned)planned=plan.scopes.find(scope=>scope.purpose==='last_complete_month');
    // The first local day has no completed current-month period. The host
    // planner can report the intentional skip without selecting a DB job.
    if(!planned)throw unavailable();

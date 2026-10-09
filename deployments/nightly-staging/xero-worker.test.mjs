@@ -14,3 +14,22 @@ test('rolling mode is explicit, London completed-day bounded and never overrides
  assert.throws(()=>readStagingXeroWorkerConfig(rolling,()=>new Date('2026-06-30T23:01:00Z')),/invalid/);
  assert.deepEqual(readStagingXeroWorkerConfig({...rolling,NIGHT_SCOUT_XERO_PERIOD_MODE:'last_complete_month'},()=>new Date('2026-06-30T23:01:00Z')).scope,{from:'2026-06-01',to:'2026-06-30',currency:'GBP'});
 });
+test('daily completed period finalizes the previous month then starts the new month without gaps or future dates',()=>{
+ const daily={...env,NIGHT_SCOUT_XERO_PERIOD_MODE:'daily_completed_period',NIGHT_SCOUT_XERO_REPORT_FROM:undefined,NIGHT_SCOUT_XERO_REPORT_TO:undefined};
+ const cases=[
+  ['2026-10-31T03:30:00Z','2026-10-01','2026-10-30'],
+  ['2026-11-01T03:30:00Z','2026-10-01','2026-10-31'],
+  ['2026-11-02T03:30:00Z','2026-11-01','2026-11-01'],
+  ['2026-03-31T23:05:00Z','2026-03-01','2026-03-31'],
+  ['2026-10-01T00:05:00Z','2026-09-01','2026-09-30'],
+  ['2027-01-01T03:30:00Z','2026-12-01','2026-12-31'],
+  ['2028-03-01T03:30:00Z','2028-02-01','2028-02-29'],
+ ];
+ for(const [instant,from,to] of cases){
+  const scope=readStagingXeroWorkerConfig(daily,()=>new Date(instant)).scope;
+  assert.deepEqual(scope,{from,to,currency:'GBP'});assert.equal('closedPeriod' in scope,false);
+ }
+ for(const instant of ['2026-03-29T01:30:00Z','2026-10-25T01:30:00Z'])assert.equal(readStagingXeroWorkerConfig(daily,()=>new Date(instant)).scope.to,instant.slice(0,8)+String(Number(instant.slice(8,10))-1).padStart(2,'0'));
+ assert.throws(()=>readStagingXeroWorkerConfig({...daily,NIGHT_SCOUT_XERO_REPORT_FROM:'2026-10-01'}),/invalid/);
+ assert.throws(()=>readStagingXeroWorkerConfig({...daily,NIGHT_SCOUT_RUNTIME_ENV:'production'}),/invalid/);
+});

@@ -1,3 +1,9 @@
+## 9 October current fixture applied — reader compatibility repair
+
+Owner reports successful UTC operator transaction. Coordinator independently ran its full read-only postflight through the existing dedicated reporting login, bound to the privately verified existing reviewer: all 980 rows/counts/fingerprints and October profit absence pass. New synthetic store is visible to the authenticated application. September sales £960, shipping £36, 12 original orders and AOV £80 are live, with actual advertising £92/overheads £30/D&A £6 supported.
+
+Profit totals remain unavailable on the pre-repair deployment. A bounded live diagnostic confirms `Historical landed-cost proof unavailable`: node-postgres returns the bigint cost as decimal text while the preparation driver hashed a numeric value. The reader repair validates the exact safe nonnegative integer and accepts either representation in the immutable whole-row proof, retaining all other field, snapshot, source, membership and precision checks. Six focused tests and two actual node-postgres bigint-parser regressions pass; tampered, unsafe, negative and noncanonical costs remain refused. No database edits or grants are needed. Publish/deploy and authenticated shared-page acceptance remain to complete before claiming profit success.
+
 ## 9 October SQL Editor recovery — UTC fixture serialization
 
 The original 1.3 MB operator file exceeded the SQL Editor size limit. A compact equivalent retained all rows and guards, but the owner then reported `Unsupported or stale overhead source` from the profit evidence trigger. The preparation database serialized timestamps with a fixed +01:00 offset; operator/runtime UTC sessions produced different JSON strings for the same instants. Pinning only the load to that offset would leave runtime evidence revisions stale.

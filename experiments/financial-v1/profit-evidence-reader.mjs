@@ -53,8 +53,13 @@ export async function readProfitEvidence(db,{versionId,scope,readSales}) {
    try { mappedLines=lines.map(({sale_day,...l})=>{
     const original=orderMap.get(l.order_id),proof=manifest.lineProofs?.[l.line_id];
     ensure(original&&original.soldOn===sale_day&&l.store_id===scope.storeId&&l.currency===scope.currency&&same(l.observed_line,l.current_line),'Stale line or original sale evidence');
-    ensure(proof?.historicalLandedCostSupported===true&&typeof proof.documentRef==='string'&&proof.documentRef.trim()&&proof.observedEvidenceRevision===revision(l),'Historical landed-cost proof unavailable');
-    const unit=Number(l.historic_unit_cost_pence);ensure(Number.isSafeInteger(unit),'Cost precision unsupported');
+    // pg decodes int8 as decimal text; the disposable fixture decodes it as a
+    // number. Validate the exact integer before accepting either representation
+    // of this one field in the immutable proof. Every other field stays exact.
+    const rawUnit=l.historic_unit_cost_pence,unit=Number(rawUnit);
+    ensure((typeof rawUnit==='number'||(typeof rawUnit==='string'&&/^(0|[1-9][0-9]*)$/.test(rawUnit)))&&Number.isSafeInteger(unit)&&unit>=0,'Cost precision unsupported');
+    const numberLine={...l,historic_unit_cost_pence:unit},decimalLine={...l,historic_unit_cost_pence:String(unit)};
+    ensure(proof?.historicalLandedCostSupported===true&&typeof proof.documentRef==='string'&&proof.documentRef.trim()&&[revision(numberLine),revision(decimalLine)].includes(proof.observedEvidenceRevision),'Historical landed-cost proof unavailable');
     return {...common(l,l.current_line),id:l.line_id,orderId:l.order_id,soldOn:original.soldOn,quantity:l.quantity,unitCostPence:unit,originalEligible:true,landedCostSupported:true};
    });
    }catch(error){problem('productCosts',error);}

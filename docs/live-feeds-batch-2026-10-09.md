@@ -1,3 +1,13 @@
+## 9 October activation applied — Xero reader enabled; reconnect handoff
+
+Paul supplied the final successful operator CSV: state=staging_readers_and_disabled_writer_installed, member_readers=2, enabled_writer_programmes=0, provider_actions=0, reconnect_uses_fourth_authorization=true. Combined transaction applied; do not rerun it. This is the operator's committed receipt, not an independently repeated admin inspection.
+
+Coordinator saved NIGHT_SCOUT_XERO_ACCOUNTING_READER_ENABLED=true on the exact existing staging web service. Environment-triggered deploy dep-db4i40flot8c73b44oa0 is visibly Live at code fd0e174493b3f878ded95287a9a81c466133f824 (36.0s). Signed-in Settings on PocketLaunchpad1 now correctly says Xero needs reconnection and offers Reconnect Xero test account. Shopify latest saved collection is9 October01:00UTC, confirming02:00BST; remains old fixed scope. Published rolling next-window acceptance still pending. Dated September18 deployment acknowledgement in the Settings card is historical, not current scheduler status.
+
+Clicking reconnect started the read-only discovery transition but native browser credential protection blocked observation. One explicit recovery navigation to retained app Settings succeeded; readiness still shows reconnect needed. No sign-in/consent completion or credential replacement is claimed. Supported manual handoff on this exact Settings page is necessary; owner completes existing read-only test-organisation discovery and then Continue reconnecting Xero. Preserve same tenant/mapping/history; do not start another schema migration, clear authorization records or activate the failed read cron before fresh connectivity passes.
+
+Provider writer schema exists but all programmes remain disabled and new login password/isolated apps/consents/credentials/scheduling are still unprovisioned. No provider test mutation occurred. Customer-friendly mapping and per-dashboard review remain later canonical roadmap work.
+
 # Live feeds and recurring test programme — 9 October 2026
 
 ## Approved activation checkpoint

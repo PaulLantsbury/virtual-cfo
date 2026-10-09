@@ -9,10 +9,11 @@ import {createXeroRouter} from './routes/xero';
 import {createXeroStagingBootstrapRouter, type XeroBootstrapRouterDependencies} from './routes/xero-staging-bootstrap';
 import {mountStagingSpa} from './lib/mount-staging-spa.ts';
 import {createXeroMerchantReadinessRouter,type XeroReadinessDependencies} from './routes/xero-merchant-readiness.ts';
+import {createXeroAccountingRouter,type XeroAccountingDependencies} from './routes/xero-accounting.ts';
 import {safeRequestPath} from './lib/safe-request-path.ts';
 import {createProfitReportingRouter,type ProfitReportingService} from './routes/profit-reporting.ts';
 
-export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService): Express {
+export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService,xeroAccounting?:XeroAccountingDependencies): Express {
 const app: Express = express();
 
 app.use(
@@ -39,6 +40,7 @@ app.use(cors());
 app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
 app.use('/api/profit-reporting',createProfitReportingRouter(profitReporting));
 app.use('/api/xero/staging',createXeroStagingBootstrapRouter(xeroBootstrap));
+app.use('/api/xero',createXeroAccountingRouter(xeroAccounting));
 app.use('/api/xero',createXeroMerchantReadinessRouter(xeroReadiness));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

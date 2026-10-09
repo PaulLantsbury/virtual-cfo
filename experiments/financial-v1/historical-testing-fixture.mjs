@@ -8,16 +8,18 @@ export const PERIODS = Object.freeze([
   ['2026-04',3,30],['2026-05',3,31],['2026-06',4,30],['2026-07',4,31],
   ['2026-08',4,31],['2026-09',2,17],
 ].map(Object.freeze));
+export const CURRENT_PERIODS = Object.freeze([...PERIODS.slice(0,-1), Object.freeze(['2026-09',4,30]), Object.freeze(['2026-10',1,8])]);
 const blockDays = ['05','15','20','24','27'];
 const scopeFor = (month,to) => ({storeId:HISTORICAL_STORE,currency:'GBP',from:`${month}-01`,to:`${month}-${String(to).padStart(2,'0')}`});
 // All scheduled fixture dates are clear of the March/October transition days.
 const offsetFor = month => month >= '2025-11' && month <= '2026-03' ? '+00:00' : '+01:00';
 const proof = {storeId:HISTORICAL_STORE,currency:'GBP',basis:'actual',evidenceRef:'invented historical source document; synthetic only',sourceRevision:'v1',observedRevision:'v1'};
 
-export function historicalManifest() {
+export function historicalManifest({current=false}={}) {
+  const periods=current?CURRENT_PERIODS:PERIODS;
   const orders=[], lines=[], actions=[], expenses=[];
   const templates=acceptanceInput().mapped.orders.slice(0,3);
-  for (const [month,blocks,to] of PERIODS) {
+  for (const [month,blocks,to] of periods) {
     for (let block=1;block<=blocks;block++) {
       for (let index=0;index<3;index++) {
         const type='abc'[index], id=`history-${month}-${block}-${type}`;
@@ -32,7 +34,7 @@ export function historicalManifest() {
         expenses.push({...proof,id,sourceId:`document-${id}`,...scopeFor(month,to),category,amountPence,daPence:null});
       }
     }
-    if (to!==17) {
+    if (to!==17 && !(month==='2026-10' && to===8)) {
       const id=`${month}-overheads`;
       expenses.push({...proof,id,sourceId:`document-${id}`,...scopeFor(month,to),category:'overheads',amountPence:3000,daPence:600});
     }
@@ -46,15 +48,15 @@ export function historicalManifest() {
   expenses.push({...proof,id:'2026-03-return-handling',sourceId:'document-return-handling',...scopeFor('2026-03',31),category:'variableCosts',amountPence:400,daPence:null});
   for(const r of refunds) actions.push({id:`refund:${r.id}`,kind:'invented-refund',sourceId:r.id,originalOrderId:r.order_id,occurredAt:r.occurredAt,synthetic:true});
   actions.push({id:'recovery:history-recovery-b',kind:'invented-saleable-recovery',sourceId:'history-recovery-b',originalOrderId:'history-2026-02-1-b',occurredAt:recoveries[0].occurredAt,synthetic:true});
-  return {version:'historical-testing-proposal-v1',synthetic:true,status:'prepared-only',storeId:HISTORICAL_STORE,currency:'GBP',timezone:'Europe/London',frozenAt:'2026-09-17T23:59:59+01:00',orders,refunds,lines,recoveries,expenses,actions};
+  return {version:'historical-testing-proposal-v1',synthetic:true,status:'prepared-only',storeId:HISTORICAL_STORE,currency:'GBP',timezone:'Europe/London',frozenAt:current?'2026-10-08T23:59:59+01:00':'2026-09-17T23:59:59+01:00',orders,refunds,lines,recoveries,expenses,actions};
 }
 
-export function historicalInput(month, {throughDay, excludedTestOrder=false}={}) {
-  const period=PERIODS.find(p=>p[0]===month);
+export function historicalInput(month, {throughDay, excludedTestOrder=false,current=false}={}) {
+  const period=(current?CURRENT_PERIODS:PERIODS).find(p=>p[0]===month);
   if(!period) throw new Error('Unreviewed fixture month');
   const to=throughDay??period[2];
   if(to!==period[2] && !(month==='2025-09' && to===17)) throw new Error('Unreviewed fixture comparison scope');
-  const scope=scopeFor(month,to), manifest=historicalManifest();
+  const scope=scopeFor(month,to), manifest=historicalManifest({current});
   // Retain original-order links for later refunds, including cross-month links.
   const orders=manifest.orders;
   if(excludedTestOrder) orders.push({...acceptanceInput().mapped.orders[3],store_id:HISTORICAL_STORE,id:`excluded-test-${month}`,day:`${month}-06`,synthetic:true});

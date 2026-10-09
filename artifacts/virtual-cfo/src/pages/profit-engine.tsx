@@ -46,6 +46,7 @@ export default function ProfitGrowth() {
         <p className="text-sm">Synthetic staging stores contain test transactions, not merchant trading results. Figures below come from the selected store’s verified evidence; no sample profit model is substituted.</p>
         <p className="text-sm">Sales means net product sales excluding VAT and shipping. Contribution is after marketing. Missing costs remain unavailable, while earlier supported subtotals stay visible.</p>
         <p role="status" className="text-sm">{profit.loading ? 'Checking profit evidence…' : report?.state === 'complete' ? 'All profit subtotals have supporting evidence for this month.' : report ? 'Some profit subtotals are unavailable. See the reasons alongside each figure.' : profit.reason ?? 'Profit evidence unavailable.'}</p>
+        {!report && profit.canRetry && <button type="button" className="text-sm underline underline-offset-4" onClick={profit.retry}>Retry profit evidence check</button>}
       </section>
       <CfoEvidenceStatus evidence={cfoEvidenceFromReporting({
         scope: { storeId, currency: reporting.config?.currency ?? '', from: reporting.period.dateFrom, to: reporting.period.dateTo },

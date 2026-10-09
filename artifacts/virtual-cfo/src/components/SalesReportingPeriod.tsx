@@ -14,9 +14,9 @@ export function SalesReportingPeriod({ reporting }: { reporting: ReturnType<type
       </label>
       {selection.mode === 'custom' && <>
         <label className="text-sm font-medium">From<input className="block mt-1 border rounded p-2 bg-background" type="date" value={selection.from}
-          onChange={event => reporting.setRange(event.target.value, selection.to)} /></label>
+          onChange={event => reporting.setDate('from', event.target.value)} /></label>
         <label className="text-sm font-medium">To<input className="block mt-1 border rounded p-2 bg-background" type="date" value={selection.to}
-          onChange={event => reporting.setRange(selection.from, event.target.value)} /></label>
+          onChange={event => reporting.setDate('to', event.target.value)} /></label>
       </>}
     </div>
     <p className="text-sm text-muted-foreground mt-3">{period.label}{period.dateFrom && `: ${period.dateFrom} – ${period.dateTo}`}</p>

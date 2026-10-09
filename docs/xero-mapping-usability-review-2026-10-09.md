@@ -47,4 +47,4 @@ Do not expand the deployed five-category credential bootstrap in place, blend Xe
 - Frontend TypeScript check: `pnpm --filter @workspace/virtual-cfo typecheck` passed.
 - New UI text/search/summary is a reversible presentation change; no new financial arithmetic or schema.
 
-Remaining verification: signed-in browser walkthrough using synthetic discovery fixtures, full hosted revision/connection/evidence inspection, and accounting amount endpoint integration. This audit does not claim customer mapping or cash reporting is complete.
+Synthetic desktop/mobile browser walkthrough is prepared in `artifacts/virtual-cfo/tests/xero-mapping-browser.mjs`, but execution is blocked by the absent local Chromium binary. Full hosted revision/connection/evidence inspection and accounting amount endpoint integration remain. See the [subsequent accounting reader package](xero-accounting-reader-package-2026-10-09.md) for the locally repaired cash-status endpoint and default-off accounting proposal. This audit does not claim customer mapping or cash reporting is complete.

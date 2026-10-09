@@ -1,15 +1,15 @@
 // Disposable preparation only. No credentials, network, grants or live runner.
 import {historicalReportingFixture,HISTORICAL_REPORTING_STORE as STORE} from '../shopify/historical-reporting-fixture.mjs';
 import {sql,U} from '../shopify/finance-fixture.mjs';
-import {historicalManifest,PERIODS} from './historical-testing-fixture.mjs';
+import {historicalManifest,PERIODS,CURRENT_PERIODS} from './historical-testing-fixture.mjs';
 import {readProfitEvidence,profitEvidenceDigest} from './profit-evidence-reader.mjs';
 import {createProfitSalesReader} from './profit-sales-reader.mjs';
 const id=n=>`97000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 export const HISTORICAL_PROFIT_IDS=Object.freeze({store:STORE,versions:Object.freeze(Object.fromEntries(PERIODS.map(([m],i)=>[m,id(5000+i)]))),lineIds:Object.freeze(Object.fromEntries(historicalManifest().lines.map((l,i)=>[l.id,id(1+i)])))});
 const evidence='INVENTED disposable historical fixture only; no live completeness attestation';
-export async function setupHistoricalProfitEvidence(db,{userId,orderIds,failAt=null}={}){
+export async function setupHistoricalProfitEvidence(db,{userId,orderIds,failAt=null,current=false}={}){
  if(!userId||!(orderIds instanceof Map))throw Error('Explicit synthetic identity and imported order map required');
- const manifest=historicalManifest(),ids=HISTORICAL_PROFIT_IDS,readSales=createProfitSalesReader({userId});
+ const manifest=historicalManifest({current}),periods=current?CURRENT_PERIODS:PERIODS,ids=current?{store:STORE,versions:Object.fromEntries(periods.map(([m],i)=>[m,id(5000+i)])),lineIds:Object.fromEntries(manifest.lines.map((l,i)=>[l.id,id(1+i)]))}:HISTORICAL_PROFIT_IDS,readSales=createProfitSalesReader({userId});
  return db.transaction(async tx=>{
   const existing=await tx.query('SELECT id FROM finance_v1.profit_evidence_versions WHERE store_id=$1',[STORE]);
   const lines=await tx.query('SELECT id FROM public.order_line_items WHERE store_id=$1',[STORE]);
@@ -17,7 +17,7 @@ export async function setupHistoricalProfitEvidence(db,{userId,orderIds,failAt=n
   const stores=await tx.query('SELECT shopify_domain FROM public.stores WHERE id=$1',[STORE]);
   if(stores.rows[0]?.shopify_domain!=='historical-pipeline.invalid')throw Error('Exact disposable synthetic store required');
   const sourceOrders=(await tx.query('SELECT id FROM public.orders WHERE store_id=$1',[STORE])).rows;
-  if(orderIds.size!==132||sourceOrders.length!==132||new Set(orderIds.values()).size!==132||manifest.orders.some(o=>!sourceOrders.some(s=>s.id===orderIds.get(o.id))))throw Error('Exact imported historical order manifest required');
+  if(orderIds.size!==manifest.orders.length||sourceOrders.length!==manifest.orders.length||new Set(orderIds.values()).size!==manifest.orders.length||manifest.orders.some(o=>!sourceOrders.some(s=>s.id===orderIds.get(o.id))))throw Error('Exact imported historical order manifest required');
   for(const [i,l]of manifest.lines.entries()){
    const o=manifest.orders[i];
    // Import path currently stores order-level financial evidence only. These
@@ -35,8 +35,8 @@ export async function setupHistoricalProfitEvidence(db,{userId,orderIds,failAt=n
    }
   }
   if(failAt==='after-sources')throw Error('Injected historical profit failure after sources');
-  for(const [month,,day]of PERIODS){
-   if(day===17)continue; // Schema and agreed actual-profit contract require complete months.
+  for(const [month,,day]of periods){
+   if(day===17 || (month==='2026-10' && day===8))continue; // Schema and agreed actual-profit contract require complete months.
    const scope={storeId:STORE,currency:'GBP',from:`${month}-01`,to:`${month}-${day}`},versionId=ids.versions[month];
    const sales=await readSales(tx,scope),returns=manifest.recoveries.filter(r=>r.recoveryOn>=scope.from&&r.recoveryOn<=scope.to);
    const selected=manifest.lines.filter(l=>(l.soldOn>=scope.from&&l.soldOn<=scope.to)||returns.some(r=>r.lineId===l.id));

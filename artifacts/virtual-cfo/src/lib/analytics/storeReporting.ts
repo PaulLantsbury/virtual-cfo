@@ -21,6 +21,12 @@ export type SalesReportingSelection =
   | { mode: ReportingTimeline }
   | { mode: 'custom'; from: string; to: string };
 
+/** Merge one edit with the latest draft, rather than a captured render's opposite date. */
+export function editReportingDate(selection: SalesReportingSelection, field: 'from' | 'to', value: string): SalesReportingSelection {
+  const draft = selection.mode === 'custom' ? selection : { mode: 'custom' as const, from: '', to: '' };
+  return { ...draft, [field]: value };
+}
+
 /** Reject calendar rollover, partial dates and reversed ranges before any request. */
 export function isValidReportingDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;

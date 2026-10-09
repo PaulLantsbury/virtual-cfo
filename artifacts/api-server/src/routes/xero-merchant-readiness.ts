@@ -1,4 +1,5 @@
 import {Router,type IRouter} from 'express';
+import {cashReadinessFromMerchant} from '../lib/xero-cash-readiness.ts';
 
 export type XeroReadinessIdentity=Readonly<{userId:string}>;
 export type XeroReadinessAuthenticator=(authorization:string)=>Promise<XeroReadinessIdentity>;
@@ -15,6 +16,12 @@ export function createXeroMerchantReadinessRouter(dependencies:XeroReadinessDepe
   const storeId=typeof req.query.storeId==='string'&&Object.keys(req.query).length===1&&uuid.test(req.query.storeId)?req.query.storeId:null;
   if(!storeId){res.status(400).json({error:'Xero readiness unavailable'});return;}
   try{const identity=await authenticate!(req.headers.authorization);const result=await service!.read(identity,storeId);res.status(200).json(result);}catch{res.status(403).json({error:'Xero readiness unavailable'});}
+ });
+ router.get('/cash-readiness',async(req,res)=>{
+  if(!bearer(req.headers.authorization)){res.status(401).json({error:'Xero readiness sign-in required'});return;}
+  const storeId=typeof req.query.storeId==='string'&&Object.keys(req.query).length===1&&uuid.test(req.query.storeId)?req.query.storeId:null;
+  if(!storeId){res.status(400).json({error:'Xero readiness unavailable'});return;}
+  try{const identity=await authenticate!(req.headers.authorization);const result=cashReadinessFromMerchant(await service!.read(identity,storeId),storeId);res.status(200).json(result);}catch{res.status(403).json({error:'Xero readiness unavailable'});}
  });
  return router;
 }

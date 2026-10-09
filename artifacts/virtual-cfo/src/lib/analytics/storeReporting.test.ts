@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseStoreReporting,storeReportingPeriod} from './storeReporting.ts';
+import {parseStoreReporting,storeReportingPeriod,editReportingDate} from './storeReporting.ts';
+test('consecutive custom boundary edits keep the latest opposite boundary, including cleared drafts', () => {
+ const first = editReportingDate({mode:'custom',from:'',to:''},'from','2026-09-01');
+ const both = editReportingDate(first,'to','2026-09-30');
+ assert.deepEqual(both,{mode:'custom',from:'2026-09-01',to:'2026-09-30'});
+ assert.deepEqual(editReportingDate(both,'from',''),{mode:'custom',from:'',to:'2026-09-30'});
+});
 test('settings require matching store, valid timezone and supported minor-unit scale',()=>{
  const r={id:'A',currency_code:'USD',timezone:'America/New_York'};
  assert.equal(parseStoreReporting(r,'A').currency,'USD');

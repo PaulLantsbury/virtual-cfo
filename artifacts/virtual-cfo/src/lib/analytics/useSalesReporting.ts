@@ -5,6 +5,7 @@ import { salesAvailabilityReason } from './reportingAvailability';
 import {
   parseStoreReporting, storeReportingPeriod, isValidReportingRange,
   restoreSalesReportingSelection, type SalesReportingSelection,
+  editReportingDate,
 } from './storeReporting';
 import { fetchVerifiedSales, type VerifiedSales } from '../../../../../experiments/financial-v1/rpc-sales-adapter.mjs';
 
@@ -88,6 +89,7 @@ export function useSalesReporting(storeId: string) {
     comparison: { status: comparisonStatus as 'loading' | 'ready' | 'error', period: prior },
     selection,
     setRange: (from: string, to: string) => select(storeId, { mode: 'custom', from, to }),
+    setDate: (field: 'from' | 'to', value: string) => select(storeId, editReportingDate(selectionFor(storeId), field, value)),
     setMode: (mode: SalesReportingSelection['mode']) => select(storeId, mode === 'custom'
       ? { mode, from: period.dateFrom, to: period.dateTo } : { mode }),
   };

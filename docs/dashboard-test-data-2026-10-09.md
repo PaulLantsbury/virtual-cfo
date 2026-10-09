@@ -2,6 +2,8 @@
 
 Status: local preparation, not live application. Repository evidence confirms that ongoing Shopify generation and the large historical staging package were prepared, not activated. No live database/source writes, grants, credentials, scheduled jobs or publication were performed by this work package.
 
+A later opt-in [current-period package](current-dashboard-test-package-2026-10-09.md) now prepares complete September 2026 profit and October 1–8 sales locally. The historical limitations below describe the original default fixture; neither package has been applied live.
+
 ## What the existing fixtures can populate
 
 | Route | Selection | Supported checks | Limits |

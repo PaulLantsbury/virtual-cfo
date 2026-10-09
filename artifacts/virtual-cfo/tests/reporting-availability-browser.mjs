@@ -26,3 +26,22 @@ for (const [status, reason] of [[401, /Sign in again/], [403, /not accessible/],
     });
   });
 }
+
+test('profit retry rechecks the same scope without requesting a collection or replacing missing figures', async () => {
+  const scopes = [];
+  let recovered = false;
+  await fixture({ profitRespond: scope => {
+    scopes.push(scope);
+    return recovered ? { data: { state: 'unavailable', reason: 'No sealed profit evidence is available for this month' } } : { status: 503, data: { error: 'Unavailable' } };
+  } }, async page => {
+    const summary = page.getByRole('region', { name: 'Verified profit summary', exact: true });
+    await summary.getByText(/service is unavailable/).waitFor();
+    const before = scopes.length;
+    recovered = true;
+    await summary.getByRole('button', { name: 'Retry profit evidence check' }).click();
+    await summary.getByText('No sealed profit evidence is available for this month', { exact: true }).waitFor();
+    assert.ok(scopes.length > before);
+    assert.deepEqual(scopes[scopes.length - 1], scopes[0]);
+    assert.doesNotMatch(await summary.innerText(), /£0\.00/);
+  });
+});

@@ -17,6 +17,7 @@ export function VerifiedProfitSummary({ profit, currency }: {
   return <section aria-label="Verified profit summary" className="rounded-xl border border-border bg-card p-5 my-6">
     <h2 className="text-lg font-bold">Profit for the selected period</h2>
     <p role="status" className="text-sm text-muted-foreground mt-2">{profit.loading ? 'Checking profit evidence…' : report?.state === 'complete' ? 'All profit subtotals have supporting evidence for this month.' : report ? 'Some profit subtotals need more evidence. Supported figures remain available.' : profit.reason ?? 'Profit evidence is unavailable for this period.'}</p>
+    {!report && profit.canRetry && <button type="button" className="text-sm underline underline-offset-4 mt-2" onClick={profit.retry}>Retry profit evidence check</button>}
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
       {metrics.map(([label, metric]) => <div role="group" aria-label={label} key={label} className="min-w-0">
         <h3 className="text-xs font-semibold">{label}</h3>

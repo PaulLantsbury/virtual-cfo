@@ -56,5 +56,5 @@ export function useProfitReporting(storeId: string, reporting: ReturnType<typeof
   });
   const report = enabled && query.isSuccess && query.data.state === 'ready' && profitReportMatches(query.data.report, scope) ? query.data.report : null;
   const reason = !reporting.valid ? 'Choose a valid reporting period.' : !fullMonth ? 'Profit reporting requires one complete calendar month. Select custom dates from the first to the last day of a month.' : !config ? 'Store reporting settings are unavailable.' : query.isError ? query.error.message : query.data?.state === 'unavailable' ? query.data.reason : report?.reason;
-  return { report, reason, loading: enabled && query.isPending, fullMonth };
+  return { report, reason, loading: enabled && query.isPending, fullMonth, canRetry: enabled && !query.isFetching, retry: () => { if (enabled) void query.refetch(); } };
 }

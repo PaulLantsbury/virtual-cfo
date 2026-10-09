@@ -1,5 +1,19 @@
 # Live feeds and recurring test programme — 9 October 2026
 
+## Approved activation checkpoint
+
+Paul explicitly approved the concrete staging activation package (“all approved”). Do not request that approval again. This covers the reviewed restricted database capabilities, rolling Shopify publication, guarded Xero reader reconnect/daily configuration and the separately isolated 12–25 October provider trial. Exact development/demo evidence and secure credential entry remain operational steps. Production/main remain outside this approval.
+
+Shopify's existing scheduled staging deployment was successfully republished: deployed fixed-date variables were preserved under `NIGHT_SCOUT_RETIRED_REPORT_FROM/TO`, and `NIGHT_SCOUT_REPORT_SCOPE=rolling-31-completed-days` was added. Replit visibly reports Live with a new publication timestamp. Existing machine, six-minute timeout, daily cron and previously verified Europe/London timezone were preserved. No Run now, fake clock or claim clearing occurred. Next genuine scheduled receipt must establish rolling collection; publication alone does not establish current financial evidence.
+
+The exact single operator file is [approved-staging-activation-2026-10-09.sql](../deployments/nightly-staging/approved-staging-activation-2026-10-09.sql). One atomic transaction installs narrow authenticated Xero readers, conditionally appends a fourth one-use reconnect authorization only when the existing third is unusable and current verified reconnect evidence qualifies, and installs isolated disabled writer capabilities. It preserves earlier authorization/source/credential/mapping history, refuses unknown installed bootstrap definitions and incompatible writer targets, and leaves zero enabled programmes/provider actions. New writer login has no password. Six disposable integration tests pass, including this exact combined file and complete rollback on writer conflicts. Earlier individual readiness proposals are superseded by this combined activation file.
+
+Browser credential protection persistently blocks SQL-editor observation after even read-only input. No Run was clicked and no operator SQL was applied. One supported manual handoff is required for the combined file in verified Night Scout Staging project `bioalckltvkhlczusdvl`. Never substitute administrator credentials, use the reporting role for writes, or bypass browser restrictions. If acknowledgment is lost, inspect committed read-only postflights before another application; the writer installer deliberately refuses blind replay.
+
+Integrated verification: 24 provider tests, six exact-file database tests and four API runtime/routing tests pass. API build and actual bundled-server default-off startup/503/clean shutdown smoke pass. Side-effect-free hosted modules avoid invoking worker command-line entry points during bundling.
+
+Separate Xero writer bootstrap now provides owner/store-bound hashed one-use state, strict writer scopes, actual GBP demo verification, first encrypted-envelope seeding and a disabled programme. Its hosted route is default-off and requires separately provisioned writer app credentials, restricted writer database URL and callback registration. Existing reader callback/envelope remain separate. Shopify likewise requires its separately installed writer app. Consent, secure credential provisioning, programme/scheduler enablement and first real scheduled writes remain uncompleted; recurring provider testing is not live.
+
 ## Verified hosted state
 
 The existing Shopify Replit scheduled worker ran on 9 October, completed in 29.15 seconds and returned a replay for the fixed 17 September period. Its receipt explicitly reports financeImported=false, coverageCertified=false and reviewRequired=true. This is working source collection, not current dashboard financial evidence. No Run now, fake clock or reservation clearing was used.

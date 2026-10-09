@@ -1,11 +1,8 @@
 import { decryptStagingEnvelope, encryptStagingEnvelope, refreshXeroCredential } from '../../deployments/nightly-staging/xero-refresh-runtime.mjs';
-const allowedScopes=new Set(['openid','profile','email','offline_access','accounting.invoices','accounting.settings.read','accounting.contacts.read']);
+import {validWriterScopes} from './writer-oauth-scopes.mjs';
+export {validWriterScopes} from './writer-oauth-scopes.mjs';
 function bytes(value){if(value instanceof Uint8Array)return Buffer.from(value);if(typeof value==='string' && /^\\x[0-9a-f]+$/i.test(value))return Buffer.from(value.slice(2),'hex');throw new Error('Invalid envelope bytes');}
-export function validWriterScopes(raw) {
-  if (typeof raw!=='string' || raw.length>4096) return false;
-  const scopes=raw.split(' '),set=new Set(scopes);
-  return scopes.length===set.size && scopes.every(s=>allowedScopes.has(s)) && ['offline_access','accounting.invoices','accounting.settings.read'].every(s=>set.has(s));
-}
+
 
 // Separate encrypted writer envelope. Existing read-worker credentials are never read.
 export async function withRefreshedXeroWriter({pool,programmeKey,target,masterKey,keyVersion,clientId,clientSecret,fetchImpl=fetch,consume}) {

@@ -18,6 +18,8 @@ test('Current package completes September, supports only elapsed October sales, 
  assert.match(p.compatibilityPreflightSql,/^BEGIN READ ONLY;/);
  const {db}=await setup(undefined,{installIntake:false});
  try{
+  // Hosted reporting connections use UTC; the package restores that session setting.
+  await db.exec("SET TIME ZONE 'UTC'");
   await db.exec(sql('proposals/20260913_profit_evidence.sql'));
   const readSales=createProfitSalesReader({userId:U});
   await setupProfitStagingFixture(db,{userId:U,readSales});

@@ -8,7 +8,7 @@ import {PERIODS} from './historical-testing-fixture.mjs';
 const options={...target,reviewerId:U};
 let packagePromise;
 const prepared=()=>packagePromise??=prepareHistoricalStagingPackage(options);
-async function database(){const {db}=await setup(undefined,{installIntake:false});await db.exec(sql('proposals/20260913_profit_evidence.sql'));return db;}
+async function database(){const {db}=await setup(undefined,{installIntake:false});await db.exec("SET TIME ZONE 'UTC'");await db.exec(sql('proposals/20260913_profit_evidence.sql'));return db;}
 async function attestation(db,project=target.project,reviewer=U){await db.query("SELECT set_config('night_scout.approved_project',$1,false),set_config('night_scout.approved_reviewer',$2,false)",[project,reviewer]);}
 async function snapshot(db){const data={};for(const table of tables)data[table]=(await db.query(`SELECT to_jsonb(t)::text r FROM ${table} t ORDER BY to_jsonb(t)::text`)).rows;return data;}
 async function refused(db,text,pattern){await assert.rejects(db.exec(text),pattern);await db.exec('ROLLBACK');}

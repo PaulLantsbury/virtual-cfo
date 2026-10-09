@@ -8,6 +8,9 @@ import {setup,sql} from '../shopify/finance-fixture.mjs';
 import {historicalManifest,historicalInput,PERIODS,CURRENT_PERIODS} from './historical-testing-fixture.mjs';
 import {setupHistoricalProfitEvidence,HISTORICAL_PROFIT_IDS} from './historical-profit-fixture.mjs';
 export const HISTORICAL_STAGING_TARGET=Object.freeze({project:'bioalckltvkhlczusdvl',host:'db.bioalckltvkhlczusdvl.supabase.co',database:'postgres',storeId:HISTORICAL_PROFIT_IDS.store,domain:'historical-pipeline.invalid'});
+// Pin JSON timestamp rendering to UTC before creating source snapshots. This is independent
+// of each store's business timezone and restores automatically after execution.
+const serializationTimezoneSql="SET LOCAL TIME ZONE 'UTC';";
 const stamp='2026-09-17T23:00:00.000Z',uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const id=n=>`98000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 const literal=value=>"'"+String(value).replaceAll("'","''")+"'";
@@ -24,6 +27,7 @@ async function sourceFixture(reviewerId,{current=false,intake=false}={}){
  const frozenStamp=current?'2026-10-08T23:00:00.000Z':stamp;
  const {db}=await setup(undefined,{installIntake:false});
  try{
+  await db.exec("SET TIME ZONE 'UTC'");
   if(intake)await db.exec(sql('staging/20260910_review_setup.sql'));
   await db.exec(sql('proposals/20260913_profit_evidence.sql'));
   // Freeze defaults only inside this throwaway preparation database. Exported
@@ -113,7 +117,7 @@ SELECT jsonb_build_object('server_major',current_setting('server_version_num')::
  'application_authorized',false) diagnostics FROM expected e CROSS JOIN actual a;
 ROLLBACK;
 `;
-  const body=`BEGIN;\nSET LOCAL lock_timeout='5s';\nSET LOCAL statement_timeout='60s';\n${guard}\n${statements.join('\n')}\n${postflight}\n`;
+  const body=`BEGIN;\n${serializationTimezoneSql}\nSET LOCAL lock_timeout='5s';\nSET LOCAL statement_timeout='60s';\n${guard}\n${statements.join('\n')}\n${postflight}\n`;
   const preservedStore='90000000-0000-4000-8000-000000000004';
   const baselineTables=[...HISTORICAL_STAGING_TABLES,'public.marketing_channel_daily_metrics'];
   const baselineQuery=`SELECT jsonb_build_object(${baselineTables.flatMap(table=>{
@@ -136,6 +140,6 @@ BEGIN;
 SET LOCAL night_scout.approved_project=${literal(target.project)};
 SET LOCAL night_scout.approved_reviewer=${literal(reviewerId)};
 `);
-  return Object.freeze({status:'prepared-only',target:{...target,reviewerId},manifestSha256:digest(JSON.stringify(historicalManifest({current}))),schemaSha256:digest(JSON.stringify(contract)),rows:Object.fromEntries(Object.entries(rowsByTable).map(([k,v])=>[k,v.length])),sqlSha256:digest(body+'COMMIT;\n'),applySql:body+'COMMIT;\n',rehearsalSql:body+'ROLLBACK;\n',preflightSql:'BEGIN READ ONLY;\n'+guard+'\nROLLBACK;\n',postflightSql:'BEGIN READ ONLY;\n'+postflight+'\nROLLBACK;\n',rollbackSql:'ROLLBACK;\n',compatibilityPreflightSql,schemaDiagnosticsSql,operatorApplySql,operatorSqlSha256:digest(operatorApplySql),storeDVerified:verifyStoreD,intakeAware:intake,fixtureMode:current?'current-2026-10-09':'historical-2026-09-18',versionIds:current?Object.fromEntries(CURRENT_PERIODS.filter(([, ,d])=>d!==8).map(([m],i)=>[m,id(5000+i).replace('98000000','97000000')])):HISTORICAL_PROFIT_IDS.versions});
+  return Object.freeze({status:'prepared-only',target:{...target,reviewerId},manifestSha256:digest(JSON.stringify(historicalManifest({current}))),schemaSha256:digest(JSON.stringify(contract)),rows:Object.fromEntries(Object.entries(rowsByTable).map(([k,v])=>[k,v.length])),sqlSha256:digest(body+'COMMIT;\n'),applySql:body+'COMMIT;\n',rehearsalSql:body+'ROLLBACK;\n',preflightSql:'BEGIN READ ONLY;\n'+guard+'\nROLLBACK;\n',postflightSql:'BEGIN READ ONLY;\n'+serializationTimezoneSql+'\n'+postflight+'\nROLLBACK;\n',rollbackSql:'ROLLBACK;\n',compatibilityPreflightSql,schemaDiagnosticsSql,operatorApplySql,operatorSqlSha256:digest(operatorApplySql),storeDVerified:verifyStoreD,intakeAware:intake,fixtureMode:current?'current-2026-10-09':'historical-2026-09-18',versionIds:current?Object.fromEntries(CURRENT_PERIODS.filter(([, ,d])=>d!==8).map(([m],i)=>[m,id(5000+i).replace('98000000','97000000')])):HISTORICAL_PROFIT_IDS.versions});
  }finally{await db.close();}
 }

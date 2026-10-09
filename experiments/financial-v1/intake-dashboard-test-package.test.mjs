@@ -18,6 +18,8 @@ test('Intake-aware canonical package completes September, supports only elapsed 
  assert.match(p.compatibilityPreflightSql,/^BEGIN READ ONLY;/);
  const {db}=await setup(undefined,{installIntake:false});
  try{
+  // Match the hosted reporting connection's UTC session before baseline capture.
+  await db.exec("SET TIME ZONE 'UTC'");
   await db.exec(sql('staging/20260910_review_setup.sql'));
   await db.exec(sql('proposals/20260913_profit_evidence.sql'));
   const readSales=createProfitSalesReader({userId:U});
@@ -34,10 +36,22 @@ test('Intake-aware canonical package completes September, supports only elapsed 
   await db.query('INSERT INTO auth.users(id) VALUES($1)',[secondReviewer]);await db.query('INSERT INTO public.store_memberships VALUES($1,$2)',[secondReviewer,PROFIT_STAGING_IDS.store]);
   await assert.rejects(db.exec(p.operatorApplySql),/singleton reviewer mismatch/);await db.exec('ROLLBACK');
   await db.query('DELETE FROM public.store_memberships WHERE user_id=$1 AND store_id=$2',[secondReviewer,PROFIT_STAGING_IDS.store]);
+  // Source JSON must retain the preparation timezone even when the operator
+  // session differs. Omitting it reproduces the stale-overhead guard failure.
+  await db.exec("SET TIME ZONE 'Europe/London'");
+  const timezoneSql="SET LOCAL TIME ZONE 'UTC';\n";
+  assert.ok(p.operatorApplySql.includes(timezoneSql));
+  const unpinned=p.operatorApplySql.replace(timezoneSql,'');
+  await assert.rejects(db.exec(unpinned),/Unsupported or stale overhead source/);await db.exec('ROLLBACK');
+  assert.equal((await readiness()).reserved_target_vacant,true);
+  await db.exec(p.operatorApplySql.replace(/COMMIT;\n$/,'ROLLBACK;\n'));
+  assert.equal((await readiness()).reserved_target_vacant,true);
+  assert.equal((await db.query("SELECT current_setting('TimeZone') tz")).rows[0].tz,'Europe/London');
+  await db.exec("SET TIME ZONE 'UTC'");
   const tampered=p.operatorApplySql.replace('DO $store_d_preserved$',`UPDATE public.orders SET gross_sales=gross_sales+1 WHERE store_id='${PROFIT_STAGING_IDS.store}';\nDO $store_d_preserved$`);
   await assert.rejects(db.exec(tampered),/Store D fingerprint changed/);await db.exec('ROLLBACK');assert.equal((await readiness()).reserved_target_vacant,true);
   await db.exec(p.operatorApplySql.replace(/COMMIT;\n$/,'ROLLBACK;\n'));assert.equal((await readiness()).reserved_target_vacant,true);
-  await db.exec(p.operatorApplySql);await db.exec(p.postflightSql);
+  await db.exec(p.operatorApplySql);assert.equal((await db.query("SELECT current_setting('TimeZone') tz")).rows[0].tz,'UTC');await db.exec(p.postflightSql);
   const sepScope={storeId:target.storeId,currency:'GBP',from:'2026-09-01',to:'2026-09-30'};
   const sep=await readProfitEvidence(db,{versionId:p.versionIds['2026-09'],scope:sepScope,readSales});assert.equal(sep.readError,null);
   for(const [key,amount] of Object.entries({cogs:36000,grossProfit:60000,contribution:49600,operatingProfit:46600,ebitda:47200}))assert.equal(sep.result[key].value,amount,key);

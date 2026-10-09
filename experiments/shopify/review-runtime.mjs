@@ -1,7 +1,7 @@
 import {createProfitReportingService} from '../financial-v1/profit-reporting-service.mjs';
 import {createReviewerService} from './reviewer-auth.mjs';
 const check=(ok)=>{if(!ok)throw new Error('Review server configuration is invalid');};
-/** Explicit server-only configuration. Direct Supabase connections only for now.
+/** Explicit server-only configuration. Direct connections plus the verified staging session pooler.
  * Never reads generic DATABASE_URL, browser inputs or process environment itself.
  */
 export function reviewConnectionOptions(config){
@@ -10,8 +10,10 @@ export function reviewConnectionOptions(config){
   check(typeof projectRef==='string'&&/^[a-z]{20}$/.test(projectRef));
   const auth=new URL(authUrl),db=new URL(databaseUrl);
   check(auth.href===`https://${projectRef}.supabase.co/`);
-  check(['postgres:','postgresql:'].includes(db.protocol)&&db.hostname===`db.${projectRef}.supabase.co`&&(!db.port||db.port==='5432')&&db.pathname==='/postgres'&&!db.search&&!db.hash);
-  check(decodeURIComponent(db.username)==='night_scout_review_login'&&db.password.length>0);
+  const user=decodeURIComponent(db.username);
+  const direct=db.hostname===`db.${projectRef}.supabase.co`&&user==='night_scout_review_login';
+  const session=projectRef==='bioalckltvkhlczusdvl'&&db.hostname==='aws-1-eu-west-1.pooler.supabase.com'&&user===`night_scout_review_login.${projectRef}`&&db.port==='5432';
+  check(['postgres:','postgresql:'].includes(db.protocol)&&(direct||session)&&(!db.port||db.port==='5432')&&db.pathname==='/postgres'&&!db.search&&!db.hash&&db.password.length>0);
   check(typeof publishableKey==='string'&&publishableKey.length>0);
   if(!publishableKey.startsWith('sb_publishable_')){
    const parts=publishableKey.split('.');check(parts.length===3);

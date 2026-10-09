@@ -19,3 +19,7 @@ The current-period fixture remains unapplied. Run [reviewer-independent read-onl
 Browser credential protection prevented SQL editor observation; no schema result or database application is claimed. Automatic approval review rejected an unredacted environment-page snapshot; the safe startup receipt supplied the configuration diagnosis instead.
 
 Next batch acceptance: restore reporting configuration, reconcile live schema, apply the exact reviewer-bound synthetic package, verify September/elapsed-October figures across supported pages, then conduct detailed dashboard review. Proposed Xero amount RPC remains disabled and unapplied.
+
+## Network recovery
+
+Owner supplied a value-free socket diagnostic: direct staging endpoint returns ENETUNREACH from Render. Configuration syntax was valid but enabled runtime startup failed. Reporting now supports the exact staging session pooler already verified for intake, aws-1-eu-west-1.pooler.supabase.com:5432, with project-qualified dedicated review username. TLS verification, role/readiness checks and connection bounds remain. Other hosts, projects, privileged logins and transaction pooling are rejected. No credential values or grants change in this code repair. Live pooler authentication and permission readiness remain to verify after owner configuration.

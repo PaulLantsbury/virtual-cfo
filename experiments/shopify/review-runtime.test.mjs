@@ -38,3 +38,11 @@ test('unsafe or incomplete permissions close the pool without creating Auth clie
   const f=factories(override);await assert.rejects(initialiseReviewRuntime(config,f),/could not be initialised/);assert.equal(f.calls.ended,1);assert.equal(f.calls.auth,0);
  }
 });
+
+test('verified staging session pooler retains dedicated project login, TLS and connection bounds',()=>{
+ const projectRef='bioalckltvkhlczusdvl';
+ const c={...config,projectRef,authUrl:`https://${projectRef}.supabase.co`,databaseUrl:`postgresql://night_scout_review_login.${projectRef}:synthetic@aws-1-eu-west-1.pooler.supabase.com:5432/postgres`};
+ const o=reviewConnectionOptions(c);assert.equal(o.pool.user,`night_scout_review_login.${projectRef}`);assert.equal(o.pool.ssl.rejectUnauthorized,true);assert.equal(o.pool.max,3);
+ for(const databaseUrl of [c.databaseUrl.replace(':5432',':6543'),c.databaseUrl.replace('aws-1','aws-0'),c.databaseUrl.replace('night_scout_review_login.','postgres.'),c.databaseUrl.replace(`night_scout_review_login.${projectRef}`,'night_scout_review_login'),c.databaseUrl+'?sslmode=disable',c.databaseUrl.replace(projectRef,'abcdefghijklmnopqrst'),c.databaseUrl.replace(':5432','')])assert.throws(()=>reviewConnectionOptions({...c,databaseUrl}));
+ assert.throws(()=>reviewConnectionOptions({...c,projectRef:'abcdefghijklmnopqrst',authUrl:'https://abcdefghijklmnopqrst.supabase.co'}));
+});

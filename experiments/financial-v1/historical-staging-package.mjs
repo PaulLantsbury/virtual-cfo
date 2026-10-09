@@ -17,10 +17,14 @@ const target=HISTORICAL_STAGING_TARGET;
 // Includes row layouts and constraints, so a differing staging schema is a
 // preflight stop requiring reconciliation, never automatic DDL adaptation.
 export const historicalSchemaQuery=`SELECT jsonb_build_object('columns',(SELECT jsonb_agg(to_jsonb(c) ORDER BY table_schema,table_name,ordinal_position) FROM (SELECT table_schema,table_name,column_name,ordinal_position,data_type,udt_name,is_nullable,character_maximum_length,numeric_precision,numeric_scale,is_generated,generation_expression FROM information_schema.columns WHERE table_schema||'.'||table_name=ANY(ARRAY[${HISTORICAL_STAGING_TABLES.map(literal).join(',')}])) c),'constraints',(SELECT jsonb_agg(jsonb_build_object('table',n.nspname||'.'||r.relname,'name',c.conname,'definition',pg_get_constraintdef(c.oid)) ORDER BY n.nspname,r.relname,c.conname) FROM pg_constraint c JOIN pg_class r ON r.oid=c.conrelid JOIN pg_namespace n ON n.oid=r.relnamespace WHERE n.nspname||'.'||r.relname=ANY(ARRAY[${HISTORICAL_STAGING_TABLES.map(literal).join(',')}])), 'triggers',(SELECT jsonb_agg(jsonb_build_object('table',n.nspname||'.'||r.relname,'name',t.tgname,'enabled',t.tgenabled,'definition',pg_get_triggerdef(t.oid),'function',pg_get_functiondef(t.tgfoid)) ORDER BY n.nspname,r.relname,t.tgname) FROM pg_trigger t JOIN pg_class r ON r.oid=t.tgrelid JOIN pg_namespace n ON n.oid=r.relnamespace WHERE NOT t.tgisinternal AND n.nspname||'.'||r.relname=ANY(ARRAY[${HISTORICAL_STAGING_TABLES.map(literal).join(',')}])) ) contract`;
-async function sourceFixture(reviewerId,{current=false}={}){
+// PostgreSQL17 lacks table NOT NULL catalog rows. Compare their enforced
+// column attributes exactly; retain unvalidated/nonlocal NOT NULL exceptions.
+export const stagingSchemaQuery=historicalSchemaQuery.replace("WHERE n.nspname||'.'||r.relname=ANY", "WHERE (c.contype<>'n' OR NOT(c.convalidated AND c.conislocal AND c.coninhcount=0 AND NOT c.connoinherit AND NOT c.condeferrable AND NOT c.condeferred)) AND n.nspname||'.'||r.relname=ANY").replace("'triggers',(SELECT", "'not_null_attributes',(SELECT jsonb_agg(jsonb_build_object('table',ns.nspname||'.'||r.relname,'column',a.attname,'not_null',a.attnotnull,'local',a.attislocal,'inheritance_count',a.attinhcount) ORDER BY ns.nspname,r.relname,a.attnum) FROM pg_attribute a JOIN pg_class r ON r.oid=a.attrelid JOIN pg_namespace ns ON ns.oid=r.relnamespace WHERE a.attnum>0 AND NOT a.attisdropped AND ns.nspname||'.'||r.relname=ANY(ARRAY["+HISTORICAL_STAGING_TABLES.map(literal).join(',')+"])), 'triggers',(SELECT");
+async function sourceFixture(reviewerId,{current=false,intake=false}={}){
  const frozenStamp=current?'2026-10-08T23:00:00.000Z':stamp;
  const {db}=await setup(undefined,{installIntake:false});
  try{
+  if(intake)await db.exec(sql('staging/20260910_review_setup.sql'));
   await db.exec(sql('proposals/20260913_profit_evidence.sql'));
   // Freeze defaults only inside this throwaway preparation database. Exported
   // SQL contains explicit values; it never changes defaults or live schemas.
@@ -52,11 +56,14 @@ function validate({project,host,database,reviewerId}={}){
  if(typeof reviewerId!=='string'||!uuid.test(reviewerId))throw Error('Explicit existing approved synthetic reviewer UUID required');
 }
 export async function prepareHistoricalStagingPackage(options){
- validate(options);const {reviewerId,current=false}=options;
+ validate(options);const {reviewerId,current=false,intake=false,verifyStoreD=false}=options;
+ if(typeof verifyStoreD!=='boolean')throw Error('Explicit boolean Store D verification required');
+ if(typeof intake!=='boolean')throw Error('Explicit boolean intake fixture mode required');
+ const schemaQuery=intake?stagingSchemaQuery:historicalSchemaQuery;
  if(typeof current!=='boolean')throw Error('Explicit boolean current fixture mode required');
- const {db}=await sourceFixture(reviewerId,{current});
+ const {db}=await sourceFixture(reviewerId,{current,intake});
  try{
-  const contract=(await db.query(historicalSchemaQuery)).rows[0].contract,rowsByTable={},fingerprints={},statements=[];
+  const contract=(await db.query(schemaQuery)).rows[0].contract,rowsByTable={},fingerprints={},statements=[];
   for(const table of HISTORICAL_STAGING_TABLES){
    const where=table==='public.stores'?'id=$1':table==='finance_v1.profit_component_coverage'?'version_id IN (SELECT id FROM finance_v1.profit_evidence_versions WHERE store_id=$1)':'store_id=$1';
    const rows=(await db.query(`SELECT to_jsonb(t)::text row FROM ${table} t WHERE ${where} ORDER BY to_jsonb(t)::text`,[target.storeId])).rows.map(r=>r.row);rowsByTable[table]=rows;
@@ -69,7 +76,7 @@ export async function prepareHistoricalStagingPackage(options){
  IF current_setting('night_scout.approved_project',true) IS DISTINCT FROM ${literal(target.project)} OR current_setting('night_scout.approved_reviewer',true) IS DISTINCT FROM ${literal(reviewerId)} THEN RAISE EXCEPTION 'Exact staging target and reviewer attestation required'; END IF;
  IF NOT EXISTS(SELECT 1 FROM auth.users WHERE id=${literal(reviewerId)}::uuid) OR NOT EXISTS(SELECT 1 FROM public.store_memberships WHERE user_id=${literal(reviewerId)}::uuid) THEN RAISE EXCEPTION 'Existing approved reviewer with existing membership required'; END IF;
  IF EXISTS(SELECT 1 FROM public.stores WHERE id=${literal(target.storeId)}::uuid OR shopify_domain=${literal(target.domain)} OR shopify_store_id='synthetic-historical-v1') THEN RAISE EXCEPTION 'Historical target occupied: replay/dirty pre-state refused'; END IF;
- IF (${historicalSchemaQuery.replace(/ contract$/,'')}) IS DISTINCT FROM ${literal(JSON.stringify(contract))}::jsonb THEN RAISE EXCEPTION 'Historical schema contract differs; inspect before approval'; END IF;
+ IF (${schemaQuery.replace(/ contract$/,'')}) IS DISTINCT FROM ${literal(JSON.stringify(contract))}::jsonb THEN RAISE EXCEPTION 'Historical schema contract differs; inspect before approval'; END IF;
 END $historical_guard$;`;
   const countChecks=Object.entries(rowsByTable).map(([table,rows])=>{
    const where=table==='public.stores'?`id=${literal(target.storeId)}::uuid`:table==='finance_v1.profit_component_coverage'?`version_id IN (SELECT id FROM finance_v1.profit_evidence_versions WHERE store_id=${literal(target.storeId)}::uuid)`:`store_id=${literal(target.storeId)}::uuid`;
@@ -86,14 +93,49 @@ SELECT jsonb_build_object(
  'expected_trigger_count',${contract.triggers?.length??0},
  'visible_trigger_count',(SELECT count(*) FROM pg_trigger t JOIN pg_class r ON r.oid=t.tgrelid JOIN pg_namespace n ON n.oid=r.relnamespace WHERE NOT t.tgisinternal AND n.nspname||'.'||r.relname=ANY(ARRAY[${HISTORICAL_STAGING_TABLES.map(literal).join(',')}])),
  'visible_column_count',(SELECT count(*) FROM information_schema.columns WHERE table_schema||'.'||table_name=ANY(ARRAY[${HISTORICAL_STAGING_TABLES.map(literal).join(',')}])),
- 'schema_contract_matches',(${historicalSchemaQuery.replace(/ contract$/,'')})=${literal(JSON.stringify(contract))}::jsonb,
+ 'schema_contract_matches',(${schemaQuery.replace(/ contract$/,'')})=${literal(JSON.stringify(contract))}::jsonb,
  'reserved_target_vacant',NOT EXISTS(SELECT 1 FROM public.stores WHERE id=${literal(target.storeId)}::uuid OR shopify_domain=${literal(target.domain)} OR shopify_store_id='synthetic-historical-v1'),
  'reviewer_verification_still_required',true,
  'auth_identity_verification_still_required',true,
  'connection_identity_verification_still_required',true) readiness;
 ROLLBACK;
 `;
+  const diagnosticParts=(intake?['columns','constraints','triggers','not_null_attributes']:['columns','constraints','triggers']).map(component=>{
+   const identity=component==='not_null_attributes'?`jsonb_build_object('table',item->>'table','name',item->>'column')`:component==='columns'?`jsonb_build_object('table',item->>'table_schema'||'.'||(item->>'table_name'),'name',item->>'column_name')`:`jsonb_build_object('table',item->>'table','name',item->>'name')`;
+   return `${literal(component)},(SELECT COALESCE(jsonb_agg(${identity}||jsonb_build_object('status',status) ORDER BY item::text,status),'[]'::jsonb) FROM (SELECT item,'expected_record_not_found'::text status FROM jsonb_array_elements(COALESCE(e.contract->${literal(component)},'[]'::jsonb)) item WHERE NOT EXISTS(SELECT 1 FROM jsonb_array_elements(COALESCE(a.contract->${literal(component)},'[]'::jsonb)) actual WHERE actual=item) UNION ALL SELECT item,'unexpected_or_changed_record'::text status FROM jsonb_array_elements(COALESCE(a.contract->${literal(component)},'[]'::jsonb)) item WHERE NOT EXISTS(SELECT 1 FROM jsonb_array_elements(COALESCE(e.contract->${literal(component)},'[]'::jsonb)) expected WHERE expected=item)) differences)`;
+  }).join(',\n');
+  const schemaDiagnosticsSql=`BEGIN READ ONLY;
+WITH expected AS (SELECT ${literal(JSON.stringify(contract))}::jsonb contract), actual AS (${schemaQuery})
+SELECT jsonb_build_object('server_major',current_setting('server_version_num')::integer/10000,'expected_catalog_major',${Number((await db.query("SELECT current_setting('server_version_num')::integer/10000 major")).rows[0].major)},
+ 'schema_contract_matches',e.contract=a.contract,
+ 'visible_constraint_types',(SELECT COALESCE(jsonb_object_agg(kind,n),'{}'::jsonb) FROM (SELECT c.contype::text kind,count(*) n FROM pg_constraint c JOIN pg_class r ON r.oid=c.conrelid JOIN pg_namespace ns ON ns.oid=r.relnamespace WHERE ns.nspname||'.'||r.relname=ANY(ARRAY[${HISTORICAL_STAGING_TABLES.map(literal).join(',')}]) GROUP BY c.contype) kinds),
+ 'mismatches',jsonb_build_object(${diagnosticParts}),
+ 'application_authorized',false) diagnostics FROM expected e CROSS JOIN actual a;
+ROLLBACK;
+`;
   const body=`BEGIN;\nSET LOCAL lock_timeout='5s';\nSET LOCAL statement_timeout='60s';\n${guard}\n${statements.join('\n')}\n${postflight}\n`;
-  return Object.freeze({status:'prepared-only',target:{...target,reviewerId},manifestSha256:digest(JSON.stringify(historicalManifest({current}))),schemaSha256:digest(JSON.stringify(contract)),rows:Object.fromEntries(Object.entries(rowsByTable).map(([k,v])=>[k,v.length])),sqlSha256:digest(body+'COMMIT;\n'),applySql:body+'COMMIT;\n',rehearsalSql:body+'ROLLBACK;\n',preflightSql:'BEGIN READ ONLY;\n'+guard+'\nROLLBACK;\n',postflightSql:'BEGIN READ ONLY;\n'+postflight+'\nROLLBACK;\n',rollbackSql:'ROLLBACK;\n',compatibilityPreflightSql,fixtureMode:current?'current-2026-10-09':'historical-2026-09-18',versionIds:current?Object.fromEntries(CURRENT_PERIODS.filter(([, ,d])=>d!==8).map(([m],i)=>[m,id(5000+i).replace('98000000','97000000')])):HISTORICAL_PROFIT_IDS.versions});
+  const preservedStore='90000000-0000-4000-8000-000000000004';
+  const baselineTables=[...HISTORICAL_STAGING_TABLES,'public.marketing_channel_daily_metrics'];
+  const baselineQuery=`SELECT jsonb_build_object(${baselineTables.flatMap(table=>{
+   const where=table==='public.stores'?`id=${literal(preservedStore)}::uuid`:table==='finance_v1.profit_component_coverage'?`version_id IN(SELECT id FROM finance_v1.profit_evidence_versions WHERE store_id=${literal(preservedStore)}::uuid)`:`store_id=${literal(preservedStore)}::uuid`;
+   return [literal(table),`(SELECT jsonb_build_object('count',count(*),'sha256',encode(sha256(convert_to(COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text)::text,'[]'),'UTF8')),'hex')) FROM ${table} t WHERE ${where})`];
+  }).join(',')})`;
+  const storeDGuard=verifyStoreD?`DO $store_d_guard$ BEGIN
+ IF (SELECT count(*) FROM public.store_memberships WHERE store_id=${literal(preservedStore)}::uuid)<>1 OR NOT EXISTS(SELECT 1 FROM public.store_memberships WHERE store_id=${literal(preservedStore)}::uuid AND user_id=${literal(reviewerId)}::uuid) THEN RAISE EXCEPTION 'Existing Store D singleton reviewer mismatch'; END IF;
+ PERFORM set_config('night_scout.store_d_baseline',(${baselineQuery})::text,true);
+END $store_d_guard$;
+`:'';
+  const storeDPostflight=verifyStoreD?`DO $store_d_preserved$ BEGIN
+ IF (${baselineQuery}) IS DISTINCT FROM current_setting('night_scout.store_d_baseline',true)::jsonb THEN RAISE EXCEPTION 'Existing Store D fingerprint changed'; END IF;
+END $store_d_preserved$;
+`:'';
+  const operatorBody=body.replace('DO $historical_guard$',storeDGuard+'DO $historical_guard$')+storeDPostflight+'COMMIT;\n';
+  const operatorApplySql=operatorBody.replace('BEGIN;\n',`-- Operator attestation only: independently verify the exact staging TLS connection and approved reviewer before execution.
+-- This file performs the reviewed synthetic staging data mutation; schema agreement alone is not application approval.
+BEGIN;
+SET LOCAL night_scout.approved_project=${literal(target.project)};
+SET LOCAL night_scout.approved_reviewer=${literal(reviewerId)};
+`);
+  return Object.freeze({status:'prepared-only',target:{...target,reviewerId},manifestSha256:digest(JSON.stringify(historicalManifest({current}))),schemaSha256:digest(JSON.stringify(contract)),rows:Object.fromEntries(Object.entries(rowsByTable).map(([k,v])=>[k,v.length])),sqlSha256:digest(body+'COMMIT;\n'),applySql:body+'COMMIT;\n',rehearsalSql:body+'ROLLBACK;\n',preflightSql:'BEGIN READ ONLY;\n'+guard+'\nROLLBACK;\n',postflightSql:'BEGIN READ ONLY;\n'+postflight+'\nROLLBACK;\n',rollbackSql:'ROLLBACK;\n',compatibilityPreflightSql,schemaDiagnosticsSql,operatorApplySql,operatorSqlSha256:digest(operatorApplySql),storeDVerified:verifyStoreD,intakeAware:intake,fixtureMode:current?'current-2026-10-09':'historical-2026-09-18',versionIds:current?Object.fromEntries(CURRENT_PERIODS.filter(([, ,d])=>d!==8).map(([m],i)=>[m,id(5000+i).replace('98000000','97000000')])):HISTORICAL_PROFIT_IDS.versions});
  }finally{await db.close();}
 }

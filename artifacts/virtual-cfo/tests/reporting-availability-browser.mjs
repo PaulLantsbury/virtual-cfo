@@ -45,3 +45,13 @@ test('profit retry rechecks the same scope without requesting a collection or re
     assert.doesNotMatch(await summary.innerText(), /£0\.00/);
   });
 });
+
+test('disabled profit service remains separate from supported sales and exposes no diagnostics', async () => {
+  await fixture({ profitRespond: () => ({ status: 503, data: { error: 'Profit reporting is not configured' } }) }, async page => {
+    await metrics(page);
+    const summary = page.getByRole('region', { name: 'Verified profit summary', exact: true });
+    await summary.getByText(/Profit reporting has not been enabled on this website/).waitFor();
+    assert.doesNotMatch(await summary.innerText(), /£0\.00/);
+    await summary.getByRole('button', { name: 'Retry profit evidence check' }).waitFor();
+  });
+});

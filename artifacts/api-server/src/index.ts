@@ -5,6 +5,7 @@ import {createXeroStagingBootstrapRuntime} from './lib/xero-staging-bootstrap-ru
 import {resolve} from 'node:path';
 import {createXeroMerchantReadinessRuntime} from './lib/xero-merchant-readiness-runtime.ts';
 import {createXeroAccountingRuntime} from './lib/xero-accounting-runtime.ts';
+import {createXeroSavedMappingRuntime} from './lib/xero-saved-mapping-runtime.ts';
 import {reportingConfigReadiness} from '../../../deployments/render-staging/check-reporting-config.mjs';
 
 const rawPort = process.env["PORT"];
@@ -53,7 +54,13 @@ try{xeroAccounting=createXeroAccountingRuntime(process.env);}catch{
   process.exit(1);
 }
 const webRoot=process.env.NIGHT_SCOUT_RUNTIME_ENV==='staging'?resolve(process.cwd(),'artifacts/virtual-cfo/dist/public'):undefined;
-const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined,webRoot,xeroReadiness,runtime?.profitService,xeroAccounting);
+let xeroSavedMapping;
+try{xeroSavedMapping=createXeroSavedMappingRuntime(process.env);}catch{
+  logger.error("Xero saved mapping reader configuration failed; server startup stopped");
+  await Promise.all([runtime?.close(),xeroBootstrap?.close()]);
+  process.exit(1);
+}
+const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined,webRoot,xeroReadiness,runtime?.profitService,xeroAccounting,xeroSavedMapping);
 const server=app.listen(port, localBind ?? "0.0.0.0", (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");

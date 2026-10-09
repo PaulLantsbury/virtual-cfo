@@ -1,3 +1,11 @@
+## Latest verified state — reporting startup recovered
+
+The owner confirms successful deployment following dedicated review configuration, exact staging session pooler and CA-file repair. Coordinator independently verified signed-in Store D February Profit Overview: sales £140, gross profit £80, contribution £60, operating profit £35, EBITDA £40. Earlier absent-configuration statements below describe the first deployment, not current readiness.
+
+Read-only diagnostics executed through Render using the existing dedicated review role and TLS validation. Actual staging is PostgreSQL 17. The reconciled intake-aware canonical contract matches: 154 visible/expected columns, 95 portable constraints, ten triggers including full function bodies, reserved target vacant. No schema changes or financial writes were made. The sole existing Store D reviewer membership was verified privately, with identities excluded from public documentation.
+
+Current synthetic September/October data remains unapplied. Its reviewer-bound operator package must pass the same guarded contract/target/auth checks before any writes. The default-off saved mapping code is prepared separately; its new member RPC proposal remains unapplied. Full authenticated cross-page current figures are still a release gate.
+
 # Staging rollout checkpoint — 9 October 2026
 
 Revision `d3a2ad54dc3ec46fa276f7f3033fee619cf45b91` deployed successfully to the existing staging web service. Hosted build and health check passed; authenticated Settings and Profit Overview load the updated UI. No production/main changes.

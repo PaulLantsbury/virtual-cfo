@@ -5,6 +5,7 @@ import { useActiveStore } from '@/lib/auth/AuthProvider';
 import { fetchXeroMerchantReadiness } from '@/lib/xeroMerchantApi';
 import { accountCanMapTo, fetchXeroStagingDiscovery, startXeroStagingBootstrap, startXeroStagingDiscovery, startXeroStagingReauthorization, validateXeroBootstrapSelection, XERO_MAPPING_CATEGORIES, type XeroBootstrapMapping, type XeroDiscovery, type XeroMappingCategory } from '@/lib/xeroStagingDiscovery';
 import { xeroOwnerConnectionView } from '@/lib/xeroOwnerConnectionView';
+import { SavedXeroMappingReview } from '@/components/SavedXeroMappingReview';
 
 const QUERY_KEY = 'xeroDiscovery';
 const CONNECTED_KEY = 'xeroConnected';
@@ -85,7 +86,7 @@ export function XeroStagingDiscovery() {
   };
 
   if(readiness.isPending)return <section aria-label="Xero staging discovery" className="rounded-xl border bg-card p-4"><h3 className="font-medium">Checking Xero connection</h3><p className="mt-1 text-sm text-muted-foreground">Night Scout is checking the persisted connection for this store.</p></section>;
-  if(readiness.data?.connection?.status==='active')return <section aria-label="Xero staging discovery" className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4"><h3 className="font-medium">{connectionReceived?'Xero reconnected':'Xero connected'}</h3><p role={connectionReceived?'status':undefined} className="mt-1 text-sm text-muted-foreground">The read-only Xero connection and owner-confirmed mapping are persisted for this store. Connection status is separate from accounting readiness; check the evidence status above for the latest refresh result. Reviewing or changing the saved mapping is not available in this setup screen yet.</p></section>;
+  if(readiness.data?.connection?.status==='active')return <section aria-label="Xero staging discovery" className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4"><h3 className="font-medium">{connectionReceived?'Xero reconnected':'Xero connected'}</h3><p role={connectionReceived?'status':undefined} className="mt-1 text-sm text-muted-foreground">The read-only Xero connection and owner-confirmed mapping are persisted for this store. Connection status is separate from accounting readiness; check the evidence status above for the latest refresh result. Editing the saved mapping is not available in this setup screen yet.</p><SavedXeroMappingReview storeId={storeId}/></section>;
   if(readiness.isError)return <section aria-label="Xero staging discovery" className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4"><h3 className="font-medium">Xero connection status unavailable</h3><p className="mt-1 text-sm text-muted-foreground">Night Scout cannot safely start another connection until the persisted state can be checked.</p><button type="button" className="mt-3 text-sm font-medium text-primary underline underline-offset-4" onClick={()=>readiness.refetch()}>Check connection again</button></section>;
 
   const ownerView=xeroOwnerConnectionView(readiness.data?.connection?.status??null);

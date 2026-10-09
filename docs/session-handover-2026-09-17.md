@@ -1,3 +1,13 @@
+## 9 October latest — multi-agent takeover after reporting recovery
+
+Use the existing roadmap. Owner confirms successful hosted build after dedicated review configuration, exact session pooler and Supabase CA file recovery. Coordinator independently verified Store D February Profit Overview £140 sales / £80 gross profit / £60 contribution / £35 operating profit / £40 EBITDA. Current development-store September remains unsupported; no current-data load is claimed.
+
+Live read-only staging metadata verified PostgreSQL 17. The intake-aware current fixture preserves all ten existing triggers/functions and every column/nullability and relation constraint; exact schema agreement is now true (154 columns, 95 portable constraints, ten triggers). Reserved synthetic target is vacant. The single existing Store D reviewer membership was verified privately; no identity enters public files. SQL editor credential protection prevents direct operator SQL entry, so the dedicated reporting role was used only for read-only diagnostics. No admin/worker credential substitution, new grants or live data writes occurred.
+
+Integrated dashboard safe failure/retry refinements and default-off saved Xero mapping metadata review. Frontend typecheck, frontend/API builds and focused contract/isolation/composed-route tests pass. Browser test scripts were expanded but their local Chromium runs remain unavailable; full authenticated cross-page verification is pending. Saved-mapping RPC remains a proposal; it must not be called available merely because the button exists.
+
+See current-dashboard-test-package-2026-10-09.md, dashboard-shared-acceptance-2026-10-09.md, xero-saved-mapping-review-package-2026-10-09.md and staging-rollout-checkpoint-2026-10-09.md. Coordinator owns development-branch publication/staging deployment and final evidence. Next concrete gate is reviewer-bound current synthetic application, independent postflight and authenticated page reconciliation, then detailed dashboard revision with Paul.
+
 # Dashboard recovery batch — 9 October 2026
 
 Start with [the recovery batch](dashboard-recovery-batch-2026-10-09.md) and [the existing roadmap](roadmap-2026-09-17.md). Paul authorized large multi-agent batches with minimum intervention. Profit API hosted composition fixed, truthful failure diagnostics and mapping selection usability improved, historical/daily artifacts prepared and focused checks run. No live deployment/data activation. Next requires authenticated hosted/configuration/schema inspection and concrete staging packages; do not recreate completed Xero consent or apply fixture identities. Earlier dated entries below are historical.

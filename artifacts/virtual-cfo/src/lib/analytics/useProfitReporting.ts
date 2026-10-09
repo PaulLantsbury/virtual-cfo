@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../supabase';
 import { useAuth } from '../auth/AuthProvider';
-import { profitHttpFailure } from './reportingAvailability';
+import { readProfitResponse } from './reportingAvailability';
 import type { useSalesReporting } from './useSalesReporting';
 import type { VerifiedSales } from '../../../../../experiments/financial-v1/rpc-sales-adapter.mjs';
 
@@ -44,11 +44,17 @@ export function useProfitReporting(storeId: string, reporting: ReturnType<typeof
     queryFn: async ({ signal }) => {
       const { data, error } = await supabase.auth.getSession();
       if (error || !data.session || data.session.user.id !== userId) throw new Error('Sign in again to check profit evidence.');
-      const response = await fetch(`/api/profit-reporting?${new URLSearchParams(scope)}`, {
-        headers: { Authorization: `Bearer ${data.session.access_token}` }, signal,
-      });
-      if (!response.ok) throw new Error(profitHttpFailure(response.status));
-      const result = await response.json() as ProfitResponse;
+      let response: Response;
+      try {
+        response = await fetch(`/api/profit-reporting?${new URLSearchParams(scope)}`, {
+          headers: { Authorization: `Bearer ${data.session.access_token}` }, signal,
+        });
+      } catch (cause) {
+        if (signal.aborted) throw cause;
+        throw new Error('Profit reporting could not be reached. Check your connection and retry the evidence check.');
+      }
+      const result = await readProfitResponse(response) as ProfitResponse;
+      if (!result || typeof result !== 'object') throw new Error('Profit evidence does not match this reporting period.');
       if (result.state === 'unavailable' && typeof result.reason === 'string') return result;
       if (result.state !== 'ready' || !profitReportMatches(result.report, scope)) throw new Error('Profit evidence does not match this reporting period.');
       return result;

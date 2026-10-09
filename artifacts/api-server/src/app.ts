@@ -12,8 +12,9 @@ import {createXeroMerchantReadinessRouter,type XeroReadinessDependencies} from '
 import {createXeroAccountingRouter,type XeroAccountingDependencies} from './routes/xero-accounting.ts';
 import {safeRequestPath} from './lib/safe-request-path.ts';
 import {createProfitReportingRouter,type ProfitReportingService} from './routes/profit-reporting.ts';
+import {createXeroSavedMappingRouter,type SavedMappingDependencies} from './routes/xero-saved-mapping.ts';
 
-export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService,xeroAccounting?:XeroAccountingDependencies): Express {
+export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService,xeroAccounting?:XeroAccountingDependencies,xeroSavedMapping?:SavedMappingDependencies): Express {
 const app: Express = express();
 
 app.use(
@@ -41,6 +42,7 @@ app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
 app.use('/api/profit-reporting',createProfitReportingRouter(profitReporting));
 app.use('/api/xero/staging',createXeroStagingBootstrapRouter(xeroBootstrap));
 app.use('/api/xero',createXeroAccountingRouter(xeroAccounting));
+app.use('/api/xero',createXeroSavedMappingRouter(xeroSavedMapping));
 app.use('/api/xero',createXeroMerchantReadinessRouter(xeroReadiness));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

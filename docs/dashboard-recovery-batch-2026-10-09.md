@@ -21,9 +21,9 @@ See [test-data package](dashboard-test-data-2026-10-09.md) and [Xero mapping aud
 
 ## Live evidence and next concrete operations
 
-The hosted Render landing/login page loads, but this session has no signed-in Night Scout account, server configuration access or authenticated database session. No hosted membership, evidence contents, schema compatibility or deployment of this batch is claimed. Render blueprint disables automatic deployment; development-branch publication alone is not a deployment.
+Secure staging sign-in and an authenticated Settings walkthrough completed after the initial code batch. Private account/store/collection/evidence metadata is deliberately excluded from this public handover. This session still has no server configuration access or authenticated database session. No schema compatibility or deployment of this batch is claimed. Render blueprint disables automatic deployment; development-branch publication alone is not a deployment.
 
-1. Authenticate to the existing staging site and verify selected store/memberships, live response states and exact reporting scopes.
+1. Reuse the authenticated staging session where available; verify reporting responses and known fixture periods after deployment. Signed-in Settings was inspected, but financial amounts were not certified in this batch.
 2. Inspect existing Render review configuration names without printing values. Profit uses existing `NIGHT_SCOUT_REVIEW_ENABLED`, `NIGHT_SCOUT_REVIEW_PROJECT_REF`, `NIGHT_SCOUT_REVIEW_AUTH_URL`, `NIGHT_SCOUT_REVIEW_PUBLIC_KEY`, `NIGHT_SCOUT_REVIEW_DATABASE_URL` and the dedicated restricted review login. Do not substitute Xero bootstrap/worker or generic admin credentials. Missing configuration requires the reviewed server setup before endpoint success.
 3. Deploy the reviewed web revision to the existing staging service under a concrete approval; preserve production and disabled fixed-period worker settings. Verify health, authenticated route, membership denial and browser behavior.
 4. Read-only inspect current schema/reviewer/store state before generating reviewer-bound test artifacts. Historical package remains blocked until deployed schema matches; do not apply the fixture reviewer or bypass the guard. Then present exact staging dataset/membership and application steps for the separate approval.

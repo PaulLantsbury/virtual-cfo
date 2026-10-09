@@ -1,3 +1,13 @@
+## 9 October live current-data acceptance complete
+
+Staging deployment `dep-db4h1p2d0e5s73ev5f2g` is Live at revision `58e02a59fccd4af657053cb13b97f6427a44a8fb`. Coordinator independently verified full 980-row UTC postflight through the dedicated member-bound reporting role. Owner-applied fixture is now applied and live-verified; do not rerun its guarded operator SQL.
+
+Authenticated September shared totals agree across CFO Briefing, Margin Analysis and Profit Overview: net product sales £960, gross profit £600, contribution after marketing £496, operating profit £466, EBITDA £472. The detailed bridge reconciles: COGS £360, shipping £36, variable costs £48, advertising £92, overheads including D&A £30, D&A £6. Marketing Efficiency, Growth Quality, Pricing & Discounts and Cash Control each show the same shared sales summary: £960 sales, £80 original AOV, 12 original orders. Their detailed models remain labelled samples, not actual source-backed analysis.
+
+Elapsed October 1–8 shows £240 sales/£80 AOV with monthly profit correctly withheld; full October 1–31 shows unsupported coverage and no sealed profit version. Store D returns to its own February selection and preserves £140 sales/£80 gross profit/£60 contribution/£35 operating profit/£40 EBITDA. Selection was restored to the new synthetic store and Last Complete Month (September) for review. Manual browser checks establish these cases, not comprehensive failure-injection/browser-test coverage.
+
+Next canonical roadmap batch: detailed dashboard review/revision using this trusted synthetic baseline; customer-friendly Xero mapping workflow and independent accounting/cash reporting; ongoing dated Shopify/Xero testing programme preparation. Saved mapping member RPC remains unapplied/default-off, ongoing source writers/schedulers remain unactivated. Current synthetic acceptance does not establish real Shopify/Xero end-to-end recurring collection.
+
 # Shared dashboard acceptance — 9 October 2026
 
 Paul confirmed, and the coordinator subsequently independently verified across CFO Briefing, Margin Analysis and Profit Overview, the hosted Store D February 2026 results after reporting configuration and TLS certificate correction: sales £140, gross profit £80, contribution after marketing £60, operating profit £35 and EBITDA £40. This verifies the selected fixture period on those three pages, not September/current coverage, other dashboards or recurring refresh.

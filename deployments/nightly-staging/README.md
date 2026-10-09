@@ -110,3 +110,23 @@ Complete both consent stages from the Render `/settings` page without changing
 origin or rerunning the preflight between migration and consent. After Settings
 reports `Xero reconnected`, rerun the connection preflight. Continue to the
 fourth accounting retry only after exact `connected/organisation/ok` output.
+
+### Value-free report structure diagnostic
+
+After a connected preflight, use this staging-only probe to localise a report
+parser or selected-account failure without authorising or consuming another
+accounting refresh:
+
+```sh
+NIGHT_SCOUT_XERO_STAGING_REFRESH_ENABLED=true \
+node deployments/nightly-staging/run-xero-report-structure-diagnostic.mjs
+```
+
+It uses the existing worker-only connection lookup, rotates the single-use
+refresh token under the exact lease and reads the same five read-only Xero
+endpoints. Output is limited to report-envelope booleans, bounded row/container
+and cell counts, and per-category expected/found/missing/duplicate selected-
+account counts. It never emits or persists balances, labels, account or tenant
+identifiers, dates, currencies, tokens or raw Xero payloads. It neither selects
+an accounting job nor reads/writes evidence or retry authorizations. Run it
+once and retain its JSON output for the parser correction.

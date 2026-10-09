@@ -100,8 +100,29 @@ test('second reviewed reauthorization is version-pinned, one-shot and preserves 
  assert.equal((await db.query('SELECT count(*)::int n FROM xero_v1.accounting_evidence')).rows[0].n,6);
  assert.equal((await db.query('SELECT count(*)::int n FROM xero_v1.connection_preflight_evidence')).rows[0].n,3);
  assert.equal((await db.query('SELECT version FROM xero_v1.credential_envelopes')).rows[0].version,6);
+
+ // The final accounting retry is allowed only after the reconnect has been
+ // consumed and the replacement credential itself passes organisation preflight.
+ await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+ const finalPreflightLease=(await db.query('SELECT xero_v1.worker_acquire_refresh_lease($1,6,300) lease',[connection])).rows[0].lease;
+ await db.query(`SELECT xero_v1.worker_record_connection_preflight($1,6,'connected','organisation','ok',NULL,true,$2)`,[connection,finalPreflightLease]);
+ await db.query('SELECT xero_v1.worker_release_refresh_lease($1,6,$2)',[connection,finalPreflightLease]);
+ await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+ await db.exec(sql('20261009_xero_fifth_reviewed_failed_scope_retry.sql'));
+ assert.deepEqual((await db.query(sql('verify-xero-fifth-reviewed-retry-2026-10-09.sql'))).rows[0],{
+  exactly_five_reviewed_retries:true,exactly_four_retries_consumed:true,
+  exactly_one_retry_unconsumed:true,current_latest_failure_authorized:true,
+  current_credential_preflight_supported:true,reviewed_reconnect_consumed:true
+ });
+ await db.exec('SET SESSION AUTHORIZATION night_scout_import_login');
+ assert.equal((await db.query(`SELECT count(*)::int n FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`)).rows[0].n,1);
+ await assert.rejects(db.query(`SELECT * FROM xero_v1.worker_get_single_refresh_job('2026-09-01','2026-09-25','GBP',false)`),/job unavailable|retry unavailable/i);
+ await db.exec('RESET SESSION AUTHORIZATION;SET SESSION AUTHORIZATION postgres');
+ await assert.rejects(db.exec(sql('20261009_xero_fifth_reviewed_failed_scope_retry.sql')),/prior Xero retry authorizations unavailable|already authorized/i);
  }finally{await db.close();}});
 
 test('second reauthorization remains bootstrap-only and verifier is status-only',()=>{const migration=sql('20261003_xero_second_reviewed_reauthorization.sql'),verify=sql('verify-xero-second-reviewed-reauthorization-2026-10-03.sql');assert.match(migration,/target_credential_version=p_expected_version/);assert.match(migration,/ce\.version=ra\.target_credential_version/);assert.match(migration,/session_user<>'night_scout_xero_bootstrap_login'/);assert.match(migration,/REVOKE ALL[\s\S]*service_role/);assert.doesNotMatch(verify,/failure_evidence_id|allowed_owner_id|ciphertext|tenant_id|connection_id/i);});
 
 test('third reauthorization requires both consumed predecessors and has a status-only verifier',()=>{const migration=sql('20261009_xero_third_reviewed_reauthorization.sql'),verify=sql('verify-xero-third-reviewed-reauthorization-2026-10-09.sql');assert.match(migration,/v_first<>1 OR v_first_consumed<>1 OR v_second<>1 OR v_second_consumed<>1/);assert.match(migration,/pe\.reason='reconnect_required'/);assert.match(migration,/ce\.version=pe\.credential_version/);assert.match(migration,/target_credential_version=p_expected_version/);assert.match(migration,/xero_third_reauthorization_authorizations/);assert.doesNotMatch(verify,/preflight_evidence_id|allowed_owner_id|ciphertext|tenant_id|connection_id/i);});
+
+test('fifth retry is exact-state gated, one-shot and status-only',()=>{const migration=sql('20261009_xero_fifth_reviewed_failed_scope_retry.sql'),verify=sql('verify-xero-fifth-reviewed-retry-2026-10-09.sql');assert.match(migration,/ae\.reason='accounting_evidence_unavailable'/);assert.match(migration,/authorization_count<>4 OR consumed_count<>4/);assert.match(migration,/third_reauthorization_count<>1 OR third_reauthorization_consumed<>1/);assert.match(migration,/pe\.credential_version=current_credential_version/);assert.match(migration,/pe\.checked_at>latest_failure_at/);assert.match(migration,/latest\.reason IN \('source_refresh_failed','accounting_evidence_unavailable'\)/);assert.match(migration,/INSERT INTO xero_v1\.accounting_evidence_retry_authorizations/);assert.doesNotMatch(migration,/DELETE\s+FROM\s+xero_v1\.accounting_evidence_retry_authorizations/i);assert.doesNotMatch(verify,/AS\s+evidence_id|tenant_id|ciphertext|encrypted_dek|provider_status\s+AS|connection_id\s+AS/i);});

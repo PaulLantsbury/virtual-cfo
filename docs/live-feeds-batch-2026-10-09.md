@@ -21,7 +21,7 @@ The default-off provider test programme uses real fixed-origin transports, devel
 1. Restore the existing Xero read-only connection through the application; preserve tenant, mapping and evidence history.
 2. Deploy rolling Shopify worker configuration to the existing scheduled staging host, preserving the 02:00–02:15 London start guard and durable claims. Next genuine scheduled receipt must show the current scope.
 3. Review/install the exact Xero member amount-reader proposal and test ACL/isolation, then enable only the staging web reader. Configure the existing Xero worker current-period mode and daily schedule only after connection and exact-scope/mapping readiness pass.
-4. Review the dedicated generator ledger/access proposals and separate provider write consent. Never borrow the collector/reporting/bootstrap identity. Recurring Xero generation requires securely refreshed writer credentials.
+4. Review the dedicated generator ledger/access proposals and separate provider write consent. Never borrow the collector/reporting/bootstrap identity. Both providers have separately scoped unattended renewal adapters prepared; activation still requires consent and securely configured writer credentials.
 5. Verify provider receipt → collected candidate → independently reviewed coverage → supported financial result. A collection receipt or excluded test order cannot replace this acceptance.
 6. Keep the accepted synthetic dashboard baseline available; review each dashboard in detail after its own source-backed inputs work. Customer-friendly Xero mapping and fuller accounting/cash remain roadmap package 3.
 
@@ -35,3 +35,13 @@ The user requested a large multi-agent batch. Preparation, code and tests may be
 - Proposed trial: 12–25 October inclusive; six mutations per provider on 12,13,17,19,20,24 October at 18:00–18:14 London, hard stop 26 October. Shopify six GBP60 nominal test orders (no real charge, excluded from revenue). Xero six GBP10 draft invoices by default, or separately approved posted-demo invoices to exercise booked revenue; no VAT/payment/email/stock. Provider must verify the exact development/demo target before every write.
 
 These proposals are intentionally unapplied. Existing repository instructions exclude database migrations from standing publication approval. No manual SQL, account keys or secret values are required in chat.
+
+## Publication and deployment boundary
+
+Code and proposals published to approved development branch at `6d03ffe4c05d5644ecb738c56126f23caf0e5e4d`. Sixteen provider tests pass, including encrypted rotation, unknown outcomes, role isolation, posted-mode gates, forged plan rejection and fresh Shopify writer scopes. Nineteen accounting API/period tests and thirteen member/readiness database tests pass; frontend typecheck and frontend/API builds pass. Existing Vite sourcemap/chunk warnings remain non-fatal.
+
+Existing Replit staging workspace now contains the six rolling runtime/diagnostic files, passes the import/scheduling smoke, and passes the read-only explicit rolling configuration check. Editor fixed-date keys are preserved as RETIRED_REPORT_FROM/TO; rolling scope is prepared in editor configuration. The published worker still retains its original fixed-date deployment settings. Automatic approval review rejected opening their edit control because Replit labels this separate staging host's settings as production app secrets. No published setting, schedule, run reservation or TLS protection was changed. Do not claim the rolling worker is live until the exact staging deployment settings and publication are approved and verified.
+
+Staging database proposals and generator credentials/schedules remain unapplied. No provider transaction was created by this batch. The Xero reconnect status correction is prepared but its RPC still needs installation; an old saved active connection in the browser is not a current-connectivity receipt.
+
+Staging website deployment `dep-db4hia942hec73bai3n0` is Live at the code revision above. Authenticated Profit Overview independently verified the unchanged September baseline: sales GBP960, gross profit GBP600, contribution GBP496, operating profit GBP466, EBITDA GBP472, 12 original orders, AOV GBP80. The new separate Xero section is present and withholds amounts while its member reader is default-off/uninstalled. Active store restored to Staging Synthetic Historical Store, Last Complete Month, for review. This is deployed UI verification, not live feed activation.

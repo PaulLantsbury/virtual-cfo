@@ -1,0 +1,3098 @@
+{
+  "views": [
+    {
+      "name": "v_current_cash_balance",
+      "options": [
+        "security_invoker=true"
+      ],
+      "definition": " SELECT store_id,\n    snapshot_date,\n    sum(cash_balance) AS total_cash_balance\n   FROM cash_balance_snapshots\n  WHERE snapshot_date = (( SELECT max(s2.snapshot_date) AS max\n           FROM cash_balance_snapshots s2\n          WHERE s2.store_id = cash_balance_snapshots.store_id))\n  GROUP BY store_id, snapshot_date;"
+    },
+    {
+      "name": "v_current_cost_assumptions",
+      "options": [
+        "security_invoker=true"
+      ],
+      "definition": " SELECT DISTINCT ON (store_id) id,\n    store_id,\n    payment_fee_rate,\n    fulfilment_cost_per_order,\n    packaging_cost_per_order,\n    return_handling_rate,\n    effective_from,\n    created_at,\n    vat_rate\n   FROM store_cost_assumptions\n  WHERE effective_from <= CURRENT_DATE\n  ORDER BY store_id, effective_from DESC;"
+    },
+    {
+      "name": "v_month_on_month",
+      "options": [
+        "security_invoker=true"
+      ],
+      "definition": " SELECT cur.store_id,\n    cur.period_start,\n    cur.period_end,\n    cur.gross_revenue AS gross_revenue_cur,\n    cur.net_sales AS net_sales_cur,\n    cur.average_order_value AS aov_cur,\n    cur.refund_rate AS refund_rate_cur,\n    cur.discount_dependency AS discount_dep_cur,\n    cur.repeat_purchase_rate AS rpr_cur,\n    cur.contribution_margin_pct AS cm_pct_cur,\n    cur.operating_profit AS op_profit_cur,\n    cur.fixed_overhead_actual AS overhead_cur,\n    prv.gross_revenue AS gross_revenue_prv,\n    prv.net_sales AS net_sales_prv,\n    prv.average_order_value AS aov_prv,\n    prv.refund_rate AS refund_rate_prv,\n    prv.discount_dependency AS discount_dep_prv,\n    prv.repeat_purchase_rate AS rpr_prv,\n    prv.contribution_margin_pct AS cm_pct_prv,\n    prv.operating_profit AS op_profit_prv,\n    prv.fixed_overhead_actual AS overhead_prv,\n    round((cur.gross_revenue - prv.gross_revenue) / NULLIF(abs(prv.gross_revenue), 0::numeric) * 100::numeric, 1) AS gross_revenue_delta_pct,\n    round((cur.net_sales - prv.net_sales) / NULLIF(abs(prv.net_sales), 0::numeric) * 100::numeric, 1) AS net_sales_delta_pct,\n    round((cur.average_order_value - prv.average_order_value) / NULLIF(abs(prv.average_order_value), 0::numeric) * 100::numeric, 1) AS aov_delta_pct,\n    round((cur.operating_profit - prv.operating_profit) / NULLIF(abs(prv.operating_profit), 0::numeric) * 100::numeric, 1) AS op_profit_delta_pct,\n    round((cur.fixed_overhead_actual - prv.fixed_overhead_actual) / NULLIF(abs(prv.fixed_overhead_actual), 0::numeric) * 100::numeric, 1) AS overhead_delta_pct,\n    round((cur.refund_rate - prv.refund_rate) * 100::numeric, 2) AS refund_rate_delta_pp,\n    round((cur.discount_dependency - prv.discount_dependency) * 100::numeric, 2) AS discount_dep_delta_pp,\n    round((cur.repeat_purchase_rate - prv.repeat_purchase_rate) * 100::numeric, 1) AS rpr_delta_pp,\n    round((cur.contribution_margin_pct - prv.contribution_margin_pct) * 100::numeric, 2) AS cm_pct_delta_pp\n   FROM v_monthly_metrics cur\n     LEFT JOIN v_monthly_metrics prv ON prv.store_id = cur.store_id AND prv.period_start = (cur.period_start - '1 mon'::interval)::date;"
+    },
+    {
+      "name": "v_monthly_metrics",
+      "options": [
+        "security_invoker=true"
+      ],
+      "definition": " WITH months AS (\n         SELECT generate_series('2026-01-01'::date::timestamp with time zone, '2026-06-01'::date::timestamp with time zone, '1 mon'::interval)::date AS month_start\n        ), stores_list AS (\n         SELECT stores.id AS store_id\n           FROM stores\n        )\n SELECT s.store_id,\n    m.month_start AS period_start,\n    (m.month_start + '1 mon'::interval)::date - 1 AS period_end,\n    gross_revenue(s.store_id, m.month_start, (m.month_start + '1 mon'::interval)::date - 1) AS gross_revenue,\n    net_sales(s.store_id, m.month_start, (m.month_start + '1 mon'::interval)::date - 1) AS net_sales,\n    average_order_value(s.store_id, m.month_start, (m.month_start + '1 mon'::interval)::date - 1) AS average_order_value,\n    refund_rate(s.store_id, m.month_start, (m.month_start + '1 mon'::interval)::date - 1) AS refund_rate,\n    discount_dependency(s.store_id, m.month_start, (m.month_start + '1 mon'::interval)::date - 1) AS discount_dependency,\n    repeat_purchase_rate(s.store_id, m.month_start, (m.month_start + '1 mon'::interval)::date - 1) AS repeat_purchase_rate,\n    contribution_margin_pct(s.store_id, m.month_start, (m.month_start + '1 mon'::interval)::date - 1) AS contribution_margin_pct,\n    operating_profit_monthly(s.store_id, m.month_start, (m.month_start + '1 mon'::interval)::date - 1) AS operating_profit,\n    monthly_overhead_total(s.store_id, m.month_start, (m.month_start + '1 mon'::interval)::date - 1, 'actual'::text) AS fixed_overhead_actual\n   FROM months m\n     CROSS JOIN stores_list s;"
+    },
+    {
+      "name": "v_monthly_overhead_summary",
+      "options": [
+        "security_invoker=true"
+      ],
+      "definition": " SELECT oe.store_id,\n    oc.category_type,\n    oc.name AS category_name,\n    oe.period_start,\n    oe.period_end,\n    oe.entry_type,\n    oe.is_recurring,\n    sum(oe.amount) AS total_amount,\n    count(*) AS entry_count\n   FROM overhead_entries oe\n     JOIN overhead_categories oc ON oc.id = oe.category_id AND oc.is_active = true\n  GROUP BY oe.store_id, oc.category_type, oc.name, oe.period_start, oe.period_end, oe.entry_type, oe.is_recurring;"
+    }
+  ],
+  "ledger": [
+    "20260429000000",
+    "20260429000001",
+    "20260429000002",
+    "20260429000003",
+    "20260429000004",
+    "20260429000005",
+    "20260430000000",
+    "20260430000001",
+    "20260430000002",
+    "20260430000003",
+    "20260430000004",
+    "20260430000005",
+    "20260430000006",
+    "20260430000007",
+    "20260430000008",
+    "20260430000009",
+    "20260430000010",
+    "20260430000011",
+    "20260430000012",
+    "20260430000013",
+    "20260430000014",
+    "20260430000015",
+    "20260501000016",
+    "20260501000017",
+    "20260502000018"
+  ],
+  "tables": [
+    {
+      "rls": true,
+      "name": "cac_trend_snapshots",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "channel",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "snapshot_date",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "cac",
+          "type": "numeric(10,2)",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "trailing_30d_cac",
+          "type": "numeric(10,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "trailing_90d_cac",
+          "type": "numeric(10,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "mom_change_pct",
+          "type": "numeric(8,4)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "attributed_new_customers",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "spend",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "calculation_version",
+          "type": "text",
+          "default": "'v1'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "cash_balance_snapshots",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "snapshot_date",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "cash_balance",
+          "type": "numeric(14,2)",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "account_key",
+          "type": "text",
+          "default": "'main'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "account_display_name",
+          "type": "text",
+          "default": "'Main Account'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "currency_code",
+          "type": "text",
+          "default": "'GBP'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "default": "'manual'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "external_ref",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "cfo_alerts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "alert_type",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "severity",
+          "type": "text",
+          "default": "'warning'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "body",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "is_read",
+          "type": "boolean",
+          "default": "false",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "channel_opportunity_scores",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "channel",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "assessed_at",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "opportunity_type",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "score",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "estimated_uplift_low",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "estimated_uplift_high",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "rationale",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'active'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "calculation_version",
+          "type": "text",
+          "default": "'v1'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "customers",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shopify_customer_id",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "first_name",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "last_name",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "first_order_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "total_orders",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "is_guest",
+          "type": "boolean",
+          "default": "false",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "discount_codes",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "discount_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "usage_count",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "discounts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shopify_price_rule_id",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "value_type",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "value",
+          "type": "numeric(10,4)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "marketing_blended_monthly",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "period_start",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "period_end",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "total_spend",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "overhead_content_spend",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "total_attributed_revenue",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "total_attributed_orders",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "total_new_customers",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "blended_cac",
+          "type": "numeric(10,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "blended_roas",
+          "type": "numeric(10,4)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "blended_mer",
+          "type": "numeric(10,4)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "blended_contribution_margin_pct",
+          "type": "numeric(8,4)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "total_contribution_profit",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "total_attributed_net_sales",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "calculation_version",
+          "type": "text",
+          "default": "'v1'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "marketing_channel_daily_metrics",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "channel",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "metric_date",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "spend",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "impressions",
+          "type": "bigint",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "clicks",
+          "type": "bigint",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "sessions",
+          "type": "bigint",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "attributed_orders",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "attributed_new_customers",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "attributed_gross_sales",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "discount_impact",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "returns_impact",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shipping_subsidy_impact",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "data_source",
+          "type": "text",
+          "default": "'estimated'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "marketing_channel_monthly_snapshots",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "channel",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "period_start",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "period_end",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "spend",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "impressions",
+          "type": "bigint",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "clicks",
+          "type": "bigint",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "sessions",
+          "type": "bigint",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "attributed_orders",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "attributed_new_customers",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "attributed_gross_sales",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "discount_impact",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "returns_impact",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shipping_subsidy_impact",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "attributed_net_sales",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "contribution_profit",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "contribution_margin_pct",
+          "type": "numeric(8,4)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "cac",
+          "type": "numeric(10,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "roas",
+          "type": "numeric(10,4)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "mer",
+          "type": "numeric(10,4)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "cac_payback_orders",
+          "type": "numeric(8,4)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "opportunity_score",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "data_freshness",
+          "type": "text",
+          "default": "'estimated'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "calculation_version",
+          "type": "text",
+          "default": "'v1'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "opportunities",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "impact_low",
+          "type": "numeric(14,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "impact_high",
+          "type": "numeric(14,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "priority",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'open'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "confidence",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "effort",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "timing",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "implementation_type",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "recommended_action",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "linked_page",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "linked_page_label",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "impact_type",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "order_line_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "product_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "variant_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shopify_line_item_id",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "price",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "discount",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "total",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "orders",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shopify_order_id",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "customer_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "order_number",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "order_date",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "currency",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "gross_sales",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "discounts",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "refunds",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "net_sales",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "tax",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shipping",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "total_sales",
+          "type": "numeric(12,2)",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "financial_status",
+          "type": "text",
+          "default": "'paid'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "discount_codes",
+          "type": "jsonb",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "is_guest_checkout",
+          "type": "boolean",
+          "default": "(customer_id IS NULL)",
+          "not_null": false,
+          "generated": "s",
+          "identity": ""
+        },
+        {
+          "name": "has_discount",
+          "type": "boolean",
+          "default": "(discounts > (0)::numeric)",
+          "not_null": false,
+          "generated": "s",
+          "identity": ""
+        },
+        {
+          "name": "is_cancelled",
+          "type": "boolean",
+          "default": "(financial_status = 'cancelled'::text)",
+          "not_null": false,
+          "generated": "s",
+          "identity": ""
+        },
+        {
+          "name": "refund_ex_vat",
+          "type": "numeric",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "refund_tax",
+          "type": "numeric",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "overhead_categories",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "category_type",
+          "type": "text",
+          "default": "'other'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "is_fixed",
+          "type": "boolean",
+          "default": "true",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "external_account_code",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "sort_order",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "overhead_entries",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "category_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "period_start",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "period_end",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "amount",
+          "type": "numeric(14,2)",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "currency_code",
+          "type": "text",
+          "default": "'GBP'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "entry_type",
+          "type": "text",
+          "default": "'actual'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "is_recurring",
+          "type": "boolean",
+          "default": "true",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "default": "'manual'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "external_ref",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "product_variants",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shopify_variant_id",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "product_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "sku",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "price",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "compare_at_price",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "cost",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "inventory_quantity",
+          "type": "integer",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "cost_populated",
+          "type": "boolean",
+          "default": "(cost IS NOT NULL)",
+          "not_null": false,
+          "generated": "s",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "products",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shopify_product_id",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "product_type",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "vendor",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "refund_line_items",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "refund_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "order_line_item_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "subtotal",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "refunds",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "order_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shopify_refund_id",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "refund_date",
+          "type": "timestamp with time zone",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "amount",
+          "type": "numeric(12,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "reason",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "store_cost_assumptions",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "payment_fee_rate",
+          "type": "numeric(8,5)",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "fulfilment_cost_per_order",
+          "type": "numeric(10,2)",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "packaging_cost_per_order",
+          "type": "numeric(10,2)",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "return_handling_rate",
+          "type": "numeric(8,5)",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "effective_from",
+          "type": "date",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "vat_rate",
+          "type": "numeric",
+          "default": "0.20",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shipping_cost_per_order",
+          "type": "numeric",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "marketing_spend_rate",
+          "type": "numeric",
+          "default": "0",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "store_settings",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "store_id",
+          "type": "uuid",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "cm_target_pct",
+          "type": "numeric(6,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "runway_warn_months",
+          "type": "numeric(6,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "repeat_rate_target_pct",
+          "type": "numeric(6,2)",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    },
+    {
+      "rls": true,
+      "name": "stores",
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shopify_domain",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "shopify_store_id",
+          "type": "text",
+          "default": null,
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "default": null,
+          "not_null": false,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "currency_code",
+          "type": "character(3)",
+          "default": "'GBP'::bpchar",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "timezone",
+          "type": "text",
+          "default": "'Europe/London'::text",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "is_active",
+          "type": "boolean",
+          "default": "true",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "not_null": true,
+          "generated": "",
+          "identity": ""
+        }
+      ],
+      "force_rls": false
+    }
+  ],
+  "indexes": [
+    {
+      "name": "idx_cash_balance_snapshots_store_date",
+      "definition": "CREATE INDEX idx_cash_balance_snapshots_store_date ON public.cash_balance_snapshots USING btree (store_id, snapshot_date DESC)"
+    },
+    {
+      "name": "idx_cfo_alerts_store_read",
+      "definition": "CREATE INDEX idx_cfo_alerts_store_read ON public.cfo_alerts USING btree (store_id, is_read, created_at DESC)"
+    },
+    {
+      "name": "idx_customers_store_first_order",
+      "definition": "CREATE INDEX idx_customers_store_first_order ON public.customers USING btree (store_id, first_order_at)"
+    },
+    {
+      "name": "idx_discount_codes_store_discount",
+      "definition": "CREATE INDEX idx_discount_codes_store_discount ON public.discount_codes USING btree (store_id, discount_id)"
+    },
+    {
+      "name": "idx_opportunities_store_status",
+      "definition": "CREATE INDEX idx_opportunities_store_status ON public.opportunities USING btree (store_id, status)"
+    },
+    {
+      "name": "idx_order_line_items_store_order",
+      "definition": "CREATE INDEX idx_order_line_items_store_order ON public.order_line_items USING btree (store_id, order_id)"
+    },
+    {
+      "name": "idx_orders_store_created",
+      "definition": "CREATE INDEX idx_orders_store_created ON public.orders USING btree (store_id, created_at)"
+    },
+    {
+      "name": "idx_orders_store_financial_status",
+      "definition": "CREATE INDEX idx_orders_store_financial_status ON public.orders USING btree (store_id, financial_status)"
+    },
+    {
+      "name": "idx_orders_store_updated",
+      "definition": "CREATE INDEX idx_orders_store_updated ON public.orders USING btree (store_id, updated_at)"
+    },
+    {
+      "name": "idx_overhead_entries_store_category_period",
+      "definition": "CREATE INDEX idx_overhead_entries_store_category_period ON public.overhead_entries USING btree (store_id, category_id, period_start)"
+    },
+    {
+      "name": "idx_overhead_entries_store_period_type",
+      "definition": "CREATE INDEX idx_overhead_entries_store_period_type ON public.overhead_entries USING btree (store_id, period_start, entry_type)"
+    },
+    {
+      "name": "idx_products_store_status",
+      "definition": "CREATE INDEX idx_products_store_status ON public.products USING btree (store_id, status)"
+    },
+    {
+      "name": "idx_refund_line_items_refund",
+      "definition": "CREATE INDEX idx_refund_line_items_refund ON public.refund_line_items USING btree (store_id, refund_id)"
+    },
+    {
+      "name": "idx_refunds_store_created",
+      "definition": "CREATE INDEX idx_refunds_store_created ON public.refunds USING btree (store_id, created_at)"
+    },
+    {
+      "name": "idx_refunds_store_order",
+      "definition": "CREATE INDEX idx_refunds_store_order ON public.refunds USING btree (store_id, order_id)"
+    }
+  ],
+  "policies": [],
+  "triggers": [],
+  "functions": [
+    {
+      "name": "average_order_value",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.average_order_value(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nSELECT COALESCE(\nSUM(\nCOALESCE(o.gross_sales, 0)\n- COALESCE(o.discounts, 0)\n- COALESCE(o.refunds, 0)\n- COALESCE(o.tax, 0)\n)\n/ NULLIF(\nCOUNT(*) FILTER (WHERE o.financial_status <> 'refunded'),\n0\n),\n0\n)\nFROM public.orders o\nWHERE o.store_id = p_store_id\nAND o.created_at::date BETWEEN p_date_from AND p_date_to\nAND o.financial_status <> 'cancelled';\n$function$\n"
+    },
+    {
+      "name": "blended_marketing_performance",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.blended_marketing_performance(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS TABLE(period_start date, period_end date, total_spend numeric, overhead_content_spend numeric, total_attributed_revenue numeric, total_attributed_orders integer, total_new_customers integer, blended_cac numeric, blended_roas numeric, blended_mer numeric, blended_contribution_margin_pct numeric, total_contribution_profit numeric, total_attributed_net_sales numeric, calculation_version text)\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT\n    b.period_start, b.period_end, b.total_spend, b.overhead_content_spend,\n    b.total_attributed_revenue, b.total_attributed_orders, b.total_new_customers,\n    b.blended_cac, b.blended_roas, b.blended_mer,\n    b.blended_contribution_margin_pct, b.total_contribution_profit,\n    b.total_attributed_net_sales, b.calculation_version\n  FROM public.marketing_blended_monthly b\n  WHERE b.store_id    = p_store_id\n    AND b.period_start >= p_date_from\n    AND b.period_end   <= p_date_to\n  ORDER BY b.period_start DESC\n  LIMIT 1;\n$function$\n"
+    },
+    {
+      "name": "cac_trend_by_channel",
+      "arguments": "p_store_id uuid, p_up_to_date date, p_months_back integer",
+      "definition": "CREATE OR REPLACE FUNCTION public.cac_trend_by_channel(p_store_id uuid, p_up_to_date date DEFAULT CURRENT_DATE, p_months_back integer DEFAULT 6)\n RETURNS TABLE(channel text, snapshot_date date, cac numeric, trailing_30d_cac numeric, trailing_90d_cac numeric, mom_change_pct numeric, attributed_new_customers integer, spend numeric, calculation_version text)\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT\n    c.channel, c.snapshot_date, c.cac, c.trailing_30d_cac, c.trailing_90d_cac,\n    c.mom_change_pct, c.attributed_new_customers, c.spend, c.calculation_version\n  FROM public.cac_trend_snapshots c\n  WHERE c.store_id      = p_store_id\n    AND c.snapshot_date <= p_up_to_date\n    AND c.snapshot_date >= (p_up_to_date - (p_months_back || ' months')::interval)::date\n  ORDER BY c.channel ASC, c.snapshot_date ASC;\n$function$\n"
+    },
+    {
+      "name": "cash_runway_months",
+      "arguments": "p_store_id uuid",
+      "definition": "CREATE OR REPLACE FUNCTION public.cash_runway_months(p_store_id uuid)\n RETURNS numeric\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_total_cash    numeric;\n  v_monthly_fixed numeric;\n  v_period_from   date;\n  v_period_to     date;\nBEGIN\n  -- Step 1: aggregate cash balance across all accounts at the latest snapshot\n  SELECT SUM(cash_balance)\n  INTO   v_total_cash\n  FROM   public.cash_balance_snapshots\n  WHERE  store_id      = p_store_id\n    AND  snapshot_date = (\n           SELECT MAX(s2.snapshot_date)\n           FROM   public.cash_balance_snapshots s2\n           WHERE  s2.store_id = p_store_id\n         );\n\n  -- Return NULL if no snapshot exists for this store\n  IF v_total_cash IS NULL THEN\n    RETURN NULL;\n  END IF;\n\n  -- Step 2: current calendar month bounds\n  v_period_from := date_trunc('month', CURRENT_DATE)::date;\n  v_period_to   := (date_trunc('month', CURRENT_DATE) + interval '1 month')::date - 1;\n\n  -- Step 3: actual overhead total for the current month\n  v_monthly_fixed := public.monthly_overhead_total(\n    p_store_id,\n    v_period_from,\n    v_period_to,\n    'actual'\n  );\n\n  -- Step 4: runway in months (NULLIF guards against zero denominator)\n  RETURN v_total_cash / NULLIF(v_monthly_fixed, 0);\nEND;\n$function$\n"
+    },
+    {
+      "name": "cfo_alerts",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.cfo_alerts(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS TABLE(alert_key text, severity text, metric text, current_val numeric, threshold numeric, triggered boolean)\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  -- \u2500\u2500 Named threshold constants \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  c_revenue_decline_pct     constant numeric :=  -5.0;\n  c_margin_fall_pp          constant numeric :=  -0.5;\n  c_margin_critical_floor   constant numeric :=  70.0;   -- percent (cm_pct \u00d7 100)\n  c_refund_rise_pp          constant numeric :=   0.5;\n  c_refund_critical_floor   constant numeric :=   8.0;   -- percent (refund_rate \u00d7 100)\n  c_discount_rise_pp        constant numeric :=   1.0;\n  c_discount_critical_floor constant numeric :=  15.0;   -- percent (discount_dep \u00d7 100)\n  c_overhead_outpace_gap    constant numeric :=   5.0;   -- percentage-point gap\n  c_profit_deteriorate_pct  constant numeric := -10.0;\n  c_runway_low_months       constant numeric :=   1.0;\n  c_runway_tighten_months   constant numeric :=   2.0;\n  c_runway_decline_months   constant numeric :=  -0.25;\n\n  -- \u2500\u2500 Delta row from month_on_month_delta() \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  r  record;\nBEGIN\n  -- Single call to month_on_month_delta \u2014 all 13 rules share this fetch\n  SELECT * INTO r\n  FROM public.month_on_month_delta(p_store_id, p_date_from, p_date_to);\n\n  IF NOT FOUND THEN\n    RETURN; -- no data for this period \u2014 return empty set\n  END IF;\n\n  RETURN QUERY\n\n  -- \u2500\u2500 1. revenue_declining \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'revenue_declining'::text,\n    'warning'::text,\n    'gross_revenue'::text,\n    r.gross_revenue_delta_pct,\n    c_revenue_decline_pct::numeric,\n    (r.gross_revenue_delta_pct IS NOT NULL\n     AND r.gross_revenue_delta_pct < c_revenue_decline_pct)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 2. revenue_stall (growth between decline threshold and 0%) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'revenue_stall',\n    'info',\n    'gross_revenue',\n    r.gross_revenue_delta_pct,\n    0.0,\n    (r.gross_revenue_delta_pct IS NOT NULL\n     AND r.gross_revenue_delta_pct >= c_revenue_decline_pct\n     AND r.gross_revenue_delta_pct <= 0.0)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 3. margin_falling (cm pp delta below warning threshold) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'margin_falling',\n    'warning',\n    'contribution_margin_pct',\n    r.cm_pct_delta_pp,\n    c_margin_fall_pp::numeric,\n    (r.cm_pct_delta_pp IS NOT NULL\n     AND r.cm_pct_delta_pp < c_margin_fall_pp)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 4. margin_critical (absolute cm below 70% floor) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'margin_critical',\n    'critical',\n    'contribution_margin_pct',\n    ROUND(r.cm_pct_cur * 100, 2),\n    c_margin_critical_floor::numeric,\n    (r.cm_pct_cur IS NOT NULL\n     AND r.cm_pct_cur * 100 < c_margin_critical_floor)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 5. refunds_rising (refund rate pp delta above warning threshold) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'refunds_rising',\n    'warning',\n    'refund_rate',\n    r.refund_rate_delta_pp,\n    c_refund_rise_pp::numeric,\n    (r.refund_rate_delta_pp IS NOT NULL\n     AND r.refund_rate_delta_pp > c_refund_rise_pp)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 6. refunds_critical (absolute refund rate above 8% floor) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'refunds_critical',\n    'critical',\n    'refund_rate',\n    ROUND(r.refund_rate_cur * 100, 2),\n    c_refund_critical_floor::numeric,\n    (r.refund_rate_cur IS NOT NULL\n     AND r.refund_rate_cur * 100 > c_refund_critical_floor)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 7. discounts_rising (discount dep pp delta above warning threshold) \u2500\u2500\u2500\u2500\n  SELECT\n    'discounts_rising',\n    'warning',\n    'discount_dependency',\n    r.discount_dep_delta_pp,\n    c_discount_rise_pp::numeric,\n    (r.discount_dep_delta_pp IS NOT NULL\n     AND r.discount_dep_delta_pp > c_discount_rise_pp)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 8. discounts_critical (absolute discount dep above 15% floor) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'discounts_critical',\n    'critical',\n    'discount_dependency',\n    ROUND(r.discount_dep_cur * 100, 2),\n    c_discount_critical_floor::numeric,\n    (r.discount_dep_cur IS NOT NULL\n     AND r.discount_dep_cur * 100 > c_discount_critical_floor)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 9. overhead_outpacing_revenue \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  -- Overhead is growing faster than revenue by more than the gap threshold.\n  -- current_val = (overhead_delta_pct \u2212 gross_revenue_delta_pct).\n  SELECT\n    'overhead_outpacing_revenue',\n    'warning',\n    'fixed_overhead_actual',\n    ROUND(COALESCE(r.overhead_delta_pct, 0) - COALESCE(r.gross_revenue_delta_pct, 0), 1),\n    c_overhead_outpace_gap::numeric,\n    (r.overhead_delta_pct IS NOT NULL\n     AND r.gross_revenue_delta_pct IS NOT NULL\n     AND (r.overhead_delta_pct - r.gross_revenue_delta_pct) > c_overhead_outpace_gap)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 10. profit_deteriorating (op_profit delta worse than \u221210%) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'profit_deteriorating',\n    'warning',\n    'operating_profit',\n    r.op_profit_delta_pct,\n    c_profit_deteriorate_pct::numeric,\n    (r.op_profit_delta_pct IS NOT NULL\n     AND r.op_profit_delta_pct < c_profit_deteriorate_pct)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 11. runway_low (cash runway below 1.0-month critical floor) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'runway_low',\n    'critical',\n    'cash_runway_months',\n    r.runway_cur,\n    c_runway_low_months::numeric,\n    (r.runway_cur IS NOT NULL\n     AND r.runway_cur < c_runway_low_months)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 12. runway_tightening (runway in the 1.0\u20132.0 month warning band) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'runway_tightening',\n    'warning',\n    'cash_runway_months',\n    r.runway_cur,\n    c_runway_tighten_months::numeric,\n    (r.runway_cur IS NOT NULL\n     AND r.runway_cur >= c_runway_low_months\n     AND r.runway_cur < c_runway_tighten_months)::boolean\n\n  UNION ALL\n\n  -- \u2500\u2500 13. runway_declining (runway shrinking by > 0.25 months MoM) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT\n    'runway_declining',\n    'info',\n    'cash_runway_months',\n    r.runway_delta_months,\n    c_runway_decline_months::numeric,\n    (r.runway_delta_months IS NOT NULL\n     AND r.runway_delta_months < c_runway_decline_months)::boolean;\n\nEND;\n$function$\n"
+    },
+    {
+      "name": "channel_metrics_monthly",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.channel_metrics_monthly(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS TABLE(channel text, period_start date, period_end date, spend numeric, impressions bigint, clicks bigint, sessions bigint, attributed_orders integer, attributed_new_customers integer, attributed_gross_sales numeric, discount_impact numeric, returns_impact numeric, shipping_subsidy_impact numeric, attributed_net_sales numeric, contribution_profit numeric, contribution_margin_pct numeric, cac numeric, roas numeric, mer numeric, cac_payback_orders numeric, opportunity_score integer, data_freshness text, calculation_version text)\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT\n    s.channel, s.period_start, s.period_end, s.spend, s.impressions,\n    s.clicks, s.sessions, s.attributed_orders, s.attributed_new_customers,\n    s.attributed_gross_sales, s.discount_impact, s.returns_impact,\n    s.shipping_subsidy_impact, s.attributed_net_sales, s.contribution_profit,\n    s.contribution_margin_pct, s.cac, s.roas, s.mer, s.cac_payback_orders,\n    s.opportunity_score, s.data_freshness, s.calculation_version\n  FROM public.marketing_channel_monthly_snapshots s\n  WHERE s.store_id    = p_store_id\n    AND s.period_start >= p_date_from\n    AND s.period_end   <= p_date_to\n  ORDER BY s.opportunity_score DESC, s.spend DESC;\n$function$\n"
+    },
+    {
+      "name": "channel_opportunities_active",
+      "arguments": "p_store_id uuid",
+      "definition": "CREATE OR REPLACE FUNCTION public.channel_opportunities_active(p_store_id uuid)\n RETURNS TABLE(channel text, assessed_at date, opportunity_type text, score integer, estimated_uplift_low numeric, estimated_uplift_high numeric, rationale text, status text, calculation_version text)\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT\n    c.channel, c.assessed_at, c.opportunity_type, c.score,\n    c.estimated_uplift_low, c.estimated_uplift_high,\n    c.rationale, c.status, c.calculation_version\n  FROM public.channel_opportunity_scores c\n  WHERE c.store_id = p_store_id\n    AND c.status   = 'active'\n  ORDER BY c.score DESC;\n$function$\n"
+    },
+    {
+      "name": "contribution_margin_pct",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.contribution_margin_pct(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_payment_fee_rate        numeric;\n  v_fulfilment_cost_per_ord numeric;\n  v_packaging_cost_per_ord  numeric;\n  v_return_handling_rate    numeric;\n  v_shipping_cost_per_ord   numeric;\n  v_marketing_spend_rate    numeric;\n  v_net_sales               numeric;\n  v_gross_revenue           numeric;\n  v_order_count             bigint;\n  v_return_amount           numeric;\nBEGIN\n  -- Most recent cost assumptions effective at or before the period start.\n  -- ORDER BY is required: multiple rows may exist per store (e.g. annual reviews).\n  -- effective_from <= p_date_from ensures future-dated rows are excluded from\n  -- historical period calculations.\n  SELECT payment_fee_rate,\n         fulfilment_cost_per_order,\n         packaging_cost_per_order,\n         return_handling_rate,\n         shipping_cost_per_order,\n         marketing_spend_rate\n  INTO   v_payment_fee_rate,\n         v_fulfilment_cost_per_ord,\n         v_packaging_cost_per_ord,\n         v_return_handling_rate,\n         v_shipping_cost_per_ord,\n         v_marketing_spend_rate\n  FROM   public.store_cost_assumptions\n  WHERE  store_id       = p_store_id\n    AND  effective_from <= p_date_from\n  ORDER  BY effective_from DESC\n  LIMIT  1;\n\n  -- NULL signals \"store not configured\" \u2014 frontend falls back to commerceMetrics.\n  -- Distinct from 0 which means \"configured but no orders in period\".\n  IF NOT FOUND THEN RETURN NULL; END IF;\n\n  -- Delegate to existing Phase 1 helper functions for consistency.\n  -- These functions each use COALESCE(..., 0) so they never return NULL.\n  v_net_sales     := public.net_sales(p_store_id, p_date_from, p_date_to);\n  v_gross_revenue := public.gross_revenue(p_store_id, p_date_from, p_date_to);\n  v_order_count   := public.order_count(p_store_id, p_date_from, p_date_to);\n  v_return_amount := public.return_amount(p_store_id, p_date_from, p_date_to);\n\n  -- Return 0 when no orders in the period.\n  -- Distinct from NULL (\"not configured\") \u2014 caller should treat 0 as\n  -- \"data exists but period is empty\" and show the static fallback value.\n  IF v_net_sales = 0 THEN RETURN 0; END IF;\n\n  -- Full six-component variable cost formula.\n  --\n  --   CM = (net_sales\n  --         \u2212 payment_fees     [net_sales    \u00d7 payment_fee_rate]\n  --         \u2212 fulfilment       [order_count  \u00d7 fulfilment_cost_per_order]\n  --         \u2212 packaging        [order_count  \u00d7 packaging_cost_per_order]\n  --         \u2212 shipping         [order_count  \u00d7 shipping_cost_per_order]\n  --         \u2212 return_handling  [return_amount \u00d7 return_handling_rate]\n  --         \u2212 marketing_spend  [gross_revenue \u00d7 marketing_spend_rate]\n  --        ) / net_sales\n  --\n  -- Denominator: net_sales (after discounts and refunds, excluding VAT).\n  -- VAT is NOT deducted \u2014 it is already excluded from net_sales.\n  --\n  -- gross_revenue is used only for the marketing deduction: performance\n  -- marketing spend scales with revenue, not order count.\n  --\n  -- shipping_cost_per_order and marketing_spend_rate default to 0 for stores\n  -- that have not yet been configured, preserving backward compatibility.\n  RETURN ROUND(\n    (\n        v_net_sales\n      - (v_net_sales     * v_payment_fee_rate)\n      - (v_order_count   * v_fulfilment_cost_per_ord)\n      - (v_order_count   * v_packaging_cost_per_ord)\n      - (v_order_count   * v_shipping_cost_per_ord)\n      - (v_return_amount * v_return_handling_rate)\n      - (v_gross_revenue * v_marketing_spend_rate)\n    ) / v_net_sales,\n    4\n  );\nEND;\n$function$\n"
+    },
+    {
+      "name": "discount_cost",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.discount_cost(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT COALESCE(SUM(discounts), 0) FROM public.orders\n  WHERE store_id = p_store_id AND created_at::date BETWEEN p_date_from AND p_date_to\n    AND financial_status <> 'cancelled';\n$function$\n"
+    },
+    {
+      "name": "discount_dependency",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.discount_dependency(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT COALESCE(SUM(discounts) / NULLIF(SUM(gross_sales), 0), 0) FROM public.orders\n  WHERE store_id = p_store_id AND created_at::date BETWEEN p_date_from AND p_date_to\n    AND financial_status <> 'cancelled';\n$function$\n"
+    },
+    {
+      "name": "get_marketing_spend_rate",
+      "arguments": "p_store_id uuid, p_date_from date",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_marketing_spend_rate(p_store_id uuid, p_date_from date DEFAULT CURRENT_DATE)\n RETURNS numeric\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_caller_store text;\n  v_rate         numeric;\nBEGIN\n  -- \u2500\u2500 Tenant isolation guard \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  -- Read app.current_store_id from the caller's JWT claim (set by Supabase's\n  -- RLS infrastructure).  Raise an error if it does not match p_store_id.\n  -- When the setting is absent or empty (service_role / admin calls), skip\n  -- the check \u2014 consistent with all other Phase 1 SECURITY DEFINER functions.\n  v_caller_store := current_setting('app.current_store_id', true);\n  IF v_caller_store IS NOT NULL\n     AND v_caller_store <> ''\n     AND v_caller_store::uuid <> p_store_id\n  THEN\n    RAISE EXCEPTION 'Unauthorized: caller store_id does not match requested store_id';\n  END IF;\n\n  -- \u2500\u2500 Data fetch \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT marketing_spend_rate\n  INTO   v_rate\n  FROM   public.store_cost_assumptions\n  WHERE  store_id       = p_store_id\n    AND  effective_from <= p_date_from\n  ORDER  BY effective_from DESC\n  LIMIT  1;\n\n  -- NULL when store not configured \u2014 caller falls back to static constant.\n  IF NOT FOUND THEN RETURN NULL; END IF;\n\n  RETURN v_rate;\nEND;\n$function$\n"
+    },
+    {
+      "name": "gross_revenue",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.gross_revenue(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT COALESCE(SUM(gross_sales), 0) FROM public.orders\n  WHERE store_id = p_store_id AND created_at::date BETWEEN p_date_from AND p_date_to\n    AND financial_status <> 'cancelled';\n$function$\n"
+    },
+    {
+      "name": "month_on_month_delta",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.month_on_month_delta(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS TABLE(gross_revenue_cur numeric, gross_revenue_prv numeric, gross_revenue_delta_pct numeric, net_sales_cur numeric, net_sales_prv numeric, net_sales_delta_pct numeric, aov_cur numeric, aov_prv numeric, aov_delta_pct numeric, refund_rate_cur numeric, refund_rate_prv numeric, refund_rate_delta_pp numeric, discount_dep_cur numeric, discount_dep_prv numeric, discount_dep_delta_pp numeric, rpr_cur numeric, rpr_prv numeric, rpr_delta_pp numeric, cm_pct_cur numeric, cm_pct_prv numeric, cm_pct_delta_pp numeric, op_profit_cur numeric, op_profit_prv numeric, op_profit_delta_pct numeric, overhead_cur numeric, overhead_prv numeric, overhead_delta_pct numeric, runway_cur numeric, runway_prv numeric, runway_delta_months numeric)\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_row        record;\n  v_prior_from date;\n  v_prior_to   date;\n  v_prior_cash numeric;\n  v_prior_ovhd numeric;\n  v_runway_cur numeric;\n  v_runway_prv numeric;\nBEGIN\n  -- \u2500\u2500 1. Load the delta row from the view \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  SELECT *\n  INTO   v_row\n  FROM   public.v_month_on_month\n  WHERE  store_id     = p_store_id\n    AND  period_start = p_date_from;\n\n  IF NOT FOUND THEN\n    RETURN; -- empty result set \u2014 caller receives zero rows\n  END IF;\n\n  -- \u2500\u2500 2. Current runway (live, always reads CURRENT_DATE snapshot) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  v_runway_cur := public.cash_runway_months(p_store_id);\n\n  -- \u2500\u2500 3. Prior-month runway: cash at end of prior month / prior overhead \u2500\u2500\u2500\u2500\u2500\u2500\n  v_prior_from := date_trunc('month', p_date_from - interval '1 month')::date;\n  v_prior_to   := (v_prior_from + interval '1 month')::date - 1;\n\n  -- Most recent snapshot on or before the last day of the prior month\n  SELECT COALESCE(SUM(s.cash_balance), 0)\n  INTO   v_prior_cash\n  FROM   public.cash_balance_snapshots s\n  WHERE  s.store_id     = p_store_id\n    AND  s.snapshot_date = (\n           SELECT MAX(s2.snapshot_date)\n           FROM   public.cash_balance_snapshots s2\n           WHERE  s2.store_id     = p_store_id\n             AND  s2.snapshot_date <= v_prior_to\n         );\n\n  v_prior_ovhd := public.monthly_overhead_total(\n    p_store_id, v_prior_from, v_prior_to, 'actual'\n  );\n\n  v_runway_prv := v_prior_cash / NULLIF(v_prior_ovhd, 0);\n\n  -- \u2500\u2500 4. Return the combined row \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  RETURN QUERY\n  SELECT\n    v_row.gross_revenue_cur,\n    v_row.gross_revenue_prv,\n    v_row.gross_revenue_delta_pct,\n    v_row.net_sales_cur,\n    v_row.net_sales_prv,\n    v_row.net_sales_delta_pct,\n    v_row.aov_cur,\n    v_row.aov_prv,\n    v_row.aov_delta_pct,\n    v_row.refund_rate_cur,\n    v_row.refund_rate_prv,\n    v_row.refund_rate_delta_pp,\n    v_row.discount_dep_cur,\n    v_row.discount_dep_prv,\n    v_row.discount_dep_delta_pp,\n    v_row.rpr_cur,\n    v_row.rpr_prv,\n    v_row.rpr_delta_pp,\n    v_row.cm_pct_cur,\n    v_row.cm_pct_prv,\n    v_row.cm_pct_delta_pp,\n    v_row.op_profit_cur,\n    v_row.op_profit_prv,\n    v_row.op_profit_delta_pct,\n    v_row.overhead_cur,\n    v_row.overhead_prv,\n    v_row.overhead_delta_pct,\n    v_runway_cur,\n    v_runway_prv,\n    v_runway_cur - v_runway_prv;\nEND;\n$function$\n"
+    },
+    {
+      "name": "monthly_overhead_total",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date, p_entry_type text",
+      "definition": "CREATE OR REPLACE FUNCTION public.monthly_overhead_total(p_store_id uuid, p_date_from date, p_date_to date, p_entry_type text DEFAULT 'actual'::text)\n RETURNS numeric\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_total numeric;\nBEGIN\n  SELECT COALESCE(SUM(oe.amount), 0)\n  INTO   v_total\n  FROM   public.overhead_entries    oe\n  JOIN   public.overhead_categories oc\n    ON   oc.id        = oe.category_id\n   AND   oc.is_active = true\n  WHERE  oe.store_id     = p_store_id\n    AND  oe.period_start >= p_date_from\n    AND  oe.period_end   <= p_date_to\n    AND  oe.entry_type   = p_entry_type;\n\n  RETURN v_total;\nEND;\n$function$\n"
+    },
+    {
+      "name": "net_sales",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.net_sales(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nSELECT COALESCE(\nSUM(\nCOALESCE(o.gross_sales, 0)\n- COALESCE(o.discounts, 0)\n- COALESCE(o.refunds, 0)\n- COALESCE(o.tax, 0)\n),\n0\n)\nFROM public.orders o\nWHERE o.store_id = p_store_id\nAND o.created_at::date BETWEEN p_date_from AND p_date_to\nAND o.financial_status <> 'cancelled';\n$function$\n"
+    },
+    {
+      "name": "operating_profit_monthly",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.operating_profit_monthly(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_cm_pct      numeric;\n  v_net_sales   numeric;\n  v_fixed_costs numeric;\nBEGIN\n  v_cm_pct := public.contribution_margin_pct(p_store_id, p_date_from, p_date_to);\n\n  IF v_cm_pct IS NULL THEN\n    RETURN NULL;\n  END IF;\n\n  v_net_sales := public.net_sales(p_store_id, p_date_from, p_date_to);\n\n  v_fixed_costs := public.monthly_overhead_total(\n    p_store_id,\n    p_date_from,\n    p_date_to,\n    'actual'\n  );\n\n  RETURN (v_net_sales * v_cm_pct) - v_fixed_costs;\nEND;\n$function$\n"
+    },
+    {
+      "name": "opportunity_breakdown",
+      "arguments": "p_store_id uuid",
+      "definition": "CREATE OR REPLACE FUNCTION public.opportunity_breakdown(p_store_id uuid)\n RETURNS TABLE(id uuid, title text, description text, category text, impact_low numeric, impact_high numeric, impact_mid numeric, priority integer, confidence text, effort text, timing text, implementation_type text, recommended_action text, linked_page text, linked_page_label text, impact_type text, created_at timestamp with time zone, updated_at timestamp with time zone)\n LANGUAGE sql\n STABLE\nAS $function$\n  SELECT\n    o.id,\n    o.title,\n    o.description,\n    o.category,\n    o.impact_low,\n    o.impact_high,\n    CASE\n      WHEN o.impact_low IS NOT NULL AND o.impact_high IS NOT NULL\n      THEN (o.impact_low + o.impact_high) / 2\n      ELSE NULL\n    END AS impact_mid,\n    o.priority,\n    o.confidence,\n    o.effort,\n    o.timing,\n    o.implementation_type,\n    o.recommended_action,\n    o.linked_page,\n    o.linked_page_label,\n    o.impact_type,\n    o.created_at,\n    o.updated_at\n  FROM public.opportunities o\n  WHERE o.store_id = p_store_id\n    AND COALESCE(o.status, '') <> 'archived'\n  ORDER BY\n    o.priority ASC NULLS LAST,\n    o.impact_high DESC NULLS LAST,\n    o.created_at ASC;\n$function$\n"
+    },
+    {
+      "name": "order_count",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.order_count(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS bigint\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT COUNT(*) FROM public.orders\n  WHERE store_id = p_store_id AND created_at::date BETWEEN p_date_from AND p_date_to\n    AND financial_status NOT IN ('cancelled','refunded');\n$function$\n"
+    },
+    {
+      "name": "recoverable_contribution_range",
+      "arguments": "p_store_id uuid",
+      "definition": "CREATE OR REPLACE FUNCTION public.recoverable_contribution_range(p_store_id uuid)\n RETURNS TABLE(recoverable_low numeric, recoverable_high numeric)\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT\n    COALESCE(SUM(impact_low),  0) AS recoverable_low,\n    COALESCE(SUM(impact_high), 0) AS recoverable_high\n  FROM opportunities\n  WHERE store_id = p_store_id\n    AND status   <> 'archived';\n$function$\n"
+    },
+    {
+      "name": "refund_rate",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.refund_rate(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT COALESCE(SUM(refunds) / NULLIF(SUM(gross_sales), 0), 0) FROM public.orders\n  WHERE store_id = p_store_id AND created_at::date BETWEEN p_date_from AND p_date_to\n    AND financial_status <> 'cancelled';\n$function$\n"
+    },
+    {
+      "name": "repeat_purchase_rate",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.repeat_purchase_rate(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  WITH period_customers AS (\n    SELECT o.customer_id, c.first_order_at\n    FROM   public.orders o\n    JOIN   public.customers c ON c.id = o.customer_id AND c.store_id = p_store_id\n    WHERE  o.store_id = p_store_id AND o.created_at::date BETWEEN p_date_from AND p_date_to\n      AND  o.financial_status <> 'cancelled' AND o.customer_id IS NOT NULL\n    GROUP  BY o.customer_id, c.first_order_at\n  )\n  SELECT COALESCE(\n    COUNT(*) FILTER (WHERE first_order_at < p_date_from::timestamptz)::numeric\n    / NULLIF(COUNT(*)::numeric, 0), 0)\n  FROM period_customers;\n$function$\n"
+    },
+    {
+      "name": "return_amount",
+      "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+      "definition": "CREATE OR REPLACE FUNCTION public.return_amount(p_store_id uuid, p_date_from date, p_date_to date)\n RETURNS numeric\n LANGUAGE sql\n STABLE\n SET search_path TO 'public', 'pg_temp'\nAS $function$\n  SELECT COALESCE(SUM(refund_ex_vat), 0)\n  FROM   orders\n  WHERE  store_id         = p_store_id\n    AND  created_at::date BETWEEN p_date_from AND p_date_to\n    AND  financial_status <> 'cancelled';\n$function$\n"
+    },
+    {
+      "name": "rolling_3m_averages",
+      "arguments": "p_store_id uuid, p_date_from date",
+      "definition": "CREATE OR REPLACE FUNCTION public.rolling_3m_averages(p_store_id uuid, p_date_from date)\n RETURNS TABLE(months_included integer, gross_revenue_3m_avg numeric, net_sales_3m_avg numeric, aov_3m_avg numeric, cm_pct_3m_avg numeric, fixed_overhead_3m_avg numeric, operating_profit_3m_avg numeric, runway_3m_avg numeric)\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_m0         date := p_date_from;\n  v_m1         date := (p_date_from - interval '1 month')::date;\n  v_m2         date := (p_date_from - interval '2 months')::date;\n  v_runway_avg numeric;\n  v_months_inc int;\nBEGIN\n  -- \u2500\u2500 Per-month runway (only for months with trading data) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  -- For each of T, T-1, T-2: compute (cash at month-end) / (monthly overhead).\n  -- The JOIN to v_monthly_metrics applies the gross_revenue > 0 filter so\n  -- the runway denominator matches the commerce metric denominator exactly.\n  SELECT\n    AVG(\n      (SELECT COALESCE(SUM(s.cash_balance), 0)\n       FROM   public.cash_balance_snapshots s\n       WHERE  s.store_id     = p_store_id\n         AND  s.snapshot_date = (\n                SELECT MAX(s2.snapshot_date)\n                FROM   public.cash_balance_snapshots s2\n                WHERE  s2.store_id     = p_store_id\n                  AND  s2.snapshot_date <= (m.month_start + interval '1 month')::date - 1\n              )\n      ) / NULLIF(\n        public.monthly_overhead_total(\n          p_store_id,\n          m.month_start,\n          (m.month_start + interval '1 month')::date - 1,\n          'actual'\n        ),\n        0\n      )\n    )\n  INTO v_runway_avg\n  FROM (VALUES (v_m0), (v_m1), (v_m2)) AS m(month_start)\n  -- Only include months that passed the gross_revenue > 0 filter\n  WHERE EXISTS (\n    SELECT 1\n    FROM   public.v_monthly_metrics mm\n    WHERE  mm.store_id     = p_store_id\n      AND  mm.period_start = m.month_start\n      AND  mm.gross_revenue > 0\n  );\n\n  -- \u2500\u2500 Commerce metric averages (gross_revenue > 0 months only) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  RETURN QUERY\n  SELECT\n    COUNT(*)::int                          AS months_included,\n    ROUND(AVG(mm.gross_revenue),       2)  AS gross_revenue_3m_avg,\n    ROUND(AVG(mm.net_sales),           2)  AS net_sales_3m_avg,\n    ROUND(AVG(mm.average_order_value), 2)  AS aov_3m_avg,\n    ROUND(AVG(mm.contribution_margin_pct), 6) AS cm_pct_3m_avg,\n    ROUND(AVG(mm.fixed_overhead_actual), 2) AS fixed_overhead_3m_avg,\n    ROUND(AVG(mm.operating_profit),    2)  AS operating_profit_3m_avg,\n    v_runway_avg                           AS runway_3m_avg\n  FROM public.v_monthly_metrics mm\n  WHERE mm.store_id     = p_store_id\n    AND mm.period_start IN (v_m0, v_m1, v_m2)\n    AND mm.gross_revenue > 0;\nEND;\n$function$\n"
+    },
+    {
+      "name": "trailing_12m_cm_avg",
+      "arguments": "p_store_id uuid, p_date_from date",
+      "definition": "CREATE OR REPLACE FUNCTION public.trailing_12m_cm_avg(p_store_id uuid, p_date_from date)\n RETURNS TABLE(cm_pct_12m_avg numeric, months_included integer)\n LANGUAGE plpgsql\n STABLE SECURITY DEFINER\n SET search_path TO 'public', 'pg_temp'\nAS $function$\nDECLARE\n  v_total      numeric := 0;\n  v_count      integer := 0;\n  v_cm         numeric;\n  v_rev        numeric;\n  v_month_from date;\n  v_month_to   date;\n  i            integer;\nBEGIN\n  -- Iterate T-1 through T-12 (the 12 calendar months before the anchor).\n  -- gross_revenue() and contribution_margin_pct() both accept inclusive date\n  -- ranges and use COALESCE(..., 0), so they never raise when a month is empty.\n  FOR i IN 1..12 LOOP\n    -- First day of month T-i\n    v_month_from := (date_trunc('month', p_date_from::timestamp)\n                     - (i || ' month')::interval)::date;\n    -- Last day of month T-i (day 0 of T-i+1 = last day of T-i)\n    v_month_to   := (v_month_from + interval '1 month' - interval '1 day')::date;\n\n    -- Skip months with no order data to avoid dragging the average toward 0.\n    v_rev := public.gross_revenue(p_store_id, v_month_from, v_month_to);\n    CONTINUE WHEN v_rev = 0;\n\n    -- contribution_margin_pct() returns NULL when store has no cost assumptions.\n    -- NULL months are excluded from the running total.\n    v_cm := public.contribution_margin_pct(p_store_id, v_month_from, v_month_to);\n    CONTINUE WHEN v_cm IS NULL;\n\n    v_total := v_total + v_cm;\n    v_count := v_count + 1;\n  END LOOP;\n\n  IF v_count = 0 THEN\n    -- No months with live data found \u2014 caller should show \"\u2014\" or fall back.\n    RETURN QUERY SELECT NULL::numeric, 0;\n  ELSE\n    RETURN QUERY SELECT ROUND(v_total / v_count, 4), v_count;\n  END IF;\nEND;\n$function$\n"
+    }
+  ],
+  "constraints": [
+    {
+      "name": "cac_trend_snapshots_pkey",
+      "type": "p",
+      "table": "cac_trend_snapshots",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "cac_trend_snapshots_store_id_fkey",
+      "type": "f",
+      "table": "cac_trend_snapshots",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id)"
+    },
+    {
+      "name": "cts_calc_version_check",
+      "type": "c",
+      "table": "cac_trend_snapshots",
+      "definition": "CHECK ((calculation_version ~ '^v[0-9]+$'::text))"
+    },
+    {
+      "name": "cts_channel_check",
+      "type": "c",
+      "table": "cac_trend_snapshots",
+      "definition": "CHECK ((channel = ANY (ARRAY['meta'::text, 'google_shopping'::text, 'email'::text, 'organic'::text, 'direct'::text, 'other'::text])))"
+    },
+    {
+      "name": "cts_unique",
+      "type": "u",
+      "table": "cac_trend_snapshots",
+      "definition": "UNIQUE (store_id, channel, snapshot_date)"
+    },
+    {
+      "name": "cash_balance_snapshots_pkey",
+      "type": "p",
+      "table": "cash_balance_snapshots",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "cash_balance_snapshots_store_id_fkey",
+      "type": "f",
+      "table": "cash_balance_snapshots",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "chk_cash_balance_snapshots_source",
+      "type": "c",
+      "table": "cash_balance_snapshots",
+      "definition": "CHECK ((source = ANY (ARRAY['manual'::text, 'xero'::text, 'quickbooks'::text, 'open_banking'::text, 'csv_import'::text])))"
+    },
+    {
+      "name": "uq_cash_balance_snapshots_store_date_account",
+      "type": "u",
+      "table": "cash_balance_snapshots",
+      "definition": "UNIQUE (store_id, snapshot_date, account_key)"
+    },
+    {
+      "name": "cfo_alerts_pkey",
+      "type": "p",
+      "table": "cfo_alerts",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "cfo_alerts_store_id_fkey",
+      "type": "f",
+      "table": "cfo_alerts",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "channel_opportunity_scores_pkey",
+      "type": "p",
+      "table": "channel_opportunity_scores",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "channel_opportunity_scores_store_id_fkey",
+      "type": "f",
+      "table": "channel_opportunity_scores",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id)"
+    },
+    {
+      "name": "cos_calc_version_check",
+      "type": "c",
+      "table": "channel_opportunity_scores",
+      "definition": "CHECK ((calculation_version ~ '^v[0-9]+$'::text))"
+    },
+    {
+      "name": "cos_channel_check",
+      "type": "c",
+      "table": "channel_opportunity_scores",
+      "definition": "CHECK ((channel = ANY (ARRAY['meta'::text, 'google_shopping'::text, 'email'::text, 'organic'::text, 'direct'::text, 'other'::text, 'blended'::text])))"
+    },
+    {
+      "name": "cos_status_check",
+      "type": "c",
+      "table": "channel_opportunity_scores",
+      "definition": "CHECK ((status = ANY (ARRAY['active'::text, 'dismissed'::text, 'implemented'::text, 'monitoring'::text])))"
+    },
+    {
+      "name": "cos_type_check",
+      "type": "c",
+      "table": "channel_opportunity_scores",
+      "definition": "CHECK ((opportunity_type = ANY (ARRAY['contribution_gap'::text, 'cac_reduction'::text, 'budget_reallocation'::text, 'roas_improvement'::text, 'channel_mix'::text])))"
+    },
+    {
+      "name": "customers_pkey",
+      "type": "p",
+      "table": "customers",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "customers_store_id_fkey",
+      "type": "f",
+      "table": "customers",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_customers_store_shopify",
+      "type": "u",
+      "table": "customers",
+      "definition": "UNIQUE (store_id, shopify_customer_id)"
+    },
+    {
+      "name": "discount_codes_discount_id_fkey",
+      "type": "f",
+      "table": "discount_codes",
+      "definition": "FOREIGN KEY (discount_id) REFERENCES discounts(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "discount_codes_pkey",
+      "type": "p",
+      "table": "discount_codes",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "discount_codes_store_id_fkey",
+      "type": "f",
+      "table": "discount_codes",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_discount_codes_store_code",
+      "type": "u",
+      "table": "discount_codes",
+      "definition": "UNIQUE (store_id, code)"
+    },
+    {
+      "name": "discounts_pkey",
+      "type": "p",
+      "table": "discounts",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "discounts_store_id_fkey",
+      "type": "f",
+      "table": "discounts",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_discounts_store_shopify",
+      "type": "u",
+      "table": "discounts",
+      "definition": "UNIQUE (store_id, shopify_price_rule_id)"
+    },
+    {
+      "name": "marketing_blended_monthly_pkey",
+      "type": "p",
+      "table": "marketing_blended_monthly",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "marketing_blended_monthly_store_id_fkey",
+      "type": "f",
+      "table": "marketing_blended_monthly",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id)"
+    },
+    {
+      "name": "mbm_calc_version_check",
+      "type": "c",
+      "table": "marketing_blended_monthly",
+      "definition": "CHECK ((calculation_version ~ '^v[0-9]+$'::text))"
+    },
+    {
+      "name": "mbm_unique",
+      "type": "u",
+      "table": "marketing_blended_monthly",
+      "definition": "UNIQUE (store_id, period_start)"
+    },
+    {
+      "name": "marketing_channel_daily_metrics_pkey",
+      "type": "p",
+      "table": "marketing_channel_daily_metrics",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "marketing_channel_daily_metrics_store_id_fkey",
+      "type": "f",
+      "table": "marketing_channel_daily_metrics",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id)"
+    },
+    {
+      "name": "mcdm_channel_check",
+      "type": "c",
+      "table": "marketing_channel_daily_metrics",
+      "definition": "CHECK ((channel = ANY (ARRAY['meta'::text, 'google_shopping'::text, 'email'::text, 'organic'::text, 'direct'::text, 'other'::text])))"
+    },
+    {
+      "name": "mcdm_source_check",
+      "type": "c",
+      "table": "marketing_channel_daily_metrics",
+      "definition": "CHECK ((data_source = ANY (ARRAY['meta_api'::text, 'google_api'::text, 'manual'::text, 'estimated'::text, 'shopify'::text])))"
+    },
+    {
+      "name": "mcdm_unique",
+      "type": "u",
+      "table": "marketing_channel_daily_metrics",
+      "definition": "UNIQUE (store_id, channel, metric_date)"
+    },
+    {
+      "name": "marketing_channel_monthly_snapshots_pkey",
+      "type": "p",
+      "table": "marketing_channel_monthly_snapshots",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "marketing_channel_monthly_snapshots_store_id_fkey",
+      "type": "f",
+      "table": "marketing_channel_monthly_snapshots",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id)"
+    },
+    {
+      "name": "mcms_calc_version_check",
+      "type": "c",
+      "table": "marketing_channel_monthly_snapshots",
+      "definition": "CHECK ((calculation_version ~ '^v[0-9]+$'::text))"
+    },
+    {
+      "name": "mcms_channel_check",
+      "type": "c",
+      "table": "marketing_channel_monthly_snapshots",
+      "definition": "CHECK ((channel = ANY (ARRAY['meta'::text, 'google_shopping'::text, 'email'::text, 'organic'::text, 'direct'::text, 'other'::text])))"
+    },
+    {
+      "name": "mcms_freshness_check",
+      "type": "c",
+      "table": "marketing_channel_monthly_snapshots",
+      "definition": "CHECK ((data_freshness = ANY (ARRAY['live'::text, 'estimated'::text, 'stale'::text])))"
+    },
+    {
+      "name": "mcms_unique",
+      "type": "u",
+      "table": "marketing_channel_monthly_snapshots",
+      "definition": "UNIQUE (store_id, channel, period_start)"
+    },
+    {
+      "name": "opportunities_pkey",
+      "type": "p",
+      "table": "opportunities",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "opportunities_store_id_fkey",
+      "type": "f",
+      "table": "opportunities",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "order_line_items_order_id_fkey",
+      "type": "f",
+      "table": "order_line_items",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "order_line_items_pkey",
+      "type": "p",
+      "table": "order_line_items",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "order_line_items_product_id_fkey",
+      "type": "f",
+      "table": "order_line_items",
+      "definition": "FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "order_line_items_store_id_fkey",
+      "type": "f",
+      "table": "order_line_items",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "order_line_items_variant_id_fkey",
+      "type": "f",
+      "table": "order_line_items",
+      "definition": "FOREIGN KEY (variant_id) REFERENCES product_variants(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "uq_order_line_items_store_shopify",
+      "type": "u",
+      "table": "order_line_items",
+      "definition": "UNIQUE (store_id, shopify_line_item_id)"
+    },
+    {
+      "name": "orders_customer_id_fkey",
+      "type": "f",
+      "table": "orders",
+      "definition": "FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL"
+    },
+    {
+      "name": "orders_pkey",
+      "type": "p",
+      "table": "orders",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "orders_store_id_fkey",
+      "type": "f",
+      "table": "orders",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_orders_store_shopify",
+      "type": "u",
+      "table": "orders",
+      "definition": "UNIQUE (store_id, shopify_order_id)"
+    },
+    {
+      "name": "chk_overhead_categories_type",
+      "type": "c",
+      "table": "overhead_categories",
+      "definition": "CHECK ((category_type = ANY (ARRAY['payroll'::text, 'facilities'::text, 'technology'::text, 'marketing_fixed'::text, 'logistics_fixed'::text, 'finance'::text, 'other'::text])))"
+    },
+    {
+      "name": "overhead_categories_pkey",
+      "type": "p",
+      "table": "overhead_categories",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "overhead_categories_store_id_fkey",
+      "type": "f",
+      "table": "overhead_categories",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_overhead_categories_store_name",
+      "type": "u",
+      "table": "overhead_categories",
+      "definition": "UNIQUE (store_id, name)"
+    },
+    {
+      "name": "chk_overhead_entries_entry_type",
+      "type": "c",
+      "table": "overhead_entries",
+      "definition": "CHECK ((entry_type = ANY (ARRAY['actual'::text, 'budget'::text, 'forecast'::text])))"
+    },
+    {
+      "name": "chk_overhead_entries_source",
+      "type": "c",
+      "table": "overhead_entries",
+      "definition": "CHECK ((source = ANY (ARRAY['manual'::text, 'xero'::text, 'quickbooks'::text, 'csv_import'::text])))"
+    },
+    {
+      "name": "overhead_entries_category_id_fkey",
+      "type": "f",
+      "table": "overhead_entries",
+      "definition": "FOREIGN KEY (category_id) REFERENCES overhead_categories(id) ON DELETE RESTRICT"
+    },
+    {
+      "name": "overhead_entries_pkey",
+      "type": "p",
+      "table": "overhead_entries",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "overhead_entries_store_id_fkey",
+      "type": "f",
+      "table": "overhead_entries",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_overhead_entries_store_cat_period_type_recurring",
+      "type": "u",
+      "table": "overhead_entries",
+      "definition": "UNIQUE (store_id, category_id, period_start, entry_type, is_recurring)"
+    },
+    {
+      "name": "product_variants_pkey",
+      "type": "p",
+      "table": "product_variants",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "product_variants_product_id_fkey",
+      "type": "f",
+      "table": "product_variants",
+      "definition": "FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "product_variants_store_id_fkey",
+      "type": "f",
+      "table": "product_variants",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_product_variants_store_shopify",
+      "type": "u",
+      "table": "product_variants",
+      "definition": "UNIQUE (store_id, shopify_variant_id)"
+    },
+    {
+      "name": "products_pkey",
+      "type": "p",
+      "table": "products",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "products_store_id_fkey",
+      "type": "f",
+      "table": "products",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_products_store_shopify",
+      "type": "u",
+      "table": "products",
+      "definition": "UNIQUE (store_id, shopify_product_id)"
+    },
+    {
+      "name": "refund_line_items_order_line_item_id_fkey",
+      "type": "f",
+      "table": "refund_line_items",
+      "definition": "FOREIGN KEY (order_line_item_id) REFERENCES order_line_items(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "refund_line_items_pkey",
+      "type": "p",
+      "table": "refund_line_items",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "refund_line_items_refund_id_fkey",
+      "type": "f",
+      "table": "refund_line_items",
+      "definition": "FOREIGN KEY (refund_id) REFERENCES refunds(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "refund_line_items_store_id_fkey",
+      "type": "f",
+      "table": "refund_line_items",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "refunds_order_id_fkey",
+      "type": "f",
+      "table": "refunds",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "refunds_pkey",
+      "type": "p",
+      "table": "refunds",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "refunds_store_id_fkey",
+      "type": "f",
+      "table": "refunds",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_refunds_store_shopify",
+      "type": "u",
+      "table": "refunds",
+      "definition": "UNIQUE (store_id, shopify_refund_id)"
+    },
+    {
+      "name": "store_cost_assumptions_pkey",
+      "type": "p",
+      "table": "store_cost_assumptions",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "store_cost_assumptions_store_id_fkey",
+      "type": "f",
+      "table": "store_cost_assumptions",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_store_cost_assumptions_store_date",
+      "type": "u",
+      "table": "store_cost_assumptions",
+      "definition": "UNIQUE (store_id, effective_from)"
+    },
+    {
+      "name": "store_settings_pkey",
+      "type": "p",
+      "table": "store_settings",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "store_settings_store_id_fkey",
+      "type": "f",
+      "table": "store_settings",
+      "definition": "FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE"
+    },
+    {
+      "name": "uq_store_settings_store",
+      "type": "u",
+      "table": "store_settings",
+      "definition": "UNIQUE (store_id)"
+    },
+    {
+      "name": "stores_pkey",
+      "type": "p",
+      "table": "stores",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "name": "uq_stores_shopify_domain",
+      "type": "u",
+      "table": "stores",
+      "definition": "UNIQUE (shopify_domain)"
+    },
+    {
+      "name": "uq_stores_shopify_store_id",
+      "type": "u",
+      "table": "stores",
+      "definition": "UNIQUE (shopify_store_id)"
+    }
+  ]
+}

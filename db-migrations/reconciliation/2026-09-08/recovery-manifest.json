@@ -1,0 +1,272 @@
+[
+  {
+    "version": "20260429000000",
+    "file": "recovered/20260429000000_phase1_shopify_tables.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260429000000_phase1_shopify_tables.sql",
+    "git_blob": "d79f931986f72b114e9b3098ff257847bd3ff8ac",
+    "sha256": "23b85bc3a1a355a4cc417b5f75e2b528fa7146afc5ce2fe9818d3eabdbbc6542",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260429000001",
+    "file": "recovered/20260429000001_phase1_metric_functions.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260429000001_phase1_metric_functions.sql",
+    "git_blob": "022562f1693bb36a3801f438ad6f466e289aacd2",
+    "sha256": "11e03494830471449e4c9eb1bf7d3a68fcb3cdefd2b4f6c4abd4ecf138cc49f9",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260429000002",
+    "file": "recovered/20260429000002_cloud_schema_remediation.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260429000002_cloud_schema_remediation.sql",
+    "git_blob": "883ba9d73d43c33c1f908f85b74c34683e62ca26",
+    "sha256": "e1828f8cd074590ad32dca49600457653e105ef89da2228eb7743e75ac3e3451",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260429000003",
+    "file": "recovered/20260429000003_contribution_margin_pct.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260429000003_contribution_margin_pct.sql",
+    "git_blob": "ade547cad0f53b3d8e434a501795275a87ff7007",
+    "sha256": "0d07ca1a26f314cac20ac3bc91ade18636d8eb4830d5efe056dcc5786d9cca87",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260429000004",
+    "file": "recovered/20260429000004_cloud_seed.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260429000004_cloud_seed.sql",
+    "git_blob": "90858ecd25a49c05659b194c4218c9a95982abec",
+    "sha256": "282689bead3020eae225fdae9113b9d72c9b08acd4ed99f2d407e222349f8de8",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260429000005",
+    "file": "recovered/20260429000005_recoverable_contribution_range.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260429000005_recoverable_contribution_range.sql",
+    "git_blob": "29464d9696eafd500b99a2cf261109e1c325166e",
+    "sha256": "58339c57718ce13fbcca609b2861e07edfaaa2b2a0a6c999722a5cf1baa81281",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000000",
+    "file": "recovered/20260430000000_overhead_categories.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000000_overhead_categories.sql",
+    "git_blob": "9dabfce0795618171e3637ba7f92aceaf0899d9a",
+    "sha256": "6e2a56065b4fdaac40327a5e4560462bac0a533bdf38f219ff2a3113c5ce119a",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000001",
+    "file": "recovered/20260430000001_overhead_entries.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000001_overhead_entries.sql",
+    "git_blob": "fbd5635dcd77660db6b86230378cd038fb67cf9f",
+    "sha256": "08bdd3655b228a99a1089ebd273fa288226d2df5e0e63394dc56b836c2a93fab",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000002",
+    "file": "recovered/20260430000002_cash_balance_snapshots.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000002_cash_balance_snapshots.sql",
+    "git_blob": "760e2a17db840f8f5107bf3ebbd8488721127f22",
+    "sha256": "d4b42d25fa121bafd2d3d0f50f457e13ad413e6b14829ee583a47a21ed57e7dc",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000003",
+    "file": "recovered/20260430000003_phase2a_seed.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000003_phase2a_seed.sql",
+    "git_blob": "ec5e2eec9514e589012b36843261c59e358dd8eb",
+    "sha256": "2f5c0ecd2d54c5efd8176f2b0fa0cc89606e7d858fba4b7b9a76bf1d58c75475",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000004",
+    "file": "recovered/20260430000004_phase2a_views.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000004_phase2a_views.sql",
+    "git_blob": "5d5871ae67854f23495925a38814a9f1e7027f19",
+    "sha256": "d482ba37a26fa955b19f3f0342215a26258494fc607020c73601c6f36ccec2b1",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000005",
+    "file": "recovered/20260430000005_phase2a_rpcs.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000005_phase2a_rpcs.sql",
+    "git_blob": "d787c12c6c07744fe35dfcd5ab47c9259c8775a8",
+    "sha256": "a5a513d2c4c9ee7cbee80e70e66eb35d0dd83ab04543071f5767278837b8ad3f",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000006",
+    "file": "recovered/20260430000006_phase1_april_seed_expansion.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000006_phase1_april_seed_expansion.sql",
+    "git_blob": "9832e1a0146b2360e2db607d82b195521a809eab",
+    "sha256": "e7a6ef1aea050d214f6425a2169d3ce14703823712bb4b79ceee2c3cf8c4356d",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000007",
+    "file": "recovered/20260430000007_phase2b_march_seed.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000007_phase2b_march_seed.sql",
+    "git_blob": "01aeb2b5024ea0944c238964b98d08307b6932d0",
+    "sha256": "40a538d3f61d6a5a87e0868297ab85552440b5e2ceed12d5a7c25154b2cbdd44",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000008",
+    "file": "recovered/20260430000008_phase2b_trend_views.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000008_phase2b_trend_views.sql",
+    "git_blob": "1474232952915801fe2631c6213d3a23e3237d76",
+    "sha256": "5e661d1ab89d419f2e2e0d086adbb81f80d53c4c8311c470ec0e9dad4f280619",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000009",
+    "file": "recovered/20260430000009_phase2b_trend_rpcs.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000009_phase2b_trend_rpcs.sql",
+    "git_blob": "a458a007354d6ceb0bbf6879ab4588ec63a53007",
+    "sha256": "edf3a85b195af8db4d9b568aeadc0f3f618d26362c7e9b3c9f3a21bcf60fd43d",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000010",
+    "file": "recovered/20260430000010_vat_refund_correction.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000010_vat_refund_correction.sql",
+    "git_blob": "7e2865d5b45d973dfcec93fd5ca456ac3b3251ae",
+    "sha256": "4a0ab291f220057b6b941685e4fefb0fa212204134d390ad284466ac64d5a4f0",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000011",
+    "file": "recovered/20260430000011_aov_vat_correction.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000011_aov_vat_correction.sql",
+    "git_blob": "ce38e18714e41d6bf72e0c9fdfddd0f6516dfc9a",
+    "sha256": "6e7bb739e749314736edf3679335d67e66b8252def4290f95262fe0ef78434e4",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000012",
+    "file": "recovered/20260430000012_add_vat_rate_to_cost_assumptions.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000012_add_vat_rate_to_cost_assumptions.sql",
+    "git_blob": "a272c2443adab309eed163b33222729c905f8b81",
+    "sha256": "28c4eee8c693a462ad0ee2f5758ff0842a8bc567da6d3f693725ea93cd579730",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000013",
+    "file": "recovered/20260430000013_assert_view_order.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000013_assert_view_order.sql",
+    "git_blob": "75c67cb303907cc63ac73a4572395c9fbc84142e",
+    "sha256": "80fc9b1a42c1ecc91a07c71557cd78d356283fdb7dd66e833df9179b9aed1eba",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000014",
+    "file": "recovered/20260430000014_sync_contribution_margin_pct.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000014_sync_contribution_margin_pct.sql",
+    "git_blob": "3ad0c3f8fda06f5cb5994ea11c4580319050a7b4",
+    "sha256": "1a96b24f7f8f2830d80a9091c8decc1a11154b14fd466e1680951c95500d1a1e",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260430000015",
+    "file": "recovered/20260430000015_sync_all_functions.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260430000015_sync_all_functions.sql",
+    "git_blob": "6cae48f9cf242a68939babd2dcdb29f2a0336504",
+    "sha256": "f78c09487af745a91ea4db24a5272b6bb724c9268aa41059d906de9b64300c15",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260501000016",
+    "file": "recovered/20260501000016_sync_remaining_functions.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260501000016_sync_remaining_functions.sql",
+    "git_blob": "4bdd70b7ab9fd42f925daa72cfab3d44b58f3c8c",
+    "sha256": "fa4876d09e63b0342439810c9c22aefb0625552b168f3e69606e9c4d596c913d",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260501000017",
+    "file": "recovered/20260501000017_shadow_consistency.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260501000017_shadow_consistency.sql",
+    "git_blob": "6df989893c0f29f4825ff3878be82da37da1b47e",
+    "sha256": "6d19b5c563f37b4867999d8c151e13ab3b78e92f8a6360a7a97f28dcc555b315",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260502000018",
+    "file": "recovered/20260502000018_shadow_metric_functions.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260502000018_shadow_metric_functions.sql",
+    "git_blob": "4f1f24fffcd2853aab5307c19c3c49dc884903a5",
+    "sha256": "438b599729a659a1e477f4203ec74761995f0b95cbeb2003f717558de62a5461",
+    "in_cloud_ledger": true,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260502000019",
+    "file": "recovered/20260502000019_opportunity_breakdown_rpc.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260502000019_opportunity_breakdown_rpc.sql",
+    "git_blob": "67b5a255df72f445fba9af2ff66cd5a0fd741c6d",
+    "sha256": "8dfdae013087bec0620b7f3fdac299dee0bac471025b7289aa8c5123efa1b907",
+    "in_cloud_ledger": false,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  },
+  {
+    "version": "20260502000020",
+    "file": "recovered/20260502000020_fix_repeat_purchase_effort.sql",
+    "source_commit": "cd96a239b12eed023d5606b59b424e4e1de4bb81",
+    "source_path": "db-migrations/history/20260502000020_fix_repeat_purchase_effort.sql",
+    "git_blob": "96dda532e87cf92417ac32a2e602e270c2dedb17",
+    "sha256": "6190d091e5b992ccc98379b6fa3f4e07f6b431ce23e285b208fbde8c2278b1cc",
+    "in_cloud_ledger": false,
+    "provenance": "latest archived repository revision before removal; not proof of exact SQL executed"
+  }
+]

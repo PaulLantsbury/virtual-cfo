@@ -1,3 +1,11 @@
+## 11 October — sixth recovery batch prepared, application pending
+
+Nine disposable database checks passed, plus independent final duration regression and SQL review. Prepared reviewed sixth one-use reconnect proposal after latest zero-membership recurrence, preserving consumed fifth and all prior connection/mapping/evidence history. Exact existing staging store/current credential/latest<=24h failed membership preflight/no lease/current owner mapping and membership/known predecessor definitions and narrow ACL are gated. New table RLS/no direct grants; bootstrap functions consume only one owner/tenant/version-bound replacement. No SQL applied or consent performed. October accounting retry remains blocked.
+
+Accompanying bounded read-only diagnostic and duration verifier distinguish current failed targets from successful reconnection. Acceptance requires two connected organisation observations at least31min apart after this reconnect, latest matching current credential/fresh, with no intervening failed receipt. Owner workflow is docs/xero-reconnect-recovery-2026-10-11.md. Web consent runtime deployment containing9e6e499 must be verified independently of Render worker before owner consent; no worker diagnostics between authorization install and second consent.
+
+Frontend now explains both ongoing read-only consent stages; frontend typecheck and production build passed (existing sourcemap/chunk warnings). Shopify weekend acceptance evidence is documented separately: saved Oct11rolling collection observed, Oct10–11 host correlation still unverified. Writer programme remains unprovisioned/default-off; Oct12 18:00London action window cannot proceed without dedicated apps/credentials/demo consent/configuration. No missed-window catch-up.
+
 ## 11 October — membership recurrence blocks October retry
 
 Latest owner Render preflight returned connectionCount0/pinnedTenantMatches0 and failed/connection/reconnect_required after earlier successful reconnect and report reads. Do not apply the October retry proposal or run collection while this remains failed. Daily cron remains parked. Timing near the initial discovery grant expiry is a hypothesis, not an established root cause.

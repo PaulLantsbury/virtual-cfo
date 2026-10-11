@@ -93,6 +93,7 @@ export function XeroStagingDiscovery() {
   return <section aria-label="Xero staging discovery" className={`rounded-xl border p-4 ${ownerView.reconnecting?'border-amber-500/30 bg-amber-500/5':'border-sky-500/30 bg-sky-500/5'}`}>
     <h3 className="font-medium">{ownerView.title}</h3>
     <p className="mt-1 text-sm text-muted-foreground">{ownerView.detail}</p>
+    <p className="mt-2 text-sm text-muted-foreground">Xero will first ask for ongoing read-only access to verify your organisation and accounts. After you confirm the organisation, a second consent connects its accounting reports.</p>
     <button type="button" disabled={busy} onClick={start} className="mt-3 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60">
       {busy ? 'Checking Xero…' : ownerView.action}
     </button>

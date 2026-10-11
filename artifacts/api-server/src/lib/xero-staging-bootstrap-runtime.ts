@@ -13,7 +13,9 @@ const REDIRECTS=new Set([
 ]);
 const IDENTITY_SCOPES=['openid','profile','email'];
 const SCOPES=[...IDENTITY_SCOPES,'accounting.settings.read','accounting.reports.profitandloss.read','accounting.reports.balancesheet.read','accounting.reports.trialbalance.read','accounting.reports.banksummary.read','offline_access'];
-const DISCOVERY_SCOPES=[...IDENTITY_SCOPES,'accounting.settings.read'];
+// Request offline consent during shared-app discovery. Discovery refresh
+// material is discarded; only the separate second consent is retained.
+const DISCOVERY_SCOPES=[...IDENTITY_SCOPES,'accounting.settings.read','offline_access'];
 const categories=['revenue','processingFee','advertising','software','includedCash'] as const;
 const allowedTypes={revenue:new Set(['REVENUE','SALES']),processingFee:new Set(['OVERHEADS','EXPENSE']),advertising:new Set(['OVERHEADS','EXPENSE']),software:new Set(['OVERHEADS','EXPENSE']),includedCash:new Set(['BANK'])} as const;
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -1,3 +1,9 @@
+## 11 October — membership recurrence blocks October retry
+
+Latest owner Render preflight returned connectionCount0/pinnedTenantMatches0 and failed/connection/reconnect_required after earlier successful reconnect and report reads. Do not apply the October retry proposal or run collection while this remains failed. Daily cron remains parked. Timing near the initial discovery grant expiry is a hypothesis, not an established root cause.
+
+Preventive bootstrap repair requests offline_access for the existing settings-only discovery grant, discards its refresh token and retains credentials only from the separate second owner consent. No report/transaction scope expansion, SQL application or provider mutation.37 focused agent checks passed; root independently reran14 bootstrap tests and API production build successfully. API typecheck remains blocked by existing declaration/dependency output gaps. Deployment and a renewed connection surviving beyond30 minutes still need acceptance. A new current-version reconnect authorization must be prepared and reviewed before another retained consent; previously consumed installers must not be replayed.
+
 ## 11 October — repaired cash parser published; exact retry awaiting owner approval
 
 Cash repair published development commitfc971d10783314b85953e3ef9069a4ee2ae04938 following independent diff acceptance.67 focused parser/orchestrator/read-only-period/runtime tests pass. Separate exact retry proposal2 disposable DB tests pass, including one-use consumption/replay rejection/prior history and nine refusal cases. New db-migrations/proposals/xero-october-exact-failure-retry-2026-10-11.sql inserts one authorization only; no function/grant replacement. Pins known fifth-worker fingerprint and observed Oct1–10GBP failure retrieved16:04:16.227Z, exactstore/currentmapping/current credential/latest newer connected preflight/no lease/no pending auth; transaction locks/fingerprints preserve history.

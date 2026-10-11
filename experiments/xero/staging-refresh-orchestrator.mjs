@@ -13,7 +13,7 @@ import {createHash} from 'node:crypto';
  * memory and are never handed to persistence.  It is therefore safe to exercise
  * with a test tenant or fixtures before a staging worker is wired.
  */
-export async function runStagingXeroRefresh({connection,scope,mapping,readSnapshot,persist,now=()=>new Date().toISOString(),maxAttempts=2}={}){
+export async function runStagingXeroRefresh({connection,scope,mapping,readSnapshot,persist,now=()=>new Date().toISOString(),maxAttempts=2,diagnose=()=>{}}={}){
  if(!validConnection(connection)||!validScope(scope)||!validateXeroAccountMapping(mapping)||typeof readSnapshot!=='function'||!validPersistencePort(persist)||typeof now!=='function'||!validAttempts(maxAttempts))throw Error('Xero staging refresh setup is invalid');
  const retrievedAt=timestamp(now());
  let snapshot,attempts=0;
@@ -24,18 +24,19 @@ export async function runStagingXeroRefresh({connection,scope,mapping,readSnapsh
  }
  if(!snapshot)return recordFailure({connection,scope,persist,retrievedAt,reason:'source_refresh_failed',attempts});
  if(!validSnapshotIdentity(snapshot,connection.tenantId,scope.to))return recordFailure({connection,scope,persist,retrievedAt,reason:'source_review_required'});
- let evidence,reader,summary,sourceFingerprint;
+ let evidence,reader,summary,sourceFingerprint;let stage='selected_account_totals';
+ const report=(reason,error)=>{const reasons=new Set(['mapping_invalid','report_shape_invalid','report_row_invalid','duplicate_selected_account','required_account_missing','account_attribute_ambiguous','amount_missing','amount_format_invalid','amount_out_of_range']);const detail={event:'xero_accounting_evidence_failed',phase:stage,reason:reasons.has(reason)?reason:'accounting_validation_failed'};if(['ProfitAndLoss','BalanceSheet'].includes(error?.safeReport))detail.report=error.safeReport;if(['revenue','processingFee','advertising','software','includedCash'].includes(error?.safeCategory))detail.category=error.safeCategory;try{diagnose(Object.freeze(detail));}catch{}};
  try {
   const accountTotals=extractSelectedAccountTotals({profitAndLoss:snapshot.profitAndLoss,balanceSheet:snapshot.balanceSheet,mapping});
-  const view=xeroAccountingView({mapping,accountTotals});
-  if(!view.available) return recordFailure({connection,scope,persist,retrievedAt,reason:'account_mapping_review_required'});
+  stage='account_mapping_view';const view=xeroAccountingView({mapping,accountTotals});
+  if(!view.available){report('accounting_validation_failed');return recordFailure({connection,scope,persist,retrievedAt,reason:'account_mapping_review_required'});}
   const values=Object.freeze({revenue:view.revenue,processingFee:view.processingFee,advertising:view.advertising,software:view.software,includedCash:view.includedCash});
   sourceFingerprint=fingerprint(values);
   evidence=Object.freeze({state:'supported',scope:Object.freeze({...scope}),asOf:scope.to,values});
-  reader=readXeroAccountingPeriod({scope,mapping:readyMapping(mapping),source:evidence});
-  if(!reader.available) return recordFailure({connection,scope,persist,retrievedAt,reason:'accounting_evidence_unavailable'});
-  summary=xeroEvidenceSummary(snapshot,{retrievedAt});
- } catch { return recordFailure({connection,scope,persist,retrievedAt,reason:'accounting_evidence_unavailable',attempts}); }
+  stage='accounting_reader';reader=readXeroAccountingPeriod({scope,mapping:readyMapping(mapping),source:evidence});
+  if(!reader.available){report('accounting_validation_failed');return recordFailure({connection,scope,persist,retrievedAt,reason:'accounting_evidence_unavailable'});}
+  stage='evidence_summary';summary=xeroEvidenceSummary(snapshot,{retrievedAt});
+ } catch(error) { report(error?.safeReason,error);return recordFailure({connection,scope,persist,retrievedAt,reason:'accounting_evidence_unavailable',attempts}); }
  if(scope.closedPeriod===true&&typeof persist.readLatestSupported==='function'){
   const prior=await persist.readLatestSupported(Object.freeze({connectionId:connection.id,tenantId:connection.tenantId,scope}));
   if(validPriorForScope(prior,connection,scope)&&prior.sourceFingerprint!==sourceFingerprint)return recordFailure({connection,scope,persist,retrievedAt,reason:'later_posting_review_required',attempts});

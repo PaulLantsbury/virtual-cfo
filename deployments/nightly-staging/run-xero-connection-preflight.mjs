@@ -6,7 +6,7 @@ try {
  const require=createRequire(new URL('../../lib/db/package.json',import.meta.url));
  const pg=require('pg');
  pool=new pg.Pool({connectionString:process.env.NIGHT_SCOUT_INTAKE_DATABASE_URL,ssl:{ca:process.env.NIGHT_SCOUT_STAGING_CA_PEM,rejectUnauthorized:true},max:1,connectionTimeoutMillis:5000,statement_timeout:30000,idle_in_transaction_session_timeout:15000});
- const preflight=createStagingXeroConnectionPreflight({query:(sql,params)=>pool.query(sql,params)});
+ const preflight=createStagingXeroConnectionPreflight({query:(sql,params)=>pool.query(sql,params),diagnose:value=>process.stderr.write(`${JSON.stringify(value)}\n`)});
  process.stdout.write(`${JSON.stringify(await preflight())}\n`);
 } catch { process.stderr.write(`${failure}\n`);process.exitCode=1; }
 finally { try { await pool?.end(); } catch { process.exitCode=1; } }

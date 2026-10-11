@@ -1,3 +1,15 @@
+## Resume batch — 11 October 2026
+
+Three supporting agents reviewed Shopify acceptance, Xero readiness and the isolated provider writer. Signed-in staging Settings independently shows a successful saved Shopify collection at 11 October 01:01 UTC for 10 September–10 October, one source test order/two refunds/zero mapped financial events. Rolling scope is working; host claims and the 10 October receipt remain unverified. The old September deployment acknowledgement is historical.
+
+Before the fresh preflight, Profit Overview on PocketLaunchpad1 for custom 1–10 October returned “No supported Xero snapshot matches this exact period and currency.” The deployed member reader checks scope-start/in-period mapping coverage before evidence lookup; this resolves the prior mapping-date blocker without a new migration. Six reader DB cases and 21 scheduling checks passed.
+
+Fresh dedicated Render worker connection preflight now returns failed / connection / reconnect_required. Token refresh succeeded far enough to check provider connections, but the pinned tenant was absent from the returned authorised connections. Cause of that absence is not established. Settings then correctly changed to Xero needs reconnection. No accounting collection or daily cron activation occurred; do not repeat refreshes or assume another consent permanently solves the recurrence. Reviewed source contains no disconnect/revoke call. Prepared bounded connection-count diagnostic; 24 preflight/refresh tests pass. Deploy it before the next check. Safe worker configuration reports period mode unset and fixed FROM/TO configured.
+
+Prepared a default-off owner/store-bound staging Settings card for the separate Xero demo writer consent, using the existing authenticated endpoint. Three tests, frontend typecheck and frontend production build pass (existing nonfatal bundle/sourcemap warnings). Writer app/DB credentials, actual GBP demo identity, matching read-feed binding and scheduling remain unprovisioned. No provider transactions/programme activation. Trial remains 12–25 October with no missed-window catch-up.
+
+Next: inspect reconnect recurrence and complete owner consent if needed; verify fresh connectivity, deploy current period mode and one fresh accounting scope before daily activation. Verify Shopify host receipts separately. Provision dedicated writers and demo identity before enabling the approved trial. Preserve existing SQL installation and synthetic baseline.
+
 ## End-of-day checkpoint — 9 October 2026
 
 This is the current resume point and supersedes the dated activation blockers below. Resume from the existing repository and this roadmap; do not rebuild completed work.

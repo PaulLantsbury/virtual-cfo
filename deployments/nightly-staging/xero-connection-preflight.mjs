@@ -9,7 +9,7 @@ const result=(state,phase,reason)=>Object.freeze({event:'xero_connection_preflig
 const bytes=value=>{if(Buffer.isBuffer(value))return Buffer.from(value);if(typeof value==='string'&&/^\\x[0-9a-f]*$/i.test(value))return Buffer.from(value.slice(2),'hex');throw unavailable();};
 const blockedLease=value=>{if(value===null)return false;const at=value instanceof Date?value.valueOf():typeof value==='string'?Date.parse(value):NaN;return !Number.isFinite(at)||at>Date.now();};
 
-export function createStagingXeroConnectionPreflight({env=process.env,query,fetchImpl=fetch}={}){
+export function createStagingXeroConnectionPreflight({env=process.env,query,fetchImpl=fetch,diagnose=()=>{}}={}){
  const config=readStagingXeroWorkerConfig(env);
  if(typeof query!=='function'||typeof fetchImpl!=='function')throw unavailable();
  const rpc=async(sql,params)=>{try{return (await query(sql,params)).rows;}catch{throw unavailable();}};
@@ -39,7 +39,7 @@ export function createStagingXeroConnectionPreflight({env=process.env,query,fetc
    leaseVersion=pinned.version+1;
    if(!hasRequiredXeroScopes(fresh.scope)){outcome=result('failed','token','insufficient_scope');return outcome;}
    try { await assertPinnedXeroConnection({accessToken:fresh.accessToken,tenantId:pinned.tenantId,fetchImpl:boundedFetch}); }
-   catch(error){const reason=allowedReasons.has(error?.safeReason)?error.safeReason:'provider_unavailable';outcome=result('failed','connection',reason);return outcome;}
+   catch(error){const reason=allowedReasons.has(error?.safeReason)?error.safeReason:'provider_unavailable';if(reason==='reconnect_required'&&Number.isInteger(error.connectionCount)&&error.connectionCount>=0&&error.connectionCount<=100){try{diagnose(Object.freeze({event:'xero_connection_membership_diagnostic',connectionCount:error.connectionCount,pinnedTenantMatches:0}));}catch{}}outcome=result('failed','connection',reason);return outcome;}
    try { await assertPinnedXeroOrganisation({accessToken:fresh.accessToken,tenantId:pinned.tenantId,fetchImpl:boundedFetch}); }
    catch(error){const reason=allowedReasons.has(error?.safeReason)?error.safeReason:'provider_unavailable';outcome=result('failed','organisation',reason);return outcome;}
    const receipt=await rpc('SELECT xero_v1.worker_record_connection_preflight($1,$2,$3,$4,$5,$6,$7,$8) AS recorded',[connectionId,leaseVersion,'connected','organisation','ok',null,true,leaseExpiresAt]);

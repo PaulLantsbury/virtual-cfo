@@ -25,7 +25,7 @@ export async function assertPinnedXeroConnection({accessToken,tenantId,fetchImpl
  if(!response.ok)throw failure(classifyStatus(response.status),response.status);
  let rows;try{rows=await boundedJson(response,65_536);}catch(error){throw error?.safeReason?error:failure('malformed_response');}
  if(!Array.isArray(rows)||rows.length>100||rows.some(row=>!row||typeof row!=='object'||typeof row.tenantId!=='string'))throw failure('malformed_response');
- if(!rows.some(row=>row.tenantId===tenantId))throw failure('reconnect_required');
+ if(!rows.some(row=>row.tenantId===tenantId))throw Object.assign(failure('reconnect_required'),{connectionCount:rows.length});
  return Object.freeze({connectionCount:rows.length});
 }
 export async function assertPinnedXeroOrganisation({accessToken,tenantId,fetchImpl}){

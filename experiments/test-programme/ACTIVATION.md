@@ -32,6 +32,14 @@ Once seeded, the runner obtains an atomic permanent refresh claim, decrypts only
 
 ## Hosted writer callback configuration
 
+### Owner Settings consent handoff — 11 October
+
+Settings now has a separate consent-only card, hidden by default. After the server-side writer credentials are privately provisioned, rebuild the staging frontend with `VITE_XERO_TEST_WRITER_CONSENT_ENABLED=true`, `VITE_XERO_TEST_WRITER_OWNER_ID` and `VITE_XERO_TEST_WRITER_STORE_ID` matching the existing server's exact owner/store bindings. These IDs are display gates, not authentication or secrets; the server still verifies the owner and membership. The card is visible only on the exact staging origin, signed in as that owner with the bound development store selected. No app secret, encryption key or database URL belongs in a `VITE_` variable.
+
+Click **Connect demo test writer** to initiate the existing authenticated same-origin consent route. The application obtains its session internally; no token copying or console extraction is needed. Choose the actual GBP **Demo Company**. An ordinary Xero trial account fails the provider demo check. Callback saves an encrypted separate credential and a disabled programme; it does not create invoices or enable scheduling. The callback currently shows the safe `writer_connected_programme_disabled` receipt rather than redirecting to Settings.
+
+Posted demo invoices will only appear in a read feed connected to that same demo tenant. The existing Night Scout Test Account must not be assumed to be the demo tenant. Keep the existing reader connection intact while verifying and preparing any separate demo read-feed binding.
+
 The mounted API adapter uses these exact variable names (names only; no values in this document):
 
 - `NIGHT_SCOUT_XERO_TEST_WRITER_BOOTSTRAP_ENABLED=true` and `NIGHT_SCOUT_RUNTIME_ENV=staging`.

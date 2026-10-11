@@ -7,6 +7,28 @@ const row=(id,value='123.45')=>({RowType:'Row',Cells:[{Value:`SECRET ${id}`,Attr
 const report=(ReportID,Rows)=>({Reports:[{ReportID,ReportName:'SECRET NAME',ReportDate:'2026-09-25',Rows}]});
 const snapshot={profitAndLoss:report('ProfitAndLoss',[{RowType:'Header',Cells:[{Value:'SECRET'}]},{RowType:'Section',Rows:[row('sales'),row('shipping'),row('fees'),row('ads'),row('software')]}]),balanceSheet:report('BalanceSheet',[{RowType:'Section',Rows:[row('bank1'),row('bank1')]}]),trialBalance:report('TrialBalance',[]),bankSummary:report('BankSummary',[{RowType:'SummaryRow',Cells:[{Value:'SECRET'}]}])};
 
+test('inspects mapped cash presence independently in BankSummary and TrialBalance without introducing fallback values',()=>{
+ const bank=row('bank1','98765.43');bank.Cells.push({Value:'12345.67'},{Value:'24680.12'},{Value:'97531.24'});
+ const trial=row('bank2','13579.24');trial.Cells.push({Value:'86420.13'},{Value:'11223.34'},{Value:'55667.78'});
+ const result=diagnoseXeroReportStructure({mapping,snapshot:{...snapshot,balanceSheet:report('BalanceSheet',[]),bankSummary:report('BankSummary',[bank]),trialBalance:report('TrialBalance',[{RowType:'Section',Rows:[trial]}])}});
+ assert.equal(result.reports.balanceSheet.selected.includedCash.missing,2);
+ for(const kind of ['bankSummary','trialBalance']){
+  const cash=result.reports[kind].selected.includedCash;
+  assert.equal(cash.expected,2);assert.equal(cash.found,1);assert.equal(cash.missing,1);assert.equal(cash.duplicate,0);
+  assert.equal(cash.extractorEligible,1);assert.equal(cash.consistentAccountAttributes,1);assert.equal(cash.usableMoney,1);assert.equal(cash.minCells,5);assert.equal(cash.maxCells,5);
+ }
+ const output=JSON.stringify(result);for(const secret of ['bank1','bank2','SECRET','98765','12345','24680','97531','13579','86420','11223','55667'])assert.doesNotMatch(output,new RegExp(secret));
+ assert.equal(result.values,undefined);assert.equal(result.accounting,undefined);
+});
+test('alternate cash report metadata distinguishes duplicates and conflicting attributes without treating them as evidence',()=>{
+ const conflicting=row('bank1');conflicting.Cells[1].Attributes=[{Id:'account',Value:'PRIVATE DIFFERENT ACCOUNT'}];
+ const result=diagnoseXeroReportStructure({mapping,snapshot:{...snapshot,bankSummary:report('BankSummary',[row('bank2'),row('bank2')]),trialBalance:report('TrialBalance',[conflicting])}});
+ assert.equal(result.reports.bankSummary.selected.includedCash.duplicate,1);
+ assert.equal(result.reports.trialBalance.selected.includedCash.conflictingAccountAttributes,1);
+ assert.equal(result.reports.trialBalance.selected.includedCash.usableMoney,0);
+ assert.doesNotMatch(JSON.stringify(result),/PRIVATE|DIFFERENT|bank1|bank2|123\.45/);
+});
+
 test('reports bounded shapes and selected-account presence without source content',()=>{
  const result=diagnoseXeroReportStructure({snapshot,mapping});
  assert.equal(result.state,'observed');

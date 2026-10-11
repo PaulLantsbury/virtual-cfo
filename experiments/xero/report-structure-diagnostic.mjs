@@ -3,8 +3,8 @@ import {validateXeroAccountMapping} from './account-mapping-contract.mjs';
 const definitions=Object.freeze({
  profitAndLoss:Object.freeze({reportId:'ProfitAndLoss',categories:Object.freeze(['revenue','processingFee','advertising','software'])}),
  balanceSheet:Object.freeze({reportId:'BalanceSheet',categories:Object.freeze(['includedCash'])}),
- trialBalance:Object.freeze({reportId:'TrialBalance',categories:Object.freeze([])}),
- bankSummary:Object.freeze({reportId:'BankSummary',categories:Object.freeze([])})
+ trialBalance:Object.freeze({reportId:'TrialBalance',categories:Object.freeze(['includedCash'])}),
+ bankSummary:Object.freeze({reportId:'BankSummary',categories:Object.freeze(['includedCash'])})
 });
 const knownTypes=Object.freeze(['Header','Section','Row','SummaryRow']);
 const unavailable=()=>Error('Xero report structure diagnostic unavailable');

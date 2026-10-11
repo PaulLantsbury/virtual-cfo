@@ -1,3 +1,38 @@
+## End of day 11 October — reconnect completed; first check passed; stopped safely
+
+Paul confirmed both owner consent steps completed after staging web revision b0b3b17 went Live. At approximately18:15 Europe/London he supplied the Render receipt connected / organisation / ok. This supersedes the earlier “consent not started” checkpoint below. The sixth recovery was installed and used for this owner flow; do not reapply it. Its consumed status has not separately been queried. First successful connectivity is confirmed; durability remains unverified. Paul explicitly stopped work for the evening. No second preflight, October accounting retry/collection or dailycron activation occurred. Schedule stays parked, provider writers unprovisioned/default-off.
+
+### Achievements and remaining proof
+
+- Current completed-period worker configuration validated, selecting Oct1–10GBP without temporary environment overrides.
+- Live reports narrowed accounting failure to mapped cash absent from BalanceSheet but present exactly once in BankSummary/TrialBalance. No zero balance inferred.
+- Conservative BankSummary closing-cash fallback implemented and published, with fresh ACTIVE BANK GBP directory gating and67 focused checks. Live successful October accounting snapshot still outstanding.
+- Value-free extraction diagnostics published; exact failed October one-use retry prepared with2 disposable DB checks, not applied.
+- Recurring zero-membership failure identified after earlier successful consent. Discovery now requests offline_access on existing settings-only scopes, discards its credential, and retains only second consent.37 focused checks passed, API build passed; short discovery expiry remains a timing-correlated hypothesis, not confirmed root cause.
+- Sixth owner/tenant/current-version recovery reviewed,9 disposable tests passed, approved and installed; web consent repair deployed and first fresh connectivity verified. Mapping/history preserved.
+- Shopify Oct11saved rolling collection verified, test order excluded; host scheduler correlation still outstanding. Independent writer readiness reviewed; not provisioned or activated.
+
+### Next work in priority order
+
+1. On resumption, run one existing Render connection preflight. If connected, run the read-only duration verifier: requires two successes spanning>=31min after reconnect, latestcurrentcredential/fresh and no intervening failed observation. If resuming more than24h after firstcheck, require a fresh31min observation pair and review verifier semantics rather than claiming old evidence proves new continuity.
+2. Verify Render worker contains the cash repair. After connectivity acceptance, obtain explicit approval/apply exact October failure retry, then collect once and reconcile revenue and closing cash to Xero and merchant views. Preserve append-only failed evidence.
+3. Enable previously agreed daily staging schedule only after snapshot acceptance. Observe at least7 consecutive genuine nightly refreshes, including credential renewal; inspect source scopes, supported receipts and failures. A single immediate check is insufficient.
+4. Prioritize customer connection lifecycle hardening before claiming customer readiness: standard member-bound connect/reconnect flow without manually numbered recovery migrations; assess and simplify two-consent staging bootstrap; reliable deployment/version visibility; safe retry/lease/refresh rotation; revoked consent, tenant drift, rate limits/network errors, concurrency/restart and multiple organisation/currency tests; actionable freshness/status and alerts.
+5. Run controlled multi-organisation pilot, reconcile representative account/report layouts and confirm owner reconnect preserves history. Proposed acceptance target is7–14days unattended observation, with no unexplained dropped authorization or manual SQL recovery. This is a proposed readiness criterion, not a claim already satisfied or an authorization to production-release.
+6. Finish Shopify host acceptance in parallel. Keep independent writer programme disabled until dedicated identities/apps/demo consent/configuration are verified; missed action windows cannot be caught up.
+
+### Candid delivery assessment
+
+Real progress: data reads, guarded extraction, mapping, encrypted renewal and diagnosed failure paths exist and have been tested. Current state is a working staging integration still needing durability proof, not a customer-ready connection. Repeated SQL rescues are deliberate staging controls, but are operationally unsuitable as the customer reconnect experience. Shift effort from repeated rescue cycles to lifecycle reliability and observability.
+
+Planning estimate only, contingent on this repair surviving and no new provider/platform blocker: approximately3–5 focused development days to stabilize and accept unattended staging, plus7–14calendar days of observation; approximately2–4weeks elapsed for a limited customer-ready pilot including lifecycle hardening and multiple-tenant reconciliation. Broader release depends on pilot evidence; no guaranteed date. If membership loss recurs, investigate provider app/authorization lifecycle from fresh bounded evidence rather than issuing another blind recovery. Overall roadmap stays integration reliability first, then trusted shared dashboard calculations, CFO guardrails/commentary and Ask Night Scout; customer identity/retention metrics and gamification remain later.
+
+## 11 October — sixth recovery installed; web repair deployment started
+
+Owner receipt confirms sixth_reconnect_authorization_installed,ready_one_use_authorizations1,consumed_fifth_authorizations1. Approval granted and SQL applied by owner after supported Supabase handoff; do not reapply. No worker preflight/report diagnostic before second consent consumes the current-version authorization.
+
+Direct browser Settings still showed old consent UI; Render independently confirmed web Live revisionfd0e174. Coordinator started existing staging web Manual Deploy latest commitb0b3b17f143b07d652f09d28c45c4a3b0902c329, deploymentdep-db5s447lot8c7380modg. Deployment detail now visibly confirms Deploy succeeded | Live atb0b3b17; build successful and service live. Settings reload last displayed Sign in to Night Scout; next browser observation timed out. Fresh owner discovery/ongoing consent has not started. No accounting retry or dailycron activation.
+
 ## 11 October — sixth recovery batch prepared, application pending
 
 Nine disposable database checks passed, plus independent final duration regression and SQL review. Prepared reviewed sixth one-use reconnect proposal after latest zero-membership recurrence, preserving consumed fifth and all prior connection/mapping/evidence history. Exact existing staging store/current credential/latest<=24h failed membership preflight/no lease/current owner mapping and membership/known predecessor definitions and narrow ACL are gated. New table RLS/no direct grants; bootstrap functions consume only one owner/tenant/version-bound replacement. No SQL applied or consent performed. October accounting retry remains blocked.

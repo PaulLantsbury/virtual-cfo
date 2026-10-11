@@ -1,3 +1,9 @@
+## Thursday parallel-work trial agreed — 11 October
+
+Paul approved the proposed organisation for Thursday15October: three independent workstreams (integrations; dashboards/sharedcalculations/UX; AI CFO guardrails/commentary/evaluations/Ask Night Scout), initially one implementation agent each with shared independent review. Coordinator owns roadmap, agreed financial/data contracts, integration and stagingpublication. Use isolated branches/worktrees or explicit disjointfile ownership; separate chats do not automatically share all decisions. Return bounded tested packages before integration. Dashboard and AI work may use agreed syntheticfixtures/contracts while integrations undergo live durability verification; no claim of live acceptance from fixtures.
+
+Trial first, expand only for independent deliverables. Read account-wide usage before/after when available, record intervening work/topups/delay and follow existing costreportingpolicy; no invented taskbilling or poundquote. More parallelism uses shared allowance/credits and cannot shorten required observation or remove secureaccess/consent gates. No new teams, paidservices or live actions started tonight. Resume from this plan on Thursday.
+
 ## Agreed Thursday resume — 15 October 2026
 
 Paul will not resume until Thursday15October. Stop live work until then; no reminder/automation requested. This checkpoint records the additional customer-feed decisions agreed after the end-of-day report.

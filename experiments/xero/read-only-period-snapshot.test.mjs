@@ -27,3 +27,9 @@ test('period diagnostics expose only bounded phase and reason enums',async()=>{
  assert.deepEqual(diagnostics,[{event:'xero_source_refresh_failed',phase:'trial_balance',reason:'forbidden'}]);
  assert.doesNotMatch(JSON.stringify(diagnostics),/private|token|tenant|body|2026/);
 });
+
+test('optional fresh account directory uses same tenant/read-only access and preserves exact report cutoff',async()=>{
+ const calls=[];const Accounts=[{AccountID:'private-cash',CurrencyCode:'GBP',Type:'BANK',Status:'ACTIVE'}];
+ const snapshot=await readFixedXeroPeriodSnapshot({accessToken:'a'.repeat(20),tenantId:'tenant-test',from:'2026-10-01',to:'2026-10-10',includeAccountDirectory:true,fetchImpl:async(url,options)=>{calls.push([url.toString(),options]);return new Response(JSON.stringify(url.pathname.endsWith('/Accounts')?{Accounts}:{}));}});
+ assert.equal(calls.length,6);assert.match(calls[4][0],/BankSummary\?fromDate=2026-10-01&toDate=2026-10-10$/);assert.match(calls[5][0],/\/Accounts$/);assert.ok(calls.every(([,o])=>o.method==='GET'&&o.headers['xero-tenant-id']==='tenant-test'));assert.deepEqual(snapshot.accountDirectory,{Accounts});assert.equal(snapshot.to,'2026-10-10');
+});

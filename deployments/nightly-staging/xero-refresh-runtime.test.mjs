@@ -55,7 +55,7 @@ test('successful report requests use the configured accounting period after one 
  const empty={Reports:[{ReportTitles:['Empty'],Rows:[]}]};
  const fetchImpl=async url=>{if(url==='https://identity.xero.com/connect/token'){tokenCalls+=1;return {ok:true,json:async()=>({access_token:'access-token-that-is-long-enough',refresh_token:'next-refresh-token-that-is-long-enough',scope:scopes})};}if(url==='https://api.xero.com/connections')return {ok:true,json:async()=>[{tenantId:binding.tenantId}]};urls.push(url.toString());return {ok:true,json:async()=>url.toString().includes('/Organisation')?{Organisations:[{BaseCurrency:'GBP'}]}:empty};};
  const result=await createStagingXeroRefreshJob({env,query:h.query,fetchImpl,now:()=> '2026-09-19T02:00:00.000Z'})();
- assert.equal(result.state,'failed');assert.equal(tokenCalls,1);assert.equal(urls.length,5);
+ assert.equal(result.state,'failed');assert.equal(tokenCalls,1);assert.equal(urls.length,6);assert.equal(new URL(urls[5]).pathname,'/api.xro/2.0/Accounts');
  assert.match(urls[1],/ProfitAndLoss\?fromDate=2026-09-01&toDate=2026-09-18&standardLayout=true$/);
  assert.match(urls[4],/BankSummary\?fromDate=2026-09-01&toDate=2026-09-18$/);
 });

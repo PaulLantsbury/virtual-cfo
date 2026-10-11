@@ -16,11 +16,12 @@ function date(value){
 }
 
 /** Read one bounded accounting period with a caller-owned access token. */
-export async function readFixedXeroPeriodSnapshot({accessToken,tenantId,from,to,fetchImpl=fetch,diagnose=()=>{}}){
+export async function readFixedXeroPeriodSnapshot({accessToken,tenantId,from,to,fetchImpl=fetch,diagnose=()=>{},includeAccountDirectory=false}){
  if(typeof accessToken!=='string'||accessToken.length<16||typeof tenantId!=='string'||!tenantId||!date(from)||!date(to)||from>to||to>new Date().toISOString().slice(0,10)||typeof diagnose!=='function')throw Error('Xero period snapshot request is invalid');
  const headers={authorization:`Bearer ${accessToken}`,'xero-tenant-id':tenantId,accept:'application/json'};
+ if(typeof includeAccountDirectory!=='boolean')throw Error('Xero period snapshot request is invalid');
  const rows=[];
- for(const [path,kind,phase] of requests){
+ for(const [path,kind,phase] of (includeAccountDirectory?[...requests,['Accounts',null,'account_directory']]:requests)){
   const url=new URL(`${base}/${path}`);
   if(kind==='period'){url.searchParams.set('fromDate',from);url.searchParams.set('toDate',to);}
   if(kind==='point')url.searchParams.set('date',to);
@@ -32,5 +33,5 @@ export async function readFixedXeroPeriodSnapshot({accessToken,tenantId,from,to,
   let body;try{body=await response.json();}catch{fail(phase,'malformed_response',diagnose);}
   rows.push([path,body]);
  }
- return Object.freeze({date:to,from,to,tenantId,organisation:rows[0][1],profitAndLoss:rows[1][1],balanceSheet:rows[2][1],trialBalance:rows[3][1],bankSummary:rows[4][1]});
+ return Object.freeze({date:to,from,to,tenantId,organisation:rows[0][1],profitAndLoss:rows[1][1],balanceSheet:rows[2][1],trialBalance:rows[3][1],bankSummary:rows[4][1],...(includeAccountDirectory?{accountDirectory:rows[5][1]}:{})});
 }

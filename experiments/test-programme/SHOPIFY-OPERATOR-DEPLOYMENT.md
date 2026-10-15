@@ -22,7 +22,7 @@ Proposed Render Cron Job configuration (not created):
 
 - Repository/branch: existing `PaulLantsbury/virtual-cfo`, `codex/restart-baseline`.
 - Root directory: repository root. Node 24, pnpm version matching the existing environment.
-- Build command: `node experiments/test-programme/prepare-operator-deployment.mjs experiments/test-programme/.operator-runtime && pnpm --dir experiments/test-programme/.operator-runtime install --frozen-lockfile --ignore-workspace --prod --ignore-scripts`.
+- Build command: `node experiments/test-programme/prepare-operator-deployment.mjs experiments/test-programme/.operator-runtime && pnpm --dir experiments/test-programme/.operator-runtime install --config.auto-install-peers=false --frozen-lockfile --ignore-workspace --prod --ignore-scripts`.
 - Command: `node experiments/test-programme/.operator-runtime/shopify-operator-entry.mjs`.
 - Config file: `experiments/test-programme/.operator-runtime/shopify-programme.json`.
 - Proposed scheduled window: 17:00 UTC on the approved 15–18 October dates, corresponding to 18:00 London before the daylight-saving change. Existing code refuses other dates/windows, caps or unknown durable profile state. Review/pause the service after the bounded programme; do not silently extend, catch up or fake execution time.
@@ -37,3 +37,9 @@ Two new tests prove the standalone copied entry executes disabled without custom
 A genuine isolated frozen/offline install was attempted. The environment's supply-chain verification refused it with `ERR_PNPM_NO_OFFLINE_META`: first missing Supabase metadata for the wider consent package, then missing `pg-cloudflare` metadata for the minimal 14-package Shopify closure. No policy check was disabled or bypassed. Therefore dependency installation is **not verified**, even though the disabled standalone runner executes without loading pg. The approved package mirror/metadata must be available and the same frozen install must pass before deploying the enabled job.
 
 Live sequence: verify installed writer app and exact scopes/development shop; provision its credentials privately on the separate job; pass isolated dependency build; inspect dedicated DB role and Shopify-only disabled programme/profile receipt; obtain/apply the separately reviewed `shopify-daily-binding-proposal-2026-10-15.sql` if required (operator metadata receipt must come from an actual fresh authenticated provider check; the proposal does not authenticate that receipt itself); review the concrete job/cost; then enable only the approved future execution window. The existing coupled two-provider amendment must not be used merely to unblock Shopify. Root's browser operator owns these live checks.
+
+## Live hosting receipt
+
+Paul approved the separate Render cron and initial US$5 test budget on 15 October. Service `crn-db8g0n8u01pc7383j2d0` was created on 0.5 CPU / 512 MB. First build failed because pnpm did not inherit the root auto-install-peers=false setting across the isolated directory; the explicit matching setting above preserves frozen-lockfile checks. Corrected build `bld-db8g1667bikc73e0ibs0` succeeded on Render using Node 24.22.0. Generation remains false; no writer secrets or DB password provisioned. Historical offline-install limitation above no longer blocks the hosted dependency build.
+
+Hosted disabled smoke run completed successfully at 16:35:24 UTC on 15 October, with output `prepared-disabled`, provider Shopify, actions 4. This verifies hosted entry/config execution, not provider credentials, database readiness or actual order creation.

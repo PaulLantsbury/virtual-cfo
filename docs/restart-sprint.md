@@ -646,3 +646,11 @@ Created the sample-only Night Scout demo from shared Profit components; see docs
 Paul requested removing Margin Analysis, Pricing & Discounts and the old Profit Overview tabs. The revised page is named Profit Engine and owns /profit-engine. Retired /new-profit, /margin-analysis and /pricing-optimisation links redirect there inside the existing authenticated merchant gate. Old page source is retained and referenced in docs/night-scout-demo-2026-10-15.md; it is no longer imported by the main router. Demo page/sidebar/title also use Profit Engine.
 
 Profit Engine labels now say Profit (EBITDA), with the qualifier smaller on headline, KPI and chart labels. Financial definitions and calculations are unchanged.
+
+### Cash Control demo and parallel Shopify writer packet — 15 October
+
+Cash Control now follows the approved Profit Engine structure in the private demo, sharing the isolated demo navigation and no provider/customer SDK. Synthetic historical and forecast cash reconcile; date-based action effects include later supplier repayment and do not annualise cash releases. See docs/night-scout-demo-2026-10-15.md.
+
+Parallel Shopify-only package: isolated headless cron export/frozen14packageclosure, no Xero consentdependency; metadata readiness helper; guarded standalone disabledbindingSQL proposal and tests. None applied or enabled. Actual writer app creation/installation, restricted DB password/secrets, dependency installation (offlinepg-cloudflaremetadata missing), actual proposedhost/cost and activation remain live gates. Browser authenticated intoShopify DevDashboard and reached newapp form; no writerappwascreated. These are source/test packages, not active testfeeds.
+
+Live Shopify step: root verified the signed-in Dev Dashboard organization and prepared “Night Scout Test Data Writer”, version isolated-test-writer-20261015, non-embedded, Shopify’s documented default app home, read_orders/write_orders only. Automatic approval review rejected Create app because the exact recipient/resource/write scope needed specific approval. No app created, installed, credentials provisioned or permission granted. Form retained for review; request explicit approval for this separate app on PocketLaunchpad1 development store only. Do not retry or bypass before approval. Root combined Shopify packet/legacy programme safeguards:13tests pass.

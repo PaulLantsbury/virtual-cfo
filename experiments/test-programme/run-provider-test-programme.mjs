@@ -4,7 +4,6 @@ import { pathToFileURL } from 'node:url';
 import { shopifyOrderPlan, xeroInvoicePlan, executeProviderWrite } from './provider-write-plan.mjs';
 import { createProviderTransport } from './provider-transport.mjs';
 import { createRpcLedger } from './provider-rpc-ledger.mjs';
-import { withRefreshedXeroWriter } from './xero-writer-refresh.mjs';
 import { mintShopifyWriterToken } from './shopify-writer-token.mjs';
 
 import {validWriterDatabaseIdentity} from './writer-database-identity.mjs';
@@ -50,7 +49,7 @@ export async function main({env=process.env,now=new Date()}={}) {
     if (parts.hour !== '18' || Number(parts.minute)>14 || now.valueOf()<Date.parse(programme.startsAt) || now.valueOf()>=Date.parse(programme.endsAt)) return {event:'provider_test_programme',state:'outside-generation-window'};
     const action = programme.plans.find(p=>p.date===today);
     if (!action) return {event:'provider_test_programme',state:'no-mutation-day'};
-    const require = createRequire(new URL('../../artifacts/api-server/package.json',import.meta.url));
+    const require = createRequire(new URL('./operator-package.manifest.json',import.meta.url));
     const {Pool}=require('pg');
     const url = new URL(env.NIGHT_SCOUT_TEST_PROGRAMME_DATABASE_URL);
     if (url.protocol!=='postgresql:' || url.search || url.hostname!=='aws-1-eu-west-1.pooler.supabase.com' || decodeURIComponent(url.username)!=='night_scout_test_writer.bioalckltvkhlczusdvl' || url.port!=='5432' || url.pathname!=='/postgres') throw new Error('Dedicated writer database required');
@@ -68,7 +67,7 @@ export async function main({env=process.env,now=new Date()}={}) {
     if(programme.scheduleProfile)await verifyDailyProfile({pool:scopedPool,programme});
     const ledger=createRpcLedger({pool:scopedPool,programmeKey:programme.programmeKey});
     const run=token=>executeProviderWrite({plan:action.plan,ledger,provider:createProviderTransport({provider:programme.provider,target:programme.target,token,allowPostedDemo:programme.financialMode==='posted_demo_only' && env.NIGHT_SCOUT_TEST_WRITER_POSTED_DEMO_APPROVED==='true'}),now,activation:{...programme,enabled:true,environment:'staging',projectRef:'bioalckltvkhlczusdvl',verifiedTestTarget:true}});
-    const result=programme.provider==='xero' ? await withRefreshedXeroWriter({pool:scopedPool,programmeKey:programme.programmeKey,target:programme.target,
+    const result=programme.provider==='xero' ? await (await import('./xero-writer-refresh.mjs')).withRefreshedXeroWriter({pool:scopedPool,programmeKey:programme.programmeKey,target:programme.target,
       masterKey:env.NIGHT_SCOUT_TEST_WRITER_ENVELOPE_MASTER_KEY,keyVersion:env.NIGHT_SCOUT_TEST_WRITER_ENVELOPE_KEY_VERSION,
       clientId:env.NIGHT_SCOUT_TEST_WRITER_XERO_CLIENT_ID,clientSecret:env.NIGHT_SCOUT_TEST_WRITER_XERO_CLIENT_SECRET,consume:run}) : await run(await mintShopifyWriterToken({target:programme.target,clientId:env.NIGHT_SCOUT_TEST_WRITER_SHOPIFY_CLIENT_ID,clientSecret:env.NIGHT_SCOUT_TEST_WRITER_SHOPIFY_CLIENT_SECRET}));
     return {event:'provider_test_programme',state:result.state,provider:programme.provider};

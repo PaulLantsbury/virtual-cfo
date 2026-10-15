@@ -12,7 +12,7 @@ Build: pnpm --filter @workspace/virtual-cfo exec vite build --config vite.demo.c
 Export: node scripts/export-night-scout-demo.mjs /workspace/sites/night-scout-demo
 Use the Sites source helper for the same project to commit/package/publish the refreshed static output. Never create another Site to update it. Main repository holds the shared source; Site source holds the static release. No duplicate page implementation.
 
-Old margin-analysis.tsx, pricing-optimisation.tsx and profit-engine.tsx are recoverable at canonical Git commit dfbb54fe3def0d63ed6a4acd5140d3bc60f16550. They have not yet been removed from main navigation. This is an exact source reference, not a claim of archived rendered screenshots.
+Old margin-analysis.tsx, pricing-optimisation.tsx and profit-engine.tsx are recoverable at canonical Git commit dfbb54fe3def0d63ed6a4acd5140d3bc60f16550. They were subsequently removed from main navigation at Paul’s request. Their source files remain in Git; the revised page is now Profit Engine at /profit-engine, with /new-profit and the retired margin/pricing URLs redirecting there. This is an exact source reference, not a claim of archived rendered screenshots.
 
 Replit cancellation: not cleared. The 15 October Shopify acceptance runbook still places its nightly job on Replit. Website and Xero worker are on Render. Migrate the Shopify reader to a dedicated replacement, verify a genuine scheduled run and disable the old job before advising cancellation.
 

@@ -20,7 +20,7 @@ export function AppLayout({ children }: { children: ReactNode; showMonitoring?: 
       <div className="ns-demo-brand"><img src="/nightscout-navigation.png" alt="Night Scout"/><span>YOUR BUSINESS. IN FOCUS.</span></div>
       <div className="ns-demo-store"><span className="ns-demo-store-icon" aria-hidden="true">S</span><div><strong>Scout &amp; Co</strong><small>Fictional sample store</small></div></div>
       <nav aria-label="Demo pages"><p className="ns-demo-nav-caption">YOUR CFO WORKSPACE</p>
-        <span className="ns-demo-nav-item ns-demo-nav-active" aria-current="page"><span>Profit</span><span className="ns-demo-active-dot" aria-hidden="true"/></span>
+        <span className="ns-demo-nav-item ns-demo-nav-active" aria-current="page"><span>Profit Engine</span><span className="ns-demo-active-dot" aria-hidden="true"/></span>
         {upcomingPages.map(page=><span key={page} className="ns-demo-nav-item ns-demo-nav-unavailable"><span>{page}</span><small>Coming next</small></span>)}
       </nav>
       <div className="ns-demo-sidebar-foot"><span className="ns-demo-pill">DEMO</span><p>Explore the numbers.<br/>Find your next move.</p><small>Sample figures only</small></div>

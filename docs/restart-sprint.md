@@ -640,3 +640,9 @@ Activation remains incomplete: separate operator host/callback migration, secure
 ### Standalone private demo — 15 October
 
 Created the sample-only Night Scout demo from shared Profit components; see docs/night-scout-demo-2026-10-15.md for URL, exact Site identity, rebuild/publish steps and old-page source archive reference. The live app keeps its real auth gate; the demo has no customer/provider infrastructure. Future pages are marked unavailable. Replit subscription is not yet safe to cancel: migrate/verify the Shopify scheduled reader first.
+
+### Profit navigation consolidation — 15 October
+
+Paul requested removing Margin Analysis, Pricing & Discounts and the old Profit Overview tabs. The revised page is named Profit Engine and owns /profit-engine. Retired /new-profit, /margin-analysis and /pricing-optimisation links redirect there inside the existing authenticated merchant gate. Old page source is retained and referenced in docs/night-scout-demo-2026-10-15.md; it is no longer imported by the main router. Demo page/sidebar/title also use Profit Engine.
+
+Profit Engine labels now say Profit (EBITDA), with the qualifier smaller on headline, KPI and chart labels. Financial definitions and calculations are unchanged.

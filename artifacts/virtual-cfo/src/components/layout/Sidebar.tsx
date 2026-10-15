@@ -1,16 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, HelpCircle, TrendingDown, BarChart2, Megaphone, Cpu, Wallet, Tag, FlaskConical, Target, Bell, Settings } from "lucide-react";
+import { LayoutDashboard, HelpCircle, BarChart2, Megaphone, Wallet, FlaskConical, Target, Bell, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/BrandLogo";
 
 const navItems = [
   { icon: LayoutDashboard, label: "CFO Briefing",        href: "/dashboard"              },
-  { icon: TrendingDown,    label: "Margin Analysis",         href: "/margin-analysis"        },
   { icon: BarChart2,       label: "Growth Quality",         href: "/growth-quality"         },
   { icon: Megaphone,       label: "Marketing Efficiency",      href: "/marketing-efficiency"   },
-  { icon: Tag,             label: "Pricing & Discounts",      href: "/pricing-optimisation"   },
-  { icon: Cpu,             label: "Profit Overview",          href: "/profit-engine"          },
-  { icon: BarChart2,       label: "New-Profit",               href: "/new-profit"             },
+  { icon: BarChart2,       label: "Profit Engine",            href: "/profit-engine"             },
   { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
   { icon: Target,          label: "Opportunity Finder",     href: "/profit-opportunities"   },
   { icon: FlaskConical,    label: "Scenario Planner",       href: "/scenario-lab"           },

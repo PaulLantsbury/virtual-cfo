@@ -6,6 +6,8 @@ import {
   buildProfitPreview,
   amount,
   benchmarkAmount,
+  selectedAverageAmount,
+  combinedScenario,
   chartRows,
   compositionSteps,
   changeSteps,
@@ -14,6 +16,7 @@ import {
   sankeyFlows,
   type DailyProfit,
   type ProfitTotals,
+  type BaseAmounts,
 } from "./newProfitPreview.ts";
 
 const DAY = 86400000;
@@ -27,6 +30,7 @@ const rawKeys = [
   "variable",
   "advertising",
   "overheads",
+  "da",
   "orders",
 ] as const;
 const close = (actual: number, expected: number) =>
@@ -39,9 +43,17 @@ const rows = (from: string, to: string) =>
 const independent = (days: readonly DailyProfit[]) => {
   const totals = Object.fromEntries(
     rawKeys.map((key) => [key, days.reduce((sum, d) => sum + d[key], 0)]),
-  ) as Omit<ProfitTotals, "grossProfit" | "contribution" | "operatingProfit">;
+  ) as BaseAmounts;
   return {
     ...totals,
+    cashOverheads: totals.overheads - totals.da,
+    ebitda:
+      totals.sales +
+      totals.shipping -
+      totals.cogs -
+      totals.variable -
+      totals.advertising -
+      (totals.overheads - totals.da),
     grossProfit: totals.sales - totals.cogs,
     contribution:
       totals.sales +
@@ -165,7 +177,7 @@ test("rolling reference uses 12 weeks or 3 complete months BEFORE selection, wit
       assert.deepEqual(m.benchmark, reference);
       close(
         benchmarkAmount(m, "operatingProfit", false)!,
-        (reference.operatingProfit / m.benchmarkCount) * m.selectedCount,
+        reference.operatingProfit / m.benchmarkCount,
       );
       close(
         benchmarkAmount(m, "operatingProfit", true)!,
@@ -186,32 +198,30 @@ test("chart totals and per-order modes retain their own period and prior-year or
       perOrder = chartRows(m, true);
     assert.equal(
       totals.reduce((sum, p) => sum + p.profit!, 0),
-      m.current.operatingProfit,
+      m.current.ebitda,
     );
     for (let i = 0; i < totals.length; i++) {
       const period = m.periods[i];
       assert.equal(totals[i].sales, period.values.sales);
       close(perOrder[i].sales!, period.values.sales / period.values.orders);
-      close(
-        perOrder[i].profit!,
-        period.values.operatingProfit / period.values.orders,
-      );
+      close(perOrder[i].profit!, period.values.ebitda / period.values.orders);
       close(
         perOrder[i].priorYearProfit!,
-        period.priorYear.operatingProfit / period.priorYear.orders,
+        period.priorYear.ebitda / period.priorYear.orders,
       );
     }
-    assert.ok(
-      totals.some((p) => p.profit! < 0),
-      "sample chart retains a visible loss period",
-    );
+    if (granularity === "weekly")
+      assert.ok(
+        totals.some((p) => p.profit! < 0),
+        "weekly sample retains a visible loss period; monthly aggregation may legitimately offset it",
+      );
   }
   const zero = aggregateDays([]);
   assert.equal(amount(zero, "operatingProfit", true), null);
   assert.deepEqual(compositionSteps(zero, true), []);
 });
 
-test("composition waterfall reconciles sales to gross profit, contribution and operating profit in both display bases", () => {
+test("composition waterfall reconciles sales to gross profit, contribution and EBITDA in both display bases", () => {
   for (const granularity of ["weekly", "monthly"] as const)
     for (const months of [3, 6, 12] as const)
       for (const perOrder of [false, true]) {
@@ -236,30 +246,76 @@ test("composition waterfall reconciles sales to gross profit, contribution and o
           steps.find((p) => p.id === "contribution")!.end,
           m.current.contribution / divisor,
         );
-        close(steps.at(-1)!.end, m.current.operatingProfit / divisor);
+        close(steps.at(-1)!.end, m.current.ebitda / divisor);
       }
 });
 
-test("change bridge explains EXACT previous-to-selected operating-profit movement, not its cause", () => {
+test("expanded EBITDA bridge shows gross, discount and reversals with one net-sales checkpoint and no double-count", () => {
   for (const granularity of ["weekly", "monthly"] as const)
-    for (const months of [3, 6, 12] as const)
+    for (const months of ["last-week", "last-month", 3, 6, 12] as const)
       for (const perOrder of [false, true]) {
         const m = buildProfitPreview({ granularity, months }),
           steps = changeSteps(m, perOrder);
-        const start =
-            m.previous.operatingProfit / (perOrder ? m.previous.orders : 1),
-          end = m.current.operatingProfit / (perOrder ? m.current.orders : 1);
-        close(steps[0].end, start);
-        close(steps.at(-1)!.end, end);
-        close(
-          steps.slice(1, -1).reduce((sum, s) => sum + s.amount, 0),
-          end - start,
+        const c = perOrder ? 1 / m.current.orders : 1,
+          p = perOrder ? 1 / m.previous.orders : 1;
+        const before = m.previous.ebitda * p,
+          after = m.current.ebitda * c;
+        assert.deepEqual(
+          steps.map((s) => s.id),
+          [
+            "previous",
+            "gross",
+            "discounts",
+            "reversals",
+            "netSales",
+            "shipping",
+            "cogs",
+            "variable",
+            "ads",
+            "cashOverheads",
+            "current",
+          ],
         );
-        for (let i = 1; i < steps.length - 1; i++) {
-          close(steps[i].start, steps[i - 1].end);
-          close(steps[i].end - steps[i].start, steps[i].amount);
-        }
-        close(steps.at(-2)!.end, end);
+        close(steps[0].end, before);
+        close(steps.at(-1)!.end, after);
+        const byId = (id: string) => steps.find((s) => s.id === id)!;
+        close(byId("gross").amount, m.current.gross * c - m.previous.gross * p);
+        close(
+          byId("discounts").amount,
+          m.previous.discounts * p - m.current.discounts * c,
+        );
+        close(
+          byId("reversals").amount,
+          m.previous.reversals * p - m.current.reversals * c,
+        );
+        const netSales = m.current.sales * c - m.previous.sales * p;
+        close(
+          byId("gross").amount +
+            byId("discounts").amount +
+            byId("reversals").amount,
+          netSales,
+        );
+        const checkpoint = byId("netSales");
+        assert.equal(checkpoint.subtotal, true);
+        assert.equal(checkpoint.checkpoint, true);
+        close(checkpoint.start, before);
+        close(checkpoint.end, before + netSales);
+        close(checkpoint.amount, netSales);
+        close(checkpoint.effect!, netSales);
+        close(checkpoint.end, byId("reversals").end);
+        close(byId("shipping").start, checkpoint.end);
+        close(
+          steps
+            .filter((s) => !s.subtotal)
+            .reduce((sum, s) => sum + s.amount, 0),
+          after - before,
+        );
+        close(
+          byId("cashOverheads").amount,
+          m.previous.cashOverheads * p - m.current.cashOverheads * c,
+        );
+        close(steps.at(-2)!.end, after);
+        assert.ok(!steps.some((s) => s.id === "da"));
       }
 });
 
@@ -279,7 +335,7 @@ test("scenario ranges are standalone arithmetic with explicit assumptions, not p
   );
   assert.match(
     scenarios.find((s) => s.id === "payment")!.assumption,
-    /overlap/,
+    /excluded from the combined/,
   );
   assert.match(
     scenarios.find((s) => s.id === "carrier")!.assumption,
@@ -342,7 +398,7 @@ test("Sankey conserves net product sales plus shipping and refuses losses/signed
             (perOrder ? m.current.orders : 1),
         );
       }
-  const loss = DAILY_SAMPLE.find((d) => independent([d]).operatingProfit < 0)!;
+  const loss = DAILY_SAMPLE.find((d) => independent([d]).ebitda < 0)!;
   assert.ok(loss);
   assert.equal(sankeyFlows(aggregateDays([loss]), false).state, "unavailable");
   const good = buildProfitPreview({
@@ -350,10 +406,114 @@ test("Sankey conserves net product sales plus shipping and refuses losses/signed
     months: 3,
   }).current;
   assert.equal(
-    sankeyFlows({ ...good, operatingProfit: good.operatingProfit + 1 }, false)
-      .state,
+    sankeyFlows({ ...good, ebitda: good.ebitda + 1 }, false).state,
     "unavailable",
   );
   assert.equal(sankeyFlows({ ...good, orders: 0 }, true).state, "unavailable");
   assert.equal(sankeyFlows(aggregateDays([]), false).state, "unavailable");
+});
+
+test("last-week and last-month force true completed horizons and retain correct independent PY/benchmark bases", () => {
+  for (const granularity of ["weekly", "monthly"] as const) {
+    const week = buildProfitPreview({ granularity, months: "last-week" });
+    assert.equal(week.granularity, "weekly");
+    assert.equal(week.from, "2026-10-05");
+    assert.equal(week.to, "2026-10-11");
+    assert.equal(week.periods.length, 1);
+    assert.equal(week.benchmarkCount, 12);
+    const month = buildProfitPreview({ granularity, months: "last-month" });
+    assert.equal(month.granularity, "monthly");
+    assert.equal(month.from, "2026-09-01");
+    assert.equal(month.to, "2026-09-30");
+    assert.equal(month.periods.length, 1);
+    assert.equal(month.benchmarkCount, 3);
+    for (const m of [week, month]) {
+      assert.deepEqual(m.current, independent(rows(m.from, m.to)));
+      assert.equal(Date.parse(m.benchmarkTo) + DAY, Date.parse(m.from));
+      assert.equal(Date.parse(m.previousTo) + DAY, Date.parse(m.from));
+    }
+    assert.deepEqual(
+      week.priorYear,
+      independent(rows("2025-10-06", "2025-10-12")),
+    );
+    assert.deepEqual(
+      month.priorYear,
+      independent(rows("2025-09-01", "2025-09-30")),
+    );
+  }
+});
+
+test("EBITDA, cash overheads and operating profit remain distinct, with exact D&A identity for every horizon", () => {
+  for (const granularity of ["weekly", "monthly"] as const)
+    for (const months of ["last-week", "last-month", 3, 6, 12] as const) {
+      const m = buildProfitPreview({ granularity, months });
+      for (const v of [
+        m.current,
+        m.priorYear,
+        m.previous,
+        m.benchmark,
+        ...m.periods.flatMap((p) => [p.values, p.priorYear]),
+      ]) {
+        assert.ok(v.da > 0);
+        assert.equal(v.cashOverheads, v.overheads - v.da);
+        assert.equal(v.ebitda, v.contribution - v.cashOverheads);
+        assert.equal(v.operatingProfit, v.ebitda - v.da);
+        assert.notEqual(v.operatingProfit, v.ebitda);
+      }
+      close(
+        selectedAverageAmount(m, "ebitda", false)!,
+        m.current.ebitda / m.selectedCount,
+      );
+      close(
+        benchmarkAmount(m, "ebitda", false)!,
+        m.benchmark.ebitda / m.benchmarkCount,
+      );
+      close(
+        selectedAverageAmount(m, "ebitda", true)!,
+        m.current.ebitda / m.current.orders,
+      );
+      close(
+        benchmarkAmount(m, "ebitda", true)!,
+        m.benchmark.ebitda / m.benchmark.orders,
+      );
+    }
+});
+
+test("combined scenario excludes the payment/carrier overlap and shows arithmetic EBITDA range without a bank-cash promise", () => {
+  for (const granularity of ["weekly", "monthly"] as const)
+    for (const months of ["last-week", "last-month", 3, 6, 12] as const) {
+      const m = buildProfitPreview({ granularity, months }),
+        r = scenarioRanges(m),
+        combined = combinedScenario(m),
+        perOrder = combinedScenario(m, true);
+      assert.deepEqual([...combined.includedIds].sort(), [
+        "carrier",
+        "discount",
+      ]);
+      assert.deepEqual(combined.excludedIds, ["payment"]);
+      const selected = r.filter(
+        (s) => s.id === "carrier" || s.id === "discount",
+      );
+      close(
+        combined.low,
+        selected.reduce((sum, s) => sum + s.low, 0),
+      );
+      close(
+        combined.high,
+        selected.reduce((sum, s) => sum + s.high, 0),
+      );
+      close(combined.midpoint, (combined.low + combined.high) / 2);
+      close(combined.ebitdaLow, m.current.ebitda + combined.low);
+      close(combined.ebitdaHigh, m.current.ebitda + combined.high);
+      close(perOrder.displayLow!, combined.low / m.current.orders);
+      close(perOrder.displayHigh!, combined.high / m.current.orders);
+      assert.ok(combined.assumptions.length);
+      assert.ok(combined.cashTimingAssumptions.length);
+      const text = [
+        ...combined.assumptions,
+        ...combined.cashTimingAssumptions,
+      ].join(" ");
+      assert.match(text, /cash|bank/i);
+      assert.match(text, /assum|timing|not|unknown|unverified/i);
+    }
 });

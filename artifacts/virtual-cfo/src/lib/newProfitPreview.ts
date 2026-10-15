@@ -154,3 +154,15 @@ export function annualisedScenarioPlan(model:PreviewModel){
  const combined=combinedScenario(model,false);
  return {factor,periodsPerYear,opportunities,combined:{...combined,annualLow:combined.low*factor,annualHigh:combined.high*factor}};
 }
+
+/** Summarise signed arithmetic movements only: checkpoints are never drivers. */
+export function profitGraphAnalysis(model:PreviewModel,perOrder:boolean,basis:ComparisonBasis){
+ const reference=comparisonTotals(model,basis),current=amount(model.current,'ebitda',perOrder),prior=amount(reference,'ebitda',perOrder);
+ const delta=current===null||prior===null?null:current-prior;
+ const currentRevenue=model.current.sales+model.current.shipping,priorRevenue=reference.sales+reference.shipping;
+ const marginChange=currentRevenue>0&&priorRevenue>0?(model.current.ebitda/currentRevenue-reference.ebitda/priorRevenue)*100:null;
+ const movements=comparisonChangeSteps(model,perOrder,basis).filter(step=>!step.subtotal&&!step.checkpoint&&Number.isFinite(step.amount));
+ const upward=movements.filter(step=>step.amount>0).sort((a,b)=>b.amount-a.amount)[0]??null;
+ const downward=movements.filter(step=>step.amount<0).sort((a,b)=>a.amount-b.amount)[0]??null;
+ return {delta,marginChange,upward,downward};
+}

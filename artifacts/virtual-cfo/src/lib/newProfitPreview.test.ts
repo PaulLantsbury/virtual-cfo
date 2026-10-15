@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   DAILY_SAMPLE,
+  profitGraphAnalysis,
+  comparisonTotals,
   annualisedScenarioPlan,
   productValueRate,
   discountRefundChartRows,
@@ -574,4 +576,22 @@ test('annualised action plan scales selected-period sensitivities consistently a
   assert.deepEqual(plan.combined.excludedIds,['payment']);
   assert.equal(plan.combined.ebitdaHigh,model.current.ebitda+plan.combined.high);
  }
+});
+
+test('graph analysis respects comparison and per-order bases without reporting checkpoints as drivers',()=>{
+ for(const granularity of ['weekly','monthly'] as const)for(const basis of ['last-year','rolling'] as const)for(const perOrder of [false,true]){
+  const model=buildProfitPreview({granularity,months:3}),reference=comparisonTotals(model,basis),analysis=profitGraphAnalysis(model,perOrder,basis);
+  assert.equal(analysis.delta,amount(model.current,'ebitda',perOrder)!-amount(reference,'ebitda',perOrder)!);
+  for(const step of [analysis.upward,analysis.downward])if(step){assert.equal(step.subtotal,false);assert.equal(Boolean(step.checkpoint),false);}
+  if(analysis.upward)assert.ok(analysis.upward.amount>0);
+  if(analysis.downward)assert.ok(analysis.downward.amount<0);
+ }
+});
+test('graph analysis treats higher costs as downward EBITDA and refuses missing ratio denominators',()=>{
+ const model=buildProfitPreview({granularity:'weekly',months:'last-week'}),reference=model.priorYear;
+ const current={...reference,cogs:reference.cogs+100,grossProfit:reference.grossProfit-100,contribution:reference.contribution-100,ebitda:reference.ebitda-100,operatingProfit:reference.operatingProfit-100};
+ const analysis=profitGraphAnalysis({...model,current},false,'last-year');
+ assert.equal(analysis.delta,-100);assert.equal(analysis.downward?.id,'cogs');assert.equal(analysis.downward?.amount,-100);assert.equal(analysis.upward,null);
+ const missing=profitGraphAnalysis({...model,current:{...current,orders:0,sales:0,shipping:0}},true,'last-year');
+ assert.equal(missing.delta,null);assert.equal(missing.marginChange,null);assert.equal(missing.upward,null);assert.equal(missing.downward,null);
 });

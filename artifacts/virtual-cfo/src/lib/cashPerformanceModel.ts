@@ -31,8 +31,8 @@ export function reconcileCash(input:CashReconciliationInput){
 }
 const monthShift=(date:string,count:number)=>{const d=new Date(date+'T00:00:00Z');return new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+count,1)).toISOString().slice(0,10);};
 const dayBefore=(date:string)=>new Date(Date.parse(date+'T00:00:00Z')-86400000).toISOString().slice(0,10);
-function sampleMonth(from:string){
- const end=monthShift(from,1),days=DAILY_SAMPLE.filter(row=>row.date>=from&&row.date<end);if(days.length!==(Date.parse(end)-Date.parse(from))/86400000)throw Error('Sample accounting month incomplete');
+export function sampleMonth(from:string,allowIncomplete=false){
+ const end=monthShift(from,1),days=DAILY_SAMPLE.filter(row=>row.date>=from&&row.date<end);if(!allowIncomplete&&days.length!==(Date.parse(end)-Date.parse(from))/86400000)throw Error('Sample accounting month incomplete');
  const p=aggregateDays(days),m=new Date(from+'T00:00:00Z').getUTCMonth(),year=Number(from.slice(0,4));
  // Independent illustrative balance-sheet movements, signed cash effects. Stock is
  // inventory movement, NOT supplier payments; payable movement is applied separately.

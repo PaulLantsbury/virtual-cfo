@@ -1,21 +1,31 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {buildCashDemo} from './cashDemoModel.ts';
-import {cashReviewPlanKey,createCashReviewPlan,readCashReviewPlan,writeCashReviewPlan,clearCashReviewPlan} from './cashReviewPlan.ts';
-const now=new Date('2026-10-15T12:00:00Z'),model=buildCashDemo(),key=cashReviewPlanKey('user','store');
+import {cashReviewPlanKey,createCashReviewPlan,readCashReviewPlan,writeCashReviewPlan,clearCashReviewPlan,describeCashReviewChange,type CashReviewSnapshot} from './cashReviewPlan.ts';
+const now=new Date('2026-10-15T12:00:00Z'),model:CashReviewSnapshot={asOf:'2026-10-11',currentCash:18600000,minimumBuffer:5000000,horizonDays:42,lowestCash:800000,lowestDate:'2026-11-01',forecastStatus:'Incomplete',gaps:['Future stock commitments not reviewed']},key=cashReviewPlanKey('user','store');
 const memory=()=>{const rows=new Map<string,string>();return {getItem:(k:string)=>rows.get(k)??null,setItem:(k:string,v:string)=>{rows.set(k,v);},removeItem:(k:string)=>{rows.delete(k);}};};
-test('cash sample action survives reload, freezes baseline and supports done/reopen/clear',()=>{
- const store=memory(),p=createCashReviewPlan('stock-order',' Paul ','2026-10-20',model,now);writeCashReviewPlan(store,key,p);
- const restored=readCashReviewPlan(store,key)!;assert.equal(restored.owner,'Paul');assert.equal(restored.baseline.currentCash,model.currentCash);assert.equal(restored.baseline.lowestCash,model.lowestForecast.balance);
- writeCashReviewPlan(store,key,{...restored,status:'done'});assert.equal(readCashReviewPlan(store,key)!.status,'done');writeCashReviewPlan(store,key,{...restored,status:'planned'});assert.equal(readCashReviewPlan(store,key)!.status,'planned');
- assert.equal(restored.baseline.minimumBuffer,model.minimumBuffer);clearCashReviewPlan(store,key);assert.equal(readCashReviewPlan(store,key),null);
+test('review freezes dates, buffer and gaps, supports reload/done/reopen/clear',()=>{
+ const s=memory(),p=createCashReviewPlan('check-commitments',' Paul ','2026-10-20',model,now);writeCashReviewPlan(s,key,p);
+ model.gaps.push('Later edit');assert.equal(p.baseline.gaps.length,1);model.gaps.pop();
+ const r=readCashReviewPlan(s,key)!;assert.equal(r.owner,'Paul');assert.equal(r.baseline.horizonDays,42);assert.equal(r.baseline.currentCash,18600000);
+ for(const status of ['done','planned'] as const){writeCashReviewPlan(s,key,{...r,status});assert.equal(readCashReviewPlan(s,key)!.status,status);}
+ clearCashReviewPlan(s,key);assert.equal(readCashReviewPlan(s,key),null);
 });
-test('verified scope keys isolate stores/users; invalid actions, dates, owner and unsafe pence refuse',()=>{
+test('missing forecast stays unavailable, requires matching nullable date',()=>{
+ const p=createCashReviewPlan('check-settlements','Me','2026-10-20',{...model,lowestCash:null,lowestDate:null},now);assert.equal(p.baseline.lowestCash,null);
+ assert.throws(()=>createCashReviewPlan('check-stock','Me','2026-10-20',{...model,lowestCash:null},now));
+ assert.throws(()=>createCashReviewPlan('check-stock','Me','2026-10-20',{...model,lowestDate:'2027-01-01'},now));
+});
+test('scope isolation; rejects old version/action, unsafe money, bad dates and malformed gaps',()=>{
  assert.notEqual(key,cashReviewPlanKey('user2','store'));assert.notEqual(key,cashReviewPlanKey('user','store2'));assert.throws(()=>cashReviewPlanKey('','store'));
- for(const args of [['wrong','Me','2026-10-20'],['overheads','','2026-10-20'],['overheads','x'.repeat(81),'2026-10-20'],['overheads','Me','2026-10-15'],['overheads','Me','2026-02-30']])assert.throws(()=>createCashReviewPlan(args[0] as 'overheads',args[1],args[2],model,now));
- assert.throws(()=>createCashReviewPlan('overheads','Me','2026-10-20',{...model,currentCash:Infinity},now));
+ const s=memory(),p=createCashReviewPlan('check-stock','Me','2026-10-20',model,now);s.setItem(key,JSON.stringify({...p,version:1,actionId:'stock-order'}));assert.throws(()=>readCashReviewPlan(s,key),/older/);
+ for(const patch of [{currentCash:Infinity},{minimumBuffer:-1},{lowestCash:1.5},{horizonDays:0},{gaps:[null]},{forecastStatus:''}])assert.throws(()=>createCashReviewPlan('check-stock','Me','2026-10-20',{...model,...patch} as CashReviewSnapshot,now));
+ assert.throws(()=>createCashReviewPlan('check-stock','','2026-10-20',model,now));assert.throws(()=>createCashReviewPlan('check-stock','Me','2026-10-15',model,now));assert.throws(()=>createCashReviewPlan('check-stock','Me','2026-02-30',model,now));
 });
-test('corrupt, oversized and storage failures surface instead of silently succeeding',()=>{
- const s=memory();s.setItem(key,'{');assert.throws(()=>readCashReviewPlan(s,key));s.setItem(key,'x'.repeat(8193));assert.throws(()=>readCashReviewPlan(s,key));
- const p=createCashReviewPlan('supplier-deferral','Me','2026-10-20',model,now);s.setItem(key,JSON.stringify({...p,baseline:{...p.baseline,lowestCash:1.5}}));assert.throws(()=>readCashReviewPlan(s,key));
- assert.throws(()=>writeCashReviewPlan({...s,setItem:()=>{throw Error('quota');}},key,p));assert.throws(()=>clearCashReviewPlan({...s,removeItem:()=>{throw Error('denied');}},key));
+test('comparisons need a later saved snapshot; do not claim action outcomes',()=>{
+ assert.match(describeCashReviewChange(model,{...model,currentCash:999}),/no later cash snapshot/);
+ assert.match(describeCashReviewChange(model,{...model,asOf:'2026-10-12',currentCash:18500000}),/£1,000 lower/);
+ assert.match(describeCashReviewChange(model,{...model,asOf:'2026-10-12'}),/does not attribute/);
+});
+test('corrupt, oversized and storage errors surface',()=>{
+ const s=memory();s.setItem(key,'{');assert.throws(()=>readCashReviewPlan(s,key));s.setItem(key,'x'.repeat(16385));assert.throws(()=>readCashReviewPlan(s,key));
+ const p=createCashReviewPlan('check-stock','Me','2026-10-20',model,now);assert.throws(()=>writeCashReviewPlan({...s,setItem:()=>{throw Error('quota');}},key,p));assert.throws(()=>clearCashReviewPlan({...s,removeItem:()=>{throw Error('denied');}},key));
 });

@@ -1,5 +1,7 @@
 # Provider writer — operational handoff, 15 October 2026
 
+> Superseded hosting boundary, 15 October 16:02 London: Paul requires the main Night Scout product and readers to remain read-only. Do not configure writer credentials, consent UI or writer callback on the customer app host. Use the isolated operator design in `experiments/test-programme/OPERATOR-HOST-ISOLATION.md`; the earlier customer-host callback instructions below are historical and must not be followed. No separate operator host is active yet.
+
 This is the consolidated setup sequence for the existing approved trial, not a new proposal to widen it. The adjacent `writer-provisioning-manifest.json` is a non-secret checklist: no runtime reads or applies it. Installation was acknowledged by the 9 October operator receipt; current apps, passwords, secrets, consent and scheduler state still need secure external inspection. A local source review cannot establish their presence.
 
 ## 1. Inspect existing resources, then provision privately

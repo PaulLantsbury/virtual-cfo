@@ -1,12 +1,14 @@
+import {operatorOrigin as validateOperatorOrigin} from './operator-origin.mjs';
 // Host supplies its Express ports; no dependency/path resolution occurs during
 // module import or after esbuild relocates this source into dist/index.mjs.
-export function createXeroWriterBootstrapRouter({service,express}={}){
+export function createXeroWriterBootstrapRouter({service,express,operatorOrigin}={}){
  if(typeof express?.Router!=='function' || typeof express?.json!=='function')throw new Error('Writer router host ports required');
+ const origin=validateOperatorOrigin(operatorOrigin);
  const {Router,json}=express;
  const router=Router();router.use((_req,res,next)=>{res.set('Cache-Control','no-store');res.set('Referrer-Policy','no-referrer');if(!service){res.status(503).json({error:'Xero writer setup unavailable'});return;}next();});
  router.use(json({limit:'1kb',strict:true}));
  router.post('/connect',async(req,res)=>{
-  if(req.headers.origin!=='https://night-scout-xero-staging.onrender.com' || typeof req.headers.authorization!=='string' || !/^Bearer [^\s,]+$/i.test(req.headers.authorization) || req.headers.authorization.length>8192 || !req.body || Object.keys(req.body).length!==0){res.status(403).json({error:'Xero writer setup unavailable'});return;}
+  if(req.headers.origin!==origin || typeof req.headers.authorization!=='string' || !/^Bearer [^\s,]+$/i.test(req.headers.authorization) || req.headers.authorization.length>8192 || !req.body || Object.keys(req.body).length!==0){res.status(403).json({error:'Xero writer setup unavailable'});return;}
   try{res.json(await service.start(req.headers.authorization));}catch{res.status(503).json({error:'Xero writer setup unavailable'});}
  });
  router.get('/callback',async(req,res)=>{

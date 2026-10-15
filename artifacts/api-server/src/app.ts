@@ -1,5 +1,3 @@
-import {createXeroWriterBootstrapRouter} from '../../../experiments/test-programme/xero-writer-bootstrap-router.mjs';
-import type {XeroTestWriterRuntime} from './lib/xero-test-writer-runtime.ts';
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
@@ -16,7 +14,7 @@ import {safeRequestPath} from './lib/safe-request-path.ts';
 import {createProfitReportingRouter,type ProfitReportingService} from './routes/profit-reporting.ts';
 import {createXeroSavedMappingRouter,type SavedMappingDependencies} from './routes/xero-saved-mapping.ts';
 
-export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService,xeroAccounting?:XeroAccountingDependencies,xeroSavedMapping?:SavedMappingDependencies,xeroTestWriter?:XeroTestWriterRuntime['service']): Express {
+export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService,xeroAccounting?:XeroAccountingDependencies,xeroSavedMapping?:SavedMappingDependencies): Express {
 const app: Express = express();
 
 app.use(
@@ -42,7 +40,8 @@ app.use(cors());
 // Mount before general body parsing so review limits and safe errors apply.
 app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
 app.use('/api/profit-reporting',createProfitReportingRouter(profitReporting));
-app.use('/api/xero/test-writer',createXeroWriterBootstrapRouter({service:xeroTestWriter,express:{Router:express.Router,json:express.json}}));
+// Retired operator-only endpoint must never reach the customer SPA or OAuth handlers.
+app.use('/api/xero/test-writer',(_req,res)=>{res.set('Cache-Control','no-store').status(404).json({error:'endpoint_unavailable'});});
 app.use('/api/xero/staging',createXeroStagingBootstrapRouter(xeroBootstrap));
 app.use('/api/xero',createXeroAccountingRouter(xeroAccounting));
 app.use('/api/xero',createXeroSavedMappingRouter(xeroSavedMapping));

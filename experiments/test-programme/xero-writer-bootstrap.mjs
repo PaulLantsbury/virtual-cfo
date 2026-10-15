@@ -1,10 +1,11 @@
+import {operatorCallback} from './operator-origin.mjs';
 import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import {encryptStagingEnvelope} from './writer-envelope-crypto.mjs';
 import {validWriterScopes} from './writer-oauth-scopes.mjs';
 const hash=v=>createHash('sha256').update(v).digest('hex'),uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-export function createXeroWriterBootstrap({enabled=false,projectRef,ownerId,storeId,expectedTenant,clientId,clientSecret,redirectUri,masterKey,keyVersion,pool,authenticate,fetchImpl=fetch}){
+export function createXeroWriterBootstrap({enabled=false,projectRef,ownerId,storeId,expectedTenant,clientId,clientSecret,operatorOrigin,redirectUri,masterKey,keyVersion,pool,authenticate,fetchImpl=fetch}){
  if(!enabled)return undefined;
- if(projectRef!=='bioalckltvkhlczusdvl' || !uuid.test(ownerId) || !uuid.test(storeId) || expectedTenant!==undefined && !uuid.test(expectedTenant) || !clientId || !clientSecret || redirectUri!=='https://night-scout-xero-staging.onrender.com/api/xero/test-writer/callback' || typeof masterKey!=='string' || masterKey.length<32 || !keyVersion || !pool || typeof authenticate!=='function')throw new Error('Xero writer setup unavailable');
+ if(projectRef!=='bioalckltvkhlczusdvl' || !uuid.test(ownerId) || !uuid.test(storeId) || expectedTenant!==undefined && !uuid.test(expectedTenant) || !clientId || !clientSecret || redirectUri!==operatorCallback(operatorOrigin) || typeof masterKey!=='string' || masterKey.length<32 || !keyVersion || !pool || typeof authenticate!=='function')throw new Error('Xero writer setup unavailable');
  const rpc=async(sql,args)=>(await pool.query(sql,args)).rows;
  async function request(url,options){
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);

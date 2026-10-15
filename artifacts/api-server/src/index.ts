@@ -1,4 +1,3 @@
-import {createXeroTestWriterRuntime} from './lib/xero-test-writer-runtime.ts';
 import {createApp} from "./app";
 import {startReviewRuntime} from "./lib/review-startup";
 import { logger } from "./lib/logger";
@@ -61,13 +60,7 @@ try{xeroSavedMapping=createXeroSavedMappingRuntime(process.env);}catch{
   await Promise.all([runtime?.close(),xeroBootstrap?.close()]);
   process.exit(1);
 }
-let xeroTestWriter;
-try{xeroTestWriter=createXeroTestWriterRuntime(process.env);}catch{
- logger.error("Xero test writer configuration failed; server startup stopped");
- await Promise.all([runtime?.close(),xeroBootstrap?.close()]);
- process.exit(1);
-}
-const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined,webRoot,xeroReadiness,runtime?.profitService,xeroAccounting,xeroSavedMapping,xeroTestWriter?.service);
+const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined,webRoot,xeroReadiness,runtime?.profitService,xeroAccounting,xeroSavedMapping);
 const server=app.listen(port, localBind ?? "0.0.0.0", (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
@@ -78,5 +71,5 @@ const server=app.listen(port, localBind ?? "0.0.0.0", (err) => {
 });
 
 for(const signal of ["SIGTERM","SIGINT"] as const){
- process.once(signal,()=>{server.close(()=>{void Promise.all([runtime?.close(),xeroBootstrap?.close(),xeroTestWriter?.close()]).finally(()=>process.exit(0));});});
+ process.once(signal,()=>{server.close(()=>{void Promise.all([runtime?.close(),xeroBootstrap?.close()]).finally(()=>process.exit(0));});});
 }

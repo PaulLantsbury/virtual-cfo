@@ -1,5 +1,7 @@
 # Daily test-feed amendment — 15 October 2026
 
+> Superseded hosting boundary, 15 October 16:02 London: Paul requires the main Night Scout product and readers to remain read-only. Do not configure writer credentials, consent UI or writer callback on the customer app host. Use the isolated operator design in `experiments/test-programme/OPERATOR-HOST-ISOLATION.md`; the earlier customer-host callback instructions below are historical and must not be followed. No separate operator host is active yet.
+
 Status: concrete bounded proposal, not activated. Paul requested daily Shopify/Xero test updates today. Existing approval covers isolated development/demo writes, but the installed runner still has six specific dates; this document does not silently turn that into indefinite daily generation. Opt-in code and an unapplied SQL proposal now prepare the bounded daily cadence; no live grants, secrets, provider calls or schedules are changed.
 
 ## Smallest useful daily trial

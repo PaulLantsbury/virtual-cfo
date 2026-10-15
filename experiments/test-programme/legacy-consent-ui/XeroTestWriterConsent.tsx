@@ -1,7 +1,8 @@
+/** Retained design reference only; never part of customer Settings or bundle. */
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { supabase } from '@/lib/supabase';
-import { startXeroTestWriterConsent, writerConsentVisible } from '@/lib/xeroTestWriterConsent';
+import { startXeroTestWriterConsent, writerConsentVisible } from './xeroTestWriterConsent';
 
 /** Operator-only staging consent; the server independently enforces owner and store membership. */
 export function XeroTestWriterConsent() {

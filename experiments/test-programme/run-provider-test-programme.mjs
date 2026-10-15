@@ -11,27 +11,37 @@ import {validWriterDatabaseIdentity} from './writer-database-identity.mjs';
 export {validWriterDatabaseIdentity} from './writer-database-identity.mjs';
 
 export function prepareBoundedProgramme(config) {
-  const allowed = new Set(['provider','target','startMonday','programmeKey','contactId','accountCode','financialMode']);
+  const allowed = new Set(['provider','target','startMonday','programmeKey','contactId','accountCode','financialMode','scheduleProfile']);
   if (!config || Object.keys(config).some(k=>!allowed.has(k)) || !['shopify','xero'].includes(config.provider) || !/^[A-Za-z0-9_-]{1,64}$/.test(config.programmeKey)) throw new Error('Invalid programme');
   if (config.financialMode!==undefined && (config.provider!=='xero' || !['draft_only','posted_demo_only'].includes(config.financialMode))) throw new Error('Invalid financial mode');
   const start = new Date(`${config.startMonday}T00:00:00Z`);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(config.startMonday) || !Number.isFinite(start.valueOf()) || start.getUTCDay() !== 1 || start.toISOString().slice(0,10) !== config.startMonday) throw new Error('Explicit Monday required');
-  const days = [0,1,5,7,8,12];
+  const daily=config.scheduleProfile==='daily-20261015-v1';
+  if(config.scheduleProfile!==undefined && !daily)throw new Error('Unknown schedule profile');
+  if(daily && (config.startMonday!=='2026-10-12' || config.programmeKey!==`${config.provider}-staging-20261012` || (config.provider==='shopify' && config.target!=='pocketlaunchpad1.myshopify.com') || (config.provider==='xero' && config.financialMode!=='posted_demo_only')))throw new Error('Daily profile binding mismatch');
+  const days = daily ? [3,4,5,6] : [0,1,5,7,8,12];
   const plans = days.map((offset, index)=> {
     const date = new Date(start.valueOf()+offset*86400000).toISOString().slice(0,10);
     const plan = config.provider === 'shopify' ? shopifyOrderPlan({kind:'create-order',route:'shopify-development',test:true,currency:'GBP',targetStore:config.target,id:`${config.programmeKey}/${date}`,amounts:{units:1,grossProductsPence:6000,productDiscountPence:0,productVatPence:0,netShippingPence:0,shippingVatPence:0}})
-      : xeroInvoicePlan({target:config.target,date,amountPence:1000,contactId:config.contactId,accountCode:config.accountCode,programmeId:config.programmeKey,ordinal:index+1,status:config.financialMode==='posted_demo_only'?'AUTHORISED':'DRAFT'});
+      : xeroInvoicePlan({target:config.target,date,amountPence:1000,contactId:config.contactId,accountCode:config.accountCode,programmeId:config.programmeKey,ordinal:daily?index+3:index+1,status:config.financialMode==='posted_demo_only'?'AUTHORISED':'DRAFT'});
     return {date,plan};
   });
   return {programmeKey:config.programmeKey,provider:config.provider,target:config.target,startMonday:config.startMonday,
-    financialMode:config.financialMode ?? 'draft_only', startsAt:start.toISOString(),endsAt:new Date(start.valueOf()+14*86400000).toISOString(),cap:6,plans};
+    financialMode:config.financialMode ?? 'draft_only', startsAt:start.toISOString(),endsAt:new Date(start.valueOf()+14*86400000).toISOString(),cap:daily?4:6,...(daily?{scheduleProfile:config.scheduleProfile}:{}),plans};
+}
+
+// No credential mint/refresh is permitted before the durable profile check passes.
+export async function verifyDailyProfile({pool,programme}) {
+  if(programme.scheduleProfile!=='daily-20261015-v1' || programme.cap!==4)throw new Error('Invalid daily profile');
+  const result=await pool.query('SELECT staging_test_programme.daily_profile_ready($1,$2,$3,$4) AS ready',[programme.programmeKey,programme.provider,programme.target,programme.cap]);
+  if(result.rows?.length!==1 || result.rows[0].ready!==true)throw new Error('Daily profile unavailable');
 }
 
 export async function main({env=process.env,now=new Date()}={}) {
   let pool;
   try {
     const programme = prepareBoundedProgramme(JSON.parse(readFileSync(env.NIGHT_SCOUT_TEST_PROGRAMME_CONFIG_FILE,'utf8')));
-    if (env.NIGHT_SCOUT_TEST_PROGRAMME_ENABLED !== 'true') return {event:'provider_test_programme',state:'prepared-disabled',provider:programme.provider,actions:6};
+    if (env.NIGHT_SCOUT_TEST_PROGRAMME_ENABLED !== 'true') return {event:'provider_test_programme',state:'prepared-disabled',provider:programme.provider,actions:programme.plans.length};
     if (env.NIGHT_SCOUT_TEST_PROGRAMME_PROJECT_REF !== 'bioalckltvkhlczusdvl' || env.NIGHT_SCOUT_TEST_PROGRAMME_TARGET !== programme.target || env.NIGHT_SCOUT_TEST_PROGRAMME_VERIFIED_TEST_TARGET !== 'true') throw new Error('Invalid activation');
     if(programme.financialMode==='posted_demo_only' && env.NIGHT_SCOUT_TEST_WRITER_POSTED_DEMO_APPROVED!=='true') throw new Error('Posted demo approval absent');
     const formatter = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/London',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
@@ -55,6 +65,7 @@ export async function main({env=process.env,now=new Date()}={}) {
       catch{await client.query('ROLLBACK').catch(()=>{});throw new Error('WRITER_DATABASE_UNAVAILABLE');}
       finally{client.release();}
     }};
+    if(programme.scheduleProfile)await verifyDailyProfile({pool:scopedPool,programme});
     const ledger=createRpcLedger({pool:scopedPool,programmeKey:programme.programmeKey});
     const run=token=>executeProviderWrite({plan:action.plan,ledger,provider:createProviderTransport({provider:programme.provider,target:programme.target,token,allowPostedDemo:programme.financialMode==='posted_demo_only' && env.NIGHT_SCOUT_TEST_WRITER_POSTED_DEMO_APPROVED==='true'}),now,activation:{...programme,enabled:true,environment:'staging',projectRef:'bioalckltvkhlczusdvl',verifiedTestTarget:true}});
     const result=programme.provider==='xero' ? await withRefreshedXeroWriter({pool:scopedPool,programmeKey:programme.programmeKey,target:programme.target,

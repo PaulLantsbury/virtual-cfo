@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import {cashReviewPlanKey} from '../lib/cashReviewPlan';
 import { samplePlanKey } from '../lib/newProfitSavedPlan';
 import { DEMO_STORE_ID, DEMO_USER_ID } from './DemoAuth';
 import './demo.css';
@@ -11,6 +12,7 @@ export function AppLayout({ children }: { children: ReactNode; showMonitoring?: 
     try {
       // Remove only the synthetic demo identity's plan. Never clear application storage.
       window.localStorage.removeItem(samplePlanKey(DEMO_USER_ID, DEMO_STORE_ID));
+      window.localStorage.removeItem(cashReviewPlanKey(DEMO_USER_ID, DEMO_STORE_ID));
       window.location.reload();
     } catch {
       setResetError('This browser could not reset the demo plan. Please allow browser storage and try again.');

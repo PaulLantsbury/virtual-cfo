@@ -49,3 +49,28 @@ test('invalid controls and unknown action IDs fail closed',()=>{
  for(const minimumBuffer of [NaN,Infinity,-1,1.5,Number.MAX_SAFE_INTEGER+1])assert.throws(()=>buildCashDemo({minimumBuffer}));
  assert.throws(()=>buildCashDemo({selectedActionIds:['invalid'] as never}));
 });
+
+test('cash chart sales match Profit exactly for every selected and prior-year period; receipts remain distinct',async()=>{
+ const { buildProfitPreview, DAILY_SAMPLE, aggregateDays }=await import('./newProfitPreview.ts');
+ for(const granularity of ['weekly','monthly'] as const)for(const months of [3,6,12] as const){
+  const cash=buildCashDemo({granularity,months}),profit=buildProfitPreview({granularity,months});
+  assert.equal(cash.history.length,profit.periods.length);
+  cash.history.forEach((row,i)=>{
+   assert.equal(row.from,profit.periods[i].from);assert.equal(row.to,profit.periods[i].to);
+   assert.equal(row.sales,profit.periods[i].values.sales);assert.equal(row.priorYearSales,profit.periods[i].priorYear.sales);
+   assert.notEqual(row.sales,row.receipts);
+   assert.ok(Number.isFinite(row.rollingAverageSales));
+  });
+  const first=cash.history[0],selected=DAILY_SAMPLE.filter(row=>row.date>=first.from&&row.date<=first.to);
+  assert.equal(first.sales,aggregateDays(selected).sales);
+ }
+});
+test('stock schedule explains every forecast payment with week-ending assumptions, not verified commitments',()=>{
+ const cash=buildCashDemo();
+ for(const row of cash.forecast){
+  assert.equal(row.stockPayments.reduce((sum,payment)=>sum+payment.amount,0),row.stock);
+  for(const payment of row.stockPayments){assert.equal(payment.date,row.date);assert.equal(payment.timingBasis,'week-ending-assumption');assert.match(payment.evidence,/not verified/);}
+ }
+ assert.equal(cash.forecast[1].stockPayments.find(row=>row.actionId==='stock-order')!.amount,1500000);
+ assert.equal(cash.forecast[2].stockPayments.find(row=>row.actionId==='supplier-deferral')!.amount,2000000);
+});

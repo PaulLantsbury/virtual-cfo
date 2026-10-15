@@ -2,6 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   DAILY_SAMPLE,
+  annualisedScenarioPlan,
+  productValueRate,
+  discountRefundChartRows,
   aggregateDays,
   buildProfitPreview,
   amount,
@@ -538,4 +541,37 @@ test('global comparison uses one prior-year or span-normalized rolling reference
       }
     }
   }
+});
+
+test('discount and refund series use their own period gross product sales and matched prior year',()=>{
+ for(const granularity of ['weekly','monthly'] as const)for(const months of ['last-week','last-month',3,6,12] as const){
+  const model=buildProfitPreview({granularity,months}),rows=discountRefundChartRows(model);
+  assert.equal(rows.length,model.selectedCount);
+  rows.forEach((row,i)=>{const period=model.periods[i];assert.equal(row.from,period.from);assert.equal(row.to,period.to);
+   assert.equal(row.discounts,period.values.discounts/period.values.gross*100);
+   assert.equal(row.refunds,period.values.reversals/period.values.gross*100);
+   assert.equal(row.priorYearDiscounts,period.priorYear.discounts/period.priorYear.gross*100);
+   assert.equal(row.priorYearRefunds,period.priorYear.reversals/period.priorYear.gross*100);
+  });
+ }
+});
+test('value rates preserve event-period refunds above sales and reject unavailable denominators',()=>{
+ assert.equal(productValueRate(200,100),200);
+ for(const denominator of [0,-1,NaN,Infinity])assert.equal(productValueRate(20,denominator),null);
+ assert.equal(productValueRate(NaN,100),null);
+ assert.equal(productValueRate(0,100),0);
+});
+
+test('annualised action plan scales selected-period sensitivities consistently across every horizon',()=>{
+ for(const granularity of ['weekly','monthly'] as const)for(const months of ['last-week','last-month',3,6,12] as const){
+  const model=buildProfitPreview({granularity,months}),plan=annualisedScenarioPlan(model);
+  const factor=(model.granularity==='weekly'?52:12)/model.selectedCount;
+  assert.equal(plan.factor,factor);
+  for(const opportunity of plan.opportunities){assert.equal(opportunity.annualLow,opportunity.low*factor);assert.equal(opportunity.annualHigh,opportunity.high*factor);}
+  assert.equal(plan.combined.annualLow,plan.combined.low*factor);assert.equal(plan.combined.annualHigh,plan.combined.high*factor);
+  const carrier=plan.opportunities.find(item=>item.id==='carrier')!,discount=plan.opportunities.find(item=>item.id==='discount')!;
+  assert.ok(Math.abs(plan.combined.annualHigh-carrier.annualHigh-discount.annualHigh)<.00001);
+  assert.deepEqual(plan.combined.excludedIds,['payment']);
+  assert.equal(plan.combined.ebitdaHigh,model.current.ebitda+plan.combined.high);
+ }
 });

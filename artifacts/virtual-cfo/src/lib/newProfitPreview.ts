@@ -131,3 +131,26 @@ export function comparisonChangeSteps(model:PreviewModel,perOrder:boolean,basis:
  const reference=comparisonTotals(model,basis);
  return changeSteps({...model,previous:reference},perOrder).map(step=>step.id==='previous'?{...step,label:basis==='last-year'?'Prior-year EBITDA':'Reference EBITDA'}:step);
 }
+
+/** Event-period value rates, ex VAT and shipping; never order-cohort return rates. */
+export function productValueRate(value:number,grossProductSales:number):number|null {
+ return Number.isFinite(value)&&Number.isFinite(grossProductSales)&&grossProductSales>0?value/grossProductSales*100:null;
+}
+export function discountRefundChartRows(model:PreviewModel){
+ return model.periods.map(period=>({from:period.from,to:period.to,label:period.label,
+  discounts:productValueRate(period.values.discounts,period.values.gross),
+  priorYearDiscounts:productValueRate(period.priorYear.discounts,period.priorYear.gross),
+  refunds:productValueRate(period.values.reversals,period.values.gross),
+  priorYearRefunds:productValueRate(period.priorYear.reversals,period.priorYear.gross)}));
+}
+
+/** Constant-rate annualised sensitivity, not a forecast or a seasonal model.
+ * Uses 52 complete weeks or 12 calendar months, not a 365-day projection. */
+export function annualisedScenarioPlan(model:PreviewModel){
+ const periodsPerYear=model.granularity==='weekly'?52:12;
+ const factor=periodsPerYear/model.selectedCount;
+ if(!Number.isFinite(factor)||factor<=0)throw Error('Invalid annualisation period');
+ const opportunities=opportunityPareto(model,false).map(item=>({...item,annualLow:item.low*factor,annualHigh:item.high*factor}));
+ const combined=combinedScenario(model,false);
+ return {factor,periodsPerYear,opportunities,combined:{...combined,annualLow:combined.low*factor,annualHigh:combined.high*factor}};
+}

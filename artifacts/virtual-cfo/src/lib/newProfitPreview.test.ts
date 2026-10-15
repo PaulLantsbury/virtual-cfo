@@ -517,3 +517,25 @@ test("combined scenario excludes the payment/carrier overlap and shows arithmeti
       assert.match(text, /assum|timing|not|unknown|unverified/i);
     }
 });
+
+test('global comparison uses one prior-year or span-normalized rolling reference in totals, trend and change bridge', async () => {
+  const { comparisonTotals, comparisonChartRows, comparisonChangeSteps } = await import('./newProfitPreview.ts');
+  for (const granularity of ['weekly','monthly'] as const) for (const months of ['last-week','last-month',3,6,12] as const) {
+    const model=buildProfitPreview({granularity,months});
+    for (const basis of ['last-year','rolling'] as const) {
+      const reference=comparisonTotals(model,basis);
+      const factor=model.selectedCount/model.benchmarkCount;
+      for(const key of Object.keys(model.current) as (keyof ProfitTotals)[])close(reference[key],basis==='last-year'?model.priorYear[key]:model.benchmark[key]*factor);
+      close(reference.ebitda,reference.contribution-reference.cashOverheads);
+      for (const perOrder of [false,true]) {
+        const chart=comparisonChartRows(model,perOrder,basis),bridge=comparisonChangeSteps(model,perOrder,basis);
+        close(bridge[0].end,amount(reference,'ebitda',perOrder)!);
+        close(bridge.at(-1)!.end,amount(model.current,'ebitda',perOrder)!);
+        close(bridge[0].end+bridge.filter(step=>!step.subtotal).reduce((sum,step)=>sum+step.amount,0),bridge.at(-1)!.end);
+        if(basis==='rolling')for(const row of chart)close(row.comparisonProfit!,perOrder?amount(model.benchmark,'ebitda',true)!:model.benchmark.ebitda/model.benchmarkCount);
+        else for(const row of chart)close(row.comparisonProfit!,amount(row.priorYear,'ebitda',perOrder)!);
+        if(!perOrder)close(chart.reduce((sum,row)=>sum+row.comparisonProfit!,0),reference.ebitda);
+      }
+    }
+  }
+});

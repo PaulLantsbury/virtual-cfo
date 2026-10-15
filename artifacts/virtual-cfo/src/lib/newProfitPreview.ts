@@ -52,7 +52,7 @@ export function compositionSteps(values:ProfitTotals,perOrder:boolean):Waterfall
  if(perOrder&&(!Number.isFinite(values.orders)||values.orders<=0))return [];
  const scale=perOrder?1/values.orders:1,steps:WaterfallStep[]=[];let cursor=0;
  const add=(id:string,label:string,value:number,subtotal=false)=>{const target=value*scale;const start=subtotal?0:cursor,end=subtotal?target:cursor+target;steps.push({id,label,start,end,amount:target,subtotal});cursor=end;};
- add('sales','Sales',values.sales,true);add('cogs','Product costs',-values.cogs);add('grossProfit','Gross profit',values.grossProfit,true);add('shipping','Net shipping',values.shipping);add('variable','Variable costs',-values.variable);add('ads','Advertising',-values.advertising);add('contribution','Contribution',values.contribution,true);add('cashOverheads','Cash overheads excluding D&A',-values.cashOverheads);add('ebitda','EBITDA',values.ebitda,true);return steps;
+ add('sales','Sales',values.sales,true);add('cogs','Product costs',-values.cogs);add('grossProfit','Gross profit',values.grossProfit,true);add('shipping','Net shipping',values.shipping);add('variable','Variable costs',-values.variable);add('ads','Advertising',-values.advertising);add('contribution','Contribution',values.contribution,true);add('cashOverheads','Overheads excluding D&A',-values.cashOverheads);add('ebitda','EBITDA',values.ebitda,true);return steps;
 }
 export function changeSteps(model:PreviewModel,perOrder:boolean):WaterfallStep[]{
  if(perOrder&&(!Number.isFinite(model.current.orders)||model.current.orders<=0||!Number.isFinite(model.previous.orders)||model.previous.orders<=0))return [];
@@ -62,7 +62,7 @@ export function changeSteps(model:PreviewModel,perOrder:boolean):WaterfallStep[]
  const movement=(id:string,label:string,value:number)=>{const start=cursor;cursor+=value;steps.push({id,label,start,end:cursor,amount:value,subtotal:false});};
  movement('gross','Gross product sales',current.gross*c-previous.gross*p);
  movement('discounts','Product discounts',previous.discounts*p-current.discounts*c);
- movement('reversals','Sales reversals',previous.reversals*p-current.reversals*c);
+ movement('reversals','Refunds / sales reversals',previous.reversals*p-current.reversals*c);
  const netSalesEffect=current.sales*c-previous.sales*p;
  // Grouped summary of the three sales movements already applied. This column
  // spans their combined effect above the PRIOR EBITDA baseline, not a new cost
@@ -72,7 +72,7 @@ export function changeSteps(model:PreviewModel,perOrder:boolean):WaterfallStep[]
  movement('cogs','Product costs',previous.cogs*p-current.cogs*c);
  movement('variable','Variable costs',previous.variable*p-current.variable*c);
  movement('ads','Advertising',previous.advertising*p-current.advertising*c);
- movement('cashOverheads','Cash overheads excluding D&A',previous.cashOverheads*p-current.cashOverheads*c);
+ movement('cashOverheads','Overheads excluding D&A',previous.cashOverheads*p-current.cashOverheads*c);
  steps.push({id:'current',label:'Selected EBITDA',start:0,end:current.ebitda*c,amount:current.ebitda*c,subtotal:true});
  return steps;
 }
@@ -86,7 +86,7 @@ export function opportunityPareto(model:PreviewModel,perOrder:boolean){const sce
 
 export function sankeyFlows(values:ProfitTotals,perOrder:boolean){
  const source=[{id:'sales',label:'Net product sales',amount:values.sales},{id:'shipping',label:'Net shipping',amount:values.shipping}];
- const uses=[{id:'cogs',label:'Product costs',amount:values.cogs},{id:'variable',label:'Variable costs',amount:values.variable},{id:'advertising',label:'Advertising',amount:values.advertising},{id:'cashOverheads',label:'Cash overheads excluding D&A',amount:values.cashOverheads},{id:'ebitda',label:'EBITDA',amount:values.ebitda}];
+ const uses=[{id:'cogs',label:'Product costs',amount:values.cogs},{id:'variable',label:'Variable costs',amount:values.variable},{id:'advertising',label:'Advertising',amount:values.advertising},{id:'cashOverheads',label:'Overheads excluding D&A',amount:values.cashOverheads},{id:'ebitda',label:'EBITDA',amount:values.ebitda}];
  if([...source,...uses].some(flow=>!Number.isFinite(flow.amount)||flow.amount<0))return {state:'unavailable' as const,reason:'Signed or loss period: use the waterfall.'};
  const revenue=values.sales+values.shipping;
  if(uses.reduce((total,item)=>total+item.amount,0)!==revenue)return {state:'unavailable' as const,reason:'Composition does not reconcile.'};
@@ -112,4 +112,22 @@ export function combinedScenario(model:PreviewModel,perOrder=false){
   'The eligible cost pool and realised rates require validation. This is a combined EBITDA sensitivity with overlap removed, not an achievable-benefit estimate, causal forecast or cash saving.'
  ];
  return {includedIds:['carrier','discount'] as const,excludedIds:['payment'] as const,low,high,midpoint,displayLow:perOrder?(denominator?low/denominator:null):low,displayHigh:perOrder?(denominator?high/denominator:null):high,ebitdaLow:model.current.ebitda+low,ebitdaHigh:model.current.ebitda+high,assumptions,cashTimingAssumptions:CASH_TIMING_ASSUMPTIONS};
+}
+
+/** Shared sample comparison: rolling amounts are a reference average scaled to
+ * the selected span, never actual transactions or a prediction for that span. */
+export type ComparisonBasis = 'last-year' | 'rolling';
+export function comparisonTotals(model:PreviewModel,basis:ComparisonBasis):ProfitTotals {
+ if(basis==='last-year')return {...model.priorYear};
+ if(basis!=='rolling')throw Error('Invalid sample comparison');
+ const factor=model.selectedCount/model.benchmarkCount;
+ return Object.fromEntries(Object.entries(model.benchmark).map(([key,value])=>[key,value*factor])) as ProfitTotals;
+}
+export function comparisonChartRows(model:PreviewModel,perOrder:boolean,basis:ComparisonBasis){
+ const reference=comparisonTotals(model,basis);
+ return chartRows(model,perOrder).map(row=>({...row,comparisonProfit:basis==='last-year'?row.priorYearProfit:perOrder?amount(reference,'ebitda',true):reference.ebitda/model.selectedCount}));
+}
+export function comparisonChangeSteps(model:PreviewModel,perOrder:boolean,basis:ComparisonBasis):WaterfallStep[]{
+ const reference=comparisonTotals(model,basis);
+ return changeSteps({...model,previous:reference},perOrder).map(step=>step.id==='previous'?{...step,label:basis==='last-year'?'Prior-year EBITDA':'Reference EBITDA'}:step);
 }

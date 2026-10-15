@@ -10,6 +10,7 @@ const navItems = [
   { icon: Megaphone,       label: "Marketing Efficiency",      href: "/marketing-efficiency"   },
   { icon: Tag,             label: "Pricing & Discounts",      href: "/pricing-optimisation"   },
   { icon: Cpu,             label: "Profit Overview",          href: "/profit-engine"          },
+  { icon: BarChart2,       label: "New-Profit",               href: "/new-profit"             },
   { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
   { icon: Target,          label: "Opportunity Finder",     href: "/profit-opportunities"   },
   { icon: FlaskConical,    label: "Scenario Planner",       href: "/scenario-lab"           },

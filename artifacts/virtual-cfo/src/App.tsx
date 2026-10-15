@@ -21,6 +21,7 @@ import GrowthQuality from "@/pages/growth-quality";
 import MarketingEfficiency from "@/pages/marketing-efficiency";
 import Opportunities from "@/pages/opportunities";
 import ProfitGrowth from "@/pages/profit-engine";
+import NewProfit from "@/pages/new-profit";
 import CashControl from "@/pages/cash-control";
 import PricingOptimisation from "@/pages/pricing-optimisation";
 import Settings from "@/pages/settings";
@@ -51,6 +52,7 @@ function MerchantRouter() {
       <Route path="/opportunities" component={Opportunities} />
       <Route path="/profit-opportunities" component={Opportunities} />
       <Route path="/profit-engine" component={ProfitGrowth} />
+      <Route path="/new-profit" component={NewProfit} />
       <Route path="/cash-control" component={CashControl} />
       <Route path="/pricing-optimisation" component={PricingOptimisation} />
       <Route path="/scenario-lab" component={ScenarioLab} />

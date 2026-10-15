@@ -1,0 +1,46 @@
+/** Deterministic commentary for synthetic design data; no live analysis or AI call. */
+import { annualisedScenarioPlan, comparisonTotals, type ComparisonBasis, type PreviewModel } from './newProfitPreview.ts';
+export type FounderActionId = 'discount' | 'marketing' | 'cost';
+export type FounderAction = {
+ id:FounderActionId; metricKey:'discounts'|'advertising'|'variable'; title:string; bridgeEffect:number|null; adverseAmount:number;
+ current:number|null; reference:number|null;
+ perOrder:{current:number|null;reference:number|null;delta:number|null};
+ annualLow:number|null; annualHigh:number|null; why:string; assumedChange:string;
+ firstStep:string; successMetric:string; guardrail:string; reviewCadence:string;
+ confidence:string; evidenceGap:string; effort:string; timing:string; subtasks:string[];
+};
+const finite=(value:number):number|null=>Number.isFinite(value)?value:null;
+const difference=(a:number|null,b:number|null)=>a===null||b===null?null:finite(a-b);
+const unit=(value:number,orders:number)=>Number.isFinite(value)&&Number.isFinite(orders)&&orders>0?finite(value/orders):null;
+const movement=(current:number,reference:number)=>({current:finite(current),reference:finite(reference),delta:finite(current-reference),pct:Number.isFinite(current)&&Number.isFinite(reference)&&reference>0?finite((current-reference)/reference*100):null});
+const money=(pence:number)=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:0}).format(pence/100);
+export function buildProfitDecision(model:PreviewModel,basis:ComparisonBasis,perOrder=false){
+ const reference=comparisonTotals(model,basis),current=model.current;
+ const metric=(key:'sales'|'ebitda')=>perOrder?movement(unit(current[key],current.orders)??NaN,unit(reference[key],reference.orders)??NaN):movement(current[key],reference[key]);
+ const sales=metric('sales'),ebitda=metric('ebitda');
+ const currentRevenue=current.sales+current.shipping,referenceRevenue=reference.sales+reference.shipping;
+ const margin={current:currentRevenue>0?finite(current.ebitda/currentRevenue*100):null,reference:referenceRevenue>0?finite(reference.ebitda/referenceRevenue*100):null};
+ const plan=annualisedScenarioPlan(model);
+ const scenario=(id:string)=>plan.opportunities.find(item=>item.id===id)!;
+ const describe=(v:ReturnType<typeof movement>,name:string)=>v.pct===null?(v.delta===null?`${name} comparison unavailable`:`${name} ${v.delta>=0?'up':'down'} ${money(Math.abs(v.delta))}`):`${name} ${v.pct>=0?'up':'down'} ${Math.abs(v.pct).toFixed(1)}%`;
+ const specs:Array<{id:FounderActionId;key:'discounts'|'advertising'|'variable';title:string;assumedChange:string;firstStep:string;successMetric:string;guardrail:string;reviewCadence:string;confidence:string;evidenceGap:string;effort:string;timing:string;subtasks:string[]}>= [
+  {id:'discount',key:'discounts',title:'Check whether discounts are earning their keep',assumedChange:'Illustration: reduce the product discount rate by 0.5–1 percentage point, with unchanged gross demand, refunds and product mix.',firstStep:'Select one comparable promotion or product group. Record its current discount, orders and contribution; test a shallower offer against an unchanged control where feasible.',successMetric:'Contribution after marketing per eligible visitor and in total, with order volume and discount rate alongside it.',guardrail:'Agree a minimum contribution and demand floor before the test; stop or revise if lost demand outweighs the retained discount.',reviewCadence:'Review after 2–3 complete weeks and the relevant refund lag; extend if the sample is too small.',confidence:'Arithmetic only · demand response unknown',evidenceGap:'No controlled promotion results or price-response evidence are supplied.',effort:'Medium',timing:'2–3 weeks to test',subtasks:['Check product mix, overlapping promotions and refund timing before attributing the change.']},
+  {id:'marketing',key:'advertising',title:'Check what the extra advertising is contributing',assumedChange:'No advertising cut or recoverable saving is assumed. Establish whether incremental spend produces profitable incremental demand.',firstStep:'Break out spend by channel, brand/non-brand and acquisition/retargeting; reconcile to the same-period sales and contribution before choosing a bounded test.',successMetric:'Total contribution after marketing, acquisition cost versus first-order contribution, and new customer volume; use mature cohorts where available.',guardrail:'Do not cut spend solely because it rose, or move budget solely on platform-reported average ROAS; protect profitable acquisition and allow for conversion lag.',reviewCadence:'Review weekly over complete comparable periods, allowing for conversion and refund lag.',confidence:'Observed spend movement · incremental return unknown',evidenceGap:'Channel, acquisition mix, attribution and incremental-demand evidence are not available in this preview.',effort:'Medium',timing:'1 week to diagnose; test timing depends on conversion lag',subtasks:['Keep platform-attributed revenue separate; do not add overlapping Google and Meta sales.']},
+  {id:'cost',key:'variable',title:'Validate a lower cost to serve each order',assumedChange:'Illustration: reduce variable costs by £0.50–£1 per original order, holding order volume, product mix and service level constant.',firstStep:'Reconcile fulfilment, carrier and processor invoices to eligible orders; identify the largest cost per order and request one like-for-like rate or process alternative.',successMetric:'Realised variable cost per original order and total EBITDA, after implementation costs.',guardrail:'Protect delivery promises, damage/refund rates and customer experience; include minimum fees and transition costs.',reviewCadence:'Assess quotes in 2–4 weeks, then check the first complete invoice cycle after any change.',confidence:'Arithmetic only · eligible costs and rates unverified',evidenceGap:'Invoice-level cost pools, service mix and achievable contract rates are not supplied.',effort:'Medium',timing:'2–4 weeks to assess',subtasks:['Check payment processing rates as part of this cost review; never add a separate payment-fee saving on top.']},
+ ];
+ const actions:FounderAction[]=specs.map(({key,...spec})=>{
+  const a=finite(current[key]),b=finite(reference[key]),effect=difference(b,a);
+  const perCurrent=unit(current[key],current.orders),perReference=unit(reference[key],reference.orders),perDelta=difference(perCurrent,perReference);
+  const candidate=spec.id==='marketing'?null:scenario(spec.id==='cost'?'carrier':'discount');
+  const low=candidate?finite(candidate.annualLow):null,high=candidate?finite(candidate.annualHigh):null;
+  const eligibleBase=spec.id==='cost'?Number.isFinite(current.orders)&&current.orders>0:Number.isFinite(current.gross)&&current.gross>0;
+  const rangeValid=eligibleBase&&low!==null&&high!==null&&low>=0&&high>=low;
+  const why=effect===null?'Comparable cost evidence is unavailable.':effect<0?`${money(-effect)} higher selected-period deduction reduces the arithmetic EBITDA bridge by the same amount. This does not establish waste or a recoverable saving.`:effect>0?`${money(effect)} lower selected-period deduction supports the arithmetic EBITDA bridge. No deterioration in this deduction is shown.`:'No change in this deduction is shown against the selected comparison.';
+  return {...spec,metricKey:key,current:a,reference:b,bridgeEffect:effect,adverseAmount:effect===null?0:Math.max(0,-effect),perOrder:{current:perCurrent,reference:perReference,delta:perDelta},annualLow:rangeValid?low:null,annualHigh:rangeValid?high:null,why};
+ }).sort((a,b)=>b.adverseAmount-a.adverseAmount||specs.findIndex(s=>s.id===a.id)-specs.findIndex(s=>s.id===b.id));
+ const negative=actions.filter(item=>item.adverseAmount>0);
+ const summary=negative.length?`${negative.slice(0,2).map(item=>item.id==='discount'?'Discounts':item.id==='marketing'?'Advertising':'Variable costs').join(', ')} show adverse profit movements. Check their per-order context and commercial causes before changing spending or pricing.`:'None of these three profit drivers shows an adverse movement. Review the remaining bridge drivers before treating them as recovery priorities.';
+ const combined=plan.combined;
+ const combinedAnnual=actions.filter(item=>item.id!=='marketing').every(item=>item.annualLow!==null&&item.annualHigh!==null)&&Number.isFinite(combined.annualLow)&&Number.isFinite(combined.annualHigh)&&combined.annualLow>=0&&combined.annualHigh>=combined.annualLow?{low:combined.annualLow,high:combined.annualHigh}:null;
+ return {source:'synthetic-preview' as const,sales,ebitda,margin,headline:`${describe(sales,perOrder?'Sales per order':'Sales')}; ${describe(ebitda,perOrder?'EBITDA per order':'EBITDA')}.`,summary:perOrder?`Headline amounts are per original order; investigation ranking remains based on total £ movements. ${summary}`:summary,actions,combinedAnnual,rankingExplanation:'Investigate largest adverse selected-comparison total £ bridge movement first. This is diagnostic priority, not a ranking of achievable savings. Ties retain discount, marketing, cost order. Annual scenarios are separate constant-rate sensitivities; they are not the observed deterioration.'};
+}

@@ -52,7 +52,7 @@ function MerchantRouter() {
       <Route path="/opportunities" component={Opportunities} />
       <Route path="/profit-opportunities" component={Opportunities} />
       <Route path="/profit-engine" component={ProfitGrowth} />
-      <Route path="/new-profit" component={NewProfit} />
+      <Route path="/new-profit" component={()=><NewProfit/>} />
       <Route path="/cash-control" component={CashControl} />
       <Route path="/pricing-optimisation" component={PricingOptimisation} />
       <Route path="/scenario-lab" component={ScenarioLab} />

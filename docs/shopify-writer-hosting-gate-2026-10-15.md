@@ -15,3 +15,9 @@ Render service `night-scout-shopify-test-writer-staging`, ID `crn-db8g0n8u01pc73
 Schedule `0 17 * * *`; `NIGHT_SCOUT_TEST_PROGRAMME_ENABLED=false`. Config points to the isolated generated Shopify programme file; Node 24 selected. No writer secrets, DB password or provider writes have been provisioned/performed. Scheduler existence does not mean test generation is active. Existing source date/window/cap guards remain unchanged.
 
 Hosted disabled smoke run completed successfully at 16:35:24 UTC on 15 October, with output `prepared-disabled`, provider Shopify, actions 4. This verifies hosted entry/config execution, not provider credentials, database readiness or actual order creation.
+
+## Next multi-agent batch
+
+Prepared source-only authenticated preflight with exact safe seven-field receipt, independently reviewed. Separate writer host now has non-secret project/domain/app pins and independently observed app-boundary acknowledgement; generation remains false and no provider-target verification flag is asserted. Hosted configuration rebuild `bld-db8g7iuq1p3s73d97g20` succeeded. Client secret and restricted DB password remain absent; no actual provider preflight or schema amendment has occurred.
+
+A separate Render Shopify reader wrapper/cutover specification is prepared only. It has no hosted service and replaces no Replit schedule yet. See `docs/integration-acceptance-2026-10-15.md`.

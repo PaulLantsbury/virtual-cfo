@@ -3,6 +3,7 @@ import {X509Certificate} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {INTAKE_TARGET as target,intakeConnectionOptions} from './intake-runtime.mjs';
 import {rollingReportingScope} from './rolling-reporting-scope.mjs';
+import {readRecentNightlyHistory} from './nightly-recent-history.mjs';
 const failure='Shopify nightly history unavailable; no collection, retry or write was attempted.';
 const ensure=ok=>{if(!ok)throw Error(failure);};
 const safeCodes=['ENETUNREACH','ENOTFOUND','ECONNREFUSED','ETIMEDOUT','28P01','28000','42501','42P01','42703','SELF_SIGNED_CERT_IN_CHAIN','UNABLE_TO_VERIFY_LEAF_SIGNATURE','CERT_HAS_EXPIRED'];
@@ -44,16 +45,18 @@ export async function checkCloudNightly({env=process.env}={}, {createPool,now=()
   const attempts=(await client.query('SELECT state,date_from::text AS date_from,date_to::text AS date_to,result_code FROM ingest_v1.sync_attempts WHERE store_id=$1 ORDER BY started_at DESC,id DESC LIMIT 1',[target.storeId])).rows;
   const claims=(await client.query('SELECT state,date_from::text AS date_from,date_to::text AS date_to FROM ingest_v1.nightly_claims WHERE store_id=$1 AND local_date=$2',[target.storeId,period.localDate])).rows;
   const totals=(await client.query(`SELECT (SELECT count(*)::int FROM ingest_v1.sync_attempts WHERE store_id=$1 AND state IN ('running','unconfirmed')) AS unresolved_attempts,
+   (SELECT count(*)::int FROM ingest_v1.nightly_claims WHERE store_id=$1 AND state IN ('running','unconfirmed')) AS unresolved_claims,
    (SELECT count(*)::int FROM ingest_v1.heads WHERE store_id=$1 AND date_from=$2 AND date_to=$3) AS current_heads`,[target.storeId,scope.from,scope.to])).rows;
-  ensure(attempts.length<=1&&claims.length<=1&&totals.length===1&&Number.isSafeInteger(totals[0].unresolved_attempts)&&totals[0].unresolved_attempts>=0&&[0,1].includes(totals[0].current_heads));
+  ensure(attempts.length<=1&&claims.length<=1&&totals.length===1&&Number.isSafeInteger(totals[0].unresolved_attempts)&&totals[0].unresolved_attempts>=0&&Number.isSafeInteger(totals[0].unresolved_claims)&&totals[0].unresolved_claims>=0&&[0,1].includes(totals[0].current_heads));
   const same=r=>r.date_from===scope.from&&r.date_to===scope.to;
   for(const r of [...attempts,...claims])ensure(['running','completed','unconfirmed'].includes(r.state));
   if(attempts[0])ensure(attempts[0].state==='completed'?codes.includes(attempts[0].result_code):attempts[0].result_code===null);
+  const recentHistory=await readRecentNightlyHistory(client,{storeId:target.storeId,localDate:period.localDate,timezone:target.timezone});
   await client.query('ROLLBACK');
   return {event:'shopify_nightly_readiness',projectRef:target.projectRef,localDate:period.localDate,from:scope.from,to:scope.to,
    latestAttempt:attempts[0]?{state:attempts[0].state,resultCode:attempts[0].result_code,matchesCurrentScope:same(attempts[0])}:null,
    todayClaim:claims[0]?{state:claims[0].state,matchesCurrentScope:same(claims[0])}:null,
-   retryBlocked:totals[0].unresolved_attempts>0,currentCandidatePresent:totals[0].current_heads===1,
+   retryBlocked:totals[0].unresolved_attempts>0||totals[0].unresolved_claims>0,currentCandidatePresent:totals[0].current_heads===1,recentHistory,
    sourceAuthenticationChecked:false,collectionAttempted:false,financialVerification:'not_assessed',writeAttempted:false};
  }catch(error){discard=true;try{await client?.query('ROLLBACK');}catch{}throw diagnosticError(phase,error);}
  finally{let failed=false;try{client?.release(discard);}catch{failed=true;}try{await pool?.end();}catch{failed=true;}if(failed)throw diagnosticError('cleanup');}

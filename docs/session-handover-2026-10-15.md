@@ -1,5 +1,9 @@
 # Night Scout — stopping point, 15 October 2026
 
+## Added 16 October — discuss interactive scenario sliders next session
+
+Paul particularly liked the slider-based scenario modelling at the bottom of the original Profit and Cash dashboards and wants this retained/reintroduced. Discuss placement before implementation: contextual sliders on Profit Engine and Cash Control, everything in Scenario Planner, or lightweight page-specific controls linking to a shared planner. Compare simplicity, discoverability, shared assumptions, combined profit/cash impact and avoiding duplicated calculations. Keep hypothetical scenarios distinct from forecasts, confirmed actions and guaranteed savings. This is a discussion request, not an approved placement or permission to rebuild the dashboards. Include it alongside the Cash page review and data-feed work when resuming.
+
 Paul is stopping for today. No active agent work should be claimed. Next session starts with reviewing the latest Cash Control page, then continuing source-feed reliability/test-data setup. Do not rebuild completed packages.
 
 ## Review first

@@ -76,6 +76,8 @@ export function usePhase2Deltas(
   dateFrom: string,
   dateTo:   string,
 ): Phase2DeltasState {
+  const requestKey = `${storeId}:${dateFrom}:${dateTo}`;
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const [deltas,      setDeltas]      = useState<Phase2DeltaRow | null>(null);
   const [trends,      setTrends]      = useState<Rolling3mRow | null>(null);
   const [trailing12m, setTrailing12m] = useState<Trailing12mRow | null>(null);
@@ -85,6 +87,7 @@ export function usePhase2Deltas(
     // Guard: both dates must be present before fetching.
     // dateFrom is always set to the current month on init by useLatestDataPeriod,
     // so this guard only blocks if the consumer passes empty strings explicitly.
+    setLoadedKey(null);
     if (!dateFrom || !dateTo) return;
 
     let cancelled = false;
@@ -122,18 +125,21 @@ export function usePhase2Deltas(
         setDeltas(deltaResponse.data);
         setTrends(trendsResponse.data);
         setTrailing12m(trailing12mResponse.data);
+        setLoadedKey(requestKey);
         setLoading(false);
       })
       .catch(() => {
         // Unhandled rejection (e.g. network offline).
         // Leave all null so callers show static sentinels / "—".
-        if (!cancelled) setLoading(false);
+        if (!cancelled) { setLoadedKey(requestKey); setLoading(false); }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [storeId, dateFrom, dateTo]);
+  }, [storeId, dateFrom, dateTo, requestKey]);
 
-  return { deltas, trends, trailing12m, loading };
+  const current = loadedKey === requestKey && Boolean(dateFrom && dateTo);
+  return { deltas: current ? deltas : null, trends: current ? trends : null,
+    trailing12m: current ? trailing12m : null, loading: Boolean(dateFrom && dateTo) && (!current || loading) };
 }

@@ -1,8 +1,8 @@
 # Shopify writer restart — 29 October 2026
 
-Prepared only; no remote changes or orders performed. Preserve the read-only customer app and collectors. The previous four-day trial expired 18 October, with a 26 October hard stop. Do not enable or amend it, clear actions, catch up missed days or reuse its programme key.
+This is the source specification and operator sequence. Consult the current private session handover for approval/application/deployment evidence; do not infer live state from this proposal file. Do not reapply completed SQL or repeat an approval already recorded there. Preserve the read-only customer app and collectors. The previous four-day trial expired 18 October, with a 26 October hard stop. Do not enable or amend it, clear actions, catch up missed days or reuse its programme key.
 
-## Concrete new programme for approval
+## Bounded programme specification
 
 Separate installed app **Night Scout Test Data Writer**, PocketLaunchpad1 (`pocketlaunchpad1.myshopify.com`) development store only. Propose **29 October–4 November inclusive, 18:00–18:14 Europe/London**, at most **one GBP60 nominal test order/day, seven total (GBP420 nominal / GBP0 charged)**. New immutable identity `shopify-staging-20261029`; hard stop **5 November 00:00 UTC**. No transactions/payment, emails, fulfilment, shipping, tax or inventory changes. Test orders remain excluded from genuine merchant revenue. Elapsed dates are skipped and do not transfer to later days. New disabled config uses `startMonday=2026-10-26` purely as schedule anchor, not permission for 26–28 October. Runtime starts 29 October.
 

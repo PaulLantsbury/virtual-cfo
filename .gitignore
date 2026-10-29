@@ -5,6 +5,8 @@ dist
 tmp
 out-tsc
 *.tsbuildinfo
+experiments/test-programme/.operator-runtime/
+experiments/test-programme/.xero-consent-runtime/
 .expo
 .expo-shared
 

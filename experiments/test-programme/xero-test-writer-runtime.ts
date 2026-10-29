@@ -10,6 +10,8 @@ export type XeroTestWriterRuntime=Readonly<{service:{start(authorization:string)
 /** Separate write-consent capability: never borrows reader credentials or database privileges. */
 export function createXeroTestWriterRuntime(env:NodeJS.ProcessEnv,deps:{createPool?:(config:any)=>any;createAuthClient?:(...args:any[])=>any;fetchImpl?:typeof fetch}={}):XeroTestWriterRuntime|undefined {
  if(env.NIGHT_SCOUT_XERO_TEST_WRITER_BOOTSTRAP_ENABLED!=='true')return undefined;
+ const consentProfile=env.NIGHT_SCOUT_XERO_TEST_WRITER_CONSENT_PROFILE??'original';
+ if(!['original','daily-xero-20261030-v1'].includes(consentProfile))throw unavailable();
  if(typeof deps.createPool!=='function'||typeof deps.createAuthClient!=='function')throw unavailable();
  const origin=operatorOrigin(env.NIGHT_SCOUT_TEST_WRITER_OPERATOR_ORIGIN),redirect=operatorCallback(origin);
  const authUrl=env.NIGHT_SCOUT_REVIEW_AUTH_URL,key=env.NIGHT_SCOUT_REVIEW_PUBLIC_KEY;
@@ -37,7 +39,7 @@ export function createXeroTestWriterRuntime(env:NodeJS.ProcessEnv,deps:{createPo
    const result=await client.query(sql,args);await client.query('COMMIT');return result;
   }catch{await client.query('ROLLBACK').catch(()=>{});throw unavailable();}finally{client.release();}
  }};
- const service=createXeroWriterBootstrap({enabled:true,projectRef:PROJECT,ownerId,storeId,expectedTenant,clientId,clientSecret,operatorOrigin:origin,redirectUri:redirect,masterKey,keyVersion,pool:scopedPool,fetchImpl,
+ const service=createXeroWriterBootstrap({enabled:true,consentProfile,projectRef:PROJECT,ownerId,storeId,expectedTenant,clientId,clientSecret,operatorOrigin:origin,redirectUri:redirect,masterKey,keyVersion,pool:scopedPool,fetchImpl,
   authenticate:async(authorization:string)=>{const {data,error}=await auth.auth.getUser(authorization.replace(/^Bearer\s+/i,''));if(error||data?.user?.id!==ownerId)throw unavailable();return Object.freeze({userId:ownerId,isOwner:true});},
  });
  return Object.freeze({service,close:()=>pool.end()});

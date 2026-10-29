@@ -1,31 +1,31 @@
-# Night Scout — 29 October 2026 restart batch
+# Night Scout — 29 October 2026 development handover
 
-## Current priority and scope
+## Priority and decisions
 
-Paul has approximately three hours and prioritises daily development test data flowing through Shopify into Night Scout. Broader CFO recommendation work is deferred until remaining pages are redesigned and connected; no page redesign is requested today. Keep existing Shopify/Xero customer connections read-only and development writers isolated.
+Daily development test data flowing through Shopify/Xero into Night Scout takes priority. Remaining page redesigns are later work; broader CFO recommendations remain deferred. Keep customer connections read-only, provider writers isolated, test orders excluded from merchant sales and previously approved financial definitions intact.
 
-## Implemented and locally checked
+The owner approved the bounded seven-day Shopify proposal and its reviewed setup, with activation conditional on readiness. Do not ask for that same approval again. The Xero restart proposal is separate and unapproved. Preserve expired programmes and their action history. Never shift dates, create catch-up actions, reuse old envelopes or infer scheduled success from a build.
 
-- Settings now explains retained test-order counts and their exclusion from merchant sales; absence of evidence stays unavailable. Counts cover the retained extraction, not newly created orders in the reporting period. The September deployment failure remains available as historical evidence rather than current status.
-- Added a disposable end-to-end test: mocked Shopify orders/details → retained candidate → durable journal → authenticated membership RPC → frontend status. Replays do not duplicate candidates; test orders produce no merchant finance events.
-- Prepared an explicitly opt-in Shopify-only programme proposal for 29 October–4 November, 18:00–18:14 London (GMT), one GBP60 nominal test order/day, seven maximum, GBP0 charged. New key `shopify-staging-20261029`, hard stop 5 November 00:00 UTC. Old programme rows/caps/dates/actions remain unchanged; missed dates are skipped. No payment/email/fulfilment/inventory changes.
-- New binding SQL leaves generation disabled, requires a fresh actual provider receipt and rejects unresolved/overlapping Shopify work. Guarded wrapper preserves the existing claim implementation and revokes direct writer access to its renamed underlying function. No remote SQL applied.
-- Root combined test run: 40 passed, zero failures. Frontend TypeScript passed. Initial root build lacked required PORT; rerun with PORT=3000 BASE_PATH=/ passed, with existing sourcemap/chunk warnings. Independent source review passed. Reviewer additionally installed the full activation schema in disposable PGlite and verified wrapper/underlying function ACLs, disabled cap7 row, and SET-only membership. No hosted or multi-backend concurrency acceptance.
+## Source work completed today
 
-## Live access and evidence — not completed
+- Settings explains retained test-order counts and exclusion from merchant sales; the historical September failure is presented as historical evidence. A disposable collector → candidate → journal → authenticated RPC → status test checks retained exclusions and replay behavior.
+- Explicitly opt-in Shopify daily profile, strict disabled binding proposal, metadata/window gates and independent SQL capability tests preserve legacy programmes and prevent direct access to the underlying claim implementation.
+- New restricted database preflight validates the dedicated configuration/TLS, authenticates the exact restricted login, verifies SET-only membership and RPC ACLs inside a read-only transaction, then rolls back. It cannot claim, post, enable or reset anything. A real restricted-session regression covers schema resolution after role assumption.
+- New read-only Shopify ingestion verifier correlates the exact planned action with the next nightly claim, a unique attempt/candidate, retained test flag/exclusion and zero mapped or merchant-order inclusion. It reports only safe states, dates and ordinals. Its period/time correlation does not prove a host scheduler triggered or certify financial reporting.
+- Xero restart preparation adds a fresh explicitly unapproved daily profile, source/database/operator readiness checks and one-use consent routing that seeds a new disabled encrypted writer envelope. It preserves legacy history and Shopify safeguards. Actual separate-app consent, approved dates/hosting and same-demo reader alignment remain gates.
+- Isolated owner sign-in now holds the token only in browser memory and sends it automatically to the owner-gated consent API. A consent-only deployment package has an independent frozen lock and passed an actual isolated install/startup smoke. These are prepared source packages; they do not authorize new hosting, credentials, callbacks, grants, consent or activation.
 
-Live hosted access requires an owner authentication handoff. Browser approval infrastructure also returned transient capacity/time-limit failures. Do not claim hosted authentication, service inspection, or live activation success. No hosted settings, provider transactions or schedules changed in this batch.
+## Resume documents
 
-Actual overnight Shopify/Xero receipts and live writer role/password/binding state remain uninspected today. Preserve the 15 October observations as historical only. Do not infer that the old services still run successfully. Shopify reader still depends on Replit until proven otherwise; do not recommend cancellation.
+- [Shopify restart sequence](../experiments/test-programme/SHOPIFY-RESTART-2026-10-29.md)
+- [Private credential recovery procedure](../experiments/test-programme/DATABASE-PASSWORD-RECOVERY.md)
+- [Read-only ingestion verification](../experiments/shopify/VERIFY-TEST-INGESTION.md)
+- [Xero restart proposal and blockers](../experiments/test-programme/XERO-RESTART-2026-10-29.md)
 
-## Resume live work
+Operational host/database observations, exact approved deployment state and password recovery progress are recorded in the owner's private session handover. This public source checkpoint intentionally does not reproduce internal service telemetry. Read that private evidence before attempting live work; do not treat older prepared-only or access-blocked notes as current facts.
 
-1. Complete the owner authentication handoff, resolve any remaining browser approval/access issue and verify hosted access. Inspect existing writer and Xero reader jobs/logs, then current Supabase restricted roles/programmes/actions using the read-only inspection SQL. Do not expose credentials, hashes or customer IDs.
-2. Complete restricted writer password/URL/trusted CA privately if absent. Existing Shopify secret passed 15 October preflight; recheck rather than rotate or request it again.
-3. Read `experiments/test-programme/SHOPIFY-RESTART-2026-10-29.md`. Obtain explicit approval for the concrete new programme/binding before remote migration/activation. Obtain a fresh Shopify source receipt, apply reviewed disabled binding, opt into the new build profile, verify disabled hosted build/connectivity, then activate the exact approved programme/schedule. Proposed GMT cron `0 18 * * *`; no catch-up or silent date extension.
-4. Acceptance requires provider receipt + durable confirmed action + exact order matched privately to the next genuine overnight candidate with test exclusion. A UI count, source preflight or successful build alone is insufficient.
-5. Profit Engine and Cash demonstrations remain synthetic. Making merchant charts nonzero from test orders is not authorised; a separate development financial-data design needs agreement. Retain scenario-slider discussion and remaining page redesign agenda for a later session.
+## Validation and limits
 
-Routine source publication is authorised to the existing development branch; this does not apply SQL or activate jobs. Latest previous durable checkpoint is the 15 October handover, updated on 16 October.
+Earlier combined batch: 40 checks passed; frontend TypeScript and build passed (build rerun with required PORT/BASE_PATH; existing bundle/sourcemap warnings). Final integrated regression: **60 checks passed**, including restricted-session database preflight, ingestion verifier, Xero consent/profile, isolated owner UI/package and existing Shopify/legacy paths. The isolated frozen production install passed for all 92 dependency snapshots; disabled/synthetic HTTP smokes made zero database/provider calls. Full API TypeScript checking was attempted and remains blocked by existing missing declarations in unchanged Xero modules and unbuilt api-zod declaration outputs; this is not a passing backend-wide typecheck.
 
-Publication: reviewed code and roadmap saved to development commit `342b34b87d6e9e7865882da947daf8610548a0d4`; no main merge, hosted deployment, SQL application or programme activation.
+These tests use disposable fixtures and databases. They do not prove real consent, live restricted credentials, multi-backend PostgreSQL concurrency, provider action execution, host scheduling, retained overnight acceptance or populated financial dashboards. Production/main merge and a Shopify reader hosting cutover remain outside this package. Keep Replit until replacement overnight acceptance is independently verified.

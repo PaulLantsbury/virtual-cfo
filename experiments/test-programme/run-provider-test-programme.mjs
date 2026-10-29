@@ -17,10 +17,12 @@ export function prepareBoundedProgramme(config) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(config.startMonday) || !Number.isFinite(start.valueOf()) || start.getUTCDay() !== 1 || start.toISOString().slice(0,10) !== config.startMonday) throw new Error('Explicit Monday required');
   const daily=config.scheduleProfile==='daily-20261015-v1';
   const renewed=config.scheduleProfile==='daily-20261029-v1';
-  if(config.scheduleProfile!==undefined && !daily && !renewed)throw new Error('Unknown schedule profile');
+  const xeroRestart=config.scheduleProfile==='daily-xero-20261030-v1';
+  if(config.scheduleProfile!==undefined && !daily && !renewed && !xeroRestart)throw new Error('Unknown schedule profile');
   if(daily && (config.startMonday!=='2026-10-12' || config.programmeKey!==`${config.provider}-staging-20261012` || (config.provider==='shopify' && config.target!=='pocketlaunchpad1.myshopify.com') || (config.provider==='xero' && config.financialMode!=='posted_demo_only')))throw new Error('Daily profile binding mismatch');
   if(renewed && (config.provider!=='shopify' || config.startMonday!=='2026-10-26' || config.programmeKey!=='shopify-staging-20261029' || config.target!=='pocketlaunchpad1.myshopify.com'))throw new Error('Renewed daily profile binding mismatch');
-  const days = renewed ? [3,4,5,6,7,8,9] : daily ? [3,4,5,6] : [0,1,5,7,8,12];
+  if(xeroRestart && (config.provider!=='xero' || config.startMonday!=='2026-10-26' || config.programmeKey!=='xero-staging-20261030' || config.financialMode!=='posted_demo_only'))throw new Error('Xero restart binding mismatch');
+  const days = xeroRestart ? [4,5,6,7,8,9,10] : renewed ? [3,4,5,6,7,8,9] : daily ? [3,4,5,6] : [0,1,5,7,8,12];
   const plans = days.map((offset, index)=> {
     const date = new Date(start.valueOf()+offset*86400000).toISOString().slice(0,10);
     const plan = config.provider === 'shopify' ? shopifyOrderPlan({kind:'create-order',route:'shopify-development',test:true,currency:'GBP',targetStore:config.target,id:`${config.programmeKey}/${date}`,amounts:{units:1,grossProductsPence:6000,productDiscountPence:0,productVatPence:0,netShippingPence:0,shippingVatPence:0}})
@@ -28,14 +30,15 @@ export function prepareBoundedProgramme(config) {
     return {date,plan};
   });
   return {programmeKey:config.programmeKey,provider:config.provider,target:config.target,startMonday:config.startMonday,
-    financialMode:config.financialMode ?? 'draft_only', startsAt:new Date(start.valueOf()+(renewed?3:0)*86400000).toISOString(),endsAt:new Date(start.valueOf()+(renewed?10:14)*86400000).toISOString(),cap:renewed?7:daily?4:6,...(daily||renewed?{scheduleProfile:config.scheduleProfile}:{}),plans};
+    financialMode:config.financialMode ?? 'draft_only', startsAt:new Date(start.valueOf()+(xeroRestart?4:renewed?3:0)*86400000).toISOString(),endsAt:new Date(start.valueOf()+(xeroRestart?11:renewed?10:14)*86400000).toISOString(),cap:xeroRestart||renewed?7:daily?4:6,...(daily||renewed||xeroRestart?{scheduleProfile:config.scheduleProfile}:{}),plans};
 }
 
 // No credential mint/refresh is permitted before the durable profile check passes.
 export async function verifyDailyProfile({pool,programme}) {
   const renewed=programme.scheduleProfile==='daily-20261029-v1';
-  if(renewed ? programme.cap!==7 || programme.provider!=='shopify' || programme.programmeKey!=='shopify-staging-20261029' : programme.scheduleProfile!=='daily-20261015-v1' || programme.cap!==4)throw new Error('Invalid daily profile');
-  const sql=renewed?'SELECT staging_test_programme.shopify_daily_20261029_ready($1,$2,$3,$4) AS ready':'SELECT staging_test_programme.daily_profile_ready($1,$2,$3,$4) AS ready';
+  const xeroRestart=programme.scheduleProfile==='daily-xero-20261030-v1';
+  if(xeroRestart ? programme.cap!==7 || programme.provider!=='xero' || programme.programmeKey!=='xero-staging-20261030' : renewed ? programme.cap!==7 || programme.provider!=='shopify' || programme.programmeKey!=='shopify-staging-20261029' : programme.scheduleProfile!=='daily-20261015-v1' || programme.cap!==4)throw new Error('Invalid daily profile');
+  const sql=xeroRestart?'SELECT staging_test_programme.xero_daily_20261030_ready($1,$2,$3,$4) AS ready':renewed?'SELECT staging_test_programme.shopify_daily_20261029_ready($1,$2,$3,$4) AS ready':'SELECT staging_test_programme.daily_profile_ready($1,$2,$3,$4) AS ready';
   const result=await pool.query(sql,[programme.programmeKey,programme.provider,programme.target,programme.cap]);
   if(result.rows?.length!==1 || result.rows[0].ready!==true)throw new Error('Daily profile unavailable');
 }

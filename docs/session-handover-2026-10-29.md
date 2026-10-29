@@ -14,16 +14,18 @@ Paul has approximately three hours and prioritises daily development test data f
 
 ## Live access and evidence — not completed
 
-The current cloud browser started with no tabs and was signed out of Render. Secure auth initially failed because automatic review model was at capacity; retry allowed method selection, and Paul selected Google and the saved paul@thepocketfd.com account. Secure password request returned submitted. Subsequent browser observations repeatedly timed out at the origin approval gate. This is an approval infrastructure timeout, not a site error or unsafe-action determination. Render authentication state remains unknown; do not claim sign-in success or inspect through an indirect workaround. No hosted service settings changed, secrets copied, provider calls made, or orders created in this batch.
+Live hosted access requires an owner authentication handoff. Browser approval infrastructure also returned transient capacity/time-limit failures. Do not claim hosted authentication, service inspection, or live activation success. No hosted settings, provider transactions or schedules changed in this batch.
 
 Actual overnight Shopify/Xero receipts and live writer role/password/binding state remain uninspected today. Preserve the 15 October observations as historical only. Do not infer that the old services still run successfully. Shopify reader still depends on Replit until proven otherwise; do not recommend cancellation.
 
 ## Resume live work
 
-1. Resolve browser approval/access and verify Render signed-in state. Inspect existing writer and Xero reader jobs/logs, then current Supabase restricted roles/programmes/actions using the read-only inspection SQL. Do not expose credentials, hashes or customer IDs.
+1. Complete the owner authentication handoff, resolve any remaining browser approval/access issue and verify hosted access. Inspect existing writer and Xero reader jobs/logs, then current Supabase restricted roles/programmes/actions using the read-only inspection SQL. Do not expose credentials, hashes or customer IDs.
 2. Complete restricted writer password/URL/trusted CA privately if absent. Existing Shopify secret passed 15 October preflight; recheck rather than rotate or request it again.
 3. Read `experiments/test-programme/SHOPIFY-RESTART-2026-10-29.md`. Obtain explicit approval for the concrete new programme/binding before remote migration/activation. Obtain a fresh Shopify source receipt, apply reviewed disabled binding, opt into the new build profile, verify disabled hosted build/connectivity, then activate the exact approved programme/schedule. Proposed GMT cron `0 18 * * *`; no catch-up or silent date extension.
 4. Acceptance requires provider receipt + durable confirmed action + exact order matched privately to the next genuine overnight candidate with test exclusion. A UI count, source preflight or successful build alone is insufficient.
 5. Profit Engine and Cash demonstrations remain synthetic. Making merchant charts nonzero from test orders is not authorised; a separate development financial-data design needs agreement. Retain scenario-slider discussion and remaining page redesign agenda for a later session.
 
 Routine source publication is authorised to the existing development branch; this does not apply SQL or activate jobs. Latest previous durable checkpoint is the 15 October handover, updated on 16 October.
+
+Publication: reviewed code and roadmap saved to development commit `342b34b87d6e9e7865882da947daf8610548a0d4`; no main merge, hosted deployment, SQL application or programme activation.

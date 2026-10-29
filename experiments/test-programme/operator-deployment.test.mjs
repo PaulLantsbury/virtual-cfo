@@ -13,3 +13,12 @@ test('Shopify entry rejects provider or target switches before invoking runner',
  const path=join(dir,'config.json');await writeFile(path,JSON.stringify(config));let called=false;const out=await runShopifyOperator({env:{NIGHT_SCOUT_TEST_PROGRAMME_CONFIG_FILE:path},run:async()=>{called=true;}});assert.equal(called,false);assert.equal(out.state,'configuration-or-provider-unavailable');
  }}finally{await rm(dir,{recursive:true,force:true});}
 });
+test('renewed profile requires explicit packaging opt-in and runs disabled with seven actions',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'ns-renewed-operator-'));try{
+ await prepareOperatorDeployment(dir,{scheduleProfile:'daily-20261029-v1'});
+ const config=JSON.parse(await readFile(join(dir,'shopify-programme.json'),'utf8'));assert.equal(config.programmeKey,'shopify-staging-20261029');assert.equal(config.startMonday,'2026-10-26');
+ const out=execFileSync(process.execPath,[join(dir,'shopify-operator-entry.mjs')],{env:{PATH:process.env.PATH,NIGHT_SCOUT_TEST_PROGRAMME_CONFIG_FILE:join(dir,'shopify-programme.json')},encoding:'utf8'});
+ assert.deepEqual(JSON.parse(out),{event:'provider_test_programme',state:'prepared-disabled',provider:'shopify',actions:7});
+ await assert.rejects(prepareOperatorDeployment(dir,{scheduleProfile:'unbounded'}));
+ }finally{await rm(dir,{recursive:true,force:true});}
+});

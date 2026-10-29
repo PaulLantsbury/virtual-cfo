@@ -27,3 +27,10 @@ test('readiness has no secret or operational dependency and malformed evidence c
  assert.equal(prepareShopifyDailyReadiness({now}).providerCalls,0);assert.equal(prepareShopifyDailyReadiness({now,providerReceipt:{domain:'attacker.example'}}).tokenMints,0);
  assert.throws(()=>prepareShopifyDailyReadiness({now:new Date('invalid')}));
 });
+test('renewed profile uses fresh identity and GMT daily windows, never shifts expired dates',()=>{
+ const now=new Date('2026-10-29T18:16:00Z');
+ const result=prepareShopifyDailyReadiness({scheduleProfile:'daily-20261029-v1',now});
+ assert.equal(result.disabledConfig.programmeKey,'shopify-staging-20261029');assert.equal(result.remainingWindows.length,6);assert.equal(result.remainingWindows[0].opensAt,'2026-10-30T18:00:00.000Z');assert.equal(result.hardStop,'2026-11-05T00:00:00.000Z');assert.equal(result.activationAuthorized,false);assert.equal(result.enabled,false);
+ const expired=prepareShopifyDailyReadiness({scheduleProfile:'daily-20261029-v1',now:new Date('2026-11-05T00:00:00Z')});assert.equal(expired.remainingWindows.length,0);assert.ok(expired.blockers.includes('no_remaining_daily_windows'));
+ assert.throws(()=>prepareShopifyDailyReadiness({scheduleProfile:'daily'}));
+});

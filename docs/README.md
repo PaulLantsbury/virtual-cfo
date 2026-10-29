@@ -1,3 +1,5 @@
+> **CURRENT PRIORITY — 29 October 2026:** Daily Shopify development test data and reliable readers first; remaining page redesigns next; broader CFO recommendation work deferred. Read [the restart handover](session-handover-2026-10-29.md). New seven-day writer programme is prepared only, disabled and requires explicit approval; expired October programme stays untouched. Live verification is blocked by browser origin-approval timeouts; no overnight results or new provider writes verified today.
+
 > 18 September latest: the first nightly run failed before collection; approved staging correction published successfully at 10:14:45 UTC. Next genuine run expected 19 September 02:00 BST, fixed reporting date 17 September. [Actual evidence](first-overnight-verification-2026-09-18.md). [Historical/daily test preparation](testing-programme-preparation-2026-09-18.md) is local/disposable only; no generator activated. Earlier checkpoints below are historical.
 
 # Night Scout — current starting point, 17 September 2026

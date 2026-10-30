@@ -63,3 +63,9 @@ The isolated deployment closure now includes the two proof modules (**eleven mod
 5. Retain only safe proof/receipt metadata. Provider facts expire within an hour; owner binding expires in ten minutes; combined proof expiry is the earliest constituent expiry. No enabled-only refresh is used to obtain a disabled preflight.
 
 Tests use synthetic network responses/disposable databases. They verify request/identity boundaries, safe provenance/expiry, conflicting evidence, missing-data behavior, callback opt-in and disabled-only results, not live credentials, schema exposure, consent or schedule execution.
+
+## Recovered Demo-specific proof and inspection
+
+Strict audit proof selection accepts only explicit legacy or Demo schema modes; the isolated Demo store cannot use legacy preflight evidence. The separate consent runtime can also consume the already authenticated owner member-status RPC's fresh connected health tied to the current credential. A branded binding receipt expires at the earlier of ten minutes after binding or one hour after its health observation. Raw caller receipts cannot establish provenance. Missing/stale/failed health remains disabled-setup evidence only. Reader credentials and audit database access must not be installed on the writer host.
+
+`xero-demo-writer-inventory-2026-10-30.sql` provides a read-only aggregate inventory before reviewing unused-writer retargeting. `inspectDemoWriterEvidence` takes caller-supplied expected binding, fresh metadata and environment **names** only; it exposes missing configuration without values. Presence is not credential validity, retarget permission or activation authority. Full current report/mapping/reader and separate writer acceptance remain required. No dates, caps, SQL grants or live activation are changed by this source package.

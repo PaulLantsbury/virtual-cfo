@@ -46,7 +46,7 @@ test('fresh conflicting owner binding and strict reader evidence fail closed in 
 
 test('demo proof consumes exact current mapped account binding; matching tenant health cannot override mismatch or expiry',async()=>{
  const demoStore=XERO_DEMO_BINDING_STORE_ID;
- const demoHealth=createXeroReaderContextProofSource({authenticateContext:async()=>({ownerId:owner,storeId:demoStore,authenticated:true}),query:async()=>({rows:[{...row,store_id:demoStore}]}),now});
+ const demoHealth=createXeroReaderContextProofSource({readerSchema:'demo',authenticateContext:async()=>({ownerId:owner,storeId:demoStore,authenticated:true}),query:async()=>({rows:[{...row,store_id:demoStore}]}),now});
  const bindingReader=createXeroOwnerSessionBindingReader({authUrl:'https://bioalckltvkhlczusdvl.supabase.co',publicKey:'sb_publishable_'+'a'.repeat(24),authenticateOwner:async()=>({userId:owner,isOwner:true}),bindingTransport:'demo-public-binding-rpc-v1',selectedRevenueAccountId:account,now,fetchImpl:async url=>new Response(JSON.stringify(url.endsWith('xero_demo_reader_status_v1')?{storeId:demoStore,tenantId:tenant,bindingState:'active',mappingState:'current',mappingVersion:1,mappingEffectiveFrom:'2026-10-01',revenueAccountIds:[account]}:[{store_id:demoStore,tenant_id:tenant}]))});
  const receipt=await bindingReader.read({authorization:'Bearer synthetic-owner-session',ownerId:owner,storeId:demoStore});
  const complete=await verifyXeroWriterSourceProof({...base,...harness(),storeId:demoStore,readerBindingReceipt:receipt,readerContextSource:demoHealth});assert.equal(complete.state,'source_proof_complete');assert.equal(complete.readerHealthVerified,true);assert.equal(complete.activationAuthorized,false);
@@ -57,4 +57,13 @@ test('demo proof consumes exact current mapped account binding; matching tenant 
  }
  const expired=await verifyXeroWriterSourceProof({...base,...harness(),storeId:demoStore,readerBindingReceipt:receipt,readerContextSource:demoHealth,now:()=>new Date('2026-10-30T12:11:00Z')});assert.equal(expired.state,'source_proof_incomplete');assert.equal(expired.readerHealthVerified,false);
  const missing=await verifyXeroWriterSourceProof({...base,...harness(),storeId:demoStore,readerContextSource:demoHealth});assert.equal(missing.state,'source_proof_incomplete');assert.equal(missing.readerHealthVerified,false);
+});
+test('existing owner Demo RPC establishes health without reader credentials or asserted receipt provenance',async()=>{
+ const demoStore=XERO_DEMO_BINDING_STORE_ID;
+ async function receipt(readerHealth){return createXeroOwnerSessionBindingReader({authUrl:'https://bioalckltvkhlczusdvl.supabase.co',publicKey:'sb_publishable_'+'a'.repeat(24),authenticateOwner:async()=>({userId:owner,isOwner:true}),bindingTransport:'demo-public-binding-rpc-v1',selectedRevenueAccountId:account,now,fetchImpl:async url=>new Response(JSON.stringify(url.endsWith('xero_demo_reader_status_v1')?{storeId:demoStore,tenantId:tenant,bindingState:'active',mappingState:'current',mappingVersion:1,mappingEffectiveFrom:'2026-10-01',revenueAccountIds:[account],readerHealth}:[{store_id:demoStore,tenant_id:tenant}]))}).read({authorization:'Bearer synthetic-owner-session',ownerId:owner,storeId:demoStore});}
+ const health={state:'connected',checkedAt:'2026-10-30T11:59:00Z',matchesCurrentCredential:true};
+ const binding=await receipt(health),result=await verifyXeroWriterSourceProof({...base,...harness(),storeId:demoStore,readerBindingReceipt:binding});
+ assert.equal(result.readerHealthVerified,true);assert.equal(result.readerState,'matched');assert.equal(result.readerReceipt.provenance,'authenticated_owner_demo_rpc_current_preflight_v1');assert.equal(result.activationAuthorized,false);assert.equal(result.providerWrites,0);
+ const asserted=await verifyXeroWriterSourceProof({...base,...harness(),storeId:demoStore,readerBindingReceipt:{...binding}});assert.equal(asserted.readerHealthVerified,false);
+ for(const h of [undefined,{...health,matchesCurrentCredential:false},{...health,checkedAt:'2026-10-30T10:59:00Z'}]){const r=await verifyXeroWriterSourceProof({...base,...harness(),storeId:demoStore,readerBindingReceipt:await receipt(h)});assert.equal(r.readerHealthVerified,false);assert.equal(r.activationAuthorized,false);}
 });

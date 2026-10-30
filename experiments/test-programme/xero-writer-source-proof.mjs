@@ -40,8 +40,13 @@ export async function verifyXeroWriterSourceProof({accessToken,tenantId,grantedS
   // A tenant/health match cannot substitute for the selected demo revenue map.
   const demoMappingRequired=storeId===XERO_DEMO_BINDING_STORE_ID;
   const demoMappingUnverified=demoMappingRequired&&(!binding||binding.provenance!=='authenticated_owner_demo_rpc_binding_v1'||binding.revenueAccountBindingVerified!==true||binding.mappedRevenueAccountId!==selection.accountId);
+  if(!readerReceipt&&demoMappingRequired&&binding?.readerHealthVerified===true&&binding.provenance==='authenticated_owner_demo_rpc_binding_v1'){
+   readerReceipt={provider:'xero',target:binding.target,connected:true,observedAt:binding.readerHealthObservedAt,contextObservedAt:binding.observedAt,provenance:'authenticated_owner_demo_rpc_current_preflight_v1'};
+   readerState=readerReceipt.target===tenantId?'matched':'mismatched';
+  }
   const conflicting=!!(readerReceipt&&binding&&readerReceipt.target!==binding.target);
-  const readerHealthVerified=!conflicting&&!demoMappingUnverified&&readerState==='matched';
+  const demoHealthUnverified=demoMappingRequired&&!['authenticated_demo_read_context_current_preflight_v1','authenticated_owner_demo_rpc_current_preflight_v1'].includes(readerReceipt?.provenance);
+  const readerHealthVerified=!conflicting&&!demoMappingUnverified&&!demoHealthUnverified&&readerState==='matched';
   const tenantBindingVerified=!conflicting&&!demoMappingUnverified&&(readerHealthVerified||readerState!=='mismatched'&&binding?.target===tenantId);
   if(conflicting)readerState='conflicting_reader_evidence';
   if(!readerReceipt&&binding)readerState=binding.target===tenantId?'binding_matched_health_unverified':'mismatched';

@@ -1,7 +1,7 @@
 import {mkdir,readFile,readdir,lstat,writeFile} from 'node:fs/promises';import {createHash} from 'node:crypto';import {resolve,join,dirname,relative,sep} from 'node:path';import {fileURLToPath,pathToFileURL} from 'node:url';
 const source=dirname(fileURLToPath(import.meta.url)),root=resolve(source,'../..'),sha=value=>createHash('sha256').update(value).digest('hex');
 export const DEMO_READER_MODULES=Object.freeze([
- ...['demo-intake-window','demo-envelope-crypto','demo-config','demo-database-identity','demo-query-port','demo-source-primitives','demo-preflight','demo-refresh','run-demo-refresh','run-demo-preflight','run-demo-daily-cron'].map(n=>'deployments/demo-staging/'+n+'.mjs'),
+ ...['demo-intake-window','demo-envelope-crypto','demo-config','demo-database-identity','demo-query-port','demo-source-primitives','demo-preflight','demo-refresh','run-demo-refresh','run-demo-preflight','run-demo-daily-cron','demo-readiness'].map(n=>'deployments/demo-staging/'+n+'.mjs'),
  'deployments/nightly-staging/xero-completed-periods.mjs','deployments/nightly-staging/xero-cron-window.mjs',
  ...['read-only-period-snapshot','staging-refresh-orchestrator','account-mapping-contract','selected-account-totals','accounting-reader-contract','evidence-summary'].map(n=>'experiments/xero/'+n+'.mjs')
 ]);

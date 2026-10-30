@@ -1,10 +1,10 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,readFile,readdir,rm,writeFile,symlink,access,mkdir,copyFile,appendFile} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,dirname,resolve} from 'node:path';import {fileURLToPath,pathToFileURL} from 'node:url';import {execFileSync} from 'node:child_process';import {createHash} from 'node:crypto';
+import test from 'node:test';import assert from 'node:assert/strict';import {mkdtemp,readFile,readdir,rm,writeFile,symlink,access,mkdir,copyFile,appendFile,realpath} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,dirname,resolve} from 'node:path';import {fileURLToPath,pathToFileURL} from 'node:url';import {execFileSync} from 'node:child_process';import {createHash} from 'node:crypto';
 import {prepareXeroGenerationDeployment,XERO_GENERATION_MODULES,isolateXeroRefreshImport} from './prepare-xero-generation-deployment.mjs';
 import {runXeroGeneration} from './xero-generation-entry.mjs';
 const source=dirname(fileURLToPath(import.meta.url)),sha=value=>createHash('sha256').update(value).digest('hex');
 const config={provider:'xero',target:'90000000-0000-4000-8000-000000000003',contactId:'90000000-0000-4000-8000-000000000004',accountCode:'200',startMonday:'2026-10-26',programmeKey:'xero-staging-20261030',scheduleProfile:'daily-xero-20261030-v1',financialMode:'posted_demo_only'};
 test('standalone unbound/default-off start succeeds without dependencies, config, credentials or customer source',async()=>{
- const dir=await mkdtemp(join(tmpdir(),'ns-xero-generator-'));try{
+ const dir=await realpath(await mkdtemp(join(tmpdir(),'ns-xero-generator-')));try{
  const result=await prepareXeroGenerationDeployment(dir);assert.equal(result.modules,11);assert.equal(result.dependencySnapshots,14);assert.equal(result.generationEnabled,false);assert.equal(result.scheduleInstalled,false);
  const out=JSON.parse(execFileSync(process.execPath,[join(dir,'xero-generation-entry.mjs')],{env:{PATH:process.env.PATH},encoding:'utf8'}));assert.deepEqual(out,{event:'provider_test_programme',state:'prepared-disabled',provider:'xero',programmeKey:config.programmeKey,actions:7,configurationBound:false});
  const files=await readdir(dir);assert.equal(files.length,17);assert.equal(files.some(f=>/consent|owner-page|source-proof|\.env|sql$/.test(f)),false);await assert.rejects(access(join(dir,'node_modules')));

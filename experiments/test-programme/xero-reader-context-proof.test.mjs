@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {PGlite} from '@electric-sql/pglite';
-import {createXeroReaderContextProofSource,isXeroReaderContextProofSource,XERO_READER_CONTEXT_SQL} from './xero-reader-context-proof.mjs';
+import {createXeroReaderContextProofSource,isXeroReaderContextProofSource,XERO_READER_CONTEXT_SQL,XERO_DEMO_READER_CONTEXT_SQL,XERO_DEMO_BINDING_STORE_ID} from './xero-reader-context-proof.mjs';
 const owner='90000000-0000-4000-8000-000000000001',store='90000000-0000-4000-8000-000000000002',tenant='90000000-0000-4000-8000-000000000003',connection='90000000-0000-4000-8000-000000000004';
 const now=()=>new Date('2026-10-30T12:00:00Z'),identity=async()=>({ownerId:owner,storeId:store,authenticated:true});
 const safe={tenant_id:tenant,store_id:store,context_role:'existing_authorized_audit',outcome:'connected',phase:'organisation',reason:'ok',tenant_visible:true,matches_current_credential:true,latest_time_unambiguous:true,checked_at:'2026-10-30T11:55:00Z'};
@@ -34,4 +34,19 @@ test('owner RLS path fails closed for unexposed schema, denied/ambiguous/wrong-s
  for(const fetchImpl of cases){const reader=createXeroOwnerSessionBindingReader({...bindingConfig,fetchImpl});await assert.rejects(reader.read({authorization:'Bearer synthetic-owner-session',ownerId:owner,storeId:store}),/^Error: Xero reader context proof unavailable$/);}
  let calls=0;const denied=createXeroOwnerSessionBindingReader({...bindingConfig,authenticateOwner:async()=>({userId:tenant,isOwner:true}),fetchImpl:async()=>{calls++;}});await assert.rejects(denied.read({authorization:'Bearer synthetic-owner-session',ownerId:owner,storeId:store}));assert.equal(calls,0);
  const privileged=['x',Buffer.from(JSON.stringify({role:'service_role',ref:'bioalckltvkhlczusdvl'})).toString('base64url'),'x'].join('.');assert.throws(()=>createXeroOwnerSessionBindingReader({...bindingConfig,publicKey:privileged}));
+});
+
+test('isolated Demo proof executes actual Demo SELECT and cannot use matching legacy rows',async()=>{
+ const demo=XERO_DEMO_BINDING_STORE_ID,db=await fixture();
+ try {
+  await db.exec(`CREATE SCHEMA xero_demo_v1; CREATE TABLE xero_demo_v1.connections (LIKE xero_v1.connections); CREATE TABLE xero_demo_v1.credential_envelopes (LIKE xero_v1.credential_envelopes); CREATE TABLE xero_demo_v1.connection_preflight_evidence (LIKE xero_v1.connection_preflight_evidence); INSERT INTO public.store_memberships VALUES ('${owner}','${demo}'); INSERT INTO xero_v1.connections VALUES ('${connection}','${demo}','${tenant}',NULL);`);
+  const auth=async()=>({ownerId:owner,storeId:demo,authenticated:true});let used;
+  const source=createXeroReaderContextProofSource({readerSchema:'demo',authenticateContext:auth,query:(sql,args)=>{used=sql;return db.query(sql,args);},now});
+  await assert.rejects(source.read({ownerId:owner,storeId:demo}));assert.equal(used,XERO_DEMO_READER_CONTEXT_SQL);
+  await db.exec(`INSERT INTO xero_demo_v1.connections VALUES ('${connection}','${demo}','${tenant}',NULL); INSERT INTO xero_demo_v1.credential_envelopes VALUES ('${connection}',2); INSERT INTO xero_demo_v1.connection_preflight_evidence VALUES ('90000000-0000-4000-8000-000000000005','${connection}','connected','organisation','ok',true,'2026-10-30T11:55:00Z',2);`);
+  const proof=await source.read({ownerId:owner,storeId:demo});assert.equal(proof.target,tenant);assert.equal(proof.provenance,'authenticated_demo_read_context_current_preflight_v1');
+  await db.exec('UPDATE xero_demo_v1.credential_envelopes SET version=3');await assert.rejects(source.read({ownerId:owner,storeId:demo}));
+  const legacy=createXeroReaderContextProofSource({authenticateContext:auth,query:()=>{throw Error('must not query');},now});await assert.rejects(legacy.read({ownerId:owner,storeId:demo}));
+  const wrong=createXeroReaderContextProofSource({readerSchema:'demo',authenticateContext:identity,query:()=>{throw Error('must not query');},now});await assert.rejects(wrong.read({ownerId:owner,storeId:store}));
+ } finally {await db.close();}
 });

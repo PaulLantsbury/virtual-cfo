@@ -48,3 +48,13 @@ node --test deployments/demo-staging/*.test.mjs experiments/xero/demo-isolation.
 ```
 
 Disposable SQL integration uses synthetic data and the actual proposed schema plus restricted query adapter. It verifies successful supported evidence, token rotation and lease completion while all legacy reader table rows, function definitions and its global selector remain identical. No successful local fixture is a live consent, provider source or hosted-run receipt.
+
+## Metadata-only readiness receipt
+
+The packaged `deployments/demo-staging/demo-readiness.mjs` accepts explicit completed scope dates. It validates configuration, restricted database identity, current mapping context, tenant/key/version, idle lease and a supported saved receipt in a repeatable-read read-only transaction. It refuses future evidence timestamps and prints no credentials or financial values. It makes no provider call or credential rotation.
+
+```sh
+node deployments/demo-staging/.demo-reader-runtime/deployments/demo-staging/demo-readiness.mjs 2026-10-01 2026-10-29
+```
+
+`hostSchedule` and `automaticRun` deliberately remain `not_checked`: verify those from hosted settings and genuine run receipts separately. The receipt is not writer activation authority or exact invoice linkage. Earlier proposal-stage statements above are historical package descriptions; consult the private operational checkpoint before repeating setup.

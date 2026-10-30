@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,readFile,readdir,rm,mkdir,writeFile,symlink} from 'node:fs/promises';
+import {mkdtemp,readFile,readdir,rm,mkdir,writeFile,symlink,realpath} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -10,9 +10,9 @@ import {prepareDemoReaderDeployment,DEMO_READER_MODULES} from './prepare-demo-re
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const sha=b=>createHash('sha256').update(b).digest('hex');
 test('frozen independent package has exact source closure, provenance and credential-free disabled real CLI entry points',async()=>{
- const parent=await mkdtemp(join(tmpdir(),'demo-package-')),out=join(parent,'build');
+ const parent=await realpath(await mkdtemp(join(tmpdir(),'demo-package-'))),out=join(parent,'build');
  try{
-  const result=await prepareDemoReaderDeployment(out);assert.equal(result.modules,19);
+  const result=await prepareDemoReaderDeployment(out);assert.equal(result.modules,20);
   const provenance=JSON.parse(await readFile(join(out,'source-provenance.json')));
   assert.deepEqual(Object.keys(provenance).sort(),[...DEMO_READER_MODULES,'deployments/demo-staging/demo-reader.manifest.json'].sort());
   for(const file of DEMO_READER_MODULES){

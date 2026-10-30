@@ -16,19 +16,21 @@ LEFT JOIN LATERAL (SELECT outcome,phase,reason,tenant_visible,checked_at,credent
  ORDER BY checked_at DESC,id DESC LIMIT 1) p ON true
 WHERE c.store_id=$2::uuid AND c.retired_at IS NULL
  AND EXISTS(SELECT 1 FROM public.store_memberships m WHERE m.user_id=$1::uuid AND m.store_id=c.store_id)`;
+// An explicit audit-context query; no credentials or ciphertext leave the database.
+export const XERO_DEMO_READER_CONTEXT_SQL=XERO_READER_CONTEXT_SQL.replaceAll('xero_v1.', 'xero_demo_v1.');
 const unavailable=()=>Error('Xero reader context proof unavailable');
-export function createXeroReaderContextProofSource({authenticateContext,query,now=()=>new Date()}={}){
- if(typeof authenticateContext!=='function'||typeof query!=='function'||typeof now!=='function')throw unavailable();
+export function createXeroReaderContextProofSource({authenticateContext,query,now=()=>new Date(),readerSchema='legacy'}={}){
+ if(typeof authenticateContext!=='function'||typeof query!=='function'||typeof now!=='function'||!['legacy','demo'].includes(readerSchema))throw unavailable();
  const source=Object.freeze({async read({ownerId,storeId}){
   try{
-   if(!UUID.test(ownerId??'')||!UUID.test(storeId??''))throw unavailable();
+   if(!UUID.test(ownerId??'')||!UUID.test(storeId??'')||(readerSchema==='demo')!==(storeId===XERO_DEMO_BINDING_STORE_ID))throw unavailable();
    const identity=await authenticateContext();
    if(identity?.ownerId!==ownerId||identity.storeId!==storeId||identity.authenticated!==true)throw unavailable();
-   const result=await query(XERO_READER_CONTEXT_SQL,[ownerId,storeId]);
+   const result=await query(readerSchema==='demo'?XERO_DEMO_READER_CONTEXT_SQL:XERO_READER_CONTEXT_SQL,[ownerId,storeId]);
    if(result.rows?.length!==1)throw unavailable();
    const r=result.rows[0],clock=now(),at=r.checked_at instanceof Date?r.checked_at.toISOString():r.checked_at;
    if(!(clock instanceof Date)||!Number.isFinite(clock.valueOf())||!UUID.test(r.tenant_id??'')||r.store_id!==storeId||typeof r.context_role!=='string'||['night_scout_test_writer','night_scout_test_writer_service','anon','authenticated'].includes(r.context_role)||typeof at!=='string'||!Number.isFinite(Date.parse(at))||Date.parse(at)>clock.valueOf()||clock.valueOf()-Date.parse(at)>3600000||r.outcome!=='connected'||r.phase!=='organisation'||r.reason!=='ok'||r.tenant_visible!==true||r.matches_current_credential!==true||r.latest_time_unambiguous!==true)throw unavailable();
-   return Object.freeze({provider:'xero',target:r.tenant_id,connected:true,observedAt:at,contextObservedAt:clock.toISOString(),provenance:'authenticated_read_context_current_preflight_v1'});
+   return Object.freeze({provider:'xero',target:r.tenant_id,connected:true,observedAt:at,contextObservedAt:clock.toISOString(),provenance:readerSchema==='demo'?'authenticated_demo_read_context_current_preflight_v1':'authenticated_read_context_current_preflight_v1'});
   }catch{throw unavailable();}
  }});sources.add(source);return source;
 }
@@ -47,7 +49,8 @@ function publicMemberKey(key){
  * requires existing schema exposure. Explicit public-binding-rpc-v1 opt-in requires
  * separately reviewed/applied SQL; neither transport falls back to the other.
  * Schema exposure/RPC availability is not assumed: failures stay closed.
- * Only safe binding metadata is retained; reader connection health is not inferred.
+ * Demo health uses only the independently authenticated member status RPC;
+ * binding alone never establishes health or activation authority.
  */
 export function createXeroOwnerSessionBindingReader({authUrl,publicKey,authenticateOwner,fetchImpl=fetch,now=()=>new Date(),bindingTransport='existing-schema-select',selectedRevenueAccountId}={}){
  const demo=bindingTransport==='demo-public-binding-rpc-v1';
@@ -66,6 +69,7 @@ export function createXeroOwnerSessionBindingReader({authUrl,publicKey,authentic
     while(true){const {done,value}=await bodyReader.read();if(done)break;size+=value.byteLength;if(size>8192){await bodyReader.cancel();throw unavailable();}chunks.push(Buffer.from(value));}
     const rows=JSON.parse(Buffer.concat(chunks,size).toString('utf8'));if(!Array.isArray(rows)||rows.length!==1||Object.keys(rows[0]).sort().join(',')!=='store_id,tenant_id'||rows[0].store_id!==storeId||!UUID.test(rows[0].tenant_id??''))throw unavailable();
     const clock=now();if(!(clock instanceof Date)||!Number.isFinite(clock.valueOf()))throw unavailable();
+    let readerHealthObservedAt;
     if(demo){
      bodyReader.releaseLock();bodyReader=undefined;
      const statusResponse=await fetchImpl(`${authUrl}/rest/v1/rpc/xero_demo_reader_status_v1`,{method:'POST',redirect:'error',signal:controller.signal,headers:{apikey:publicKey,Authorization:authorization,Accept:'application/json','Accept-Profile':'public','Content-Profile':'public','Content-Type':'application/json'},body:JSON.stringify({p_store_id:storeId})});
@@ -74,8 +78,12 @@ export function createXeroOwnerSessionBindingReader({authUrl,publicKey,authentic
      while(true){const {done,value}=await bodyReader.read();if(done)break;statusSize+=value.byteLength;if(statusSize>8192){await bodyReader.cancel();throw unavailable();}statusChunks.push(Buffer.from(value));}
      const status=JSON.parse(Buffer.concat(statusChunks,statusSize).toString('utf8')),ids=status?.revenueAccountIds,date=status?.mappingEffectiveFrom;
      if(status?.storeId!==storeId||status.tenantId!==rows[0].tenant_id||status.bindingState!=='active'||status.mappingState!=='current'||!Number.isSafeInteger(status.mappingVersion)||status.mappingVersion<1||typeof date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+'T00:00:00Z'))||new Date(date+'T00:00:00Z').toISOString().slice(0,10)!==date||date>clock.toISOString().slice(0,10)||!Array.isArray(ids)||ids.length<1||ids.length>100||ids.some(id=>typeof id!=='string'||!UUID.test(id))||new Set(ids).size!==ids.length||!ids.includes(selectedRevenueAccountId))throw unavailable();
+     const health=status.readerHealth,at=health?.checkedAt;
+     // Only this authenticated, fixed member RPC can mint a health receipt.
+     // Stale/missing health leaves binding usable for disabled setup only.
+     if(health?.state==='connected'&&health.matchesCurrentCredential===true&&typeof at==='string'&&Number.isFinite(Date.parse(at))&&Date.parse(at)<=clock.valueOf()&&clock.valueOf()-Date.parse(at)<=3600000)readerHealthObservedAt=at;
     }
-    const receipt=Object.freeze({provider:'xero',target:rows[0].tenant_id,ownerId,storeId,tenantBindingVerified:true,readerHealthVerified:false,...(demo?{revenueAccountBindingVerified:true,mappedRevenueAccountId:selectedRevenueAccountId}:{}),observedAt:clock.toISOString(),expiresAt:new Date(clock.valueOf()+600000).toISOString(),provenance:demo?'authenticated_owner_demo_rpc_binding_v1':rpc?'authenticated_owner_public_rpc_binding_v1':'authenticated_owner_rls_connection_binding_v1'});
+    const receipt=Object.freeze({provider:'xero',target:rows[0].tenant_id,ownerId,storeId,tenantBindingVerified:true,readerHealthVerified:!!readerHealthObservedAt,...(readerHealthObservedAt?{readerHealthObservedAt}:{}),...(demo?{revenueAccountBindingVerified:true,mappedRevenueAccountId:selectedRevenueAccountId}:{}),observedAt:clock.toISOString(),expiresAt:new Date(Math.min(clock.valueOf()+600000,readerHealthObservedAt?Date.parse(readerHealthObservedAt)+3600000:Infinity)).toISOString(),provenance:demo?'authenticated_owner_demo_rpc_binding_v1':rpc?'authenticated_owner_public_rpc_binding_v1':'authenticated_owner_rls_connection_binding_v1'});
     ownerBindingReceipts.add(receipt);return receipt;
    }finally{clearTimeout(timer);bodyReader?.releaseLock();}
   }catch{throw unavailable();}

@@ -1,3 +1,5 @@
+> **Latest source finding — 30 October:** The real reader organisation check is connected and GBP but API `IsDemoCompany=false`. The separate UK Demo Company is accessible in Xero. Keep writer generation off; prepare the [isolated demo-reader package](xero-demo-reader-proposal-2026-10-30.md) without adding a second eligible connection to legacy global discovery or repointing the working reader. Exact setup/deployment/private-owner steps are in the current checkpoint.
+
 > **APPROVED SETUP — 30 October 2026:** Paul approved the separate bounded Xero setup. Both reviewed staging SQL packages are now applied; the separate operator, cron and writer app exist. Bootstrap and generation remain off pending private owner credentials, MFA, genuine demo/source checks and matching reader acceptance. Read [the setup checkpoint](xero-staging-setup-2026-10-30.md); do not repeat migration/hosting/app approval or application. Benchmarking remains deferred.
 
 # Night Scout — 30 October 2026 development handover

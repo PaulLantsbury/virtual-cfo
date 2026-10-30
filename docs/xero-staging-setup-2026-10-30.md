@@ -27,7 +27,7 @@ The owner page now offers **Set up authenticator** only after password sign-in a
 
 ## Remaining sequence
 
-1. Publish the reviewed compatibility/authentication source and reader diagnostic, verify the actual hosted revision, and retain the safe receipts.
+1. The reviewed compatibility/authentication source and reader diagnostic are published; actual deployments of the operator, generator and existing reader were verified. Retain exact source/deployment receipts privately.
 2. On the existing authorised reader host only, use the [organisation diagnostic](../deployments/nightly-staging/XERO-READER-ORGANISATION-CHECK.md) to establish actual API demo/currency facts. Its normal token rotation, lease and health writes are explicit. It collects no accounting evidence, adds no business-data request and copies no credential to a writer.
 3. Keep bootstrap/generation off while completing the private writer app secret, restricted writer URL and separate writer encryption key. Genuine GBP Demo Company and existing synthetic contact/revenue-account selections must be proved, not guessed.
 4. If the working reader is not the same genuine demo tenant, prepare a separately scoped reader and resolve that setup explicitly. Do not repoint the working reader or infer demo status from its name. Same-tenant metadata alone is not reader health.
@@ -37,3 +37,9 @@ The owner page now offers **Set up authenticator** only after password sign-in a
 ## Validation
 
 Final root regression: **118 tests passed** across the retained integration checks plus client-ID compatibility, owner-operated enrollment, post-application verification and reader organisation diagnostic. Independent review found no blocking source issue. Diff whitespace checks passed. These checks do not prove owner credential entry, live MFA, writer consent or scheduled invoices. The customer frontend is unchanged; the previously recorded backend-wide TypeScript limitation remains.
+
+## Actual organisation finding after publication
+
+The hosted diagnostic on the existing reader completed successfully: `organisationVerified=true`, **`isDemoCompany=false`**, `currency=GBP`, preflight connected/organisation/ok and no accounting collection. Normal reader credential rotation/lease/health persistence completed; no credential was copied to a writer and no reader target was changed. The separate Demo Company (UK) is accessible in Xero with its explicit fictional-data banner, but has no verified API tenant binding or reader/writer consent yet.
+
+This mismatch blocks the approved demo-only writer trial. The [separate demo-reader proposal](xero-demo-reader-proposal-2026-10-30.md) explains why adding another eligible connection to the legacy schema could break its single-job discovery and proposes a separately scoped store/schema/roles/RPC/runtime. The new implementation and database/consent scope remain unapproved; preserve the working reader. Private writer credential entry and owner MFA remain owner-only steps and do not resolve this mismatch on their own.

@@ -52,3 +52,7 @@ Do not infer approval for execution from today's read-only preparation or pick a
 `node --test experiments/data-handling/inventory.test.mjs`
 
 Six disposable tests cover store scoping/aggregate privacy, missing versus empty tables, unreadable/changed shapes, savepoint failure recovery/private errors, wrong-target rejection and RLS hiding real rows behind an apparently empty count. No live database/provider/backup/browser deletion or production validation is claimed.
+
+## Proposed isolated Demo dataset
+
+The new source-only Demo reader package adds a proposed private `xero_demo_v1` copy of bounded accounting/mapping/encrypted credential history and a separately identified synthetic logical store/member link. It is not applied by this audit. If approved later, include those new copies/roles/host secrets and provider consent in retention/deletion inventory; existing source inventory reports incomplete coverage for unclassified relations. Demo credentials remain sensitive even when the financial sample data is fictional. No expiry claim here proves data or backups erased, and no cross-client benchmark reuse is introduced.

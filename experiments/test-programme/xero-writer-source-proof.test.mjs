@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {verifyXeroWriterSourceProof,validXeroSourceSelection} from './xero-writer-source-proof.mjs';
-import {createXeroReaderContextProofSource,createXeroOwnerSessionBindingReader} from './xero-reader-context-proof.mjs';
+import {createXeroReaderContextProofSource,createXeroOwnerSessionBindingReader,XERO_DEMO_BINDING_STORE_ID} from './xero-reader-context-proof.mjs';
 const owner='90000000-0000-4000-8000-000000000001',store='90000000-0000-4000-8000-000000000002',tenant='90000000-0000-4000-8000-000000000003',contact='90000000-0000-4000-8000-000000000004',account='90000000-0000-4000-8000-000000000005';
 const now=()=>new Date('2026-10-30T12:00:00Z'),token='synthetic-private-fresh-access-token',scopes='offline_access accounting.invoices accounting.settings.read accounting.contacts.read';
 const selection={contactId:contact,accountId:account,confirmedSyntheticContactId:contact,confirmedNonStockAccountId:account,separateWriterAppConfirmed:true};
@@ -42,4 +42,19 @@ test('fresh conflicting owner binding and strict reader evidence fail closed in 
  const readerBindingReceipt=await bindingReader.read({authorization:'Bearer synthetic-owner-session',ownerId:owner,storeId:store});
  const r=await verifyXeroWriterSourceProof({...base,...harness(),readerBindingReceipt,readerContextSource:reader({tenant_id:strictTarget})});assert.equal(r.state,'source_proof_incomplete');assert.equal(r.tenantBindingVerified,false);assert.equal(r.readerHealthVerified,false);assert.equal(r.readerState,'conflicting_reader_evidence');assert.ok(r.limitations.includes('conflicting_reader_bindings'));
  }
+});
+
+test('demo proof consumes exact current mapped account binding; matching tenant health cannot override mismatch or expiry',async()=>{
+ const demoStore=XERO_DEMO_BINDING_STORE_ID;
+ const demoHealth=createXeroReaderContextProofSource({authenticateContext:async()=>({ownerId:owner,storeId:demoStore,authenticated:true}),query:async()=>({rows:[{...row,store_id:demoStore}]}),now});
+ const bindingReader=createXeroOwnerSessionBindingReader({authUrl:'https://bioalckltvkhlczusdvl.supabase.co',publicKey:'sb_publishable_'+'a'.repeat(24),authenticateOwner:async()=>({userId:owner,isOwner:true}),bindingTransport:'demo-public-binding-rpc-v1',selectedRevenueAccountId:account,now,fetchImpl:async url=>new Response(JSON.stringify(url.endsWith('xero_demo_reader_status_v1')?{storeId:demoStore,tenantId:tenant,bindingState:'active',mappingState:'current',mappingVersion:1,mappingEffectiveFrom:'2026-10-01',revenueAccountIds:[account]}:[{store_id:demoStore,tenant_id:tenant}]))});
+ const receipt=await bindingReader.read({authorization:'Bearer synthetic-owner-session',ownerId:owner,storeId:demoStore});
+ const complete=await verifyXeroWriterSourceProof({...base,...harness(),storeId:demoStore,readerBindingReceipt:receipt,readerContextSource:demoHealth});assert.equal(complete.state,'source_proof_complete');assert.equal(complete.readerHealthVerified,true);assert.equal(complete.activationAuthorized,false);
+ const anotherAccount='90000000-0000-4000-8000-000000000006',changedSelection={...selection,accountId:anotherAccount,confirmedNonStockAccountId:anotherAccount};
+ for(const readerContextSource of [undefined,demoHealth]){
+  const h=harness({Accounts:{Accounts:[{AccountID:anotherAccount,Code:'201',Type:'REVENUE',Status:'ACTIVE'}]}});
+  const mismatched=await verifyXeroWriterSourceProof({...base,...h,selection:changedSelection,storeId:demoStore,readerBindingReceipt:receipt,readerContextSource});assert.equal(mismatched.state,'source_proof_incomplete');assert.equal(mismatched.tenantBindingVerified,false);assert.equal(mismatched.readerHealthVerified,false);assert.equal(mismatched.readerState,'demo_revenue_mapping_unverified');
+ }
+ const expired=await verifyXeroWriterSourceProof({...base,...harness(),storeId:demoStore,readerBindingReceipt:receipt,readerContextSource:demoHealth,now:()=>new Date('2026-10-30T12:11:00Z')});assert.equal(expired.state,'source_proof_incomplete');assert.equal(expired.readerHealthVerified,false);
+ const missing=await verifyXeroWriterSourceProof({...base,...harness(),storeId:demoStore,readerContextSource:demoHealth});assert.equal(missing.state,'source_proof_incomplete');assert.equal(missing.readerHealthVerified,false);
 });

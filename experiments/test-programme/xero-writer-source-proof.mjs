@@ -1,5 +1,5 @@
 import {validWriterScopes} from './writer-oauth-scopes.mjs';
-import {isXeroReaderContextProofSource,isXeroOwnerSessionBindingReceipt} from './xero-reader-context-proof.mjs';
+import {isXeroReaderContextProofSource,isXeroOwnerSessionBindingReceipt,XERO_DEMO_BINDING_STORE_ID} from './xero-reader-context-proof.mjs';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const unavailable=()=>Error('Xero writer source proof unavailable');
 export const validXeroSourceSelection=selection=>!!selection&&Object.keys(selection).sort().join(',')==='accountId,confirmedNonStockAccountId,confirmedSyntheticContactId,contactId,separateWriterAppConfirmed'&&UUID.test(selection.contactId??'')&&UUID.test(selection.accountId??'')&&selection.confirmedSyntheticContactId===selection.contactId&&selection.confirmedNonStockAccountId===selection.accountId&&selection.separateWriterAppConfirmed===true;
@@ -37,12 +37,16 @@ export async function verifyXeroWriterSourceProof({accessToken,tenantId,grantedS
    try{readerReceipt=await readerContextSource.read({ownerId,storeId});readerState=readerReceipt.target===tenantId?'matched':'mismatched';}catch{}
   }
   const binding=isXeroOwnerSessionBindingReceipt(readerBindingReceipt)&&readerBindingReceipt.storeId===storeId&&readerBindingReceipt.ownerId===ownerId&&Date.parse(readerBindingReceipt.observedAt)<=clock.valueOf()&&Date.parse(readerBindingReceipt.expiresAt)>clock.valueOf()?readerBindingReceipt:null;
+  // A tenant/health match cannot substitute for the selected demo revenue map.
+  const demoMappingRequired=storeId===XERO_DEMO_BINDING_STORE_ID;
+  const demoMappingUnverified=demoMappingRequired&&(!binding||binding.provenance!=='authenticated_owner_demo_rpc_binding_v1'||binding.revenueAccountBindingVerified!==true||binding.mappedRevenueAccountId!==selection.accountId);
   const conflicting=!!(readerReceipt&&binding&&readerReceipt.target!==binding.target);
-  const readerHealthVerified=!conflicting&&readerState==='matched';
-  const tenantBindingVerified=!conflicting&&(readerHealthVerified||readerState!=='mismatched'&&binding?.target===tenantId);
+  const readerHealthVerified=!conflicting&&!demoMappingUnverified&&readerState==='matched';
+  const tenantBindingVerified=!conflicting&&!demoMappingUnverified&&(readerHealthVerified||readerState!=='mismatched'&&binding?.target===tenantId);
   if(conflicting)readerState='conflicting_reader_evidence';
   if(!readerReceipt&&binding)readerState=binding.target===tenantId?'binding_matched_health_unverified':'mismatched';
-  return freeze({state:tenantBindingVerified?'source_proof_complete':'source_proof_incomplete',providerReceipt,readerReceipt,readerBindingReceipt:binding,readerState,tenantBindingVerified:!!tenantBindingVerified,readerHealthVerified,limitations:conflicting?['conflicting_reader_bindings','reader_health_not_verified']:readerHealthVerified?[]:['reader_health_not_verified'],observedAt,expiresAt:new Date(Math.min(clock.valueOf()+3600000,readerReceipt?Date.parse(readerReceipt.observedAt)+3600000:Infinity,binding?Date.parse(binding.expiresAt):Infinity)).toISOString(),providerReads:3,providerWrites:0,credentialRefreshes:0,activationAuthorized:false,
+  if(demoMappingUnverified)readerState='demo_revenue_mapping_unverified';
+  return freeze({state:tenantBindingVerified?'source_proof_complete':'source_proof_incomplete',providerReceipt,readerReceipt,readerBindingReceipt:binding,readerState,tenantBindingVerified:!!tenantBindingVerified,readerHealthVerified,limitations:demoMappingUnverified?['selected_demo_revenue_account_not_verified','reader_health_not_verified']:conflicting?['conflicting_reader_bindings','reader_health_not_verified']:readerHealthVerified?[]:['reader_health_not_verified'],observedAt,expiresAt:new Date(Math.min(clock.valueOf()+3600000,readerReceipt?Date.parse(readerReceipt.observedAt)+3600000:Infinity,binding?Date.parse(binding.expiresAt):Infinity)).toISOString(),providerReads:3,providerWrites:0,credentialRefreshes:0,activationAuthorized:false,
    provenance:{provider:'fresh_oauth_access_token_fixed_gets',contactExistenceAndStatus:'xero_api',syntheticContactIntent:'owner_confirmed_exact_contact_id',accountStatusAndRevenueType:'xero_api',nonStockUse:'owner_confirmed_exact_account_id_no_item_invoice',separateWriterApp:'operator_app_boundary_confirmation',reader:readerReceipt?.provenance??binding?.provenance??'not_verified'}});
  }catch{throw unavailable();}
 }

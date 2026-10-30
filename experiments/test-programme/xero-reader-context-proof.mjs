@@ -36,6 +36,8 @@ export const isXeroReaderContextProofSource=value=>!!value&&sources.has(value);
 
 const ownerBindingReaders=new WeakSet(),ownerBindingReceipts=new WeakSet();
 const PROJECT='bioalckltvkhlczusdvl';
+// Proposed isolated demo store: never dispatch this transport to the live reader.
+export const XERO_DEMO_BINDING_STORE_ID='f59e3a44-7106-4df8-9c08-52da30c9de30';
 function publicMemberKey(key){
  if(typeof key!=='string'||key.length>4096)return false;
  if(/^sb_publishable_[A-Za-z0-9_-]{20,}$/.test(key))return true;
@@ -47,23 +49,33 @@ function publicMemberKey(key){
  * Schema exposure/RPC availability is not assumed: failures stay closed.
  * Only safe binding metadata is retained; reader connection health is not inferred.
  */
-export function createXeroOwnerSessionBindingReader({authUrl,publicKey,authenticateOwner,fetchImpl=fetch,now=()=>new Date(),bindingTransport='existing-schema-select'}={}){
- if(authUrl!==`https://${PROJECT}.supabase.co`||!publicMemberKey(publicKey)||typeof authenticateOwner!=='function'||typeof fetchImpl!=='function'||typeof now!=='function'||!['existing-schema-select','public-binding-rpc-v1'].includes(bindingTransport))throw unavailable();
+export function createXeroOwnerSessionBindingReader({authUrl,publicKey,authenticateOwner,fetchImpl=fetch,now=()=>new Date(),bindingTransport='existing-schema-select',selectedRevenueAccountId}={}){
+ const demo=bindingTransport==='demo-public-binding-rpc-v1';
+ if(authUrl!==`https://${PROJECT}.supabase.co`||!publicMemberKey(publicKey)||typeof authenticateOwner!=='function'||typeof fetchImpl!=='function'||typeof now!=='function'||!['existing-schema-select','public-binding-rpc-v1','demo-public-binding-rpc-v1'].includes(bindingTransport)||demo&&!UUID.test(selectedRevenueAccountId??''))throw unavailable();
  const reader=Object.freeze({async read({authorization,ownerId,storeId}){
   try{
-   if(typeof authorization!=='string'||authorization.length>8192||!/^Bearer [^\s,]+$/i.test(authorization)||!UUID.test(ownerId??'')||!UUID.test(storeId??''))throw unavailable();
+   if(typeof authorization!=='string'||authorization.length>8192||!/^Bearer [^\s,]+$/i.test(authorization)||!UUID.test(ownerId??'')||!UUID.test(storeId??'')||demo&&storeId!==XERO_DEMO_BINDING_STORE_ID)throw unavailable();
    const principal=await authenticateOwner(authorization);if(principal?.userId!==ownerId||principal.isOwner!==true)throw unavailable();
    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);let bodyReader;
    try{
-    const rpc=bindingTransport==='public-binding-rpc-v1';
-    const url=new URL(`${authUrl}/rest/v1/${rpc?'rpc/xero_member_active_tenant_binding_v1':'connections'}`);
+    const rpc=demo||bindingTransport==='public-binding-rpc-v1';
+    const url=new URL(`${authUrl}/rest/v1/${demo?'rpc/xero_demo_member_active_tenant_binding_v1':rpc?'rpc/xero_member_active_tenant_binding_v1':'connections'}`);
     if(!rpc){url.searchParams.set('select','store_id,tenant_id');url.searchParams.set('store_id',`eq.${storeId}`);url.searchParams.set('retired_at','is.null');url.searchParams.set('limit','2');}
     const r=await fetchImpl(url.href,{method:rpc?'POST':'GET',redirect:'error',signal:controller.signal,headers:{apikey:publicKey,Authorization:authorization,Accept:'application/json','Accept-Profile':rpc?'public':'xero_v1',...(rpc?{'Content-Profile':'public','Content-Type':'application/json'}:{})},...(rpc?{body:JSON.stringify({p_store_id:storeId})}:{})});
     if(!r?.ok||r.redirected||Number(r.headers?.get?.('content-length'))>8192)throw unavailable();bodyReader=r.body?.getReader();if(!bodyReader)throw unavailable();let size=0;const chunks=[];
     while(true){const {done,value}=await bodyReader.read();if(done)break;size+=value.byteLength;if(size>8192){await bodyReader.cancel();throw unavailable();}chunks.push(Buffer.from(value));}
     const rows=JSON.parse(Buffer.concat(chunks,size).toString('utf8'));if(!Array.isArray(rows)||rows.length!==1||Object.keys(rows[0]).sort().join(',')!=='store_id,tenant_id'||rows[0].store_id!==storeId||!UUID.test(rows[0].tenant_id??''))throw unavailable();
     const clock=now();if(!(clock instanceof Date)||!Number.isFinite(clock.valueOf()))throw unavailable();
-    const receipt=Object.freeze({provider:'xero',target:rows[0].tenant_id,ownerId,storeId,tenantBindingVerified:true,readerHealthVerified:false,observedAt:clock.toISOString(),expiresAt:new Date(clock.valueOf()+600000).toISOString(),provenance:rpc?'authenticated_owner_public_rpc_binding_v1':'authenticated_owner_rls_connection_binding_v1'});
+    if(demo){
+     bodyReader.releaseLock();bodyReader=undefined;
+     const statusResponse=await fetchImpl(`${authUrl}/rest/v1/rpc/xero_demo_reader_status_v1`,{method:'POST',redirect:'error',signal:controller.signal,headers:{apikey:publicKey,Authorization:authorization,Accept:'application/json','Accept-Profile':'public','Content-Profile':'public','Content-Type':'application/json'},body:JSON.stringify({p_store_id:storeId})});
+     if(!statusResponse?.ok||statusResponse.redirected||Number(statusResponse.headers?.get?.('content-length'))>8192)throw unavailable();
+     bodyReader=statusResponse.body?.getReader();if(!bodyReader)throw unavailable();let statusSize=0;const statusChunks=[];
+     while(true){const {done,value}=await bodyReader.read();if(done)break;statusSize+=value.byteLength;if(statusSize>8192){await bodyReader.cancel();throw unavailable();}statusChunks.push(Buffer.from(value));}
+     const status=JSON.parse(Buffer.concat(statusChunks,statusSize).toString('utf8')),ids=status?.revenueAccountIds,date=status?.mappingEffectiveFrom;
+     if(status?.storeId!==storeId||status.tenantId!==rows[0].tenant_id||status.bindingState!=='active'||status.mappingState!=='current'||!Number.isSafeInteger(status.mappingVersion)||status.mappingVersion<1||typeof date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+'T00:00:00Z'))||new Date(date+'T00:00:00Z').toISOString().slice(0,10)!==date||date>clock.toISOString().slice(0,10)||!Array.isArray(ids)||ids.length<1||ids.length>100||ids.some(id=>typeof id!=='string'||!UUID.test(id))||new Set(ids).size!==ids.length||!ids.includes(selectedRevenueAccountId))throw unavailable();
+    }
+    const receipt=Object.freeze({provider:'xero',target:rows[0].tenant_id,ownerId,storeId,tenantBindingVerified:true,readerHealthVerified:false,...(demo?{revenueAccountBindingVerified:true,mappedRevenueAccountId:selectedRevenueAccountId}:{}),observedAt:clock.toISOString(),expiresAt:new Date(clock.valueOf()+600000).toISOString(),provenance:demo?'authenticated_owner_demo_rpc_binding_v1':rpc?'authenticated_owner_public_rpc_binding_v1':'authenticated_owner_rls_connection_binding_v1'});
     ownerBindingReceipts.add(receipt);return receipt;
    }finally{clearTimeout(timer);bodyReader?.releaseLock();}
   }catch{throw unavailable();}

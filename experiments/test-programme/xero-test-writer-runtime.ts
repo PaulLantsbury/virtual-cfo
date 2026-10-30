@@ -1,7 +1,7 @@
 /** Isolated operator-only source. Not imported or deployed by the Night Scout app.
  * Separate operator hosting/callback review is required. */
 import {createXeroWriterBootstrap} from './xero-writer-bootstrap.mjs';
-import {createXeroOwnerSessionBindingReader} from './xero-reader-context-proof.mjs';
+import {createXeroOwnerSessionBindingReader,XERO_DEMO_BINDING_STORE_ID} from './xero-reader-context-proof.mjs';
 import {validXeroSourceSelection} from './xero-writer-source-proof.mjs';
 import {validWriterDatabaseIdentity} from './writer-database-identity.mjs';
 const PROJECT='bioalckltvkhlczusdvl';
@@ -20,7 +20,7 @@ export function createXeroTestWriterRuntime(env:NodeJS.ProcessEnv,deps:{createPo
  if(typeof deps.createPool!=='function'||typeof deps.createAuthClient!=='function')throw unavailable();
  const sourceProofEnabled=env.NIGHT_SCOUT_XERO_TEST_WRITER_SOURCE_PROOF_ENABLED==='true';
  const bindingTransport=env.NIGHT_SCOUT_XERO_TEST_WRITER_READER_BINDING_TRANSPORT??'existing-schema-select';
- if(sourceProofEnabled&&!['existing-schema-select','public-binding-rpc-v1'].includes(bindingTransport))throw unavailable();
+ if(sourceProofEnabled&&(!['existing-schema-select','public-binding-rpc-v1','demo-public-binding-rpc-v1'].includes(bindingTransport)||bindingTransport==='demo-public-binding-rpc-v1'&&env.NIGHT_SCOUT_XERO_STAGING_STORE_ID!==XERO_DEMO_BINDING_STORE_ID))throw unavailable();
  const proofSelection=sourceProofEnabled?{contactId:env.NIGHT_SCOUT_XERO_TEST_WRITER_PROOF_CONTACT_ID,accountId:env.NIGHT_SCOUT_XERO_TEST_WRITER_PROOF_ACCOUNT_ID,confirmedSyntheticContactId:env.NIGHT_SCOUT_XERO_TEST_WRITER_PROOF_SYNTHETIC_CONTACT_CONFIRMED_ID,confirmedNonStockAccountId:env.NIGHT_SCOUT_XERO_TEST_WRITER_PROOF_NON_STOCK_ACCOUNT_CONFIRMED_ID,separateWriterAppConfirmed:env.NIGHT_SCOUT_XERO_TEST_WRITER_APP_BOUNDARY_VERIFIED==='true'}:undefined;
  if(sourceProofEnabled&&!validXeroSourceSelection(proofSelection))throw unavailable();
  const origin=operatorOrigin(env.NIGHT_SCOUT_TEST_WRITER_OPERATOR_ORIGIN),redirect=operatorCallback(origin);
@@ -61,7 +61,7 @@ export function createXeroTestWriterRuntime(env:NodeJS.ProcessEnv,deps:{createPo
   if(error||data?.user?.id!==ownerId||data.user.is_anonymous===true)throw unavailable();
   return Object.freeze({userId:ownerId,isOwner:true,assuranceLevel:'aal2'});
  };
- const ownerSessionBindingReader=sourceProofEnabled?createXeroOwnerSessionBindingReader({authUrl,publicKey:key,authenticateOwner,fetchImpl:boundedFetch,bindingTransport}):undefined;
+ const ownerSessionBindingReader=sourceProofEnabled?createXeroOwnerSessionBindingReader({authUrl,publicKey:key,authenticateOwner,fetchImpl:boundedFetch,bindingTransport,selectedRevenueAccountId:proofSelection?.accountId}):undefined;
  const service=createXeroWriterBootstrap({enabled:true,consentProfile,projectRef:PROJECT,ownerId,storeId,expectedTenant,clientId,clientSecret,operatorOrigin:origin,redirectUri:redirect,masterKey,keyVersion,pool:scopedPool,fetchImpl,...(sourceProofEnabled?{sourceProof:{selection:proofSelection,readerContextSource:deps.readerContextSource,ownerSessionBindingReader}}:{}),authenticate:authenticateOwner});
  return Object.freeze({service,close:()=>pool.end()});
 }

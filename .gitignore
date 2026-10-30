@@ -49,3 +49,7 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Independently generated Demo reader deployments (source is tracked separately).
+.reader-consent-runtime/
+.demo-reader-runtime/

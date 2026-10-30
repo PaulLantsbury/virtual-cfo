@@ -9,12 +9,12 @@ const project='bioalckltvkhlczusdvl',origin='https://operator.example.test',auth
 const jwt=payload=>Buffer.from('{}').toString('base64url')+'.'+Buffer.from(JSON.stringify(payload)).toString('base64url')+'.syntheticSignature';
 const page=()=>operatorOwnerPage({origin,authUrl,publicKey,nonce});
 function browser(fetchImpl){
- const elements=Object.fromEntries(['signin','email','password','login','connect','signout','status'].map(id=>[id,{value:'',disabled:true,textContent:'',handlers:{},addEventListener(event,fn){this.handlers[event]=fn;}}]));
+ const elements=Object.fromEntries(['signin','email','password','login','connect','signout','status','mfa','code','verify'].map(id=>[id,{value:'',disabled:true,textContent:'',handlers:{},addEventListener(event,fn){this.handlers[event]=fn;}}]));
  elements.signin.reset=()=>{elements.email.value='';elements.password.value='';};
  const callbacks={},redirects=[],calls=[],timers=[];let clock=100000;
  const context={document:{getElementById:id=>elements[id]},window:{addEventListener:(event,fn)=>{callbacks[event]=fn;}},location:{assign:url=>redirects.push(url)},URL,Date:{now:()=>clock},setTimeout:(fn)=>{timers.push(fn);return timers.length;},clearTimeout(){},fetch:async(...args)=>{calls.push(args);return fetchImpl(...args);}};
  runInNewContext(page().match(/<script nonce="[^"]+">([\s\S]*?)<\/script>/)[1],context);
- return {elements,calls,redirects,callbacks,timers,advance:ms=>{clock+=ms;},login:async()=>{elements.email.value='owner@example.test';elements.password.value='synthetic-owner-password';await elements.signin.handlers.submit({preventDefault(){}});}};
+ return {elements,calls,redirects,callbacks,timers,advance:ms=>{clock+=ms;},verify:async()=>{elements.code.value='123456';await elements.mfa.handlers.submit({preventDefault(){}});},login:async()=>{elements.email.value='owner@example.test';elements.password.value='synthetic-owner-password';await elements.signin.handlers.submit({preventDefault(){}});}};
 }
 const success=data=>({ok:true,json:async()=>data});
 const consentUrl=()=>{const url=new URL('https://login.xero.com/identity/connect/authorize');url.searchParams.set('redirect_uri',origin+'/api/xero/test-writer/callback');return url.href;};
@@ -29,45 +29,72 @@ test('page accepts only fixed staging public anon/publishable configuration',()=
  assert.throws(()=>operatorOwnerPage({origin,authUrl,publicKey,nonce:'unsafe"nonce'}));
 });
 
-test('owner password goes directly to pinned Supabase; token goes automatically only in connect header',async()=>{
- const b=browser(async(url)=>success(url.startsWith(authUrl)?{access_token:'synthetic-owner-token',expires_in:3600,refresh_token:'never-persist-refresh'}:{url:consentUrl()}));
+const factor='50000000-0000-4000-8000-000000000001',challenge='60000000-0000-4000-8000-000000000001';
+const authResponse=(url)=>{
+ if(url===authUrl+'/auth/v1/user')return success({factors:[{id:factor,factor_type:'totp',status:'verified'}]});
+ if(url.endsWith('/challenge'))return success({id:challenge});
+ if(url.endsWith('/verify'))return success({access_token:'synthetic-aal2-token',expires_in:3600,refresh_token:'never-persist-refresh'});
+ return success({access_token:'synthetic-aal1-token',expires_in:3600,refresh_token:'never-persist-refresh'});
+};
+
+test('password and TOTP go directly to pinned Supabase; only upgraded token reaches connect header',async()=>{
+ const b=browser(async(url)=>url.startsWith(authUrl)?authResponse(url):success({url:consentUrl()}));
  assert.equal(b.elements.login.disabled,false);assert.equal(b.elements.connect.disabled,true);
- await b.login();assert.equal(b.elements.password.value,'');assert.equal(b.elements.connect.disabled,false);
+ await b.login();assert.equal(b.elements.password.value,'');assert.equal(b.elements.connect.disabled,true);assert.equal(b.elements.mfa.hidden,false);
+ await b.elements.connect.handlers.click();assert.equal(b.calls.length,2);assert.match(b.elements.status.textContent,/Verify your authenticator/);
+ await b.verify();assert.equal(b.elements.code.value,'');assert.equal(b.elements.connect.disabled,false);
  const [url,request]=b.calls[0];assert.equal(url,authUrl+'/auth/v1/token?grant_type=password');
  assert.equal(request.headers.apikey,publicKey);assert.equal(request.credentials,'omit');assert.equal(request.redirect,'error');
  assert.deepEqual(JSON.parse(request.body),{email:'owner@example.test',password:'synthetic-owner-password'});
+ assert.equal(b.calls[1][0],authUrl+'/auth/v1/user');
+ assert.equal(b.calls[2][0],authUrl+'/auth/v1/factors/'+factor+'/challenge');
+ assert.equal(b.calls[3][0],authUrl+'/auth/v1/factors/'+factor+'/verify');
+ assert.deepEqual(JSON.parse(b.calls[3][1].body),{challenge_id:challenge,code:'123456'});
  await b.elements.connect.handlers.click();
- assert.equal(b.calls[1][0],'/api/xero/test-writer/connect');assert.equal(b.calls[1][1].headers.Authorization,'Bearer synthetic-owner-token');assert.equal(b.calls[1][1].body,'{}');
- assert.equal(b.redirects[0],consentUrl());assert.doesNotMatch(b.redirects[0],/synthetic-owner-token|password/);
- assert.equal(b.elements.connect.disabled,true);
+ assert.equal(b.calls[4][0],'/api/xero/test-writer/connect');assert.equal(b.calls[4][1].headers.Authorization,'Bearer synthetic-aal2-token');assert.equal(b.calls[4][1].body,'{}');
+ assert.equal(b.redirects[0],consentUrl());assert.doesNotMatch(b.redirects[0],/synthetic|password|123456/);assert.equal(b.elements.connect.disabled,true);
+});
+
+test('no enrolled factor, wrong/expired challenge and invalid OTP remain locked without enrollment',async()=>{
+ for(const factors of [[],[{id:factor,factor_type:'totp',status:'unverified'}],[{id:'../unsafe',factor_type:'totp',status:'verified'}],[{id:factor,factor_type:'phone',status:'verified'}]]){
+  const b=browser(async(url)=>url.endsWith('/user')?success({factors}):authResponse(url));await b.login();assert.equal(b.elements.connect.disabled,true);assert.match(b.elements.status.textContent,/enrolled authenticator is required/);assert.equal(b.calls.length,2);
+ }
+ for(const failed of ['challenge','verify']){
+  const b=browser(async(url)=>url.endsWith('/'+failed)?{ok:false,json:async()=>({error:'private-error-message'})}:authResponse(url));await b.login();await b.verify();assert.equal(b.elements.connect.disabled,true);assert.equal(b.elements.code.value,'');assert.doesNotMatch(b.elements.status.textContent,/private-error-message/);
+ }
+ const b=browser(async(url)=>authResponse(url));await b.login();b.elements.code.value='bad';await b.elements.mfa.handlers.submit({preventDefault(){}});assert.equal(b.calls.length,2);
+ const malformed=browser(async(url)=>url.endsWith('/challenge')?success({id:'../steal'}):authResponse(url));await malformed.login();await malformed.verify();assert.equal(malformed.calls.length,3);assert.equal(malformed.elements.connect.disabled,true);
+ assert.doesNotMatch(page(),/otpauth|qr_code|\/factors['"]/);
 });
 
 test('cleared/expired/page-hidden sessions cannot start consent and no token input/storage is used',async()=>{
  for(const clear of ['signout','expiry','pagehide']){
-  const b=browser(async()=>success({access_token:'synthetic-token',expires_in:1}));await b.login();
-  if(clear==='signout')b.elements.signout.handlers.click();else if(clear==='expiry')b.advance(1001);else b.callbacks.pagehide();
-  await b.elements.connect.handlers.click();assert.equal(b.calls.length,1);assert.deepEqual(b.redirects,[]);
+  const b=browser(async(url)=>authResponse(url));await b.login();await b.verify();
+  if(clear==='signout')b.elements.signout.handlers.click();else if(clear==='expiry')b.advance(3600001);else b.callbacks.pagehide();
+  await b.elements.connect.handlers.click();assert.equal(b.calls.length,4);assert.deepEqual(b.redirects,[]);assert.equal(b.elements.code.value,'');
  }
  const script=page().match(/<script nonce="[^"]+">([\s\S]*?)<\/script>/)[1];
- assert.doesNotMatch(script,/localStorage|sessionStorage|document\.cookie|history\.|URLSearchParams/);
+ assert.doesNotMatch(script,/localStorage|sessionStorage|document\.cookie|history\.|URLSearchParams|console\./);
  assert.doesNotMatch(page(),/<input[^>]*(bearer|token)/i);
 });
 
-test('non-owner/failed consent, unsafe redirects and expired login responses remain unavailable',async()=>{
+test('failed consent, unsafe redirects and expired login responses remain unavailable',async()=>{
  for(const response of [{ok:false,json:async()=>({error:'private-provider-message'})},success({url:'https://evil.example/steal'}),success({url:'https://login.xero.com/identity/connect/authorize?redirect_uri=https://other.example/callback'})]){
-  const b=browser(async(url)=>url.startsWith(authUrl)?success({access_token:'synthetic-token',expires_in:3600}):response);await b.login();await b.elements.connect.handlers.click();
+  const b=browser(async(url)=>url.startsWith(authUrl)?authResponse(url):response);await b.login();await b.verify();await b.elements.connect.handlers.click();
   assert.deepEqual(b.redirects,[]);assert.match(b.elements.status.textContent,/Could not start Xero consent/);assert.doesNotMatch(b.elements.status.textContent,/private-provider-message/);
  }
  const b=browser(async()=>success({access_token:'synthetic-token',expires_in:0}));await b.login();assert.equal(b.elements.connect.disabled,true);
  for(const token of ['contains whitespace','token,other','token\nnewline','token\\slash']){const invalid=browser(async()=>success({access_token:token,expires_in:3600}));await invalid.login();assert.equal(invalid.elements.connect.disabled,true);}
 });
 
-test('clearing sign-in while a request is pending prevents later token restoration or redirect',async()=>{
+test('clearing sign-in during password, MFA, or consent requests prevents restoration and redirect',async()=>{
  let resolveLogin;const loginResponse=new Promise(resolve=>{resolveLogin=resolve;});
  const b=browser(async()=>loginResponse);const pending=b.login();b.callbacks.pagehide();resolveLogin(success({access_token:'late-token',expires_in:3600}));await pending;
  assert.equal(b.elements.connect.disabled,true);assert.deepEqual(b.redirects,[]);
+ let resolveVerify;const verifyResponse=new Promise(resolve=>{resolveVerify=resolve;});
+ const m=browser(async(url)=>url.endsWith('/verify')?verifyResponse:authResponse(url));await m.login();const checking=m.verify();await new Promise(resolve=>setImmediate(resolve));m.callbacks.pagehide();resolveVerify(success({access_token:'late-aal2',expires_in:3600}));await checking;assert.equal(m.elements.connect.disabled,true);assert.equal(m.elements.mfa.hidden,true);
  let resolveConsent;const consentResponse=new Promise(resolve=>{resolveConsent=resolve;});
- const c=browser(async(url)=>url.startsWith(authUrl)?success({access_token:'token',expires_in:3600}):consentResponse);await c.login();const connecting=c.elements.connect.handlers.click();c.elements.signout.handlers.click();resolveConsent(success({url:consentUrl()}));await connecting;assert.deepEqual(c.redirects,[]);
+ const c=browser(async(url)=>url.startsWith(authUrl)?authResponse(url):consentResponse);await c.login();await c.verify();const connecting=c.elements.connect.handlers.click();c.elements.signout.handlers.click();resolveConsent(success({url:consentUrl()}));await connecting;assert.deepEqual(c.redirects,[]);
 });
 
 test('isolated HTTP page enforces canonical host, CSP, no-store and hides unsafe/private configuration',async()=>{

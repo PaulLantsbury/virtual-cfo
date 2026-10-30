@@ -4,7 +4,7 @@ import {prepareXeroConsentDeployment,XERO_CONSENT_MODULES} from './prepare-xero-
 const source=dirname(fileURLToPath(import.meta.url)),sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 test('consent-only package contains its own frozen dependencies and no customer/writer runner',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'ns-xero-consent-'));try{
- const result=await prepareXeroConsentDeployment(dir);assert.equal(result.modules,9);assert.equal(result.dependencySnapshots,92);assert.equal(result.generationEnabled,false);assert.equal(result.scheduleInstalled,false);
+ const result=await prepareXeroConsentDeployment(dir);assert.equal(result.modules,11);assert.equal(result.dependencySnapshots,92);assert.equal(result.generationEnabled,false);assert.equal(result.scheduleInstalled,false);
  const names=await readdir(dir);assert.deepEqual(names.sort(),[...XERO_CONSENT_MODULES,'operator-package.manifest.json','package.json','pnpm-lock.yaml','deployment-boundary.json'].sort());
  const manifest=JSON.parse(await readFile(join(dir,'package.json'),'utf8'));assert.equal(manifest.private,true);assert.equal(manifest.type,'module');assert.equal(manifest.engines.node,'>=24 <25');assert.equal(manifest.scripts.start,'node --experimental-strip-types operator-consent-server.mjs');assert.deepEqual(manifest.dependencies,{express:'5.2.1',pg:'8.20.0','@supabase/supabase-js':'2.100.1'});
  const lock=await readFile(join(dir,'pnpm-lock.yaml'),'utf8');assert.match(lock,/lockfileVersion: '9.0'/);assert.match(lock,/autoInstallPeers: false/);assert.match(lock,/sha512-/);assert.doesNotMatch(lock,/(?:^|[\s'"])(?:link|workspace|file|catalog):/m);

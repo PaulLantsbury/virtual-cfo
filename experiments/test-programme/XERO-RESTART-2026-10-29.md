@@ -1,5 +1,7 @@
 # Xero daily test-data restart preparation — 29 October 2026
 
+> **30 October continuation:** Source proof, the isolated generation package, verified AAL2 owner sign-in and a narrow public member-binding RPC proposal are now prepared and independently reviewed. See [today's handover](../../docs/session-handover-2026-10-30.md). Actual `xero_v1` API exposure is absent; use only the separately approved/applied metadata RPC and explicit transport opt-in, never broad schema exposure. No Xero trial/app/host/SQL activation approval is implied. The dates below remain the exact unapproved proposal; no silent renewal.
+
 **Prepared, unapproved and inactive.** No provider calls, live SQL, consent, credentials, hosting or schedule changed by this package. Shopify's existing new disabled binding is separate and unchanged. Original Xero trial ended 26 October; its rows, envelopes, claims, caps and dates must not be reset or repurposed.
 
 ## Concrete proposal, not an agreed schedule

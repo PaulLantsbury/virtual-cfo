@@ -1,6 +1,8 @@
 /** Isolated operator-only source. Not imported or deployed by the Night Scout app.
  * Separate operator hosting/callback review is required. */
 import {createXeroWriterBootstrap} from './xero-writer-bootstrap.mjs';
+import {createXeroOwnerSessionBindingReader} from './xero-reader-context-proof.mjs';
+import {validXeroSourceSelection} from './xero-writer-source-proof.mjs';
 import {validWriterDatabaseIdentity} from './writer-database-identity.mjs';
 const PROJECT='bioalckltvkhlczusdvl';
 import {operatorOrigin,operatorCallback} from './operator-origin.mjs';
@@ -8,11 +10,16 @@ const unavailable=()=>Error('Xero writer setup unavailable');
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export type XeroTestWriterRuntime=Readonly<{service:{start(authorization:string):Promise<unknown>;complete(input:{state:string;code:string}):Promise<unknown>};close():Promise<void>}>;
 /** Separate write-consent capability: never borrows reader credentials or database privileges. */
-export function createXeroTestWriterRuntime(env:NodeJS.ProcessEnv,deps:{createPool?:(config:any)=>any;createAuthClient?:(...args:any[])=>any;fetchImpl?:typeof fetch}={}):XeroTestWriterRuntime|undefined {
+export function createXeroTestWriterRuntime(env:NodeJS.ProcessEnv,deps:{createPool?:(config:any)=>any;createAuthClient?:(...args:any[])=>any;fetchImpl?:typeof fetch;readerContextSource?:unknown}={}):XeroTestWriterRuntime|undefined {
  if(env.NIGHT_SCOUT_XERO_TEST_WRITER_BOOTSTRAP_ENABLED!=='true')return undefined;
  const consentProfile=env.NIGHT_SCOUT_XERO_TEST_WRITER_CONSENT_PROFILE??'original';
  if(!['original','daily-xero-20261030-v1'].includes(consentProfile))throw unavailable();
  if(typeof deps.createPool!=='function'||typeof deps.createAuthClient!=='function')throw unavailable();
+ const sourceProofEnabled=env.NIGHT_SCOUT_XERO_TEST_WRITER_SOURCE_PROOF_ENABLED==='true';
+ const bindingTransport=env.NIGHT_SCOUT_XERO_TEST_WRITER_READER_BINDING_TRANSPORT??'existing-schema-select';
+ if(sourceProofEnabled&&!['existing-schema-select','public-binding-rpc-v1'].includes(bindingTransport))throw unavailable();
+ const proofSelection=sourceProofEnabled?{contactId:env.NIGHT_SCOUT_XERO_TEST_WRITER_PROOF_CONTACT_ID,accountId:env.NIGHT_SCOUT_XERO_TEST_WRITER_PROOF_ACCOUNT_ID,confirmedSyntheticContactId:env.NIGHT_SCOUT_XERO_TEST_WRITER_PROOF_SYNTHETIC_CONTACT_CONFIRMED_ID,confirmedNonStockAccountId:env.NIGHT_SCOUT_XERO_TEST_WRITER_PROOF_NON_STOCK_ACCOUNT_CONFIRMED_ID,separateWriterAppConfirmed:env.NIGHT_SCOUT_XERO_TEST_WRITER_APP_BOUNDARY_VERIFIED==='true'}:undefined;
+ if(sourceProofEnabled&&!validXeroSourceSelection(proofSelection))throw unavailable();
  const origin=operatorOrigin(env.NIGHT_SCOUT_TEST_WRITER_OPERATOR_ORIGIN),redirect=operatorCallback(origin);
  const authUrl=env.NIGHT_SCOUT_REVIEW_AUTH_URL,key=env.NIGHT_SCOUT_REVIEW_PUBLIC_KEY;
  const ownerId=env.NIGHT_SCOUT_XERO_STAGING_OWNER_ID,storeId=env.NIGHT_SCOUT_XERO_STAGING_STORE_ID;
@@ -39,8 +46,19 @@ export function createXeroTestWriterRuntime(env:NodeJS.ProcessEnv,deps:{createPo
    const result=await client.query(sql,args);await client.query('COMMIT');return result;
   }catch{await client.query('ROLLBACK').catch(()=>{});throw unavailable();}finally{client.release();}
  }};
- const service=createXeroWriterBootstrap({enabled:true,consentProfile,projectRef:PROJECT,ownerId,storeId,expectedTenant,clientId,clientSecret,operatorOrigin:origin,redirectUri:redirect,masterKey,keyVersion,pool:scopedPool,fetchImpl,
-  authenticate:async(authorization:string)=>{const {data,error}=await auth.auth.getUser(authorization.replace(/^Bearer\s+/i,''));if(error||data?.user?.id!==ownerId)throw unavailable();return Object.freeze({userId:ownerId,isOwner:true});},
- });
+ // Verify the signature/expiry with the SDK before using AAL claims, then ask
+ // Auth for the current user. Decoding a bearer or reading a local session alone
+ // is never authority for this separate credential-creation capability.
+ const authenticateOwner=async(authorization:string)=>{
+  if(typeof authorization!=='string'||!/^Bearer [-A-Za-z0-9._]{1,8192}$/i.test(authorization)||typeof auth.auth.getClaims!=='function')throw unavailable();
+  const token=authorization.slice(7),verified=await auth.auth.getClaims(token),claims=verified.data?.claims;
+  const now=Math.floor(Date.now()/1000);
+  if(verified.error||!claims||claims.sub!==ownerId||claims.iss!==`${authUrl}/auth/v1`||claims.role!=='authenticated'||claims.aal!=='aal2'||claims.is_anonymous===true||!Number.isInteger(claims.exp)||claims.exp<=now||!Number.isInteger(claims.iat)||claims.iat>now+60||!(claims.aud==='authenticated'||Array.isArray(claims.aud)&&claims.aud.includes('authenticated')))throw unavailable();
+  const {data,error}=await auth.auth.getUser(token);
+  if(error||data?.user?.id!==ownerId||data.user.is_anonymous===true)throw unavailable();
+  return Object.freeze({userId:ownerId,isOwner:true,assuranceLevel:'aal2'});
+ };
+ const ownerSessionBindingReader=sourceProofEnabled?createXeroOwnerSessionBindingReader({authUrl,publicKey:key,authenticateOwner,fetchImpl:boundedFetch,bindingTransport}):undefined;
+ const service=createXeroWriterBootstrap({enabled:true,consentProfile,projectRef:PROJECT,ownerId,storeId,expectedTenant,clientId,clientSecret,operatorOrigin:origin,redirectUri:redirect,masterKey,keyVersion,pool:scopedPool,fetchImpl,...(sourceProofEnabled?{sourceProof:{selection:proofSelection,readerContextSource:deps.readerContextSource,ownerSessionBindingReader}}:{}),authenticate:authenticateOwner});
  return Object.freeze({service,close:()=>pool.end()});
 }

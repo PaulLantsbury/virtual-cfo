@@ -4,7 +4,7 @@ import {resolve,join,dirname,sep} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 const source=dirname(fileURLToPath(import.meta.url));
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
-export const XERO_CONSENT_MODULES=Object.freeze(['operator-consent-server.mjs','operator-owner-page.mjs','operator-origin.mjs','xero-test-writer-runtime.ts','xero-writer-bootstrap.mjs','xero-writer-bootstrap-router.mjs','writer-database-identity.mjs','writer-envelope-crypto.mjs','writer-oauth-scopes.mjs']);
+export const XERO_CONSENT_MODULES=Object.freeze(['operator-consent-server.mjs','operator-owner-page.mjs','operator-origin.mjs','xero-test-writer-runtime.ts','xero-writer-bootstrap.mjs','xero-writer-bootstrap-router.mjs','writer-database-identity.mjs','writer-envelope-crypto.mjs','writer-oauth-scopes.mjs','xero-writer-source-proof.mjs','xero-reader-context-proof.mjs']);
 /** File preparation only: no installs, servers, environment reads, secrets or provider calls. */
 export async function prepareXeroConsentDeployment(target){
  if(typeof target!=='string'||!target)throw Error('Separate operator output required');

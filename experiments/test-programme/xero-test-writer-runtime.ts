@@ -8,6 +8,9 @@ const PROJECT='bioalckltvkhlczusdvl';
 import {operatorOrigin,operatorCallback} from './operator-origin.mjs';
 const unavailable=()=>Error('Xero writer setup unavailable');
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+// OAuth client IDs are opaque: accept the observed compact hex form and the
+// existing UUID form, without trimming, changing case or inserting separators.
+const validOAuthClientId=(value:unknown)=>typeof value==='string'&&((value.length===32&&/^[0-9a-f]{32}$/i.test(value))||(value.length===36&&uuid.test(value)));
 export type XeroTestWriterRuntime=Readonly<{service:{start(authorization:string):Promise<unknown>;complete(input:{state:string;code:string}):Promise<unknown>};close():Promise<void>}>;
 /** Separate write-consent capability: never borrows reader credentials or database privileges. */
 export function createXeroTestWriterRuntime(env:NodeJS.ProcessEnv,deps:{createPool?:(config:any)=>any;createAuthClient?:(...args:any[])=>any;fetchImpl?:typeof fetch;readerContextSource?:unknown}={}):XeroTestWriterRuntime|undefined {
@@ -26,7 +29,7 @@ export function createXeroTestWriterRuntime(env:NodeJS.ProcessEnv,deps:{createPo
  const clientId=env.NIGHT_SCOUT_XERO_TEST_WRITER_CLIENT_ID,clientSecret=env.NIGHT_SCOUT_XERO_TEST_WRITER_CLIENT_SECRET;
  const expectedTenant=env.NIGHT_SCOUT_XERO_TEST_WRITER_EXPECTED_TENANT_ID;
  const masterKey=env.NIGHT_SCOUT_TEST_WRITER_ENVELOPE_MASTER_KEY,keyVersion=env.NIGHT_SCOUT_TEST_WRITER_ENVELOPE_KEY_VERSION;
- if(env.NIGHT_SCOUT_RUNTIME_ENV!=='staging'||env.NIGHT_SCOUT_TEST_PROGRAMME_PROJECT_REF!==PROJECT||authUrl!==`https://${PROJECT}.supabase.co`||typeof key!=='string'||key.length<20||!uuid.test(ownerId??'')||!uuid.test(storeId??'')||!uuid.test(clientId??'')||typeof clientSecret!=='string'||clientSecret.length<24||clientSecret.length>2048||env.NIGHT_SCOUT_XERO_TEST_WRITER_REDIRECT_URI!==redirect||expectedTenant!==undefined&&!uuid.test(expectedTenant)||typeof masterKey!=='string'||Buffer.byteLength(masterKey)<32||!keyVersion||!/^[A-Za-z0-9._-]{1,128}$/.test(keyVersion))throw unavailable();
+ if(env.NIGHT_SCOUT_RUNTIME_ENV!=='staging'||env.NIGHT_SCOUT_TEST_PROGRAMME_PROJECT_REF!==PROJECT||authUrl!==`https://${PROJECT}.supabase.co`||typeof key!=='string'||key.length<20||!uuid.test(ownerId??'')||!uuid.test(storeId??'')||!validOAuthClientId(clientId)||typeof clientSecret!=='string'||clientSecret.length<24||clientSecret.length>2048||env.NIGHT_SCOUT_XERO_TEST_WRITER_REDIRECT_URI!==redirect||expectedTenant!==undefined&&!uuid.test(expectedTenant)||typeof masterKey!=='string'||Buffer.byteLength(masterKey)<32||!keyVersion||!/^[A-Za-z0-9._-]{1,128}$/.test(keyVersion))throw unavailable();
  if(clientId===env.NIGHT_SCOUT_XERO_CLIENT_ID||masterKey===env.NIGHT_SCOUT_XERO_ENVELOPE_MASTER_KEY)throw unavailable();
  let url:URL;try{url=new URL(env.NIGHT_SCOUT_TEST_PROGRAMME_DATABASE_URL!);}catch{throw unavailable();}
  if(url.protocol!=='postgresql:'||url.hostname!=='aws-1-eu-west-1.pooler.supabase.com'||url.port!=='5432'||url.pathname!=='/postgres'||decodeURIComponent(url.username)!==`night_scout_test_writer.${PROJECT}`||!url.password||url.search||url.hash)throw unavailable();

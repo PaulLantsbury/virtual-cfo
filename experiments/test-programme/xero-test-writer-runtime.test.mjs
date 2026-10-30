@@ -69,3 +69,30 @@ test('runtime public RPC unavailable remains failclosed before writer consent SQ
  try{await assert.rejects(runtime.service.start('Bearer synthetic-aal2-owner-session'),/setup unavailable/);assert.equal(calls.length,1);assert.equal(new URL(calls[0].url).pathname,'/rest/v1/rpc/xero_member_active_tenant_binding_v1');assert.equal(h.calls.length,0);}
  finally{await runtime.close();}
 });
+
+test('compact hex and canonical UUID client IDs preserve exact case/value in authorize URL and token Basic auth',async()=>{
+ const tenant='80000000-0000-4000-8000-000000000001';
+ for(const clientId of ['ABCD0123'.repeat(4),'AbCd0123'.repeat(4),'abcd0123'.repeat(4),env.NIGHT_SCOUT_XERO_TEST_WRITER_CLIENT_ID,'AbCd0123-4567-489A-BCDE-F0123456789A']){
+  const h=harness(),requests=[];
+  h.deps.fetchImpl=async(url,options)=>{requests.push({url,options});return new Response(JSON.stringify(String(url).endsWith('/token')?{access_token:'synthetic-fresh-access-token',refresh_token:'synthetic-fresh-refresh-token',scope:'offline_access accounting.invoices accounting.settings.read accounting.contacts.read'}:String(url).endsWith('/connections')?[{tenantId:tenant,tenantType:'ORGANISATION'}]:{Organisations:[{IsDemoCompany:true,BaseCurrency:'GBP'}]}));};
+  const runtime=createXeroTestWriterRuntime({...env,NIGHT_SCOUT_XERO_TEST_WRITER_CLIENT_ID:clientId},h.deps);
+  try{
+   const authorize=new URL((await runtime.service.start('Bearer synthetic-aal2-owner-session')).url);assert.equal(authorize.searchParams.get('client_id'),clientId);const state=authorize.searchParams.get('state');
+   assert.deepEqual(await runtime.service.complete({state,code:'synthetic-authorization-code'}),{state:'writer_connected_programme_disabled'});
+   const tokenRequests=requests.filter(r=>String(r.url)==='https://identity.xero.com/connect/token');assert.equal(tokenRequests.length,1);const token=tokenRequests[0];
+   assert.equal(token.options.method,'POST');assert.equal(Buffer.from(token.options.headers.Authorization.slice(6),'base64').toString('utf8'),clientId+':'+env.NIGHT_SCOUT_XERO_TEST_WRITER_CLIENT_SECRET);assert.equal(new URLSearchParams(token.options.body).get('grant_type'),'authorization_code');
+   assert.equal(h.calls.some(sql=>sql.includes('seed_writer_consent')),true);assert.equal(h.poolConfig.ssl.rejectUnauthorized,true);
+  }finally{await runtime.close();}
+ }
+});
+test('client ID validation rejects non-hex/whitespace/length variants before creating any pool',()=>{
+ const hex='ABCD0123'.repeat(4),canonical=env.NIGHT_SCOUT_XERO_TEST_WRITER_CLIENT_ID;
+ for(const clientId of [undefined,null,'','arbitrary-client-id',hex.slice(1),hex+'0','G'+hex.slice(1),' '+hex,hex+' ',hex+'\n',hex+'\r\n','\t'+hex,canonical+'\n',' '+canonical,'{'+canonical+'}',[hex],{toString:()=>hex}]){
+  const h=harness();assert.throws(()=>createXeroTestWriterRuntime({...env,NIGHT_SCOUT_XERO_TEST_WRITER_CLIENT_ID:clientId},h.deps),/Xero writer setup unavailable/);assert.equal(h.poolConfig,undefined);assert.equal(h.calls.length,0);
+ }
+});
+test('accepting compact client ID preserves reader separation and AAL2 authorization gates',async()=>{
+ const clientId='ABCD0123'.repeat(4),sameReader=harness();assert.throws(()=>createXeroTestWriterRuntime({...env,NIGHT_SCOUT_XERO_TEST_WRITER_CLIENT_ID:clientId,NIGHT_SCOUT_XERO_CLIENT_ID:clientId},sameReader.deps));assert.equal(sameReader.poolConfig,undefined);
+ const h=harness();h.deps.createAuthClient=()=>({auth:{getClaims:async()=>({data:{claims:{sub:owner,iss:`https://${project}.supabase.co/auth/v1`,aud:'authenticated',role:'authenticated',aal:'aal1',iat:Math.floor(Date.now()/1000),exp:Math.floor(Date.now()/1000)+3600}},error:null}),getUser:async()=>{throw Error('AAL1 must stop before current-user check');}}});
+ const runtime=createXeroTestWriterRuntime({...env,NIGHT_SCOUT_XERO_TEST_WRITER_CLIENT_ID:clientId},h.deps);try{await assert.rejects(runtime.service.start('Bearer synthetic-low-assurance-token'),/Xero writer setup unavailable/);assert.equal(h.calls.length,0);}finally{await runtime.close();}
+});

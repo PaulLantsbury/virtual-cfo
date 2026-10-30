@@ -1,3 +1,5 @@
+> **30 October approved setup:** Separate hosts/app now exist and the two reviewed staging SQL packages are applied. Bootstrap and generation remain off; private owner credentials, actual MFA, genuine demo/source and matching-reader checks remain. See [the current setup record](../../docs/xero-staging-setup-2026-10-30.md). Earlier prepared/unapproved wording below records the package stage; do not repeat completed setup or reset dates/history.
+
 # Xero daily test-data restart preparation — 29 October 2026
 
 > **30 October continuation:** Source proof, the isolated generation package, verified AAL2 owner sign-in and a narrow public member-binding RPC proposal are now prepared and independently reviewed. See [today's handover](../../docs/session-handover-2026-10-30.md). Actual `xero_v1` API exposure is absent; use only the separately approved/applied metadata RPC and explicit transport opt-in, never broad schema exposure. No Xero trial/app/host/SQL activation approval is implied. The dates below remain the exact unapproved proposal; no silent renewal.

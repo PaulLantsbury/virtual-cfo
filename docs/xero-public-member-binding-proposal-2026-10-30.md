@@ -1,3 +1,5 @@
+> **Applied checkpoint — 30 October:** Paul approved this exact proposal and it was applied once in verified staging. Metadata/ACL/RLS checks and a read-only member-role SQL probe passed. Actual signed owner/MFA/Data API consent remains unverified. Do not reapply. See [the current setup record](xero-staging-setup-2026-10-30.md).
+
 # Narrow public Xero tenant-binding RPC — unapproved proposal
 
 Prepared on 30 October 2026. **No live SQL, grants, schema-exposure change or hosted transport activation was performed by this package.** Installing this proposal changes the database function/execute privileges and requires separate review/approval. The function itself performs metadata reads only.

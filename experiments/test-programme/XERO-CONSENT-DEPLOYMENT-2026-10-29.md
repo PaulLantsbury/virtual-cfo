@@ -1,3 +1,5 @@
+> **30 October approved setup:** Separate hosts/app now exist and the two reviewed staging SQL packages are applied. Bootstrap and generation remain off; private owner credentials, actual MFA, genuine demo/source and matching-reader checks remain. See [the current setup record](../../docs/xero-staging-setup-2026-10-30.md). Earlier prepared/unapproved wording below records the package stage; do not repeat completed setup or reset dates/history.
+
 # Isolated Xero consent deployment package — 29 October 2026
 
 **Prepared locally; no host, resource charge, live settings or consent enabled.** This closes the reproducible dependency/package gap in the existing isolated operator source. Actual operator origin, hosting cost approval, separate Xero developer app/callback and genuine GBP Demo Company consent remain external gates. The customer app and read-only collectors remain separate.

@@ -1,3 +1,5 @@
+> **APPROVED SETUP — 30 October 2026:** Paul approved the separate bounded Xero setup. Both reviewed staging SQL packages are now applied; the separate operator, cron and writer app exist. Bootstrap and generation remain off pending private owner credentials, MFA, genuine demo/source checks and matching reader acceptance. Read [the setup checkpoint](xero-staging-setup-2026-10-30.md); do not repeat migration/hosting/app approval or application. Benchmarking remains deferred.
+
 # Night Scout — 30 October 2026 development handover
 
 ## Today's decisions

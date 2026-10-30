@@ -23,8 +23,8 @@ export function createOperatorConsentServer({env=process.env,deps}={}){
   if(!runtime||req.headers.host!==new URL(origin).host){res.status(503).json({error:'Owner sign-in unavailable'});return;}
   try{
    const nonce=randomBytes(18).toString('base64url');
-   const page=operatorOwnerPage({origin,authUrl:env.NIGHT_SCOUT_REVIEW_AUTH_URL,publicKey:env.NIGHT_SCOUT_REVIEW_PUBLIC_KEY,nonce});
-   res.set('Content-Security-Policy',`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self' https://bioalckltvkhlczusdvl.supabase.co; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'`);
+   const page=operatorOwnerPage({origin,authUrl:env.NIGHT_SCOUT_REVIEW_AUTH_URL,publicKey:env.NIGHT_SCOUT_REVIEW_PUBLIC_KEY,ownerId:env.NIGHT_SCOUT_XERO_STAGING_OWNER_ID,nonce});
+   res.set('Content-Security-Policy',`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self' https://bioalckltvkhlczusdvl.supabase.co; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'`);
    res.set('X-Frame-Options','DENY');res.type('html').send(page);
   }catch{res.status(503).json({error:'Owner sign-in unavailable'});}
  });

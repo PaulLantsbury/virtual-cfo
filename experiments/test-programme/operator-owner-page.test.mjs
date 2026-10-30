@@ -5,11 +5,11 @@ import {createRequire} from 'node:module';
 import {request as httpRequest} from 'node:http';
 import {operatorOwnerPage,publicOwnerAuthConfig} from './operator-owner-page.mjs';
 import {createOperatorConsentServer} from './operator-consent-server.mjs';
-const project='bioalckltvkhlczusdvl',origin='https://operator.example.test',authUrl=`https://${project}.supabase.co`,publicKey='sb_publishable_syntheticPublicKeyMaterial123',nonce='syntheticNonce123456789';
+const project='bioalckltvkhlczusdvl',origin='https://operator.example.test',authUrl=`https://${project}.supabase.co`,publicKey='sb_publishable_syntheticPublicKeyMaterial123',nonce='syntheticNonce123456789',ownerId='10000000-0000-4000-8000-000000000001';
 const jwt=payload=>Buffer.from('{}').toString('base64url')+'.'+Buffer.from(JSON.stringify(payload)).toString('base64url')+'.syntheticSignature';
-const page=()=>operatorOwnerPage({origin,authUrl,publicKey,nonce});
+const page=()=>operatorOwnerPage({origin,authUrl,publicKey,ownerId,nonce});
 function browser(fetchImpl){
- const elements=Object.fromEntries(['signin','email','password','login','connect','signout','status','mfa','code','verify'].map(id=>[id,{value:'',disabled:true,textContent:'',handlers:{},addEventListener(event,fn){this.handlers[event]=fn;}}]));
+ const elements=Object.fromEntries(['signin','email','password','login','connect','signout','status','mfa','code','verify','enroll','enrollment','qr','setupkey'].map(id=>[id,{value:'',disabled:true,textContent:'',handlers:{},removeAttribute(name){if(name==='src')this.src='';},addEventListener(event,fn){this.handlers[event]=fn;}}]));
  elements.signin.reset=()=>{elements.email.value='';elements.password.value='';};
  const callbacks={},redirects=[],calls=[],timers=[];let clock=100000;
  const context={document:{getElementById:id=>elements[id]},window:{addEventListener:(event,fn)=>{callbacks[event]=fn;}},location:{assign:url=>redirects.push(url)},URL,Date:{now:()=>clock},setTimeout:(fn)=>{timers.push(fn);return timers.length;},clearTimeout(){},fetch:async(...args)=>{calls.push(args);return fetchImpl(...args);}};
@@ -26,12 +26,13 @@ test('page accepts only fixed staging public anon/publishable configuration',()=
  for(const key of ['sb_secret_syntheticSecretMaterial123',jwt({role:'service_role',ref:project}),jwt({role:'anon',ref:'wrong-project'}),'not-a-public-key','</script><script>alert(1)</script>'])assert.throws(()=>publicOwnerAuthConfig({authUrl,publicKey:key}));
  assert.throws(()=>publicOwnerAuthConfig({authUrl:'https://another.supabase.co',publicKey}));
  assert.throws(()=>operatorOwnerPage({origin:'https://night-scout-xero-staging.onrender.com',authUrl,publicKey,nonce}));
- assert.throws(()=>operatorOwnerPage({origin,authUrl,publicKey,nonce:'unsafe"nonce'}));
+ assert.throws(()=>operatorOwnerPage({origin,authUrl,publicKey,ownerId,nonce:'unsafe"nonce'}));
+ assert.throws(()=>operatorOwnerPage({origin,authUrl,publicKey,nonce}));
 });
 
 const factor='50000000-0000-4000-8000-000000000001',challenge='60000000-0000-4000-8000-000000000001';
 const authResponse=(url)=>{
- if(url===authUrl+'/auth/v1/user')return success({factors:[{id:factor,factor_type:'totp',status:'verified'}]});
+ if(url===authUrl+'/auth/v1/user')return success({id:ownerId,factors:[{id:factor,factor_type:'totp',status:'verified'}]});
  if(url.endsWith('/challenge'))return success({id:challenge});
  if(url.endsWith('/verify'))return success({access_token:'synthetic-aal2-token',expires_in:3600,refresh_token:'never-persist-refresh'});
  return success({access_token:'synthetic-aal1-token',expires_in:3600,refresh_token:'never-persist-refresh'});
@@ -55,16 +56,16 @@ test('password and TOTP go directly to pinned Supabase; only upgraded token reac
  assert.equal(b.redirects[0],consentUrl());assert.doesNotMatch(b.redirects[0],/synthetic|password|123456/);assert.equal(b.elements.connect.disabled,true);
 });
 
-test('no enrolled factor, wrong/expired challenge and invalid OTP remain locked without enrollment',async()=>{
+test('no enrolled factor, wrong/expired challenge and invalid OTP keep consent locked before explicit setup',async()=>{
  for(const factors of [[],[{id:factor,factor_type:'totp',status:'unverified'}],[{id:'../unsafe',factor_type:'totp',status:'verified'}],[{id:factor,factor_type:'phone',status:'verified'}]]){
-  const b=browser(async(url)=>url.endsWith('/user')?success({factors}):authResponse(url));await b.login();assert.equal(b.elements.connect.disabled,true);assert.match(b.elements.status.textContent,/enrolled authenticator is required/);assert.equal(b.calls.length,2);
+  const b=browser(async(url)=>url.endsWith('/user')?success({id:ownerId,factors}):authResponse(url));await b.login();assert.equal(b.elements.connect.disabled,true);assert.equal(b.elements.enroll.disabled,false);assert.match(b.elements.status.textContent,/no verified authenticator/);assert.equal(b.calls.length,2);
  }
  for(const failed of ['challenge','verify']){
   const b=browser(async(url)=>url.endsWith('/'+failed)?{ok:false,json:async()=>({error:'private-error-message'})}:authResponse(url));await b.login();await b.verify();assert.equal(b.elements.connect.disabled,true);assert.equal(b.elements.code.value,'');assert.doesNotMatch(b.elements.status.textContent,/private-error-message/);
  }
  const b=browser(async(url)=>authResponse(url));await b.login();b.elements.code.value='bad';await b.elements.mfa.handlers.submit({preventDefault(){}});assert.equal(b.calls.length,2);
  const malformed=browser(async(url)=>url.endsWith('/challenge')?success({id:'../steal'}):authResponse(url));await malformed.login();await malformed.verify();assert.equal(malformed.calls.length,3);assert.equal(malformed.elements.connect.disabled,true);
- assert.doesNotMatch(page(),/otpauth|qr_code|\/factors['"]/);
+ assert.doesNotMatch(page(),/otpauth|innerHTML|insertAdjacentHTML/);
 });
 
 test('cleared/expired/page-hidden sessions cannot start consent and no token input/storage is used',async()=>{
@@ -107,7 +108,7 @@ test('isolated HTTP page enforces canonical host, CSP, no-store and hides unsafe
   assert.equal((await fetch(base+'/')).status,503);
   const res=await httpGet(base+'/',{host:new URL(origin).host});assert.equal(res.status,200);
   assert.equal(res.headers.get('cache-control'),'no-store');assert.equal(res.headers.get('referrer-policy'),'no-referrer');assert.equal(res.headers.get('x-frame-options'),'DENY');
-  const csp=res.headers.get('content-security-policy');assert.match(csp,/frame-ancestors 'none'/);assert.match(csp,/form-action 'none'/);assert.match(csp,/connect-src 'self' https:\/\/bioalckltvkhlczusdvl.supabase.co/);assert.doesNotMatch(csp,/unsafe-inline|\*/);
+  const csp=res.headers.get('content-security-policy');assert.match(csp,/frame-ancestors 'none'/);assert.match(csp,/form-action 'none'/);assert.match(csp,/connect-src 'self' https:\/\/bioalckltvkhlczusdvl.supabase.co/);assert.doesNotMatch(csp,/unsafe-inline|\*/);assert.match(csp,/img-src data:/);
   const html=await res.text();assert.doesNotMatch(html,/private-database-password|private-xero-client-secret|private-envelope-master/);
   const token=html.match(/<script nonce="([^"]+)"/)[1];assert.ok(csp.includes(`'nonce-${token}'`));
   env.NIGHT_SCOUT_REVIEW_PUBLIC_KEY=jwt({role:'service_role',ref:project});
@@ -115,4 +116,42 @@ test('isolated HTTP page enforces canonical host, CSP, no-store and hides unsafe
   env.NIGHT_SCOUT_REVIEW_PUBLIC_KEY=publicKey;
   assert.equal((await httpGet(base+'/?access_token=synthetic',{host:new URL(origin).host})).status,400);
  }finally{await new Promise(resolve=>server.close(resolve));await service.close();}
+});
+
+const enrollmentReply={id:factor,type:'totp',totp:{qr_code:'<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',secret:'JBSWY3DPEHPK3PXP'}};
+const noFactorResponse=url=>url.endsWith('/user')?success({id:ownerId,factors:[]}):url===authUrl+'/auth/v1/factors'?success(enrollmentReply):authResponse(url);
+
+test('only explicit owner enrollment creates a TOTP factor and displays safe image/text until verification',async()=>{
+ const b=browser(async url=>noFactorResponse(url));await b.login();
+ assert.equal(b.calls.length,2);assert.equal(b.elements.connect.disabled,true);assert.equal(b.elements.enroll.disabled,false);
+ assert.equal(b.elements.qr.src,'');assert.equal(b.elements.setupkey.textContent,'');
+ await b.elements.enroll.handlers.click();
+ assert.equal(b.calls.length,4);assert.equal(b.calls[2][0],authUrl+'/auth/v1/user');
+ const [url,request]=b.calls[3];assert.equal(url,authUrl+'/auth/v1/factors');assert.equal(request.method,'POST');assert.equal(request.headers.Authorization,'Bearer synthetic-aal1-token');
+ assert.deepEqual(JSON.parse(request.body),{factor_type:'totp',friendly_name:'Night Scout operator authenticator'});
+ assert.equal(b.elements.enrollment.hidden,false);assert.equal(b.elements.qr.src,'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(enrollmentReply.totp.qr_code));assert.equal(b.elements.setupkey.textContent,enrollmentReply.totp.secret);
+ assert.equal(b.elements.connect.disabled,true);assert.equal(b.elements.mfa.hidden,false);
+ await b.verify();assert.equal(b.elements.connect.disabled,false);assert.equal(b.elements.qr.src,'');assert.equal(b.elements.setupkey.textContent,'');assert.equal(b.elements.enrollment.hidden,true);
+ assert.ok(b.calls.every(([target])=>target.startsWith(authUrl)));assert.doesNotMatch(JSON.stringify(b.redirects),/JBSWY|123456/);
+});
+
+test('non-owner, stale or newly enrolled owners cannot create a factor through stale controls',async()=>{
+ const outsider=browser(async url=>url.endsWith('/user')?success({id:'40000000-0000-4000-8000-000000000001',factors:[]}):authResponse(url));await outsider.login();assert.equal(outsider.elements.enroll.disabled,true);await outsider.elements.enroll.handlers.click();assert.equal(outsider.calls.length,2);
+ for(const changed of ['owner','factor','expired']){
+  let reads=0;const b=browser(async url=>{if(url.endsWith('/user')){reads++;return success({id:changed==='owner'&&reads>1?'40000000-0000-4000-8000-000000000001':ownerId,factors:changed==='factor'&&reads>1?[{id:factor,factor_type:'totp',status:'verified'}]:[]});}return noFactorResponse(url);});
+  await b.login();if(changed==='expired')b.advance(3600001);await b.elements.enroll.handlers.click();
+  assert.equal(b.calls.some(([url])=>url===authUrl+'/auth/v1/factors'),false);assert.equal(b.elements.connect.disabled,true);
+ }
+});
+
+test('enrollment responses are fenced, bounded and never restored after clear, expiry or page leave',async()=>{
+ for(const cancel of ['signout','expiry','pagehide']){
+  let resolveEnroll;const pendingReply=new Promise(resolve=>{resolveEnroll=resolve;});
+  const b=browser(async url=>url===authUrl+'/auth/v1/factors'?pendingReply:noFactorResponse(url));await b.login();const pending=b.elements.enroll.handlers.click();await new Promise(resolve=>setImmediate(resolve));
+  if(cancel==='signout')b.elements.signout.handlers.click();else if(cancel==='expiry')b.timers[0]();else b.callbacks.pagehide();
+  resolveEnroll(success(enrollmentReply));await pending;assert.equal(b.elements.qr.src,'');assert.equal(b.elements.setupkey.textContent,'');assert.equal(b.elements.enrollment.hidden,true);assert.equal(b.elements.connect.disabled,true);
+ }
+ for(const unsafe of [{...enrollmentReply,id:'../unsafe'},{...enrollmentReply,type:'phone'},{...enrollmentReply,totp:{qr_code:'https://external.example/qr',secret:'JBSWY3DPEHPK3PXP'}},{...enrollmentReply,totp:{qr_code:'<img src=x onerror=alert(1)>',secret:'JBSWY3DPEHPK3PXP'}},{...enrollmentReply,totp:{qr_code:'<svg '+'x'.repeat(200000),secret:'JBSWY3DPEHPK3PXP'}},{...enrollmentReply,totp:{qr_code:'<svg></svg>',secret:'<script>not-base32</script>'}}]){
+  const b=browser(async url=>url===authUrl+'/auth/v1/factors'?success(unsafe):noFactorResponse(url));await b.login();await b.elements.enroll.handlers.click();assert.equal(b.elements.qr.src,'');assert.equal(b.elements.setupkey.textContent,'');assert.equal(b.elements.enroll.disabled,true);assert.match(b.elements.status.textContent,/No automatic retry or removal/);
+ }
 });

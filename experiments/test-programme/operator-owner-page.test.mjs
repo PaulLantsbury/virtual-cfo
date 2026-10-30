@@ -9,7 +9,7 @@ const project='bioalckltvkhlczusdvl',origin='https://operator.example.test',auth
 const jwt=payload=>Buffer.from('{}').toString('base64url')+'.'+Buffer.from(JSON.stringify(payload)).toString('base64url')+'.syntheticSignature';
 const page=()=>operatorOwnerPage({origin,authUrl,publicKey,ownerId,nonce});
 function browser(fetchImpl){
- const elements=Object.fromEntries(['signin','email','password','login','connect','signout','status','mfa','code','verify','enroll','enrollment','qr','setupkey'].map(id=>[id,{value:'',disabled:true,textContent:'',handlers:{},removeAttribute(name){if(name==='src')this.src='';},addEventListener(event,fn){this.handlers[event]=fn;}}]));
+ const elements=Object.fromEntries(['signin','email','password','login','connect','signout','status','mfa','code','verify','enroll','enrollment','qr','setupkey','pendingRecovery','recoveryAck','removePending'].map(id=>[id,{value:'',disabled:true,textContent:'',handlers:{},removeAttribute(name){if(name==='src')this.src='';},addEventListener(event,fn){this.handlers[event]=fn;}}]));
  elements.signin.reset=()=>{elements.email.value='';elements.password.value='';};
  const callbacks={},redirects=[],calls=[],timers=[];let clock=100000;
  const context={document:{getElementById:id=>elements[id]},window:{addEventListener:(event,fn)=>{callbacks[event]=fn;}},location:{assign:url=>redirects.push(url)},URL,Date:{now:()=>clock},setTimeout:(fn)=>{timers.push(fn);return timers.length;},clearTimeout(){},fetch:async(...args)=>{calls.push(args);return fetchImpl(...args);}};
@@ -58,7 +58,7 @@ test('password and TOTP go directly to pinned Supabase; only upgraded token reac
 
 test('no enrolled factor, wrong/expired challenge and invalid OTP keep consent locked before explicit setup',async()=>{
  for(const factors of [[],[{id:factor,factor_type:'totp',status:'unverified'}],[{id:'../unsafe',factor_type:'totp',status:'verified'}],[{id:factor,factor_type:'phone',status:'verified'}]]){
-  const b=browser(async(url)=>url.endsWith('/user')?success({id:ownerId,factors}):authResponse(url));await b.login();assert.equal(b.elements.connect.disabled,true);assert.equal(b.elements.enroll.disabled,false);assert.match(b.elements.status.textContent,/no verified authenticator/);assert.equal(b.calls.length,2);
+  const b=browser(async(url)=>url.endsWith('/user')?success({id:ownerId,factors}):authResponse(url));await b.login();assert.equal(b.elements.connect.disabled,true);if(factors.some(value=>value?.factor_type==='totp'&&value.status==='unverified')){assert.equal(b.elements.enroll.disabled,true);assert.match(b.elements.status.textContent,/unfinished-factor/);}else{assert.equal(b.elements.enroll.disabled,false);assert.match(b.elements.status.textContent,/no verified authenticator/);}assert.equal(b.calls.length,2);
  }
  for(const failed of ['challenge','verify']){
   const b=browser(async(url)=>url.endsWith('/'+failed)?{ok:false,json:async()=>({error:'private-error-message'})}:authResponse(url));await b.login();await b.verify();assert.equal(b.elements.connect.disabled,true);assert.equal(b.elements.code.value,'');assert.doesNotMatch(b.elements.status.textContent,/private-error-message/);
@@ -180,4 +180,24 @@ test('authenticator setup supports XML SVG and manual-only fallback without exte
 test('enrollment reports only fixed safe categories and never retries or replaces unfinished factors',async()=>{
  for(const code of ['mfa_totp_enroll_not_enabled','mfa_factor_name_conflict','unexpected-private-payload']){const b=browser(async url=>url===authUrl+'/auth/v1/factors'?{ok:false,json:async()=>({code,message:'private-secret-payload'})}:noFactorResponse(url));await b.login();await b.elements.enroll.handlers.click();assert.match(b.elements.status.textContent,/Authenticator setup did not complete/);assert.doesNotMatch(b.elements.status.textContent,/private-secret-payload|unexpected-private-payload/);if(code!=='unexpected-private-payload')assert.ok(b.elements.status.textContent.includes(code));assert.equal(b.calls.filter(([url])=>url===authUrl+'/auth/v1/factors').length,1);}
  const pending=browser(async url=>url.endsWith('/user')?success({id:ownerId,factors:[{id:factor,factor_type:'totp',status:'unverified'}]}):authResponse(url));await pending.login();await pending.elements.enroll.handlers.click();assert.match(pending.elements.status.textContent,/unfinished-factor/);assert.equal(pending.calls.some(([url,init])=>url===authUrl+'/auth/v1/factors'&&init.method==='POST'),false);
+});
+
+
+test('unfinished-factor recovery requires explicit owner confirmation and removes only the fresh matching unverified factor',async()=>{
+ const pendingUser={id:ownerId,factors:[{id:factor,factor_type:'totp',status:'unverified'}]};
+ const b=browser(async(url,init)=>url.endsWith('/user')?success(pendingUser):init.method==='DELETE'?{ok:true}:authResponse(url));
+ await b.login();assert.equal(b.elements.pendingRecovery.hidden,false);assert.equal(b.elements.removePending.disabled,true);assert.equal(b.elements.enroll.disabled,true);await b.elements.removePending.handlers.click();assert.equal(b.calls.length,2);
+ b.elements.recoveryAck.checked=true;b.elements.recoveryAck.handlers.change();await b.elements.removePending.handlers.click();
+ const deletes=b.calls.filter(([,init])=>init.method==='DELETE');assert.equal(deletes.length,1);assert.equal(deletes[0][0],authUrl+'/auth/v1/factors/'+factor);assert.equal(deletes[0][1].headers.Authorization,'Bearer synthetic-aal1-token');assert.match(b.elements.status.textContent,/unfinished authenticator was removed/);assert.equal(b.elements.connect.disabled,true);assert.equal(b.elements.enroll.disabled,true);assert.equal(b.calls.some(([url,init])=>url===authUrl+'/auth/v1/factors'&&init.method==='POST'),false);
+});
+test('recovery refuses changed owner, verification, selection, multiple factors and expired or cleared sessions',async()=>{
+ const pending={id:factor,factor_type:'totp',status:'unverified'};
+ for(const change of ['owner','verified','rebound','multiple','malformed','expired','cleared']){
+  let reads=0;const b=browser(async url=>{if(url.endsWith('/user')){reads++;return success({id:change==='owner'&&reads>1?'40000000-0000-4000-8000-000000000001':ownerId,factors:reads===1?[pending]:change==='verified'?[{...pending,status:'verified'}]:change==='rebound'?[{...pending,id:'40000000-0000-4000-8000-000000000002'}]:change==='multiple'?[pending,{...pending,id:'40000000-0000-4000-8000-000000000002'}]:change==='malformed'?null:[pending]});}return authResponse(url);});
+  await b.login();b.elements.recoveryAck.checked=true;b.elements.recoveryAck.handlers.change();if(change==='expired')b.advance(3600001);if(change==='cleared')b.elements.signout.handlers.click();await b.elements.removePending.handlers.click();assert.equal(b.calls.some(([,init])=>init.method==='DELETE'),false,change);assert.equal(b.elements.connect.disabled,true);
+ }
+ const verified=browser(async url=>authResponse(url));await verified.login();assert.equal(verified.elements.pendingRecovery.hidden,true);assert.equal(verified.elements.removePending.disabled,true);
+});
+test('uncertain recovery failures do not retry, enroll replacements, or expose provider messages',async()=>{
+ const b=browser(async(url,init)=>url.endsWith('/user')?success({id:ownerId,factors:[{id:factor,factor_type:'totp',status:'unverified'}]}):init.method==='DELETE'?{ok:false,json:async()=>({message:'private-provider-detail'})}:authResponse(url));await b.login();b.elements.recoveryAck.checked=true;b.elements.recoveryAck.handlers.change();await b.elements.removePending.handlers.click();await b.elements.removePending.handlers.click();assert.equal(b.calls.filter(([,init])=>init.method==='DELETE').length,1);assert.match(b.elements.status.textContent,/removal was not confirmed/);assert.doesNotMatch(b.elements.status.textContent,/private-provider-detail/);assert.equal(b.elements.connect.disabled,true);
 });

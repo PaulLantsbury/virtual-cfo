@@ -159,3 +159,11 @@ test('bounded intake refuses expired jobs/setup but preserves historical reads a
   await admin(f.db);await assert.rejects(f.db.exec(proposal.replace(/clock_timestamp\(\)/g,'public.demo_fixture_clock()')),/proposal expired/);await f.db.exec('ROLLBACK');
  }finally{await f.close();}
 });
+
+ test('post-application read-only verification returns one all-true pre-consent row',async()=>{
+ const f=await fixture();try{
+  const verification=readFileSync(new URL('./demo-postapplication-verification-2026-10-30.sql',import.meta.url),'utf8');
+  const results=await f.db.exec(verification);const rows=results.flatMap(r=>r.rows??[]);
+  assert.equal(rows.length,1);for(const [key,value] of Object.entries(rows[0]))assert.equal(value,true,key);
+ }finally{await f.db.exec('ROLLBACK');await f.close();}
+});

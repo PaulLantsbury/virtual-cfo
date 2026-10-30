@@ -1,6 +1,6 @@
 import {setTimeout as delay} from 'node:timers/promises';
 import {API_VERSION} from './queries.mjs';
-import {createShopifyReader} from './client.mjs';
+import {createShopifyReader,hasOnlyShopifyReadScopes} from './client.mjs';
 import {verifyShopifyConnection} from './verify-connection.mjs';
 import {prepareCustomerIdentityObservation} from './customer-identity-proposal.mjs';
 export const CUSTOMER_IDENTITIES_QUERY='query NightScoutCustomerIdentities($after: String) { orders(first: 100, after: $after, sortKey: ID) { pageInfo { hasNextPage endCursor } nodes { id updatedAt customer { id } } } }';
@@ -23,7 +23,7 @@ export async function collectCustomerIdentities({connection,storeId,resolveCrede
  controller.signal.throwIfAborted();
  ensure(typeof token==='string'&&token.trim());
  const contextRead=createShopifyReader({domain:checked.settings.domain,accessToken:token,fetchImpl,sleep});
- async function identityPermission(){const c=await contextRead('context',{},controller.signal);ensure(c.shop?.id===checked.settings.shopId&&c.shop?.myshopifyDomain===checked.settings.domain&&c.shop?.currencyCode===checked.settings.currency&&c.shop?.ianaTimezone===checked.settings.timezone&&Array.isArray(c.currentAppInstallation?.accessScopes)&&['read_orders','read_all_orders','read_customers'].every(required=>c.currentAppInstallation.accessScopes.some(s=>s?.handle===required)));}
+ async function identityPermission(){const c=await contextRead('context',{},controller.signal);ensure(c.shop?.id===checked.settings.shopId&&c.shop?.myshopifyDomain===checked.settings.domain&&c.shop?.currencyCode===checked.settings.currency&&c.shop?.ianaTimezone===checked.settings.timezone&&hasOnlyShopifyReadScopes(c.currentAppInstallation?.accessScopes)&&['read_orders','read_all_orders','read_customers'].every(required=>c.currentAppInstallation.accessScopes.some(s=>s?.handle===required)));}
  await identityPermission();
  const endpoint=`https://${checked.settings.domain}/admin/api/${API_VERSION}/graphql.json`;
  async function read(after){

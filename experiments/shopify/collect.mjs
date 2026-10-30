@@ -1,12 +1,13 @@
 import {createHash} from 'node:crypto';
 import {API_VERSION} from './queries.mjs';
+import {hasOnlyShopifyReadScopes} from './client.mjs';
 const check=(ok,message)=>{if(!ok)throw new Error(message);};
 const gid=(id,type)=>typeof id==='string'&&new RegExp(`^gid://shopify/${type}/[0-9]+$`).test(id);
 const instant=value=>typeof value==='string'&&Number.isFinite(Date.parse(value));
 function context(data,expected){
  const s=data?.shop,scopes=data?.currentAppInstallation?.accessScopes;
  check(s&&s.id===expected.shopId&&s.myshopifyDomain===expected.domain,'Shopify account does not match configured store');
- check(Array.isArray(scopes)&&['read_orders','read_all_orders'].every(required=>scopes.some(s=>s.handle===required)),'Full order-history read permissions required');
+ check(hasOnlyShopifyReadScopes(scopes)&&['read_orders','read_all_orders'].every(required=>scopes.some(s=>s.handle===required)),'Full order-history read permissions required; reader credentials must contain only read scopes');
  check(typeof s.currencyCode==='string'&&typeof s.ianaTimezone==='string','Missing Shopify reporting settings');
  new Intl.DateTimeFormat('en-GB',{timeZone:s.ianaTimezone}).format();
  return {shopId:s.id,domain:s.myshopifyDomain,currency:s.currencyCode,timezone:s.ianaTimezone};

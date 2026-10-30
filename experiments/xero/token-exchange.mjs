@@ -1,10 +1,12 @@
+import {XERO_READ_SCOPES} from './read-only-oauth.mjs';
 const tokenEndpoint='https://identity.xero.com/connect/token',connectionsEndpoint='https://api.xero.com/connections';
 const safe=error=>{throw Error(error)};
 export async function exchangeReadOnlyCode({code,config,fetchImpl=fetch}){
  if(typeof code!=='string'||code.length<8||!config?.clientId||!config?.clientSecret||config.redirectUri!=='http://localhost:3000/xero/callback')safe('Xero authorisation exchange is invalid');
  const response=await fetchImpl(tokenEndpoint,{method:'POST',redirect:'error',headers:{authorization:`Basic ${Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64')}`,'content-type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:config.redirectUri})});
  if(!response.ok)safe('Xero authorisation exchange failed');const token=await response.json();
- if(typeof token?.access_token!=='string'||token.access_token.length<16||typeof token?.expires_in!=='number')safe('Xero authorisation exchange failed');
+ const scopes=typeof token?.scope==='string'?token.scope.split(' '):[],granted=new Set(scopes);
+ if(typeof token?.access_token!=='string'||token.access_token.length<16||typeof token?.expires_in!=='number'||scopes.length!==XERO_READ_SCOPES.length||granted.size!==scopes.length||!XERO_READ_SCOPES.every(scope=>granted.has(scope)))safe('Xero authorisation exchange failed');
  return Object.freeze({accessToken:token.access_token,expiresIn:token.expires_in});
 }
 export async function discoverConnectedTenant({accessToken,fetchImpl=fetch}){

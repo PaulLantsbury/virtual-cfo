@@ -1,4 +1,4 @@
-import {createShopifyReader} from './client.mjs';
+import {createShopifyReader,hasOnlyShopifyReadScopes} from './client.mjs';
 import {API_VERSION} from './queries.mjs';
 
 const REQUIRED_SCOPES = ['read_orders', 'read_all_orders'];
@@ -48,7 +48,7 @@ export async function verifyShopifyConnection({connection, resolveCredential,
       if (shop?.id !== expected.shopId || shop?.myshopifyDomain !== expected.domain) fail('Shopify identity does not match configured store');
       if (shop.currencyCode !== expected.currency || shop.ianaTimezone !== expected.timezone) fail('Shopify reporting settings do not match configured store');
       const scopes = data?.currentAppInstallation?.accessScopes;
-      if (!Array.isArray(scopes) || !REQUIRED_SCOPES.every(required => scopes.some(scope => scope?.handle === required))) {
+      if (!hasOnlyShopifyReadScopes(scopes) || !REQUIRED_SCOPES.every(required => scopes.some(scope => scope?.handle === required))) {
         fail('Shopify full order-history read permissions are missing');
       }
       return {status: 'context_verified', apiVersion: API_VERSION, settings: {...expected},

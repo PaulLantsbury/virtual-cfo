@@ -1,6 +1,11 @@
 import {setTimeout as delay} from 'node:timers/promises';
 import {API_VERSION,QUERIES} from './queries.mjs';
 
+/** Reader credentials must carry only explicit Shopify read capabilities. */
+export function hasOnlyShopifyReadScopes(scopes){
+ return Array.isArray(scopes)&&scopes.length>0&&scopes.every(scope=>typeof scope?.handle==='string'&&/^read_[a-z0-9_]+$/.test(scope.handle));
+}
+
 /** Server-only building block. No credential storage, logging, OAuth, mutations or browser integration. */
 export function createShopifyReader({domain,accessToken,fetchImpl=globalThis.fetch,sleep=(ms,signal)=>delay(ms,undefined,{signal}),maxAttempts=3}) {
  if(typeof domain!=='string'||!/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(domain))throw new Error('Canonical Shopify domain required');

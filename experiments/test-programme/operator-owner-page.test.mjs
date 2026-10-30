@@ -155,3 +155,17 @@ test('enrollment responses are fenced, bounded and never restored after clear, e
   const b=browser(async url=>url===authUrl+'/auth/v1/factors'?success(unsafe):noFactorResponse(url));await b.login();await b.elements.enroll.handlers.click();assert.equal(b.elements.qr.src,'');assert.equal(b.elements.setupkey.textContent,'');assert.equal(b.elements.enroll.disabled,true);assert.match(b.elements.status.textContent,/No automatic retry or removal/);
  }
 });
+
+
+test('omitted optional factors allow explicit owner enrollment but malformed factors and wrong owners stay locked',async()=>{
+ const b=browser(async url=>url.endsWith('/user')?success({id:ownerId}):url===authUrl+'/auth/v1/factors'?success(enrollmentReply):authResponse(url));
+ await b.login();assert.equal(b.elements.enroll.disabled,false);assert.equal(b.elements.connect.disabled,true);assert.match(b.elements.status.textContent,/no verified authenticator/);
+ await b.elements.enroll.handlers.click();assert.equal(b.elements.enrollment.hidden,false);assert.equal(b.elements.connect.disabled,true);
+ await b.verify();assert.equal(b.elements.connect.disabled,false);
+ for(const factors of [null,{},'invalid']){
+  const bad=browser(async url=>url.endsWith('/user')?success({id:ownerId,factors}):authResponse(url));await bad.login();assert.equal(bad.elements.enroll.disabled,true);assert.equal(bad.elements.connect.disabled,true);assert.match(bad.elements.status.textContent,/password was accepted, but the owner-account check/);
+ }
+ const outsider=browser(async url=>url.endsWith('/user')?success({id:'40000000-0000-4000-8000-000000000001'}):authResponse(url));await outsider.login();assert.equal(outsider.elements.enroll.disabled,true);assert.match(outsider.elements.status.textContent,/owner-account check/);
+ const rejected=browser(async()=>({ok:false}));await rejected.login();assert.match(rejected.elements.status.textContent,/Sign-in failed/);
+ assert.equal(page().match(/id="status"/g).length,1);assert.ok(page().indexOf('id="status"')<page().indexOf('id="signin"'));
+});

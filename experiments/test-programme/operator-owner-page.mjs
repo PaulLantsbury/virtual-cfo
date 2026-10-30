@@ -58,17 +58,21 @@ export function operatorOwnerPage({origin,authUrl,publicKey,ownerId,nonce,flow='
  });
  enroll.addEventListener('click',async()=>{
   if(busy||enroll.disabled)return;if(!signedIn()){clear('Your sign-in expired. Sign in again to continue.');return;}
-  const requestRevision=revision;busy=true;enroll.disabled=true;login.disabled=true;status.textContent='Preparing your authenticator setup…';
+  const requestRevision=revision;busy=true;enroll.disabled=true;login.disabled=true;status.textContent='Preparing your authenticator setup…';let enrollmentStage='owner-check',providerCode='';
   try{
    // Recheck the fixed owner immediately before this explicit credential action.
    const user=await json(await fetch(config.authUrl+'/auth/v1/user',{method:'GET',headers:authHeaders(),credentials:'omit',redirect:'error',cache:'no-store'}));
    if(revision!==requestRevision||!signedIn()||user.id!==config.ownerId)throw Error();
    const factors=user.factors===undefined?[]:user.factors;
    if(!Array.isArray(factors)||factors.length>=20||factors.some(value=>value&&value.factor_type==='totp'&&value.status==='verified'))throw Error();
-   const data=await json(await fetch(config.authUrl+'/auth/v1/factors',{method:'POST',headers:authHeaders(),body:JSON.stringify({factor_type:'totp',friendly_name:'Night Scout operator authenticator'}),credentials:'omit',redirect:'error',cache:'no-store'}));
-   if(revision!==requestRevision||!signedIn()||data.type!=='totp'||!uuid.test(data.id)||typeof data.totp?.qr_code!=='string'||data.totp.qr_code.length>200000||!/^<svg[ >]/i.test(data.totp.qr_code)||typeof data.totp.secret!=='string'||!/^[A-Z2-7]{16,256}={0,6}$/.test(data.totp.secret))throw Error();
-   factorId=data.id;qr.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(data.totp.qr_code);setupkey.textContent=data.totp.secret;enrollment.hidden=false;mfa.hidden=false;code.disabled=false;verify.disabled=false;status.textContent='Scan the QR code privately, then enter your authenticator code to finish setup. Consent remains locked.';
-  }catch{if(revision===requestRevision)clear('Authenticator setup did not complete. Sign in again to inspect your account. No automatic retry or removal was made.');}
+   if(factors.some(value=>value&&value.factor_type==='totp'&&value.status==='unverified')){enrollmentStage='unfinished-factor';throw Error();}
+   enrollmentStage='provider-request';
+   const response=await fetch(config.authUrl+'/auth/v1/factors',{method:'POST',headers:authHeaders(),body:JSON.stringify({factor_type:'totp',friendly_name:'Night Scout operator authenticator'}),credentials:'omit',redirect:'error',cache:'no-store'});
+   if(!response.ok){let failure;try{failure=await response.json();}catch{}const code=failure?.code??failure?.error_code;const allowed=['mfa_totp_enroll_not_enabled','mfa_factor_name_conflict','too_many_enrolled_mfa_factors','mfa_verified_factor_exists','session_not_found','session_expired','bad_jwt','over_request_rate_limit'];if(allowed.includes(code))providerCode=code;throw Error();}
+   enrollmentStage='setup-response';const data=await response.json();
+   if(revision!==requestRevision||!signedIn()||data.type!=='totp'||!uuid.test(data.id)||typeof data.totp.secret!=='string'||!/^[A-Z2-7]{16,256}={0,6}$/.test(data.totp.secret))throw Error();
+   factorId=data.id;const qrText=typeof data.totp?.qr_code==='string'?data.totp.qr_code.trim():'';const qrReady=qrText.length<=200000&&(/^<svg[ >]/i.test(qrText)||qrText.startsWith('<?xml')&&qrText.includes('<svg'));if(qrReady){qr.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(qrText);qr.hidden=false;}else{qr.removeAttribute('src');qr.hidden=true;}setupkey.textContent=data.totp.secret;enrollment.hidden=false;mfa.hidden=false;code.disabled=false;verify.disabled=false;status.textContent=qrReady?'Scan the QR code privately, then enter your authenticator code to finish setup. Consent remains locked.':'The QR image could not be displayed. Add the manual setup key below to your authenticator, then enter its code. Consent remains locked.';
+  }catch{if(revision===requestRevision)clear('Authenticator setup did not complete ('+(providerCode||enrollmentStage)+'). Sign in again to inspect your account. No automatic retry or removal was made.');}
   finally{busy=false;login.disabled=false;}
  });
  mfa.addEventListener('submit',async event=>{

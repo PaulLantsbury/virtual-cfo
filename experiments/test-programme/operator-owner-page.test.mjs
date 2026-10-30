@@ -151,7 +151,7 @@ test('enrollment responses are fenced, bounded and never restored after clear, e
   if(cancel==='signout')b.elements.signout.handlers.click();else if(cancel==='expiry')b.timers[0]();else b.callbacks.pagehide();
   resolveEnroll(success(enrollmentReply));await pending;assert.equal(b.elements.qr.src,'');assert.equal(b.elements.setupkey.textContent,'');assert.equal(b.elements.enrollment.hidden,true);assert.equal(b.elements.connect.disabled,true);
  }
- for(const unsafe of [{...enrollmentReply,id:'../unsafe'},{...enrollmentReply,type:'phone'},{...enrollmentReply,totp:{qr_code:'https://external.example/qr',secret:'JBSWY3DPEHPK3PXP'}},{...enrollmentReply,totp:{qr_code:'<img src=x onerror=alert(1)>',secret:'JBSWY3DPEHPK3PXP'}},{...enrollmentReply,totp:{qr_code:'<svg '+'x'.repeat(200000),secret:'JBSWY3DPEHPK3PXP'}},{...enrollmentReply,totp:{qr_code:'<svg></svg>',secret:'<script>not-base32</script>'}}]){
+ for(const unsafe of [{...enrollmentReply,id:'../unsafe'},{...enrollmentReply,type:'phone'},{...enrollmentReply,totp:{qr_code:'<svg></svg>',secret:'<script>not-base32</script>'}}]){
   const b=browser(async url=>url===authUrl+'/auth/v1/factors'?success(unsafe):noFactorResponse(url));await b.login();await b.elements.enroll.handlers.click();assert.equal(b.elements.qr.src,'');assert.equal(b.elements.setupkey.textContent,'');assert.equal(b.elements.enroll.disabled,true);assert.match(b.elements.status.textContent,/No automatic retry or removal/);
  }
 });
@@ -168,4 +168,16 @@ test('omitted optional factors allow explicit owner enrollment but malformed fac
  const outsider=browser(async url=>url.endsWith('/user')?success({id:'40000000-0000-4000-8000-000000000001'}):authResponse(url));await outsider.login();assert.equal(outsider.elements.enroll.disabled,true);assert.match(outsider.elements.status.textContent,/owner-account check/);
  const rejected=browser(async()=>({ok:false}));await rejected.login();assert.match(rejected.elements.status.textContent,/Sign-in failed/);
  assert.equal(page().match(/id="status"/g).length,1);assert.ok(page().indexOf('id="status"')<page().indexOf('id="signin"'));
+});
+
+
+test('authenticator setup supports XML SVG and manual-only fallback without external image fetch or weaker MFA',async()=>{
+ for(const qr_code of ['<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg"></svg>',undefined,'https://external.example/qr','<img src=x onerror=alert(1)>','<svg '+'x'.repeat(200000)]){
+  const b=browser(async url=>url===authUrl+'/auth/v1/factors'?success({...enrollmentReply,totp:{...enrollmentReply.totp,qr_code}}):noFactorResponse(url));await b.login();await b.elements.enroll.handlers.click();assert.equal(b.elements.setupkey.textContent,enrollmentReply.totp.secret);assert.equal(b.elements.connect.disabled,true);
+  if(qr_code?.startsWith('<?xml'))assert.match(b.elements.qr.src,/^data:image\/svg/);else{assert.equal(b.elements.qr.src,'');assert.equal(b.elements.qr.hidden,true);assert.match(b.elements.status.textContent,/manual setup key/);}
+ }
+});
+test('enrollment reports only fixed safe categories and never retries or replaces unfinished factors',async()=>{
+ for(const code of ['mfa_totp_enroll_not_enabled','mfa_factor_name_conflict','unexpected-private-payload']){const b=browser(async url=>url===authUrl+'/auth/v1/factors'?{ok:false,json:async()=>({code,message:'private-secret-payload'})}:noFactorResponse(url));await b.login();await b.elements.enroll.handlers.click();assert.match(b.elements.status.textContent,/Authenticator setup did not complete/);assert.doesNotMatch(b.elements.status.textContent,/private-secret-payload|unexpected-private-payload/);if(code!=='unexpected-private-payload')assert.ok(b.elements.status.textContent.includes(code));assert.equal(b.calls.filter(([url])=>url===authUrl+'/auth/v1/factors').length,1);}
+ const pending=browser(async url=>url.endsWith('/user')?success({id:ownerId,factors:[{id:factor,factor_type:'totp',status:'unverified'}]}):authResponse(url));await pending.login();await pending.elements.enroll.handlers.click();assert.match(pending.elements.status.textContent,/unfinished-factor/);assert.equal(pending.calls.some(([url,init])=>url===authUrl+'/auth/v1/factors'&&init.method==='POST'),false);
 });

@@ -1,3 +1,5 @@
+> **NEXT SESSION:** Start with [the current roadmap and exact resume checklist](roadmap-2026-10-31.md).
+
 # Night Scout — 31 October 2026 development handover
 
 ## Current direction

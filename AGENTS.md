@@ -1,3 +1,5 @@
+> **Resume checklist — 31 October 2026:** Read `docs/roadmap-2026-10-31.md` first for the two parallel workstreams, exact scheduled-run acceptance checks, v11 source-data gates and delivery boundaries.
+
 > **Latest implementation checkpoint — 31 October 2026:** Start with `docs/session-handover-2026-10-31.md` and `docs/v11-implementation-2026-10-31.md`. The approved v11 review and shared financial layer are separate from live merchant reporting and scheduled transaction acceptance. Preserve explicit fictional labels, existing store access, source readiness and operational safeguards.
 
 ## Approved page design baseline — 30 October 2026

@@ -1,3 +1,5 @@
+> **PICK UP NEXT TIME — 31 October 2026:** [Current roadmap and ordered resume checklist](roadmap-2026-10-31.md): accept genuine Shopify/Xero transaction flows in parallel with v11 review and supported-data wiring.
+
 > **LATEST DEVELOPMENT — 31 October 2026:** The approved v11 implementation is progressing in a coordinated interface, shared-finance and independent-test batch. Read [the latest handover](session-handover-2026-10-31.md) and [implementation record](v11-implementation-2026-10-31.md). The explicit fictional review is separate from live integrations and merchant data. Older prepared/disabled operational notices below are historical; do not repeat completed setup.
 
 > **APPROVED DESIGN BASELINE — 30 October 2026:** [Version 11 specification and 33 linked mockups](design/v11/README.md) are the reference for signed-in page redesign work. Includes principles, page behavior, financial fixtures, priorities and acceptance criteria. Design approval does not imply implementation or alter current data/reader priorities or deployment safeguards.

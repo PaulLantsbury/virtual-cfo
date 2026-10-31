@@ -26,6 +26,7 @@ import Upgrade from "@/pages/upgrade";
 import ScenarioLab from "@/pages/scenario-lab";
 import CfoAlerts from "@/pages/cfo-alerts";
 import XeroCallback from "@/pages/xero-callback";
+import V11Preview from "./v11-preview";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,6 +40,8 @@ const queryClient = new QueryClient({
 function MerchantRouter() {
   return (
     <Switch>
+      <Route path="/v11/:section" component={() => <V11Preview />} />
+      <Route path="/v11"><Redirect to="/v11/scout" /></Route>
       {import.meta.env.DEV && <Route path="/verified-sales" component={VerifiedSalesPage} />}
       <Route path="/financial-review" component={FinancialReviewPage} />
       <Route path="/dashboard" component={Dashboard} />

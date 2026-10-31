@@ -1,3 +1,5 @@
+> **SUPERSEDED CHECKPOINT — 31 October 2026:** Continue from [the latest handover](session-handover-2026-10-31.md). The bounded Demo reader/writer setup subsequently completed; scheduled transaction acceptance remains separate. The older prepared-only statements below describe their original point in time.
+
 > **APPROVED DESIGN BASELINE — 30 October 2026:** [Version 11 specification and 33 linked mockups](design/v11/README.md) are the reference for signed-in page redesign work. Includes principles, page behavior, financial fixtures, priorities and acceptance criteria. Design approval does not imply implementation or alter current data/reader priorities or deployment safeguards.
 
 > **Latest source finding — 30 October:** The real reader organisation check is connected and GBP but API `IsDemoCompany=false`. The separate UK Demo Company is accessible in Xero. Keep writer generation off; prepare the [isolated demo-reader package](xero-demo-reader-proposal-2026-10-30.md) without adding a second eligible connection to legacy global discovery or repointing the working reader. Exact setup/deployment/private-owner steps are in the current checkpoint.

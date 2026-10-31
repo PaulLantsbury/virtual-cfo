@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 /**
  * SimulatorSlider — shared slider row used across all simulator sections.
  *
- * Pages: Profit Engine, Cash Control, Pricing Optimisation.
+ * Pages: Profit Engine, Cash Control, Pricing & Discounts.
  * Replaces per-page duplicate SliderRow implementations.
  *
  * Props

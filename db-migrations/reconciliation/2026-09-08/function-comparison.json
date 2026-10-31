@@ -1,0 +1,513 @@
+[
+  {
+    "file": "db-migrations/migrations/20260430000007z_pre_views_functions.sql",
+    "version": "20260430000007z",
+    "recorded_in_cloud": false,
+    "functions": [
+      {
+        "name": "gross_revenue",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "net_sales",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "average_order_value",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "refund_rate",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "discount_dependency",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "repeat_purchase_rate",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "monthly_overhead_total",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "contribution_margin_pct",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "operating_profit_monthly",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/migrations/20260504000001_fix_contribution_margin_pct.sql",
+    "version": "20260504000001",
+    "recorded_in_cloud": false,
+    "functions": [
+      {
+        "name": "contribution_margin_pct",
+        "body_status": "different_or_superseded_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/migrations/20260504000002_add_shipping_marketing_to_cm.sql",
+    "version": "20260504000002",
+    "recorded_in_cloud": false,
+    "functions": [
+      {
+        "name": "contribution_margin_pct",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/migrations/20260504000003_trailing_12m_cm_avg.sql",
+    "version": "20260504000003",
+    "recorded_in_cloud": false,
+    "functions": [
+      {
+        "name": "trailing_12m_cm_avg",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/migrations/20260507000001_rls_and_view_security.sql",
+    "version": "20260507000001",
+    "recorded_in_cloud": false,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/migrations/20260507000002_marketing_intelligence_schema.sql",
+    "version": "20260507000002",
+    "recorded_in_cloud": false,
+    "functions": [
+      {
+        "name": "channel_metrics_monthly",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "blended_marketing_performance",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "channel_opportunities_active",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "cac_trend_by_channel",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/migrations/20260507000003_seed_opportunities.sql",
+    "version": "20260507000003",
+    "recorded_in_cloud": false,
+    "functions": [
+      {
+        "name": "recoverable_contribution_range",
+        "body_status": "different_or_superseded_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/migrations/20260517000001_fix_net_sales_aov_rpc.sql",
+    "version": "20260517000001",
+    "recorded_in_cloud": false,
+    "functions": [
+      {
+        "name": "net_sales",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "average_order_value",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260429000000_phase1_shopify_tables.sql",
+    "version": "20260429000000",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260429000001_phase1_metric_functions.sql",
+    "version": "20260429000001",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "gross_revenue",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "discount_cost",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "return_amount",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "net_sales",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "order_count",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "average_order_value",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "repeat_purchase_rate",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "discount_dependency",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "refund_rate",
+        "body_status": "different_or_superseded_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260429000002_cloud_schema_remediation.sql",
+    "version": "20260429000002",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "gross_revenue",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "discount_cost",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "return_amount",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "net_sales",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "order_count",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "average_order_value",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "repeat_purchase_rate",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "discount_dependency",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "refund_rate",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260429000003_contribution_margin_pct.sql",
+    "version": "20260429000003",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "contribution_margin_pct",
+        "body_status": "different_or_superseded_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260429000004_cloud_seed.sql",
+    "version": "20260429000004",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260429000005_recoverable_contribution_range.sql",
+    "version": "20260429000005",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "recoverable_contribution_range",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000000_overhead_categories.sql",
+    "version": "20260430000000",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000001_overhead_entries.sql",
+    "version": "20260430000001",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000002_cash_balance_snapshots.sql",
+    "version": "20260430000002",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000003_phase2a_seed.sql",
+    "version": "20260430000003",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000004_phase2a_views.sql",
+    "version": "20260430000004",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000005_phase2a_rpcs.sql",
+    "version": "20260430000005",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "monthly_overhead_total",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "cash_runway_months",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "operating_profit_monthly",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000006_phase1_april_seed_expansion.sql",
+    "version": "20260430000006",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000007_phase2b_march_seed.sql",
+    "version": "20260430000007",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000008_phase2b_trend_views.sql",
+    "version": "20260430000008",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000009_phase2b_trend_rpcs.sql",
+    "version": "20260430000009",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "month_on_month_delta",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "rolling_3m_averages",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "cfo_alerts",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000010_vat_refund_correction.sql",
+    "version": "20260430000010",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "net_sales",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "return_amount",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000011_aov_vat_correction.sql",
+    "version": "20260430000011",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "average_order_value",
+        "body_status": "different_or_superseded_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000012_add_vat_rate_to_cost_assumptions.sql",
+    "version": "20260430000012",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000013_assert_view_order.sql",
+    "version": "20260430000013",
+    "recorded_in_cloud": true,
+    "functions": []
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000014_sync_contribution_margin_pct.sql",
+    "version": "20260430000014",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "contribution_margin_pct",
+        "body_status": "different_or_superseded_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260430000015_sync_all_functions.sql",
+    "version": "20260430000015",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "gross_revenue",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "discount_cost",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "discount_dependency",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "order_count",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "refund_rate",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "repeat_purchase_rate",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "recoverable_contribution_range",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "cfo_alerts",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260501000016_sync_remaining_functions.sql",
+    "version": "20260501000016",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "month_on_month_delta",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "cfo_alerts",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260501000017_shadow_consistency.sql",
+    "version": "20260501000017",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "contribution_margin_pct",
+        "body_status": "different_or_superseded_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260502000018_shadow_metric_functions.sql",
+    "version": "20260502000018",
+    "recorded_in_cloud": true,
+    "functions": [
+      {
+        "name": "gross_revenue",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "net_sales",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "average_order_value",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "refund_rate",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "discount_dependency",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "repeat_purchase_rate",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "monthly_overhead_total",
+        "body_status": "matches_current_body"
+      },
+      {
+        "name": "contribution_margin_pct",
+        "body_status": "different_or_superseded_body"
+      },
+      {
+        "name": "operating_profit_monthly",
+        "body_status": "matches_current_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260502000019_opportunity_breakdown_rpc.sql",
+    "version": "20260502000019",
+    "recorded_in_cloud": false,
+    "functions": [
+      {
+        "name": "opportunity_breakdown",
+        "body_status": "different_or_superseded_body"
+      }
+    ]
+  },
+  {
+    "file": "db-migrations/reconciliation/2026-09-08/recovered/20260502000020_fix_repeat_purchase_effort.sql",
+    "version": "20260502000020",
+    "recorded_in_cloud": false,
+    "functions": []
+  }
+]

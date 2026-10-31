@@ -1,28 +1,32 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Redirect, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { TimelineProvider } from "@/lib/timeline";
 import { AiCfoProvider } from "@/components/AiCfoProvider";
 import { AiCfoDrawer } from "@/components/AiCfoDrawer";
+import { AuthProvider } from "@/lib/auth/AuthProvider";
+import { StoreAccessGate } from "@/components/StoreAccessGate";
 import NotFound from "@/pages/not-found";
 
 // Pages
 import Landing from "@/pages/landing";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
+import FinancialReviewPage from "@/pages/financial-review";
+import VerifiedSalesPage from "@/pages/verified-sales";
 import Dashboard from "@/pages/dashboard";
-import MarginAnalysis from "@/pages/margin-analysis";
 import GrowthQuality from "@/pages/growth-quality";
 import MarketingEfficiency from "@/pages/marketing-efficiency";
 import Opportunities from "@/pages/opportunities";
-import ProfitGrowth from "@/pages/profit-engine";
+import NewProfit from "@/pages/new-profit";
 import CashControl from "@/pages/cash-control";
-import PricingOptimisation from "@/pages/pricing-optimisation";
 import Settings from "@/pages/settings";
 import Upgrade from "@/pages/upgrade";
 import ScenarioLab from "@/pages/scenario-lab";
 import CfoAlerts from "@/pages/cfo-alerts";
+import XeroCallback from "@/pages/xero-callback";
+import V11Preview from "./v11-preview";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,22 +37,24 @@ const queryClient = new QueryClient({
   }
 });
 
-function Router() {
+function MerchantRouter() {
   return (
     <Switch>
-      <Route path="/" component={Landing} />
-      <Route path="/login" component={Login} />
-      <Route path="/signup" component={Signup} />
+      <Route path="/v11/:section" component={() => <V11Preview />} />
+      <Route path="/v11"><Redirect to="/v11/scout" /></Route>
+      {import.meta.env.DEV && <Route path="/verified-sales" component={VerifiedSalesPage} />}
+      <Route path="/financial-review" component={FinancialReviewPage} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/dashboard/transactions" component={Dashboard} /> {/* Map to dashboard for now */}
-      <Route path="/margin-analysis" component={MarginAnalysis} />
+      <Route path="/margin-analysis"><Redirect to="/profit-engine"/></Route>
       <Route path="/growth-quality" component={GrowthQuality} />
       <Route path="/marketing-efficiency" component={MarketingEfficiency} />
       <Route path="/opportunities" component={Opportunities} />
       <Route path="/profit-opportunities" component={Opportunities} />
-      <Route path="/profit-engine" component={ProfitGrowth} />
+      <Route path="/profit-engine" component={()=><NewProfit/>} />
+      <Route path="/new-profit"><Redirect to="/profit-engine"/></Route>
       <Route path="/cash-control" component={CashControl} />
-      <Route path="/pricing-optimisation" component={PricingOptimisation} />
+      <Route path="/pricing-optimisation"><Redirect to="/profit-engine"/></Route>
       <Route path="/scenario-lab" component={ScenarioLab} />
       <Route path="/monitoring" component={CfoAlerts} />
       <Route path="/cfo-alerts" component={CfoAlerts} />
@@ -62,19 +68,27 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <TimelineProvider>
-          <AiCfoProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-            <AiCfoDrawer />
-            <Toaster />
-          </AiCfoProvider>
-        </TimelineProvider>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Switch>
+              <Route path="/" component={Landing} />
+              <Route path="/login" component={Login} />
+              <Route path="/signup" component={Signup} />
+              <Route path="/xero/callback" component={XeroCallback} />
+              <Route>
+                <StoreAccessGate>
+                  <TimelineProvider>
+                    <AiCfoProvider><MerchantRouter /><AiCfoDrawer /></AiCfoProvider>
+                  </TimelineProvider>
+                </StoreAccessGate>
+              </Route>
+            </Switch>
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
-
 export default App;

@@ -1,0 +1,11 @@
+# Cash Control revision — 15 October 2026
+
+Implemented in the existing private demo from shared Night Scout source. Actual performance leads: complete monthly sales and operating profit, aligned operating cash chart, current bank account coverage/timestamp, profit-to-cash waterfall and separate tax/investment/funding-to-bank reconciliation. Operating profit includes D&A; operating cash is before corporation tax and interest. Reconciliation exposes missing fields/residuals and rejects unsafe arithmetic.
+
+Outlook defaults to 42 days, with 30 days and explicitly reviewed 91 days; daily end balances include within-week pressure and opening-day breaches. Optional commitments remain unreviewed unless explicitly confirmed; unmatched manual payments require duplicate review. Dated sample bills/payouts/plans and historical estimates remain distinguishable. Standard scoped review reminders and frozen snapshots preserved; older records require explicit clear. No email scheduling or provider action execution added.
+
+Validation: 22 final focused model/reminder tests pass, plus seven existing historical fixture regression tests; frontend TypeScript and demo/main Vite builds checked. Independent accounting/data-contract/UI-source review completed. No browser layout QA or empirical forecast validation claimed. The settlement helper and knownAt filters are arithmetic foundations, not a fitted prediction model; actual as-of snapshots and subsequent actuals are absent, so leakage-free historical forecast testing is unavailable.
+
+All revised numbers are synthetic. Current member accounting contract exposes cash:null; it does not deliver operating profit totals, classified bank movements, bill schedules or Shopify payout settlement schedules. See cash-data-dependencies-2026-10-15.md. Do not wire synthetic fixtures into customer financial reporting. No connected cash forecast or live bank reconciliation is claimed.
+
+Shopify writer: actual authenticated source-only preflight succeeded at 17:03:34 UTC, GBP development shop and exact read_orders/write_orders. Generation remains disabled; restricted DB password and reviewed Shopify-only binding remain pending. Main app/read collectors remain read-only.

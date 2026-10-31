@@ -6,9 +6,9 @@ import { user } from "@/lib/plan";
 const FREE_FEATURES = [
   "Dashboard",
   "Growth Quality",
-  "Margin Recovery",
+  "Margin Analysis",
   "Cash Control",
-  "Profit Growth",
+  "Profit Overview",
   "Ask Night Scout",
 ];
 

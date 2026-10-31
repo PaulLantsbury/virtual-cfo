@@ -1,0 +1,11 @@
+{
+  "source": "pnpm-lock.yaml",
+  "sourceSha256": "1bb67ef5a56b9b338053c5f3b847563dd9b2b3d857032e5d330931cba7ae0c88",
+  "lockSha256": "857e628d7b4ba4b0fcba4e03b0dbaf24ccffcce60e2df4637e7f6cad5d36b74a",
+  "dependencies": {
+    "pg": "8.20.0"
+  },
+  "packageCount": 14,
+  "snapshotCount": 14,
+  "purpose": "Existing root-lock pg dependency closure only; no network resolution or install"
+}

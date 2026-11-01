@@ -1,5 +1,17 @@
 # Shopify test-data journey — 29 October 2026
 
+## Current strategy decision — 1 November 2026
+
+Keep two distinct evidence lanes:
+
+- Provider acceptance: real isolated Shopify and Xero development/demo transactions prove the integrations can write, retain, read and account for provider data. Shopify orders with source `test=true` remain excluded from merchant financial events.
+- Synthetic reporting data: a separate synthetic company in Supabase is planned to exercise realistic, daily-changing financial charts and cost coverage. It is not provider evidence and must not make Shopify test orders eligible.
+
+The synthetic company will model e-commerce revenue and seasonality plus VAT, five synthetic employees, outsourced fulfilment and other operating costs. Read the [synthetic daily reporting-data plan](synthetic-daily-reporting-data-stream.md) and [current roadmap](roadmap-2026-10-31.md). This is a documentation decision only; no persistent synthetic company or scheduled generator has been created here.
+
+## Historical status
+
+
 Status: code audit and local synthetic integration verification. No live provider order, remote database update, scheduled run or deployment is established by this record.
 
 ## Existing supported route
@@ -29,7 +41,7 @@ This adds no schema, grants, provider scopes, writer endpoint, credentials, sche
 4. Member Settings shows the dated collection and test-order ingestion counts; exact-order matching remains an operator verification, not a claim inferred from aggregate counts.
 5. Unchanged reader replay creates no duplicate candidate or merchant order; failed/unconfirmed attempts retain honest status and must not be relabelled successful.
 
-To show trading/profit charts evolving, a separate labelled synthetic reporting fixture can exercise eligible financial events. Do not make real Shopify `test=true` orders eligible to create a visually busy dashboard. Any connected development financial view needs an explicit isolated data contract and remains separate work.
+To show trading/profit charts evolving, implement the separately scoped synthetic-company stream in the linked plan. Only fixture-provenance events inside that isolated company may be eligible for those charts. Do not make real Shopify `test=true` orders eligible or infer provider acceptance from fixture activity.
 
 ## Validation
 

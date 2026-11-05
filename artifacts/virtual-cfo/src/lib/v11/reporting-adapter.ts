@@ -46,6 +46,7 @@ export interface SupportedProfitReport {
   sales?: SupportedSalesReport | null;
 }
 export interface ReportingAdapterInput {
+  sourceBasis?: "shopify-operational" | "synthetic-local";
   expected: {
     storeId: string;
     currency: string;
@@ -104,7 +105,7 @@ export function adaptSupportedReporting(input: ReportingAdapterInput): {
   context: ReportContext | null;
   result: HistoricalResult;
   issues: string[];
-  source: "shopify-operational";
+  source: "shopify-operational" | "synthetic-local";
   isRetained: boolean;
 } {
   const issues: string[] = [],
@@ -115,7 +116,7 @@ export function adaptSupportedReporting(input: ReportingAdapterInput): {
     context: null,
     result: unavailable,
     issues,
-    source: "shopify-operational" as const,
+    source: input.sourceBasis ?? "shopify-operational",
     isRetained: false,
   });
   if (input.access !== "allowed") {
@@ -306,7 +307,7 @@ export function adaptSupportedReporting(input: ReportingAdapterInput): {
     context,
     result,
     issues,
-    source: "shopify-operational",
+    source: input.sourceBasis ?? "shopify-operational",
     isRetained,
   };
 }

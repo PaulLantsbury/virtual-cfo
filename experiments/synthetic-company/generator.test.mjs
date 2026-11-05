@@ -45,6 +45,7 @@ test('refunds retain original eligible orders and event dates; never refund more
     const old=refunded.get(e.refs.orderId)||[0,0];old[0]+=e.metrics.refunds;old[1]-=e.metrics.cogs;
     assert.ok(old[0]<=e.refs.originalProduct);assert.ok(old[1]<=e.refs.originalCogs);refunded.set(e.refs.orderId,old);
     assert.equal(e.metrics.cogs,-e.metrics.refunds/2);
+    assert.ok(e.metrics.refundedVat<=Math.round(e.refs.originalProduct/5));
   }
   assert.ok(opening>0);assert.ok(crossMonth>0);
 });
@@ -122,4 +123,12 @@ test('leap-year annual allocation and London DST calendar retain every business 
   for(const day of ['2024-02-29','2024-03-31','2024-10-27'])assert.equal(f.daily.filter(d=>d.date===day).length,1);
   assert.throws(()=>{PROFILE.salaries[0]=1;},TypeError);
   assert.throws(()=>{PROFILE.costs.marketing=0;},TypeError);
+});
+
+test('sale tax is recorded separately for product and shipping; full product refunds cannot exceed original component tax',()=>{
+  for(const e of fixture.events.filter(e=>e.kind==='sale')) {
+    assert.equal(e.metrics.productVat,Math.round(e.metrics.productSales/5));
+    assert.equal(e.metrics.shippingVat,Math.round(e.metrics.shipping/5));
+    assert.equal(e.metrics.outputVat,e.metrics.productVat+e.metrics.shippingVat);
+  }
 });

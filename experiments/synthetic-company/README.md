@@ -1,6 +1,6 @@
 # Offline synthetic company generator
 
-Local preparation only. This module never connects to Supabase, Shopify, Xero or Render; it has no credentials, target store identifiers, provider SDKs, SQL writer or scheduler. Nothing here certifies reporting completeness or changes the application. A new dedicated company and reviewed canonical adapter remain staging gates. Never use Store D or an existing customer store.
+The generator itself is offline: it never connects to Supabase, Shopify, Xero or Render and contains no credentials or scheduler. Other modules in this directory prepare and rehearse explicitly bounded staging proposals. January's separately approved synthetic example is already loaded; that approval does not cover a full-history load. Never use Store D or an existing customer store.
 
 ## Run
 
@@ -62,4 +62,12 @@ Every journal event carries fictional company, profile, currency, timezone and p
 
 Tests independently assert annual target amounts, balancing, every daily balance roll-forward, refund capacity/event dates, cash clearing versus unsettled receipts, VAT quarter reconciliation, payroll liability timing, Christmas seasonality, leap/DST date coverage, deterministic replay/extension, rejected scope/date input and byte-equivalent CLI output. No application test suite is modified.
 
-Remaining before live chart acceptance: read-only schema fit, reviewed scoped event/cost adapter and any required access proposal; canonical coverage/seals and snapshot metadata; supported live page wiring; chart/table/commentary/Explore the Numbers consistency; non-member/cross-company database tests; incomplete/stale/failure cases; scheduler approval and operational receipts. Customer cohorts, channel matching, stock units/ageing, individual supplier products and bank reconciliation are not fully modeled. A synthetic ledger cannot establish Shopify/Xero OAuth, collection, pagination, webhook or test-provider acceptance. No live write path is prepared by this package.
+January's supported sales/profit page slice has separate hosted acceptance. Full-history acceptance still requires a reviewed versioned source/evidence contract, hosted permissions and authenticated readback, chart/table/commentary/Explore the Numbers consistency, failure and isolation checks, and separate scheduler approval. Customer cohorts, channel matching, stock ageing, individual supplier products and bank reconciliation are not fully modeled. A synthetic ledger cannot establish Shopify/Xero OAuth, collection, pagination, webhook or test-provider acceptance.
+
+## Two-year history and daily continuation
+
+The `history-*` modules are a **local disposable-database proposal**, not an installed feed. They prepare a separate private history edition, preserve the existing January v1 source/evidence tables, and reuse existing monetary calculations through a new SQL-backed v2 reader. They do not extend the installed v1 SQL reader or bypass its store-wide invalidation rules.
+
+Pin the November 2024 opening date when extending the default reference history. Only completed London business days may be appended; replay must insert nothing, changed immutable IDs must fail, and each complete month must retain its exact evidence basis. January sales/profit reconcile across editions; closing cash can differ because the opening basis differs. Never combine their opening journals or silently switch a page between editions.
+
+See [rollout and recovery](../../docs/history-rollout-and-recovery-2026-11-05.md) and [independent review](../../docs/synthetic-history-independent-review-2026-11-05.md). A real hosted load, access policy, page connection and daily scheduler each remain distinct acceptance gates. Local overlapping calls do not prove distributed concurrency safety.

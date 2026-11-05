@@ -102,9 +102,9 @@ export function generate({asOf='2026-11-05', months=24, company=PROFILE.company,
       later(addDays(day,30),settle=>event(settle,`stock-payment-${day}`,'supplier_payment',{supplier_payable:purchase+tax,bank:-purchase-tax},{},{invoiceDate:day}));
     }
     for(const o of orders) {
-      const tax=vat(o.product+o.shipping), receipt=o.product+o.shipping+tax;
+      const productVat=vat(o.product), shippingVat=vat(o.shipping), tax=productVat+shippingVat, receipt=o.product+o.shipping+tax;
       event(day,o.id,'sale',{processor:receipt,product_revenue:-o.product,shipping_revenue:-o.shipping,vat_control:-tax,cogs:o.cogs,inventory:-o.cogs},
-        {orders:1,gross:o.gross,discounts:o.discount,productSales:o.product,shipping:o.shipping,outputVat:tax,cogs:o.cogs},
+        {orders:1,gross:o.gross,discounts:o.discount,productSales:o.product,shipping:o.shipping,outputVat:tax,productVat,shippingVat,cogs:o.cogs},
         {orderId:o.id,customerId:o.customerId,channel:o.channel,paid:true,providerTest:false});
       later(businessDays(day,2),settle=>event(settle,`payout-${o.id}`,'processor_payout',{bank:receipt,processor:-receipt},{},{orderId:o.id}));
     }

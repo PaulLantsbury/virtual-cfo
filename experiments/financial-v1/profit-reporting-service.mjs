@@ -1,7 +1,7 @@
 import {reviewerAuthenticator} from '../shopify/reviewer-auth.mjs';
 import {readProfitEvidence} from './profit-evidence-reader.mjs';
 import {createProfitSalesReader} from './profit-sales-reader.mjs';
-import {readTrustedProfitSnapshot,trustedSnapshotUnavailable} from './profit-trusted-snapshot-reader.mjs';
+import {readTrustedProfitSnapshot,trustedSnapshotUnavailable,TRUSTED_SYNTHETIC_POLICY} from './profit-trusted-snapshot-reader.mjs';
 const snapshotMode='SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function validProfitScope(scope){
@@ -16,7 +16,7 @@ export function validProfitScope(scope){
  * selection and source validation share one repeatable-read transaction.
  * No raw evidence, SQL errors or account metadata are returned to the browser.
  */
-export function createProfitReportingService(db,supabase,{snapshotPolicy=null}={}){
+export function createProfitReportingService(db,supabase,{snapshotPolicy=TRUSTED_SYNTHETIC_POLICY}={}){
  const trustedPolicy=snapshotPolicy?Object.freeze({...snapshotPolicy}):null;
  return {async read(scope,authorization){
   if(!validProfitScope(scope))throw new Error('Invalid profit reporting scope');

@@ -101,7 +101,7 @@ For orientation only, if all £480,000 net product sales and £20,000 shipping r
 
 ## Data architecture and isolation
 
-Before implementation, inspect the existing Supabase schema, RLS policies, company/store membership model, canonical reporting queries and chart data paths. Decide whether existing Staging Synthetic Profit Store D can safely be repurposed or whether a dedicated synthetic reporting company is required. Do not write anything until this read-only review demonstrates that the fixture can be isolated from merchant companies.
+Before implementation, inspect the existing Supabase schema, RLS policies, company/store membership model, canonical reporting queries and chart data paths. Use a new dedicated synthetic reporting company; do not repurpose Store D or any existing store. Store D's reported incomplete same-day order values remain a separate verification issue. Do not write anything until this read-only review demonstrates that the fixture can be isolated from merchant companies.
 
 Requirements:
 
@@ -162,3 +162,44 @@ These inputs can stay configurable for the plan and local generator, but must be
 - Existing synthetic company suitability, write path, generator runtime and run time.
 
 No further user detail is required to finish this plan. Use sensible, visible defaults for the initial local fixture, and ask only if a choice affects a persistent database write, access, cost or materially changes the reporting interpretation.
+
+
+## 5 November 2026 — concrete local fixture defaults and readiness assessment
+
+These versioned planning defaults resolve routine local-generator choices. They authorize no remote writes, access changes or scheduler activation. Retain the revenue/AOV definitions above: £500,000 net turnover includes £20,000 shipping; £38 AOV excludes VAT/shipping and precedes later refunds. Do not relabel this as a £38 VAT-inclusive checkout basket.
+
+Use 24 completed months ending at the last completed London month, plus current-month completed days. Apply the seasonal weights above to a £500,000 annual baseline, with Mother's Day, Valentine's Day, Easter and Christmas gifting pulses; move holiday dates by year. Never generate future actuals. Freeze a separate dated reference mode for screenshot comparisons.
+
+### Editable annual company cost base
+
+| Component | Annual fixture assumption |
+| --- | ---: |
+| Five gross salaries: owner/manager £36k; buying/operations £30k; marketing £28k; customer service £25k; administrator £24k | £143,000 |
+| Employer contribution allowance, separately accrued (scenario parameter, not a statutory calculation) | £17,000 |
+| Employer pension allowance | £4,000 |
+| Total employment expense | £164,000 |
+| 3PL pick/pack: 13,263 orders × £1.25 | £16,578.75 |
+| Carrier cost: 13,263 orders × £2.50 | £33,157.50 |
+| 3PL storage | £4,800 |
+| Returns handling and surcharges | £2,400 |
+| Packaging: 13,263 orders × £0.25 | £3,315.75 |
+| Marketing, channel-scoped | £30,000 |
+| Processor fee budget, allocated to settlements | £9,000 |
+| Office/administrative premises | £6,000 |
+| Software | £4,800 |
+| Insurance | £1,800 |
+| Utilities/communications | £2,400 |
+| Professional services | £3,600 |
+| Equipment depreciation | £2,400 |
+
+These assumptions deliberately expose a financially pressured five-person retailer: revenue £500,000 less £240,000 product COGS and £284,252 other costs gives operating loss £24,252; EBITDA loss £21,852. Do not manufacture a healthy operating margin to make the demo look attractive. Shipping revenue is already in turnover; carrier and packaging are charged once. Payroll is overhead; inventory purchases affect stock/payables/cash before sale-triggered COGS. The £17k employer allowance is an editable fictional budget, not UK payroll advice.
+
+Generate monthly payroll accruals and net-pay/liability settlements, weekly 3PL invoices, daily processor clearing/fees with two-business-day payouts, monthly software/office costs, channel advertising accruals and monthly payment, supplier invoices on 30-day terms, inventory receipts before seasonal peaks, later-dated partial refunds and quarterly VAT settlement events. Use artificial IDs only. Start with £60,000 opening bank cash, £35,000 stock and matching explicit opening equity/payables; validate every opening balance and roll-forward. Standard-rated-only baseline is simplest; mixed VAT/zero-rate cases belong in separate named edge scenarios. Keep tax settlement timing configurable.
+
+### Is direct Supabase synthetic data enough?
+
+Yes for the supported reporting and chart path **if** the generator populates the canonical scoped event/cost structures, coverage evidence and sealed snapshots expected by those readers. Rows alone are insufficient. The current code contract in `src/lib/v11/reporting-adapter.ts` requires matching business/currency/period, allowed access, freshness, verified snapshot ID/as-of, sales coverage and ready profit components. Existing hooks do not yet expose every required snapshot field. The fictional v11 workspace is therefore not converted into a dynamic merchant dashboard by merely adding table rows.
+
+Daily sales/profit events can exercise date changes, AOV, margin, seasonality, per-order denominators and contextual Explore the Numbers links once wired through the shared contract. Cash requires balances, settlements, stock and payable/receivable roll-forwards; customer economics requires stable synthetic customer/cohort IDs and acquisition attribution; channel views require matched spend and channel activity. Plan persistence, monitoring delivery and invitations need their own services. Provider OAuth, API pagination, webhooks, test-order exclusion and scheduled provider transaction linkage remain separate Shopify/Xero tests.
+
+Acceptance must follow one event from source row through reader/snapshot to chart, commentary and Explore the Numbers evidence, retaining the same company, dates, unit, denominator and snapshot. Check the ten-second owner verdict with changing figures, and reject any static Q3 preview substitution. Also test unavailable, incomplete, stale and refund-only days, same-day amounts, DST, monthly close, idempotent replay and non-member isolation. No staging seed or schedule is claimed by this update.

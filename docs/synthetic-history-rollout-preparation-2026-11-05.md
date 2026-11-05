@@ -1,5 +1,7 @@
 # History corrections, supported reader and staged rollout preparation
 
+Subsequent checkpoint: the explicitly approved staging application and signed-in checks are recorded in [hosted history acceptance](synthetic-history-hosted-acceptance-2026-11-05.md). The preparation-only statements below describe this package before that approval; daily scheduling remains off.
+
 Status: implemented, independently reviewed and rehearsed locally. No hosted schema, financial data, access policy, application deployment, environment setting, provider transaction or recurring schedule changed in this batch. The existing January example remains the current hosted checkpoint.
 
 ## Delivered behaviour

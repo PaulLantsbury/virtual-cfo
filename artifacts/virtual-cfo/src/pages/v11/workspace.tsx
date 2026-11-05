@@ -198,7 +198,9 @@ export default function V11Workspace({
               >
                 {PERIOD_OPTIONS.map((p) => (
                   <option key={p.value} value={p.value}>
-                    {p.label}
+                    {p.value === "last-3-months"
+                      ? `${p.label} · sample Q3 2026`
+                      : p.label}
                   </option>
                 ))}
               </select>

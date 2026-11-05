@@ -1033,6 +1033,7 @@ export function GrowthPage(
             "Readiness",
             "Fictional fixture only; cash commitments and guardrails unconfirmed",
           ],
+          ...(active === "channels" ? [
           [
             "Selected channel",
             channel === "all"
@@ -1076,6 +1077,18 @@ export function GrowthPage(
             "Channel contribution",
             "Unavailable: store-wide contribution is not a channel benchmark",
           ],
+          ] : active === "customers" ? [
+            ["Current first-order contribution before acquisition", money(ctx.incomplete ? null : m.firstOrderContribution)],
+            ["Current new-customer CAC", money(m.cac, 2)],
+            ["Mature cohort", "April–June 2026; observed through 30 September 2026"],
+            ["Current cohort maturity", "Current-quarter customers are not observed 90-day cohorts"],
+          ] : [
+            ["Investment readiness", "Needs evidence: commitments and business guardrails unconfirmed"],
+            ["Business contribution per order", money(ctx.incomplete ? null : safeRatio(ctx.data.current.cm3, ctx.data.current.orders), 2)],
+            ["Blended new-customer CAC", money(m.cac, 2)],
+            ["Current first-order contribution before acquisition", money(ctx.incomplete ? null : m.firstOrderContribution)],
+            ["Decision limit", "Historical contribution and payback do not establish cash available to scale"],
+          ]),
           [
             "Cost coverage",
             ctx.incomplete

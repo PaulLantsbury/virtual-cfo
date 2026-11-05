@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { PROFILE, allocate, date, generate, replay, summarise } from './generator.mjs';
+import { PROFILE, HISTORICAL_PROFILE_V1, allocate, date, generate, replay, summarise } from './generator.mjs';
 const fixture=generate();
 const total=values=>values.reduce((a,b)=>a+b,0);
 
@@ -14,13 +14,13 @@ test('24 completed months plus current completed days; no clock or future actual
 });
 test('independently specified annual revenue/cost/employee budgets reconcile exactly',()=>{
   const t=summarise(fixture,'2025-01-01','2025-12-31');
-  for(const [key,expected] of Object.entries({orders:13263,gross:52800000,discounts:2400000,refunds:2400000,productSales:50400000,netProduct:48000000,shipping:2000000,revenue:50000000,cogs:24000000,grossProfit:24000000,variableCosts:6925200,marketing:3000000,overheads:18500000,operatingProfit:-2425200,ebitda:-2185200})) assert.equal(t[key],expected,key);
+  for(const [key,expected] of Object.entries({orders:19895,gross:79200000,discounts:3600000,refunds:3600000,productSales:75600000,netProduct:72000000,shipping:3000000,revenue:75000000,cogs:36000000,grossProfit:36000000,variableCosts:10028000,marketing:3000000,overheads:15747552,operatingProfit:10224448,ebitda:10464448})) assert.equal(t[key],expected,key);
   assert.ok(Math.abs(t.productSales/t.orders/100-38)<0.01);
   const payroll=fixture.events.filter(e=>e.kind==='payroll_accrual'&&e.date.startsWith('2025'));
-  assert.equal(payroll.length,60);assert.equal(new Set(payroll.map(e=>e.refs.staffId)).size,5);
-  assert.equal(total(payroll.map(e=>e.refs.gross)),14300000);
-  assert.equal(total(payroll.map(e=>e.refs.employer)),1700000);
-  assert.equal(total(payroll.map(e=>e.refs.pension)),400000);
+  assert.equal(payroll.length,48);assert.equal(new Set(payroll.map(e=>e.refs.staffId)).size,4);
+  assert.equal(total(payroll.map(e=>e.refs.gross)),11900000);
+  assert.equal(total(payroll.map(e=>e.refs.employer)),1414685);
+  assert.equal(total(payroll.map(e=>e.refs.pension)),332867);
 });
 test('every journal balances in safe integer pennies; independently rebuild every daily balance',()=>{
   const ledger={},ids=new Set();let index=0;
@@ -73,8 +73,8 @@ test('VAT control reconciles computed line tax and actual dated settlements; nev
 });
 test('seasonal history peaks Christmas and Q4; accounting and cash are distinct',()=>{
   const november=summarise(fixture,'2025-11-01','2025-11-30');const december=summarise(fixture,'2025-12-01','2025-12-31');const january=summarise(fixture,'2025-01-01','2025-01-31');
-  assert.equal(december.revenue,9000000);assert.equal(november.revenue,6500000);assert.equal(january.revenue,3000000);
-  assert.equal(summarise(fixture,'2025-10-01','2025-12-31').revenue,20000000);
+  assert.equal(december.revenue,13500000);assert.equal(november.revenue,9750000);assert.equal(january.revenue,4500000);
+  assert.equal(summarise(fixture,'2025-10-01','2025-12-31').revenue,30000000);
   const bank=fixture.daily.at(-1).balances.bank-6000000;
   assert.notEqual(bank,summarise(fixture).operatingProfit);
 });
@@ -90,7 +90,7 @@ test('exact deterministic rerun and immutable replay; future extension preserves
 test('allocation conserves pennies; invalid dates, history and company scopes rejected',()=>{
   assert.deepEqual(allocate(5,[1,1,1]),[2,2,1]);
   assert.equal(total(allocate(9007199254740000,[3,7,9])),9007199254740000);
-  for(const input of [{asOf:'2026-02-30'},{asOf:'2026-2-01'},{months:0},{months:1.5},{company:'existing-store'},{from:'2024-01-02'},{from:'2027-01-01'}])assert.throws(()=>generate(input));
+  for(const input of [{asOf:'2026-02-30'},{asOf:'2026-2-01'},{months:0},{months:1.5},{company:'existing-store'},{from:'2024-01-02'},{from:'2027-01-01'},{profile:'unknown'},{profile:'__proto__'}])assert.throws(()=>generate(input));
 });
 test('CLI output is byte equivalent; rejects unknown options without producing data',()=>{
   const cli=fileURLToPath(new URL('./cli.mjs',import.meta.url));
@@ -119,7 +119,7 @@ test('payroll net/deduction/employer liabilities preserve accrual versus cash ti
 });
 test('leap-year annual allocation and London DST calendar retain every business date',()=>{
   const f=generate({asOf:'2025-01-01',from:'2024-01-01'});
-  assert.equal(f.daily.length,366);assert.equal(summarise(f).revenue,50000000);
+  assert.equal(f.daily.length,366);assert.equal(summarise(f).revenue,75000000);
   for(const day of ['2024-02-29','2024-03-31','2024-10-27'])assert.equal(f.daily.filter(d=>d.date===day).length,1);
   assert.throws(()=>{PROFILE.salaries[0]=1;},TypeError);
   assert.throws(()=>{PROFILE.costs.marketing=0;},TypeError);
@@ -131,4 +131,15 @@ test('sale tax is recorded separately for product and shipping; full product ref
     assert.equal(e.metrics.shippingVat,Math.round(e.metrics.shipping/5));
     assert.equal(e.metrics.outputVat,e.metrics.productVat+e.metrics.shippingVat);
   }
+});
+
+test('v1 pressure scenario remains immutable and separate from revised profitable profile',()=>{
+  const old=generate({asOf:'2026-01-01',from:'2025-01-01',profile:'uk-gifts-v1'});
+  const t=summarise(old);
+  assert.equal(old.scope.profile,'uk-gifts-v1');assert.equal(fixture.scope.profile,'uk-gifts-v2');
+  assert.equal(t.revenue,50000000);assert.equal(t.operatingProfit,-2425200);assert.equal(t.ebitda,-2185200);
+  assert.equal(HISTORICAL_PROFILE_V1.salaries.length,5);assert.equal(PROFILE.salaries.length,4);
+  assert.equal(HISTORICAL_PROFILE_V1.costs.processor,900000);assert.equal(PROFILE.costs.processor,1350000);
+  const ids=new Set(fixture.events.map(e=>e.id));assert.ok(old.events.every(e=>!ids.has(e.id)));
+  assert.throws(()=>{HISTORICAL_PROFILE_V1.salaries.pop();},TypeError);
 });

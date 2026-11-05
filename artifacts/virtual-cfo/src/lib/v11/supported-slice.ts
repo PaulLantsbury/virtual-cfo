@@ -17,7 +17,7 @@ export function supportedSlice(current: ReportingAdapterInput, comparison: { per
   const comparable = !!primary.context && !primary.isRetained && !!prior?.context && !prior.isRetained;
   const keys: MetricId[] = ['netProductSales', 'grossProfit', 'cm3', 'ebitda'];
   const metrics = keys.map(id => ({
-    id, label: METRIC_DEFINITIONS[id].label, formula: METRIC_DEFINITIONS[id].formula,
+    id, label: id === "cm3" ? "Contribution after marketing (CM3)" : METRIC_DEFINITIONS[id].label, formula: METRIC_DEFINITIONS[id].formula,
     valuePence: primary.result.metrics[id],
     comparisonPence: comparable ? prior!.result.metrics[id] : null,
     changePence: comparable && primary.result.metrics[id] !== null && prior!.result.metrics[id] !== null

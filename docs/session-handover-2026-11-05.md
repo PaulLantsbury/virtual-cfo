@@ -21,3 +21,30 @@ Saved on isolated branch codex/synthetic-company-20261105 to avoid the provider-
 5. Choose/approve the daily scheduler after database/chart acceptance. Preserve provider hard stops and no retry/catch-up rules; provider linkage acceptance remains separate.
 
 No database records, schema, grants, provider transactions, schedules or service settings changed in this batch.
+
+
+---
+
+# End-of-day update — supersedes the earlier preparation status above
+
+## What is working
+All seven redesigned destinations are available on staging as clearly labelled fictional previews: Scout, Profit, Growth & Marketing, Cash, Plan, Monitoring and Settings. This is page availability and functional walkthrough acceptance, not full design parity or complete database integration.
+
+The separate supported monthly history page is connected to the isolated synthetic-company evidence. Its 24 complete months cover November 2024–October 2026, with 734 reporting days through completed source days on 4 November. Signed-in January and October cards and Explore the Numbers matched the selected evidence. The original January example and unrelated data were preserved.
+
+The current fictional retailer is a UK gifting/e-commerce business with £750,000 annual net turnover, four employees, VAT and outsourced fulfilment. Annual operating profit is £102,244.48 and EBITDA £104,644.48. These are synthetic scenario results, not customer or provider results.
+
+## What remains
+The ongoing daily synthetic feed and schedule are off. Wider redesigned charts and cash/customer/channel measures still need supported data and acceptance. Full mobile/accessibility, complete visual comparisons and representative-owner ten-second comprehension remain open. Every supported chart, card and Explore link must share company, period, units, formula and evidence revision.
+
+## Next development batch
+1. Prepare the restricted daily writer and prove actual simultaneous PostgreSQL submissions, replay, gaps, failures and uncertain outcomes using disposable databases.
+2. Measure and improve the observed slow first read, make unselected/loading/version states clearer, and connect supported monthly chart data.
+3. Independently review the changes and prepare a bounded release package. Hosted application/database changes and daily schedule activation require their own explicit approval after review.
+
+Shopify and Xero provider checks remain separate. No provider transactions, catch-up, production changes or new daily scheduling are included.
+
+## Cloud preparation
+The private reusable cloud environment was successfully published after a fresh supported recovery. Rebuilt validation passed 261 frontend tests, 79 history checks, two startup safety tests, library/frontend TypeScript, frontend/API builds and a disposable PostgreSQL smoke check. Full API TypeScript is not claimed passed. The original publication failure had no retained diagnostic explaining its cause; the repository metadata hypothesis remains unproven.
+
+A finite parallel development batch has been requested. Its cloud workspace is provisioning; task execution and results are not yet confirmed. First check the actual task status next session, then review its diff and validation before any release. No successful unattended feature batch is claimed at this checkpoint.

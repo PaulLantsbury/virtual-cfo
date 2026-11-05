@@ -38,10 +38,12 @@ const queryClient = new QueryClient({
 });
 
 import SupportedLivePage from "./pages/v11/supported-live-page";
+import HistoryLivePage from "./pages/v11/HistoryLivePage";
 
 function MerchantRouter() {
   return (
     <Switch>
+      <Route path="/supported-v11/history" component={HistoryLivePage} />
       <Route path="/supported-v11/scout" component={() => <SupportedLivePage section="scout" />} />
       <Route path="/supported-v11/profit" component={() => <SupportedLivePage section="profit" />} />
       <Route path="/v11/:section" component={() => <V11Preview />} />

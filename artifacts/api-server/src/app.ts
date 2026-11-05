@@ -12,9 +12,10 @@ import {createXeroMerchantReadinessRouter,type XeroReadinessDependencies} from '
 import {createXeroAccountingRouter,type XeroAccountingDependencies} from './routes/xero-accounting.ts';
 import {safeRequestPath} from './lib/safe-request-path.ts';
 import {createProfitReportingRouter,type ProfitReportingService} from './routes/profit-reporting.ts';
+import {createHistoryReportingRouter,type HistoryReportingService} from './routes/history-reporting.ts';
 import {createXeroSavedMappingRouter,type SavedMappingDependencies} from './routes/xero-saved-mapping.ts';
 
-export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService,xeroAccounting?:XeroAccountingDependencies,xeroSavedMapping?:SavedMappingDependencies): Express {
+export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService,xeroAccounting?:XeroAccountingDependencies,xeroSavedMapping?:SavedMappingDependencies,historyReporting?:HistoryReportingService): Express {
 const app: Express = express();
 
 app.use(
@@ -40,6 +41,7 @@ app.use(cors());
 // Mount before general body parsing so review limits and safe errors apply.
 app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
 app.use('/api/profit-reporting',createProfitReportingRouter(profitReporting));
+app.use('/api/history-reporting',createHistoryReportingRouter(historyReporting));
 // Retired operator-only endpoint must never reach the customer SPA or OAuth handlers.
 app.use('/api/xero/test-writer',(_req,res)=>{res.set('Cache-Control','no-store').status(404).json({error:'endpoint_unavailable'});});
 app.use('/api/xero/staging',createXeroStagingBootstrapRouter(xeroBootstrap));

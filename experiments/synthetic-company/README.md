@@ -71,3 +71,9 @@ The `history-*` modules are a **local disposable-database proposal**, not an ins
 Pin the November 2024 opening date when extending the default reference history. Only completed London business days may be appended; replay must insert nothing, changed immutable IDs must fail, and each complete month must retain its exact evidence basis. January sales/profit reconcile across editions; closing cash can differ because the opening basis differs. Never combine their opening journals or silently switch a page between editions.
 
 See [rollout and recovery](../../docs/history-rollout-and-recovery-2026-11-05.md) and [independent review](../../docs/synthetic-history-independent-review-2026-11-05.md). A real hosted load, access policy, page connection and daily scheduler each remain distinct acceptance gates. Local overlapping calls do not prove distributed concurrency safety.
+
+### Subsequent correction and rollout batch
+
+The [current preparation record](../../docs/synthetic-history-rollout-preparation-2026-11-05.md) supersedes the initial invalidation-only limit for one bounded type: explicitly reviewed expense-accrual amount corrections. Other financial/source corrections remain unsupported. Immutable originals, rejected reviews, replacement selection and receipt reconciliation are locally tested; no remote correction writer is provided.
+
+`history-release-package.mjs` and `history-staged-release.mjs` prepare private, bounded initial-load artifacts. Sources remain private and unreportable until complete publication checks pass. Exact replay compares actual rows, inspection reports exact receipts and fingerprints, and staged access cannot be enabled before publication. Generated artifacts and bindings stay outside the repository. The optional supported history page is prepared and disabled by default; hosted application, read-access application and daily scheduling require their separate acceptance/approval steps.

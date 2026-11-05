@@ -44,6 +44,7 @@ export async function createHistoryRehearsal({reviewerId,withLoadedJanuary=true,
   if(withLoadedJanuary){const f=generate({asOf:'2025-02-01',from:'2025-01-01'}),p=prepareStagingPayload(f,{reviewerId:base.reviewerId,identity,reviewed:true,from:'2025-01-01',to:'2025-01-31'});await executeStagingRehearsal(base,p,{mode:'commit-local'});}
   else{await base.db.query("INSERT INTO public.stores(id,shopify_domain,shopify_store_id,name,currency_code,timezone) VALUES($1,$2,$3,$4,'GBP','Europe/London')",[identity.storeId,identity.domain,identity.externalId,identity.name]);await base.db.query('INSERT INTO public.store_memberships VALUES($1,$2)',[base.reviewerId,identity.storeId]);}
   await base.db.exec(await readFile(new URL('./history-schema.sql',import.meta.url),'utf8'));
+  await base.db.exec(await readFile(new URL('./history-correction-schema.sql',import.meta.url),'utf8'));
   const h=Object.freeze({db:base.db,storeId:identity.storeId,reviewerId:base.reviewerId,kind:'disposable-history-v2',now});handles.add(h);return h;
  }catch(e){await base.db.close();throw e;}
 }
@@ -86,3 +87,5 @@ async function apply(handle,options,{daily=false,date:businessDay,failAt=null}={
 export const importHistory=(h,options={})=>apply(h,options,{failAt:options.failAt||null});
 export const appendHistoryDay=(h,options={})=>apply(h,options,{daily:true,date:options.date,failAt:options.failAt||null});
 export async function invalidateHistoryMonth(handle,{from,to,reason}={}){ensure(handles.has(handle),'Disposable history handle required');ensure(reason&&typeof reason==='string','Explicit correction review reason required');const rows=(await handle.db.query('SELECT snapshot_id FROM finance_history_v2.seals WHERE store_id=$1 AND date_from=$2 AND date_to=$3',[identity.storeId,from,to])).rows;ensure(rows.length===1,'Exact existing month required');await handle.db.query('INSERT INTO finance_history_v2.invalidations VALUES($1,$2)',[rows[0].snapshot_id,reason]);return {state:'invalidated',snapshotId:rows[0].snapshot_id,remoteApplied:false};}
+
+export function requireHistoryHandle(handle){ensure(handles.has(handle),'Only branded disposable history databases accepted');return handle;}

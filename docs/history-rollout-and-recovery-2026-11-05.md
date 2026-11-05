@@ -1,5 +1,7 @@
 # Synthetic history rollout and recovery — 5 November 2026
 
+Subsequent checkpoint: [correction and staged-rollout preparation](synthetic-history-rollout-preparation-2026-11-05.md) adds one bounded expense-correction replacement path, receipt reconciliation and a fully rehearsed staged initial-load package. Invalidation-only statements below describe the earlier proposal; broader source corrections and hosted activation remain separate gates.
+
 Status: financial compatibility and acceptance preparation only. No history load, live write, seal replacement, provider action, production release or schedule is authorised by this document. Existing January staging evidence remains a distinct preserved checkpoint.
 
 ## Material blockers before loading history

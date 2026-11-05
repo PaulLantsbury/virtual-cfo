@@ -9,6 +9,8 @@ export function trustedResponseInput(raw: unknown, expected: ReportingAdapterInp
  || meta.scope.currency!==expected.currency || meta.scope.timezone!==expected.timezone || meta.contractVersion!==1
  || meta.formulaVersion!=='night-scout-v11-2026-10-30' || !['shopify-operational','synthetic-local'].includes(meta.sourceBasis)
  || !['current','stale'].includes(meta.freshness) || (trusted.state==='stale')!==(meta.freshness==='stale')
+ || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(meta.sourceAsOf ?? '')
+ || (Number.isFinite(Date.parse(meta.sourceAsOf)) && new Date(meta.sourceAsOf).toISOString().slice(0,19)!==meta.sourceAsOf.slice(0,19))
  || typeof meta.snapshotId!=='string' || !meta.snapshotId || typeof meta.sourceAsOf!=='string' || !Number.isFinite(Date.parse(meta.sourceAsOf))
  || typeof meta.coverageReference!=='string' || !meta.coverageReference || meta.coverage?.sales!=='complete') return unavailable;
  const report=response.report as SupportedProfitReport;

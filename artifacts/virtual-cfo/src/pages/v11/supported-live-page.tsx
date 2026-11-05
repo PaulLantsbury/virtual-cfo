@@ -28,7 +28,7 @@ export default function SupportedLivePage({section}:{section:'scout'|'profit'}) 
  });
  const current=useReader(expected,true), previous=useReader(prior,compare);
  const input=current.isSuccess?current.data:trustedResponseInput(null,expected);
- return <AppLayout><header><h1>{section==='scout'?'Scout’s View':'Profit Engine'} · supported evidence</h1><p>Opt-in reader slice. Cash, recommendations and broader diagnostics require their own supported evidence.</p><nav aria-label="Supported reporting pages"><Link href="/supported-v11/scout">Scout’s View</Link>{' · '}<Link href="/supported-v11/profit">Profit Engine</Link></nav></header>
+ return <AppLayout showMonitoring={false}><header><h1>{section==='scout'?'Scout’s View':'Profit Engine'} · supported evidence</h1><p>Opt-in reader slice. Cash, recommendations and broader diagnostics require their own supported evidence.</p><nav aria-label="Supported reporting pages"><Link href="/supported-v11/scout">Scout’s View</Link>{' · '}<Link href="/supported-v11/profit">Profit Engine</Link></nav></header>
  <label className="block my-3">Complete calendar month
  <input className="block border rounded p-2 bg-background" type="month" aria-describedby="supported-month-help" value={isFullProfitMonth(expected.period.from,expected.period.to)?expected.period.from.slice(0,7):''} onChange={event=>{
  const month=event.target.value;

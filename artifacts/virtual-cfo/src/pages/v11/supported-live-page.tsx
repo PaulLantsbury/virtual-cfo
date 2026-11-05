@@ -9,7 +9,7 @@ import { isFullProfitMonth } from '@/lib/analytics/useProfitReporting';
 import { readProfitResponse } from '@/lib/analytics/reportingAvailability';
 import { supabase } from '@/lib/supabase';
 import { trustedResponseInput } from '@/lib/v11/trusted-response';
-import { SupportedReportingSlice } from './supported-reporting-slice';
+import { SupportedReportingSlice } from './supported-evidence-panel';
 import type { ReportingAdapterInput } from '@/lib/v11/reporting-adapter';
 import './workspace.css';
 

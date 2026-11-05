@@ -1,6 +1,7 @@
 import {reviewerAuthenticator} from '../shopify/reviewer-auth.mjs';
 import {readProfitEvidence} from './profit-evidence-reader.mjs';
 import {createProfitSalesReader} from './profit-sales-reader.mjs';
+import {readTrustedProfitSnapshot,trustedSnapshotUnavailable} from './profit-trusted-snapshot-reader.mjs';
 const snapshotMode='SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function validProfitScope(scope){
@@ -15,7 +16,8 @@ export function validProfitScope(scope){
  * selection and source validation share one repeatable-read transaction.
  * No raw evidence, SQL errors or account metadata are returned to the browser.
  */
-export function createProfitReportingService(db,supabase){
+export function createProfitReportingService(db,supabase,{snapshotPolicy=null}={}){
+ const trustedPolicy=snapshotPolicy?Object.freeze({...snapshotPolicy}):null;
  return {async read(scope,authorization){
   if(!validProfitScope(scope))throw new Error('Invalid profit reporting scope');
   const user=await reviewerAuthenticator(supabase,authorization)();
@@ -24,19 +26,30 @@ export function createProfitReportingService(db,supabase){
    await tx.query("SELECT set_config('night_scout.profit_user_id',$1,true)",[user.id]);
    const {rows:members}=await tx.query('SELECT store_id FROM public.store_memberships WHERE user_id=$1 AND store_id=$2',[user.id,scope.storeId]);
    if(members.length!==1)throw new Error('Profit store membership required');
-   const {rows:versions}=await tx.query(`SELECT v.id FROM finance_v1.profit_evidence_versions v JOIN finance_v1.profit_component_coverage c ON c.version_id=v.id WHERE v.store_id=$1 AND v.date_from=$2::date AND v.date_to=$3::date AND v.currency=$4 ORDER BY v.id LIMIT 2`,[scope.storeId,scope.from,scope.to,scope.currency]);
+   const {rows:versions}=await tx.query(`SELECT v.id,v.source_manifest FROM finance_v1.profit_evidence_versions v JOIN finance_v1.profit_component_coverage c ON c.version_id=v.id WHERE v.store_id=$1 AND v.date_from=$2::date AND v.date_to=$3::date AND v.currency=$4 ORDER BY v.id LIMIT 2`,[scope.storeId,scope.from,scope.to,scope.currency]);
    if(versions.length!==1)return {state:'unavailable',reason:versions.length?'Several profit evidence versions need an explicit selection':'No sealed profit evidence is available for this month'};
    // The reader normally owns its transaction. Here the outer service already
    // established that identical mode BEFORE membership/version queries. Reuse
    // it; never open a second transaction or reset isolation after a read.
    const bound={query:(...args)=>tx.query(...args),exec:sql=>sql===snapshotMode?Promise.resolve():tx.exec(sql)};
-   const {result}=await readProfitEvidence({transaction:fn=>fn(bound)},{versionId:versions[0].id,scope,readSales:createProfitSalesReader({userId:user.id})});
+   let verifiedSales;
+   const sourceReader=createProfitSalesReader({userId:user.id});
+   const {result,readError}=await readProfitEvidence({transaction:fn=>fn(bound)},{versionId:versions[0].id,scope,readSales:async(tx,sourceScope)=>{verifiedSales=await sourceReader(tx,sourceScope);return verifiedSales;}});
+   let trustedSnapshot=trustedSnapshotUnavailable();
+   if(trustedPolicy?.storeId===scope.storeId){
+    // Metadata access is separately approved. Missing tables/permissions fail closed without exposing diagnostics
+    // or leaving the legacy read transaction aborted. No grants are created by this service.
+    await tx.exec('SAVEPOINT trusted_snapshot_metadata');
+    try{trustedSnapshot=await readTrustedProfitSnapshot(tx,{scope,version:versions[0],salesRevision:verifiedSales?.revision,report:result,readError,policy:trustedPolicy});}
+    catch{await tx.exec('ROLLBACK TO SAVEPOINT trusted_snapshot_metadata');}
+    finally{await tx.exec('RELEASE SAVEPOINT trusted_snapshot_metadata');}
+   }
    // Reader diagnostics can contain internal database errors. Metric states
    // survive, while diagnostic text and sales evidence references stay private.
    const report={...result,reason:result.reason?'Some profit evidence is unavailable':null};
    if(report.sales){const {provenance,...sales}=report.sales;report.sales={...sales,provenance:{storeId:scope.storeId,from:scope.from,to:scope.to,currency:scope.currency}};}
    for(const [key,value] of Object.entries(report))if(value&&typeof value==='object'&&value.state==='unavailable')report[key]={...value,reason:value.reason==='Non-positive margin denominator policy unresolved'?'Margin unavailable when net sales plus shipping is zero or negative':'Supporting evidence is missing or needs checking'};
-   return {state:'ready',versionId:versions[0].id,report};
+   return {state:'ready',versionId:versions[0].id,report,trustedSnapshot};
   });
  }};
 }

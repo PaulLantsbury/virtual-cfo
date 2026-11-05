@@ -99,3 +99,15 @@ test('explicit incomplete cost coverage preserves verified sales and independent
   assert.equal(r.report.operatingProfit.state,'unavailable');assert.equal(r.report.operatingProfit.value,null);
  }finally{await f.db.close();}
 });
+
+test('default two-argument service leaves other stores unchanged and explicit null disables snapshot reads',async()=>{
+ const f=await fixture();try{
+  const queries=[];
+  const tracked={transaction:fn=>f.db.transaction(tx=>fn({query:(text,args)=>{queries.push(text);return tx.query(text,args);},exec:text=>tx.exec(text)}))};
+  for(const options of [undefined,{snapshotPolicy:null}]){
+   queries.length=0;const service=createProfitReportingService(tracked,f.auth,options);
+   const r=await service.read(scope,'Bearer valid');assert.equal(r.report.operatingProfit.value,3500);
+   assert.equal(r.trustedSnapshot.state,'unavailable');assert.ok(!queries.some(q=>q.includes('reporting_snapshots')));
+  }
+ }finally{await f.db.close();}
+});

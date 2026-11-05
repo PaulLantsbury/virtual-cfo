@@ -8,6 +8,7 @@ export function supportedSlice(current: ReportingAdapterInput, comparison: { per
   const candidate = comparison?.input;
   const scope = current.expected;
   const comparisonMatches = !!candidate && !!comparison && candidate.expected.storeId === scope.storeId
+    && (candidate.sourceBasis ?? "shopify-operational") === (current.sourceBasis ?? "shopify-operational")
     && candidate.expected.currency === scope.currency && candidate.expected.timezone === scope.timezone
     && candidate.expected.period.from === comparison.period.from && candidate.expected.period.to === comparison.period.to
     && candidate.expected.period.to < scope.period.from && (candidate.mode ?? 'total') === (current.mode ?? 'total');

@@ -8,7 +8,7 @@ test('seed snapshot through actual service authenticates and scopes metadata, re
  try{
  await h.db.exec(await readFile(new URL('./staging-snapshot-schema.sql',import.meta.url),'utf8'));await h.db.query("SELECT set_config('night_scout.synthetic_target_verified','v2-isolated-staging-reviewed',false)");await h.db.exec(p.commitCandidateSql);
  const scope={storeId:p.sourceSnapshot.store_id,currency:'GBP',from:'2025-01-01',to:'2025-01-31'},policy={storeId:scope.storeId,sourceBasis:'synthetic-local',formulaVersion:'night-scout-v11-2026-10-30',profileVersion:'uk-gifts-v2'};
- const service=createProfitReportingService(h.db,auth(reviewerId),{snapshotPolicy:policy});
+ const service=createProfitReportingService(h.db,auth(reviewerId));
  const ready=await service.read(scope,'Bearer valid');assert.equal(ready.trustedSnapshot.state,'supported');assert.equal(ready.trustedSnapshot.verification,'canonical-current');assert.equal(ready.trustedSnapshot.metadata.providerFreshness,'unverified');assert.equal(ready.trustedSnapshot.metadata.sourceAsOf.slice(0,19),'2025-02-01T00:00:00');assert.equal(ready.report.operatingProfit.value,197602);
  const text=JSON.stringify(ready);for(const privateField of ['source_manifest','verified_by','manifest_digest','sales_revision','observed_line','journalIds','SECRET'])assert.ok(!text.includes(privateField),privateField);
  await assert.rejects(service.read(scope,'Bearer invalid'),/sign-in could not be verified/);

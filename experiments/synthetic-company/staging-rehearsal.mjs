@@ -7,6 +7,7 @@ import {prepareStagingPayload,RESERVED_SYNTHETIC_IDENTITY as TARGET,hash,stableI
 const handles=new WeakSet();
 const evidence='FICTIONAL uk-gifts-v2 local source-model review; no provider completeness claim';
 export const STAGING_TABLES=Object.freeze(['public.stores','public.store_memberships','public.orders','public.refunds','public.order_line_items','public.overhead_categories','public.overhead_entries','finance_v1.order_evidence','finance_v1.refund_evidence','finance_v1.coverage_evidence','finance_v1.profit_evidence_versions','finance_v1.line_cost_evidence','finance_v1.stock_return_evidence','finance_v1.expense_evidence','finance_v1.profit_component_coverage']);
+export const STAGING_SIDE_EFFECT_TABLES=Object.freeze(['ingest_v1.batches','ingest_v1.heads','ingest_v1.source_versions','ingest_v1.review_authorizations','ingest_v1.review_audit']);
 const ensure=(ok,message)=>{if(!ok)throw Error(message);};
 async function bulk(tx,table,rows,columns) {
  for(let start=0;start<rows.length;start+=250) {
@@ -16,7 +17,7 @@ async function bulk(tx,table,rows,columns) {
 }
 export async function stagingFingerprints(db,{excludeTarget=false}={}) {
  const result={};
- for(const table of STAGING_TABLES){
+ for(const table of [...STAGING_TABLES,...STAGING_SIDE_EFFECT_TABLES]){
   const where=!excludeTarget?'true':table==='public.stores'?'id<>$1':table==='finance_v1.profit_component_coverage'?'version_id IN(SELECT id FROM finance_v1.profit_evidence_versions WHERE store_id<>$1)':'store_id<>$1';
   result[table]=(await db.query(`SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb) rows FROM ${table} t WHERE ${where}`,excludeTarget?[TARGET.storeId]:[])).rows[0].rows;
  }
@@ -24,9 +25,10 @@ export async function stagingFingerprints(db,{excludeTarget=false}={}) {
 }
 export async function createStagingRehearsal({reviewerId=U}={}) {
  ensure(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reviewerId),'Existing reviewer UUID shape required for disposable binding');
- const {db}=await setup(undefined,{installIntake:false});
+ const {db}=await setup(undefined,{installIntake:true});
  try {
   await db.exec(sql('proposals/20260913_profit_evidence.sql'));
+  await db.exec(sql('proposed/ingest_v1_review_restoration.sql'));
   if(reviewerId!==U){await db.query('INSERT INTO auth.users(id) VALUES($1)',[reviewerId]);await db.query('INSERT INTO public.store_memberships(user_id,store_id) VALUES($1,$2)',[reviewerId,A]);}
   // Fix default authoring timestamps only in this new in-memory database. They are not source-as-of dates.
   for(const table of STAGING_TABLES){const [schema,name]=table.split('.');const columns=(await db.query("SELECT column_name FROM information_schema.columns WHERE table_schema=$1 AND table_name=$2 AND data_type IN ('timestamp with time zone','timestamp without time zone') AND column_default IS NOT NULL",[schema,name])).rows;for(const c of columns)await db.exec(`ALTER TABLE ${table} ALTER COLUMN ${c.column_name} SET DEFAULT '2026-11-05T12:00:00Z'::timestamptz`);}
@@ -46,6 +48,7 @@ export async function inspectStagingPreflight(handle,payload) {
  const reviewer=(await db.query('SELECT id FROM auth.users WHERE id=$1',[payload.reviewerId])).rows;
  const memberships=(await db.query('SELECT store_id FROM public.store_memberships WHERE user_id=$1',[payload.reviewerId])).rows;
  ensure(reviewer.length===1&&memberships.length>0,'Existing approved reviewer and prior membership required');
+ for(const table of STAGING_SIDE_EFFECT_TABLES)ensure((await db.query(`SELECT count(*)::int n FROM ${table} WHERE store_id=$1`,[TARGET.storeId])).rows[0].n===0,'Reserved synthetic identity has intake side effects; stop');
  const receipt=(await db.query('SELECT * FROM synthetic_rehearsal.receipts WHERE store_id=$1',[TARGET.storeId])).rows[0];
  const occupied=(await db.query('SELECT id FROM public.stores WHERE id=$1 OR shopify_domain=$2 OR shopify_store_id=$3',[TARGET.storeId,TARGET.domain,TARGET.externalId])).rows;
  ensure(receipt||occupied.length===0,'Reserved identity already occupied; never reuse an existing store');

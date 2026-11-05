@@ -1,7 +1,7 @@
 /** Offline fictional ledger. No credentials, network, database or provider SDKs. */
 import { createHash } from 'node:crypto';
 function deepFreeze(value) { for(const child of Object.values(value)) if(child&&typeof child==='object')deepFreeze(child);return Object.freeze(value); }
-export const PROFILE = deepFreeze({
+export const HISTORICAL_PROFILE_V1 = deepFreeze({
   version: 'uk-gifts-v1', company: 'fictional-uk-gifts', currency: 'GBP', timezone: 'Europe/London',
   orders: 13263, gross: 52800000, discounts: 2400000, refunds: 2400000,
   shipping: 2000000, saleCogs: 25200000, returnedCogs: 1200000,
@@ -10,6 +10,15 @@ export const PROFILE = deepFreeze({
     premises: 600000, software: 480000, insurance: 180000, utilities: 240000,
     professional: 360000, depreciation: 240000 },
 });
+/** Revised user-selected local scenario; v1 remains addressable for immutable historical replay. */
+export const PROFILE = deepFreeze({
+  ...HISTORICAL_PROFILE_V1, version: 'uk-gifts-v2',
+  orders: 19895, gross: 79200000, discounts: 3600000, refunds: 3600000,
+  shipping: 3000000, saleCogs: 37800000, returnedCogs: 1800000,
+  salaries: [3600000, 3000000, 2800000, 2500000], employer: 1414685, pension: 332867,
+  costs: {...HISTORICAL_PROFILE_V1.costs, processor: 1350000},
+});
+const PROFILES = deepFreeze({'uk-gifts-v1':HISTORICAL_PROFILE_V1,'uk-gifts-v2':PROFILE});
 const MONTH_WEIGHTS = [6,6,6,6,7,7,7,7,8,9,13,18];
 const iso = d => d.toISOString().slice(0,10);
 export function date(value) {
@@ -64,13 +73,15 @@ function yearOrders(year,p) {
   return result;
 }
 /** asOf is an explicit London date; never use the machine clock to change a fixture. */
-export function generate({asOf='2026-11-05', months=24, company=PROFILE.company, from: explicitFrom}={}) {
+export function generate({asOf='2026-11-05', months=24, company=PROFILE.company, from: explicitFrom, profile=PROFILE.version}={}) {
   date(asOf);
+  const p=Object.hasOwn(PROFILES,profile)?PROFILES[profile]:null;
+  if(!p)throw Error('Unknown immutable profile version');
   if(!Number.isInteger(months)||months<1||months>120) throw Error('History months must be 1..120');
   if(!/^fictional-[a-z0-9-]+$/.test(company)) throw Error('Only explicit fictional company IDs are accepted');
   const d=date(asOf), startDate=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-months,1,12));
   const from=explicitFrom ?? iso(startDate); date(from); if(from.slice(8)!=='01'||from>=asOf)throw Error('History start must be an earlier month start');
-  const to=addDays(asOf,-1), p=PROFILE, events=[], daily=[], scheduled=new Map();
+  const to=addDays(asOf,-1), events=[], daily=[], scheduled=new Map();
   const scope={company,profile:p.version,currency:p.currency,timezone:p.timezone,provenance:'synthetic-local',provider:null};
   function event(day,key,kind,postings,metrics={},refs={}) {
     const entries=Object.entries(postings).filter(([,amount])=>amount!==0).map(([account,amount])=>({account,amount}));
@@ -97,7 +108,7 @@ export function generate({asOf='2026-11-05', months=24, company=PROFILE.company,
     }
     if(dom===1) {
       // Receive the month's expected net stock consumption before selling; VAT invoice and 30-day supplier terms.
-      const purchase=allocate(24000000,MONTH_WEIGHTS)[m-1], tax=vat(purchase);
+      const purchase=allocate(p.saleCogs-p.returnedCogs,MONTH_WEIGHTS)[m-1], tax=vat(purchase);
       event(day,'stock-receipt','stock_receipt',{inventory:purchase,vat_control:tax,supplier_payable:-purchase-tax},{purchases:purchase,inputVat:tax});
       later(addDays(day,30),settle=>event(settle,`stock-payment-${day}`,'supplier_payment',{supplier_payable:purchase+tax,bank:-purchase-tax},{},{invoiceDate:day}));
     }
@@ -147,7 +158,7 @@ export function generate({asOf='2026-11-05', months=24, company=PROFILE.company,
       const grossByStaff=p.salaries.map(total=>allocate(total,Array(12).fill(1))[m-1]);
       const employers=allocate(allocate(p.employer,Array(12).fill(1))[m-1],p.salaries);
       const pensions=allocate(allocate(p.pension,Array(12).fill(1))[m-1],p.salaries);
-      for(let i=0;i<5;i++) {
+      for(let i=0;i<p.salaries.length;i++) {
         const gross=grossByStaff[i], employer=employers[i], pension=pensions[i], deduction=Math.round(gross*.2), net=gross-deduction;
         event(day,`payroll-${i}`,'payroll_accrual',{'expense:salary':gross,'expense:employer':employer,'expense:pension':pension,net_payable:-net,payroll_liability:-deduction-employer-pension},
           {overheads:gross+employer+pension},{staffId:`fictional-staff-${i+1}`,gross,net,deduction,employer,pension,allowances:'fictional budget; not statutory payroll'});

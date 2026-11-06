@@ -1,3 +1,4 @@
+import { adaptSupportedReporting } from './reporting-adapter.ts';
 import type { ReportingAdapterInput, SupportedProfitMetric, SupportedProfitReport } from './reporting-adapter.ts';
 import { FORMULA_VERSION } from './fixtures.ts';
 import { validRange } from './periods.ts';
@@ -49,4 +50,27 @@ export function historyAvailableMonths(raw:unknown, scope:Omit<HistorySelection,
  if(range.versions){const ids=new Set<string>();for(const version of range.versions){if(typeof version.versionId!=='string'||!version.versionId||ids.has(version.versionId)||!['selected','invalidated'].includes(version.status)||!['base','expense-correction'].includes(version.kind))return [];ids.add(version.versionId);}}
  }
  return [...r.months].sort((a,b)=>a.from.localeCompare(b.from));
+}
+
+export type HistoryReadState = 'unselected' | 'loading' | 'unavailable' | 'invalidated' | 'denied' | 'supported';
+/** Request lifecycle is separate from source invalidation. Old/cross-scope responses never become displayable. */
+export function historyReadState(selection: HistorySelection, raw: unknown, request: { loading?: boolean; error?: 'denied' | 'unavailable'; invalidated?: boolean } = {}): HistoryReadState {
+ if (request.invalidated) return 'invalidated';
+ if (!selection.period.from || !selection.period.to || !selection.versionId) return 'unselected';
+ if (request.loading) return 'loading';
+ if (request.error) return request.error;
+ if (!raw || typeof raw !== 'object') return 'unavailable';
+ const response = raw as Record<string, any>;
+ if (response.state === 'denied') return 'denied';
+ if (response.state === 'invalidated' || response.state === 'stale' || response.state === 'unavailable' && response.reason === 'History evidence changed') return 'invalidated';
+ return adaptSupportedReporting(historySupportedInput(raw, selection)).context ? 'supported' : 'unavailable';
+}
+
+/** Explicit choices belong to the authenticated identity as well as the business. */
+export function historyChoiceEnabled(choice: { userId: string | null; storeId: string; edition: string }, userId: string | null, storeId: string) {
+ return !!userId && choice.userId === userId && choice.storeId === storeId && choice.edition === HISTORY_EDITION;
+}
+/** A previously explicit choice disappearing from a successfully checked listing is withdrawal. */
+export function historyChoiceWithdrawn(versionId: string, versions: { versionId: string; status: string }[]) {
+ return !!versionId && !versions.some(version => version.versionId === versionId && version.status === 'selected');
 }

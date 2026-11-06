@@ -15,7 +15,7 @@ const validRow=(r,scope,dateKey)=>{ensure(digest(r.body)===r.row_hash&&r.body.st
 export async function historySources(tx,scope,{overlays=new Map()}={}){
  const args=[scope.storeId,scope.from,scope.to];
  const orders=(await tx.query(`SELECT source_id,event_date::text,body,row_hash FROM finance_history_v2.orders WHERE store_id=$1 AND (event_date BETWEEN $2::date AND $3::date OR source_id IN(SELECT body->>'order_id' FROM finance_history_v2.refunds WHERE store_id=$1 AND event_date BETWEEN $2::date AND $3::date)) ORDER BY source_id`,args)).rows;
- const orderIds=orders.map(r=>r.source_id),currentIds=orders.filter(r=>r.event_date>=scope.from).map(r=>r.source_id);
+ const orderIds=orders.map(r=>r.source_id);
  const refunds=(await tx.query(`SELECT source_id,event_date::text,body,row_hash FROM finance_history_v2.refunds WHERE store_id=$1 AND body->>'order_id'=ANY($2) AND event_date<=$3::date ORDER BY source_id`,[scope.storeId,orderIds,scope.to])).rows;
  const returns=(await tx.query(`SELECT source_id,event_date::text,body,row_hash FROM finance_history_v2.returns WHERE store_id=$1 AND event_date BETWEEN $2::date AND $3::date ORDER BY source_id`,args)).rows;
  const lineIds=returns.map(r=>r.body.line_id);
@@ -31,10 +31,13 @@ export async function historySources(tx,scope,{overlays=new Map()}={}){
  for(const r of refunds){validRow(r,scope,'event_date');const e=refundEvents.get(r.source_id);ensure(e&&stableId('order',e.refs.orderId)===r.body.order_id&&e.date===r.event_date&&pence(r.body.product_cash)===e.metrics.refunds+e.metrics.refundedVat&&pence(r.body.product_vat)===e.metrics.refundedVat,'Refund source changed');}
  const orderMap=new Map(orders.map(r=>[r.source_id,r]));
  for(const r of lines){validRow(r,scope,'sale_date');const l=r.body,o=orderMap.get(l.order_id);ensure(o&&r.event_date===o.event_date&&l.quantity===1&&Number.isSafeInteger(l.historic_unit_cost_pence)&&l.historic_unit_cost_pence>=0,'Historical product-unit cost unsupported');}
- for(const o of orders){const all=lines.filter(l=>l.body.order_id===o.source_id);const expected=saleEvents.get(o.source_id);ensure(all.length>=1&&all.reduce((sum,l)=>sum+pence(l.body.total),0)===expected.metrics.productSales&&all.reduce((sum,l)=>sum+pence(l.body.discount),0)===expected.metrics.discounts&&all.reduce((sum,l)=>sum+l.body.quantity*l.body.historic_unit_cost_pence,0)===expected.metrics.cogs,'Original unit amounts/costs do not reconcile');}
+ // Group without changing canonical source-array order or the revision manifest.
+ const linesByOrder=new Map();for(const l of lines){const key=l.body.order_id;if(!linesByOrder.has(key))linesByOrder.set(key,[]);linesByOrder.get(key).push(l);}
+ for(const o of orders){const all=linesByOrder.get(o.source_id)||[];const expected=saleEvents.get(o.source_id);ensure(all.length>=1&&all.reduce((sum,l)=>sum+pence(l.body.total),0)===expected.metrics.productSales&&all.reduce((sum,l)=>sum+pence(l.body.discount),0)===expected.metrics.discounts&&all.reduce((sum,l)=>sum+l.body.quantity*l.body.historic_unit_cost_pence,0)===expected.metrics.cogs,'Original unit amounts/costs do not reconcile');}
  const lineMap=new Map(lines.map(r=>[r.source_id,r]));
  const priorReturns=(await tx.query(`SELECT source_id,event_date::text,body,row_hash FROM finance_history_v2.returns WHERE store_id=$1 AND body->>'line_id'=ANY($2) AND event_date<=$3::date ORDER BY source_id`,[scope.storeId,[...lineMap.keys()],scope.to])).rows;
- const quantities=new Map();for(const r of priorReturns){const b=r.body;ensure(digest(b)===r.row_hash&&b.source_return_id===r.source_id&&b.store_id===scope.storeId&&b.saleable_date===r.event_date&&b.quantity===1,'Stock recovery source hash/date unsupported');const l=lineMap.get(b.line_id);ensure(l&&r.event_date>=l.event_date,'Stock recovery original unit missing');const refund=refunds.find(f=>f.source_id===b.refund_id),ev=refundEvents.get(b.refund_id);ensure(refund&&ev&&refund.body.order_id===l.body.order_id&&r.event_date===refund.event_date&&b.quantity*l.body.historic_unit_cost_pence===-ev.metrics.cogs,'Recovery/refund source proof differs');quantities.set(b.line_id,(quantities.get(b.line_id)||0)+b.quantity);ensure(quantities.get(b.line_id)<=l.body.quantity,'Cumulative recovered stock exceeds original quantity');}
+ const refundsById=new Map(refunds.map(r=>[r.source_id,r]));
+ const quantities=new Map();for(const r of priorReturns){const b=r.body;ensure(digest(b)===r.row_hash&&b.source_return_id===r.source_id&&b.store_id===scope.storeId&&b.saleable_date===r.event_date&&b.quantity===1,'Stock recovery source hash/date unsupported');const l=lineMap.get(b.line_id);ensure(l&&r.event_date>=l.event_date,'Stock recovery original unit missing');const refund=refundsById.get(b.refund_id),ev=refundEvents.get(b.refund_id);ensure(refund&&ev&&refund.body.order_id===l.body.order_id&&r.event_date===refund.event_date&&b.quantity*l.body.historic_unit_cost_pence===-ev.metrics.cogs,'Recovery/refund source proof differs');quantities.set(b.line_id,(quantities.get(b.line_id)||0)+b.quantity);ensure(quantities.get(b.line_id)<=l.body.quantity,'Cumulative recovered stock exceeds original quantity');}
  const within=r=>r.event_date>=scope.from&&r.event_date<=scope.to;
  const selectedOrders=orders.filter(within),selectedRefunds=refunds.filter(within),selectedReturns=returns;
  const costEvents=events.filter(r=>within(r)&&r.body.postings.some(p=>p.account.startsWith('expense:')));
@@ -48,14 +51,15 @@ export async function calculateHistorySources(tx,scope,coverage,options={}){
  const refunds=s.priorRefunds.map(({body:r,event_date})=>({...r,currency:scope.currency,day:event_date,mapping_state:'verified'}));
  const sales=calculateMappedSales({orders:mapped,refunds,coverage:[{store_id:scope.storeId,currency:scope.currency,date_from:scope.from,date_to:scope.to,sales_and_refunds_complete:true,evidence_ref:`history-v2:${coverage.coverage_id}`}]},scope);
  let cogs=s.selectedLines.filter(l=>l.event_date>=scope.from&&l.event_date<=scope.to).reduce((sum,l)=>sum+l.body.quantity*l.body.historic_unit_cost_pence,0);
- for(const ret of s.selectedReturns){const line=s.selectedLines.find(l=>l.source_id===ret.body.line_id);ensure(line,'Unsupported stock return');cogs-=ret.body.quantity*line.body.historic_unit_cost_pence;}
+ const selectedLinesById=new Map(s.selectedLines.map(l=>[l.source_id,l]));
+ for(const ret of s.selectedReturns){const line=selectedLinesById.get(ret.body.line_id);ensure(line,'Unsupported stock return');cogs-=ret.body.quantity*line.body.historic_unit_cost_pence;}
  const costs={variableCosts:0,advertising:0,overheadIncludingDA:0,depreciationAmortisation:0};
  for(const e of s.costEvents)for(const p of e.body.postings){if(!p.account.startsWith('expense:'))continue;const category=p.account.slice(8);if(variable.has(category))costs.variableCosts+=p.amount;else if(category==='marketing')costs.advertising+=p.amount;else{costs.overheadIncludingDA+=p.amount;if(category==='depreciation')costs.depreciationAmortisation+=p.amount;}}
  return {...s,sales,components:{cogs,...costs},profit:profitBridge({...sales,cogs,...costs})};
 }
-async function historyReadContext(tx,scope,{now=()=>new Date(),selection}={}) {
-  const contract=(await tx.query('SELECT *,date_from::text anchor,through_day::text through FROM finance_history_v2.contracts WHERE store_id=$1',[scope.storeId])).rows[0];
-  const store=(await tx.query('SELECT currency_code,timezone FROM public.stores WHERE id=$1',[scope.storeId])).rows[0];
+async function historyReadContext(tx,scope,{now=()=>new Date(),selection,requestContext}={}) {
+  const contract=requestContext?requestContext.contract:(await tx.query('SELECT *,date_from::text anchor,through_day::text through FROM finance_history_v2.contracts WHERE store_id=$1',[scope.storeId])).rows[0];
+  const store=requestContext?requestContext.store:(await tx.query('SELECT currency_code,timezone FROM public.stores WHERE id=$1',[scope.storeId])).rows[0];
   const fail=reason=>({state:'unavailable',reason,contract:'history-v2-proposal'});
   if(!contract||contract.profile!=='uk-gifts-v2'||contract.edition!==HISTORY_EDITION||contract.currency!==scope.currency||contract.timezone!=='Europe/London'||contract.anchor>scope.from||contract.through<scope.to||store?.currency_code!==scope.currency||store?.timezone!=='Europe/London')return fail('History edition/scope unavailable');
   const {rows:coverage}=await tx.query("SELECT *,date_from::text scope_from,date_to::text scope_to FROM finance_history_v2.coverage WHERE store_id=$1 AND date_from=$2 AND date_to=$3 AND kind='month'",[scope.storeId,scope.from,scope.to]);
@@ -89,13 +93,18 @@ export function createHistoryService(db,supabase,{now=()=>new Date()}={}){return
   const user=await reviewerAuthenticator(supabase,authorization)();
   return db.transaction(async tx=>{
    await tx.exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');await member(tx,scope,user);
-   const contract=(await tx.query('SELECT *,date_from::text anchor FROM finance_history_v2.contracts WHERE store_id=$1',[scope.storeId])).rows[0];
+   const contract=(await tx.query('SELECT *,date_from::text anchor,through_day::text through FROM finance_history_v2.contracts WHERE store_id=$1',[scope.storeId])).rows[0];
    const response={contract:'history-availability-v2',storeId:scope.storeId,currency:scope.currency,timezone:'Europe/London',edition:HISTORY_EDITION,anchor:contract?.anchor||null,verification:'sealed-candidates-only',requiresReadValidation:true,months:[]};
    if(!contract)return response;
+   // Reuse only immutable request-local context inside this authenticated read-only snapshot.
+   const store=(await tx.query('SELECT currency_code,timezone FROM public.stores WHERE id=$1',[scope.storeId])).rows[0];
+   const requestContext={contract,store};
+   const alternativesByPeriod=new Map();
+   for(const v of (await tx.query('SELECT version_id,date_from::text,date_to::text FROM finance_history_v2.correction_versions WHERE store_id=$1 ORDER BY version_id',[scope.storeId])).rows){const key=v.date_from+':'+v.date_to;if(!alternativesByPeriod.has(key))alternativesByPeriod.set(key,[]);alternativesByPeriod.get(key).push(v);}
    const rows=(await tx.query('SELECT s.snapshot_id,s.date_from::text,s.date_to::text,h.version_id FROM finance_history_v2.seals s LEFT JOIN finance_history_v2.version_heads h USING(store_id,date_from,date_to) WHERE s.store_id=$1 ORDER BY s.date_from',[scope.storeId])).rows;
    for(const row of rows){const period={...scope,from:row.date_from,to:row.date_to},chosen=row.version_id||row.snapshot_id;
-    const result=await historyReadContext(tx,period,{now,selection:{edition:HISTORY_EDITION,versionId:chosen}});if(result.state!=='resolved')continue;
-    const alternatives=(await tx.query('SELECT version_id FROM finance_history_v2.correction_versions WHERE store_id=$1 AND date_from=$2 AND date_to=$3 ORDER BY version_id',[scope.storeId,period.from,period.to])).rows;
+    const result=await historyReadContext(tx,period,{now,requestContext,selection:{edition:HISTORY_EDITION,versionId:chosen}});if(result.state!=='resolved')continue;
+    const alternatives=alternativesByPeriod.get(period.from+':'+period.to)||[];
     response.months.push({from:period.from,to:period.to,snapshotId:chosen,versionId:chosen,requiresExplicitSelection:true,versions:[{versionId:row.snapshot_id,status:chosen===row.snapshot_id?'selected':'invalidated',kind:'base'},...alternatives.map(v=>({versionId:v.version_id,status:v.version_id===chosen?'selected':'invalidated',kind:'expense-correction'}))]});
    }
    return response;

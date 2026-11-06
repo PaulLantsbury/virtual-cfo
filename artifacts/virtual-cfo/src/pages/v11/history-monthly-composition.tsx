@@ -1,0 +1,16 @@
+import { HISTORY_SERIES, type composeHistoryMonth } from '../../lib/v11/history-composition';
+const amount = (pence: number | null) => pence === null ? 'Unavailable' : new Intl.NumberFormat('en-GB', {style:'currency',currency:'GBP'}).format(pence / 100);
+/** A single actual monthly bucket, never a fictional daily trend or forecast. */
+export function HistoryMonthlyComposition({month}:{month:NonNullable<ReturnType<typeof composeHistoryMonth>>}) {
+ const max=Math.max(1,...Object.values(month.amounts).filter((value):value is number=>value!==null).map(Math.abs));
+ return <details className="v11-panel"><summary>Monthly sales and profit composition</summary>
+ <p>{month.selection.period.from} – {month.selection.period.to} · one completed monthly bucket · GBP excluding VAT. This is a profit composition, not cash flow or a trend.</p>
+ <p>{month.originalOrders.toLocaleString('en-GB')} verified original eligible orders. Product gross profit excludes shipping; contribution and operating/EBITDA margins use net turnover including shipping. No comparison is selected; changes and comparative conclusions are withheld.</p>
+ <div role="img" aria-label="Selected month sales and profit amounts; exact values follow in the table">
+ {HISTORY_SERIES.map(([id,label])=><div key={id} style={{display:'grid',gridTemplateColumns:'minmax(120px, 1fr) 2fr',gap:'0.75rem',marginBlock:'0.5rem'}}><span>{label}</span><span><span style={{display:'inline-block',height:'0.75rem',width:`${month.amounts[id]===null?0:Math.abs(month.amounts[id]!)/max*100}%`,background:month.amounts[id]!==null&&month.amounts[id]!<0?'#b45309':'#2563eb'}}/>{month.amounts[id]===null?'Unavailable':month.amounts[id]!<0?' Negative amount':''}</span></div>)}
+ </div>
+ <div role="region" aria-label="Monthly composition evidence" tabIndex={0} style={{overflowX:'auto'}}><table className="v11-table"><caption>Exact amounts and original-order denominators</caption><thead><tr><th>Measure</th><th>Monthly total</th><th>Per original eligible order</th><th>Calculation</th></tr></thead><tbody>{HISTORY_SERIES.map(([id,label])=><tr key={id}><th scope="row">{label}</th><td>{amount(month.amounts[id])}</td><td>{amount(month.amounts[id]!==null&&month.originalOrders>0?month.amounts[id]!/month.originalOrders:null)}</td><td>{id==='operatingProfit'?'EBITDA − depreciation and amortisation':id==='turnover'?'Net product sales + net shipping':id==='grossProfit'?'Net product sales − COGS':id==='contribution'?'Gross profit + shipping − variable costs − marketing':id==='ebitda'?'Contribution − overheads excluding D&A':'Verified source period total'}</td></tr>)}</tbody></table></div>
+ <p>Business: {month.context.businessId} · {month.context.timezone} · contract profile: {month.evidence.financialProfile} · edition: {month.evidence.edition} · opening anchor: {month.evidence.anchor} · version/snapshot: {month.context.snapshotId} · source as of: {month.context.snapshotAsOf} · observed: {month.evidence.observedAt} · formula: {month.context.formulaVersion}.</p>
+ <p>Sales revision: {month.evidence.salesRevision} · cost revision: {month.evidence.costRevision} · source coverage: {month.evidence.coverage} · cost coverage: {month.evidence.costCoverage}. Canonical source verification does not certify provider freshness, cash, inventory, cohorts, channels or monitoring.</p>
+ </details>;
+}

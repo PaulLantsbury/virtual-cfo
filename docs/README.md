@@ -1,3 +1,5 @@
+> **LATEST — 6 November 2026:** [Current roadmap](roadmap-2026-11-06.md) · [Session handover](session-handover-2026-11-06.md). Approved website release is live; synthetic daily-feed preparation is reviewed and remains OFF. See the [activation package](daily-feed-activation-package-2026-11-06.md).
+
 > **PICK UP NEXT TIME — 31 October 2026:** [Current roadmap and ordered resume checklist](roadmap-2026-10-31.md): accept genuine Shopify/Xero transaction flows in parallel with v11 review and supported-data wiring.
 
 > **LATEST DEVELOPMENT — 31 October 2026:** The approved v11 implementation is progressing in a coordinated interface, shared-finance and independent-test batch. Read [the latest handover](session-handover-2026-10-31.md) and [implementation record](v11-implementation-2026-10-31.md). The explicit fictional review is separate from live integrations and merchant data. Older prepared/disabled operational notices below are historical; do not repeat completed setup.

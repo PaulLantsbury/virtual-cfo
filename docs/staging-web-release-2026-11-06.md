@@ -1,5 +1,10 @@
 # Staging website release — 6 November 2026
 
+## Hosted outcome — 6 November
+The user approved the exact website candidate. Its hosted build completed, but the new instance failed its database-connection readiness check and the rollout ended unsuccessfully. The previous website revision `f54f17a5baf716e10a8baab4c2c1c5d5aec43c34` remains the live HTTP instance. This does not certify current financial/authenticated access: the staging database dashboard reports Unhealthy, diagnostic panels cannot load and browser authentication is retrying.
+
+No database data, roles, permissions, provider transactions or schedules were changed. The new web candidate is not live-accepted. Recovery of the staging database connection path is a separate decision; do not bypass readiness or blindly redeploy. Retry the already approved exact web revision only after connectivity is restored and then complete the hosted acceptance below.
+
 ## Exact candidate and scope
 Reviewed candidate: `c7e69211be65b5fb054062d327451844042d38bc`, on the isolated synthetic-company branch. This is a website/reader release only. It contains nine source/test files for explicit authenticated history selection, truthful loading/error/retry states, one verified monthly composition with exact values and original-order denominators, shared card/Explore composition, and request-local reader indexing. It contains no daily-writer implementation, proposal, schedule or new database permission.
 

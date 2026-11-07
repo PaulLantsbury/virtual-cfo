@@ -1,0 +1,3028 @@
+[
+  {
+    "kind": "function",
+    "name": "average_order_value",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "average_order_value",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "average_order_value",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "average_order_value",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "average_order_value",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "blended_marketing_performance",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "blended_marketing_performance",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "blended_marketing_performance",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "blended_marketing_performance",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "blended_marketing_performance",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cac_trend_by_channel",
+    "arguments": "p_store_id uuid, p_up_to_date date, p_months_back integer",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cac_trend_by_channel",
+    "arguments": "p_store_id uuid, p_up_to_date date, p_months_back integer",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cac_trend_by_channel",
+    "arguments": "p_store_id uuid, p_up_to_date date, p_months_back integer",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cac_trend_by_channel",
+    "arguments": "p_store_id uuid, p_up_to_date date, p_months_back integer",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cac_trend_by_channel",
+    "arguments": "p_store_id uuid, p_up_to_date date, p_months_back integer",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cash_runway_months",
+    "arguments": "p_store_id uuid",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cash_runway_months",
+    "arguments": "p_store_id uuid",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cash_runway_months",
+    "arguments": "p_store_id uuid",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cash_runway_months",
+    "arguments": "p_store_id uuid",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cash_runway_months",
+    "arguments": "p_store_id uuid",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cfo_alerts",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cfo_alerts",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cfo_alerts",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cfo_alerts",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "cfo_alerts",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_metrics_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_metrics_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_metrics_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_metrics_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_metrics_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_opportunities_active",
+    "arguments": "p_store_id uuid",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_opportunities_active",
+    "arguments": "p_store_id uuid",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_opportunities_active",
+    "arguments": "p_store_id uuid",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_opportunities_active",
+    "arguments": "p_store_id uuid",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "channel_opportunities_active",
+    "arguments": "p_store_id uuid",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "contribution_margin_pct",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "contribution_margin_pct",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "contribution_margin_pct",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "contribution_margin_pct",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "contribution_margin_pct",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_cost",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_cost",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_cost",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_cost",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_cost",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_dependency",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_dependency",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_dependency",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_dependency",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "discount_dependency",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "get_marketing_spend_rate",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "get_marketing_spend_rate",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "get_marketing_spend_rate",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "get_marketing_spend_rate",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "gross_revenue",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "gross_revenue",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "gross_revenue",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "gross_revenue",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "gross_revenue",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "month_on_month_delta",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "month_on_month_delta",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "month_on_month_delta",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "month_on_month_delta",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "month_on_month_delta",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "monthly_overhead_total",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date, p_entry_type text",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "monthly_overhead_total",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date, p_entry_type text",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "monthly_overhead_total",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date, p_entry_type text",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "monthly_overhead_total",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date, p_entry_type text",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "monthly_overhead_total",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date, p_entry_type text",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "net_sales",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "net_sales",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "net_sales",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "net_sales",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "net_sales",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "operating_profit_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "operating_profit_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "operating_profit_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "operating_profit_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "operating_profit_monthly",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "opportunity_breakdown",
+    "arguments": "p_store_id uuid",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "opportunity_breakdown",
+    "arguments": "p_store_id uuid",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "opportunity_breakdown",
+    "arguments": "p_store_id uuid",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "opportunity_breakdown",
+    "arguments": "p_store_id uuid",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "opportunity_breakdown",
+    "arguments": "p_store_id uuid",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "order_count",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "order_count",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "order_count",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "order_count",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "order_count",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "recoverable_contribution_range",
+    "arguments": "p_store_id uuid",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "recoverable_contribution_range",
+    "arguments": "p_store_id uuid",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "recoverable_contribution_range",
+    "arguments": "p_store_id uuid",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "recoverable_contribution_range",
+    "arguments": "p_store_id uuid",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "recoverable_contribution_range",
+    "arguments": "p_store_id uuid",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "refund_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "refund_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "refund_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "refund_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "refund_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "repeat_purchase_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "repeat_purchase_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "repeat_purchase_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "repeat_purchase_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "repeat_purchase_rate",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "return_amount",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "return_amount",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "return_amount",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "return_amount",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "return_amount",
+    "arguments": "p_store_id uuid, p_date_from date, p_date_to date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "rolling_3m_averages",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "rolling_3m_averages",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "rolling_3m_averages",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "rolling_3m_averages",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "rolling_3m_averages",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "trailing_12m_cm_avg",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "PUBLIC",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "trailing_12m_cm_avg",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "trailing_12m_cm_avg",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "trailing_12m_cm_avg",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "function",
+    "name": "trailing_12m_cm_avg",
+    "arguments": "p_store_id uuid, p_date_from date",
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "EXECUTE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cac_trend_snapshots",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cac_trend_snapshots",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cac_trend_snapshots",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cac_trend_snapshots",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cash_balance_snapshots",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cash_balance_snapshots",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cash_balance_snapshots",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cash_balance_snapshots",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cfo_alerts",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cfo_alerts",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cfo_alerts",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "cfo_alerts",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "channel_opportunity_scores",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "channel_opportunity_scores",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "channel_opportunity_scores",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "channel_opportunity_scores",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "customers",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "customers",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "customers",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "customers",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "discount_codes",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "discount_codes",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "discount_codes",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "discount_codes",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "discounts",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "discounts",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "discounts",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "discounts",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_blended_monthly",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_blended_monthly",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_blended_monthly",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_blended_monthly",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_channel_daily_metrics",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_channel_daily_metrics",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_channel_daily_metrics",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_channel_daily_metrics",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_channel_monthly_snapshots",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_channel_monthly_snapshots",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_channel_monthly_snapshots",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "marketing_channel_monthly_snapshots",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "opportunities",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "opportunities",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "opportunities",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "opportunities",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "order_line_items",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "order_line_items",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "order_line_items",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "order_line_items",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "orders",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "orders",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "orders",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "orders",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "overhead_categories",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "overhead_categories",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "overhead_categories",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "overhead_categories",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "overhead_entries",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "overhead_entries",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "overhead_entries",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "overhead_entries",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "product_variants",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "product_variants",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "product_variants",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "product_variants",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "products",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "products",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "products",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "products",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "refund_line_items",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "refund_line_items",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "refund_line_items",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "refund_line_items",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "refunds",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "refunds",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "refunds",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "refunds",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "store_cost_assumptions",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "store_cost_assumptions",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "store_cost_assumptions",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "store_cost_assumptions",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "store_settings",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "store_settings",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "store_settings",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "store_settings",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "stores",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "stores",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "stores",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "stores",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_current_cash_balance",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_current_cash_balance",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_current_cash_balance",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_current_cash_balance",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_current_cost_assumptions",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_current_cost_assumptions",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_current_cost_assumptions",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_current_cost_assumptions",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_month_on_month",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_month_on_month",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_month_on_month",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_month_on_month",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_monthly_metrics",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_monthly_metrics",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_monthly_metrics",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_monthly_metrics",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_monthly_overhead_summary",
+    "arguments": null,
+    "grantee": "anon",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_monthly_overhead_summary",
+    "arguments": null,
+    "grantee": "authenticated",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_monthly_overhead_summary",
+    "arguments": null,
+    "grantee": "postgres",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  },
+  {
+    "kind": "relation",
+    "name": "v_monthly_overhead_summary",
+    "arguments": null,
+    "grantee": "service_role",
+    "grantable": false,
+    "privileges": [
+      "DELETE",
+      "INSERT",
+      "MAINTAIN",
+      "REFERENCES",
+      "SELECT",
+      "TRIGGER",
+      "TRUNCATE",
+      "UPDATE"
+    ]
+  }
+]

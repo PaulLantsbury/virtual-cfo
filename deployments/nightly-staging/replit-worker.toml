@@ -1,0 +1,12 @@
+# Copy as .replit ONLY in the separate staging worker; never replace website configuration.
+modules = ["nodejs-24"]
+run = "node experiments/shopify/cloud-nightly.mjs --check"
+
+[deployment]
+deploymentTarget = "scheduled"
+build = "pnpm --filter @workspace/db --prod install --frozen-lockfile --ignore-scripts && node deployments/nightly-staging/smoke.mjs"
+run = "node experiments/shopify/cloud-nightly.mjs --tick --confirm-target bioalckltvkhlczusdvl/56d92f8a-746e-4b4f-b408-81fc98c4aa17"
+ignorePorts = true
+
+[packager.features]
+enabledForHosting = false

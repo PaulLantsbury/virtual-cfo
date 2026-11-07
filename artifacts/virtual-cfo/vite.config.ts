@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import { localReviewProxy } from "./review-proxy.mjs";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
@@ -17,6 +18,8 @@ const port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
+
+const reviewProxy = localReviewProxy(process.env);
 
 const basePath = process.env.BASE_PATH;
 
@@ -60,8 +63,9 @@ export default defineConfig({
   },
   server: {
     port,
-    host: "0.0.0.0",
-    allowedHosts: true,
+    host: reviewProxy ? "127.0.0.1" : "0.0.0.0",
+    allowedHosts: reviewProxy ? [] : true,
+    proxy: reviewProxy,
     fs: {
       strict: true,
       deny: ["**/.*"],
@@ -69,7 +73,8 @@ export default defineConfig({
   },
   preview: {
     port,
-    host: "0.0.0.0",
-    allowedHosts: true,
+    host: reviewProxy ? "127.0.0.1" : "0.0.0.0",
+    allowedHosts: reviewProxy ? [] : true,
+    proxy: reviewProxy,
   },
 });

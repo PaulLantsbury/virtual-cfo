@@ -1,0 +1,50 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {PGlite} from '@electric-sql/pglite';
+import {activationInstallerSql} from './prepare-activation-installer.mjs';
+
+const read=name=>readFileSync(new URL(name,import.meta.url),'utf8');
+const owner='90000000-0000-4000-8000-000000000001';
+const store='56d92f8a-746e-4b4f-b408-81fc98c4aa17';
+const verification=read('./xero-postapplication-verification-2026-10-30.sql');
+test('postapplication metadata/member/MFA probes are read-only and emit only safe booleans/counts',async()=>{
+ const db=new PGlite();
+ try{
+  await db.exec(`CREATE ROLE anon;CREATE ROLE authenticated;CREATE ROLE service_role;
+   CREATE SCHEMA auth;
+   CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+   CREATE TABLE auth.mfa_factors(user_id uuid,factor_type text,status text,private_factor_value text);
+   CREATE TABLE public.store_memberships(user_id uuid,store_id uuid);
+   ALTER TABLE public.store_memberships ENABLE ROW LEVEL SECURITY;
+   INSERT INTO public.store_memberships VALUES('${owner}','${store}');
+   INSERT INTO auth.mfa_factors VALUES('${owner}','totp','verified','SENSITIVE_FACTOR'),('${owner}','phone','verified','SENSITIVE_PHONE');
+   CREATE SCHEMA xero_v1;
+   CREATE TABLE xero_v1.connections(id uuid,store_id uuid,tenant_id text,created_at timestamptz,retired_at timestamptz);
+   ALTER TABLE xero_v1.connections ENABLE ROW LEVEL SECURITY;
+   CREATE TABLE xero_v1.credential_envelopes(connection_id uuid,private_envelope text);
+   INSERT INTO xero_v1.connections VALUES('90000000-0000-4000-8000-000000000002','${store}','90000000-0000-4000-8000-000000000003','2026-10-01T00:00:00Z',NULL);
+   CREATE TABLE public.fixture_time(at timestamptz);INSERT INTO public.fixture_time VALUES('2026-10-30T12:00:00Z');
+   CREATE FUNCTION public.fixture_clock() RETURNS timestamptz LANGUAGE sql AS 'SELECT at FROM public.fixture_time';`);
+  const clock=sql=>sql.replace(/\bnow\(\)/g,'public.fixture_clock()');
+  await db.exec(clock(activationInstallerSql()));
+  await db.exec('GRANT USAGE ON SCHEMA auth TO authenticated;GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated');
+  const config={provider:'shopify',target:'pocketlaunchpad1.myshopify.com',startMonday:'2026-10-26',programmeKey:'shopify-staging-20261029',scheduleProfile:'daily-20261029-v1'};
+  const receipt={domain:config.target,currency:'GBP',partnerDevelopment:true,separateWriterApp:true,sameOrganisation:true,grantedScopes:['read_orders','write_orders'],observedAt:'2026-10-30T11:55:00Z'};
+  await db.query("SELECT set_config('night_scout.shopify_writer_config',$1,false),set_config('night_scout.shopify_writer_receipt',$2,false)",[JSON.stringify(config),JSON.stringify(receipt)]);
+  await db.exec(clock(read('./shopify-daily-binding-proposal-2026-10-29.sql')));
+  await db.exec(clock(read('./xero-restart-proposal-2026-10-29.sql')));
+  await db.exec(read('../../db-migrations/proposals/xero-member-active-tenant-binding-2026-10-30.sql'));
+  await db.exec("UPDATE staging_test_programme.programmes SET enabled=true WHERE programme_key='shopify-staging-20261029'");
+  const results=await db.exec(verification),rows=results.flatMap(r=>r.rows??[]);
+  assert.equal(rows.length,3);
+  const metadata=rows[0].postapplication_metadata;
+  assert(Object.values(metadata).every(value=>value===true),JSON.stringify(metadata));
+  assert.deepEqual(rows[1].sql_member_scope_probe,{read_only:true,member_role:true,sql_member_binding_returns_exact_single_scope:true,signed_owner_login_verified:false,reader_health_verified:false});
+  assert.deepEqual(rows[2].owner_mfa_enrollment_metadata,{unique_existing_store_member:true,verified_totp_factor_count:1,live_mfa_login_verified:false});
+  assert.doesNotMatch(JSON.stringify(rows),/SENSITIVE_|90000000|56d92f8a|ciphertext|user_id|tenant_id/);
+  assert.equal((await db.query('SELECT current_user::text AS role')).rows[0].role,'postgres');
+  assert.equal((await db.query('SELECT count(*)::integer AS n FROM auth.mfa_factors')).rows[0].n,2);
+  assert.equal((await db.query('SELECT count(*)::integer AS n FROM staging_test_programme.actions')).rows[0].n,0);
+ }finally{await db.close();}
+});

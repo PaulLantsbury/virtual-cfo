@@ -1,0 +1,206 @@
+{
+  "version": 11,
+  "approved_date": "2026-10-30",
+  "source_docx": "Night_Scout_Final_Specification_v11.docx",
+  "source_docx_sha256": "efe651f54d1e46721892f71677d58e18d209a165ffa3cac60f055cc218acadba",
+  "mockups": [
+    {
+      "id": "01",
+      "title": "Scout View default",
+      "path": "mockups/01-scout-view-default.png",
+      "sha256": "f75221cf213d7229991ad81589a9f6f11779db778fdd3ffb58118a1ca4faad99"
+    },
+    {
+      "id": "02",
+      "title": "Scout View expanded",
+      "path": "mockups/02-scout-view-expanded.png",
+      "sha256": "b25571a83e0e6c34c17655431f29723cba3416ca1485b8347022730665be7445"
+    },
+    {
+      "id": "03",
+      "title": "Profit Engine default",
+      "path": "mockups/03-profit-engine-default.png",
+      "sha256": "285d1191ac838fea4c9f5372942cdd7c8064f3fe3b09a11a264b569ab2abcf3a"
+    },
+    {
+      "id": "04",
+      "title": "Profit Engine expanded",
+      "path": "mockups/04-profit-engine-expanded.png",
+      "sha256": "3d9d093d9791198e393d4cbb4da3257fc05e953106538c8f7603e0953a42f21d"
+    },
+    {
+      "id": "05",
+      "title": "Investment Scorecard default",
+      "path": "mockups/05-investment-scorecard-default.png",
+      "sha256": "02bb400abe1ccbcdfb59b755e4ac177d911e1aad832346572ac5d85a9c88bff8"
+    },
+    {
+      "id": "06",
+      "title": "Investment Scorecard expanded",
+      "path": "mockups/06-investment-scorecard-expanded.png",
+      "sha256": "872a2fa343e058a466b0bde615bac871fca69768ee03e5ee7ac0ff80b4e160d9"
+    },
+    {
+      "id": "07",
+      "title": "Customer Economics default",
+      "path": "mockups/07-customer-economics-default.png",
+      "sha256": "bd366f644d45ceaa404c6e0148760172b4861fe2f8843002cd77cd3b6709cc4d"
+    },
+    {
+      "id": "08",
+      "title": "Customer Economics expanded",
+      "path": "mockups/08-customer-economics-expanded.png",
+      "sha256": "51de3a9931d580ba3de19574b0e1fe93abf30494bc74d526d2a77135f83e5f4c"
+    },
+    {
+      "id": "09",
+      "title": "Channels default",
+      "path": "mockups/09-channels-default.png",
+      "sha256": "e371bc766c06311779ab093c14e5ce05d6855c5df77e4d3934276c2d1dad663d"
+    },
+    {
+      "id": "10",
+      "title": "Channels expanded",
+      "path": "mockups/10-channels-expanded.png",
+      "sha256": "f103066e94b96aa80fd0a99902162c0bec25b5d1fc25c27cb1ad36f506ac583e"
+    },
+    {
+      "id": "11",
+      "title": "Cash Control default",
+      "path": "mockups/11-cash-control-default.png",
+      "sha256": "1d13f96cdb83b6ec71ff5b5ce65b7de57193e1221e3afe833a977c9b85644fcc"
+    },
+    {
+      "id": "12",
+      "title": "Cash Control expanded",
+      "path": "mockups/12-cash-control-expanded.png",
+      "sha256": "616b8f46deb06216b880c999163683a8f440bf2e7f217dded7ef40e9be2540ff"
+    },
+    {
+      "id": "13",
+      "title": "Plan Opportunities default",
+      "path": "mockups/13-plan-opportunities-default.png",
+      "sha256": "1acdef40927db9ea312b1a5c71e6e58ae021f0b7ebf6c09306207bb0ed776916"
+    },
+    {
+      "id": "14",
+      "title": "Plan Opportunities expanded",
+      "path": "mockups/14-plan-opportunities-expanded.png",
+      "sha256": "0607c99e098933e8cfe647588d141babcd01a976fd907073fff7259531d11007"
+    },
+    {
+      "id": "15",
+      "title": "Plan Order assumptions",
+      "path": "mockups/15-plan-order-assumptions.png",
+      "sha256": "0fa261d4feb913d2595e4bbc1ce29cdac8549e12d5d9c9f530cb6cb1f765f83c"
+    },
+    {
+      "id": "16",
+      "title": "Plan Spend and CPA",
+      "path": "mockups/16-plan-spend-and-cpa.png",
+      "sha256": "40feea4ba5a5bd3ad95cbf9138cacf46a93d779e53e93779cb661724559cb693"
+    },
+    {
+      "id": "17",
+      "title": "Plan Traffic and conversion",
+      "path": "mockups/17-plan-traffic-and-conversion.png",
+      "sha256": "f946a560bea5f8a4fb861882b41acf64cde950124977eaf7d42c844ca76952dc"
+    },
+    {
+      "id": "18",
+      "title": "Plan Scenario planner expanded",
+      "path": "mockups/18-plan-scenario-planner-expanded.png",
+      "sha256": "45569e8904c25d3887a0532fe5cc344496fff0bc4d22c7f1dd29c659473561dc"
+    },
+    {
+      "id": "19",
+      "title": "Accepted actions empty",
+      "path": "mockups/19-accepted-actions-empty.png",
+      "sha256": "2a0c7f922eaf81041b48f7879e5f49a42b2ee9e1af7a0b438b117055c8f8dd92"
+    },
+    {
+      "id": "20",
+      "title": "Accepted actions active",
+      "path": "mockups/20-accepted-actions-active.png",
+      "sha256": "312e2f324a49ada1759f914ef617daec9b0c86e558f335ba7c16c9aa74fdeea8"
+    },
+    {
+      "id": "21",
+      "title": "Accepted actions overdue review",
+      "path": "mockups/21-accepted-actions-overdue-review.png",
+      "sha256": "3ec59c19f32103fea83e5e8448d0287854ba4e0c4f54578b15b5e2be32abe9c7"
+    },
+    {
+      "id": "22",
+      "title": "Monitoring service unavailable",
+      "path": "mockups/22-monitoring-service-unavailable.png",
+      "sha256": "e8034a194b30f41a031244a57e8197d69f41389e4fb1c4ab4e0c47b63eb8e266"
+    },
+    {
+      "id": "23",
+      "title": "Monitoring ready to set up",
+      "path": "mockups/23-monitoring-ready-to-set-up.png",
+      "sha256": "8faf65bdf91ea30b0b6bf45cb8c7ca6f9e27988e72d57002df4513a2650d018b"
+    },
+    {
+      "id": "24",
+      "title": "Monitoring active and actionable",
+      "path": "mockups/24-monitoring-active-and-actionable.png",
+      "sha256": "e81fc5b1ada2cf989a7963953195e7f20d421d71ec83bc4813108c8033aeb6d0"
+    },
+    {
+      "id": "25",
+      "title": "Monitoring verified quiet",
+      "path": "mockups/25-monitoring-verified-quiet.png",
+      "sha256": "cdd9d7d4199531811051418025039f364041f249e1b41b24f50c8c1b275ab82e"
+    },
+    {
+      "id": "26",
+      "title": "Monitoring incomplete data",
+      "path": "mockups/26-monitoring-incomplete-data.png",
+      "sha256": "128b4db6e957b88867eba60a3a55f4ed5a8ab97ef33de9e2d83ae4d58e440f3a"
+    },
+    {
+      "id": "27",
+      "title": "Monitoring delivery failed",
+      "path": "mockups/27-monitoring-delivery-failed.png",
+      "sha256": "5f64b9a196e48b88756fc81b55c07c5e1da825033afc08999035e6647ee0913d"
+    },
+    {
+      "id": "28",
+      "title": "Settings Connections default",
+      "path": "mockups/28-settings-connections-default.png",
+      "sha256": "8292cad4a3a092a559c73bceb094454200fae556d950c6cbb13eefb3c48909bf"
+    },
+    {
+      "id": "29",
+      "title": "Settings Connections expanded",
+      "path": "mockups/29-settings-connections-expanded.png",
+      "sha256": "3feeea0d2af026755e930e3539ffb406f1797fee6ed079b545f8ce6ad6f9dba3"
+    },
+    {
+      "id": "30",
+      "title": "Settings Business guardrails",
+      "path": "mockups/30-settings-business-guardrails.png",
+      "sha256": "88783f616334a60cdf0608d2319a0aad96199869af33214942749241c61025af"
+    },
+    {
+      "id": "31",
+      "title": "Settings Team and access",
+      "path": "mockups/31-settings-team-and-access.png",
+      "sha256": "439d07300ebde1d040b7c9c09b93eae26d609be2152adb9b6998fd757033290a"
+    },
+    {
+      "id": "32",
+      "title": "Scout View verified quiet state",
+      "path": "mockups/32-scout-view-verified-quiet-state.png",
+      "sha256": "fb2af0cfe446a3ecf72f01f36a931059532559969af3a54c03ef99e9b3a2f8ab"
+    },
+    {
+      "id": "33",
+      "title": "Scout View incomplete evidence state",
+      "path": "mockups/33-scout-view-incomplete-evidence-state.png",
+      "sha256": "1d612c9e154ae2dc3a2942c0cfbeb7cab395f49044b00781e234848802d6e65c"
+    }
+  ]
+}

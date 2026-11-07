@@ -1,0 +1,242 @@
+.v11-shell {
+  --v11-blue: #0753ff;
+  --v11-ink: #eef4ff;
+  --v11-line: #123854;
+  color: var(--v11-ink);
+  background: radial-gradient(
+    ellipse at 80% 0%,
+    #00203a 0%,
+    #001427 58%,
+    #001120 100%
+  );
+  min-height: 100dvh;
+  font-family: Inter, Arial, sans-serif;
+  display: flex;
+}
+.v11-shell * {
+  box-sizing: border-box;
+}
+.v11-shell button,
+.v11-shell input,
+.v11-shell select {
+  font: inherit;
+}
+.v11-shell button,
+.v11-shell a,
+.v11-shell select {
+  -webkit-tap-highlight-color: transparent;
+}
+.v11-shell :focus-visible {
+  outline: 3px solid #65c4ff;
+  outline-offset: 4px;
+}
+.v11-skip {
+  position: fixed;
+  z-index: 100;
+  left: 12px;
+  top: -70px;
+  padding: 12px;
+  background: #004bff;
+  color: white;
+}
+.v11-skip:focus {
+  top: 12px;
+}
+.v11-nav {
+  width: 248px;
+  flex: 0 0 248px;
+  padding: 24px 20px;
+  border-right: 1px solid #125188;
+  background: #001120;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+.v11-logo {
+  display: block;
+  width: 195px;
+  height: 64px;
+  margin: 0 auto 12px;
+  overflow: hidden;
+}
+.v11-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 48%;
+}
+.v11-tagline {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 10px;
+  padding: 12px 6px 18px;
+  border-bottom: 1px solid #15405d;
+  margin: 0 0 14px;
+}
+.v11-nav nav {
+  display: grid;
+  gap: 7px;
+}
+.v11-nav nav a {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  min-height: 50px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  color: #e7edf9;
+  text-decoration: none;
+  font-size: 14px;
+}
+.v11-nav nav a:hover {
+  background: #072b46;
+}
+.v11-nav nav a[aria-current="page"] {
+  background: #074cff;
+  color: #fff;
+}
+.v11-nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  margin-left: auto;
+}
+.v11-nav-foot {
+  margin-top: auto;
+  padding: 22px 6px 0;
+  font-size: 11px;
+  color: #9faec6;
+  display: grid;
+  gap: 12px;
+}
+.v11-nav-foot a {
+  color: #9ec7ff;
+}
+.v11-main {
+  flex: 1;
+  min-width: 0;
+}
+.v11-sample-context {
+  padding: 16px 32px 13px;
+  border-bottom: 1px solid #123854;
+  background: #00214070;
+  font-size: 12px;
+}
+.v11-sample-context > div {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.v11-sample-context p {
+  margin: 9px 0 0;
+  color: #c0cce1;
+  font-size: 11px;
+}
+.v11-sample-badge {
+  display: inline-block;
+  padding: 6px 9px;
+  border: 1px solid #1652b5;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+  font-size: 10px;
+}
+.v11-main > main {
+  padding: 22px 32px 40px;
+  max-width: 1600px;
+  margin: auto;
+}
+.v11-main .v11-workspace {
+  padding: 0;
+}
+.v11-mobile-bar {
+  display: none;
+}
+@media (min-width: 1600px) {
+  .v11-nav {
+    width: 260px;
+    flex-basis: 260px;
+  }
+}
+@media (max-width: 850px) {
+  .v11-nav {
+    width: 210px;
+    flex-basis: 210px;
+    padding: 18px 12px;
+  }
+  .v11-logo {
+    width: 176px;
+  }
+  .v11-nav nav a {
+    gap: 10px;
+    font-size: 13px;
+    padding: 11px 9px;
+  }
+  .v11-main > main {
+    padding: 20px;
+  }
+  .v11-sample-context {
+    padding: 14px 20px;
+  }
+}
+@media (max-width: 680px) {
+  .v11-shell {
+    display: block;
+  }
+  .v11-mobile-bar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: #001120;
+    border-bottom: 1px solid #15405d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    font-size: 21px;
+    font-weight: 700;
+  }
+  .v11-brand-blue {
+    color: #2467ff;
+  }
+  .v11-mobile-bar button {
+    background: transparent;
+    border: 1px solid #285472;
+    border-radius: 6px;
+    padding: 6px;
+    color: white;
+  }
+  .v11-nav {
+    position: fixed;
+    left: 0;
+    top: 60px;
+    bottom: 0;
+    z-index: 35;
+    height: calc(100dvh - 60px);
+    width: 250px;
+    display: none;
+    box-shadow: 15px 0 60px #000a;
+  }
+  .v11-nav.is-open {
+    display: flex;
+  }
+  .v11-main > main {
+    padding: 18px 14px 32px;
+  }
+  .v11-sample-context {
+    padding: 12px 14px;
+  }
+  .v11-sample-context > div {
+    gap: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v11-shell * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

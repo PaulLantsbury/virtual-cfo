@@ -1,0 +1,13 @@
+{
+  "source": "pnpm-lock.yaml",
+  "sourceSha256": "1bb67ef5a56b9b338053c5f3b847563dd9b2b3d857032e5d330931cba7ae0c88",
+  "lockSha256": "58336119a7318bf3c8b55041dbb441ab7e37b7c54398e990f4942bf86e4fa21a",
+  "dependencies": {
+    "express": "5.2.1",
+    "pg": "8.20.0",
+    "@supabase/supabase-js": "2.100.1"
+  },
+  "packageCount": 92,
+  "snapshotCount": 92,
+  "purpose": "Existing root-lock dependency closure only; no network resolution or install"
+}

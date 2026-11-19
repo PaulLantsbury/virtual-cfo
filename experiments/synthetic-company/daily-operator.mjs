@@ -4,10 +4,10 @@ import {constants} from 'node:fs';
 import {isAbsolute,resolve,relative,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createRequire} from 'node:module';
-import {validateDailyCapabilityPreflight} from './daily-capability-preflight.mjs';
 import {addDays,date} from './generator.mjs';
 import {RESERVED_SYNTHETIC_IDENTITY as identity} from './staging-payload.mjs';
 import {validateDailyProgramme,selectReviewedDay} from './daily-programme.mjs';
+import {prepareStatisticsCatalogQuery,validateDailyPreflightWithStatistics} from './daily-statistics-compatibility.mjs';
 export const OPERATOR_PURPOSE='night-scout-synthetic-daily-operator-v1';
 export const operatorSessionRole=binding=>binding.connection.role??binding.connection.user;
 export const OPERATOR_LIMITS=Object.freeze({connectionMs:5000,lockMs:5000,statementMs:60000,queryMs:65000,processMs:120000,idleTransactionMs:10000});
@@ -95,8 +95,9 @@ export async function operateDaily({enabled=false,mode='inspect',binding,recurri
  const initial=(await client.query(IDENTITY_SQL)).rows[0];ensure(initial?.session_role===operatorSessionRole(binding)&&initial.current_role===operatorSessionRole(binding)&&initial.server_version>=170000&&initial.server_version<180000,'exact-reviewed-pg17-login-required');
  await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');transaction=true;
  const sql=await readFile(new URL('./daily-capability-preflight.sql',import.meta.url),'utf8');
- const catalog=(await client.query(sql,[binding.expected.callerRole,binding.expected.ownerRole,binding.expected.managementRole?.name??null])).rows[0]?.preflight;
- const preflight=validateDailyCapabilityPreflight(catalog,binding.expected);if(preflight.state!=='catalog-ready-for-separate-approval'){const error=new Error('candidate-catalog-or-membership-preflight-blocked');error.operatorFindings=preflight.findings;throw error;}
+ const catalogQuery=await prepareStatisticsCatalogQuery(sql,binding.expected);
+ const captured=(await client.query(catalogQuery.sql,catalogQuery.values)).rows[0];
+ const preflight=validateDailyPreflightWithStatistics(captured?.preflight,binding.expected,captured?.statistics_preflight);if(preflight.state!=='catalog-ready-for-separate-approval'){const error=new Error('candidate-catalog-or-membership-preflight-blocked');error.operatorFindings=preflight.findings;throw error;}
  await client.query("SELECT set_config('role',$1,false)",[binding.expected.callerRole]);
  const effective=(await client.query(IDENTITY_SQL)).rows[0];ensure(effective?.current_role===binding.expected.callerRole&&effective.session_role===operatorSessionRole(binding),'restricted-effective-invoker-required');
  const stamp=clockContext((await client.query(OPERATOR_CLOCK_SQL)).rows[0]);
@@ -115,7 +116,7 @@ export async function operateDaily({enabled=false,mode='inspect',binding,recurri
  if(receipt.state==='committed-reconciled'){await client.query('COMMIT');transaction=false;return {state:'already-recorded-inspect',mode,day,mutationAttempted:false,publication:receipt.publication??null,inspectedAt:receipt.inspectedAt??null,receiptRunId:receipt.receipt?.runId??null};}
  await client.query('COMMIT');transaction=false;
  await client.query('BEGIN READ WRITE');transaction=true;
- const currentCatalog=(await client.query(sql,[binding.expected.callerRole,binding.expected.ownerRole,binding.expected.managementRole?.name??null])).rows[0]?.preflight;ensure(validateDailyCapabilityPreflight(currentCatalog,binding.expected).state==='catalog-ready-for-separate-approval','candidate-changed-before-dispatch');
+ const currentCatalog=(await client.query(catalogQuery.sql,catalogQuery.values)).rows[0];ensure(validateDailyPreflightWithStatistics(currentCatalog?.preflight,binding.expected,currentCatalog?.statistics_preflight).state==='catalog-ready-for-separate-approval','candidate-changed-before-dispatch');
  const fresh=clockContext((await client.query(OPERATOR_CLOCK_SQL)).rows[0]);ensure(!expired&&fresh.day===stamp.day&&fresh.londonDay===stamp.londonDay&&fresh.inWindow,'server-cutoff-changed-before-dispatch');
  if(selected){const checked=(await client.query(INSPECT_SQL,[day])).rows[0]?.result;ensure(['committed-reconciled','absent-review-before-retry'].includes(checked?.state)&&checked.materialSha256===selected.materialSha256&&checked.reviewRef===selected.reviewRef,'reviewed-material-changed-before-dispatch');verifyProgramme(checked.programme,binding,checked.state,mode);if(checked.state==='committed-reconciled'){await client.query('COMMIT');transaction=false;return {state:'already-recorded-inspect',mode,day,mutationAttempted:false,publication:checked.publication??null,inspectedAt:checked.inspectedAt??null,receiptRunId:checked.receipt?.runId??null};}}
  appendAttempted=true;const result=(await client.query(APPEND_SQL,[binding.expectedThrough,day])).rows[0]?.result;

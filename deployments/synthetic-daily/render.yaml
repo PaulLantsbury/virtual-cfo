@@ -8,7 +8,7 @@ services:
     name: night-scout-synthetic-daily
     runtime: node
     repo: https://github.com/PaulLantsbury/virtual-cfo
-    branch: codex/synthetic-company-20261105
+    branch: codex/synthetic-daily-stage-20261119
     region: frankfurt
     plan: 0.5c-512mb
     autoDeployTrigger: 'off'
@@ -19,7 +19,7 @@ services:
       corepack prepare pnpm@10.26.1 --activate &&
       pnpm --filter @workspace/api-server... install --frozen-lockfile --prod --ignore-scripts &&
       node deployments/synthetic-daily/verify-runtime.mjs
-    startCommand: node experiments/synthetic-company/daily-operator.mjs --recurring
+    startCommand: node experiments/synthetic-company/daily-render-wrapper.mjs --recurring
     envVars:
       - key: NODE_VERSION
         value: "24.22.3"

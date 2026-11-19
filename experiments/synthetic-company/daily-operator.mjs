@@ -7,6 +7,7 @@ import {createRequire} from 'node:module';
 import {validateDailyCapabilityPreflight} from './daily-capability-preflight.mjs';
 import {addDays,date} from './generator.mjs';
 import {RESERVED_SYNTHETIC_IDENTITY as identity} from './staging-payload.mjs';
+import {validateDailyProgramme,selectReviewedDay} from './daily-programme.mjs';
 export const OPERATOR_PURPOSE='night-scout-synthetic-daily-operator-v1';
 export const OPERATOR_LIMITS=Object.freeze({connectionMs:5000,lockMs:5000,statementMs:60000,queryMs:65000,processMs:120000,idleTransactionMs:10000});
 const repoRoot=fileURLToPath(new URL('../../',import.meta.url));
@@ -23,11 +24,18 @@ const IDENTITY_SQL="SELECT current_user AS current_role,session_user AS session_
 const INSPECT_SQL='SELECT finance_daily_v1.inspect_daily_receipt($1::date) AS result';
 const APPEND_SQL='SELECT finance_daily_v1.append_completed_day($1::date,$2::date) AS result';
 export function validateOperatorBinding(binding){
- ensure(ownKeys(binding,['purpose','syntheticOnly','scope','connection','expected','approvedDay','expectedThrough','initialThrough','ceiling','appendApproved']),'exact-private-binding-shape-required');
+ ensure(ownKeys(binding,['purpose','syntheticOnly','scope','connection','expected','approvedDay','expectedThrough','initialThrough','ceiling','appendApproved','programme']),'exact-private-binding-shape-required');
  ensure(binding.purpose===OPERATOR_PURPOSE&&binding.syntheticOnly===true,'reviewed-synthetic-binding-required');
  const scope=binding.scope,fixed={storeId:identity.storeId,profile:'uk-gifts-v2',edition:'synthetic-history-v2-2026-11',anchor:'2024-11-01',currency:'GBP',timezone:'Europe/London'};ensure(ownKeys(scope,Object.keys(fixed))&&Object.entries(fixed).every(([key,value])=>scope[key]===value),'fixed-synthetic-programme-scope-required');
- for(const key of ['approvedDay','expectedThrough','initialThrough','ceiling'])date(binding[key]);
- ensure(binding.initialThrough>='2024-11-01'&&binding.initialThrough<=binding.expectedThrough&&addDays(binding.expectedThrough,1)===binding.approvedDay&&binding.approvedDay<=binding.ceiling,'reviewed-contiguous-bounded-day-required');
+ for(const key of ['initialThrough','ceiling'])date(binding[key]);
+ if(binding.programme!==undefined){
+  ensure(!Object.hasOwn(binding,'approvedDay')&&!Object.hasOwn(binding,'expectedThrough'),'recurring-binding-cannot-pin-single-day');
+  const programme=validateDailyProgramme(binding.programme);
+  ensure(programme.initialThrough===binding.initialThrough&&programme.ceiling===binding.ceiling&&Object.entries(scope).every(([key,value])=>programme.scope[key]===value),'reviewed-programme-binding-differs');
+ }else{
+  for(const key of ['approvedDay','expectedThrough'])date(binding[key]);
+  ensure(binding.initialThrough>='2024-11-01'&&binding.initialThrough<=binding.expectedThrough&&addDays(binding.expectedThrough,1)===binding.approvedDay&&binding.approvedDay<=binding.ceiling,'reviewed-contiguous-bounded-day-required');
+ }
  const c=binding.connection;ensure(ownKeys(c,['host','port','database','user','password','ssl']),'explicit-connection-fields-required');
  for(const key of ['host','database','user'])ensure(typeof c[key]==='string'&&c[key].length>0&&!/[\r\n\0]/.test(c[key]),'explicit-connection-field-required');
  ensure(Number.isInteger(c.port)&&c.port>0&&c.port<65536&&typeof c.password==='string','explicit-port-and-password-required');
@@ -65,9 +73,13 @@ function verifyProgramme(programme,binding,receiptState,mode){
  if(mode==='append'){ensure(programme.enabled===true,'actual-programme-disabled');if(receiptState==='absent-review-before-retry')ensure(programme.currentThrough===binding.expectedThrough,'actual-programme-horizon-differs');}
 }
 /** Dependency injection is test-only; CLI exposes no clock, SQL, capability name or owner override. */
-export async function operateDaily({enabled=false,mode='inspect',binding}={}, {createClient=nativeClient}={}){
+export async function operateDaily({enabled=false,mode='inspect',binding,recurring=false}={}, {createClient=nativeClient}={}){
  ensure(['inspect','append'].includes(mode),'inspect-or-append-mode-required');if(!enabled)return {state:'disabled',mode,connections:0};
  validateOperatorBinding(binding);ensure(mode!=='append'||binding.appendApproved===true,'separate-append-approval-required');
+ ensure(recurring===(binding.programme!==undefined),'explicit-recurring-mode-required');
+ // Freeze the approved manifest before any asynchronous boundary. It is never reselected from caller mutations.
+ const programme=recurring?validateDailyProgramme(binding.programme):null;
+ binding=structuredClone(binding);
  let client,transaction=false,appendAttempted=false,day=binding.approvedDay,deadline,expired=false;
  try{
  client=createClient(binding);ensure(client&&typeof client.connect==='function','native-client-required');client.on?.('error',()=>{});
@@ -81,16 +93,24 @@ export async function operateDaily({enabled=false,mode='inspect',binding}={}, {c
  await client.query("SELECT set_config('role',$1,false)",[binding.expected.callerRole]);
  const effective=(await client.query(IDENTITY_SQL)).rows[0];ensure(effective?.current_role===binding.expected.callerRole&&effective.session_role===binding.connection.user,'restricted-effective-invoker-required');
  const stamp=clockContext((await client.query(OPERATOR_CLOCK_SQL)).rows[0]);
+ let selected;
+ if(recurring){
+  selected=selectReviewedDay(programme,stamp.londonDay);day=stamp.day;
+  if(!selected){await client.query('COMMIT');transaction=false;return {state:'outside-reviewed-programme',mode,day,mutationAttempted:false};}
+  binding={...binding,approvedDay:selected.day,expectedThrough:selected.expectedThrough};
+ }
  const receipt=(await client.query(INSPECT_SQL,[day])).rows[0]?.result;ensure(['committed-reconciled','absent-review-before-retry'].includes(receipt?.state),'exact-receipt-inspection-required');
+ if(selected)ensure(receipt.materialSha256===selected.materialSha256&&receipt.reviewRef===selected.reviewRef,'independently-reviewed-day-material-differs');
  verifyProgramme(receipt.programme,binding,receipt.state,mode);
  if(mode==='inspect'){await client.query('COMMIT');transaction=false;return {state:receipt.state,mode,day,mutationAttempted:false,publication:receipt.publication??null,inspectedAt:receipt.inspectedAt??null,receiptRunId:receipt.receipt?.runId??null};}
  if(stamp.day!==day||!stamp.inWindow){await client.query('COMMIT');transaction=false;return {state:stamp.day===day?'outside-london-window':'cutoff-or-gap-review',mode,day,mutationAttempted:false};}
- if(binding.expectedThrough>binding.initialThrough){const prior=(await client.query(INSPECT_SQL,[binding.expectedThrough])).rows[0]?.result;ensure(prior?.state==='committed-reconciled','previous-contiguous-receipt-required');}
+ if(binding.expectedThrough>binding.initialThrough){const prior=(await client.query(INSPECT_SQL,[binding.expectedThrough])).rows[0]?.result;ensure(prior?.state==='committed-reconciled','previous-contiguous-receipt-required');if(programme){const expected=programme.days.find(entry=>entry.day===binding.expectedThrough);ensure(expected&&prior.materialSha256===expected.materialSha256&&prior.reviewRef===expected.reviewRef,'previous-reviewed-material-differs');}}
  if(receipt.state==='committed-reconciled'){await client.query('COMMIT');transaction=false;return {state:'already-recorded-inspect',mode,day,mutationAttempted:false,publication:receipt.publication??null,inspectedAt:receipt.inspectedAt??null,receiptRunId:receipt.receipt?.runId??null};}
  await client.query('COMMIT');transaction=false;
  await client.query('BEGIN READ WRITE');transaction=true;
  const currentCatalog=(await client.query(sql,[binding.expected.callerRole,binding.expected.ownerRole])).rows[0]?.preflight;ensure(validateDailyCapabilityPreflight(currentCatalog,binding.expected).state==='catalog-ready-for-separate-approval','candidate-changed-before-dispatch');
  const fresh=clockContext((await client.query(OPERATOR_CLOCK_SQL)).rows[0]);ensure(!expired&&fresh.day===stamp.day&&fresh.londonDay===stamp.londonDay&&fresh.inWindow,'server-cutoff-changed-before-dispatch');
+ if(selected){const checked=(await client.query(INSPECT_SQL,[day])).rows[0]?.result;ensure(['committed-reconciled','absent-review-before-retry'].includes(checked?.state)&&checked.materialSha256===selected.materialSha256&&checked.reviewRef===selected.reviewRef,'reviewed-material-changed-before-dispatch');verifyProgramme(checked.programme,binding,checked.state,mode);if(checked.state==='committed-reconciled'){await client.query('COMMIT');transaction=false;return {state:'already-recorded-inspect',mode,day,mutationAttempted:false,publication:checked.publication??null,inspectedAt:checked.inspectedAt??null,receiptRunId:checked.receipt?.runId??null};}}
  appendAttempted=true;const result=(await client.query(APPEND_SQL,[binding.expectedThrough,day])).rows[0]?.result;
  ensure(result?.state==='committed-reconciled','append-postflight-required');await client.query('COMMIT');transaction=false;
  return {state:'committed-reconciled',mode,day,mutationAttempted:true,replay:result.replay===true,publication:result.publication??null,inspectedAt:result.inspectedAt??null,receiptRunId:result.receipt?.runId??null};
@@ -101,8 +121,8 @@ export async function operateDaily({enabled=false,mode='inspect',binding}={}, {c
 }
 export async function dailyOperatorCli(argv=process.argv.slice(2)){
  const options={enabled:false,mode:'inspect'};let bindingPath;
- for(const arg of argv){if(arg==='--enabled')options.enabled=true;else if(arg.startsWith('--mode='))options.mode=arg.slice(7);else if(arg.startsWith('--binding-file='))bindingPath=arg.slice(15);else ensure(false,'unsupported-operator-option');}
- if(options.enabled){ensure(process.versions.node==='24.21.0','reviewed-node-24.21.0-required');options.binding=await readPrivateOperatorBinding(bindingPath);}
+ for(const arg of argv){if(arg==='--enabled')options.enabled=true;else if(arg==='--recurring')options.recurring=true;else if(arg.startsWith('--mode='))options.mode=arg.slice(7);else if(arg.startsWith('--binding-file='))bindingPath=arg.slice(15);else ensure(false,'unsupported-operator-option');}
+ if(options.enabled){ensure(process.versions.node==='24.22.3','reviewed-node-24.22.3-required');options.binding=await readPrivateOperatorBinding(bindingPath);}
  return operateDaily(options);
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){

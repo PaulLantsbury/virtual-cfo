@@ -8,7 +8,10 @@ import {historySources, calculateHistorySources} from './history-reader.mjs';
 import {HISTORY_EDITION,HISTORY_FORMULA,historyToday,historySourceAsOf} from './history-context.mjs';
 const ensure=(v,m)=>{if(!v)throw Error(m);};
 const clients=new WeakSet();
-export function brandDisposableDailyClient(client,proof){ensure(proof?.kind==='new-disposable-unix-cluster'&&proof.host?.startsWith('/workspace/work/night-scout/')&&!proof.host.includes('..'),'New private local test cluster required');ensure(client.connectionParameters?.host===proof.host,'Exact disposable socket required');clients.add(client);return client;}
+export function assertDisposableDailyClient(client){ensure(clients.has(client),'Branded disposable PostgreSQL client required');}
+/** A new in-memory preparation database only; never accepts an existing handle, URL or data directory. */
+export async function createInMemoryDailyClient(){const {PGlite}=await import('@electric-sql/pglite');const client=new PGlite();await client.waitReady;clients.add(client);return client;}
+export function brandDisposableDailyClient(client,proof){ensure(proof?.kind==='new-disposable-unix-cluster'&&(proof.host?.startsWith('/workspace/work/night-scout/')||proof.host?.startsWith('/tmp/night-scout/'))&&!proof.host.includes('..'),'New private local test cluster required');ensure(client.connectionParameters?.host===proof.host,'Exact disposable socket required');clients.add(client);return client;}
 const tables=['events','orders','refunds','lines','returns'];
 const end=day=>{const[y,m]=day.split('-').map(Number);return new Date(Date.UTC(y,m,0,12)).toISOString().slice(0,10);};
 function row(source_id,event_date,body,extra={}){return {store_id:identity.storeId,source_id,event_date,body,row_hash:digest(body),...extra};}

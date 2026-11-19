@@ -6,11 +6,11 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
-import {resolveBenchmarkPostgres} from './history-performance.mjs';
+import {dailyTestPostgres,mkdtempTest} from './daily-test-runtime.mjs';
 import {validateDailyCapabilityPreflight,capabilityDigest,DAILY_PROTECTED_TABLES} from './daily-capability-preflight.mjs';
 const {Client}=createRequire(new URL('../../artifacts/api-server/package.json',import.meta.url))('pg');
 test('actual catalog audits bound LOGIN, effective privileges and every application relation class',async t=>{
- const tools=resolveBenchmarkPostgres(),root=await mkdtemp(join(tmpdir(),'daily-acl-golden-')),clients=[];let started=false;
+ const {bin,share}=dailyTestPostgres(),tools={initdb:bin+'initdb',pgCtl:bin+'pg_ctl',sharedir:share},root=await mkdtempTest('daily-acl-golden-'),clients=[];let started=false;
  const command=(file,args)=>execFileSync(file,args,{stdio:'pipe'});
  try{
   command(tools.initdb,['-D',join(root,'data'),'-L',tools.sharedir,'-U','acl_fixture_admin','--auth=trust','--no-locale','--encoding=UTF8']);

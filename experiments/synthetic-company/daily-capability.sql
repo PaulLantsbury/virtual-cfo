@@ -103,16 +103,16 @@ END$$;
 
 CREATE FUNCTION finance_daily_v1.inspect_daily_receipt(requested_day date) RETURNS jsonb
 LANGUAGE plpgsql SECURITY DEFINER SET search_path=pg_catalog AS $$
-DECLARE p finance_daily_v1.programme%ROWTYPE;m jsonb;recorded jsonb;name text;r jsonb;actual jsonb;cl jsonb;protected jsonb;publication jsonb;programme_context jsonb;BEGIN
+DECLARE p finance_daily_v1.programme%ROWTYPE;m jsonb;recorded jsonb;name text;r jsonb;actual jsonb;cl jsonb;protected jsonb;publication jsonb;programme_context jsonb;reviewed_hash text;reviewed_ref text;BEGIN
  SELECT * INTO STRICT p FROM finance_daily_v1.programme WHERE singleton;
- SELECT material INTO m FROM finance_daily_v1.reviewed_days WHERE day=requested_day AND material_sha256=encode(sha256(convert_to(material::text,'UTF8')),'hex');
+ SELECT material,material_sha256,review_ref INTO m,reviewed_hash,reviewed_ref FROM finance_daily_v1.reviewed_days WHERE day=requested_day AND material_sha256=encode(sha256(convert_to(material::text,'UTF8')),'hex');
  IF m IS NULL THEN RAISE EXCEPTION 'Exact reviewed day material required';END IF;
  PERFORM finance_daily_v1.validate_reviewed_day(requested_day,m);
  SELECT to_jsonb(t) INTO cl FROM finance_history_v2.contracts t WHERE store_id=p.store_id;
  IF cl IS NULL OR cl-'through_day' IS DISTINCT FROM p.contract_base THEN RAISE EXCEPTION 'Pinned inspection contract differs';END IF;
  programme_context=jsonb_build_object('storeId',p.store_id,'profile',p.contract_base->>'profile','edition',p.contract_base->>'edition','anchor',p.contract_base->>'date_from','currency',p.contract_base->>'currency','timezone',p.contract_base->>'timezone','initialThrough',p.initial_through,'ceiling',p.ceiling,'currentThrough',cl->>'through_day','enabled',p.enabled);
  SELECT to_jsonb(t) INTO recorded FROM finance_history_v2.runs t WHERE store_id=p.store_id AND date_from=requested_day AND date_to=requested_day;
- IF recorded IS NULL THEN IF EXISTS(SELECT 1 FROM finance_daily_v1.publication_receipts WHERE day=requested_day AND store_id=p.store_id) THEN RAISE EXCEPTION 'Orphan publication receipt requires review';END IF;RETURN jsonb_build_object('state','absent-review-before-retry','programme',programme_context);END IF;
+ IF recorded IS NULL THEN IF EXISTS(SELECT 1 FROM finance_daily_v1.publication_receipts WHERE day=requested_day AND store_id=p.store_id) THEN RAISE EXCEPTION 'Orphan publication receipt requires review';END IF;RETURN jsonb_build_object('state','absent-review-before-retry','programme',programme_context,'materialSha256',reviewed_hash,'reviewRef',reviewed_ref,'inspectedAt',pg_catalog.clock_timestamp());END IF;
  IF recorded<>m->'run' THEN RAISE EXCEPTION 'Receipt differs from reviewed day';END IF;
  SELECT jsonb_build_object('runId',run_id,'publishedAt',published_at) INTO publication FROM finance_daily_v1.publication_receipts WHERE day=requested_day AND store_id=p.store_id AND run_id=(recorded->>'run_id')::uuid AND published_at<=pg_catalog.clock_timestamp();
  IF publication IS NULL THEN RAISE EXCEPTION 'Exact durable publication timestamp required';END IF;
@@ -147,7 +147,7 @@ DECLARE p finance_daily_v1.programme%ROWTYPE;m jsonb;recorded jsonb;name text;r 
   EXECUTE format('SELECT jsonb_build_object(''rowCount'',count(*),''sha256'',encode(sha256(convert_to(COALESCE(jsonb_agg(to_jsonb(t) ORDER BY source_id),''[]''::jsonb)::text,''UTF8'')),''hex'')) FROM finance_history_v2.%I t WHERE store_id=$1 AND event_date<=$2',name) INTO actual USING p.store_id,requested_day;
   IF actual IS DISTINCT FROM m->'validationSets'->name THEN RAISE EXCEPTION 'Receipt complete actual source set differs';END IF;
  END LOOP;
- RETURN jsonb_build_object('state','committed-reconciled','receipt',recorded->'receipt','programme',programme_context,'publication',publication,'inspectedAt',pg_catalog.clock_timestamp());
+ RETURN jsonb_build_object('state','committed-reconciled','receipt',recorded->'receipt','programme',programme_context,'publication',publication,'inspectedAt',pg_catalog.clock_timestamp(),'materialSha256',reviewed_hash,'reviewRef',reviewed_ref);
 END$$;
 
 CREATE FUNCTION finance_daily_v1.append_completed_day(expected_through date,requested_day date) RETURNS jsonb

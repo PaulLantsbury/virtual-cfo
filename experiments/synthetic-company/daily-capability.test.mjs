@@ -12,13 +12,14 @@ import {capabilityDigest,validateDailyCapabilityPreflight} from './daily-capabil
 import {STAGING_TABLES} from './staging-rehearsal.mjs';
 import {profitEvidenceDigest as digest} from '../financial-v1/profit-evidence-reader.mjs';
 const {Client}=createRequire(new URL('../../artifacts/api-server/package.json',import.meta.url))('pg');
-const bin='/workspace/night-scout-tools/pg17/usr/lib/postgresql/17/bin/';
+import {dailyTestPostgres,mkdtempTest} from './daily-test-runtime.mjs';
+const {bin,share}=dailyTestPostgres();
 for(const full of [false,true]){
 const day=full?'2026-11-05':'2024-11-30',before=full?'2026-11-04':'2024-11-29',asOf=full?'2026-11-06':'2024-12-01',now=()=>new Date(asOf+'T02:00:00Z');
 test(`bounded reviewed-plan capability ${full?'full 24-seal / original January':'month-end'} actual PostgreSQL`,{timeout:360000},async t=>{
- const dir=await mkdtemp('/workspace/work/night-scout/daily-capability-'),clients=[];let started=false,h;
+ const dir=await mkdtempTest('daily-capability-'),clients=[];let started=false,h;
  try{
- execFileSync(bin+'initdb',['-D',dir+'/data','-L','/workspace/night-scout-tools/pg17/usr/share/postgresql/17','-U','capability_test_operator','--auth=trust','--no-locale','--encoding=UTF8'],{stdio:'pipe'});
+ execFileSync(bin+'initdb',['-D',dir+'/data','-L',share,'-U','capability_test_operator','--auth=trust','--no-locale','--encoding=UTF8'],{stdio:'pipe'});
  execFileSync(bin+'pg_ctl',['-D',dir+'/data','-l',dir+'/postgres.log','-o',`-h '' -k ${dir}`,'-w','start'],{stdio:'pipe'});started=true;
  const connect=async()=>{const c=new Client({host:dir,user:'capability_test_operator',database:'postgres'});await c.connect();clients.push(c);return brandDisposableDailyClient(c,{kind:'new-disposable-unix-cluster',host:dir});};
  const operator=await connect(),observer=await connect();let a=await connect(),b=await connect();
@@ -42,7 +43,7 @@ test(`bounded reviewed-plan capability ${full?'full 24-seal / original January':
  const other='10000000-0000-4000-8000-000000000098';await query("INSERT INTO public.stores VALUES($1,'GBP','Europe/London');",[other]);await query("INSERT INTO finance_history_v2.orders VALUES($1,'unrelated-retained-row','2024-11-01','{\"unrelated\":true}','unchanged')",[other]);
  const fingerprint=async()=>{const out={};for(const table of HISTORY_TABLES)out[table]=(await observer.query(`SELECT to_jsonb(t) row FROM finance_history_v2.${table} t ORDER BY to_jsonb(t)::text`)).rows;out.v1=(await observer.query('SELECT * FROM finance_v1.original_january')).rows;if(full)out.archive=(await observer.query('SELECT * FROM finance_v1.reviewed_original_archive')).rows;return digest(out);};
  const initial=await fingerprint(),v1Before=digest((await observer.query(full?'SELECT * FROM finance_v1.reviewed_original_archive':'SELECT * FROM finance_v1.original_january')).rows);
- const stock=await readFile(new URL('./daily-capability.sql',import.meta.url),'utf8');assert.equal((stock.match(/pg_catalog.clock_timestamp\(\)/g)??[]).length,5);
+ const stock=await readFile(new URL('./daily-capability.sql',import.meta.url),'utf8');assert.equal((stock.match(/pg_catalog.clock_timestamp\(\)/g)??[]).length,6);
  // Disposable clock substitution is explicit: shipped SQL always reads the real server clock.
  await operator.query(stock);
  await operator.query("CREATE ROLE daily_capability_login LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB;GRANT daily_capability_invoker TO daily_capability_login");

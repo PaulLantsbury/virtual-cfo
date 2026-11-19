@@ -1,0 +1,30 @@
+# PROPOSAL ONLY. Do not create/sync this Blueprint before separate approval.
+# Use this custom Blueprint path; do not merge it into provider-service infrastructure.
+# The command remains disabled: no binding read and no database connection.
+previews:
+  generation: 'off'
+services:
+  - type: cron
+    name: night-scout-synthetic-daily
+    runtime: node
+    repo: https://github.com/PaulLantsbury/virtual-cfo
+    branch: codex/synthetic-company-20261105
+    region: frankfurt
+    plan: 0.5c-512mb
+    autoDeployTrigger: 'off'
+    schedule: "0 1,2 * * *"
+    buildCommand: >-
+      node -e "if(process.versions.node!=='24.22.3')process.exit(1)" &&
+      corepack enable &&
+      corepack prepare pnpm@10.26.1 --activate &&
+      pnpm --filter @workspace/api-server... install --frozen-lockfile --prod --ignore-scripts
+    startCommand: node experiments/synthetic-company/daily-operator.mjs --recurring
+    envVars:
+      - key: NODE_VERSION
+        value: "24.22.3"
+      - key: NODE_ENV
+        value: production
+# Deliberately no DATABASE_URL, shared environment group, secret value, disk,
+# migration hook, provider job, automatic deployment or enabled append flag.
+# The 120-second deadline and finite programme ceiling are application guards,
+# not unsupported cron Blueprint max-runtime/expiry fields.

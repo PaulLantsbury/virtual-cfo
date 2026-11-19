@@ -11,15 +11,16 @@ import {STAGING_TABLES} from './staging-rehearsal.mjs';
 import {historySources,calculateHistorySources} from './history-reader.mjs';
 import {brandDisposableDailyClient,prepareDailySources,createDisposableDailyWriter,initialiseDisposableDailyFixture} from './daily-writer.mjs';
 const {Client}=createRequire(new URL('../../artifacts/api-server/package.json',import.meta.url))('pg');
-const bin='/workspace/night-scout-tools/pg17/usr/lib/postgresql/17/bin/';
+import {dailyTestPostgres,mkdtempTest} from './daily-test-runtime.mjs';
+const {bin,share}=dailyTestPostgres();
 const clock=()=>new Date('2026-11-08T12:00:00Z');
 const tick=()=>new Promise(r=>setTimeout(r,15));
 async function waitBlocked(observer,pid){for(let n=0;n<200;n++){const r=(await observer.query("SELECT wait_event,pg_blocking_pids(pid) blockers FROM pg_stat_activity WHERE pid=$1",[pid])).rows[0];if(r?.wait_event==='advisory'&&r.blockers.length)return r;await tick();}throw Error('No independent backend lock overlap observed');}
 const gate=()=>{let release;const promise=new Promise(r=>release=r);return {promise,release};};
 test('real PostgreSQL daily writer races, recovery, restricted access and preserved monthly revisions',{timeout:600000},async t=>{
- const dir=await mkdtemp('/workspace/work/night-scout/daily-pg-'),clients=[];let started=false,h;
+ const dir=await mkdtempTest('daily-pg-'),clients=[];let started=false,h;
  try{
- execFileSync(bin+'initdb',['-D',dir+'/data','-L','/workspace/night-scout-tools/pg17/usr/share/postgresql/17','-U','daily_test_owner','--auth=trust','--no-locale','--encoding=UTF8'],{stdio:'pipe'});
+ execFileSync(bin+'initdb',['-D',dir+'/data','-L',share,'-U','daily_test_owner','--auth=trust','--no-locale','--encoding=UTF8'],{stdio:'pipe'});
  execFileSync(bin+'pg_ctl',['-D',dir+'/data','-l',dir+'/postgres.log','-o',`-h '' -k ${dir}`,'-w','start'],{stdio:'pipe'});started=true;
  const connect=async()=>{const c=new Client({host:dir,user:'daily_test_owner',database:'postgres'});await c.connect();clients.push(c);return brandDisposableDailyClient(c,{kind:'new-disposable-unix-cluster',host:dir});};
  const a=await connect(),b=await connect(),observer=await connect();const pids=await Promise.all([a,b,observer].map(async c=>(await c.query('SELECT pg_backend_pid() pid')).rows[0].pid));assert.equal(new Set(pids).size,3);

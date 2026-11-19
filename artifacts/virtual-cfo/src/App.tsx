@@ -18,6 +18,7 @@ import VerifiedSalesPage from "@/pages/verified-sales";
 import Dashboard from "@/pages/dashboard";
 import GrowthQuality from "@/pages/growth-quality";
 import MarketingEfficiency from "@/pages/marketing-efficiency";
+import OriginalMarketingEfficiency from "@/pages/marketing-efficiency-original";
 import Opportunities from "@/pages/opportunities";
 import NewProfit from "@/pages/new-profit";
 import CashControl from "@/pages/cash-control";
@@ -54,6 +55,7 @@ function MerchantRouter() {
       <Route path="/dashboard/transactions" component={Dashboard} /> {/* Map to dashboard for now */}
       <Route path="/margin-analysis"><Redirect to="/profit-engine"/></Route>
       <Route path="/growth-quality" component={GrowthQuality} />
+      <Route path="/marketing-efficiency-original" component={OriginalMarketingEfficiency} />
       <Route path="/marketing-efficiency" component={MarketingEfficiency} />
       <Route path="/opportunities" component={Opportunities} />
       <Route path="/profit-opportunities" component={Opportunities} />

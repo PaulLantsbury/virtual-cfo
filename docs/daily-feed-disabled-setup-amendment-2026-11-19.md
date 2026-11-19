@@ -1,3 +1,5 @@
+> **Next session:** The [tested hosted compatibility package](daily-feed-hosted-compatibility-2026-11-19.md) pins tested source 1168b0b2ae5fa2fe7211de64f9fcd2b5a675b439. It is published, not approved or deployed. Preparation is complete; the existing source remains disabled. Financial activation remains separately gated.
+
 > **Applied continuation:** Revised disabled source 299998abfe61da90f55417111e565dbc065699b7 was approved and applied. Guarded schema/restricted login and private file delivery are complete; hosted acceptance is blocked by native secret-file layout and existing statistics-view access. Feed OFF, no financial writes. See the [current roadmap](roadmap-2026-11-19.md) for exact acceptance gates.
 
 # Disabled staging setup — amendment, 19 November 2026

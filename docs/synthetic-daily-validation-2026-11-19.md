@@ -1,3 +1,15 @@
+## Final evening compatibility preparation
+
+Source **1168b0b2ae5fa2fe7211de64f9fcd2b5a675b439**, published but not deployed. Combined group: **76 passed; zero failed, cancelled or skipped**. Includes native PostgreSQL 17.6 fixtures for effective permissions, actual restricted operator dispatch, recurring selection and two source-built statistics profiles; real filesystem staging/race/ownership checks; and controlled-client hosted connection verification tests. The statistics operator integration uses empty disposable protocol material and is not a financial oracle. Original financial SQL is unchanged.
+
+Native statistics tests prove masked other-user query text/IDs, own-query visibility, refused reset/elevated-role/table/column/grant-option drift, owner-only grant-option semantic normalization and both same-statement operator preflights. Private target metadata matches the independent profile with review still false. No target statistics rows were read; original evidence/live baseline remain unaccepted.
+
+Local build probe confirms Node 24.22.3, pg 8.20.0 and two disabled counts zero. Actual new-source Linux build, trusted Render target-chain acceptance and restricted hosted connection evidence are pending exact approval. Current live 299998 restored disabled run succeeded with zero connections. No financial rows or programme/material/receipts were written in staging.
+
+See the [tested hosted compatibility package](daily-feed-hosted-compatibility-2026-11-19.md) for commands, visibility decision and exact remaining gates.
+
+---
+
 > **Applied continuation:** Revised disabled source 299998abfe61da90f55417111e565dbc065699b7 was approved and applied. Guarded schema/restricted login and private file delivery are complete; hosted acceptance is blocked by native secret-file layout and existing statistics-view access. Feed OFF, no financial writes. See the [current roadmap](roadmap-2026-11-19.md) for exact acceptance gates.
 
 # Synthetic recurring-feed validation — 19 November 2026

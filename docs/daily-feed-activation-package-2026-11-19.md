@@ -1,3 +1,5 @@
+> **Next session:** The [tested hosted compatibility package](daily-feed-hosted-compatibility-2026-11-19.md) pins tested source 1168b0b2ae5fa2fe7211de64f9fcd2b5a675b439. It is published, not approved or deployed. Preparation is complete; the existing source remains disabled. Financial activation remains separately gated.
+
 > **Applied continuation:** Revised disabled source 299998abfe61da90f55417111e565dbc065699b7 was approved and applied. Guarded schema/restricted login and private file delivery are complete; hosted acceptance is blocked by native secret-file layout and existing statistics-view access. Feed OFF, no financial writes. See the [current roadmap](roadmap-2026-11-19.md) for exact acceptance gates.
 
 > **Phase 1 continuation:** the disabled service was created at c59ec2e, but database installation was held for managed-role compatibility. Read the [tested amendment](daily-feed-disabled-setup-amendment-2026-11-19.md) before further setup. This original exact-revision record is preserved below.

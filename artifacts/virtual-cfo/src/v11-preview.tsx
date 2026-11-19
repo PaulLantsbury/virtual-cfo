@@ -92,7 +92,8 @@ export default function V11Preview({
           ))}
         </nav>
         <div className="v11-nav-foot">
-          <span>Approved design v11</span>
+          <span>Approved design v11 · preview</span>
+          <Link href="/supported-v11/scout">Supported sales &amp; profit</Link>
           {!reviewMode && (
             <Link href="/dashboard">Return to current reporting</Link>
           )}
@@ -102,14 +103,14 @@ export default function V11Preview({
         <div className="v11-sample-context" role="note">
           <div>
             <span className="v11-sample-badge">
-              Fictional data · design review
+              New page preview · fictional data
             </span>
             <span>Scout &amp; Co · sample store</span>
           </div>
           <p>
-            No real store or financial connection is used. Examples do not
-            certify live integrations.
+            All seven new pages are available to explore. Figures and service states are fictional examples; no provider transaction, monitoring, notification or saved action is activated.
           </p>
+          <p><Link href="/supported-v11/scout">Open supported sales &amp; profit evidence</Link> · <Link href="/dashboard">Return to current reporting</Link></p>
         </div>
         <main id="v11-content" tabIndex={-1}>
           <V11Workspace

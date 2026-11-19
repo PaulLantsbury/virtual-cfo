@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateStagingSnapshot as validate} from './staging-snapshot-contract.mjs';
+const id='11111111-1111-4111-8111-111111111111';
+const expected={store_id:id,date_from:'2026-09-01',date_to:'2026-09-30',currency:'GBP',timezone:'Europe/London',source_basis:'synthetic-local',formula_version:'v11',contract_version:1,sales_revision:'revision-a',profit_version_id:null};
+const row=()=>({...expected,snapshot_id:'22222222-2222-4222-8222-222222222222',source_as_of:'2026-10-01T00:00:00Z',observed_at:'2026-10-01T01:00:00Z',manifest_digest:'a'.repeat(64),profile_version:'v2',coverage:{sales:'complete',costs:'complete'},raw_manifest:'PRIVATE',verifier:'PRIVATE'});
+const input=()=>({expected:{...expected},rows:[row()],authorised:true,refreshState:'current'});
+test('exact scope returns only safe source metadata',()=>{const result=validate(input());assert.equal(result.state,'supported');assert.equal(result.metadata.sourceAsOf,'2026-10-01T00:00:00Z');assert.doesNotMatch(JSON.stringify(result),/PRIVATE|manifest_digest|observed_at/);});
+test('absence, ambiguity, access denial and unknown refresh fail closed',()=>{for(const patch of [{rows:[]},{rows:[row(),row()]},{authorised:false},{refreshState:'unknown'}]) assert.equal(validate({...input(),...patch}).metadata,null);});
+test('all scope and source revision keys are bound',()=>{for(const key of Object.keys(expected)){const value=input();value.rows[0][key]='different';assert.equal(validate(value).state,'unavailable',key);}});
+test('observed timestamp cannot substitute source as-of',()=>{for(const source_as_of of [undefined,null,'','2026-10-02T00:00:00Z']){const value=input();value.rows[0].source_as_of=source_as_of;assert.equal(validate(value).metadata,null);}});
+test('invalidated and superseded rows cannot become current or retained',()=>{for(const key of ['invalidated_by','superseded_by']){const value=input();value.rows[0][key]=id;assert.equal(validate(value).metadata,null);}assert.equal(validate({...input(),refreshState:'invalidated'}).metadata,null);});
+test('stale and failed refresh retain original exact-scope date only',()=>{for(const refreshState of ['stale','failed']){const value=input();value.refreshState=refreshState;const result=validate(value);assert.equal(result.state,'stale');assert.equal(result.metadata.sourceAsOf,value.rows[0].source_as_of);value.rows[0].date_from='2026-08-01';assert.equal(validate(value).metadata,null);}});
+test('missing costs remain partial, missing sales/profile/integrity unavailable',()=>{const partial=input();partial.rows[0].coverage.costs='incomplete';assert.equal(validate(partial).state,'partial');for(const patch of [{coverage:{sales:'incomplete',costs:'complete'}},{profile_version:null},{manifest_digest:null}]){const value=input();Object.assign(value.rows[0],patch);assert.equal(validate(value).metadata,null);}});

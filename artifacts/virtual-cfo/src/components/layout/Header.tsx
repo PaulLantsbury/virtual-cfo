@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { Bell, Menu } from "lucide-react";
 import { DevPlanToggle } from "@/components/DevPlanToggle";
 import { CfoMonitoringStatus } from "@/components/CfoMonitoringStatus";
@@ -20,6 +21,7 @@ export function Header({ showMonitoring = true }: { showMonitoring?: boolean }) 
 
       <div className="flex items-center gap-3 ml-auto">
         {showMonitoring ? <CfoMonitoringStatus /> : <span className="text-xs text-white/70">Monitoring not active</span>}
+        <Link href="/v11/scout" className="text-xs font-semibold text-cyan-200 underline underline-offset-4">New page preview</Link>
         <DevPlanToggle />
         <button className="relative p-2 text-white/70 hover:bg-white/10 rounded-full transition-colors">
           <Bell className="w-5 h-5" />

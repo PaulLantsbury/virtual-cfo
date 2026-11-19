@@ -25,3 +25,9 @@ Five focused behavioral test groups pass, including invalid/missing amounts, fun
 Only the marketing page, its focused tests and this new design handover are included. No auth, navigation, provider scopes, store permissions, database, reader/writer schedule, advertising account or production branch change. Preserve concurrent roadmap changes. Paul explicitly approved uploading this redesign, tests and documentation to PaulLantsbury/virtual-cfo, codex/restart-baseline, after the initial automatic approval rejection. Publication uses an expected-head guard; hosted build and visual acceptance remain separate checks.
 
 Next data work: source-matched ad spend, new-customer identity, historical product/variable costs, attribution reconciliation, mature cohorts and business guardrails. These gates are separate from approval of the redesign.
+
+## Hosted acceptance — 19 November 2026
+
+The existing staging web service was manually deployed at 767bee721badcc1640e8f4be64d90a688ba57ca7; Render reported Deploy succeeded in 1m 14s. This integration commit preserves the previously deployed c7e6921 reporting/history tree and adds only the marketing page, focused tests and this design document. The development branch had been behind deployed history; both histories were retained in a non-forced integration commit before deployment. Automatic web deployments were not enabled or otherwise changed.
+
+The signed-in staging /marketing-efficiency page was reloaded and verified: new purpose/evidence state, explicit review opening, Hold fixture, live switching to Scale, matching CAC/POAS/ROAS/contribution values and recalculated marginal-spend inputs/results. Desktop layout visually checked in the actual app shell. Actual store recommendations remain unavailable pending their separate data gates. No database, provider, credential or scheduler changes were performed by this redesign delivery.

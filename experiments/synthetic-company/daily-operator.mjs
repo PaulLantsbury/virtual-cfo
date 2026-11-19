@@ -9,6 +9,7 @@ import {addDays,date} from './generator.mjs';
 import {RESERVED_SYNTHETIC_IDENTITY as identity} from './staging-payload.mjs';
 import {validateDailyProgramme,selectReviewedDay} from './daily-programme.mjs';
 export const OPERATOR_PURPOSE='night-scout-synthetic-daily-operator-v1';
+export const operatorSessionRole=binding=>binding.connection.role??binding.connection.user;
 export const OPERATOR_LIMITS=Object.freeze({connectionMs:5000,lockMs:5000,statementMs:60000,queryMs:65000,processMs:120000,idleTransactionMs:10000});
 const repoRoot=fileURLToPath(new URL('../../',import.meta.url));
 const require=createRequire(new URL('../../artifacts/api-server/package.json',import.meta.url));
@@ -36,12 +37,18 @@ export function validateOperatorBinding(binding){
   for(const key of ['approvedDay','expectedThrough'])date(binding[key]);
   ensure(binding.initialThrough>='2024-11-01'&&binding.initialThrough<=binding.expectedThrough&&addDays(binding.expectedThrough,1)===binding.approvedDay&&binding.approvedDay<=binding.ceiling,'reviewed-contiguous-bounded-day-required');
  }
- const c=binding.connection;ensure(ownKeys(c,['host','port','database','user','password','ssl']),'explicit-connection-fields-required');
+ const c=binding.connection;ensure(ownKeys(c,['host','port','database','user','password','ssl','role','transport','projectRef']),'explicit-connection-fields-required');
  for(const key of ['host','database','user'])ensure(typeof c[key]==='string'&&c[key].length>0&&!/[\r\n\0]/.test(c[key]),'explicit-connection-field-required');
  ensure(Number.isInteger(c.port)&&c.port>0&&c.port<65536&&typeof c.password==='string','explicit-port-and-password-required');
+ const sessionRole=operatorSessionRole(binding),transport=c.transport??'direct';
+ ensure(typeof sessionRole==='string'&&/^[a-z_][a-z0-9_]{0,62}$/.test(sessionRole),'explicit-database-session-role-required');
+ ensure(['direct','supavisor-session'].includes(transport),'session-preserving-transport-required');
+ if(transport==='supavisor-session')ensure(typeof c.projectRef==='string'&&/^[a-z0-9]{20}$/.test(c.projectRef)&&c.user===sessionRole+'.'+c.projectRef&&/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+pooler\.supabase\.com$/.test(c.host)&&c.port===5432&&c.ssl?.rejectUnauthorized===true,'exact-reviewed-session-pooler-binding-required');
+ else ensure(c.user===sessionRole&&c.projectRef===undefined,'direct-wire-and-session-role-must-match');
+ ensure(!binding.expected?.managementRole||binding.expected.managementRole.name!==sessionRole,'runtime-login-cannot-be-management-administrator');
  ensure(c.host.startsWith('/')?c.ssl===false:c.ssl?.rejectUnauthorized===true&&ownKeys(c.ssl,['rejectUnauthorized','ca']),'verified-tls-or-private-socket-required');
- ensure(binding.expected&&new Set([binding.expected.callerRole,binding.expected.ownerRole,binding.expected.schemaOwner]).size===3&&[binding.expected.callerRole,binding.expected.ownerRole,binding.expected.schemaOwner].every(v=>typeof v==='string'&&v.length>0)&&c.user!==binding.expected.ownerRole&&c.user!==binding.expected.schemaOwner&&c.user!==binding.expected.callerRole,'runtime-login-must-not-be-owner-or-invoker');
- ensure(binding.expected.memberships?.length===1&&binding.expected.memberships[0].role===binding.expected.callerRole&&binding.expected.memberships[0].member===c.user&&binding.expected.memberships[0].adminOption===false&&binding.expected.memberships[0].inheritOption===false&&binding.expected.memberships[0].setOption===true,'exact-reviewed-login-membership-required');
+ ensure(binding.expected&&new Set([binding.expected.callerRole,binding.expected.ownerRole,binding.expected.schemaOwner]).size===3&&[binding.expected.callerRole,binding.expected.ownerRole,binding.expected.schemaOwner].every(v=>typeof v==='string'&&v.length>0)&&sessionRole!==binding.expected.ownerRole&&sessionRole!==binding.expected.schemaOwner&&sessionRole!==binding.expected.callerRole,'runtime-login-must-not-be-owner-or-invoker');
+ ensure(binding.expected.memberships?.length===1&&binding.expected.memberships[0].role===binding.expected.callerRole&&binding.expected.memberships[0].member===sessionRole&&binding.expected.memberships[0].adminOption===false&&binding.expected.memberships[0].inheritOption===false&&binding.expected.memberships[0].setOption===true,'exact-reviewed-login-membership-required');
  return binding;
 }
 export async function readPrivateOperatorBinding(path){
@@ -85,13 +92,13 @@ export async function operateDaily({enabled=false,mode='inspect',binding,recurri
  client=createClient(binding);ensure(client&&typeof client.connect==='function','native-client-required');client.on?.('error',()=>{});
  deadline=setTimeout(()=>{expired=true;void client.end().catch(()=>{});},OPERATOR_LIMITS.processMs);deadline.unref?.();
  await client.connect();await client.query(SETTINGS_SQL);
- const initial=(await client.query(IDENTITY_SQL)).rows[0];ensure(initial?.session_role===binding.connection.user&&initial.current_role===binding.connection.user&&initial.server_version>=170000&&initial.server_version<180000,'exact-reviewed-pg17-login-required');
+ const initial=(await client.query(IDENTITY_SQL)).rows[0];ensure(initial?.session_role===operatorSessionRole(binding)&&initial.current_role===operatorSessionRole(binding)&&initial.server_version>=170000&&initial.server_version<180000,'exact-reviewed-pg17-login-required');
  await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');transaction=true;
  const sql=await readFile(new URL('./daily-capability-preflight.sql',import.meta.url),'utf8');
- const catalog=(await client.query(sql,[binding.expected.callerRole,binding.expected.ownerRole])).rows[0]?.preflight;
+ const catalog=(await client.query(sql,[binding.expected.callerRole,binding.expected.ownerRole,binding.expected.managementRole?.name??null])).rows[0]?.preflight;
  const preflight=validateDailyCapabilityPreflight(catalog,binding.expected);if(preflight.state!=='catalog-ready-for-separate-approval'){const error=new Error('candidate-catalog-or-membership-preflight-blocked');error.operatorFindings=preflight.findings;throw error;}
  await client.query("SELECT set_config('role',$1,false)",[binding.expected.callerRole]);
- const effective=(await client.query(IDENTITY_SQL)).rows[0];ensure(effective?.current_role===binding.expected.callerRole&&effective.session_role===binding.connection.user,'restricted-effective-invoker-required');
+ const effective=(await client.query(IDENTITY_SQL)).rows[0];ensure(effective?.current_role===binding.expected.callerRole&&effective.session_role===operatorSessionRole(binding),'restricted-effective-invoker-required');
  const stamp=clockContext((await client.query(OPERATOR_CLOCK_SQL)).rows[0]);
  let selected;
  if(recurring){
@@ -108,7 +115,7 @@ export async function operateDaily({enabled=false,mode='inspect',binding,recurri
  if(receipt.state==='committed-reconciled'){await client.query('COMMIT');transaction=false;return {state:'already-recorded-inspect',mode,day,mutationAttempted:false,publication:receipt.publication??null,inspectedAt:receipt.inspectedAt??null,receiptRunId:receipt.receipt?.runId??null};}
  await client.query('COMMIT');transaction=false;
  await client.query('BEGIN READ WRITE');transaction=true;
- const currentCatalog=(await client.query(sql,[binding.expected.callerRole,binding.expected.ownerRole])).rows[0]?.preflight;ensure(validateDailyCapabilityPreflight(currentCatalog,binding.expected).state==='catalog-ready-for-separate-approval','candidate-changed-before-dispatch');
+ const currentCatalog=(await client.query(sql,[binding.expected.callerRole,binding.expected.ownerRole,binding.expected.managementRole?.name??null])).rows[0]?.preflight;ensure(validateDailyCapabilityPreflight(currentCatalog,binding.expected).state==='catalog-ready-for-separate-approval','candidate-changed-before-dispatch');
  const fresh=clockContext((await client.query(OPERATOR_CLOCK_SQL)).rows[0]);ensure(!expired&&fresh.day===stamp.day&&fresh.londonDay===stamp.londonDay&&fresh.inWindow,'server-cutoff-changed-before-dispatch');
  if(selected){const checked=(await client.query(INSPECT_SQL,[day])).rows[0]?.result;ensure(['committed-reconciled','absent-review-before-retry'].includes(checked?.state)&&checked.materialSha256===selected.materialSha256&&checked.reviewRef===selected.reviewRef,'reviewed-material-changed-before-dispatch');verifyProgramme(checked.programme,binding,checked.state,mode);if(checked.state==='committed-reconciled'){await client.query('COMMIT');transaction=false;return {state:'already-recorded-inspect',mode,day,mutationAttempted:false,publication:checked.publication??null,inspectedAt:checked.inspectedAt??null,receiptRunId:checked.receipt?.runId??null};}}
  appendAttempted=true;const result=(await client.query(APPEND_SQL,[binding.expectedThrough,day])).rows[0]?.result;

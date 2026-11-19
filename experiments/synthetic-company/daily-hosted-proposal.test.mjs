@@ -18,6 +18,21 @@ test('hosted proposal pins reviewed code and adds real target guards without cha
 test('changed source, unbounded counts and malformed dates cannot produce an installation proposal',()=>{
  for(const patch of [{capabilitySql:capabilitySql+'\n'},{expectedThrough:'2026-02-30'},{expectedSeals:-1},{expectedSeals:121}])assert.throws(()=>prepareHostedDailyProposal({capabilitySql,expectedThrough:'2026-11-04',...patch}));
 });
+test('managed installer adaptation changes only ownership choreography and keeps financial functions exact',()=>{
+ const managementRole={name:'managed_fixture_installer',login:true,superuser:false,bypassRls:false,replication:false,createRole:true,createDb:false,inherit:false};
+ const result=prepareHostedDailyProposal({capabilitySql,expectedThrough:'2026-11-04',managementRole});
+ for(const name of ['validate_reviewed_day','inspect_daily_receipt','append_completed_day']){
+  const body=sql=>{const start=sql.indexOf('CREATE FUNCTION finance_daily_v1.'+name+'(');assert.ok(start>=0);const end=sql.indexOf('END$$;',start);assert.ok(end>start);return sql.slice(start,end+7);};
+  assert.equal(body(result.sql),body(capabilitySql),name);
+ }
+ assert.match(result.sql,/SET LOCAL createrole_self_grant='set'/);
+ assert.match(result.sql,/GRANTED BY %I/);
+ assert.match(result.sql,/Exact bootstrap ADMIN-only management memberships required/);
+ assert.ok(result.sql.indexOf('REVOKE ALL ON ALL FUNCTIONS')<result.sql.indexOf('ALTER FUNCTION finance_daily_v1.validate_reviewed_day'));
+ assert.ok(result.sql.indexOf('REVOKE CREATE ON SCHEMA')<result.sql.indexOf('ALTER SCHEMA finance_daily_v1 OWNER'));
+ assert.deepEqual(result.managementRole,managementRole);assert.equal(result.remoteApplied,false);
+ for(const role of [{...managementRole,superuser:true},{...managementRole,createRole:false},{...managementRole,name:'daily_capability_owner'},{...managementRole,extra:'unreviewed'},{...managementRole,name:'bad; SET ROLE postgres;'}])assert.throws(()=>prepareHostedDailyProposal({capabilitySql,expectedThrough:'2026-11-04',managementRole:role}),/management/);
+});
 test('native PostgreSQL target guards refuse a changed baseline atomically before installing reviewed authority',async()=>{
  const {bin,share}=dailyTestPostgres(),dir=await mkdtempTest('hosted-proposal-');
  const {Client}=createRequire(new URL('../../artifacts/api-server/package.json',import.meta.url))('pg');

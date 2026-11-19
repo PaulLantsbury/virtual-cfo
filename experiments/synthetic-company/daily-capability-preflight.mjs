@@ -10,6 +10,26 @@ export const capabilityDigest=value=>createHash('sha256').update(value).digest('
 /** expected hashes come from an independently reviewed private candidate, never the observed catalog. */
 export function validateDailyCapabilityPreflight(observed,expected){
  const findings=[];const require=(ok,code)=>{if(!ok)findings.push(code);};
+ const sorted=value=>JSON.stringify((value??[]).map(v=>JSON.stringify(v&&typeof v==='object'?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v)).sort());
+ const descriptorFields=['name','login','superuser','bypassRls','replication','createRole','createDb','inherit'];
+ const exactKeys=(value,keys)=>value!==null&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===keys.length&&Object.keys(value).every(key=>keys.includes(key));
+ const management=expected?.managementRole??null,managementName=management?.name;
+ if(management===null){
+  require(observed?.managementRole===null&&Array.isArray(observed?.managementMemberships)&&observed.managementMemberships.length===0,'unexpected-management-authority');
+  require(expected?.managementMemberships===undefined||(Array.isArray(expected.managementMemberships)&&expected.managementMemberships.length===0),'reviewed-management-role-required');
+ }else{
+  require(exactKeys(management,descriptorFields)&&typeof managementName==='string'&&managementName.length>0&&descriptorFields.slice(1).every(key=>typeof management[key]==='boolean')&&management.login===true&&management.createRole===true&&management.superuser===false,'explicit-reviewed-management-descriptor-required');
+  require(![expected?.callerRole,expected?.ownerRole,expected?.schemaOwner,...(expected?.memberships??[]).map(edge=>edge.member)].includes(managementName),'management-role-must-be-separate-from-runtime');
+  require(exactKeys(observed?.managementRole,descriptorFields)&&sorted([observed.managementRole])===sorted([management]),'reviewed-management-descriptor-mismatch');
+  require(!(observed?.roles??[]).some(role=>role.name===managementName)&&!(observed?.auditedPrincipals??[]).includes(managementName),'management-role-must-not-be-runtime-principal');
+  const protectedRoles=[expected?.callerRole,expected?.ownerRole,expected?.schemaOwner,...(expected?.memberships??[]).map(edge=>edge.member)];
+  const reviewed=expected?.managementMemberships,actual=observed?.managementMemberships;
+  const safeEdge=edge=>edge&&typeof edge.role==='string'&&protectedRoles.includes(edge.role)&&edge.member===managementName&&edge.adminOption===true&&edge.setOption===false&&edge.inheritOption===false;
+  require(Array.isArray(reviewed)&&reviewed.every(edge=>safeEdge(edge)&&exactKeys(edge,['role','member','grantor','adminOption','inheritOption','setOption'])&&typeof edge.grantor==='string'&&edge.grantor.length>0),'exact-reviewed-management-memberships-required');
+  require(Array.isArray(actual)&&actual.every(edge=>safeEdge(edge)&&exactKeys(edge,['role','member','grantor','adminOption','inheritOption','setOption'])&&typeof edge.grantor==='string'&&edge.grantor.length>0),'management-must-not-have-runtime-set-or-inherit');
+  // Every trusted administration grantor is independently pinned; omitted provenance is refused.
+  require(Array.isArray(actual)&&Array.isArray(reviewed)&&sorted(actual)===sorted(reviewed),'unreviewed-management-membership');
+ }
  require(observed?.schemaPresent===true,'missing-private-capability-schema');
  require(typeof expected?.callerRole==='string'&&typeof expected?.ownerRole==='string'&&expected.callerRole!==expected.ownerRole,'reviewed-distinct-roles-required');
  require(typeof expected?.schemaOwner==='string'&&![expected?.callerRole,expected?.ownerRole].includes(expected?.schemaOwner)&&observed?.schemaOwner===expected?.schemaOwner,'separate-reviewed-plan-owner-required');
@@ -17,7 +37,6 @@ export function validateDailyCapabilityPreflight(observed,expected){
   const role=observed?.roles?.find(r=>r.name===name);
   require(role&&!role.login&&!role.superuser&&!role.bypassRls&&role.replication===false&&!role.createRole&&!role.createDb&&!role.inherit,'restricted-role-required:'+name);
  }
- const sorted=value=>JSON.stringify((value??[]).map(v=>JSON.stringify(v&&typeof v==='object'?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v)).sort());
  require(Array.isArray(observed?.memberships)&&sorted(observed.memberships)===sorted(expected?.memberships??[]),'unreviewed-role-membership');
  require((observed?.memberships??[]).every(m=>{const login=observed?.roles?.find(r=>r.name===m.member);return m.role===expected?.callerRole&&m.adminOption===false&&m.inheritOption===false&&m.setOption===true&&login?.login===true&&!login.superuser&&!login.bypassRls&&login.replication===false&&!login.createRole&&!login.createDb&&!login.inherit;}),'bound-login-must-have-only-restricted-invoker-membership');
  const principals=[expected?.callerRole,expected?.ownerRole,...(expected?.memberships??[]).map(m=>m.member)];

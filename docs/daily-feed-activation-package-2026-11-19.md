@@ -1,3 +1,5 @@
+> **Phase 1 continuation:** the disabled service was created at c59ec2e, but database installation was held for managed-role compatibility. Read the [tested amendment](daily-feed-disabled-setup-amendment-2026-11-19.md) before further setup. This original exact-revision record is preserved below.
+
 # Synthetic daily feed — staging approval package, 19 November 2026
 
 ## Decision now requested

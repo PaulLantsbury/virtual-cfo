@@ -31,3 +31,9 @@ Private source/material/summary artifacts are owner-only and excluded from GitHu
 A clean hosted Linux install, exact deployed source, secret-file/TLS/session behavior, independently pinned target metadata, private live baseline comparison, material provisioning, bounded gap publication, retirement and first actual scheduled run remain staged acceptance gates. The proposed programme is finite and remains off. No frontend tests/build were rerun because this preparation changes no customer application code. Prior known API Xero declaration failures remain a separate workstream.
 
 See [approval package](daily-feed-activation-package-2026-11-19.md) for the two explicit phases.
+
+
+## Approved Phase 1 continuation
+The separate cron built and became live at exact c59ec2e at 18:44 London. Its disabled verification run succeeded at 18:46 with connections=0. No database schema/role/login/credential change was attempted. The original installer was reproduced locally under a non-superuser managed administrator and failed ownership transfer, rolling back all proposed authority.
+
+Revised source 299998abfe61da90f55417111e565dbc065699b7 adds the managed-control-plane audit and installation choreography, stable policy-role pins and explicit session-pooler transport. Updated native regression group passed 76 checks; final tightened focused group passed 27. These overlap earlier evidence and include harnesses. Runtime build probe passed locally; revised source is not deployed or installed. See [amended approval](daily-feed-disabled-setup-amendment-2026-11-19.md).

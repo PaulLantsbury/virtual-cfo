@@ -1,6 +1,8 @@
+> **Latest continuation:** [Amended disabled-setup approval](daily-feed-disabled-setup-amendment-2026-11-19.md). Managed installation compatibility was reproduced and fixed locally; revised source 299998abfe61da90f55417111e565dbc065699b7 is pending exact approval. No live DDL or credential creation occurred.
+
 # Night Scout handover — 19 November 2026
 
-The next large parallel preparation batch is complete. Reviewed code is published at c59ec2ecb4f58f942f3839bd8c7ee455066c2c5e on the isolated synthetic-company branch. The live website remains the separate c7e69211 release; the automatic synthetic feed remains OFF and its proposed database authority/service are still absent.
+The next large parallel preparation batch is complete. Reviewed code is published at c59ec2ecb4f58f942f3839bd8c7ee455066c2c5e on the isolated synthetic-company branch. The live website remains the separate c7e69211 release. The separate cron has since been created under the original approval and verified disabled at c59ec2e with zero database connections. Database authority and credentials remain absent; the automatic feed is OFF.
 
 Implemented and reviewed finite recurring selection, immutable material preparation, exact material-digest matching, guarded hosted installation, temporary fixed historical-gap publication/retirement and a separate disabled cron proposal. Native PostgreSQL 17.6 tests cover actual permissions, concurrency, rollback, lost acknowledgements, recurring receipt selection and original evidence protection. The private full scenario prepared 45 canonical days through 19 December and preserved the original 24 seals/January archive. See the [validation record](synthetic-daily-validation-2026-11-19.md); offline preparation is not proof that the live baseline matches.
 
@@ -8,4 +10,4 @@ Next: obtain Phase 1 disabled staging setup approval from the [concrete package]
 
 Permanent programme initialThrough remains 4 November. Reviewed entries include the historical gap plus future days; normal selection remains yesterday-only. Current proposed historical range is 5–18 November, expiring 20 November 01:45 London. If that window has passed, refresh the finite review instead of changing the clock, reusing an initial loader or catching up automatically.
 
-No hosted changes were made in this batch. Existing local working trees, original January, other stores and provider infrastructure were preserved. Temporary test PostgreSQL clusters were stopped; private owner-only rehearsal artifacts are outside version control. Do not publish credentials, raw snapshots or operational binding details. Resume from the [current roadmap](roadmap-2026-11-19.md).
+The initial preparation made no hosted changes; the later approved continuation created only the disabled separate cron. Existing local working trees, original January, other stores and provider infrastructure were preserved. Temporary test PostgreSQL clusters were stopped; private owner-only rehearsal artifacts are outside version control. Do not publish credentials, raw snapshots or operational binding details. Resume from the [current roadmap](roadmap-2026-11-19.md).

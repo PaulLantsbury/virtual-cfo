@@ -1,0 +1,11 @@
+# Night Scout handover — 19 November 2026
+
+The next large parallel preparation batch is complete. Reviewed code is published at c59ec2ecb4f58f942f3839bd8c7ee455066c2c5e on the isolated synthetic-company branch. The live website remains the separate c7e69211 release; the automatic synthetic feed remains OFF and its proposed database authority/service are still absent.
+
+Implemented and reviewed finite recurring selection, immutable material preparation, exact material-digest matching, guarded hosted installation, temporary fixed historical-gap publication/retirement and a separate disabled cron proposal. Native PostgreSQL 17.6 tests cover actual permissions, concurrency, rollback, lost acknowledgements, recurring receipt selection and original evidence protection. The private full scenario prepared 45 canonical days through 19 December and preserved the original 24 seals/January archive. See the [validation record](synthetic-daily-validation-2026-11-19.md); offline preparation is not proof that the live baseline matches.
+
+Next: obtain Phase 1 disabled staging setup approval from the [concrete package](daily-feed-activation-package-2026-11-19.md). Verify the clean hosted build, exact deployed revision, actual secret-file/TLS/session behavior, target-compatible independently pinned metadata and private live baseline. Then request the separate Phase 2 gap/publication/activation approval. Do not treat Phase 1 as financial-write authority.
+
+Permanent programme initialThrough remains 4 November. Reviewed entries include the historical gap plus future days; normal selection remains yesterday-only. Current proposed historical range is 5–18 November, expiring 20 November 01:45 London. If that window has passed, refresh the finite review instead of changing the clock, reusing an initial loader or catching up automatically.
+
+No hosted changes were made in this batch. Existing local working trees, original January, other stores and provider infrastructure were preserved. Temporary test PostgreSQL clusters were stopped; private owner-only rehearsal artifacts are outside version control. Do not publish credentials, raw snapshots or operational binding details. Resume from the [current roadmap](roadmap-2026-11-19.md).

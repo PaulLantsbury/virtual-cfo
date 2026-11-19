@@ -1,3 +1,5 @@
+> **Applied continuation:** Revised disabled source 299998abfe61da90f55417111e565dbc065699b7 was approved and applied. Guarded schema/restricted login and private file delivery are complete; hosted acceptance is blocked by native secret-file layout and existing statistics-view access. Feed OFF, no financial writes. See the [current roadmap](roadmap-2026-11-19.md) for exact acceptance gates.
+
 > **Phase 1 continuation:** the disabled service was created at c59ec2e, but database installation was held for managed-role compatibility. Read the [tested amendment](daily-feed-disabled-setup-amendment-2026-11-19.md) before further setup. This original exact-revision record is preserved below.
 
 # Synthetic daily feed — staging approval package, 19 November 2026

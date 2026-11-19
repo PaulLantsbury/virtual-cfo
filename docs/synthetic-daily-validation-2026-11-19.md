@@ -1,3 +1,5 @@
+> **Applied continuation:** Revised disabled source 299998abfe61da90f55417111e565dbc065699b7 was approved and applied. Guarded schema/restricted login and private file delivery are complete; hosted acceptance is blocked by native secret-file layout and existing statistics-view access. Feed OFF, no financial writes. See the [current roadmap](roadmap-2026-11-19.md) for exact acceptance gates.
+
 # Synthetic recurring-feed validation — 19 November 2026
 
 Reviewed source revision: `c59ec2ecb4f58f942f3839bd8c7ee455066c2c5e`, integrated on the isolated synthetic-company branch. Existing local work and the provider baseline were preserved. No hosted deployment, schema/grant, financial write, programme enablement or schedule creation occurred.

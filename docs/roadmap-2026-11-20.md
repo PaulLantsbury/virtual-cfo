@@ -1,3 +1,15 @@
+## Agreed next-session task — extend synthetic programme by three months
+
+Paul requested this roadmap addition on 20 November 2026. Prepare another **three calendar months of synthetic activity beyond the existing 19 December 2026 ceiling: 20 December 2026–19 March 2027 inclusive**.
+
+Extend the same isolated £750,000 annual-sales, four-employee UK retailer scenario, preserving seasonal Christmas/gifting patterns, VAT, outsourced fulfilment, historical records and company isolation. Include the financial daily inputs and matching cash/customer/acquisition source coverage; prepare the corresponding closed-month summaries and cohort observation-window updates so the new pages remain current.
+
+Before the existing programme expires, prepare and test the continuation package: exact generated dates/hashes, existing-record protection, publication/recovery checks, reporting coverage, restricted access expiry and scheduler configuration. Review genuine scheduled-run evidence first. Keep Shopify/Xero/marketing-provider tests separate.
+
+**This records the requested extension; it does not claim new data is generated or published, or that scheduling/credentials have been extended.** Prepare the concrete package under the existing approval rules before applying hosted data, access or feed changes. No changes applied today. Stop for the day; pick this up next session.
+
+---
+
 # Day-end checkpoint — Cash and New Marketing connected and verified
 
 **20 November 2026: approved staging batch complete. Stop for the day.**

@@ -1,31 +1,34 @@
-**Planning choice — 20 November:** The user chose preparation of a Pro/Small **2 GB** staging release (approximately US$30/month before tax and usage, subject to the reviewed package). This authorizes preparation only: no paid upgrade, helper replacement or further publication attempt. The candidate's full 15-day financial/protection/retirement rehearsal passes, but its roughly 954 MiB backend RSS rules out the current 0.5 GB Nano. Ordinary/month-end/ceiling and exact installation/private-binding checks are being completed before approval.
-
 # Night Scout handover — 20 November 2026
 
-## Safe checkpoint after one publication attempt
+## Resume here
 
-The exact approved inherited-read installer amendment applied successfully; before/after inherited-access attestations and the independent nine-function authority audit matched. All 23 staging batches are committed and verified, 45 reviewed days exist, and the approved expiry is 20 December 03:00 UTC. Do not repeat completed setup.
+Read the [prepared 2 GB package](daily-feed-2gb-release-review-2026-11-20.md) and [current roadmap](roadmap-2026-11-20.md). User selected preparation only. Paid plan/resize, source replacement, private financial binding and another publication attempt still require the package's explicit approval.
 
-Two separately approved restricted publisher invocations returned **unknown-rollback-stop-independent-inspection-only**. Independent receipts are absent for all 15 reviewed historical days; all 17 history/correction full-row hashes match the original 4 November prefix exactly, and all 22 protected global fingerprints match. No active restricted backend remained. Thus no financial publication persisted.
+Live state: runtime fb5 disabled with automatic deployment off; published horizon 4 November; 24 seals; 45 reviewed inputs staged; zero daily receipts; ordinary and bridge switches off; runtime gap membership revoked and manager temporary SET clean. Existing login expiry 20 December 03:00 UTC. Do not restage the 23 committed batches, repeat the expiry change or reinstall existing capability/login.
 
-Runtime bridge membership was revoked, bridge approval disabled, ordinary programme remains disabled, and manager temporary owner/reviewer SET access is absent. Bridge schema remains installed **disabled**; do not bypass the original retirement guard requiring committed receipts. Exact Render runtime fb5 remains disabled with automatic deployment off. Financial candidate binding has not been delivered to Render.
+## Why activation stopped
 
-## Second attempt and capacity finding
+Two separately approved attempts ended in rollback uncertainty. Independent receipts/full-row source/protected-global checks confirmed no missing days persisted after either. Database automatic recovery occurred during the second attempt; no manual restart. Current Nano allocation up to 0.5 GB is insufficient for measured full-prefix validation. Increasing timeouts did not resolve publication.
 
-The approved timeout-aligned publisher used server/client/wall limits of 240/270/300 seconds, plus bounded cleanup. Its single allowed invocation returned publication-phase uncertainty with no SQLSTATE; that approval is consumed. The database entered automatic recovery during the attempt, later reported healthy, and no manual restart was performed.
+The first text alternative is rejected for this release. The byte-equivalent helper proposal passes full financial and cleanup proofs but still needs the reviewed 2 GB capacity and measured reserve. Local RSS is not a hosted OOM diagnosis or guarantee.
 
-Fresh post-attempt independent checks again found 15 absent receipts, the exact original 17-table prefix and unchanged 22 protected globals. Runtime temporary membership is revoked; both switches are false and manager SET access is clean. A same-second migration-history version collision occurred during bridge-disable bookkeeping; independent readback confirmed the disable body committed and permissions were cleaned. Do not replay the action because its history insertion returned an error.
+## Exact prepared change
 
-Live read-only dashboard confirms Nano with up to 0.5 GB RAM. Local backend RSS profiling of the largest full-source check found original JSONB aggregation around 1.29 GiB and first equivalent ordered-text aggregation around 527 MiB. RSS includes shared/cache pages; hosted OOM is not proven. Neither more timeouts nor the first alternative establishes adequate capacity.
+Proposal source **cc5b9363b2936aa38a2be4d77982c8638aac0ed3**.
+Only inspect_daily_receipt changes: old stored definition **9dcc83df08aee2998c859448bca2c9336030a8a2e52ba6e75fb97c6ba87091b3**, new **3ac48f815453db116edc467c972f88778e2be48ec493eaa6954f6a56c1d5d645**.
+Guarded installer SQL **11dc291516d63f5f5c647f6ccf8e3beb03f24007a9b5ff246309125eec44c7fb**.
+No new extension/permanent privilege or financial formula. Original 5032 source is the historical baseline; after applying this patch its helper hash alone is intentionally superseded.
 
-## Diagnosis and continuation
+Six native installer tests, full-prefix atomic rollback/ACL/duplicate checks, full 15-day financial/source/protection/retirement proof and ordinary Nov20/Nov30/Dec19 + same-connection capacity tests pass. Correct-context independent core catalog and private binding checks pass, only intended hash/explicit prepared financial flags differ. Full statistics metadata remains separately verified and must be refreshed after resize.
 
-The private publisher inherits a 65-second client query timeout but sets a 90-second server statement timeout. This mismatch can cause client failure before useful database completion/error reporting; it does not prove the sole cause. The 15-day loop repeats whole-prefix receipt hashes. Logs show a connection reset; no server timeout was established from the bounded error search.
+Private immutable 28-artifact manifest, exact raw SQL, binding forms/pins, new nine-function armed/prerearm expectations, source/original/global captures and read-only inspector remain outside GitHub. Manifest billing/source/financial/execution approval flags are false. Do not publish private hashes or paths.
 
-The timeout amendment has been tested and applied to its one allowed invocation. Next finish offline byte-equivalent memory reduction and full financial/protection rehearsal before proposing an installed-function/source change or another attempt. Existing materials and original checksums must remain immutable. No third invocation is authorized. Recheck absent receipts, original full-row prefix, complete source/temporary authority and protected globals first. Regrant only the exact original runtime bridge SET membership and re-enable the exact finite bridge only under that approval. Preserve expiry 21 November 01:45 London and original 5–19 November range.
+## Approved boundaries to retain
 
-On success reconcile all 15 independent receipts, source graph/profit/coverage evidence and protections; revoke runtime membership and apply unchanged retirement SQL; verify ordinary metadata restored. Only then continue the existing conditional daily activation approval. First ordinary publication remains 21 November 02:00 London for 20 November. Stop rather than catch up a missed window.
+The user has not approved the paid package yet. It proposes one further attempt only after new exact approval, resize/health/reserve, full protection and new-source authority gates. Preserve unchanged 15-day scope and expiry. Do not start after **21 November 00:45 London**; bridge expires 01:45. First ordinary window **21 November 02:00 London** for 20 November. Ceiling 19 December, login expiry 20 December 03:00 UTC. Missed windows are not catch-up authority.
 
-Private execution copies, amendment artifacts, receipts, installed authority proof and stop record remain outside GitHub. Raw exception messages, SQL, credentials and account details must not enter diagnostics or public docs.
+No automatic retry, 4 GB upgrade, source widening or downgrade. Unknown install/commit must be inspected before any replay. On failure keep programmes off and remove runtime gap access; do not bypass the retirement receipt guard or automatically restore the old memory-heavy helper while outcomes are uncertain. Existing disabled bridge schema is retained until properly retired.
 
-[Roadmap](roadmap-2026-11-20.md) · [Approved installer amendment](daily-feed-installer-amendment-2026-11-20.md)
+Paid Pro subscription and Small resize are distinct actions; Pro does not resize Nano. Owner enters payment/tax details in Supabase, never chat/repo. Keep spend cap enabled but do not call it a compute cap. Preserve other projects/provider jobs. Resizing interrupts staging DB connections, not a website deployment. No production/provider transactions/new services are included.
+
+After successful retirement, revalidate normal catalog, deliver exact new financial binding/pin to the same service and conditionally activate existing runtime fb5. First real scheduled receipt/reporting acceptance remains outstanding; do not claim ongoing feed success from local tests or a disabled cron run.

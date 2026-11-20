@@ -25,7 +25,7 @@ These are annual scenario targets independently checked against the source ledge
 
 Two years of isolated synthetic history and 24 monthly seals exist. The current published daily horizon is **4 November**, with **45** immutable reviewed inputs staged through **19 December**, but **zero** daily publication receipts. The separate recurring service is prepared and disabled. Two approved publication attempts committed no new financial records; independent readback verified the existing prefix and protected data unchanged. Both financial programmes are off and runtime temporary bridge access is removed.
 
-The user selected preparation of a **2 GB paid release package**, not an upgrade or further financial attempt. [The current roadmap](roadmap-2026-11-20.md) is authoritative for application status and approvals.
+The user selected preparation of a **2 GB paid release package**, not an upgrade or further financial attempt. The [reviewed source, capacity gates and proposed application sequence](daily-feed-2gb-release-review-2026-11-20.md) are now complete; explicit paid/source/one-attempt approval is still required. [The current roadmap](roadmap-2026-11-20.md) is authoritative for application status and approvals.
 
 ### Capacity is part of test-data acceptance
 

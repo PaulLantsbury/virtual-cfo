@@ -20,7 +20,7 @@ const dummyDays=Array.from({length:15},(_,i)=>({day:addDays(first,i),materialSha
 function functions(sql){const found=[];for(const match of sql.matchAll(/CREATE FUNCTION finance_daily_gap_v1\./g)){const start=match.index,end=sql.indexOf('END$$;',start);assert.ok(end>start);found.push(sql.slice(start,end+7));}return found;}
 test('managed bridge preserves the pinned ordinary source and every derived financial function body',()=>{
  assert.equal(sha(source),GAP_CAPABILITY_SOURCE_SHA256);
- const approval=approvalFor(dummyDays),base=prepareDailyGapProposal({capabilitySql:source,approval}),candidate=prepareManagedDailyGapProposal({capabilitySql:source,approval,managementRole:manager});
+ const approval=approvalFor(dummyDays),base=prepareDailyGapProposal({capabilitySql:source,approval}),candidate=prepareManagedDailyGapProposal({capabilitySql:source,approval,managementRole:manager,managementReadAllData:true});
  assert.deepEqual(functions(candidate.sql),functions(base.sql));assert.equal(candidate.remoteApplied,false);assert.equal(candidate.activationAllowed,false);
  assert.match(candidate.sql,/SET LOCAL createrole_self_grant='set'/);assert.match(candidate.retirementSql,/Retirement requires only exact bootstrap/);
  assert.ok(candidate.retirementSql.indexOf('SET LOCAL ROLE daily_capability_owner')<candidate.retirementSql.indexOf('DROP FUNCTION'));
@@ -36,13 +36,13 @@ test('native managed bridge installs, rolls back, reconciles and retires with on
   execFileSync(bin+'pg_ctl',['-D',dir+'/data','-l',dir+'/server.log','-o',`-h '' -k ${dir}`,'-w','start'],{stdio:'pipe'});started=true;
   const connect=async user=>{const c=new Client({host:dir,user,database:'postgres',password:async()=>'',ssl:false});await c.connect();return c;};
   admin=await connect('supabase_admin');await admin.query('CREATE ROLE postgres LOGIN CREATEROLE CREATEDB INHERIT NOSUPERUSER BYPASSRLS REPLICATION;ALTER DATABASE postgres OWNER TO postgres');
-  installer=await connect('postgres');observer=await connect('supabase_admin');
+  await admin.query('GRANT pg_read_all_data TO postgres');installer=await connect('postgres');observer=await connect('supabase_admin');
   await installer.query('CREATE TABLE public.stores(id uuid PRIMARY KEY,currency_code text,timezone text);CREATE SCHEMA finance_v1;CREATE TABLE finance_v1.original_january(body jsonb);INSERT INTO finance_v1.original_january VALUES(\'{"protected":"original January protocol sentinel"}\')');
   await installer.query("INSERT INTO public.stores VALUES($1,'GBP','Europe/London'),('10000000-0000-4000-8000-000000000099','GBP','Europe/London')",[target]);
   await installer.query(await readFile(new URL('./history-schema.sql',import.meta.url),'utf8'));
   await installer.query("INSERT INTO finance_history_v2.contracts VALUES($1,'uk-gifts-v2','synthetic-history-v2-2026-11','2024-11-01',$2,'GBP','Europe/London')",[target,initial]);
   await installer.query("INSERT INTO finance_history_v2.orders VALUES('10000000-0000-4000-8000-000000000099','unrelated-retained-order','2026-11-04','{\"unrelated\":true}','retained-unrelated-fixture')");
-  await installer.query(prepareHostedDailyProposal({capabilitySql:source,expectedThrough:initial,expectedSeals:0,managementRole:manager}).sql);
+  await installer.query(prepareHostedDailyProposal({capabilitySql:source,expectedThrough:initial,expectedSeals:0,managementRole:manager,managementReadAllData:true}).sql);
   const ordinaryDefinition=(await admin.query("SELECT pg_get_functiondef('finance_daily_v1.append_completed_day(date,date)'::regprocedure) body")).rows[0].body;
   const setClock=async iso=>admin.query(`CREATE OR REPLACE FUNCTION pg_catalog.clock_timestamp() RETURNS timestamptz LANGUAGE sql VOLATILE AS $$SELECT '${iso}'::timestamptz$$`);
   // Only this brand-new disposable cluster substitutes its server clock. Source functions are unchanged.
@@ -64,7 +64,7 @@ test('native managed bridge installs, rolls back, reconciles and retires with on
   await installer.query("INSERT INTO finance_daily_v1.programme(singleton,store_id,contract_base,initial_through,ceiling,protected_seals,enabled) VALUES(true,$1,$2,$3,$4,'[]',false)",[target,base,initial,last]);
   for(const m of materials)await installer.query('INSERT INTO finance_daily_v1.reviewed_days VALUES($1,$2,$3,$4)',[m.day,JSON.stringify(m.material),m.materialSha256,m.reviewRef]);
   await installer.query('RESET ROLE;REVOKE daily_capability_reviewer FROM CURRENT_USER GRANTED BY CURRENT_USER;COMMIT');
-  const approval=approvalFor(materials.map(({day,materialSha256,sourceHash,reviewRef})=>({day,materialSha256,sourceHash,reviewRef}))),proposal=prepareManagedDailyGapProposal({capabilitySql:source,approval,managementRole:manager});
+  const approval=approvalFor(materials.map(({day,materialSha256,sourceHash,reviewRef})=>({day,materialSha256,sourceHash,reviewRef}))),proposal=prepareManagedDailyGapProposal({capabilitySql:source,approval,managementRole:manager,managementReadAllData:true});
   const before=(await admin.query("SELECT jsonb_build_object('contract',(SELECT to_jsonb(t) FROM finance_history_v2.contracts t WHERE store_id=$1),'january',(SELECT jsonb_agg(body) FROM finance_v1.original_january),'other',(SELECT jsonb_agg(to_jsonb(t)) FROM finance_history_v2.orders t WHERE store_id<>$1)) body",[target])).rows[0].body;
   await t.test('late installation failure atomically restores role, namespace, permanent authority and settings',async()=>{
    await assert.rejects(installer.query(proposal.sql.replace('COMMIT;','SELECT 1/0;\nCOMMIT;')),/division by zero/);await installer.query('ROLLBACK');
@@ -73,6 +73,10 @@ test('native managed bridge installs, rolls back, reconciles and retires with on
    assert.equal((await installer.query("SELECT current_setting('createrole_self_grant') value")).rows[0].value,'');
    assert.equal((await admin.query("SELECT pg_get_functiondef('finance_daily_v1.append_completed_day(date,date)'::regprocedure) body")).rows[0].body,ordinaryDefinition);
   });
+  await t.test('legacy guard refuses implicit usage and forged direct schema grant is not accepted',async()=>{
+   const legacy=prepareManagedDailyGapProposal({capabilitySql:source,approval,managementRole:manager});await assert.rejects(installer.query(legacy.sql),/Unexpected existing managed bridge installation access/);await installer.query('ROLLBACK');
+   await admin.query('GRANT USAGE ON SCHEMA finance_daily_v1 TO postgres');await assert.rejects(installer.query(proposal.sql),/Exact inherited read-all baseline/);await installer.query('ROLLBACK');await admin.query('REVOKE USAGE ON SCHEMA finance_daily_v1 FROM postgres');
+  });
   await installer.query(proposal.sql);
   await t.test('installation leaves exact bootstrap-only management and no selectable, inherited or CREATE authority',async()=>{
    const rows=(await admin.query("SELECT m.rolname member,g.oid grantor,a.admin_option,a.set_option,a.inherit_option FROM pg_auth_members a JOIN pg_roles p ON p.oid=a.roleid JOIN pg_roles m ON m.oid=a.member JOIN pg_roles g ON g.oid=a.grantor WHERE p.rolname='daily_gap_invoker'")).rows;
@@ -80,6 +84,9 @@ test('native managed bridge installs, rolls back, reconciles and retires with on
    for(const role of ['daily_capability_owner','daily_capability_reviewer','daily_gap_invoker'])assert.equal((await installer.query("SELECT pg_has_role(current_user,$1,'SET') v",[role])).rows[0].v,false);
    assert.equal((await admin.query("SELECT has_schema_privilege('daily_capability_owner','finance_daily_gap_v1','CREATE') v")).rows[0].v,false);
    assert.equal((await admin.query("SELECT has_database_privilege('daily_capability_reviewer',current_database(),'CREATE') v")).rows[0].v,false);
+   assert.equal((await installer.query("SELECT pg_has_role(current_user,'pg_read_all_data','USAGE') v")).rows[0].v,true);
+   assert.equal((await installer.query("SELECT has_schema_privilege(current_user,'finance_daily_v1','USAGE') v")).rows[0].v,true);
+   assert.equal((await admin.query("SELECT count(*)::int n FROM pg_namespace n CROSS JOIN LATERAL aclexplode(n.nspacl) a WHERE n.nspname='finance_daily_v1' AND a.grantee=(SELECT oid FROM pg_roles WHERE rolname='postgres')")).rows[0].n,0);
   });
   await admin.query('CREATE ROLE bridge_fixture_runtime LOGIN NOINHERIT NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB NOREPLICATION');
   await installer.query('GRANT daily_gap_invoker TO bridge_fixture_runtime WITH ADMIN FALSE,INHERIT FALSE,SET TRUE');runtime=await connect('bridge_fixture_runtime');await runtime.query('SET ROLE daily_gap_invoker');
@@ -114,6 +121,7 @@ test('native managed bridge installs, rolls back, reconciles and retires with on
    assert.equal((await observer.query("SELECT pg_get_functiondef('finance_daily_v1.append_completed_day(date,date)'::regprocedure) body")).rows[0].body,ordinaryDefinition);
    const after=(await observer.query("SELECT jsonb_build_object('contract',(SELECT to_jsonb(t) FROM finance_history_v2.contracts t WHERE store_id=$1),'january',(SELECT jsonb_agg(body) FROM finance_v1.original_january),'other',(SELECT jsonb_agg(to_jsonb(t)) FROM finance_history_v2.orders t WHERE store_id<>$1)) body",[target])).rows[0].body;
    assert.deepEqual(after,{...before,contract:{...before.contract,through_day:last}});
+   assert.equal((await installer.query("SELECT pg_has_role(current_user,'pg_read_all_data','USAGE') v")).rows[0].v,true);
    for(const role of ['daily_capability_owner','daily_capability_reviewer'])assert.equal((await installer.query("SELECT pg_has_role(current_user,$1,'SET') v",[role])).rows[0].v,false);
   });
  }finally{if(runtime)await runtime.end();if(observer)await observer.end();if(installer)await installer.end();if(admin)await admin.end();if(started)execFileSync(bin+'pg_ctl',['-D',dir+'/data','-m','fast','-w','stop'],{stdio:'pipe'});}

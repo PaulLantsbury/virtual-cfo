@@ -23,10 +23,11 @@ function cleanupOwners(extra=''){return `DO $managed_gap_cleanup$ BEGIN
 END $managed_gap_cleanup$;`;}
 function gapBootstrapOnly(manager){return `(SELECT count(*) FROM pg_auth_members WHERE roleid=(SELECT oid FROM pg_roles WHERE rolname='daily_gap_invoker'))<>1 OR EXISTS(SELECT 1 FROM pg_auth_members a JOIN pg_roles m ON m.oid=a.member JOIN pg_roles g ON g.oid=a.grantor WHERE a.roleid=(SELECT oid FROM pg_roles WHERE rolname='daily_gap_invoker') AND (m.rolname<>${lit(manager)} OR a.grantor<>10 OR NOT g.rolsuper OR NOT a.admin_option OR a.inherit_option OR a.set_option))`;}
 
-export function prepareManagedDailyGapProposal({capabilitySql,approval,managementRole}={}){
+export function prepareManagedDailyGapProposal({capabilitySql,approval,managementRole,managementReadAllData=false}={}){
  const base=prepareDailyGapProposal({capabilitySql,approval});
  const management=prepareHostedDailyProposal({capabilitySql,expectedThrough:base.approval.initialThrough,expectedSeals:0,managementRole}).managementRole;
  ensure(management,'Explicit reviewed managed bridge installer required');
+ ensure(typeof managementReadAllData==='boolean','Explicit boolean managed read-all baseline required');
  let sql=base.sql;
  sql=once(sql,'CREATE ROLE daily_gap_invoker',managerGuard(management)+`\nDO $managed_gap_database$ BEGIN IF has_database_privilege('daily_capability_reviewer',current_database(),'CREATE') OR has_schema_privilege(current_user,'finance_daily_v1','USAGE') OR COALESCE(has_function_privilege(current_user,(SELECT f.oid FROM pg_proc f JOIN pg_namespace n ON n.oid=f.pronamespace WHERE n.nspname='finance_daily_v1' AND f.proname='guard_reviewed_material' AND f.pronargs=0),'EXECUTE'),true) THEN RAISE EXCEPTION 'Unexpected existing managed bridge installation access';END IF; EXECUTE format('GRANT CREATE ON DATABASE %I TO daily_capability_reviewer',current_database()); END $managed_gap_database$;\nSET LOCAL createrole_self_grant='set';\n`+temporaryOwners+`\nSET LOCAL ROLE daily_capability_reviewer;\nGRANT USAGE ON SCHEMA finance_daily_v1 TO ${ident(management.name)};\nGRANT EXECUTE ON FUNCTION finance_daily_v1.guard_reviewed_material() TO ${ident(management.name)};\nRESET ROLE;\nCREATE ROLE daily_gap_invoker`,'role creation');
  const usage='GRANT USAGE ON SCHEMA finance_daily_gap_v1 TO daily_capability_owner,daily_gap_invoker;';
@@ -43,6 +44,19 @@ export function prepareManagedDailyGapProposal({capabilitySql,approval,managemen
  IF pg_has_role(current_user,'daily_gap_invoker','SET') OR pg_has_role(current_user,'daily_gap_invoker','USAGE') OR has_schema_privilege('daily_capability_owner','finance_daily_gap_v1','CREATE') OR has_database_privilege('daily_capability_reviewer',current_database(),'CREATE') OR has_schema_privilege(current_user,'finance_daily_v1','USAGE') OR COALESCE(has_function_privilege(current_user,(SELECT f.oid FROM pg_proc f JOIN pg_namespace n ON n.oid=f.pronamespace WHERE n.nspname='finance_daily_v1' AND f.proname='guard_reviewed_material' AND f.pronargs=0),'EXECUTE'),true) THEN RAISE EXCEPTION 'Temporary bridge installation access remains';END IF;
 END $managed_gap_final$;`;
  sql=once(sql,'COMMIT;',installedCleanup+'\nCOMMIT;','installation commit');
+ if(managementReadAllData){
+  // Existing managed pg_read_all_data grants implicit schema USAGE. Never revoke
+  // that bootstrap membership or mistake it for runtime/owner selectable authority.
+  const usage="has_schema_privilege(current_user,'finance_daily_v1','USAGE')";
+  ensure(sql.split(usage).length===3,'Exactly initial/final implicit schema usage guards required');
+  sql=sql.split(usage).join('('+usage+' IS DISTINCT FROM true)');
+  const attestation=`DO $managed_read_all_baseline$ BEGIN
+ IF NOT pg_has_role(current_user,'pg_read_all_data','USAGE') OR pg_has_role(current_user,'pg_write_all_data','USAGE') OR NOT has_schema_privilege(current_user,'finance_daily_v1','USAGE') OR EXISTS(SELECT 1 FROM pg_namespace n CROSS JOIN LATERAL aclexplode(COALESCE(n.nspacl,acldefault('n',n.nspowner))) a WHERE n.nspname='finance_daily_v1' AND a.grantee=(SELECT oid FROM pg_roles WHERE rolname=current_user)) THEN RAISE EXCEPTION 'Exact inherited read-all baseline and absent direct schema grant required';END IF;
+END $managed_read_all_baseline$;`;
+  sql=once(sql,'SET LOCAL createrole_self_grant=\'set\';',attestation+'\nSET LOCAL createrole_self_grant=\'set\';','inherited read-all initial attestation');
+  sql=once(sql,'COMMIT;',attestation+'\nCOMMIT;','inherited read-all final attestation');
+ }
+
 
  let retirementSql=base.retirementSql;
  retirementSql=once(retirementSql,'BEGIN;','BEGIN;\n'+managerGuard(management)+'\n'+temporaryOwners+'\nSET LOCAL ROLE daily_capability_owner;','retirement authority');
@@ -50,6 +64,6 @@ END $managed_gap_final$;`;
  retirementSql=once(retirementSql,membershipGuard,`IF ${gapBootstrapOnly(management.name)} THEN RAISE EXCEPTION 'Retirement requires only exact bootstrap gap administration; revoke separate runtime membership first';END IF;`,'bootstrap membership retirement');
  retirementSql=once(retirementSql,'DROP TRIGGER gap_fixed ON finance_daily_gap_v1.approval;','SET LOCAL ROLE daily_capability_reviewer;\nDROP TRIGGER gap_fixed ON finance_daily_gap_v1.approval;','reviewer-owned retirement');
  retirementSql=once(retirementSql,'DROP ROLE daily_gap_invoker;','RESET ROLE;\n'+cleanupOwners()+'\nDROP ROLE daily_gap_invoker;','role retirement');
- return {...base,status:'private-managed-fixed-gap-proposal-only',managementRole:management,sql,sqlSha256:sha(sql),retirementSql,retirementSha256:sha(retirementSql),unadaptedSqlSha256:base.sqlSha256,unadaptedRetirementSha256:base.retirementSha256,
+ return {...base,status:'private-managed-fixed-gap-proposal-only',managementRole:management,managementReadAllData,sql,sqlSha256:sha(sql),retirementSql,retirementSha256:sha(retirementSql),unadaptedSqlSha256:base.sqlSha256,unadaptedRetirementSha256:base.retirementSha256,
   limitations:[...base.limitations,'Managed adaptation changes installation/retirement choreography only; the ordinary capability source and derived finite financial functions remain unchanged.','Only the pinned trusted non-superuser management session may install/retire. Temporary SET/CREATE are removed; no INHERIT grant is added.','The unremovable bootstrap ADMIN-only gap-role membership is permitted solely for its declared installer, then removed by DROP ROLE; any separate runtime membership blocks retirement.','All generated authority remains disabled/unapplied and requires a new exact financial milestone approval.']};
 }

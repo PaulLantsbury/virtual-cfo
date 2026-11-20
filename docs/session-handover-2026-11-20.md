@@ -1,3 +1,9 @@
+## Release held to preserve newer live Plan — 20 November 2026
+
+The approved2ec14a6 deployment was not triggered: preflight found newer live Plan115a6117. Exact tested union **950baf935c33ac7c00cbdc53f3be6e93bebab81a** preserves all eight live Plan application/test files and all approved connections; independent file comparison,130 tests, TypeScript and production build pass. [Concrete amendment](new-pages-connections-preserve-plan-amendment-2026-11-20.md) awaits exact-source website approval. No hosted settings, database, provider or feed changes were made. Current staging remains115a6117. Next: approve amended website source, deploy and verify the signed-in pages, then separate cash/acquisition evidence work.
+
+---
+
 ## Full connections implementation — 20 November 2026
 
 [Next website batch](new-pages-full-connections-batch-2026-11-20.md) is implemented and locally tested, not deployed. Profit now has reviewed monthly trends, weighted comparisons and full-breakdown/rate deltas. Marketing has reviewed financial trends, break-even/targets and explicit-baseline financial scenarios. Cash has a separate reviewed EBITDA history; cash balances/movements still require source data. The verified synthetic company has no cash snapshots. Prepared cash adapters/builders do not count as a live connection.

@@ -1,3 +1,13 @@
+## Cash and new Marketing data batch in progress — 20 November 2026
+
+The current live design baseline is146e80c1c39ae25540a2f26f7ef7e0bca75582c5, including the separate /new-marketing Acquisition, Conversion and Retention tabs. That design, prior Marketing Efficiency, Plan and existing reporting connections are being preserved.
+
+Prepared locally:24 closed months of separately reconciled synthetic cash and24 acquisition/retention/session summaries, bound to the isolated company's exact selected financial versions. Read-only staging source totals match the programme across all24months. A disposable PostgreSQL rehearsal loaded all48records and verified unchanged replay. Core cash/source/reader/RLS/browser checks pass; no staging schema, grants, data or deployment has been changed. Source privacy keeps raw fictional identity/bank proofs out of the browser and routine repository documentation.
+
+The new Marketing cells now have prepared wiring for paid-first CAC, counts, refund-linked new/repeat revenue and separately labelled simulated sessions/funnel inputs. A bounded matched-cost/cohort review is checking the remaining first-order economics/payback figures; unsupported figures stay yellow. The final exact-source/data/permission/website package will be presented for one bundled approval after that check. Daily feed/provider transactions, production and budget remain unchanged.
+
+---
+
 ## Live and signed-in verified — New page connections, 20 November 2026
 
 **950baf935c33ac7c00cbdc53f3be6e93bebab81a is live**, preserving the newer115a6117 Plan. [Hosted verification](https://github.com/PaulLantsbury/virtual-cfo/blob/e27c041452669a96c75606b48472fc4aa9029d99/docs/new-pages-full-connections-hosted-verification-2026-11-20.md) records real twelve-month Profit/Cash profit-reference history, Marketing financial history/conditional scenario, October/September per-order comparisons, company switching and zero observed browser/application errors.130 local tests, TypeScript and production build passed. The earlier release hold is resolved; no repeat release approval is needed.

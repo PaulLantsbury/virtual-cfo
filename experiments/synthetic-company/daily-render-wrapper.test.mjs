@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as fs from 'node:fs/promises';
@@ -13,7 +14,7 @@ async function fixture(){
  // Fictional credentials are intentionally absent from the fixture and all diagnostics.
  const body='{"purpose":"fictional-unit-binding","appendApproved":false}\n';
  await fs.writeFile(target,body,{mode:0o644});await fs.symlink(target,sourcePath);
- return {root,mounted,targetDir,target,sourcePath,body,options:{sourcePath,trustedSourceRoot:root,trustedOwnerUid:process.getuid(),runtimeUid:process.getuid(),repoRoot:join(root,'repo'),temporaryRoot:root},cleanup:()=>fs.rm(root,{recursive:true,force:true})};
+ return {root,mounted,targetDir,target,sourcePath,body,options:{expectedSha256:createHash('sha256').update(body).digest('hex'),sourcePath,trustedSourceRoot:root,trustedOwnerUid:process.getuid(),runtimeUid:process.getuid(),repoRoot:join(root,'repo'),temporaryRoot:root},cleanup:()=>fs.rm(root,{recursive:true,force:true})};
 }
 test('trusted symlink delivery becomes an exclusive owner-only regular file and is cleaned up',async()=>{
  const f=await fixture();try{
@@ -34,7 +35,7 @@ test('untrusted ownership, writable parent/target and targets inside source fail
 });
 test('oversize, malformed JSON, invalid UTF8 and unsafe paths never produce a private copy',async()=>{
  for(const value of [Buffer.alloc(RENDER_BINDING_MAX_BYTES+1,32),Buffer.from('{malformed'),Buffer.from([0xff,0xfe])]){
-  const f=await fixture();try{await fs.writeFile(f.target,value);await assert.rejects(stageRenderMountedBinding(f.options));assert.ok(!(await fs.readdir(f.root)).some(name=>name.startsWith('night-scout-render-binding-')));}finally{await f.cleanup();}
+  const f=await fixture();try{await fs.writeFile(f.target,value);f.options.expectedSha256=createHash('sha256').update(value).digest('hex');await assert.rejects(stageRenderMountedBinding(f.options));assert.ok(!(await fs.readdir(f.root)).some(name=>name.startsWith('night-scout-render-binding-')));}finally{await f.cleanup();}
  }
  const f=await fixture();try{for(const sourcePath of ['relative.json',f.sourcePath+'/../binding.json',f.sourcePath+'\0'])await assert.rejects(stageRenderMountedBinding({...f.options,sourcePath}));}finally{await f.cleanup();}
 });
@@ -74,13 +75,47 @@ test('delivery verification uses the unchanged strict operator reader on the rea
  const f=await fixture();let stagedPath,reads=0;
  const binding={purpose:OPERATOR_PURPOSE,syntheticOnly:true,scope:{storeId:'d7500000-0000-4000-8000-000000000009',profile:'uk-gifts-v2',edition:'synthetic-history-v2-2026-11',anchor:'2024-11-01',currency:'GBP',timezone:'Europe/London'},connection:{host:'/private/tmp/fictional-unused-socket',port:5432,database:'postgres',user:'copy_binding_fixture',password:'',ssl:false},approvedDay:'2026-11-05',expectedThrough:'2026-11-04',initialThrough:'2026-11-04',ceiling:'2026-11-05',appendApproved:false,expected:{callerRole:'daily_capability_invoker',ownerRole:'daily_capability_owner',schemaOwner:'daily_capability_reviewer',memberships:[{role:'daily_capability_invoker',member:'copy_binding_fixture',adminOption:false,inheritOption:false,setOption:true}],protectedFingerprintsAccepted:false}};
  try{
-  await fs.writeFile(f.target,JSON.stringify(binding));
+  await fs.writeFile(f.target,JSON.stringify(binding));f.options.expectedSha256=createHash('sha256').update(JSON.stringify(binding)).digest('hex');
   const stage=async()=>{const staged=await stageRenderMountedBinding(f.options);stagedPath=staged.path;return staged;};
   const readBinding=async path=>{reads++;return readPrivateOperatorBinding(path);};
   const result=await renderDailyCli(['--verify-delivery'],{stage,readBinding,invoke:async()=>{throw Error('Operator execution is forbidden in verification');}});
   assert.deepEqual(result,{state:'delivery-verified-disabled',bindingValid:true,appendApproved:false,protectedFingerprintsAccepted:false,mutationAttempted:false,connections:0});assert.equal(reads,1);
   await assert.rejects(fs.lstat(stagedPath),{code:'ENOENT'});
-  await fs.writeFile(f.target,JSON.stringify({...binding,appendApproved:true}));await assert.rejects(verifyRenderBindingDelivery({stage,readBinding}),/disabled-pending/);
+  await fs.writeFile(f.target,JSON.stringify({...binding,appendApproved:true}));f.options.expectedSha256=createHash('sha256').update(JSON.stringify({...binding,appendApproved:true})).digest('hex');await assert.rejects(verifyRenderBindingDelivery({stage,readBinding}),/disabled-pending/);
   await assert.rejects(renderDailyCli(['--enabled','--verify-delivery'],{stage,readBinding}),/separate-purpose/);
+ }finally{await f.cleanup();}
+});
+
+test('missing or malformed independent approval pin refuses before any filesystem access',async()=>{
+ for(const expectedSha256 of [undefined,null,'','A'.repeat(64),'0'.repeat(63),'0'.repeat(65)]){
+  let io=0;const api=new Proxy({},{get(){return async()=>{io++;throw Error('No filesystem access allowed');};}});
+  await assert.rejects(stageRenderMountedBinding({expectedSha256,api}),/approved-binding-digest-required/);assert.equal(io,0);
+ }
+});
+test('digest mismatch and replay of old valid JSON refuse before parsing or copying',async()=>{
+ const f=await fixture();try{
+  for(const body of ['{bad json','{"purpose":"older-reviewed-binding","appendApproved":false}',f.body+' ']){
+   await fs.writeFile(f.target,body);await assert.rejects(stageRenderMountedBinding(f.options),/approved-digest-differs/);
+   assert.ok(!(await fs.readdir(f.root)).some(n=>n.startsWith('night-scout-render-binding-')));
+  }
+ }finally{await f.cleanup();}
+});
+test('only fixed root-owned Render mount may be writable, with exact independent bytes and strict other ancestors',async()=>{
+ const f=await fixture();try{
+  await fs.chmod(f.mounted,0o777);
+  let writableOther=false,wrongOwner=false;
+  const source='/etc/secrets/synthetic-daily-binding.json',target='/etc/secrets/target/mounted.json';
+  const map=p=>p===source?f.sourcePath:p===target?f.target:p==='/etc/secrets/target'?f.targetDir:p==='/etc/secrets'?f.mounted:p;
+  const api={...fs,
+   lstat:async p=>{if(p==='/'||p==='/etc')return {isDirectory:()=>true,isSymbolicLink:()=>false,uid:0,mode:p==='/etc'&&writableOther?0o40777:0o40755};const stat=await fs.lstat(map(p));if(p.startsWith('/etc/secrets'))return new Proxy(stat,{get(o,k){if(k==='uid')return wrongOwner&&p==='/etc/secrets'?1:0;const v=o[k];return typeof v==='function'?v.bind(o):v;}});return stat;},
+   realpath:async p=>p===source||p===target?target:fs.realpath(map(p)),
+   open:async(p,...args)=>{const file=await fs.open(map(p),...args);if(p!==target)return file;return {read:(...a)=>file.read(...a),close:()=>file.close(),stat:async()=>{const s=await file.stat();return new Proxy(s,{get(o,k){if(k==='uid')return 0;const v=o[k];return typeof v==='function'?v.bind(o):v;}});}};}
+  };
+  const options={...f.options,sourcePath:source,trustedSourceRoot:'/',trustedOwnerUid:0,api};
+  const staged=await stageRenderMountedBinding(options);assert.equal(await fs.readFile(staged.path,'utf8'),f.body);await staged.cleanup();
+  writableOther=true;await assert.rejects(stageRenderMountedBinding(options),/parent-not-trusted/);writableOther=false;
+  wrongOwner=true;await assert.rejects(stageRenderMountedBinding(options),/parent-not-trusted/);wrongOwner=false;
+  await fs.chmod(f.targetDir,0o777);await assert.rejects(stageRenderMountedBinding(options),/parent-not-trusted/);await fs.chmod(f.targetDir,0o700);
+  await fs.writeFile(f.target,f.body+' ');await assert.rejects(stageRenderMountedBinding(options),/approved-digest-differs/);
  }finally{await f.cleanup();}
 });

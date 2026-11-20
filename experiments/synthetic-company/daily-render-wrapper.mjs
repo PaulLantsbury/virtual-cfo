@@ -1,4 +1,5 @@
 /** Unapplied Render delivery adaptation. Strict operator binding checks remain unchanged. */
+import {createHash,timingSafeEqual} from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import {constants} from 'node:fs';
 import {dirname,resolve,relative,isAbsolute,join,sep} from 'node:path';
@@ -7,27 +8,31 @@ import {tmpdir} from 'node:os';
 
 export const RENDER_BINDING_MOUNT='/etc/secrets/synthetic-daily-binding.json';
 export const RENDER_BINDING_MAX_BYTES=1048576;
+export const RENDER_BINDING_DIGEST_ENV='NIGHT_SCOUT_BINDING_SHA256';
 const repositoryRoot=fileURLToPath(new URL('../../',import.meta.url));
 const ensure=(value,code)=>{if(!value){const error=new Error(code);error.operatorErrorClass='render-binding-stage-refused';throw error;}};
 const inside=(root,path)=>{const rel=relative(root,path);return rel===''||(!isAbsolute(rel)&&rel!=='..'&&!rel.startsWith('..'+sep));};
 const unchanged=(a,b)=>['dev','ino','mode','uid','size','mtimeMs','ctimeMs'].every(key=>a[key]===b[key]);
-async function trustedDirectories(api,path,root,owner){
+async function trustedDirectories(api,path,root,owner,writableMount){
  ensure(inside(root,path),'mounted-secret-outside-trusted-root');
  const paths=[];for(let current=path;;current=dirname(current)){paths.push(current);if(current===root)break;ensure(current!==dirname(current),'mounted-secret-parent-root-differs');}
- for(const directory of paths.reverse()){const stat=await api.lstat(directory);ensure(stat.isDirectory()&&!stat.isSymbolicLink()&&stat.uid===owner&&(stat.mode&0o022)===0,'mounted-secret-parent-not-trusted');}
+ for(const directory of paths.reverse()){const stat=await api.lstat(directory);ensure(stat.isDirectory()&&!stat.isSymbolicLink()&&stat.uid===owner&&((stat.mode&0o022)===0||directory===writableMount),'mounted-secret-parent-not-trusted');}
 }
 /** Test-only filesystem/layout injection is not exposed by the Render CLI. */
-export async function stageRenderMountedBinding({sourcePath=RENDER_BINDING_MOUNT,trustedSourceRoot='/',trustedOwnerUid=0,runtimeUid=process.getuid(),repoRoot=repositoryRoot,temporaryRoot=tmpdir(),api=fs}={}){
+export async function stageRenderMountedBinding({sourcePath=RENDER_BINDING_MOUNT,trustedSourceRoot='/',trustedOwnerUid=0,runtimeUid=process.getuid(),repoRoot=repositoryRoot,temporaryRoot=tmpdir(),api=fs,expectedSha256=process.env[RENDER_BINDING_DIGEST_ENV]}={}){
+ // The separately delivered private approval pin is authority; the writable mount is transport only.
+ ensure(typeof expectedSha256==='string'&&/^[a-f0-9]{64}$/.test(expectedSha256),'independently-approved-binding-digest-required');
+ const writableMount=sourcePath===RENDER_BINDING_MOUNT&&trustedSourceRoot==='/'&&trustedOwnerUid===0?'/etc/secrets':undefined;
  ensure(typeof sourcePath==='string'&&isAbsolute(sourcePath)&&resolve(sourcePath)===sourcePath&&!/[\r\n\0]/.test(sourcePath),'exact-absolute-mounted-secret-path-required');
  ensure(isAbsolute(trustedSourceRoot)&&resolve(trustedSourceRoot)===trustedSourceRoot&&isAbsolute(temporaryRoot),'absolute-trusted-roots-required');
  const actualRepoRoot=await api.realpath(repoRoot);
  ensure(!inside(actualRepoRoot,sourcePath),'mounted-secret-must-be-outside-source');
- await trustedDirectories(api,dirname(sourcePath),trustedSourceRoot,trustedOwnerUid);
+ await trustedDirectories(api,dirname(sourcePath),trustedSourceRoot,trustedOwnerUid,writableMount);
  const linkBefore=await api.lstat(sourcePath);
  ensure((linkBefore.isSymbolicLink()||linkBefore.isFile())&&linkBefore.uid===trustedOwnerUid,'mounted-secret-entry-not-trusted');
  const target=await api.realpath(sourcePath);
  ensure(isAbsolute(target)&&!inside(actualRepoRoot,target),'mounted-secret-target-must-be-outside-source');
- await trustedDirectories(api,dirname(target),trustedSourceRoot,trustedOwnerUid);
+ await trustedDirectories(api,dirname(target),trustedSourceRoot,trustedOwnerUid,writableMount);
  const before=await api.lstat(target);
  ensure(before.isFile()&&!before.isSymbolicLink()&&before.uid===trustedOwnerUid&&(before.mode&0o022)===0&&before.size>0&&before.size<=RENDER_BINDING_MAX_BYTES,'mounted-secret-target-not-trusted-or-bounded');
  let input,output,directory,destination,created=false;
@@ -40,8 +45,10 @@ export async function stageRenderMountedBinding({sourcePath=RENDER_BINDING_MOUNT
   ensure(length>0&&length<=RENDER_BINDING_MAX_BYTES,'mounted-secret-exceeds-bounded-read');
   ensure(unchanged(before,await input.stat())&&unchanged(before,await api.lstat(target)),'mounted-secret-target-changed-during-read');
   ensure(unchanged(linkBefore,await api.lstat(sourcePath))&&await api.realpath(sourcePath)===target,'mounted-secret-delivery-changed-during-read');
-  await trustedDirectories(api,dirname(sourcePath),trustedSourceRoot,trustedOwnerUid);
-  await trustedDirectories(api,dirname(target),trustedSourceRoot,trustedOwnerUid);
+  await trustedDirectories(api,dirname(sourcePath),trustedSourceRoot,trustedOwnerUid,writableMount);
+  await trustedDirectories(api,dirname(target),trustedSourceRoot,trustedOwnerUid,writableMount);
+  const actualDigest=createHash('sha256').update(bytes.subarray(0,length)).digest();
+  ensure(timingSafeEqual(actualDigest,Buffer.from(expectedSha256,'hex')),'mounted-secret-approved-digest-differs');
   let text;try{text=new TextDecoder('utf-8',{fatal:true}).decode(bytes.subarray(0,length));JSON.parse(text);}catch{ensure(false,'mounted-secret-json-invalid');}
   directory=await api.mkdtemp(join(temporaryRoot,'night-scout-render-binding-'));await api.chmod(directory,0o700);
   directory=await api.realpath(directory);

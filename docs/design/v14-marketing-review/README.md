@@ -54,3 +54,13 @@ The scenario adds an unsaved test checklist, scope/owner fields and a proposed r
 At mobile widths, Amounts and View occupy one compact row; Period and Compare use native dropdowns on the next row. They share the desktop state and retain every original option. Desktop controls retain their existing appearance. The response curve stays expanded while its numerical table has a separate closed-by-default disclosure.
 
 Fourteen focused financial/status/driver checks and frontend TypeScript pass. Browser acceptance checks both responsive controls, the independent table disclosure, changing scenario draft reset and missing-comparison explanation. Hosted deployment is verified separately.
+
+### Shared numbered section framing — 20 November
+
+Paul requested the Profit Engine blue section frames and 01–04 badges on Marketing and the completed/new pages; he clarified that “Scenario Finder” means Opportunity Finder, not Scenario Planner. A cosmetic DecisionSection component copies the existing Profit Engine frame, badge, spacing and responsive title treatment without applying Profit Engine typography to other page contents.
+
+Marketing now groups its unchanged content into 01 position (briefing/cards), 02 explanation (coverage/history), 03 action (scenario/test planner), 04 supporting numbers. Opportunity Finder groups its existing sample headline, action list, one-off cash examples and supporting assumptions into the same four numbered frames. The current staging Cash Control view receives frames around summary, cash pressures, recovery actions and supporting detail. Existing sample/unsupported-source notices stay visible before the framed content. No financial calculations, ranking, gates, selectors, action state or routes change.
+
+The redesigned Cash demo already uses matching 01–04 frames; only intermediate-width frame padding is aligned with Profit Engine. Profit Engine remains the unchanged visual reference. Scenario Planner, unfinished page redesigns and the temporary original Marketing page are outside this cosmetic pass.
+
+Frontend TypeScript passes. Browser checks cover section counts/labels, reference styling and responsive layout; hosted acceptance is verified after deployment. No new financial test logic is needed for wrapping existing content.

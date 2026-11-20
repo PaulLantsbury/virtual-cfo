@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DecisionSection } from "@/components/DecisionSection";
 import { SHARED_OPPORTUNITIES } from "@/lib/mock-data";
 import { ChevronDown, FlaskConical, Lock, Target } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -270,6 +271,7 @@ export default function Opportunities() {
         <p className="text-sm text-muted-foreground mt-2">Monthly example amounts are summed without resolving overlapping actions. They are not a forecast or a validated combined benefit. One-off cash examples remain separate. Upgrading does not activate real analysis.</p>
       </section>
 
+      <DecisionSection id="opportunities-position" number="01" eyebrow="YOUR FINANCIAL POSITION" title="The opportunity headline">
       {/* ── CFO verdict ── */}
       <div className="sc-purple rounded-2xl px-6 py-6 mb-10">
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
@@ -346,6 +348,8 @@ export default function Opportunities() {
         </div>
       </div>
 
+      </DecisionSection>
+      <DecisionSection id="opportunities-actions" number="02" eyebrow="FROM INSIGHT TO ACTION" title="Review the sample actions">
       {/* ── Priority actions ── */}
       {visibleQueue.length > 0 ? (
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
@@ -532,6 +536,8 @@ export default function Opportunities() {
         </div>
       )}
 
+      </DecisionSection>
+      <DecisionSection id="opportunities-cash" number="03" eyebrow="KEEP CASH SEPARATE" title="One-off cash examples">
       {/* ── Sample cash release projects ── */}
       {cashReleaseProjects.length > 0 && (
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-10">
@@ -601,6 +607,8 @@ export default function Opportunities() {
         </div>
       )}
 
+      </DecisionSection>
+      <DecisionSection id="opportunities-support" number="04" eyebrow="DETAIL WITHOUT THE CLUTTER" title="Supporting numbers and assumptions">
       <p className="text-sm text-muted-foreground mb-6">Store-specific CFO advice is unavailable. The examples above are not generated advice.</p>
 
       <DataBenchmarkAssumptions
@@ -610,6 +618,7 @@ export default function Opportunities() {
         className="mb-2"
       />
 
+      </DecisionSection>
     </AppLayout>
   );
 }

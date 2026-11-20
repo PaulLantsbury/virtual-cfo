@@ -1,5 +1,6 @@
 import { useActiveStore } from "@/lib/auth/AuthProvider";
 import { useState } from "react";
+import { DecisionSection } from "@/components/DecisionSection";
 import {
   Sparkles, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight,
   AlertTriangle, CheckCircle, Info, Zap, Activity, Shield, Lock,
@@ -451,6 +452,7 @@ export default function CashControl() {
         <p className="text-sm text-muted-foreground mt-2">The sample runway model does not use measured cash burn over the last three complete months. It is not a cash runway estimate based on your actual cash flows.</p>
       </section>
 
+      <DecisionSection id="cash-position" number="01" eyebrow="YOUR FINANCIAL POSITION" title="Your cash summary">
       {/* ── Sample cash summary ── */}
       <div className="sc-purple rounded-2xl shadow-md mb-6 overflow-hidden">
         <div className="sc-purple-header flex flex-wrap items-center gap-3 px-6 py-3">
@@ -517,6 +519,8 @@ export default function CashControl() {
         </div>
       </div>
 
+      </DecisionSection>
+      <DecisionSection id="cash-movement" number="02" eyebrow="EXPLAIN THE MOVEMENT" title="What is affecting cash?">
       {/* ── Cash Headroom Opportunity ── */}
       <div className="rounded-2xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/60 dark:bg-emerald-950/15 shadow-sm mb-8 px-6 py-5">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
@@ -602,6 +606,8 @@ export default function CashControl() {
         ))}
       </div>
 
+      </DecisionSection>
+      <DecisionSection id="cash-actions" number="03" eyebrow="FROM INSIGHT TO ACTION" title="Your cash review plan">
       {/* ── Cash Recovery Plan ── */}
       <div className="mb-2">
         <h2 className="text-xl font-bold text-foreground">Sample Cash Recovery Actions</h2>
@@ -717,6 +723,8 @@ export default function CashControl() {
         <p className="text-sm text-muted-foreground">Business-specific cash answers are not available here. The sample explanations and simulator above illustrate the concept only.</p>
       </div>
 
+      </DecisionSection>
+      <DecisionSection id="cash-support" number="04" eyebrow="DETAIL WITHOUT THE CLUTTER" title="Supporting numbers and assumptions">
       {/* ── Supporting Analysis ── */}
       <details className="group bg-card rounded-2xl shadow-sm border border-border/50 mb-8 overflow-hidden">
         <summary className="list-none cursor-pointer px-6 py-5 hover:bg-secondary/20 transition-colors">
@@ -947,6 +955,7 @@ export default function CashControl() {
         className="mb-2"
       />
 
+      </DecisionSection>
     </AppLayout>
   );
 }

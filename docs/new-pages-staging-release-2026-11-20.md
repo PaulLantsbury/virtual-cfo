@@ -21,7 +21,7 @@ Current website baseline: **ea10f8e34930e8ca13e995572a4f9a17190751bb**, includin
 
 Frontend TypeScript; **119** financial/evidence/cash/Plan tests; production frontend build; standalone demo build and live-infrastructure exclusion guard. Existing sourcemap/mixed-import/bundle-size warnings remain. Local desktop and 390px fixture UI review is separate from actual signed-in staging source checks. The existing staging history reader independently returned October sales £64,800, gross profit £32,400, contribution £23,515 and EBITDA £10,592.05.
 
-## Requested release
+## Approved release scope — applied
 
 Deploy **only this exact revision** to the existing staging website, then verify all three signed-in New pages against the existing reviewed monthly source, selected period/version and comparison/per-order controls. Confirm yellow unavailable and explicit sample states; check switching store does not retain prior amounts. If the staging baseline changes again, preserve/review the newer work before release.
 
@@ -29,4 +29,4 @@ Use a specific-commit deployment. Leave provider auto-deploy branches, provider 
 
 Rollback is the existing website revision **ea10f8e34930e8ca13e995572a4f9a17190751bb**. No database rollback is needed: this package changes website reads and presentation only.
 
-After release, update the roadmap/handover with the observed hosted result. Do not claim full cash, CAC/cohort, forecast, weekly trend or first unattended daily-feed acceptance from this deployment.
+The roadmap/handover now record the observed hosted result. Do not claim full cash, CAC/cohort, forecast, weekly trend or first unattended daily-feed acceptance from this deployment.

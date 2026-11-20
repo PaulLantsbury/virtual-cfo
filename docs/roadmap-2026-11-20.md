@@ -1,3 +1,5 @@
+**Tested amendment ready:** [Exact installer correction and approval scope](daily-feed-installer-amendment-2026-11-20.md). Ten native checks and the full-prefix compatibility rehearsal passed; independent review complete. Await exact amendment approval, then resume at installation only.
+
 ## Phase 2 application checkpoint — 20 November
 
 The user approved the conditional Phase 2 staging package. All **23 bounded staging batches** committed and independently verified: **45 immutable daily materials**, programme still **disabled**. The approved existing-login expiry adjustment to **20 December 03:00 UTC** is applied.

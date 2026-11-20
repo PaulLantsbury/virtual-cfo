@@ -1,3 +1,32 @@
+## Cash and new Marketing source package prepared — 20 November 2026
+
+The [cash/acquisition batch](cash-acquisition-data-batch-2026-11-20.md) prepares48 scoped snapshots across24 closed months and connects the newly changed /new-marketing tabs, preserving the live8287d10 briefing/design and Plan. Includes cash reconciliations/history, identity-linked revenue/CAC, separately labelled simulated sessions and allocated first-order/mature-cohort costs. Six historical financial dependencies prevent stale mature results after a correction.215 tests plus the latest 16 focused merge checks and production bundles pass; desktop/mobile local preview checked. No staging data, new grants, flag activation or deployment yet.
+
+Next: review the exact source/data/read-access/website activation package, then conditionally apply and verify signed-in staging. Remaining comparisons/customer drill-downs/forecast/action tracking and future recurring supplemental publication stay explicit follow-on work. Financial daily feed, providers, other stores and production unchanged.
+
+---
+
+
+
+## Marketing growth duplicate — 20 November 2026
+
+Preserved Marketing Efficiency at /marketing-efficiency with the New prefix removed. Added temporary New Marketing at /new-marketing with Acquisition, Conversion and Retention tabs, shared context, four numbered blue sections per tab, visual diagnosis and Explore the Numbers. Existing reviewed monthly financials are reused read-only; missing customer/funnel/cohort measures stay explicitly unavailable. Fictional design requires an explicit switch. Product AOV follows the agreed original-sales definition; mature cohorts retain separate observation windows. Plan and provider/feed work are preserved. See design/v16-marketing-growth/README.md for scope, definitions and remaining data acceptance. TypeScript and eleven calculation tests passed; mobile width checked at 390px. Customer identity/funnel ingestion and acquisition-to-future-repeat forecasting remain pending, not claimed connected.
+
+
+## Live and signed-in verified — New page connections, 20 November 2026
+
+**950baf935c33ac7c00cbdc53f3be6e93bebab81a is live**, preserving the newer115a6117 Plan. [Hosted verification](new-pages-full-connections-hosted-verification-2026-11-20.md) records real twelve-month Profit/Cash profit-reference history, Marketing financial history/conditional scenario, October/September per-order comparisons, company switching and zero observed browser/application errors.130 local tests, TypeScript and production build passed. The earlier release hold is resolved; no repeat release approval is needed.
+
+Next: prepare separately reviewed synthetic cash inputs/reader, then matched acquisition/cohort evidence. Cash bank/movement/resilience and customer metrics still remain yellow/unavailable; New Plan remains explicitly sample. Daily-feed/provider/database/production settings unchanged. Genuine overnight acceptance remains a separate milestone. Twelve-month source reads completed interactively; formal latency/load benchmarking remains outstanding.
+
+---
+
+## Release held to preserve newer live Plan — 20 November 2026
+
+The approved2ec14a6 deployment was not triggered: preflight found newer live Plan115a6117. Exact tested union **950baf935c33ac7c00cbdc53f3be6e93bebab81a** preserves all eight live Plan application/test files and all approved connections; independent file comparison,130 tests, TypeScript and production build pass. [Concrete amendment](new-pages-connections-preserve-plan-amendment-2026-11-20.md) awaits exact-source website approval. No hosted settings, database, provider or feed changes were made. Current staging remains115a6117. Next: approve amended website source, deploy and verify the signed-in pages, then separate cash/acquisition evidence work.
+
+---
+
 ## Full connections implementation — 20 November 2026
 
 [Next website batch](new-pages-full-connections-batch-2026-11-20.md) is implemented and locally tested, not deployed. Profit now has reviewed monthly trends, weighted comparisons and full-breakdown/rate deltas. Marketing has reviewed financial trends, break-even/targets and explicit-baseline financial scenarios. Cash has a separate reviewed EBITDA history; cash balances/movements still require source data. The verified synthetic company has no cash snapshots. Prepared cash adapters/builders do not count as a live connection.
@@ -51,9 +80,3 @@ The monthly chart now uses only the selected future calendar months. Each month 
 Full 3/6-month prior-year comparisons are available in the fixture at this date. The 12-month view explicitly marks October/November 2026 prior-year actuals unavailable because the fixture ends part-way through October; it does not fill partial/missing actuals or break the two future paths. This fixes comparison alignment and presentation without changing the forecast financial model or draft version.
 
 Validation: six new chart alignment/completeness/leap-year/per-order tests and the twelve monthly model/persistence tests passed, with frontend TypeScript. Desktop and real 390px iframe review verified direct input focus, chart updates and no page overflow. Hosted staging build and live comparison are verified at publication. Scope is Plan only; connected reporting, provider services and daily-feed schedules remain unchanged.
-
-
-## Marketing growth duplicate — 20 November 2026
-
-Preserved Marketing Efficiency at /marketing-efficiency with the New prefix removed. Added temporary New Marketing at /new-marketing with Acquisition, Conversion and Retention tabs, shared context, four numbered blue sections per tab, visual diagnosis and Explore the Numbers. Existing reviewed monthly financials are reused read-only; missing customer/funnel/cohort measures stay explicitly unavailable. Fictional design requires an explicit switch. Product AOV follows the agreed original-sales definition; mature cohorts retain separate observation windows. Plan and provider/feed work are preserved. See design/v16-marketing-growth/README.md for scope, definitions and remaining data acceptance. TypeScript and eleven calculation tests passed; mobile width checked at 390px. Customer identity/funnel ingestion and acquisition-to-future-repeat forecasting remain pending, not claimed connected.
-

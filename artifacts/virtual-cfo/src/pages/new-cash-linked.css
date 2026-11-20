@@ -3,3 +3,5 @@
 .cash-demo.nc-sample-unlinked .nc-buffer-control input{color:#713f12!important;background:#fef08a;border-color:#a16207}.cash-demo .nc-not-linked th{color:inherit}
 
 .nc-reviewed-profit-chart{width:100%;min-width:0;margin:20px 0}.nc-linked .nc-table-scroll{overflow-x:auto}.nc-linked details summary{cursor:pointer;padding:12px 0;font-weight:600}.nc-linked .nc-table-scroll td:last-child{max-width:260px;overflow-wrap:anywhere}
+
+.nc-linked .nc-table-scroll{max-width:100%;overflow-x:auto}.nc-linked .nc-card,.nc-linked .nc-section{min-width:0}.nc-linked p{overflow-wrap:anywhere}

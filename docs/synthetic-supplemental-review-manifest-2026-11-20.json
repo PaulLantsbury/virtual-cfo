@@ -1,0 +1,23 @@
+{
+  "contract": "synthetic-supplemental-review-v1",
+  "state": "prepared-not-applied",
+  "from": "2024-11-01",
+  "to": "2026-10-31",
+  "months": 24,
+  "records": 48,
+  "kinds": [
+    "cash",
+    "acquisition"
+  ],
+  "economicsIncluded": true,
+  "planHash": "05e6ace2953f8857a064aa7cd58eae5c4c3ec4f87b6b3fe763c5dd62e43c0348",
+  "recordsHash": "48128db86890f6a71a5be2e02c4ecae5a20706632a80474258287f4eeb3a915c",
+  "observedAt": "2026-11-20T17:50:41.447Z",
+  "recordBytes": 351665,
+  "schemaSha256": "260ff1b2e6698f4d5cc55fa40279d0e7ed2d75cd3a8508ccd4ed1a4a7526529d",
+  "publicationSqlSha256": "654597c8a80838bf5909df3d9231f87f28ed7ab53ef9308299042bbddd088c2f",
+  "sqlBytes": 355833,
+  "toolArgumentBytes": 386813,
+  "unchangedReplayVerified": true,
+  "singleCallReplayVerified": true
+}

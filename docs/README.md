@@ -1,3 +1,5 @@
+> **Prepared next data batch:** [Cash and new Marketing connections](cash-acquisition-data-batch-2026-11-20.md), [v16 coverage register](new-marketing-v16-connection-register-2026-11-20.md) and [review manifest](synthetic-supplemental-review-manifest-2026-11-20.json). Prepared/tested, not applied or deployed.
+
 > **LATEST — 20 November 2026, released New pages:** [Hosted verification](new-pages-hosted-verification-2026-11-20.md) · [Data-link audit](new-pages-data-links-2026-11-20.md) · [Roadmap](roadmap-2026-11-20.md). Approved website release is live; linked monthly figures checked, unsupported/sample values yellow. Daily feed remains independent; first unattended receipt still unverified.
 
 > **PICK UP NEXT TIME — 31 October 2026:** [Current roadmap and ordered resume checklist](roadmap-2026-10-31.md): accept genuine Shopify/Xero transaction flows in parallel with v11 review and supported-data wiring.

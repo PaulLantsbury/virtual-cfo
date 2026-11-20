@@ -1,3 +1,11 @@
+## Live and signed-in verified — New page connections, 20 November 2026
+
+**950baf935c33ac7c00cbdc53f3be6e93bebab81a is live**, preserving the newer115a6117 Plan. [Hosted verification](new-pages-full-connections-hosted-verification-2026-11-20.md) records real twelve-month Profit/Cash profit-reference history, Marketing financial history/conditional scenario, October/September per-order comparisons, company switching and zero observed browser/application errors.130 local tests, TypeScript and production build passed. The earlier release hold is resolved; no repeat release approval is needed.
+
+Next: prepare separately reviewed synthetic cash inputs/reader, then matched acquisition/cohort evidence. Cash bank/movement/resilience and customer metrics still remain yellow/unavailable; New Plan remains explicitly sample. Daily-feed/provider/database/production settings unchanged. Genuine overnight acceptance remains a separate milestone. Twelve-month source reads completed interactively; formal latency/load benchmarking remains outstanding.
+
+---
+
 > **Prepared next website batch — 20 November:** Read docs/new-pages-full-connections-batch-2026-11-20.md and current roadmap first. New monthly trends/scenarios are locally tested, not yet deployed; cash/acquisition inputs remain separate. Preserve released New Plan and independent daily feed.
 
 > **Released New pages — 20 November 2026:** Website revision a77e65822345087aa708fad19c98bbf3e9a73b21 is live and signed-in verified. Read docs/new-pages-hosted-verification-2026-11-20.md, docs/new-pages-data-links-2026-11-20.md and docs/roadmap-2026-11-20.md. Preserve New Plan, yellow unsupported/sample markers, strict monthly evidence and the independent enabled daily feed. No repeat deployment approval or database/provider actions are needed for the completed package. Older notices below are historical.

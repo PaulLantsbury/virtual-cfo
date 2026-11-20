@@ -1,3 +1,11 @@
+## Live and signed-in verified — New page connections, 20 November 2026
+
+**950baf935c33ac7c00cbdc53f3be6e93bebab81a is live**, preserving the newer115a6117 Plan. [Hosted verification](new-pages-full-connections-hosted-verification-2026-11-20.md) records real twelve-month Profit/Cash profit-reference history, Marketing financial history/conditional scenario, October/September per-order comparisons, company switching and zero observed browser/application errors.130 local tests, TypeScript and production build passed. The earlier release hold is resolved; no repeat release approval is needed.
+
+Next: prepare separately reviewed synthetic cash inputs/reader, then matched acquisition/cohort evidence. Cash bank/movement/resilience and customer metrics still remain yellow/unavailable; New Plan remains explicitly sample. Daily-feed/provider/database/production settings unchanged. Genuine overnight acceptance remains a separate milestone. Twelve-month source reads completed interactively; formal latency/load benchmarking remains outstanding.
+
+---
+
 ## Release held to preserve newer live Plan — 20 November 2026
 
 The approved2ec14a6 deployment was not triggered: preflight found newer live Plan115a6117. Exact tested union **950baf935c33ac7c00cbdc53f3be6e93bebab81a** preserves all eight live Plan application/test files and all approved connections; independent file comparison,130 tests, TypeScript and production build pass. [Concrete amendment](new-pages-connections-preserve-plan-amendment-2026-11-20.md) awaits exact-source website approval. No hosted settings, database, provider or feed changes were made. Current staging remains115a6117. Next: approve amended website source, deploy and verify the signed-in pages, then separate cash/acquisition evidence work.

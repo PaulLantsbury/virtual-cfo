@@ -1,8 +1,10 @@
+**Owner approval recorded — 20 November:** The user approved the full paid staging package, including the recurring Pro/Small 2 GB cost, exact source/private binding, one further guarded publication and conditional activation. Payment-method entry in Supabase is still required. No billing/compute/source/publication/activation action has yet been applied under this new approval; all capacity, integrity and timing gates remain mandatory. Do not request the same package approval again.
+
 # Night Scout handover — 20 November 2026
 
 ## Resume here
 
-Read the [prepared 2 GB package](daily-feed-2gb-release-review-2026-11-20.md) and [current roadmap](roadmap-2026-11-20.md). User selected preparation only. Paid plan/resize, source replacement, private financial binding and another publication attempt still require the package's explicit approval.
+Read the [prepared 2 GB package](daily-feed-2gb-release-review-2026-11-20.md) and [current roadmap](roadmap-2026-11-20.md). The user has approved the complete package. Payment-method entry remains required; after it is confirmed, continue only the exact approved plan/resize/source/binding/one-attempt/conditional activation sequence and all mandatory gates.
 
 Live state: runtime fb5 disabled with automatic deployment off; published horizon 4 November; 24 seals; 45 reviewed inputs staged; zero daily receipts; ordinary and bridge switches off; runtime gap membership revoked and manager temporary SET clean. Existing login expiry 20 December 03:00 UTC. Do not restage the 23 committed batches, repeat the expiry change or reinstall existing capability/login.
 
@@ -25,7 +27,7 @@ Private immutable 28-artifact manifest, exact raw SQL, binding forms/pins, new n
 
 ## Approved boundaries to retain
 
-The user has not approved the paid package yet. It proposes one further attempt only after new exact approval, resize/health/reserve, full protection and new-source authority gates. Preserve unchanged 15-day scope and expiry. Do not start after **21 November 00:45 London**; bridge expires 01:45. First ordinary window **21 November 02:00 London** for 20 November. Ceiling 19 December, login expiry 20 December 03:00 UTC. Missed windows are not catch-up authority.
+The paid package is now explicitly approved; owner payment readiness and the execution gates remain pending. It proposes one further attempt only after new exact approval, resize/health/reserve, full protection and new-source authority gates. Preserve unchanged 15-day scope and expiry. Do not start after **21 November 00:45 London**; bridge expires 01:45. First ordinary window **21 November 02:00 London** for 20 November. Ceiling 19 December, login expiry 20 December 03:00 UTC. Missed windows are not catch-up authority.
 
 No automatic retry, 4 GB upgrade, source widening or downgrade. Unknown install/commit must be inspected before any replay. On failure keep programmes off and remove runtime gap access; do not bypass the retirement receipt guard or automatically restore the old memory-heavy helper while outcomes are uncertain. Existing disabled bridge schema is retained until properly retired.
 

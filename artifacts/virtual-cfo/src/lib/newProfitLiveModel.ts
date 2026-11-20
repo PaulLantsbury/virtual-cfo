@@ -15,7 +15,7 @@ export function newProfitLiveTotals(month:Month|null):ProfitTotals|null {
  if(!Object.values(values).every(Number.isSafeInteger)||reversals<0||values.sales-values.cogs!==values.grossProfit||values.grossProfit+values.shipping-values.variable-values.advertising!==values.contribution||values.contribution-values.cashOverheads!==values.ebitda||values.ebitda-values.da!==values.operatingProfit)return null;
  return values;
 }
-export const NEW_PROFIT_UNLINKED = ['Weekly figures','Automatic rolling and prior-year comparison selection','Action benefit estimates','Staff and product-level diagnosis','Reminders and realised benefit tracking'] as const;
+export const NEW_PROFIT_UNLINKED = ['Weekly figures','Automatic prior-year and broader period comparison selection','Action benefit estimates','Staff and product-level diagnosis','Reminders and realised benefit tracking'] as const;
 /** Preserve independently supported sales when some costs are unavailable. */
 export function newProfitLinkedAmounts(month:Month|null):Record<keyof ProfitTotals,number|null> {
  const empty=Object.fromEntries(['gross','discounts','reversals','sales','shipping','cogs','variable','advertising','overheads','da','orders','grossProfit','contribution','cashOverheads','ebitda','operatingProfit'].map(key=>[key,null])) as Record<keyof ProfitTotals,number|null>;

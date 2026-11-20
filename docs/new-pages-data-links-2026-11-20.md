@@ -1,8 +1,10 @@
+**Released and hosted-verified — 20 November:** Approved website revision **a77e65822345087aa708fad19c98bbf3e9a73b21** is live on existing staging. October Profit/Marketing figures match reviewed history; per-order and explicit earlier-month comparison work. Unsupported cash/acquisition/forecast figures remain yellow or explicit sample. New Plan is preserved. [Hosted verification](new-pages-hosted-verification-2026-11-20.md). Daily feed unchanged; first genuine scheduled receipt still awaits 21 November.
+
 # New pages: data connections and yellow markers — 20 November 2026
 
 ## Scope and status
 
-Prepared and tested; **not deployed yet**. Base is the existing website revision ea10f8e34930e8ca13e995572a4f9a17190751bb, preserving the rewritten pages, new consolidated Plan and their navigation. The concurrently released New Plan was integrated before preparing this release; its sample review context is applied only after an explicit sample choice, never as a verified baseline. This is separate from the synthetic daily-feed runtime and its development branch.
+**Approved, deployed and hosted-verified.** Base is the existing website revision ea10f8e34930e8ca13e995572a4f9a17190751bb, preserving the rewritten pages, new consolidated Plan and their navigation. The concurrently released New Plan was integrated before preparing this release; its sample review context is applied only after an explicit sample choice, never as a verified baseline. This is separate from the synthetic daily-feed runtime and its development branch.
 
 The reviewed targets are the sidebar entries **New Marketing Efficiency** (`/marketing-efficiency`), **New Profit Engine** (`/profit-engine`; `/new-profit` redirects here), and **New Cash Control** (`/new-cash-control`). The original marketing/cash comparison pages are not substituted for these targets.
 

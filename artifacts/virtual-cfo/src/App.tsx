@@ -18,6 +18,7 @@ import VerifiedSalesPage from "@/pages/verified-sales";
 import Dashboard from "@/pages/dashboard";
 import GrowthQuality from "@/pages/growth-quality";
 import MarketingEfficiency from "@/pages/marketing-efficiency";
+import NewMarketing from "@/pages/new-marketing";
 import OriginalMarketingEfficiency from "@/pages/marketing-efficiency-original";
 import Opportunities from "@/pages/opportunities";
 import PlanPage from "@/pages/plan";
@@ -59,6 +60,7 @@ function MerchantRouter() {
       <Route path="/growth-quality" component={GrowthQuality} />
       <Route path="/marketing-efficiency-original" component={OriginalMarketingEfficiency} />
       <Route path="/marketing-efficiency" component={MarketingEfficiency} />
+      <Route path="/new-marketing" component={NewMarketing} />
       <Route path="/plan" component={PlanPage} />
       <Route path="/opportunities"><Redirect to="/plan?tab=opportunities" /></Route>
       <Route path="/profit-opportunities"><Redirect to="/plan?tab=opportunities" /></Route>

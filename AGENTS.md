@@ -1,4 +1,6 @@
-> **New pages checkpoint — 20 November 2026:** Read docs/new-pages-data-links-2026-11-20.md and docs/roadmap-2026-11-20.md first. New Profit, New Marketing and New Cash data wiring/yellow provenance markers are prepared and tested, not deployed. Base website ea10f8e34930e8ca13e995572a4f9a17190751bb. Use the existing restricted history reader; no new database grants or provider actions. Preserve the independent enabled daily feed and its finite limits. Older notices below are historical.
+> **Prepared next website batch — 20 November:** Read docs/new-pages-full-connections-batch-2026-11-20.md and current roadmap first. New monthly trends/scenarios are locally tested, not yet deployed; cash/acquisition inputs remain separate. Preserve released New Plan and independent daily feed.
+
+> **Released New pages — 20 November 2026:** Website revision a77e65822345087aa708fad19c98bbf3e9a73b21 is live and signed-in verified. Read docs/new-pages-hosted-verification-2026-11-20.md, docs/new-pages-data-links-2026-11-20.md and docs/roadmap-2026-11-20.md. Preserve New Plan, yellow unsupported/sample markers, strict monthly evidence and the independent enabled daily feed. No repeat deployment approval or database/provider actions are needed for the completed package. Older notices below are historical.
 
 > **Resume checklist — 31 October 2026:** Read `docs/roadmap-2026-10-31.md` first for the two parallel workstreams, exact scheduled-run acceptance checks, v11 source-data gates and delivery boundaries.
 

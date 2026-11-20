@@ -124,3 +124,14 @@ export function performanceStatus(actual: number | null, benchmark: number | nul
   if (actual === benchmark) return 'equal';
   return (lowerBetter ? actual < benchmark : actual > benchmark) ? 'good' : 'bad';
 }
+
+/** Explain matched-scope ratio movements without inferring campaign causes. */
+export function efficiencyDrivers(current: MarketingTotals, previous: MarketingTotals | null) {
+  if (!previous) return null;
+  const now = metrics(current), old = metrics(previous);
+  const change = (amount: number, reference: number) => Number.isFinite(amount) && Number.isFinite(reference) && reference > 0 ? (amount / reference - 1) * 100 : null;
+  return {
+    cac: { actual: now.cac, previous: old.cac, numerator: change(current.acquisitionSpend, previous.acquisitionSpend), denominator: change(current.customers, previous.customers) },
+    poas: { actual: now.poas, previous: old.poas, numerator: change(current.beforeAds, previous.beforeAds), denominator: change(current.advertising, previous.advertising) },
+  };
+}

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { aggregateDays, DAILY_SAMPLE } from '../src/lib/newProfitPreview.ts';
-import { buildMarketingReview, metrics, requirements, spendScenario, scenarioBridge, recommendation, performanceStatus } from '../src/lib/marketing/review-model.ts';
+import { buildMarketingReview, metrics, requirements, spendScenario, scenarioBridge, recommendation, performanceStatus, efficiencyDrivers } from '../src/lib/marketing/review-model.ts';
 const near = (a,b) => assert.ok(Math.abs(a-b)<1e-6, `${a} ≠ ${b}`);
 const model = buildMarketingReview({granularity:'monthly',horizon:3,comparison:'last-year'});
 const base = model.baseline30;
@@ -96,4 +96,17 @@ test('performance colours respect metric direction, equal benchmarks and missing
  assert.equal(performanceStatus(160,123),'good');
  assert.equal(performanceStatus(160,169),'bad');
  assert.equal(performanceStatus(160,200),'bad');
+});
+
+test('driver explanation follows matched ratio numerators and refuses missing comparison bases',()=>{
+ const d=efficiencyDrivers(model.current,model.previous);
+ near(d.cac.numerator,(model.current.acquisitionSpend/model.previous.acquisitionSpend-1)*100);
+ near(d.cac.denominator,(model.current.customers/model.previous.customers-1)*100);
+ near(d.poas.numerator,(model.current.beforeAds/model.previous.beforeAds-1)*100);
+ near(d.poas.denominator,(model.current.advertising/model.previous.advertising-1)*100);
+ near(d.cac.actual,metrics(model.current).cac);
+ assert.equal(efficiencyDrivers(model.current,null),null);
+ const unavailable=efficiencyDrivers(model.current,{...model.previous,acquisitionSpend:0,advertising:0,customers:0,beforeAds:-1});
+ assert.equal(unavailable.cac.numerator,null);assert.equal(unavailable.cac.denominator,null);
+ assert.equal(unavailable.poas.numerator,null);assert.equal(unavailable.poas.denominator,null);
 });

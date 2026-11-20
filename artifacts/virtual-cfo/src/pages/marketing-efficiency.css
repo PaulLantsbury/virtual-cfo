@@ -10,3 +10,14 @@
 .marketing-review .mr-tone-neutral,.marketing-review .mr-tone-unknown{color:var(--mr-muted)}
 .marketing-review .mr-benchmark-status{display:block;font-size:12px;font-weight:500;margin-top:2px}
 .marketing-review .mr-colour-key{font-size:13px;line-height:1.7;margin:12px 0;color:var(--mr-muted)}
+
+.mr-mobile-select{display:none}
+.mr-driver-note{margin-top:18px;padding:15px 17px;border-left:3px solid #818cf8;background:color-mix(in srgb,#818cf8 5%,var(--mr-card));border-radius:0 9px 9px 0;font-size:14px}
+.mr-driver-note>strong{display:block;margin-bottom:5px}.mr-driver-note>small{display:block;color:var(--mr-muted);font-size:12px;margin-top:6px}
+.mr-test-plan{margin-top:24px;padding:22px;border:1px solid var(--mr-border);border-radius:12px;background:color-mix(in srgb,#818cf8 4%,var(--mr-card))}
+.marketing-review .mr-test-plan h3{margin:5px 0 12px}.mr-test-plan>p{font-size:14px;color:var(--mr-muted)}.mr-test-plan>p+p{margin-top:12px}
+.mr-test-fields{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:14px;margin:20px 0}.mr-test-fields label{font-size:14px;font-weight:600;min-width:0}
+.marketing-review .mr-test-fields input{display:block;width:100%;min-width:0;margin-top:7px;background:hsl(var(--background));border:1px solid var(--mr-border);border-radius:8px;padding:10px 12px;color:hsl(var(--foreground));font-size:16px;color-scheme:dark}
+.mr-checks{display:grid;gap:10px;margin-bottom:18px}.mr-checks label{display:flex;align-items:flex-start;gap:10px;font-size:14px}.mr-checks input{accent-color:#818cf8;flex-shrink:0;width:17px;height:17px;margin-top:3px}
+@media(max-width:800px){.mr-test-fields{grid-template-columns:1fr}.mr-test-plan{padding:18px}}
+@media(max-width:650px){.marketing-review .np-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 12px}.marketing-review .np-control-group{width:auto;min-width:0;gap:4px}.marketing-review .np-amounts-group{padding:0;border:0;background:transparent;box-shadow:none}.marketing-review .np-control-group>span{font-size:12px}.marketing-review .np-control-group .np-segment{display:flex;flex-wrap:nowrap;width:100%}.marketing-review .np-control-group .np-segment button{flex:1;white-space:nowrap;min-height:40px;padding:6px 7px;font-size:12px}.marketing-review .mr-select-group .mr-wide-control{display:none}.marketing-review .mr-mobile-select{display:block;width:100%;min-width:0;height:46px;padding:8px;font-size:13px}.marketing-review .np-controls>.np-control-group:nth-child(1){order:1}.marketing-review .np-controls>.np-control-group:nth-child(3){order:2}.marketing-review .np-controls>.np-control-group:nth-child(2){order:3}.marketing-review .np-controls>.np-control-group:nth-child(4){order:4}.mr-test-plan .mr-section-head{flex-wrap:wrap;gap:2px}.mr-driver-note{padding:13px}}

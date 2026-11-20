@@ -44,3 +44,13 @@ References: the documented Profit/Cash four-section pattern in `docs/night-scout
 Implemented now: green/red financial status with explicit text, not colour alone. KPI headline numbers compare with business break-even; comparison changes have their own favourable/unfavourable direction (lower CAC is better); break-even and target threshold rows explicitly say Within limit/Above limit or Meets minimum/Below minimum. A green break-even result can coexist with a red target gap and red worsening comparison. EBITDA is coloured relative to zero; target gaps relative to target; scenario changes relative to the unchanged trajectory in the active display units. Missing/nonfinite comparisons and unset targets stay neutral. Fixed costs and spending are not automatically labelled bad merely because they are positive costs. No financial model or provider data changes.
 
 The four recommendations above are proposals for Paul's review, not claims of completed action tracking or measured causal drivers. Thirteen focused financial/status test groups and frontend TypeScript pass. Hosted acceptance is checked separately.
+
+### Approved refinements implemented — 20 November
+
+Paul approved all four proposals. The history section now explains CAC and POAS movements from their matched numerator/denominator percentage changes, using the selected comparator (including the scaled rolling reference). It does not infer a campaign cause. None asks for a comparator; absent/non-positive reference amounts do not produce fabricated percentages.
+
+The scenario adds an unsaved test checklist, scope/owner fields and a proposed review date seven London calendar days ahead. It asks for activity-level economics, cash/stock/capacity checks and cohort payback before accepting first-order losses; review criteria compare actual CAC/contribution/EBITDA with the unchanged plan. It explicitly distinguishes a whole-acquisition-budget illustration from a bounded campaign test. Draft inputs/ticks reset with scenario/period/comparison/target changes and reload. No saving, reminders, monitoring or provider changes are enabled.
+
+At mobile widths, Amounts and View occupy one compact row; Period and Compare use native dropdowns on the next row. They share the desktop state and retain every original option. Desktop controls retain their existing appearance. The response curve stays expanded while its numerical table has a separate closed-by-default disclosure.
+
+Fourteen focused financial/status/driver checks and frontend TypeScript pass. Browser acceptance checks both responsive controls, the independent table disclosure, changing scenario draft reset and missing-comparison explanation. Hosted deployment is verified separately.

@@ -100,3 +100,14 @@ Plan remains the cross-business financial simulator; specialist tabs diagnose pe
 Shopify reports support new/returning customer and cohort analysis and a session-based conversion funnel. This does not prove Night Scout's current imports include those datasets. Audit complete first-order history, stable customer identity, refunds/cancellations and anonymised/guest handling; historical orders outside the default 60-day window need appropriate access. Funnel sessions need a separate supported analytics source and measurement definitions. Do not calculate Shopify session conversion as all-channel orders divided by sessions.
 
 References reviewed: Shopify Help Center Customers reports and Behavior reports; Shopify developer API access scopes. Preserve cohort maturity and comparable-session definitions, including the documented September 2026 measurement change. Never compare immature cohorts as though they have completed the same 90-day window.
+
+
+## Plan comparison chart and simpler navigation — 20 November 2026
+
+Plan now has one planning view plus My Actions. Former Find your focus / Build your plan URLs resolve to the same combined view, retaining saved sample drafts. Impact cards explicitly point to the editable inputs below; each Edit input below link selects the lever and focuses its number field. A return link leads back to the impact/chart section.
+
+The monthly chart now uses only the selected future calendar months. Each month compares the planned EBITDA, unchanged trajectory and complete same-calendar-month prior-year sample actual, with exact actual dates in tooltip/table. The disconnected historical segment and artificial Data gap bucket are removed. An unchanged plan coincides with baseline and is explained in the main view. Target is an optional chart overlay. Prior-year data does not seasonally adjust the baseline. Per-order paths retain their own original order denominators.
+
+Full 3/6-month prior-year comparisons are available in the fixture at this date. The 12-month view explicitly marks October/November 2026 prior-year actuals unavailable because the fixture ends part-way through October; it does not fill partial/missing actuals or break the two future paths. This fixes comparison alignment and presentation without changing the forecast financial model or draft version.
+
+Validation: six new chart alignment/completeness/leap-year/per-order tests and the twelve monthly model/persistence tests passed, with frontend TypeScript. Desktop and real 390px iframe review verified direct input focus, chart updates and no page overflow. Hosted staging build and live comparison are verified at publication. Scope is Plan only; connected reporting, provider services and daily-feed schedules remain unchanged.

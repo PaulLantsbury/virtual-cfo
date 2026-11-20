@@ -1,0 +1,13 @@
+# Copy only into a separately prepared staging Xero scheduled-worker export.
+# Never replace the website configuration or the existing Shopify worker.
+modules = ["nodejs-24"]
+run = "node deployments/nightly-staging/xero-worker.mjs"
+
+[deployment]
+deploymentTarget = "scheduled"
+build = "pnpm --filter @workspace/db --prod install --frozen-lockfile --ignore-scripts && node deployments/nightly-staging/smoke.mjs"
+run = "node deployments/nightly-staging/run-xero-refresh.mjs"
+ignorePorts = true
+
+[packager.features]
+enabledForHosting = false

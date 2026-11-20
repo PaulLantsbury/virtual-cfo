@@ -1,3 +1,5 @@
+> Historical snapshot: see [8 September reconciliation](trading-reconciliation-2026-09-08.md) for the current dashboard wiring, measured results and unresolved data definitions. Labels such as “live” below do not imply reconciled financial data.
+
 # Number Source Audit — Virtual CFO Dashboard
 
 **Date:** 2026-05-10  

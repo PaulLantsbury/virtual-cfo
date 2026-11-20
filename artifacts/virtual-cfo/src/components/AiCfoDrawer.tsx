@@ -13,16 +13,16 @@ import { cn } from "@/lib/utils";
 // ─── Page metadata ────────────────────────────────────────────────────────────
 
 const PAGE_NAMES: Record<PageId, string> = {
-  dashboard:     "Morning Briefing",
+  dashboard:     "CFO Briefing",
   margin:        "Margin Analysis",
   growth:        "Growth Quality",
   marketing:     "Marketing Efficiency",
-  pricing:       "Pricing Optimisation",
-  profit:        "Profit Growth",
+  pricing:       "Pricing & Discounts",
+  profit:        "Profit Overview",
   cash:          "Cash Control",
   opportunities: "Opportunity Finder",
-  scenario:      "Profit Launchpad",
-  alerts:        "Night Scout Monitoring",
+  scenario:      "Scenario Planner",
+  alerts:        "Monitoring",
 };
 
 const CONFIDENCE_META: Record<Confidence, { label: string; colour: string }> = {
@@ -255,14 +255,14 @@ export function AiCfoDrawer() {
                 </div>
               </div>
 
-              {/* Profit Launchpad CTA — Pro only */}
+              {/* Scenario Planner CTA — Pro only */}
               {hasActionPlans && (
                 <button
                   onClick={() => { closeDrawer(); navigate("/scenario-lab"); }}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-primary/30 bg-primary/5 text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
                 >
                   <FlaskConical className="w-4 h-4" />
-                  Apply to Profit Launchpad
+                  Apply to Scenario Planner
                 </button>
               )}
             </>

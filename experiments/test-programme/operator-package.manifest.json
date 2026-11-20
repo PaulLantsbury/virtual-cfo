@@ -1,0 +1,8 @@
+{
+  "name": "night-scout-isolated-test-operator",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=24 <25"},
+  "scripts": {"start": "node --experimental-strip-types operator-consent-server.mjs"},
+  "dependencies": {"express": "5.2.1", "pg": "8.20.0", "@supabase/supabase-js": "2.100.1"}
+}

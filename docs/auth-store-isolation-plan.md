@@ -1,257 +1,46 @@
-# Auth & Store Isolation Plan
+# Authentication and store isolation — restart status
 
-## Purpose
+Updated 8 September 2026. This replaces the April plan's unsafe implication that a store parameter or a frontend membership lookup alone enforces authorisation.
 
-This document describes the future work required to replace the hardcoded
-`PHASE1_STORE_ID` constant with authenticated per-session store resolution.
-It is a planning reference only. No application code should be changed until
-the prerequisite auth and membership table work described below is in place.
+## Verified implementation state
 
----
+The initial audit found simulated login/signup and hardcoded store IDs. The [subsequent local sign-in package](local-auth-handover.md) replaces these with Supabase SDK authentication and membership-gated active stores; it is not deployed. The frontend uses the configured public key. The captured public database schema has no membership table or policies. Of 24 public functions, 22 use SECURITY DEFINER and two use caller permissions.
 
-## 1. Current state
+A caller-controlled store ID is a filter, not an access check. A browser user can bypass frontend selection and call a granted RPC directly. Table RLS does not protect data read by an owner-executed function that bypasses it. Local reconstruction of the observed database proves an anonymous caller can retrieve a second synthetic store's recoverable-contribution total while a direct table read returns no rows.
 
-### Hardcoded store ID
+The existing server opportunity route was unauthenticated and used a service-role credential to read a fixed demo store. Fixing the store ID does not authenticate its caller. **The local route now returns 503 until authenticated store access is implemented**, without making an upstream request. This change is on the draft branch only; it has not changed the deployed route. Static dashboard API responses remain demo content; deployed sign-in is still unverified.
 
-`artifacts/virtual-cfo/src/pages/dashboard.tsx` lines 28–32:
+## Proposed read-only access model
 
-```ts
-// DEV-ONLY — hardcoded seed store UUID. Must be replaced with the
-// authenticated session's store_id before any real merchant can use this page.
-// Primary source: auth session → stores.id lookup.
-// Not safe for production multi-tenant deployment.
-const PHASE1_STORE_ID = "10000000-0000-0000-0000-000000000001";
-```
+Supabase Auth was selected for the first implementation; local SDK integration now exists, with real staging verification pending. The [local SQL proposal](../db-migrations/proposed/20260908000002_store_membership_read_access.sql) adds `store_memberships(user_id, store_id)` referencing `auth.users` and `stores`, with a composite primary key. No roles, invitation flow or client write privileges are introduced. Membership grants/removal are trusted administrative operations; no automatic demo membership or backfill is included.
 
-This UUID is the dev store UUID (`Bloom & Co.`) seeded by migration
-`20260429000004_cloud_seed.sql`. It is hardcoded at module load time.
-Every call to `getPhase1Metrics()` in the dashboard `useEffect` passes this
-constant directly:
+Authenticated users can read only their own memberships. Policies on all 22 captured business tables restrict rows to those memberships, including the stores table itself. All five views use caller permissions. All 24 existing functions are changed to SECURITY INVOKER so nested calls cannot bypass the table policies. Anonymous table/view/function privileges are revoked; authenticated clients receive only SELECT/EXECUTE and cannot insert, update, delete or self-enrol. Existing service-role privileges remain privileged and must never be used as a substitute for user authorisation on a public route.
 
-```ts
-getPhase1Metrics(PHASE1_STORE_ID, PHASE1_DATE_FROM, PHASE1_DATE_TO)
-```
+This approach follows [Supabase RLS guidance](https://supabase.com/docs/guides/database/postgres/row-level-security) and [function security guidance](https://supabase.com/docs/guides/database/functions). The database must derive identity from a validated session, and enforce membership on each read. A frontend store selector is only presentation.
 
-### What is already multi-tenant
+The SQL is outside the automatic migration runner, atomic and intended for the captured baseline. It rejects a changed object inventory/existing policies and is not silently rerunnable. Review the fresh full schema before deployment; inventory counts alone are not schema equality. Future tables/functions require explicit access review and default-grant hardening. The private finance_v1 evidence proposal remains inaccessible to normal clients and is not included in this public read contract.
 
-The following pieces are already written for multi-tenant use and require no
-structural changes when real store IDs are introduced:
+## Tested locally
 
-- **All 11 Phase 1 RPC functions** accept `p_store_id uuid` as their first
-  parameter. The SQL inside each function filters exclusively on that parameter.
-  No cross-tenant data can be returned by the RPCs themselves.
+Four PostgreSQL test groups cover:
 
-- **`getPhase1Metrics(storeId, dateFrom, dateTo)`** in
-  `src/lib/analytics/phase1Metrics.ts` accepts `storeId` as a plain string
-  argument. There is no internal reference to the hardcoded constant inside
-  this function.
+- The anonymous cross-store exposure in the unchanged captured baseline.
+- The proposed fix: Alice sees store A, Bob sees store B; explicit requests for another store return no protected data. All 24 RPCs reject anonymous execution and return the same results for an inaccessible store as an absent store with the seeded fixture. All five views exclude other stores.
+- Missing identity, own-membership visibility, denied self-enrolment/data/membership writes, and immediate loss of access after membership removal.
+- The earlier monthly-contribution correction cannot be replayed to restore SECURITY DEFINER after access hardening. That earlier proposal now rejects a changed security mode.
 
-- **All 14 Phase 1 tables** have `store_id NOT NULL REFERENCES stores(id)` on
-  every tenant-owned row. The data layer is structurally multi-tenant today.
+An HTTP regression test verifies that anonymous and forged-token/store requests receive 503 from the local server opportunity route and make no upstream calls. It uses a temporary loopback server; the sandbox initially blocked the socket, and the approved local test then passed.
 
-The only change needed on the frontend is the source of `storeId` — from the
-hardcoded constant to a value derived from the authenticated session.
+Run `pnpm test:access`. The full suite totals 71 passing tests, including 66 previous tests, four database access groups and the HTTP route group. Full workspace type checking and build are also run for the server change; see the sprint handover for their results.
 
----
+**Limit:** PGlite uses a test-only auth.users table and auth.uid function with a controlled subject setting. It does not validate JWTs, passwords, expiry, refresh, invitations, PostgREST or real Supabase identities. These tests verify the database role/RLS contract, not a working end-to-end sign-in system. All 24 RPCs are exercised with representative inputs; this is not exhaustive coverage of every function branch. An inaccessible-store aggregate may retain legacy zeros/defaults; those are not certified financial data.
 
-## 2. Required future tables
+## Work required before deployment
 
-A membership table is needed to record which Supabase auth user has access to
-which store, and in what role. Two acceptable names:
+1. Confirm Supabase Auth and configure a separate staging environment with two real users and two synthetic stores, plus an authenticated non-member. No real merchant data is needed.
+2. Verify the locally implemented sign-in/sign-out/session expiry handling and gated active-store selection against staging. Never fall back to the demo UUID for an authenticated merchant. Clear store data/cache on user/store changes and logout.
+3. Restore the opportunity route only with verified user identity and user-scoped database credentials, or call the membership-protected RPC directly from the authenticated client. Remove service-role proxying from public request paths.
+4. Test valid/expired/forged/missing tokens, direct REST/RPC bypass attempts, revoked membership and reads/writes in the real Supabase gateway. Review all remaining public routes, schema/default grants, function branches, performance and privileged ingestion paths.
+5. Register reviewed migrations after reconciling history. Apply monthly-contribution correction before the membership proposal. No blanket ledger repair or historical seed replay. Recheck the full schema and permissions immediately before deployment.
 
-- `user_stores`
-- `store_memberships`
-
-Either name is acceptable; choose one and be consistent across migrations,
-RLS policies, and application code.
-
-### Minimum required columns
-
-| Column | Type | Notes |
-|---|---|---|
-| `id` | `uuid NOT NULL DEFAULT gen_random_uuid()` | PK |
-| `user_id` | `uuid NOT NULL` | FK → `auth.users(id)` (Supabase built-in). `ON DELETE CASCADE`. |
-| `store_id` | `uuid NOT NULL` | FK → `public.stores(id)`. `ON DELETE CASCADE`. |
-| `role` | `text NOT NULL DEFAULT 'owner'` | e.g. `'owner'`, `'admin'`, `'viewer'`. Define the allowed set before the migration. |
-| `created_at` | `timestamptz NOT NULL DEFAULT now()` | Membership grant timestamp. |
-
-### Recommended constraints
-
-```sql
-UNIQUE (user_id, store_id)
-```
-
-One role per user per store. If a user needs a role upgrade, UPDATE the
-existing row rather than inserting a second.
-
-### Relationship to `stores`
-
-The `stores` table already exists. No changes to `stores` are required for the
-membership model to work; `user_stores.store_id` simply references the
-existing PK.
-
----
-
-## 3. Required frontend changes
-
-The following changes must be made together as a single unit — they are not
-safely splittable because removing the hardcoded constant before the
-authenticated resolution is in place would break the dashboard entirely.
-
-### 3a. Resolve the active store for the logged-in user
-
-After the user signs in, query the membership table to find all stores the
-user belongs to:
-
-```ts
-const { data: memberships } = await supabase
-  .from("user_stores")           // or "store_memberships"
-  .select("store_id, role")
-  .eq("user_id", session.user.id);
-```
-
-For Phase 2 (single-store merchants) the first row's `store_id` can be used
-directly. Multi-store switching (a store selector) is a separate, later
-concern and is not required to unblock this work.
-
-### 3b. Pass the active store UUID into `getPhase1Metrics()`
-
-Replace:
-
-```ts
-getPhase1Metrics(PHASE1_STORE_ID, PHASE1_DATE_FROM, PHASE1_DATE_TO)
-```
-
-with:
-
-```ts
-getPhase1Metrics(activeStoreId, PHASE1_DATE_FROM, PHASE1_DATE_TO)
-```
-
-where `activeStoreId` comes from the resolved membership query above.
-
-`getPhase1Metrics()` already has the correct signature — no changes to the
-function itself are required.
-
-### 3c. Remove the hardcoded constant
-
-Delete the `PHASE1_STORE_ID` constant from `dashboard.tsx` entirely.
-If any other file references `PHASE1_STORE_ID` at the time of removal, those
-references must be resolved in the same commit.
-
-### Suggested state management approach
-
-Store `activeStoreId: string | null` in React state or a lightweight context.
-Initialise to `null`. Render the dashboard in a loading/gated state while
-`activeStoreId` is null, then trigger the `getPhase1Metrics()` call once it
-is resolved. This avoids a brief window where the dashboard fires RPCs with an
-empty or incorrect store ID.
-
----
-
-## 4. Security notes
-
-### RLS policy considerations
-
-Supabase Row Level Security should be the final enforcement layer for tenant
-isolation — it should not be the only layer, but it must be in place before
-production traffic can reach real merchant data.
-
-The minimum RLS posture for the membership-driven model:
-
-- `user_stores` / `store_memberships` — users should only be able to `SELECT`
-  their own rows (`user_id = auth.uid()`). No `INSERT` or `UPDATE` should be
-  permitted via the client key; membership grants must go through a trusted
-  server-side function or admin path.
-
-- All tenant data tables (`orders`, `customers`, `products`, etc.) — `SELECT`
-  policies should check that `store_id` appears in the set of stores the
-  calling user has a membership row for. Example pattern:
-
-  ```sql
-  CREATE POLICY "tenant_isolation" ON public.orders
-    FOR SELECT USING (
-      store_id IN (
-        SELECT store_id FROM public.user_stores
-        WHERE user_id = auth.uid()
-      )
-    );
-  ```
-
-- RLS should be **enabled but permissive (or absent) in the dev environment**
-  during Phase 2 dummy-data work. Hardening to the above pattern is Phase 3
-  work (see "Not in scope" below).
-
-### SECURITY DEFINER RPC tenant isolation
-
-All 11 Phase 1 RPCs are `SECURITY DEFINER`. This means they run as the
-Supabase `postgres` role, bypassing RLS entirely. They enforce tenant
-isolation purely through their `p_store_id` parameter — there is no
-additional row-level check inside the function body.
-
-This is safe **only** under the following conditions:
-
-1. The `p_store_id` value is **not** taken verbatim from client-supplied input
-   without validation. The server-side resolution step (section 3a) must
-   verify the user is a member of the requested store before calling the RPC.
-
-2. The Supabase service role key is **never** exposed to the browser. RPC
-   calls from the frontend must use the `anon` key. The anon key's effective
-   permissions are controlled by RLS on the non-RPC tables.
-
-### Risk: trusting client-supplied `store_id`
-
-If the dashboard simply reads a `store_id` from a URL parameter, local
-storage, or any other client-controlled source and passes it to
-`getPhase1Metrics()` without server-side validation, an authenticated user
-could pass any store UUID and receive that store's metrics — because the RPCs
-do not themselves check membership.
-
-**Mitigation:** The active store must be resolved server-side (via a Supabase
-function or a verified membership query) and must never be taken from
-unvalidated client input. The frontend state derived from a successful
-membership query is the only safe source for `activeStoreId`.
-
-This risk exists today in the dev environment too, but is acceptable because
-the only store that exists is the seed store, and the API is not publicly
-reachable with real merchant data. It must be resolved before any real
-merchant connects their store.
-
----
-
-## 5. Not in scope for Phase 2 dummy data
-
-The following items are explicitly deferred. Phase 2 work (continued
-dummy-data development, additional metric tiles, analysis pages) may proceed
-without them.
-
-| Item | Reason deferred |
-|---|---|
-| Full authentication UI (sign-in, sign-up, password reset) | Phase 2 continues to use the seeded dev store. No auth flow is needed for dummy-data work. |
-| Shopify OAuth / store connection flow | Shopify API integration is post-Phase 2. No production store data will be ingested during Phase 2. |
-| `user_stores` / `store_memberships` table creation | The table does not exist yet. Adding it is the gating item for Phase 3 auth work. |
-| Production RLS hardening | RLS policy authoring and testing requires real user accounts and membership rows to test against. This is Phase 3 work. |
-| Multi-store switching UI | Single-merchant scope for the initial launch. A store selector is a later iteration. |
-| Session refresh / token expiry handling | Depends on the chosen auth provider (Supabase Auth, Clerk, etc.), which is not yet decided. |
-
----
-
-## Gating dependencies
-
-The following must all be true before `PHASE1_STORE_ID` can be removed:
-
-1. An auth provider is chosen and integrated (Supabase Auth or Clerk).
-2. The `user_stores` / `store_memberships` table exists in the cloud schema
-   with at least one membership row for the dev/test user.
-3. The frontend can obtain `session.user.id` from the auth provider.
-4. A membership resolution query has been tested against the cloud project.
-5. RLS on `user_stores` is enabled (even if permissive) so the anon key
-   cannot enumerate all stores.
-
-None of items 1–5 are Phase 2 work. Phase 2 concludes with the hardcoded
-`PHASE1_STORE_ID` still in place.
-
----
-
-*Last updated: 2026-04-30. Update this file when the auth provider decision
-is made or when Phase 3 planning begins.*
+GitHub's draft is the durable record. Nothing in this package was applied to Supabase, main or Replit. The application cannot yet claim authenticated tenant isolation in production; local SDK wiring and mocked tests are not live deployment evidence.

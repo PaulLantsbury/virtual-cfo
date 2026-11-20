@@ -8,7 +8,8 @@ id = "artifacts/mockup-sandbox"
 
 [deployment]
 router = "application"
-deploymentTarget = "autoscale"
+deploymentTarget = "gce"
+ignorePorts = false
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
@@ -28,8 +29,8 @@ timeoutMs = 20000
 [userenv]
 
 [userenv.shared]
-VITE_SUPABASE_URL = "https://futkktdebdygsdrcknpr.supabase.co"
-VITE_SUPABASE_ANON_KEY = "sb_publishable_zkobcxnjTBfUW4lcnXAcCA_CXhEEUZp"
+VITE_SUPABASE_URL = "https://bioalckltvkhlczusdvl.supabase.co"
+VITE_SUPABASE_ANON_KEY = "sb_publishable_bz1FRwKst6ehHgWTxzSiiQ_nfyP_U1n"
 
 [nix]
 channel = "stable-25_05"

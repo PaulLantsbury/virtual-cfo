@@ -1,0 +1,3 @@
+# Temporary original Marketing comparison
+
+Paul requested a separate temporary copy of the Marketing page as it existed before the 19 November redesign. Restored the exact c7e6921 marketing page source (blob c134e28) with only a temporary comparison notice and renamed component. Existing sample content, calculations, paid-view gates, source panels and warnings are preserved. The authenticated /marketing-efficiency-original route is linked from the current Marketing header and links back. The current redesigned page remains the main navigation destination. No database/provider/permission/scheduler changes. Frontend TypeScript check and hosted build/visual verification are recorded at delivery.

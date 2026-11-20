@@ -1,3 +1,17 @@
+## Cash and latest New Marketing — ready for owner approval, not applied
+
+Parallel preparation is complete and published on `codex/cash-acquisition-data-20261120`. Exact tested source: `b7ea4913c928ac9dac57bc45b5478ca06688a016`. [Bundled staging approval package](https://github.com/PaulLantsbury/virtual-cfo/blob/dbead3dc6940647a417b4634a0ca9ad3ea147315/docs/cash-acquisition-staging-approval-2026-11-20.md).
+
+The package preserves latest live design `8287d10` and Plan. It prepares 24 complete months (November 2024–October 2026), 48 private synthetic cash/acquisition summaries, cash movements/resilience, identified/guest/unknown customers, allocated CAC, simulated conversion inputs, first-order costs and mature cohort economics. The page calculates ratios from stored integer inputs. All six April–September dependencies are rechecked for mature data. Unsupported figures remain yellow/unavailable; multi-period funnel/unique-returner comparisons and customer drilldowns still need sources.
+
+215 combined checks passed plus 16 focused latest-design merge checks; frontend typecheck/build, API bundle, exact local 48-record publication/replay and single-call replay passed. Prepared desktop/mobile previews checked; hosted Supabase acceptance remains pending. Full API typecheck has the same 17 pre-existing Xero declarations errors.
+
+**No schema, data publication, grants, optional flag or website deployment has been applied in this batch.** Next action: owner approval of the linked exact package, then guarded publication/read access/deploy and signed-in checks. The initial historical supplement does not change the enabled financial daily feed; future supplemental monthly refresh needs its own reviewed workflow. No provider transactions, production change, extra service or spending.
+
+Plan hash `05e6ace2953f8857a064aa7cd58eae5c4c3ec4f87b6b3fe763c5dd62e43c0348`. Sensitive private artifacts/bindings are outside GitHub. Earlier progress notices below are historical.
+
+---
+
 ## Cash and new Marketing data batch in progress — 20 November 2026
 
 The current live design baseline is146e80c1c39ae25540a2f26f7ef7e0bca75582c5, including the separate /new-marketing Acquisition, Conversion and Retention tabs. That design, prior Marketing Efficiency, Plan and existing reporting connections are being preserved.

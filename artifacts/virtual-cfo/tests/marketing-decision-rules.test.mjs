@@ -1,72 +1,83 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import ts from 'typescript';
-const path = new URL('../src/pages/marketing-efficiency.tsx', import.meta.url);
-const source = fs.readFileSync(path, 'utf8');
-const ast = ts.createSourceFile(path.pathname, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-const declarations = ast.statements.filter(node => (ts.isFunctionDeclaration(node) && ['marketingDecision', 'incrementalSpend', 'businessCoverage', 'ordersToCloseGap'].includes(node.name?.text)) || (ts.isTypeAliasDeclaration(node) && ['MarketingInputs', 'Verdict'].includes(node.name.text))).map(node => node.getFullText(ast)).join('\n');
-const js = ts.transpileModule(declarations, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
-const { marketingDecision, incrementalSpend, businessCoverage, ordersToCloseGap } = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
-const valid = { revenue: 100000, beforeAds: 40000, spend: 16000, orders: 2000, newCustomers: 1000, firstOrderContribution: 20, acquisitionSpend: 10000, overheads: 15000, marginalCac: 12, cashConfirmed: true, stockConfirmed: true, stable: true };
-test('missing, non-finite, invalid scopes and denominators cannot recommend spend', () => {
- assert.equal(marketingDecision(null).verdict, 'Needs evidence');
- for (const [key, value] of [['spend',0],['newCustomers',0],['beforeAds',NaN],['orders',-1],['acquisitionSpend',17000]]) assert.equal(marketingDecision({...valid,[key]:value}).verdict,'Needs evidence',key);
+import { aggregateDays, DAILY_SAMPLE } from '../src/lib/newProfitPreview.ts';
+import { buildMarketingReview, metrics, requirements, spendScenario, scenarioBridge, recommendation } from '../src/lib/marketing/review-model.ts';
+const near = (a,b) => assert.ok(Math.abs(a-b)<1e-6, `${a} ≠ ${b}`);
+const model = buildMarketingReview({granularity:'monthly',horizon:3,comparison:'last-year'});
+const base = model.baseline30;
+const input = {direction:'hold',changePct:20,elasticity:.35,extraOverheads:0};
+test('all supported periods and granularities have complete, scoped chart buckets',()=>{
+ for(const granularity of ['weekly','monthly'])for(const horizon of ['last-week','last-month',3,6,12]){
+  const m=buildMarketingReview({granularity,horizon,comparison:'last-year'});
+  assert.equal(m.rows[0].from,m.from);assert.equal(m.rows.at(-1).to,m.to);assert.equal(m.rows.length,m.selectedCount);
+  near(m.rows.reduce((s,r)=>s+r.totals.advertising,0),m.current.advertising);
+  near(m.rows.reduce((s,r)=>s+r.totals.customers,0),m.current.customers);
+  assert.ok(m.rows.every(r=>r.compareCac!==null&&r.comparePoas!==null));
+ }
 });
-test('scale requires both profitability and funding/capacity', () => {
- assert.equal(marketingDecision(valid).verdict, 'Scale');
- for (const key of ['cashConfirmed','stockConfirmed']) assert.equal(marketingDecision({...valid,[key]:false}).verdict,'Needs evidence');
- assert.equal(marketingDecision({...valid,stable:false}).verdict,'Hold');
- assert.equal(marketingDecision({...valid,marginalCac:undefined}).verdict,'Hold');
- assert.equal(marketingDecision({...valid,overheads:undefined}).verdict,'Needs evidence');
+test('financial totals reconcile to Profit Engine and exclude D&A from EBITDA overheads',()=>{
+ const p=aggregateDays(DAILY_SAMPLE.filter(d=>d.date>=model.from&&d.date<=model.to));
+ near(model.current.overheads,p.cashOverheads/100);near(metrics(model.current).ebitda,p.ebitda/100);
+ near(model.current.revenue,(p.sales+p.shipping)/100);
 });
-test('positive incremental profit can justify a test below business break-even', () => {
- for (const spend of [25000,40000,45000]) assert.equal(marketingDecision({...valid,spend}).verdict,'Scale');
- for (const marginalCac of [20,24]) assert.equal(marketingDecision({...valid,marginalCac}).verdict,'Pull back');
+test('ratios use weighted matched amounts, not mean bucket ratios',()=>{
+ const t=model.current,m=metrics(t);
+ near(m.cac,t.acquisitionSpend/t.customers);near(m.poas,t.beforeAds/t.advertising);
+ const weighted=model.rows.reduce((s,r)=>s+r.cac*r.totals.customers,0)/t.customers;
+ near(m.cac,weighted);
 });
-test('first-order deficit needs mature evidence and must not silently scale', () => {
- const deficit = {...valid,spend:30000,acquisitionSpend:26000};
- assert.equal(marketingDecision(deficit).verdict,'Needs evidence');
- const supported = {...deficit,repeatStrategy:true,cohortContribution90:44,cohortCac:26,paybackDays:55,maxPaybackDays:60};
- assert.equal(marketingDecision(supported).verdict,'Hold');
- assert.equal(marketingDecision({...supported,paybackDays:61}).verdict,'Pull back');
- assert.equal(marketingDecision({...supported,cohortContribution90:25}).verdict,'Pull back');
- assert.equal(marketingDecision({...supported,paybackDays:NaN}).verdict,'Needs evidence');
+test('rolling comparison uses the preceding benchmark and None removes comparison',()=>{
+ const r=buildMarketingReview({granularity:'weekly',horizon:3,comparison:'rolling'});
+ assert.ok(r.referenceTo<r.from);assert.equal(r.rows.length,13);
+ assert.ok(r.rows.every(row=>row.compareCac===r.rows[0].compareCac));
+ const n=buildMarketingReview({granularity:'monthly',horizon:6,comparison:'none'});
+ assert.equal(n.previous,null);assert.equal(n.referenceFrom,null);assert.ok(n.rows.every(r=>r.compareCac===null&&r.comparePoas===null));
+ assert.match(recommendation(n.current,n.previous,n.baseline30,.35).efficiency,/Select a comparison/);
 });
-test('marginal-spend model reconciles and exposes potential losses', () => {
- const result = incrementalSpend(1000,18,24,20);
- assert.ok(Math.abs(result.profitLow - (-166.66666666666663)) < 1e-9);
- assert.ok(Math.abs(result.profitHigh - 111.11111111111109) < 1e-9);
- assert.deepEqual(incrementalSpend(0,18,24,20),{customersLow:0,customersHigh:0,profitLow:0,profitHigh:0});
- for (const args of [[1000,0,24,20],[1000,24,18,20],[-1,18,24,20],[NaN,18,24,20]]) assert.equal(incrementalSpend(...args),null);
+test('30-day baseline uses weighted daily rates from latest selected buckets',()=>{
+ const rows=model.rows.slice(-3);const weights=rows.reduce((s,_,i)=>s+i+1,0);
+ const expected=rows.reduce((s,r,i)=>s+r.totals.advertising/r.totals.days*(i+1),0)/weights*30;
+ near(base.advertising,expected);assert.equal(base.days,30);
+ const single=buildMarketingReview({granularity:'weekly',horizon:'last-week',comparison:'none'});
+ near(single.baseline30.overheads,single.current.overheads/7*30);
 });
-
-test('business overhead and profit thresholds reconcile to the approved example', () => {
- const c=businessCoverage(100000,40000,20000,15000,8000);
- assert.equal(c.operatingProfit,5000);assert.equal(c.gap,3000);
- assert.equal(c.breakEvenBudget,25000);assert.equal(c.targetBudget,17000);
- assert.equal(c.breakEvenPoas,1.6);assert.equal(c.breakEvenRoas,4);
- assert.ok(Math.abs(c.targetPoas-40000/17000)<1e-12);
- assert.ok(Math.abs(c.targetRoas-100000/17000)<1e-12);
+test('break-even and target EBITDA reconcile; indicative CAC holds other ads fixed',()=>{
+ const t={revenue:100000,beforeAds:40000,advertising:20000,acquisitionSpend:16000,overheads:15000,da:500,orders:2000,customers:1000,firstContributionTotal:20000,firstRevenueTotal:50000,days:30};
+ const r=requirements(t,8000);
+ assert.equal(r.breakEven.budget,25000);assert.equal(r.breakEven.cac,21);assert.equal(r.breakEven.poas,1.6);assert.equal(r.breakEven.roas,4);
+ assert.equal(r.target.budget,17000);assert.equal(r.target.cac,13);near(r.target.poas,40000/17000);near(r.target.roas,100000/17000);
+ assert.equal(r.target.contribution,23000);assert.equal(metrics(t).ebitda,5000);
 });
-test('overhead coverage distinguishes zero, missing, impossible and no-target states', () => {
- assert.equal(businessCoverage(100000,40000,20000,null,8000),null);
- assert.equal(businessCoverage(100000,40000,20000,NaN,8000),null);
- assert.equal(businessCoverage(100000,40000,20000,15000,-1),null);
- assert.equal(businessCoverage(0,40000,20000,15000,8000),null);
- const none=businessCoverage(100000,40000,20000,15000,null);
- assert.equal(none.gap,null);assert.equal(none.targetPoas,null);
- assert.equal(businessCoverage(100000,40000,20000,0,0).operatingProfit,20000);
- const impossible=businessCoverage(100000,40000,20000,45000,8000);
- assert.equal(impossible.breakEvenPoas,null);assert.equal(impossible.breakEvenRoas,null);assert.equal(impossible.targetPoas,null);
- assert.equal(impossible.operatingProfit,-25000);
- const exact=businessCoverage(100000,40000,20000,32000,8000);
- assert.equal(exact.targetBudget,0);assert.equal(exact.targetPoas,null);
+test('missing, impossible and zero targets do not create misleading return thresholds',()=>{
+ const none=requirements(base,null);assert.equal(none.target,null);
+ assert.equal(requirements(base,-1),null);assert.equal(requirements(base,NaN),null);
+ const r=requirements({...base,overheads:base.beforeAds+1},100);
+ assert.equal(r.breakEven.poas,null);assert.equal(r.breakEven.cac,null);assert.equal(r.target.roas,null);
+ const exact=requirements({...base,overheads:base.beforeAds},0);assert.equal(exact.breakEven.budget,0);assert.equal(exact.breakEven.poas,null);
 });
-test('gap closing orders use positive marginal contribution, with whole-order rounding', () => {
- assert.deepEqual(ordersToCloseGap(3000,20,12),{orders:375,adSpend:4500,addedProfit:3000});
- assert.equal(ordersToCloseGap(3001,20,12).orders,376);
- assert.equal(ordersToCloseGap(3000,20,20),null);
- assert.equal(ordersToCloseGap(3000,20,24),null);
- assert.equal(ordersToCloseGap(0,20,12).orders,0);
+test('Hold is identity and extra fixed costs reduce EBITDA exactly once',()=>{
+ const r=spendScenario(base,input);near(r.ebitda,metrics(base).ebitda);near(r.newOrders,0);near(r.delta,0);
+ const cost=spendScenario(base,{...input,extraOverheads:1000});near(cost.delta,-1000);
+});
+test('higher spend raises average CAC and customers; reductions lower both under the stated response',()=>{
+ const up=spendScenario(base,{...input,direction:'scale'}),down=spendScenario(base,{...input,direction:'reduce'});
+ assert.ok(up.cac>metrics(base).cac);assert.ok(up.totals.customers>base.customers);
+ assert.ok(down.cac<metrics(base).cac);assert.ok(down.totals.customers<base.customers);
+ near(up.totals.advertising-up.totals.acquisitionSpend,base.advertising-base.acquisitionSpend);
+ near(up.delta,up.volumeContribution-up.adChange);
+});
+test('zero sensitivity gives constant CAC and the response supports diminishing returns',()=>{
+ const r=spendScenario(base,{...input,direction:'scale',elasticity:0});near(r.cac,metrics(base).cac);near(r.totals.customers,base.customers*1.2);
+ const low=spendScenario(base,{...input,direction:'scale',elasticity:.1}),high=spendScenario(base,{...input,direction:'scale',elasticity:.7});
+ assert.ok(high.totals.customers<low.totals.customers);assert.ok(high.marginalCac>high.cac);
+});
+test('scenario financial bridge reconciles on total and each scenario’s own per-order basis',()=>{
+ for(const direction of ['hold','scale','reduce'])for(const perOrder of [false,true]){
+ const s=spendScenario(base,{...input,direction,changePct:35,extraOverheads:750});const rows=scenarioBridge(base,s,perOrder);
+ near(rows.at(-1).end,perOrder?s.ebitda/s.totals.orders:s.ebitda);
+ near(rows[0].end+rows.filter(r=>!r.total).reduce((a,r)=>a+r.amount,0),rows.at(-1).end);
+ }
+});
+test('invalid scenario controls fail closed without financial output',()=>{
+ for(const patch of [{elasticity:1},{changePct:90},{extraOverheads:-1},{extraOverheads:NaN},{direction:'bad'}])assert.equal(spendScenario(base,{...input,...patch}),null);
 });

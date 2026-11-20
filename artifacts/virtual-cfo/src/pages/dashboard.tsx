@@ -24,6 +24,8 @@ const ANALYSIS_PAGES = [
 export default function Dashboard() {
   const STORE_ID = useActiveStore();
   const { period, briefing, comparison, loading, reporting } = useVerifiedBriefing(STORE_ID);
+  const comparisonCaption = comparison.status === "ready" ? `${comparison.period.label} (${comparison.period.dateFrom} – ${comparison.period.dateTo})` : "previous period · verified dates unavailable";
+  const nameComparison = (text: string) => text.replaceAll("the previous period", comparisonCaption);
   const profit = useProfitReporting(STORE_ID, reporting);
   const hasFullActionPlan = canAccess("dashboard_full_action_plan");
 
@@ -59,7 +61,7 @@ export default function Dashboard() {
       <section className="bg-card rounded-2xl border border-border shadow-sm mb-7 p-6 sm:p-7" aria-live="polite">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">This period's read</p>
         <h2 className="text-2xl font-bold mb-3">{briefing.headline}</h2>
-        <p className="text-foreground/85 max-w-4xl leading-relaxed">{briefing.summary}</p>
+        <p className="text-foreground/85 max-w-4xl leading-relaxed">{nameComparison(briefing.summary)}</p>
         <div className="mt-5 pt-4 border-t border-border text-sm text-muted-foreground">
           {briefing.comparisonNote}
           {comparison.status === "ready" && <span> · {comparison.period.label}: {comparison.period.dateFrom} – {comparison.period.dateTo}</span>}
@@ -76,7 +78,7 @@ export default function Dashboard() {
           {briefing.signals.length ? <div className="divide-y divide-indigo-800/35">
             {briefing.signals.map(signal => <div key={signal.title} className="py-4 first:pt-0">
               <h3 className="font-semibold">{signal.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{signal.evidence}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{nameComparison(signal.evidence)}</p>
               <Link href={hasFullActionPlan ? signal.href : "/upgrade"} className="inline-flex gap-1 items-center text-sm text-primary mt-3">
                 {hasFullActionPlan ? "Open analysis" : "Explore Pro analysis"}<ArrowRight className="w-3 h-3" />
               </Link>
@@ -98,7 +100,7 @@ export default function Dashboard() {
               {metric.direction === "up" ? <ArrowUpRight className="w-3 h-3" />
                 : metric.direction === "down" ? <ArrowDownRight className="w-3 h-3" />
                 : metric.direction === "flat" ? <Minus className="w-3 h-3" /> : null}
-              {metric.change}
+              {metric.change}{metric.direction !== "unknown" && ` vs ${comparisonCaption}`}
             </p>
             <p className="border-t border-border pt-3 text-xs text-muted-foreground leading-relaxed">{metric.explanation}</p>
           </div>)}

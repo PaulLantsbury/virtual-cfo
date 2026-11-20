@@ -48,7 +48,7 @@ function ProfitCards({
         }
         comparison={
           comparison
-            ? `${percent(percentageChange(c.netSales, p.netSales))} vs comparison`
+            ? `${percent(percentageChange(c.netSales, p.netSales))} vs Jul–Sep 2025 (last year)`
             : undefined
         }
       />
@@ -64,7 +64,7 @@ function ProfitCards({
         }
         comparison={
           !incomplete && comparison
-            ? `${percent(percentageChange(c.cm3, p.cm3))} vs comparison`
+            ? `${percent(percentageChange(c.cm3, p.cm3))} vs Jul–Sep 2025 (last year)`
             : undefined
         }
       />
@@ -80,7 +80,7 @@ function ProfitCards({
         }
         comparison={
           !incomplete && comparison
-            ? `${percent(percentageChange(c.ebitda, p.ebitda))} vs comparison`
+            ? `${percent(percentageChange(c.ebitda, p.ebitda))} vs Jul–Sep 2025 (last year)`
             : undefined
         }
       />
@@ -119,7 +119,7 @@ function ProfitFlow(ctx: PageContext) {
           <br />
           EBITDA margin {percent(c.ebitdaMargin)}
           {ctx.comparison
-            ? ` vs ${percent(ctx.data.comparison.ebitdaMargin)} in the comparison period`
+            ? ` vs ${percent(ctx.data.comparison.ebitdaMargin)} in Jul–Sep 2025 (last year)`
             : ". No supported comparison selected."}{" "}
           A materiality tolerance has not been configured, so the interpretation
           remains neutral.
@@ -231,7 +231,7 @@ export function ScoutPage(ctx: PageContext) {
           detail={`${money(ctx.perOrder.current.netSales, 2)} per order`}
           comparison={
             ctx.comparison
-              ? `${percent(percentageChange(c.netSales, ctx.data.comparison.netSales))} vs comparison`
+              ? `${percent(percentageChange(c.netSales, ctx.data.comparison.netSales))} vs Jul–Sep 2025 (last year)`
               : undefined
           }
         />
@@ -245,7 +245,7 @@ export function ScoutPage(ctx: PageContext) {
           }
           comparison={
             !ctx.incomplete && ctx.comparison
-              ? `${percent(percentageChange(c.cm3, ctx.data.comparison.cm3))} vs comparison`
+              ? `${percent(percentageChange(c.cm3, ctx.data.comparison.cm3))} vs Jul–Sep 2025 (last year)`
               : undefined
           }
         />
@@ -259,7 +259,7 @@ export function ScoutPage(ctx: PageContext) {
           }
           comparison={
             !ctx.incomplete && ctx.comparison
-              ? `${percent(percentageChange(c.ebitda, ctx.data.comparison.ebitda))} vs comparison`
+              ? `${percent(percentageChange(c.ebitda, ctx.data.comparison.ebitda))} vs Jul–Sep 2025 (last year)`
               : undefined
           }
         />
@@ -528,7 +528,7 @@ export function ProfitPage(ctx: PageContext) {
                 ? [
                     {
                       key: "comparisonEbitda",
-                      label: "Comparison EBITDA",
+                      label: "Jul–Sep 2025 EBITDA",
                       color: "#ba8dff",
                       comparison: true,
                     },
@@ -575,7 +575,7 @@ export function ProfitPage(ctx: PageContext) {
             "Metric",
             "Current period",
             "Current / order",
-            "Comparison / order",
+            "Jul–Sep 2025 / order",
             "Change / order",
           ]}
           rows={economicRows.map(([label, total, current, previous], i) => [
@@ -592,7 +592,7 @@ export function ProfitPage(ctx: PageContext) {
         />
         <DataTable
           caption="Margin definitions"
-          headers={["Measure", "Current", "Comparison", "Denominator"]}
+          headers={["Measure", "Current", "Jul–Sep 2025 (last year)", "Denominator"]}
           rows={[
             [
               "Gross margin",
@@ -647,7 +647,7 @@ export function ProfitPage(ctx: PageContext) {
               ? [
                   {
                     key: "comparisonOverheadRatio",
-                    label: "Comparison overhead ratio",
+                    label: "Jul–Sep 2025 overhead ratio",
                     color: "#c7b3ff",
                     comparison: true,
                     axis: "right" as const,
@@ -703,7 +703,7 @@ export function ProfitPage(ctx: PageContext) {
                 ? "Unavailable"
                 : money(ctx.data.staffDiagnostics.contributionPerPoundStaff, 2),
             ],
-            ["Comparison staff breakdown", "Unavailable"],
+            ["Jul–Sep 2025 staff breakdown", "Unavailable"],
           ]}
         />
         <Notice>
@@ -798,7 +798,7 @@ export function CashPage(ctx: PageContext & { tab?: string }) {
           value={money(c.operatingCash)}
           detail="July–September 2026"
           comparison={
-            ctx.comparison ? "vs £50,000 comparison period" : undefined
+            ctx.comparison ? "vs £50,000 in Jul–Sep 2025 (last year)" : undefined
           }
         />
         <MetricCard
@@ -935,7 +935,7 @@ export function CashPage(ctx: PageContext & { tab?: string }) {
               ? [
                   {
                     key: "comparisonOperatingCash",
-                    label: "Comparison operating cash",
+                    label: "Jul–Sep 2025 operating cash",
                     color: "#d7a4ff",
                     comparison: true,
                   },
@@ -1061,7 +1061,7 @@ export function GrowthPage(
               : money(channel === "all" ? m.cac : selected?.cac, 2),
           ],
           [
-            "Comparison",
+            "Jul–Sep 2025 (last year)",
             ctx.comparison
               ? channel === "meta" && measure === "roas"
                 ? ratioText(
@@ -1321,7 +1321,7 @@ export function GrowthPage(
                     : money(ctx.totals.current.ebitda),
                 ],
                 [
-                  "Comparison EBITDA",
+                  "Jul–Sep 2025 EBITDA",
                   ctx.comparison
                     ? money(ctx.totals.comparison.ebitda)
                     : "Unavailable",
@@ -1367,7 +1367,7 @@ export function GrowthPage(
                   ? [
                       {
                         key: "comparisonCac",
-                        label: "Comparison CAC",
+                        label: "Jul–Sep 2025 CAC",
                         color: "#c19aff",
                         comparison: true,
                       },
@@ -1602,8 +1602,8 @@ export function GrowthPage(
                           key: "comparison",
                           label:
                             measure === "roas"
-                              ? "Comparison ROAS"
-                              : "Comparison CAC",
+                              ? "Jul–Sep 2025 ROAS"
+                              : "Jul–Sep 2025 CAC",
                           color: "#d098ff",
                           comparison: true,
                           axis: "right" as const,

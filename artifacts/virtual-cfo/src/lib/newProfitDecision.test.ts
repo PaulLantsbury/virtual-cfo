@@ -5,7 +5,7 @@ import { buildProfitPreview, comparisonTotals, annualisedScenarioPlan } from './
 
 test('default story identifies growth without profit and ranks observed deterioration rather than sensitivity',()=>{
  const model=buildProfitPreview({granularity:'weekly',months:3}),result=buildProfitDecision(model,'last-year');
- assert.equal(result.headline,'Sales up 1.8%; EBITDA down 53.3%.');
+ assert.equal(result.headline,'Sales up 1.8% vs last year; EBITDA down 53.3% vs last year.');
  assert.deepEqual(result.actions.map(a=>a.id),['discount','marketing','cost']);
  assert.equal(result.actions[0].adverseAmount,4631443);
  assert.equal(result.actions[1].adverseAmount,3619573);

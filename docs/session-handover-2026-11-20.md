@@ -1,3 +1,15 @@
+## Full figure audit — 20 November 2026
+
+The comprehensive [New pages figure and calculation audit](https://github.com/PaulLantsbury/virtual-cfo/blob/codex/new-pages-data-links-20261120/docs/full-figure-lineage-audit-2026-11-20.md) covers all three New pages, including expanded charts/tables, comparisons, scenarios and saved local records. It traces deployed source `a77e65822345087aa708fad19c98bbf3e9a73b21`. The earlier 4-of-13 gap count covered headline cards only; it was not a full-page count.
+
+A figure derived on the server or in the browser from verified database inputs is connected; it does not require its own stored database cell. User assumptions are separate labelled inputs. Sample baselines remain examples even where their arithmetic works.
+
+Next batch, in order: wire eligible multi-month financial trends/comparisons to existing reviewed monthly inputs; define and connect missing cash balance/movement and customer/acquisition inputs; then update sample planners to use verified baselines while retaining explicit assumptions. Do not infer daily/weekly data by dividing monthly totals. Maintain yellow example/unsupported indicators and unavailable states for missing evidence. See the three page registers for individual formulas, sources and required work.
+
+This checkpoint publishes documentation only. Website release, database permissions, provider jobs and daily-feed settings are unchanged. The first unattended daily publication remains a separate verification milestone.
+
+---
+
 **Released and hosted-verified — 20 November:** Approved website revision **a77e65822345087aa708fad19c98bbf3e9a73b21** is live on existing staging. October Profit/Marketing figures match reviewed history; per-order and explicit earlier-month comparison work. Unsupported cash/acquisition/forecast figures remain yellow or explicit sample. New Plan is preserved. [Hosted verification](new-pages-hosted-verification-2026-11-20.md). Daily feed unchanged; first genuine scheduled receipt still awaits 21 November.
 
 # Handover — New page connections, 20 November 2026

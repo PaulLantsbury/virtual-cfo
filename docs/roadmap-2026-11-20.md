@@ -1,3 +1,11 @@
+## Tested connections package awaiting website approval — 20 November 2026
+
+Implemented and published exact source `2ec14a6d16905fd64bd18bb2fc0bab14c4bb39ab`: Profit monthly trends/full comparisons, Marketing monthly financial history/targets/conditional scenarios, and a separate Cash EBITDA history. **112 tests, TypeScript and production build pass**; local browser controls checked with labelled fixtures. [Concrete website-only release package](https://github.com/PaulLantsbury/virtual-cfo/blob/543c5ca92bccee042a701424f260b54fc2b9d4c7/docs/new-pages-full-connections-staging-release-2026-11-20.md). Not deployed; staging remains a77e658 until approval.
+
+Read-only staging confirmed zero cash snapshots for the isolated synthetic company. Cash adapter/evidence builder is prepared only; cash and acquisition source publication/permissions are separate future packages. Existing daily feed, provider jobs and production remain unchanged. Next: approve exact website deployment, verify real selected-month inputs/company switching/history latency, then prepare isolated cash/acquisition evidence. Earlier prepared/publish-next wording below is historical.
+
+---
+
 ## Full figure audit — 20 November 2026
 
 The comprehensive [New pages figure and calculation audit](https://github.com/PaulLantsbury/virtual-cfo/blob/e41eebdd3ca991d09236208fec0333b74b647126/docs/full-figure-lineage-audit-2026-11-20.md) covers all three New pages, including expanded charts/tables, comparisons, scenarios and saved local records. It traces deployed source `a77e65822345087aa708fad19c98bbf3e9a73b21`. The earlier 4-of-13 gap count covered headline cards only; it was not a full-page count.

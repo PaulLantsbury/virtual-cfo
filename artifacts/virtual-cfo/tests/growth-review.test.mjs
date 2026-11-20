@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildGrowthReview,behaviourSample,behaviourMetrics,growthTab,MATURE_COHORT,cohortMature} from '../src/lib/marketing/growth-review.ts';
+import {buildGrowthReview,behaviourSample,behaviourMetrics,growthTab,MATURE_COHORT,cohortMature,customerDrivers} from '../src/lib/marketing/growth-review.ts';
 const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 test('behaviour counts and money reconcile to the same complete financial sample',()=>{
  for(const months of [3,6,12])for(const comparison of ['last-year','rolling','none']){
@@ -38,3 +38,8 @@ test('mature contribution payback has a separate window and does not grant matur
 test('tab query permits only the three specialist views',()=>{
  assert.equal(growthTab('?tab=conversion'),'conversion');assert.equal(growthTab('?tab=retention'),'retention');assert.equal(growthTab('?tab=anything'),'acquisition');
 });
+
+test('customer drivers deduplicate windows and reconcile group customers, orders, AOV and sales',()=>{
+ for(const n of [3,6,12]){const r=buildGrowthReview(n,'last-year');assert.ok(r.current.repeatCustomers<=r.current.repeatOrders);assert.ok(r.current.repeatCustomers<r.rows.reduce((s,m)=>s+m.behaviour.repeatCustomers,0));for(const b of [r.current,r.previous,...r.rows.map(x=>x.behaviour)]){let orders=0,sales=0,customers=0;for(const segment of ['new','repeat']){const d=customerDrivers(b,segment);close(d.customers*d.frequency*d.aov,d.sales);orders+=d.orders;sales+=d.sales;customers+=d.customers;}close(orders,b.orders);close(sales,b.originalProductSales);close(customers,customerDrivers(b,'all').customers);}}
+});
+test('rolling customer points average monthly distinct counts rather than adding overlapping people',()=>{const r=buildGrowthReview(6,'rolling');const ref=r.marketing;const start=new Date(ref.benchmarkFrom+'T00:00:00Z');let sum=0;for(let i=0;i<ref.benchmarkCount;i++){const d=new Date(start);d.setUTCMonth(d.getUTCMonth()+i);const from=d.toISOString().slice(0,10);d.setUTCMonth(d.getUTCMonth()+1);d.setUTCDate(0);sum+=behaviourSample(from,d.toISOString().slice(0,10)).repeatCustomers;}close(r.rows[0].previousBehaviour.repeatCustomers,sum/ref.benchmarkCount);});

@@ -22,3 +22,11 @@ Audit full first-order history, identity/guest and cancellation/test policies, a
 ## Validation
 Frontend TypeScript passed. Seven new growth model tests plus four existing linked Marketing tests passed: reconciliation, aggregate ratios, approved AOV, distinct session/order denominators, comparisons, zero/missing evidence, cohort maturity and tab validation. Desktop and 390px review checked explicit source selection, context persistence, comparison None and no mobile page overflow. Hosted build and final live smoke check are performed at publication.
 
+
+## Customer drivers and conversion trends — 20 November refinement
+
+Retention now leads with three aligned monthly charts: distinct purchasing customers, eligible orders and approved product AOV. The group selector supports Returning, New (first orders) and All. An equation shows customers × orders/customer × AOV = original product sales before later refunds; net spending stays separately disclosed. Counts stay absolute under Per order; AOV uses the selected group’s orders. Whole-period identities are deduplicated rather than summed from monthly points. The explicit fictional identity model assigns repeat orders to a pool of 5,000 pre-existing customers with deterministic IDs; first-order identities remain separate. This fixture does not model a new customer's future repeat path. Rolling comparison points use average monthly distinct customer counts; scaled whole-window values are labelled reference equivalents, not distinct people. This supersedes the earlier sample-frequency limitation, while live customer identities remain unavailable.
+
+Conversion now leads with visible aligned Website sessions and Purchase conversion charts, each with its own scale, solid selected and dotted comparison paths. The funnel and optional AOV detail are progressively disclosed. Both respect the historical period and comparison selector, including None. The same exact data tables remain available. The new charts are sample-only until matched customer/session evidence is accepted; no provider or database changes are included.
+
+Validation: nine growth tests include distinct-window counts, group reconciliation and rolling customer reference semantics; existing four linked Marketing tests continue to pass. TypeScript and hosted build are checked at release.

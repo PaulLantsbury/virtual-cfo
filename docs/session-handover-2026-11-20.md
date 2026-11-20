@@ -1,36 +1,29 @@
-**Owner approval recorded — 20 November:** The user approved the full paid staging package, including the recurring Pro/Small 2 GB cost, exact source/private binding, one further guarded publication and conditional activation. Payment-method entry in Supabase is still required. No billing/compute/source/publication/activation action has yet been applied under this new approval; all capacity, integrity and timing gates remain mandatory. Do not request the same package approval again.
-
 # Night Scout handover — 20 November 2026
 
-## Resume here
+Read the [current roadmap](roadmap-2026-11-20.md) and [approved paid package](daily-feed-2gb-release-review-2026-11-20.md). The full paid package was approved and applied. Do not ask for the same approval or repeat completed setup.
 
-Read the [prepared 2 GB package](daily-feed-2gb-release-review-2026-11-20.md) and [current roadmap](roadmap-2026-11-20.md). The user has approved the complete package. Payment-method entry remains required; after it is confirmed, continue only the exact approved plan/resize/source/binding/one-attempt/conditional activation sequence and all mandatory gates.
+## Verified applied state
 
-Live state: runtime fb5 disabled with automatic deployment off; published horizon 4 November; 24 seals; 45 reviewed inputs staged; zero daily receipts; ordinary and bridge switches off; runtime gap membership revoked and manager temporary SET clean. Existing login expiry 20 December 03:00 UTC. Do not restage the 23 committed batches, repeat the expiry change or reinstall existing capability/login.
+- Pro subscription was upgraded by the owner. Existing staging was resized to Small / **2 GB RAM**, healthy; reviewed capacity and idle-reserve gates passed. Disk allocation remains unchanged; the included 8 GB disk allowance is separate from compute memory.
+- Exact source **cc5b9363b2936aa38a2be4d77982c8638aac0ed3** changed only the inspection helper. Stored helper hash **3ac48f815453db116edc467c972f88778e2be48ec493eaa6954f6a56c1d5d645**, guarded installer **11dc291516d63f5f5c647f6ccf8e3beb03f24007a9b5ff246309125eec44c7fb**. Financial definitions and immutable inputs are unchanged.
+- Approved publication attempt three committed exactly **5–19 November**. Each of the **15 receipts** passed independent inspection through a fresh restricted connection; all **17** company relations matched source expectations. The original **14-relation** example and **22 protected global** fingerprints remained unchanged.
+- Published horizon is **19 November**, with **24 unchanged monthly seals**. All **45** reviewed daily inputs through **19 December** remain staged; 30 await their future daily windows.
+- Temporary catch-up membership was revoked and the exact reviewed bridge retirement completed. The retirement artifact was unchanged; execution used bounded session limits. Normal catalog/statistics checks returned zero findings; existing administrator read-only inheritance was unchanged.
+- Do not restage the 23 batches, repeat expiry adjustment, reinstall capability/login/helper or re-arm the retired bridge. The one further financial attempt is consumed successfully.
+- Runtime remains **fb5beb6ccb2f38df9d535ad96136747b5c0ab45e**, separate runtime branch, automatic deployment off.
 
-## Why activation stopped
+**Recurring feed enabled; first unattended update still awaiting verification.** Exact private settings and their separate fingerprint were verified. Hosted restricted TLS/session checks passed, then the final financial configuration read the reconciled 19 November receipt with `mutationAttempted=false`. The ordinary programme is enabled; the existing Render service is live on exact runtime **fb5beb6ccb2f38df9d535ad96136747b5c0ab45e** with recurring append mode, schedule `0 1,2 * * *` UTC and automatic deployment off. The winter 01:00 run is outside the write window; the first eligible publication is **21 November 02:00–02:15 London** for 20 November. No manual append was triggered.
 
-Two separately approved attempts ended in rollback uncertainty. Independent receipts/full-row source/protected-global checks confirmed no missing days persisted after either. Database automatic recovery occurred during the second attempt; no manual restart. Current Nano allocation up to 0.5 GB is insufficient for measured full-prefix validation. Increasing timeouts did not resolve publication.
+## Resume next
 
-The first text alternative is rejected for this release. The byte-equivalent helper proposal passes full financial and cleanup proofs but still needs the reviewed 2 GB capacity and measured reserve. Local RSS is not a hosted OOM diagnosis or guarantee.
+Verify the **genuine 21 November 02:00–02:15 London** scheduled publication for **20 November**, and reporting readback. This remains outstanding until observed. A successful historical repair, file/TLS check or manual inspection is not proof of unattended daily operation. Do not manually append the next day to manufacture that evidence.
 
-## Exact prepared change
+Then continue v11 page wiring and full visual/mobile acceptance, the ten-second rule and **Explore the Numbers**. Existing tables and live page designs do not prove every chart, insight and dynamic link. Cash, cohorts/attribution, planner persistence and monitoring delivery each retain their own evidence gates.
 
-Proposal source **cc5b9363b2936aa38a2be4d77982c8638aac0ed3**.
-Only inspect_daily_receipt changes: old stored definition **9dcc83df08aee2998c859448bca2c9336030a8a2e52ba6e75fb97c6ba87091b3**, new **3ac48f815453db116edc467c972f88778e2be48ec493eaa6954f6a56c1d5d645**.
-Guarded installer SQL **11dc291516d63f5f5c647f6ccf8e3beb03f24007a9b5ff246309125eec44c7fb**.
-No new extension/permanent privilege or financial formula. Original 5032 source is the historical baseline; after applying this patch its helper hash alone is intentionally superseded.
+The fictional company remains **£750,000 annual net turnover and four employees**, UK gifting seasonality, VAT and outsourced fulfilment. Preserve original January 2025, Store D, other stores/customer data and separate Shopify/Xero provider acceptance.
 
-Six native installer tests, full-prefix atomic rollback/ACL/duplicate checks, full 15-day financial/source/protection/retirement proof and ordinary Nov20/Nov30/Dec19 + same-connection capacity tests pass. Correct-context independent core catalog and private binding checks pass, only intended hash/explicit prepared financial flags differ. Full statistics metadata remains separately verified and must be refreshed after resize.
+## Finite limits and safe stopping
 
-Private immutable 28-artifact manifest, exact raw SQL, binding forms/pins, new nine-function armed/prerearm expectations, source/original/global captures and read-only inspector remain outside GitHub. Manifest billing/source/financial/execution approval flags are false. Do not publish private hashes or paths.
+The programme ceiling remains **19 December**; restricted-login expiry is **20 December 03:00 UTC**. A missed window, drift or uncertain result requires independent inspection and a fresh bounded proposal where needed. No automatic catch-up, extension, financial retry, higher memory tier or downgrade.
 
-## Approved boundaries to retain
-
-The paid package is now explicitly approved; owner payment readiness and the execution gates remain pending. It proposes one further attempt only after new exact approval, resize/health/reserve, full protection and new-source authority gates. Preserve unchanged 15-day scope and expiry. Do not start after **21 November 00:45 London**; bridge expires 01:45. First ordinary window **21 November 02:00 London** for 20 November. Ceiling 19 December, login expiry 20 December 03:00 UTC. Missed windows are not catch-up authority.
-
-No automatic retry, 4 GB upgrade, source widening or downgrade. Unknown install/commit must be inspected before any replay. On failure keep programmes off and remove runtime gap access; do not bypass the retirement receipt guard or automatically restore the old memory-heavy helper while outcomes are uncertain. Existing disabled bridge schema is retained until properly retired.
-
-Paid Pro subscription and Small resize are distinct actions; Pro does not resize Nano. Owner enters payment/tax details in Supabase, never chat/repo. Keep spend cap enabled but do not call it a compute cap. Preserve other projects/provider jobs. Resizing interrupts staging DB connections, not a website deployment. No production/provider transactions/new services are included.
-
-After successful retirement, revalidate normal catalog, deliver exact new financial binding/pin to the same service and conditionally activate existing runtime fb5. First real scheduled receipt/reporting acceptance remains outstanding; do not claim ongoing feed success from local tests or a disabled cron run.
+No website deployment, provider transactions, production changes or new service were included. Preserve spend cap, but do not call it a compute cap. Private connection files, credentials, private pins, account bindings, live fingerprints and raw catalogs stay outside GitHub. Private operator evidence records the exact execution, receipt checks and delivery checks.

@@ -1,3 +1,13 @@
+## Phase 2 application checkpoint — 20 November
+
+The user approved the conditional Phase 2 staging package. All **23 bounded staging batches** committed and independently verified: **45 immutable daily materials**, programme still **disabled**. The approved existing-login expiry adjustment to **20 December 03:00 UTC** is applied.
+
+The exact historical-bridge installation then **refused before creating its schema or role** and rolled back. Its guard incorrectly assumed the managed administrator lacked inherited schema read access. The administrator already has platform read-only authority; do not revoke or broaden it to force this guard to pass. No historical financial days were published, no bridge/runtime temporary access remains, and the daily feed stays off. All 22 protected global table fingerprints still match after staging. The financial horizon remains 4 November.
+
+Next: prepare, independently test/review and obtain approval for a narrowly scoped exact installation amendment preserving that pre-existing read-only authority. Do not retry the failed pinned installer, restage committed chunks or reapply the expiry change. After amendment approval, continue the previously approved bounded publication, independent verification, retirement and conditional activation sequence. Financial source definitions and runtime source fb5 remain unchanged.
+
+The sections below describe the reviewed package and earlier baseline; this checkpoint takes precedence over statements that programme/material tables are empty or expiry is unapplied.
+
 # Night Scout handover — 20 November 2026
 
 ## Applied read-only milestone

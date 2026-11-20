@@ -1,6 +1,6 @@
 # Plan: proposed consolidated redesign — 20 November 2026
 
-Status: proposal for Paul's review. The New prefixes and access to the existing rewritten Cash page are implemented separately; this document does not claim that the Plan redesign, shared scenarios or action services have been built.
+Current status: Plan has been reviewed, implemented and iterated on staging. Read the end-of-day design checkpoint in ../../roadmap-2026-11-20.md and the final implementation entries below. The opening proposal and intermediate layouts are retained as history, not outstanding build instructions. The current page combines planning plus My Actions; live baselines, shared persistence and delivered reminders are not claimed.
 
 ## Purpose and design authority
 

@@ -1,3 +1,23 @@
+# Resume here — site design closeout, 20 November 2026
+
+Latest website release: 8287d1024b8c90523c807450dcef1d9d2a1490b4. This closeout is documentation only.
+
+Read the opening **End-of-day site design checkpoint** in [the roadmap](roadmap-2026-11-20.md) before older notes below.
+
+- **Reviewed/redesigned:** Profit Engine, Cash Control, Marketing (Acquisition + Conversion + Retention), Plan.
+- **Next core design review:** Scout’s View / overview, currently CFO Briefing at /dashboard, with /v11/scout as reference.
+- **Supporting reviews still pending in this latest pass:** Monitoring and Settings/connections/account mapping. Earlier work exists; do not describe them as never reviewed.
+- **Not separate unfinished core pages:** Growth Quality, Opportunity Finder, Scenario Planner, pricing/margin diagnostics. Customer work belongs in Marketing; opportunities/scenarios belong in Plan; relevant profit diagnostics belong in Profit.
+- **Temporary references:** Marketing Efficiency and the original pages. Keep them until Paul agrees final comparison/consolidation.
+- **Next design sequence:** Scout’s View → final menu/names → cross-page owner journey and consistency → Monitoring/Settings → connected/missing-data visual acceptance.
+- Design review is not data readiness. Keep sample/source boundaries, restricted readers and independent integration/feed work. Acquisition-to-future-repeat forecasting stays parked.
+
+Do not restart Cash, Profit, Marketing or Plan redesigns from the older proposals. Final minor acceptance is still possible, but their current working designs have been reviewed and implemented.
+
+---
+
+# Previous handover checkpoints — retained history
+
 ## Full connections implementation — 20 November 2026
 
 [Next website batch](new-pages-full-connections-batch-2026-11-20.md) is implemented and locally tested, not deployed. Profit now has reviewed monthly trends, weighted comparisons and full-breakdown/rate deltas. Marketing has reviewed financial trends, break-even/targets and explicit-baseline financial scenarios. Cash has a separate reviewed EBITDA history; cash balances/movements still require source data. The verified synthetic company has no cash snapshots. Prepared cash adapters/builders do not count as a live connection.

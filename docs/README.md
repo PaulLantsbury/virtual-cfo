@@ -1,3 +1,5 @@
+> **LATEST — 20 November 2026:** [Current roadmap](roadmap-2026-11-20.md) · [Handover](session-handover-2026-11-20.md) · [Pinned delivery approval](daily-feed-pinned-delivery-proposal-2026-11-20.md). Approved compatibility source is deployed, restored and verified disabled; native file delivery remains blocked. New tested fingerprint source is pending exact approval. Financial feed OFF. Older notices below are historical.
+
 > **LATEST — 19 November 2026:** [Current roadmap](roadmap-2026-11-19.md) · [Handover](session-handover-2026-11-19.md) · [Daily-feed approval package](daily-feed-activation-package-2026-11-19.md). Recurring implementation and private rehearsal are complete; live setup/financial activation remain separately unapproved and OFF.
 
 > **LATEST — 6 November 2026:** [Current roadmap](roadmap-2026-11-06.md) · [Session handover](session-handover-2026-11-06.md). Approved website release is live; synthetic daily-feed preparation is reviewed and remains OFF. See the [activation package](daily-feed-activation-package-2026-11-06.md).

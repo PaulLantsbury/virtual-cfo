@@ -54,7 +54,7 @@ export function compositionSteps(values:ProfitTotals,perOrder:boolean):Waterfall
  const add=(id:string,label:string,value:number,subtotal=false)=>{const target=value*scale;const start=subtotal?0:cursor,end=subtotal?target:cursor+target;steps.push({id,label,start,end,amount:target,subtotal});cursor=end;};
  add('sales','Sales',values.sales,true);add('cogs','Product costs',-values.cogs);add('grossProfit','Gross profit',values.grossProfit,true);add('shipping','Net shipping',values.shipping);add('variable','Variable costs',-values.variable);add('ads','Advertising',-values.advertising);add('contribution','Contribution',values.contribution,true);add('cashOverheads','Overheads excluding D&A',-values.cashOverheads);add('ebitda','EBITDA',values.ebitda,true);return steps;
 }
-export function changeSteps(model:PreviewModel,perOrder:boolean):WaterfallStep[]{
+export function changeSteps(model:Pick<PreviewModel,'current'|'previous'>,perOrder:boolean):WaterfallStep[]{
  if(perOrder&&(!Number.isFinite(model.current.orders)||model.current.orders<=0||!Number.isFinite(model.previous.orders)||model.previous.orders<=0))return [];
  const current=model.current,previous=model.previous,c=perOrder?1/current.orders:1,p=perOrder?1/previous.orders:1;
  const baseline=previous.ebitda*p,steps:WaterfallStep[]=[{id:'previous',label:'Previous EBITDA',start:0,end:baseline,amount:baseline,subtotal:true}];

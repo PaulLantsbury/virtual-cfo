@@ -3,14 +3,11 @@ import { ChevronDown, FlaskConical, Lock, Sparkles } from 'lucide-react';
 import { ComposedChart, CartesianGrid, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useActiveStore } from '@/lib/auth/AuthProvider';
-import { useSalesReporting } from '@/lib/analytics/useSalesReporting';
-import { useProfitReporting } from '@/lib/analytics/useProfitReporting';
-import { SalesReportingPeriod } from '@/components/SalesReportingPeriod';
-import { VerifiedSalesSummary } from '@/components/VerifiedSalesSummary';
 import { canAccess } from '@/lib/plan';
 import { shiftDay, type Granularity, type Horizon } from '@/lib/newProfitPreview';
 import { buildMarketingReview, metrics, requirements, spendScenario, scenarioBridge, recommendation, performanceStatus, efficiencyDrivers, type Comparison, type ScenarioDirection, type MarketingTotals } from '@/lib/marketing/review-model';
 import { DecisionSection } from '@/components/DecisionSection';
+import { NewMarketingLive } from '@/components/NewMarketingLive';
 import './new-profit.css';
 import './marketing-efficiency.css';
 
@@ -48,18 +45,15 @@ function ProfitBridge({ rows, perOrder }: { rows: ReturnType<typeof scenarioBrid
 function TestChecklist({ direction, changePct, reviewDate, earliestDate }: { direction: ScenarioDirection; changePct: number; reviewDate: string; earliestDate: string }) {
   return <section className="mr-test-plan" aria-label="Spending test checklist"><div className="mr-section-head"><div><span className="mr-eyebrow">FROM INSIGHT TO ACTION</span><h3>Plan a small test, then review it</h3></div><span className="mr-sample-chip">Unsaved draft</span></div><p>{direction === 'hold' ? 'Hold the acquisition budget while reviewing the weakest activity.' : `The illustration ${direction === 'scale' ? 'increases' : 'reduces'} the whole acquisition budget by ${changePct}%. Identify a bounded test before applying a change.`} A campaign test needs its own matched costs; the whole-business result is not a campaign forecast.</p><div className="mr-test-fields"><label>Activity to investigate<input type="text" placeholder="e.g. a high-CAC campaign" maxLength={160} /></label><label>Who will review it?<input type="text" placeholder="Name or role" maxLength={80} /></label><label>Proposed review date<input type="date" min={earliestDate} defaultValue={reviewDate} /></label></div><div className="mr-checks"><label><input type="checkbox" />Validate this activity’s CAC and first-order contribution.</label><label><input type="checkbox" />Check available cash, stock and any extra capacity costs.</label><label><input type="checkbox" />Check mature-cohort payback before accepting a first-order loss.</label></div><p><strong>At the review:</strong> compare actual CAC, contribution after ads and EBITDA with the unchanged plan. Check that any CAC reduction is not outweighed by lost contribution. Revisit the response assumption if results differ.</p><p className="mr-note">Draft only: entries and ticks reset when the scenario or historical scope changes, or this page reloads. No action, reminder or advertising change is saved or scheduled.</p></section>;
 }
-function SourceEvidence({ storeId }: { storeId: string }) {
-  const reporting = useSalesReporting(storeId);
-  const profit = useProfitReporting(storeId, reporting);
-  const r = profit.report;
-  const overheads = r?.overheads.state === 'ready' && r?.da.state === 'ready' ? r.overheads.value! - r.da.value! : null;
-  return <div className="mr-source"><p>This separate check uses connected reporting, with its own store reporting period below. It does not populate the fictional review, CAC assumptions or scenarios above.</p><SalesReportingPeriod reporting={reporting} /><VerifiedSalesSummary reporting={reporting} /><p><strong>Overheads excluding D&A:</strong> {r?.scope.currency === 'GBP' ? money(overheads) : 'Unavailable'} · <strong>EBITDA:</strong> {r?.scope.currency === 'GBP' && r.ebitda.state === 'ready' ? money(r.ebitda.value) : 'Unavailable'}</p><p>{profit.loading ? 'Checking the selected month’s financial evidence…' : r ? 'Amounts remain subject to the report’s mapping, posting and source coverage. Synthetic reporting is not live Xero evidence.' : 'Complete, verified profit evidence is not available for this source period. Missing costs have not been treated as zero.'}</p></div>;
-}
 export default function MarketingEfficiency() {
   const storeId = useActiveStore();
-  return <MarketingReview key={storeId} storeId={storeId} />;
+  return <MarketingPageMode key={storeId} storeId={storeId} />;
 }
-export function MarketingReview({ storeId }: { storeId: string }) {
+function MarketingPageMode({storeId}:{storeId:string}) {
+  const [sample,setSample]=useState(false);
+  return sample ? <MarketingReview storeId={storeId} onShowConnected={()=>setSample(false)} /> : <AppLayout showMonitoring={false}><NewMarketingLive onShowSample={()=>setSample(true)} /></AppLayout>;
+}
+export function MarketingReview({ onShowConnected }: { storeId: string; onShowConnected?:()=>void }) {
   const [horizon, setHorizon] = useState<Horizon>(3);
   const [granularity, setGranularity] = useState<Granularity>('monthly');
   const [comparison, setComparison] = useState<Comparison>('last-year');
@@ -69,7 +63,6 @@ export function MarketingReview({ storeId }: { storeId: string }) {
   const [changePct, setChangePct] = useState(20);
   const [elasticity, setElasticity] = useState(0.35);
   const [extraOverheads, setExtraOverheads] = useState(0);
-  const [showSource, setShowSource] = useState(false);
   const model = useMemo(() => buildMarketingReview({ granularity, horizon, comparison }), [granularity, horizon, comparison]);
   const t = model.current, m = metrics(t), previous = model.previous ? metrics(model.previous) : null, base = model.baseline30, bm = metrics(base);
   const targetValid = target30 === null || Number.isFinite(target30) && target30 >= 0;
@@ -104,9 +97,9 @@ export function MarketingReview({ storeId }: { storeId: string }) {
   const percentageChange = (n: number | null) => n === null ? 'no positive comparison base' : `${n > 0 ? '+' : ''}${n.toFixed(1)}%`;
   const movement = (actual: number | null, prior: number | null) => actual === null || prior === null ? 'unavailable' : actual > prior ? 'up' : actual < prior ? 'down' : 'unchanged';
   const targetText = (n: number | null, isRatio = false) => safeTarget === null ? 'Set a 30-day target' : n === null ? 'Not achievable at fixed sales' : isRatio ? multiple(n) : money(n, true);
-  return <AppLayout showMonitoring={false}><div className="new-profit marketing-review">
+  return <AppLayout showMonitoring={false}><div className="new-profit marketing-review mr-demo-data">
     <header className="np-header"><div><span className="mr-eyebrow">GROWTH & MARKETING</span><h1>New Marketing Efficiency</h1><p>Know what marketing is earning — and what to do next.</p></div><a className="mr-button mr-secondary" href="#marketing-numbers">Explore the Numbers</a></header>
-    <div className="mr-review-label"><FlaskConical size={17} aria-hidden /><p><strong>Design review · fictional data.</strong> Financial totals match Profit Engine’s sample. Acquisition and spend-response assumptions are illustrative.</p><a href="/marketing-efficiency-original">Compare original page</a></div>
+    <div className="mr-review-label mr-not-linked"><FlaskConical size={17} aria-hidden /><p><strong>Not linked · sample planner.</strong> All numbers, charts and controls in this yellow-marked review are fictional calculations or editable assumptions. They do not use the selected company’s Supabase records.</p>{onShowConnected && <button className="mr-text-link" onClick={onShowConnected}>Return to connected figures</button>}<a href="/marketing-efficiency-original">Compare original page</a></div>
     <div className="np-controls" aria-label="Marketing review controls">
       <div className="np-control-group np-amounts-group"><span>Amounts</span><div className="np-segment"><button aria-pressed={!perOrder} onClick={() => setPerOrder(false)}>Total</button><button aria-pressed={perOrder} onClick={() => setPerOrder(true)}>Per order</button></div></div>
       <div className="np-control-group mr-select-group"><span>Period</span><select className="mr-mobile-select" aria-label="Historical period" value={String(horizon)} onChange={e => setPeriod(e.target.value === 'last-week' || e.target.value === 'last-month' ? e.target.value : Number(e.target.value) as Horizon)}><option value="last-week">Last week</option><option value="last-month">Last month</option><option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option></select><div className="np-segment mr-wide-control">{(['last-week','last-month',3,6,12] as const).map(h => <button key={h} aria-pressed={horizon === h} onClick={() => setPeriod(h)}>{h === 'last-week' ? 'Last week' : h === 'last-month' ? 'Last month' : `${h} months`}</button>)}</div></div>
@@ -154,7 +147,6 @@ export function MarketingReview({ storeId }: { storeId: string }) {
     </DecisionSection>
     <DecisionSection id="marketing-support" number="04" eyebrow="DETAIL WITHOUT THE CLUTTER" title="Supporting numbers and assumptions">
     <Details id="marketing-numbers" title="Explore the Numbers · calculations and assumptions"><h3>One financial basis</h3><p>Profit Engine’s fictional daily financial fixture runs through 11 October 2026. This review uses the same period boundaries, original-order counts, net revenue, advertising and overhead totals. EBITDA excludes depreciation/amortisation; operating profit for the selected period is {display(m.ebitda - t.da)}{unit}. These are constructed data, not current merchant results.</p><h3>Marketing definitions</h3><p>POAS = contribution before advertising / all advertising. Blended ROAS = net product and shipping revenue / all advertising. CAC = eligible acquisition advertising / identified first-time customers. The example assigns 80% of advertising to acquisition and generates new-customer counts from daily eligible orders. First-order revenue and contribution use disclosed synthetic mix factors (98% and 94% of order averages). They are not validated Shopify attribution or observed cohorts.</p><p>Break-even advertising capacity = contribution before ads − overheads excluding D&A. Target capacity additionally deducts the day-equivalent EBITDA target. POAS/ROAS limits divide the matched numerator by this capacity. Indicative CAC limits hold non-acquisition advertising, sales and new-customer volume fixed: (capacity − other advertising) / new customers. They must not be used as marginal-CAC ceilings. Non-positive capacity has no finite positive-spend return threshold; negative acquisition capacity cannot be met by any non-negative CAC.</p><h3>Period and comparison</h3><p>{model.granularity === 'weekly' ? 'Weekly prior-year periods are 52 weeks earlier, preserving weekdays.' : 'Monthly prior-year periods are matching calendar months one year earlier.'} A rolling reference uses the 12 weeks or 3 months immediately before the selected span. Its totals are scaled to the same number of selected buckets, not treated as actual transactions in that span. Each per-order amount uses its own orders. The historical chart uses the selected range, not a fixed six-week illustration. Comparison None removes comparative lines and direction claims.</p><h3>30-day trajectory and scenario</h3><p>The latest up to three selected buckets are converted to daily rates, weighted 1:2:3 towards the latest (or 1 for a single bucket), and extended to 30 days. This run-rate illustration is not a forecast and does not incorporate the gap between old sample dates and today, seasonality, settlement, working capital or future repeat purchases. Targets are temporary browser state and are not saved or sent to providers.</p><p>Acquisition spend changes by a percentage. Average CAC = baseline CAC × budget factor raised to sensitivity; new customers = new acquisition spend / new CAC. Incremental first-order contribution less incremental ads and any extra fixed costs changes EBITDA. The scenario holds returning activity and other ads fixed. A response assumption can be wrong in either direction; reducing spend may damage future retention. Cash capacity and mature-cohort evidence must be checked before acting.</p><h3>Recommendation limits</h3><p>The headline compares selected historical efficiency and uses a disclosed 35% CAC-sensitivity assumption for the next-customer test. Its suggestion is not a spending instruction. Missing mature repeat-purchase economics cannot justify first-order losses automatically. The scenario's sensitivity slider explores alternatives; it does not rewrite historical observations. The original page remains available for comparing channel and planning ideas.</p></Details>
-    <details className="mr-details" onToggle={e => setShowSource(e.currentTarget.open)}><summary>Connected source coverage · separate from this review<ChevronDown size={18} aria-hidden /></summary><div className="mr-detail-body">{showSource && <SourceEvidence storeId={storeId} />}</div></details>
     </DecisionSection>
   </div></AppLayout>;
 }

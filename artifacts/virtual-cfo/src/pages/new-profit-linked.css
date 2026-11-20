@@ -1,0 +1,10 @@
+/* Yellow is a provenance marker, accompanied by explicit status text. */
+.new-profit .np-unlinked{color:#facc15;background:#713f122b;border-radius:4px;padding:2px 5px;box-decoration-break:clone}
+.new-profit .np-control-group select{background:hsl(var(--card));color:hsl(var(--foreground));border:1px solid hsl(var(--border));border-radius:7px;padding:7px;max-width:100%}
+.new-profit.np-sample-unlinked .np-stat>strong,.new-profit.np-sample-unlinked .np-stat-secondary,.new-profit.np-sample-unlinked .np-op-reconcile,.new-profit.np-sample-unlinked .np-py,.new-profit.np-sample-unlinked .np-stat>p,.new-profit.np-sample-unlinked .np-diagnosis-margin,.new-profit.np-sample-unlinked td,.new-profit.np-sample-unlinked .np-plan-impact,.new-profit.np-sample-unlinked .np-plan-overview strong,.new-profit.np-sample-unlinked .np-unit-focus-grid strong,.new-profit.np-sample-unlinked .np-unit-focus-grid small,.new-profit.np-sample-unlinked .np-combined-values strong{color:#facc15;background:#713f122b}
+.new-profit.np-sample-unlinked svg text{fill:#facc15}
+.new-profit.np-sample-unlinked .np-plan-card small{color:#facc15}
+@media(prefers-color-scheme:light){.new-profit .np-unlinked{color:#854d0e;background:#fef08a}}
+.new-profit.np-sample-unlinked .np-verdict h2,.new-profit.np-sample-unlinked .np-graph-analysis li,.new-profit.np-sample-unlinked .np-rate-observation,.new-profit.np-sample-unlinked .np-plan-card-intro p,.new-profit.np-sample-unlinked .np-plan-facts strong,.new-profit.np-sample-unlinked .np-profit-margin{color:#facc15;background:#713f122b}
+
+.new-profit .np-text-link{color:#93c5fd;text-decoration:underline;text-underline-offset:3px}.new-profit .np-text-link:focus-visible{outline:2px solid #facc15;outline-offset:3px}

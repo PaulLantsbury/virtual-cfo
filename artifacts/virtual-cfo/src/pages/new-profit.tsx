@@ -7,6 +7,7 @@ import { buildProfitTrendContext } from '@/lib/trendContext';
 import { buildProfitDecision, type FounderActionId } from '@/lib/newProfitDecision';
 import { NewProfitSavedPlan } from '@/components/NewProfitSavedPlan';
 import './new-profit.css';
+import {readReviewContext} from '@/lib/planning/review-context';
 function profitWords(value:string,svg=false){const pieces=value.split(/(?:Profit \()?EBITDA\)?/);return pieces.flatMap((piece,index)=>index?[svg?<tspan key={index}>Profit <tspan fontSize="0.75em">(EBITDA)</tspan></tspan>:<span key={index}>Profit <small className="np-profit-qualifier">(EBITDA)</small></span>,piece]:[piece]);}
 const money=(value:number|null,perOrder=false)=>value===null?'Unavailable':new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:perOrder?2:0,minimumFractionDigits:perOrder?2:0}).format(value/100);
 const signed=(value:number|null,perOrder=false)=>value===null?'Unavailable':`${value>0?'+':value<0?'−':''}${money(Math.abs(value),perOrder)}`;
@@ -32,8 +33,9 @@ function Sankey({values,perOrder}:{values:ProfitTotals;perOrder:boolean}){
  </svg><p className="np-note">Sample nonnegative flows only. Net product sales + shipping equals product costs + variable costs + advertising + overheads excluding D&A + Profit (EBITDA). Subtotals are not additional outflows.</p></div>;
 }
 export default function NewProfit({demo=false}:{demo?:boolean}){
- const [granularity,setGranularity]=useState<Granularity>('weekly'),[months,setMonths]=useState<Horizon>(3),[perOrder,setPerOrder]=useState(false),[profitOnly,setProfitOnly]=useState(false);
- const [comparison,setComparison]=useState<ComparisonBasis>('last-year');
+ const initial=readReviewContext(window.location.search);
+ const [granularity,setGranularity]=useState<Granularity>(initial.granularity??'weekly'),[months,setMonths]=useState<Horizon>(initial.horizon??3),[perOrder,setPerOrder]=useState(false),[profitOnly,setProfitOnly]=useState(false);
+ const [comparison,setComparison]=useState<ComparisonBasis>(initial.comparison==='rolling'?'rolling':'last-year');
  const [preferredAction,setPreferredAction]=useState<FounderActionId|undefined>(),[expanded,setExpanded]=useState<string|null>(null);
  const model=useMemo(()=>buildProfitPreview({granularity,months}),[granularity,months]);
  const trend=useMemo(()=>buildProfitTrendContext({granularity,comparison,perOrder}),[granularity,perOrder,comparison]);

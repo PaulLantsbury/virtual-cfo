@@ -5,6 +5,7 @@ import {AppLayout} from '@/components/layout/AppLayout';
 import {CashReviewPlan} from '@/components/CashReviewPlan';
 import './new-profit.css';
 import './cash-demo.css';
+import {readReviewContext} from '@/lib/planning/review-context';
 const money=(p:number)=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:0}).format(p/100);
 const date=(v:string)=>new Date(v.slice(0,10)+'T00:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
 const primary='hsl(var(--primary))',muted='hsl(var(--muted-foreground))',border='hsl(var(--border))',green='hsl(var(--success))',red='hsl(var(--destructive))',orange='hsl(var(--warning))';
@@ -21,7 +22,8 @@ import {buildCashPeriodView} from '@/lib/cashPeriodView';
 import {cashResilience} from '@/lib/cashResilience';
 import {buildCashTrendContext} from '@/lib/trendContext';
 export default function CashDemo({review=false}:{review?:boolean}){
- const [months,setMonths]=useState<'last-week'|'last-month'|3|6|12>('last-week'),[granularity,setGranularity]=useState<'weekly'|'monthly'>('weekly'),[comparison,setComparison]=useState<'rolling'|'last-year'|'previous-period'>('rolling');
+ const initial=readReviewContext(window.location.search);
+ const [months,setMonths]=useState<'last-week'|'last-month'|3|6|12>(initial.horizon??'last-week'),[granularity,setGranularity]=useState<'weekly'|'monthly'>(initial.granularity??'weekly'),[comparison,setComparison]=useState<'rolling'|'last-year'|'previous-period'>(initial.comparison==='last-year'?'last-year':'rolling');
  const [bufferDraft,setBufferDraft]=useState('50000'),[bufferError,setBufferError]=useState(''),[minimumBuffer,setMinimumBuffer]=useState(5_000_000);
  const performance=useMemo(()=>buildCashPeriodView({months,granularity,comparison}),[months,granularity,comparison]);
  const trend=useMemo(()=>buildCashTrendContext({granularity,comparison}),[granularity,comparison]);

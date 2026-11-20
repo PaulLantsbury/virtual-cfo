@@ -9,8 +9,7 @@ const navItems = [
   { icon: Megaphone,       label: "New Marketing Efficiency",      href: "/marketing-efficiency"   },
   { icon: BarChart2,       label: "New Profit Engine",            href: "/profit-engine"             },
   { icon: Wallet,          label: "New Cash Control",       href: "/new-cash-control"           },
-  { icon: Target,          label: "Opportunity Finder",     href: "/profit-opportunities"   },
-  { icon: FlaskConical,    label: "Scenario Planner",       href: "/scenario-lab"           },
+  { icon: Target,          label: "New Plan",               href: "/plan"                   },
   { icon: Bell,            label: "Monitoring", href: "/monitoring"             },
   { icon: Settings,        label: "Settings", href: "/settings"               },
 ];

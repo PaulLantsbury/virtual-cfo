@@ -64,3 +64,14 @@ Within ten seconds, owners should identify the top priority, why it matters and 
 ## New-page labels implemented alongside this proposal
 
 The normal site menu/headings identify New Profit Engine, New Marketing Efficiency and New Cash Control. New Cash Control opens the existing rewritten Cash demo at the protected `/new-cash-control` route, clearly labelled synthetic. The older `/cash-control` reporting/context page remains accessible through Compare original page; it has not been replaced or relabelled as the redesign. Profit and Marketing retain their existing routes. The separate published demo's normal page names stay unchanged. Legacy menu consolidation into Plan is proposed, not applied in this naming-only release.
+
+
+## Implementation — 20 November 2026
+
+The approved design is implemented at protected /plan, with Opportunities, Scenario Planner and My Actions inside one New Plan destination. Former menu routes resolve to Plan; original designs remain at /opportunity-finder-original and /scenario-planner-original. Legacy planner presets are not silently applied.
+
+Four numbered blue sections follow the rewritten pages. Historical selectors are separate from the dated, conditional next-30-day run rate. The optional EBITDA goal, integrated model and exact signed profit bridge share Marketing's baseline and acquisition response. Orders, spend and traffic are mutually exclusive order methods; combined revenue, order-cost, overhead, implementation and capacity assumptions recalculate once. Cash investigation has no invented EBITDA benefit. Specialist evidence links carry historical context; specialist pages retain their supported comparison choices.
+
+My Actions stores at most 20 explicitly fictional drafts locally for the signed-in user and store. Each freezes source dates, baseline, assumptions, target, owner, success/stop criteria and review history. Rescheduling preserves the original date. Corrupt or incompatible storage is retained and blocks overwrite. This is not secured shared action persistence, scheduled reminders, live merchant ranking or realised-savings measurement. No provider transaction or advertising setting is changed.
+
+Validation: 12 Plan model/persistence tests and 14 existing Marketing tests passed, plus frontend TypeScript. Desktop interaction checked scenario changes, saving, reload and review history. 390px layout has no document overflow; Free view gates modelling and preserves evidence. Staging production build and live route acceptance are final release checks.

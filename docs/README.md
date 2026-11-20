@@ -1,4 +1,4 @@
-> **LATEST — 20 November 2026, New pages:** [Data-link audit](new-pages-data-links-2026-11-20.md) · [Roadmap](roadmap-2026-11-20.md) · [Handover](session-handover-2026-11-20.md). Tested website wiring and yellow unlinked markers are prepared, not deployed. Daily feed remains a separate enabled release.
+> **LATEST — 20 November 2026, released New pages:** [Hosted verification](new-pages-hosted-verification-2026-11-20.md) · [Data-link audit](new-pages-data-links-2026-11-20.md) · [Roadmap](roadmap-2026-11-20.md). Approved website release is live; linked monthly figures checked, unsupported/sample values yellow. Daily feed remains independent; first unattended receipt still unverified.
 
 > **PICK UP NEXT TIME — 31 October 2026:** [Current roadmap and ordered resume checklist](roadmap-2026-10-31.md): accept genuine Shopify/Xero transaction flows in parallel with v11 review and supported-data wiring.
 

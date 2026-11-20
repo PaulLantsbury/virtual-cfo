@@ -1,6 +1,8 @@
+**Released and hosted-verified — 20 November:** Approved website revision **a77e65822345087aa708fad19c98bbf3e9a73b21** is live on existing staging. October Profit/Marketing figures match reviewed history; per-order and explicit earlier-month comparison work. Unsupported cash/acquisition/forecast figures remain yellow or explicit sample. New Plan is preserved. [Hosted verification](new-pages-hosted-verification-2026-11-20.md). Daily feed unchanged; first genuine scheduled receipt still awaits 21 November.
+
 # New reporting pages — staging release package, 20 November 2026
 
-**Prepared and tested, awaiting website release approval.**
+**Approved, deployed and hosted-verified; see the verification record.**
 
 Exact website source: **a77e65822345087aa708fad19c98bbf3e9a73b21** on `codex/new-pages-data-links-20261120`.
 Current website baseline: **ea10f8e34930e8ca13e995572a4f9a17190751bb**, including the concurrently released New Plan. The source integrates and preserves that work.

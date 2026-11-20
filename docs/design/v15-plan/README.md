@@ -75,3 +75,39 @@ Four numbered blue sections follow the rewritten pages. Historical selectors are
 My Actions stores at most 20 explicitly fictional drafts locally for the signed-in user and store. Each freezes source dates, baseline, assumptions, target, owner, success/stop criteria and review history. Rescheduling preserves the original date. Corrupt or incompatible storage is retained and blocks overwrite. This is not secured shared action persistence, scheduled reminders, live merchant ranking or realised-savings measurement. No provider transaction or advertising setting is changed.
 
 Validation: 12 Plan model/persistence tests and 14 existing Marketing tests passed, plus frontend TypeScript. Desktop interaction checked scenario changes, saving, reload and review history. 390px layout has no document overflow; Free view gates modelling and preserves evidence. Staging production build and live route acceptance are final release checks.
+
+
+## Visual monthly Plan revision — 20 November 2026
+
+Supersedes the first Plan layout and fixed next-30-day UI. New Plan now leads with editable standalone profit sensitivities for acquisition efficiency, conversion, existing-customer repeat orders, net AOV, order costs and overheads. Reduced discounts is no longer a headline lever. The four numbered sections are replaced by outlined working stages. Find your focus compares impact bars alongside a monthly trajectory; Build your plan foregrounds the trajectory and controls; My Actions preserves frozen browser samples.
+
+Plan ahead selects the next 3, 6 or 12 full calendar months. The historical evidence window is separately labelled in Explore the Numbers. A monthly total-EBITDA target is compared with each projected month and the horizon total. History and future are separated by an explicit source gap, with no invented actuals or connecting line. The first partial month is excluded. Underlying activity trend defaults to zero; seasonality and new-cohort repeat demand are not forecast.
+
+The shared Marketing sample provides the 30-day economic starting point. Monthly activity scales for calendar days and the entered trend; monthly fixed overheads stay constant. Spend uses Marketing's fixed 35% response assumption. Independent CAC improvement excludes conversion. Conversion scales first and existing repeat orders, then the repeat lever scales the existing repeat pool only. No new-cohort repeat orders are added. Net AOV uses an explicit incremental contribution margin rather than treating revenue as pure profit. Negative conversion, repeat-order and AOV changes can stress-test downside.
+
+Standalone bars exclude all other improvements and test costs. Selected effects are recalculated in one model; bridge interactions are allocated sequentially, not added from standalone bars. Start month, ramp, ongoing expenses and one-off setup expense are editable. Total/per-order paths use their own order denominators. Invalid inputs remove dependent output and block saving.
+
+Monthly browser drafts use plan-monthly-v2 and freeze the base, source, date anchor, horizon, timing, assumptions and monthly target. Earlier v1 30-day drafts remain preserved and inspectable; they are not silently converted. New review notes retain history and do not claim realised benefit. No shared persistence, automatic reminders, provider action or live forecast is introduced.
+
+Validation includes 12 new monthly model/persistence tests, 14 existing Marketing tests and frontend TypeScript. Desktop browser checks cover selection, combined six-month results, invalid input, save and reload; an actual 390px iframe viewport checks responsive controls and document overflow. Free modelling is gated and evidence stays accessible. Hosted production build and live acceptance are checked at publication.
+
+## Recommended customer analysis structure — discussion, not implemented
+
+Keep one Growth & Marketing destination with Acquisition, Conversion and Retention tabs. Acquisition retains existing CAC/POAS/ROAS and spend decisions, with new-customer versus blended definitions made explicit. Conversion covers sessions, add-to-cart, checkout and purchase funnel, device trends, net AOV and contribution trade-offs. Retention leads with new/repeat customer and revenue trends, second-purchase timing, purchase frequency and contribution; cohort heatmaps and 30/60/90-day mature-cohort economics are progressive detail.
+
+Plan remains the cross-business financial simulator; specialist tabs diagnose performance and pass evidenced assumptions into Plan. Reuse relevant Growth Quality material instead of creating another top-level customer dashboard. Do not rename/rebuild Marketing in this release. Customer acquisition creates future cohorts; the lagged acquisition-to-repeat model remains parked pending sufficient evidence.
+
+Shopify reports support new/returning customer and cohort analysis and a session-based conversion funnel. This does not prove Night Scout's current imports include those datasets. Audit complete first-order history, stable customer identity, refunds/cancellations and anonymised/guest handling; historical orders outside the default 60-day window need appropriate access. Funnel sessions need a separate supported analytics source and measurement definitions. Do not calculate Shopify session conversion as all-channel orders divided by sessions.
+
+References reviewed: Shopify Help Center Customers reports and Behavior reports; Shopify developer API access scopes. Preserve cohort maturity and comparable-session definitions, including the documented September 2026 measurement change. Never compare immature cohorts as though they have completed the same 90-day window.
+
+
+## Plan comparison chart and simpler navigation — 20 November 2026
+
+Plan now has one planning view plus My Actions. Former Find your focus / Build your plan URLs resolve to the same combined view, retaining saved sample drafts. Impact cards explicitly point to the editable inputs below; each Edit input below link selects the lever and focuses its number field. A return link leads back to the impact/chart section.
+
+The monthly chart now uses only the selected future calendar months. Each month compares the planned EBITDA, unchanged trajectory and complete same-calendar-month prior-year sample actual, with exact actual dates in tooltip/table. The disconnected historical segment and artificial Data gap bucket are removed. An unchanged plan coincides with baseline and is explained in the main view. Target is an optional chart overlay. Prior-year data does not seasonally adjust the baseline. Per-order paths retain their own original order denominators.
+
+Full 3/6-month prior-year comparisons are available in the fixture at this date. The 12-month view explicitly marks October/November 2026 prior-year actuals unavailable because the fixture ends part-way through October; it does not fill partial/missing actuals or break the two future paths. This fixes comparison alignment and presentation without changing the forecast financial model or draft version.
+
+Validation: six new chart alignment/completeness/leap-year/per-order tests and the twelve monthly model/persistence tests passed, with frontend TypeScript. Desktop and real 390px iframe review verified direct input focus, chart updates and no page overflow. Hosted staging build and live comparison are verified at publication. Scope is Plan only; connected reporting, provider services and daily-feed schedules remain unchanged.

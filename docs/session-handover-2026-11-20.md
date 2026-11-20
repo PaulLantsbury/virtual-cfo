@@ -1,11 +1,3 @@
-## Tested connections package awaiting website approval — 20 November 2026
-
-Implemented and published exact source `2ec14a6d16905fd64bd18bb2fc0bab14c4bb39ab`: Profit monthly trends/full comparisons, Marketing monthly financial history/targets/conditional scenarios, and a separate Cash EBITDA history. **112 tests, TypeScript and production build pass**; local browser controls checked with labelled fixtures. [Concrete website-only release package](https://github.com/PaulLantsbury/virtual-cfo/blob/543c5ca92bccee042a701424f260b54fc2b9d4c7/docs/new-pages-full-connections-staging-release-2026-11-20.md). Not deployed; staging remains a77e658 until approval.
-
-Read-only staging confirmed zero cash snapshots for the isolated synthetic company. Cash adapter/evidence builder is prepared only; cash and acquisition source publication/permissions are separate future packages. Existing daily feed, provider jobs and production remain unchanged. Next: approve exact website deployment, verify real selected-month inputs/company switching/history latency, then prepare isolated cash/acquisition evidence. Earlier prepared/publish-next wording below is historical.
-
----
-
 ## Full connections implementation — 20 November 2026
 
 [Next website batch](new-pages-full-connections-batch-2026-11-20.md) is implemented and locally tested, not deployed. Profit now has reviewed monthly trends, weighted comparisons and full-breakdown/rate deltas. Marketing has reviewed financial trends, break-even/targets and explicit-baseline financial scenarios. Cash has a separate reviewed EBITDA history; cash balances/movements still require source data. The verified synthetic company has no cash snapshots. Prepared cash adapters/builders do not count as a live connection.
@@ -41,3 +33,21 @@ Default connected views preserve the page section framing and show only supporte
 Keep private connection files, credentials and live account metadata out of GitHub. Local UI-review scaffolding is not part of the release. The approved website-only release and signed-in checks are complete. Next prepare the missing cash/acquisition evidence and verify the first genuine scheduled daily receipt. Do not repeat the website release or publish provider/daily-feed changes as part of this completed package.
 
 [Independent daily-feed handover](https://github.com/PaulLantsbury/virtual-cfo/blob/5420b9cea960057e827422c11b479c2d5a23f1bb/docs/session-handover-2026-11-20.md): already enabled, 15 receipts through 19 November, first actual scheduled run still awaiting 21 November verification; no catch-up/reinstallation/retry.
+
+
+## Visual Plan integration — 20 November 2026
+
+The visual Plan update preserves the reporting-page data-link package in a combined website-only revision. Plan uses explicitly fictional assumptions, standalone impact bars, a reconciled combined EBITDA bridge and 3/6/12 future full-calendar-month paths. AOV replaces discounts as a headline lever; conversion and existing-customer repeat orders are explicit. Historical evidence is separate from the future horizon. No live cohort forecast or source wiring is claimed for Plan. Connected reporting code and feed/provider configuration are preserved.
+
+Next customer design discussion: one Growth & Marketing destination with Acquisition, Conversion and Retention tabs; cohorts are progressive detail under Retention. Audit customer/order history, identity, cohort maturity and session-funnel ingestion before real metrics. Preserve current Marketing in this release. The acquisition-to-future-repeat lag stays parked. See design/v15-plan/README.md for model, checks and limitations.
+
+
+## Plan comparison chart and simpler navigation — 20 November 2026
+
+Plan now has one planning view plus My Actions. Former Find your focus / Build your plan URLs resolve to the same combined view, retaining saved sample drafts. Impact cards explicitly point to the editable inputs below; each Edit input below link selects the lever and focuses its number field. A return link leads back to the impact/chart section.
+
+The monthly chart now uses only the selected future calendar months. Each month compares the planned EBITDA, unchanged trajectory and complete same-calendar-month prior-year sample actual, with exact actual dates in tooltip/table. The disconnected historical segment and artificial Data gap bucket are removed. An unchanged plan coincides with baseline and is explained in the main view. Target is an optional chart overlay. Prior-year data does not seasonally adjust the baseline. Per-order paths retain their own original order denominators.
+
+Full 3/6-month prior-year comparisons are available in the fixture at this date. The 12-month view explicitly marks October/November 2026 prior-year actuals unavailable because the fixture ends part-way through October; it does not fill partial/missing actuals or break the two future paths. This fixes comparison alignment and presentation without changing the forecast financial model or draft version.
+
+Validation: six new chart alignment/completeness/leap-year/per-order tests and the twelve monthly model/persistence tests passed, with frontend TypeScript. Desktop and real 390px iframe review verified direct input focus, chart updates and no page overflow. Hosted staging build and live comparison are verified at publication. Scope is Plan only; connected reporting, provider services and daily-feed schedules remain unchanged.

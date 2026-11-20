@@ -26,3 +26,18 @@
 .marketing-review .decision-section-title h2{font-size:24px;margin:2px 0}
 .marketing-review .decision-section>.mr-verdict,.marketing-review .decision-section>.mr-card:first-of-type{margin-top:0}
 @media(max-width:800px){.marketing-review .decision-section-title h2{font-size:21px}}
+
+/* Evidence status is explicit text as well as amber; sample arithmetic is never a live result. */
+.marketing-review .mr-link-key{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0;font-size:12px}
+.marketing-review .mr-link-ready{border:1px solid hsl(var(--border));border-radius:7px;padding:7px 10px}
+.marketing-review .mr-not-linked{border:1px solid #d9a51d;background:rgba(250,204,21,.08);border-radius:9px;padding:9px 12px;color:#facc15}
+.marketing-review .mr-not-linked strong,.marketing-review .mr-not-linked p,.marketing-review .mr-not-linked small{color:inherit}
+.marketing-review .mr-link-notice{margin:20px 0}
+.mr-linked-review .np-controls>label{display:flex;flex-direction:column;gap:6px;min-width:220px;max-width:100%;font-size:12px}
+.mr-linked-review .np-controls select{border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--card));color:hsl(var(--foreground));padding:9px;max-width:100%}
+.mr-linked-review .mr-review-label{flex-wrap:wrap}
+.mr-linked-review .mr-review-label>p{flex:1;min-width:220px}
+.mr-demo-data .np-stat,.mr-demo-data .mr-card,.mr-demo-data .mr-verdict,.mr-demo-data .mr-target-input,.mr-demo-data .mr-test-plan{border-color:#d9a51d;background-image:linear-gradient(rgba(250,204,21,.025),rgba(250,204,21,.025))}
+.mr-demo-data .np-stat strong,.mr-demo-data .np-stat b,.mr-demo-data .np-stat dd,.mr-demo-data .mr-verdict strong,.mr-demo-data .mr-coverage-row strong,.mr-demo-data .mr-coverage-totals strong,.mr-demo-data .mr-scenario-results strong,.mr-demo-data .mr-scenario-results dd,.mr-demo-data table td,.mr-demo-data .mr-slider-panel strong,.mr-demo-data .mr-target-input input{color:#facc15!important}
+.mr-demo-data .mr-chart,.mr-demo-data .mr-bridge{outline:1px dashed #d9a51d;outline-offset:4px;border-radius:4px}
+@media(max-width:800px){.mr-linked-review .np-controls>label{width:100%;min-width:0}.mr-linked-review .mr-review-label>p{min-width:0}}

@@ -1,3 +1,5 @@
+> **New pages checkpoint — 20 November 2026:** Read docs/new-pages-data-links-2026-11-20.md and docs/roadmap-2026-11-20.md first. New Profit, New Marketing and New Cash data wiring/yellow provenance markers are prepared and tested, not deployed. Base website ea10f8e34930e8ca13e995572a4f9a17190751bb. Use the existing restricted history reader; no new database grants or provider actions. Preserve the independent enabled daily feed and its finite limits. Older notices below are historical.
+
 > **Resume checklist — 31 October 2026:** Read `docs/roadmap-2026-10-31.md` first for the two parallel workstreams, exact scheduled-run acceptance checks, v11 source-data gates and delivery boundaries.
 
 > **Latest implementation checkpoint — 31 October 2026:** Start with `docs/session-handover-2026-10-31.md` and `docs/v11-implementation-2026-10-31.md`. The approved v11 review and shared financial layer are separate from live merchant reporting and scheduled transaction acceptance. Preserve explicit fictional labels, existing store access, source readiness and operational safeguards.

@@ -26,3 +26,5 @@
 .nc-resilience{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:22px;background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:12px}.nc-resilience h3{font-size:30px;font-weight:750;margin:8px 0}.nc-resilience p,.nc-resilience-note p{font-size:13px;color:hsl(var(--muted-foreground));line-height:1.6}.nc-resilience-note{padding:18px 2px}.nc-resilience-note>strong{font-size:18px}@media(max-width:650px){.nc-resilience{align-items:stretch;flex-direction:column}}
 /* Keep the redesigned demo's intermediate-width frame padding aligned with Profit Engine. */
 @media(min-width:801px) and (max-width:1200px){.cash-demo .nc-section{padding:21px}}
+
+.nc-review-links{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.nc-review-links a{text-decoration:underline;text-underline-offset:3px}

@@ -22,6 +22,7 @@ import OriginalMarketingEfficiency from "@/pages/marketing-efficiency-original";
 import Opportunities from "@/pages/opportunities";
 import NewProfit from "@/pages/new-profit";
 import CashControl from "@/pages/cash-control";
+import CashDemo from "@/pages/cash-demo";
 import Settings from "@/pages/settings";
 import Upgrade from "@/pages/upgrade";
 import ScenarioLab from "@/pages/scenario-lab";
@@ -61,6 +62,7 @@ function MerchantRouter() {
       <Route path="/profit-opportunities" component={Opportunities} />
       <Route path="/profit-engine" component={()=><NewProfit/>} />
       <Route path="/new-profit"><Redirect to="/profit-engine"/></Route>
+      <Route path="/new-cash-control" component={() => <CashDemo review />} />
       <Route path="/cash-control" component={CashControl} />
       <Route path="/pricing-optimisation"><Redirect to="/profit-engine"/></Route>
       <Route path="/scenario-lab" component={ScenarioLab} />

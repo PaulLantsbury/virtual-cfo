@@ -6,9 +6,9 @@ import { BrandLogo } from "@/components/BrandLogo";
 const navItems = [
   { icon: LayoutDashboard, label: "CFO Briefing",        href: "/dashboard"              },
   { icon: BarChart2,       label: "Growth Quality",         href: "/growth-quality"         },
-  { icon: Megaphone,       label: "Marketing Efficiency",      href: "/marketing-efficiency"   },
-  { icon: BarChart2,       label: "Profit Engine",            href: "/profit-engine"             },
-  { icon: Wallet,          label: "Cash Control",           href: "/cash-control"           },
+  { icon: Megaphone,       label: "New Marketing Efficiency",      href: "/marketing-efficiency"   },
+  { icon: BarChart2,       label: "New Profit Engine",            href: "/profit-engine"             },
+  { icon: Wallet,          label: "New Cash Control",       href: "/new-cash-control"           },
   { icon: Target,          label: "Opportunity Finder",     href: "/profit-opportunities"   },
   { icon: FlaskConical,    label: "Scenario Planner",       href: "/scenario-lab"           },
   { icon: Bell,            label: "Monitoring", href: "/monitoring"             },

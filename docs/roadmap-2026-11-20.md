@@ -1,3 +1,9 @@
+## Release held to preserve newer live Plan — 20 November 2026
+
+The approved2ec14a6 deployment was not triggered: preflight found newer live Plan115a6117. Exact tested union **950baf935c33ac7c00cbdc53f3be6e93bebab81a** preserves all eight live Plan application/test files and all approved connections; independent file comparison,130 tests, TypeScript and production build pass. [Concrete amendment](https://github.com/PaulLantsbury/virtual-cfo/blob/10e935954ead2c81f79745534cd98539a365f832/docs/new-pages-connections-preserve-plan-amendment-2026-11-20.md) awaits exact-source website approval. No hosted settings, database, provider or feed changes were made. Current staging remains115a6117. Next: approve amended website source, deploy and verify the signed-in pages, then separate cash/acquisition evidence work.
+
+---
+
 ## Tested connections package awaiting website approval — 20 November 2026
 
 Implemented and published exact source `2ec14a6d16905fd64bd18bb2fc0bab14c4bb39ab`: Profit monthly trends/full comparisons, Marketing monthly financial history/targets/conditional scenarios, and a separate Cash EBITDA history. **112 tests, TypeScript and production build pass**; local browser controls checked with labelled fixtures. [Concrete website-only release package](https://github.com/PaulLantsbury/virtual-cfo/blob/543c5ca92bccee042a701424f260b54fc2b9d4c7/docs/new-pages-full-connections-staging-release-2026-11-20.md). Not deployed; staging remains a77e658 until approval.

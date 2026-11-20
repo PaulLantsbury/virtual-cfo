@@ -1,3 +1,11 @@
+## Tested connections package awaiting website approval — 20 November 2026
+
+Implemented and published exact source `2ec14a6d16905fd64bd18bb2fc0bab14c4bb39ab`: Profit monthly trends/full comparisons, Marketing monthly financial history/targets/conditional scenarios, and a separate Cash EBITDA history. **112 tests, TypeScript and production build pass**; local browser controls checked with labelled fixtures. [Concrete website-only release package](https://github.com/PaulLantsbury/virtual-cfo/blob/543c5ca92bccee042a701424f260b54fc2b9d4c7/docs/new-pages-full-connections-staging-release-2026-11-20.md). Not deployed; staging remains a77e658 until approval.
+
+Read-only staging confirmed zero cash snapshots for the isolated synthetic company. Cash adapter/evidence builder is prepared only; cash and acquisition source publication/permissions are separate future packages. Existing daily feed, provider jobs and production remain unchanged. Next: approve exact website deployment, verify real selected-month inputs/company switching/history latency, then prepare isolated cash/acquisition evidence. Earlier prepared/publish-next wording below is historical.
+
+---
+
 ## Full connections implementation — 20 November 2026
 
 [Next website batch](new-pages-full-connections-batch-2026-11-20.md) is implemented and locally tested, not deployed. Profit now has reviewed monthly trends, weighted comparisons and full-breakdown/rate deltas. Marketing has reviewed financial trends, break-even/targets and explicit-baseline financial scenarios. Cash has a separate reviewed EBITDA history; cash balances/movements still require source data. The verified synthetic company has no cash snapshots. Prepared cash adapters/builders do not count as a live connection.

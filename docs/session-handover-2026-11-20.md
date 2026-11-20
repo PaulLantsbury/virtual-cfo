@@ -1,23 +1,23 @@
 # Night Scout handover — 20 November 2026
 
-Read the [current roadmap](roadmap-2026-11-20.md) and [exact pinned delivery approval package](daily-feed-pinned-delivery-proposal-2026-11-20.md) first.
+## Applied read-only milestone
 
-## Applied
+Exact **fb5beb6ccb2f38df9d535ad96136747b5c0ab45e** is deployed, private independent fingerprint delivered, clean Linux build passed. Actual Render file delivery and certificate-verified hosted TLS/session/invoker checks succeeded with both financial flags false. Normal disabled command restored and verified with zero connections; automatic deployment remains off. Do not repeat the completed delivery approvals or database installation.
 
-Approved source 1168b0b2ae5fa2fe7211de64f9fcd2b5a675b439 is live on the existing separate synthetic feed service, automatic deployment off. Clean Linux build passed the locked runtime/driver probe. The private artifact was updated with already approved statistics review true; append approval and original-evidence protection acceptance remain false. Actual mount diagnostics stopped on the root-owned writable native secret directory before any database connection. The service was restored to its normal disabled wrapper command; fresh run succeeds with zero connections. The two overnight disabled scheduled runs also succeeded.
+## Financial acceptance evidence, still unaccepted
 
-A fresh restricted metadata audit passes the statistics contract; the full audit's sole remaining finding is original/closed-month/unrelated protection acceptance missing. Hosted TLS/session/invoker evidence remains unproved because file delivery failed first. Do not describe the release as accepted or the financial feed as running.
+Source-derived full-row count/hash equality: **17 total relations (10 history + 7 correction/version)**, including all 24 monthly seals. Original-company source comparison: **14 semantic relations** match; only predefined fixture-authoring timestamps excluded. The original example is January **2025**. Separate fresh exact hashes for **22 global protected tables** are a current prewrite checkpoint, not historic equality or an atomic global guard. No raw rows were exported. Keep all captures, private bindings/fingerprints and SQL artifacts outside GitHub.
 
-## Prepared, pending exact approval
+Live financial horizon remains 4 November; programme/material/receipts empty. Append approval and protected-fingerprint acceptance remain false. The source-level protection flag is an attestation gate, not automatic verification of every external table each run.
 
-Candidate **fb5beb6ccb2f38df9d535ad96136747b5c0ab45e** authenticates the exact independent approved binding bytes through a separate private service fingerprint, before decoding/parsing/copy. Only the fixed native writable mount is transport; target ownership, all other parent permissions, race checks and strict owner-only regular copy remain. Default disabled command reads no pin/binding and connects nowhere. **79 focused checks passed; no failed/cancelled/skipped checks.** Local locked-driver build probe passes with both disabled counts zero. The new source/pin has not been deployed or delivered.
+## Next financial package
 
-Obtain exact approval before moving the isolated release branch or delivering the private pin. Preserve the restricted credential and prior statistics review; no DDL replay. Run only approved delivery/read-only checks, then restore/reverify disabled mode. Neither connection nor metadata acceptance permits financial writes or accepts protected evidence.
+Full actual managed workflow rehearsal passed: 23 private batches stage 45 days disabled, grantor-specific temporary reviewer access cleaned at every commit; fresh manager backend inspects exact prefixes; failed batch rolls back; replay is refused. Then bounded 15-day Nov5–19 serializable publication, independent ordinary receipts, canonical financial/source/oracle checks and retirement pass. Existing restricted writer retains only ordinary invoker afterward; no temporary bridge role/schema remains. Normal catalog JSON matched before/after. Original archive, 24 seals and January/October revisions retained.
 
-## Financial milestone preparation
+Post-retirement ordinary next-day activation smoke passed, including zero-insert replay. The private execution manifest and guarded capsules are complete. Proposal source is 180db62ea6c7e8b44409ac0a4d463604491cf52e. [Phase 2 approval package](daily-feed-phase2-approval-2026-11-20.md) is ready; obtain explicit financial approval before applying it. No provider, website, production, extra-service or budget changes belong to this package.
 
-A separate managed bridge candidate handles the existing administrator's bootstrap ADMIN-only edges and temporary role/schema/trigger permissions through install and retirement. Ordinary financial source is unchanged. Nine native protocol checks passed; full canonical 15-day rehearsal is still in progress, not yet acceptance. Conditional range 5–19 November, expiry 21 November 01:45 London, requires a fresh exact approval package. Expired prior gap cannot be reused.
+Conditional historical range: **5–19 November**, expiry **21 November 01:45 London**. First ordinary day: **20 November**, first scheduled publication **21 November 02:00 London**. Ceiling **19 December**. The current runtime password-authentication expiry is **20 December 00:00 UTC**, too early for the final day; obtain explicit approval to extend only that expiry to **20 December 03:00 UTC**, same credentials/rights and unchanged ceiling. No extension applied yet.
 
-Before any financial approval, compare source-derived private history counts/hashes and protected original January/closed-month/unrelated evidence against reviewed baselines. Legitimate provider-table changes need reconciliation; global hashes cannot be promised unchanged forever. Existing offline compiler/rehearsal helpers must not be mistaken for hosted baseline checkers. The protection flag is an attestation gate and must remain false until that review.
+On uncertain commit: stop, use independent exact material/receipt/actual-prefix inspection and retain original errors. Do not replay or learn replacement hashes from observed state. Fresh global hash drift from independent provider activity needs classification, not silent expected-value replacement. Retirement SQL failures require rollback and review; do not proceed to activation with authority left behind.
 
-Live horizon is still 4 November, 24 seals; programme/reviewed days/receipts remain empty. No financial/provider writes, database installation changes, website/production changes, second service or additional budget were included. Keep private artifacts out of GitHub; preserve old local work and the provider baseline.
+[Current roadmap](roadmap-2026-11-20.md) · [Delivery record](daily-feed-pinned-delivery-proposal-2026-11-20.md)

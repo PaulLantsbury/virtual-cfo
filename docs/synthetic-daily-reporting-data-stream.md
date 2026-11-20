@@ -1,5 +1,44 @@
 # Synthetic Daily Reporting Data stream
 
+## Current agreed profile and status — 20 November 2026
+
+The active **uk-gifts-v2** profile supersedes the earlier £500,000/five-person plan below. The user agreed **£750,000 annual net turnover and four employees**. The implemented deterministic profile and financial evidence are described in the [generator contract](../experiments/synthetic-company/README.md).
+
+| Current annual fixture | Value |
+| --- | ---: |
+| Net product sales, excluding VAT | £720,000 |
+| Net shipping revenue | £30,000 |
+| Net turnover | £750,000 |
+| Original orders | 19,895 |
+| AOV, excluding VAT/shipping and before later refunds | About £38 |
+| Product COGS | £360,000 |
+| Product gross profit / margin | £360,000 / 50% |
+| Four gross salaries | £119,000 |
+| Fictional employer allowance and pension | £14,146.85 + £3,328.67 |
+| Total employment cost | £136,475.52 |
+| Variable costs, including fulfilment/packaging and processor fees | £100,280 |
+| Marketing | £30,000 |
+| Overheads, including employment and depreciation | £157,475.52 |
+| Operating profit / EBITDA | £102,244.48 / £104,644.48 |
+
+These are annual scenario targets independently checked against the source ledger, not a claim that a partial month's live report is sealed or that all services are wired. Q4 remains 40% of annual activity, December 18%, with year-specific gifting pulses. VAT, refunds, stock, payroll, fulfilment and settlement timing remain distinct source events. No personal data or provider transactions populate this stream.
+
+Two years of isolated synthetic history and 24 monthly seals exist. The current published daily horizon is **4 November**, with **45** immutable reviewed inputs staged through **19 December**, but **zero** daily publication receipts. The separate recurring service is prepared and disabled. Two approved publication attempts committed no new financial records; independent readback verified the existing prefix and protected data unchanged. Both financial programmes are off and runtime temporary bridge access is removed.
+
+The user selected preparation of a **2 GB paid release package**, not an upgrade or further financial attempt. [The current roadmap](roadmap-2026-11-20.md) is authoritative for application status and approvals.
+
+### Capacity is part of test-data acceptance
+
+Test the entire restricted publication transaction and the largest future ordinary/month-end day, not just individual queries or row counts. Whole-history JSON aggregation can use much more memory than the stored data size. The current Nano allocation is up to 0.5 GB; the first equivalent text-aggregation alternative still failed the full-transaction capacity test. An offline byte-equivalent helper candidate passes the 15-day financial/protection/retirement proof but used about 954 MiB backend RSS, so it is not accepted for Nano.
+
+A helper-source change must preserve exact UTF-8 validation bytes, ordering, scope, material hashes and financial results, with a newly reviewed function/catalog/private-binding pin. Memory reductions do not authorize changing immutable inputs, dropping validation, increasing deadlines, retrying publication or buying more capacity. Local RSS includes shared/cache pages and is not a hosted capacity guarantee. Preserve warm-idle/concurrency reserve and stop if the reviewed target fails its acceptance gates.
+
+Read-only data rows alone still do not complete Night Scout: verify each supported scoped reader, chart, commentary and contextual **Explore the Numbers** route, with a clear ten-second owner verdict and honest unavailable states. Cash, cohort/channel attribution, planner persistence and monitoring delivery require their own supported evidence. Shopify/Xero acceptance remains separate.
+
+## Historical planning record
+
+The sections below retain the initial £500,000/five-person design and its dated first assessment for context. Their provisional figures and “not created” statements describe that earlier state; use the current profile, source contract and roadmap above for new work.
+
 Status: agreed planning stream; documentation only. No company, schema, seed rows, job, provider writer, hosting service or deployment has been created by this plan.
 
 ## Purpose
@@ -14,7 +53,7 @@ This stream complements, but does not replace, provider acceptance:
 
 The current roadmap tracks this as its own workstream: [Night Scout roadmap](roadmap-2026-10-31.md). Provider test-order handling remains described in the [Shopify test-data journey](shopify-test-data-journey-2026-10-29.md).
 
-## Starting company profile
+## Historical starting company profile
 
 All figures below are explicit fixture assumptions to make the implementation concrete. They are not user-company facts, forecasts, tax advice or market benchmarks. Keep them configurable and versioned. Confirm the turnover interpretation, dates, and cost amounts before the first remote database write.
 
@@ -149,7 +188,7 @@ The stream is ready for daily staging use when:
 - Provider test-order exclusion and Shopify/Xero acceptance evidence are unchanged and remain independently verifiable.
 - Each run exposes a clear freshness receipt and passes financial reconciliation.
 
-## Decisions to confirm before the first write
+## Historical decisions recorded before the first write
 
 These inputs can stay configurable for the plan and local generator, but must be resolved before persistent staging records are created:
 

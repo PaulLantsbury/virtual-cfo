@@ -1,35 +1,21 @@
-**Tested amendment ready:** [Exact installer correction and approval scope](daily-feed-installer-amendment-2026-11-20.md). Ten native checks and the full-prefix compatibility rehearsal passed; independent review complete. Await exact amendment approval, then resume at installation only.
-
-## Phase 2 application checkpoint — 20 November
-
-The user approved the conditional Phase 2 staging package. All **23 bounded staging batches** committed and independently verified: **45 immutable daily materials**, programme still **disabled**. The approved existing-login expiry adjustment to **20 December 03:00 UTC** is applied.
-
-The exact historical-bridge installation then **refused before creating its schema or role** and rolled back. Its guard incorrectly assumed the managed administrator lacked inherited schema read access. The administrator already has platform read-only authority; do not revoke or broaden it to force this guard to pass. No historical financial days were published, no bridge/runtime temporary access remains, and the daily feed stays off. All 22 protected global table fingerprints still match after staging. The financial horizon remains 4 November.
-
-Next: prepare, independently test/review and obtain approval for a narrowly scoped exact installation amendment preserving that pre-existing read-only authority. Do not retry the failed pinned installer, restage committed chunks or reapply the expiry change. After amendment approval, continue the previously approved bounded publication, independent verification, retirement and conditional activation sequence. Financial source definitions and runtime source fb5 remain unchanged.
-
-The sections below describe the reviewed package and earlier baseline; this checkpoint takes precedence over statements that programme/material tables are empty or expiry is unapplied.
-
 # Night Scout handover — 20 November 2026
 
-## Applied read-only milestone
+## Safe checkpoint after one publication attempt
 
-Exact **fb5beb6ccb2f38df9d535ad96136747b5c0ab45e** is deployed, private independent fingerprint delivered, clean Linux build passed. Actual Render file delivery and certificate-verified hosted TLS/session/invoker checks succeeded with both financial flags false. Normal disabled command restored and verified with zero connections; automatic deployment remains off. Do not repeat the completed delivery approvals or database installation.
+The exact approved inherited-read installer amendment applied successfully; before/after inherited-access attestations and the independent nine-function authority audit matched. All 23 staging batches are committed and verified, 45 reviewed days exist, and the approved expiry is 20 December 03:00 UTC. Do not repeat completed setup.
 
-## Financial acceptance evidence, still unaccepted
+One restricted publisher invocation returned **unknown-rollback-stop-independent-inspection-only**. Independent receipts are absent for all 15 reviewed historical days; all 17 history/correction full-row hashes match the original 4 November prefix exactly, and all 22 protected global fingerprints match. No active restricted backend remained. Thus no financial publication persisted.
 
-Source-derived full-row count/hash equality: **17 total relations (10 history + 7 correction/version)**, including all 24 monthly seals. Original-company source comparison: **14 semantic relations** match; only predefined fixture-authoring timestamps excluded. The original example is January **2025**. Separate fresh exact hashes for **22 global protected tables** are a current prewrite checkpoint, not historic equality or an atomic global guard. No raw rows were exported. Keep all captures, private bindings/fingerprints and SQL artifacts outside GitHub.
+Runtime bridge membership was revoked, bridge approval disabled, ordinary programme remains disabled, and manager temporary owner/reviewer SET access is absent. Bridge schema remains installed **disabled**; do not bypass the original retirement guard requiring committed receipts. Exact Render runtime fb5 remains disabled with automatic deployment off. Financial candidate binding has not been delivered to Render.
 
-Live financial horizon remains 4 November; programme/material/receipts empty. Append approval and protected-fingerprint acceptance remain false. The source-level protection flag is an attestation gate, not automatic verification of every external table each run.
+## Diagnosis and continuation
 
-## Next financial package
+The private publisher inherits a 65-second client query timeout but sets a 90-second server statement timeout. This mismatch can cause client failure before useful database completion/error reporting; it does not prove the sole cause. The 15-day loop repeats whole-prefix receipt hashes. Logs show a connection reset; no server timeout was established from the bounded error search.
 
-Full actual managed workflow rehearsal passed: 23 private batches stage 45 days disabled, grantor-specific temporary reviewer access cleaned at every commit; fresh manager backend inspects exact prefixes; failed batch rolls back; replay is refused. Then bounded 15-day Nov5–19 serializable publication, independent ordinary receipts, canonical financial/source/oracle checks and retirement pass. Existing restricted writer retains only ordinary invoker afterward; no temporary bridge role/schema remains. Normal catalog JSON matched before/after. Original archive, 24 seals and January/October revisions retained.
+Prepare a tested exact publisher timeout/diagnostic amendment with aligned finite server/client/wall limits, fixed phase and safe SQLSTATE-only diagnostics, no automatic retry and no financial SQL changes. Obtain concrete approval for one further bounded attempt. Recheck absent receipts, original full-row prefix, complete source/temporary authority and protected globals first. Regrant only the exact original runtime bridge SET membership and re-enable the exact finite bridge only under that approval. Preserve expiry 21 November 01:45 London and original 5–19 November range.
 
-Post-retirement ordinary next-day activation smoke passed, including zero-insert replay. The private execution manifest and guarded capsules are complete. Proposal source is 180db62ea6c7e8b44409ac0a4d463604491cf52e. [Phase 2 approval package](daily-feed-phase2-approval-2026-11-20.md) is ready; obtain explicit financial approval before applying it. No provider, website, production, extra-service or budget changes belong to this package.
+On success reconcile all 15 independent receipts, source graph/profit/coverage evidence and protections; revoke runtime membership and apply unchanged retirement SQL; verify ordinary metadata restored. Only then continue the existing conditional daily activation approval. First ordinary publication remains 21 November 02:00 London for 20 November. Stop rather than catch up a missed window.
 
-Conditional historical range: **5–19 November**, expiry **21 November 01:45 London**. First ordinary day: **20 November**, first scheduled publication **21 November 02:00 London**. Ceiling **19 December**. The current runtime password-authentication expiry is **20 December 00:00 UTC**, too early for the final day; obtain explicit approval to extend only that expiry to **20 December 03:00 UTC**, same credentials/rights and unchanged ceiling. No extension applied yet.
+Private execution copies, amendment artifacts, receipts, installed authority proof and stop record remain outside GitHub. Raw exception messages, SQL, credentials and account details must not enter diagnostics or public docs.
 
-On uncertain commit: stop, use independent exact material/receipt/actual-prefix inspection and retain original errors. Do not replay or learn replacement hashes from observed state. Fresh global hash drift from independent provider activity needs classification, not silent expected-value replacement. Retirement SQL failures require rollback and review; do not proceed to activation with authority left behind.
-
-[Current roadmap](roadmap-2026-11-20.md) · [Delivery record](daily-feed-pinned-delivery-proposal-2026-11-20.md)
+[Roadmap](roadmap-2026-11-20.md) · [Approved installer amendment](daily-feed-installer-amendment-2026-11-20.md)

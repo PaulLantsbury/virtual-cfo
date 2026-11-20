@@ -3,3 +3,10 @@
 @media(max-width:650px){.marketing-review h1{font-size:29px}.marketing-review h2{font-size:21px}.mr-review-label{flex-wrap:wrap}.mr-review-label a{margin-left:27px}.marketing-review .np-controls{gap:12px}.marketing-review .np-control-group{align-items:flex-start;flex-direction:column;gap:6px;width:100%;min-width:0}.marketing-review .np-segment{max-width:100%}.marketing-review .np-segment button{font-size:13px;padding:7px 10px}.mr-verdict{padding:19px;flex-wrap:wrap;gap:10px}.mr-verdict-icon{display:none}.mr-verdict-copy{flex-basis:100%;order:2}.mr-verdict-badge{order:1}.mr-target-input{padding:16px}.mr-target-input>div:last-of-type{width:100%}.mr-target-input input{width:135px;flex:1}.marketing-review .mr-stats{grid-template-columns:1fr}.mr-card{padding:18px}.mr-section-head{flex-direction:column;gap:10px}.mr-coverage-totals{grid-template-columns:1fr}.mr-coverage-row>div:first-child{font-size:14px}.mr-coverage-row strong{white-space:nowrap}.mr-chart{height:290px;margin-left:-12px;margin-right:-9px}.mr-legend{font-size:13px;gap:10px}.mr-details>summary{padding:15px;font-size:14px}.mr-detail-body{padding:0 15px 16px}.mr-result-pair{grid-template-columns:1fr}.mr-scenario-impact{flex-wrap:wrap}.mr-scenario-facts>div{flex-direction:column;gap:3px}.mr-scenario-facts dd{text-align:left}.mr-slider-panel{padding:15px}.mr-sample-chip{white-space:normal}.mr-target-input label{font-size:15px}.mr-track{height:17px}}
 
 @media(max-width:650px){.mr-review-label p{flex:1 1 calc(100% - 30px)}.mr-review-label a{flex-basis:100%;margin-left:27px;white-space:normal}}
+
+/* Explicit status classes override inherited stat/card text colours. */
+.marketing-review .mr-tone-good{color:#6ee7b7}
+.marketing-review .mr-tone-bad{color:#fda4af}
+.marketing-review .mr-tone-neutral,.marketing-review .mr-tone-unknown{color:var(--mr-muted)}
+.marketing-review .mr-benchmark-status{display:block;font-size:12px;font-weight:500;margin-top:2px}
+.marketing-review .mr-colour-key{font-size:13px;line-height:1.7;margin:12px 0;color:var(--mr-muted)}

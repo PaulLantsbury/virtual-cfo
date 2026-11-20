@@ -117,3 +117,10 @@ export function recommendation(current: MarketingTotals, previous: MarketingTota
       : verdict === 'Consider scaling' ? 'The model leaves positive contribution on extra acquisition. A controlled increase may add EBITDA if cash, stock and capacity support it.'
       : 'Keep spend controlled while validating acquisition costs and the return on the next pound. A profit-target shortfall alone is not a reason to cut profitable advertising.' };
 }
+
+/** Direction against a named benchmark; missing evidence never becomes healthy. */
+export function performanceStatus(actual: number | null, benchmark: number | null, lowerBetter = false): 'good' | 'bad' | 'equal' | 'unknown' {
+  if (actual === null || benchmark === null || !Number.isFinite(actual) || !Number.isFinite(benchmark)) return 'unknown';
+  if (actual === benchmark) return 'equal';
+  return (lowerBetter ? actual < benchmark : actual > benchmark) ? 'good' : 'bad';
+}

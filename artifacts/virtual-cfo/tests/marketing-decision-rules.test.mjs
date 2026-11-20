@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { aggregateDays, DAILY_SAMPLE } from '../src/lib/newProfitPreview.ts';
-import { buildMarketingReview, metrics, requirements, spendScenario, scenarioBridge, recommendation } from '../src/lib/marketing/review-model.ts';
+import { buildMarketingReview, metrics, requirements, spendScenario, scenarioBridge, recommendation, performanceStatus } from '../src/lib/marketing/review-model.ts';
 const near = (a,b) => assert.ok(Math.abs(a-b)<1e-6, `${a} ≠ ${b}`);
 const model = buildMarketingReview({granularity:'monthly',horizon:3,comparison:'last-year'});
 const base = model.baseline30;
@@ -80,4 +80,20 @@ test('scenario financial bridge reconciles on total and each scenario’s own pe
 });
 test('invalid scenario controls fail closed without financial output',()=>{
  for(const patch of [{elasticity:1},{changePct:90},{extraOverheads:-1},{extraOverheads:NaN},{direction:'bad'}])assert.equal(spendScenario(base,{...input,...patch}),null);
+});
+
+test('performance colours respect metric direction, equal benchmarks and missing evidence',()=>{
+ assert.equal(performanceStatus(40,35,true),'bad'); // Higher CAC is worse.
+ assert.equal(performanceStatus(30,35,true),'good');
+ assert.equal(performanceStatus(2,1.5),'good'); // Higher POAS is better.
+ assert.equal(performanceStatus(1,1.5),'bad');
+ assert.equal(performanceStatus(0,0),'equal');
+ for(const missing of [null,NaN,Infinity]){
+  assert.equal(performanceStatus(missing,0),'unknown');
+  assert.equal(performanceStatus(0,missing),'unknown');
+ }
+ // The business can cover costs while missing its target and deteriorating.
+ assert.equal(performanceStatus(160,123),'good');
+ assert.equal(performanceStatus(160,169),'bad');
+ assert.equal(performanceStatus(160,200),'bad');
 });

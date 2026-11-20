@@ -29,3 +29,18 @@ Scenario results and a reconciled EBITDA bridge compare with unchanged trajector
 Only the Marketing page, new scoped CSS/model, focused behavioral tests and this document change. Existing authenticated access, original comparison route, APIs, Xero/Shopify scopes, databases, reader/writer schedules and Profit Engine source are unchanged. Connected financial evidence remains an independently labelled, lazy read-only section with its own supported source period. Actual growth recommendations are not enabled.
 
 Twelve behavioral groups cover all period/view combinations, weighted ratios, Profit Engine reconciliation, rolling/None, 30-day daily-rate weighting, EBITDA thresholds, absent/impossible targets, Hold identity, capacity cost treatment, diminishing returns, total/per-order bridge reconciliation and invalid-input refusal. Frontend TypeScript passes. Isolated browser review verifies period/per-order synchronization and scenario Scale controls; mobile width390 has no document overflow after the label layout fix. Hosted build and signed-in visual checks are separate release gates.
+
+## Four-part layout audit and colour review — 20 November
+
+References: the documented Profit/Cash four-section pattern in `docs/night-scout-demo-2026-10-15.md`, Profit Engine's numbered source sections, and v11 `00-principles.md` / `04-shared-page-contract.md`. The four jobs, in plain English, are: give the headline position; explain the movement; move from insight to action; offer supporting numbers without clutter. The v14 user instructions supersede older Marketing card counts and diagnostic ordering.
+
+| Job | Current Marketing fit | Suggested next refinement |
+| --- | --- | --- |
+| Headline position | Trend verdict, EBITDA, target gap and four benchmark cards present. | Compact the mobile controls so the verdict is reached sooner, preserving Paul's requested selectors. |
+| Explain the movement | Coverage bars and historical CAC/POAS show what changed. | Add one concise driver explanation using spend, identifiable new customers and first-order contribution; distinguish arithmetic from an unproved causal claim. |
+| Insight to action | Editable spend/CAC scenario and reconciled profit bridge present. | Add a short review checklist: which activity to investigate, cash/stock/cohort checks, proposed test and review date. Saving/monitoring must remain unavailable until supported. |
+| Supporting numbers | Source/math details and exact chart values available. | Keep the spend-response chart available but collapse its long numerical table separately, reducing default page length. |
+
+Implemented now: green/red financial status with explicit text, not colour alone. KPI headline numbers compare with business break-even; comparison changes have their own favourable/unfavourable direction (lower CAC is better); break-even and target threshold rows explicitly say Within limit/Above limit or Meets minimum/Below minimum. A green break-even result can coexist with a red target gap and red worsening comparison. EBITDA is coloured relative to zero; target gaps relative to target; scenario changes relative to the unchanged trajectory in the active display units. Missing/nonfinite comparisons and unset targets stay neutral. Fixed costs and spending are not automatically labelled bad merely because they are positive costs. No financial model or provider data changes.
+
+The four recommendations above are proposals for Paul's review, not claims of completed action tracking or measured causal drivers. Thirteen focused financial/status test groups and frontend TypeScript pass. Hosted acceptance is checked separately.

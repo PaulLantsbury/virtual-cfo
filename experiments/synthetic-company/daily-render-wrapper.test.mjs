@@ -33,8 +33,8 @@ test('untrusted ownership, writable parent/target and targets inside source fail
   async f=>{f.options.repoRoot=f.targetDir;},
  ]){const f=await fixture();try{await change(f);await assert.rejects(stageRenderMountedBinding(f.options));}finally{await f.cleanup();}}
 });
-test('oversize, malformed JSON, invalid UTF8 and unsafe paths never produce a private copy',async()=>{
- for(const value of [Buffer.alloc(RENDER_BINDING_MAX_BYTES+1,32),Buffer.from('{malformed'),Buffer.from([0xff,0xfe])]){
+test('oversize, malformed JSON, invalid UTF8, BOM and unsafe paths never produce a private copy',async()=>{
+ for(const value of [Buffer.alloc(RENDER_BINDING_MAX_BYTES+1,32),Buffer.from('{malformed'),Buffer.from([0xff,0xfe]),Buffer.from('\uFEFF{"valid":"JSON with a matching approved digest"}')]){
   const f=await fixture();try{await fs.writeFile(f.target,value);f.options.expectedSha256=createHash('sha256').update(value).digest('hex');await assert.rejects(stageRenderMountedBinding(f.options));assert.ok(!(await fs.readdir(f.root)).some(name=>name.startsWith('night-scout-render-binding-')));}finally{await f.cleanup();}
  }
  const f=await fixture();try{for(const sourcePath of ['relative.json',f.sourcePath+'/../binding.json',f.sourcePath+'\0'])await assert.rejects(stageRenderMountedBinding({...f.options,sourcePath}));}finally{await f.cleanup();}

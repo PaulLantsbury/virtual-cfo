@@ -49,6 +49,7 @@ export async function stageRenderMountedBinding({sourcePath=RENDER_BINDING_MOUNT
   await trustedDirectories(api,dirname(target),trustedSourceRoot,trustedOwnerUid,writableMount);
   const actualDigest=createHash('sha256').update(bytes.subarray(0,length)).digest();
   ensure(timingSafeEqual(actualDigest,Buffer.from(expectedSha256,'hex')),'mounted-secret-approved-digest-differs');
+  ensure(!(length>=3&&bytes[0]===0xef&&bytes[1]===0xbb&&bytes[2]===0xbf),'mounted-secret-utf8-bom-forbidden');
   let text;try{text=new TextDecoder('utf-8',{fatal:true}).decode(bytes.subarray(0,length));JSON.parse(text);}catch{ensure(false,'mounted-secret-json-invalid');}
   directory=await api.mkdtemp(join(temporaryRoot,'night-scout-render-binding-'));await api.chmod(directory,0o700);
   directory=await api.realpath(directory);

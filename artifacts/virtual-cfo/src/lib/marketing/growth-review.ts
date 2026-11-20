@@ -52,3 +52,11 @@ export function customerDrivers(t:BehaviourTotals,segment:CustomerSegment){
  const sales=segment==='new'?t.newOriginalSales:segment==='repeat'?t.repeatOriginalSales:t.originalProductSales;
  return {customers,orders,sales,aov:ratio(sales,orders),frequency:ratio(orders,customers)};
 }
+
+export type PairedPoint={label:string;from:string;to:string;a:number|null;b:number|null;priorA:number|null;priorB:number|null};
+/** One percentage scale for unlike units; missing/zero reference is unavailable, never a false zero. */
+export function pairedMovement(rows:PairedPoint[],againstComparison:boolean){
+ const change=(value:number|null,base:number|null)=>value!==null&&base!==null&&Number.isFinite(value)&&Number.isFinite(base)&&base>0?(value/base-1)*100:null;
+ return rows.map(r=>({...r,aChange:change(r.a,againstComparison?r.priorA:rows[0]?.a??null),bChange:change(r.b,againstComparison?r.priorB:rows[0]?.b??null)}));
+}
+export function movementDomain(groups:ReturnType<typeof pairedMovement>[]){const values=groups.flatMap(g=>g.flatMap(r=>[r.aChange,r.bChange])).filter((v):v is number=>v!==null&&Number.isFinite(v));const max=Math.max(5,...values.map(Math.abs));const bound=Math.ceil(max/5)*5;return [-bound,bound] as [number,number];}

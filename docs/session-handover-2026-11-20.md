@@ -1,3 +1,23 @@
+# Autonomous cloud programme checkpoint — 20 November 2026
+
+This is a separate, bounded cloud task on `codex/autonomous-cloud-prototype-20261120`, based on the requested development baseline `02858054d5b112b3f1bba15af3054530c9eaf069`, not `main`. The task workspace was initially empty; connected GitHub clone/build works. Inspection found no competing autonomous implementation branch or fresh programme PR. The previously requested saved-environment launch remains unconfirmed; this work does not claim that other job started. The programme file at its specified GitHub SHA ends with literal `undefined`, so the user’s chat scope and latest roadmap were used to define the bounded work.
+
+## Completed locally on the separate branch
+
+- Prepared the exact 90-day future synthetic continuation through 19 March 2027 as an in-memory candidate, plus a gated closed-month summary-refresh proposal. The existing 48 Cash/Acquisition summary rows remain untouched. Candidate hashes are generator fingerprints only; no hosted readback or publication occurred.
+- Added synthetic selected-month customer counts to New Marketing, retained integer counts and source lineage, derived purchase frequency in the browser, and preserved compatibility with the already-published summaries that lack the new optional aggregate. Raw customer identifiers are never exposed.
+- Added a pure fail-closed Plan baseline calculation from three contiguous, complete reviewed months with matching acquisition and supported economics evidence. It is tested but not yet wired into the Plan page; the page continues to use its labelled fictional sample.
+- Wrote the reversible Scout’s View opt-in proposal. No page choice or monitoring behaviour was implemented.
+- Updated the [roadmap](roadmap-2026-11-20.md) and added the synthetic/summary and Scout proposals.
+
+## Cloud validation and remaining gates
+
+Frozen dependency install and baseline suite passed (45/45). Focused continuation/refresh, Marketing source and Plan baseline tests passed (6/6, 9/9 and 2/2). Frontend typecheck, configured frontend production build and API-server bundle build passed. Build warnings about the existing tooltip sourcemap, mixed Supabase chunking and large bundle remain. Root workspace build is still blocked by 17 existing Xero `.mjs` TypeScript declaration errors.
+
+This branch contains source, tests and documentation only. No live database reads/writes, grants, credentials, feed or scheduler changes, provider transactions, deployments, production changes or spending occurred. The genuine scheduled financial receipt still needs independent verification before any closed-month summary refresh. Shopify/Meta customer permission and acceptance, multi-month acquisition/session comparisons, a live verified Plan baseline, and Scout’s View design/owner acceptance remain blocked. See [the continuation proposal](synthetic-continuation-and-refresh-proposal-2026-11-20.md) for exact hashes and gates.
+
+---
+
 # Day-end checkpoint — Cash and New Marketing connected and verified
 
 **20 November 2026: approved staging batch complete. Stop for the day.**

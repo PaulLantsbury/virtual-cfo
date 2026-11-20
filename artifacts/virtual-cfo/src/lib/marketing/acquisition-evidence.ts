@@ -19,6 +19,7 @@ export interface AcquisitionPayload {
   financial: {snapshotId:string;edition:string;anchor:string;salesRevision:string;costRevision:string;formulaVersion:string};
   source: {from:string;through:string;sourceHash:string;ordersHash:string;refundsHash:string;allocationHash:string;synthetic:true};
   coverage: {originalOrders:number;identifiedFirstOrders:number;identifiedRepeatOrders:number;guestOrders:number;unknownOrders:number;paidFirstCustomers:number};
+  customerActivity?: {contract:'synthetic-customer-activity-v1';policy:typeof ACQUISITION_POLICY;scope:{from:string;to:string};identifiedCustomers:number;uniqueReturningCustomers:number;identifiedOrders:number;sourceHash:string;basis:string};
   spend: {advertising:number;acquisition:number;retention:number;unallocated:number};
   revenue: {netProductSales:number;identifiedFirst:number;identifiedRepeat:number;guest:number;unknown:number};
   analytics?: SyntheticFunnel;
@@ -44,11 +45,11 @@ export function acquisitionFinancialContext(month: ReviewedMonth | null) {
     sales:{originalOrders:month.originalOrders,netProductSales:month.amounts.netProductSales},components:{advertising:advertising.value}};
 }
 /** Validate exact financial edition, version, source revisions, coverage and integer spend partition. */
-export function acquisitionView(payload: unknown, financial: unknown): (AcquisitionPayload & {cac:number|null;funnel:{conversion:number|null;checkoutCompletion:number|null;cartRate:number|null;checkoutRate:number|null}|null;economicsView:DerivedAcquisitionEconomics|null}) | null {
+export function acquisitionView(payload: unknown, financial: unknown): (AcquisitionPayload & {cac:number|null;funnel:{conversion:number|null;checkoutCompletion:number|null;cartRate:number|null;checkoutRate:number|null}|null;customerActivityView:{purchaseFrequency:number|null}|null;economicsView:DerivedAcquisitionEconomics|null}) | null {
   if (!object(payload) || !object(financial) || financial.state !== 'supported' || !object(financial.scope) || !object(financial.metadata)
     || !object(financial.sales) || !object(financial.components) || payload.contract !== 'synthetic-acquisition-v1' || payload.state !== 'supported'
     || payload.profile !== 'uk-gifts-v2' || payload.policy !== ACQUISITION_POLICY || !object(payload.scope) || !object(payload.financial)
-    || !object(payload.source) || !object(payload.coverage) || !object(payload.spend) || !object(payload.revenue) || !object(payload.metrics)) return null;
+    || !object(payload.source) || !object(payload.coverage) || (payload.customerActivity !== undefined && !object(payload.customerActivity)) || !object(payload.spend) || !object(payload.revenue) || !object(payload.metrics)) return null;
   const scope=payload.scope, f=payload.financial, source=payload.source, c=payload.coverage, s=payload.spend, m=payload.metrics;
   if (scope.storeId!=='d7500000-0000-4000-8000-000000000009' || scope.storeId!==financial.scope.storeId || scope.currency!=='GBP' || financial.scope.currency!=='GBP' || scope.timezone!=='Europe/London'
     || !day(scope.from) || !day(scope.to) || scope.from>scope.to || scope.from!==financial.scope.from || scope.to!==financial.scope.to
@@ -60,6 +61,14 @@ export function acquisitionView(payload: unknown, financial: unknown): (Acquisit
     || !count(financial.sales.originalOrders) || c.originalOrders!==financial.sales.originalOrders
     || BigInt(c.identifiedFirstOrders)+BigInt(c.identifiedRepeatOrders)+BigInt(c.guestOrders)+BigInt(c.unknownOrders)!==BigInt(c.originalOrders)
     || c.paidFirstCustomers>c.identifiedFirstOrders) return null;
+  const activity=payload.customerActivity;
+  if(activity!==undefined&&(!keys(activity,['contract','policy','scope','identifiedCustomers','uniqueReturningCustomers','identifiedOrders','sourceHash','basis'])
+    ||activity.contract!=='synthetic-customer-activity-v1'||activity.policy!==ACQUISITION_POLICY||!object(activity.scope)
+    ||!keys(activity.scope,['from','to'])||activity.scope.from!==scope.from||activity.scope.to!==scope.to
+    ||!count(activity.identifiedCustomers)||!count(activity.uniqueReturningCustomers)||activity.uniqueReturningCustomers>activity.identifiedCustomers
+    ||!count(activity.identifiedOrders)||activity.identifiedOrders!==c.identifiedFirstOrders+c.identifiedRepeatOrders
+    ||activity.identifiedCustomers>activity.identifiedOrders||activity.sourceHash!==source.ordersHash||!sha(activity.sourceHash)
+    ||typeof activity.basis!=='string'||!activity.basis.startsWith('Distinct synthetic customer identifiers')||activity.basis.length>500))return null;
   if (!['advertising','acquisition','retention','unallocated'].every(key=>count(s[key])) || !count(financial.components.advertising)
     || s.advertising!==financial.components.advertising || c.paidFirstCustomers===0 && s.acquisition!==0 || BigInt(s.acquisition)+BigInt(s.retention)+BigInt(s.unallocated)!==BigInt(s.advertising)) return null;
   const r=payload.revenue;
@@ -73,7 +82,8 @@ export function acquisitionView(payload: unknown, financial: unknown): (Acquisit
   const funnel=analytics?{conversion:ratio(analytics.totals.purchasingSessions,analytics.totals.sessions),checkoutCompletion:ratio(analytics.totals.purchasingSessions,analytics.totals.checkoutSessions),cartRate:ratio(analytics.totals.cartSessions,analytics.totals.sessions),checkoutRate:ratio(analytics.totals.checkoutSessions,analytics.totals.sessions)}:null;
   const economics=payload.economics===undefined?null:validateAcquisitionEconomics(payload.economics,payload as AcquisitionPayload);
   if(payload.economics!==undefined&&!economics)return null;
-  return { ...payload as AcquisitionPayload, cac, funnel, economicsView:economics?deriveAcquisitionEconomics(economics):null };
+  const customerActivityView=activity?{purchaseFrequency:activity.identifiedCustomers>0?activity.identifiedOrders/activity.identifiedCustomers:null}:null;
+  return { ...payload as AcquisitionPayload, cac, funnel, customerActivityView, economicsView:economics?deriveAcquisitionEconomics(economics):null };
 }
 export function validateAcquisitionPayload(payload: unknown, financial: unknown): boolean { return acquisitionView(payload, financial) !== null; }
 

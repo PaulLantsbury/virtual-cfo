@@ -25,6 +25,11 @@ test('every advertising source partitions exact pennies and customer-level acqui
  assert.equal(p.spend.advertising,financial().components.advertising);assert.equal(p.metrics.cac,null);assert.equal(acquisitionView(p,financial()).cac,p.spend.acquisition/p.coverage.paidFirstCustomers);
  assert.equal(p.metrics.firstOrderContribution,null);assert.equal(p.metrics.maturePaybackDays,null);
  assert.equal(validateAcquisitionPayload(p,financial()),true);assert.equal(acquisitionView(p,financial())?.coverage.originalOrders,p.coverage.originalOrders);
+ const identified=source.orderObservations.filter(o=>o.date>='2024-02-01'&&o.date<='2024-02-29'&&o.identityState==='identified');
+ const distinct=new Set(identified.map(o=>o.customerId)),returning=new Set(identified.filter(o=>o.firstOrderId!==o.orderId).map(o=>o.customerId));
+ assert.equal(p.customerActivity.identifiedCustomers,distinct.size);assert.equal(p.customerActivity.uniqueReturningCustomers,returning.size);
+ assert.equal(p.customerActivity.identifiedOrders,identified.length);assert.equal(acquisitionView(p,financial()).customerActivityView.purchaseFrequency,identified.length/distinct.size);
+ assert.equal('customerId' in p.customerActivity,false);assert.equal('customerId' in p,false);
 });
 test('summary and complete review envelope retain integer-pence/count values only',()=>{
  const p=summary();
@@ -43,8 +48,13 @@ test('source rejects wrong inception, tampering, missing reviewed financial scop
 });
 test('frontend/server validator rejects cross-company/version/revision, changed allocation or fabricated metrics',()=>{
  const valid=summary();
- for(const modify of [p=>p.scope.storeId='other',p=>p.financial.snapshotId='other',p=>p.financial.costRevision='changed',p=>p.spend.acquisition++,p=>p.coverage.guestOrders++,p=>p.revenue.identifiedFirst++,p=>p.metrics.cac=99,p=>p.metrics.firstOrderContribution=2500,p=>p.metrics.maturePaybackDays=55,p=>p.source.from='2024-02-01',p=>p.source.sourceHash='bad']){const p=structuredClone(valid);modify(p);assert.equal(validateAcquisitionPayload(p,financial()),false);}
+ for(const modify of [p=>p.scope.storeId='other',p=>p.financial.snapshotId='other',p=>p.financial.costRevision='changed',p=>p.spend.acquisition++,p=>p.coverage.guestOrders++,p=>p.revenue.identifiedFirst++,p=>p.customerActivity.identifiedOrders++,p=>p.customerActivity.sourceHash='bad',p=>p.customerActivity.scope.to='2024-03-01',p=>p.metrics.cac=99,p=>p.metrics.firstOrderContribution=2500,p=>p.metrics.maturePaybackDays=55,p=>p.source.from='2024-02-01',p=>p.source.sourceHash='bad']){const p=structuredClone(valid);modify(p);assert.equal(validateAcquisitionPayload(p,financial()),false);}
  assert.equal(validateAcquisitionPayload(null,financial()),false);assert.equal(validateAcquisitionPayload(valid,null),false);
+});
+test('legacy published acquisition summaries remain valid without the newer customer activity aggregate',()=>{
+ const legacy=summary();delete legacy.customerActivity;
+ const view=acquisitionView(legacy,financial());
+ assert.ok(view);assert.equal(view.customerActivityView,null);assert.equal(validateAcquisitionPayload(legacy,financial()),true);
 });
 test('zero paid first customers means unavailable CAC, never infinity or fixture replacement',()=>{
  const p=summary();p.coverage.identifiedFirstOrders-=p.coverage.paidFirstCustomers;p.coverage.identifiedRepeatOrders+=p.coverage.paidFirstCustomers;p.coverage.paidFirstCustomers=0;

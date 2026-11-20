@@ -75,6 +75,12 @@ export function summarizeAcquisitionSource(source,{from,to,financial}={}){
   ensure(financial?.state==='supported'&&financial.scope?.storeId===source.storeId&&financial.scope.currency===source.currency&&financial.scope.from===from&&financial.scope.to===to,'Exact reviewed financial scope required');
   const orders=source.orderObservations.filter(o=>o.date>=from&&o.date<=to),allocations=source.spendAllocations.filter(a=>a.date>=from&&a.date<=to);
   const coverage={originalOrders:orders.length,identifiedFirstOrders:orders.filter(o=>o.identityState==='identified'&&o.firstOrderId===o.orderId).length,identifiedRepeatOrders:orders.filter(o=>o.identityState==='identified'&&o.firstOrderId!==o.orderId).length,guestOrders:orders.filter(o=>o.identityState==='guest').length,unknownOrders:orders.filter(o=>o.identityState==='unknown').length,paidFirstCustomers:orders.filter(o=>o.paidFirst).length};
+  const identifiedOrders=orders.filter(o=>o.identityState==='identified');
+  const identifiedCustomers=new Set(identifiedOrders.map(o=>o.customerId));
+  const returningCustomers=new Set(identifiedOrders.filter(o=>o.firstOrderId!==o.orderId).map(o=>o.customerId));
+  const customerActivity={contract:'synthetic-customer-activity-v1',policy:ACQUISITION_POLICY,scope:{from,to},
+    identifiedCustomers:identifiedCustomers.size,uniqueReturningCustomers:returningCustomers.size,identifiedOrders:identifiedOrders.length,
+    sourceHash:source.ordersHash,basis:'Distinct synthetic customer identifiers with at least one identified order in this selected month; guests and unknown identities are excluded. This is a fictional source rehearsal, not merchant customer evidence.'};
   const spend=Object.fromEntries(['advertising','acquisition','retention','unallocated'].map(k=>[k,sum(allocations.map(a=>a[k]))]));
   const segment=o=>!o||o.identityState==='unknown'?'unknown':o.identityState==='guest'?'guest':o.firstOrderId===o.orderId?'identifiedFirst':'identifiedRepeat';
   const byOrder=new Map(source.orderObservations.map(o=>[o.orderId,o]));
@@ -89,7 +95,7 @@ export function summarizeAcquisitionSource(source,{from,to,financial}={}){
   return {contract:'synthetic-acquisition-v1',state:'supported',profile:'uk-gifts-v2',policy:ACQUISITION_POLICY,
     scope:{storeId:source.storeId,currency:'GBP',timezone:'Europe/London',from,to},
     financial:{snapshotId:financial.versionId,edition:financial.metadata.edition,anchor:financial.metadata.anchor,salesRevision:financial.salesRevision,costRevision:financial.costRevision,formulaVersion:financial.metadata.formulaVersion},
-    source:{from:source.from,through:source.through,sourceHash:source.sourceHash,ordersHash:source.ordersHash,refundsHash:source.refundsHash,allocationHash:source.allocationHash,synthetic:true},coverage,spend,revenue,analytics,
+    source:{from:source.from,through:source.through,sourceHash:source.sourceHash,ordersHash:source.ordersHash,refundsHash:source.refundsHash,allocationHash:source.allocationHash,synthetic:true},coverage,customerActivity,spend,revenue,analytics,
     metrics:{cac:null,firstOrderContribution:null,maturePaybackDays:null},
     limitations:['Synthetic identity and advertising allocation policy; not Shopify, Xero or platform attribution.','Guest and unknown orders are not matched or classified as first-time/repeat.','Paid first-customer CAC excludes organic/email first customers from its denominator.','First-order contribution and mature payback need a separately reviewed matched cost/cohort model.']};
 }

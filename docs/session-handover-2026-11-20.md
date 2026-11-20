@@ -1,3 +1,11 @@
+## Full connections implementation — 20 November 2026
+
+[Next website batch](new-pages-full-connections-batch-2026-11-20.md) is implemented and locally tested, not deployed. Profit now has reviewed monthly trends, weighted comparisons and full-breakdown/rate deltas. Marketing has reviewed financial trends, break-even/targets and explicit-baseline financial scenarios. Cash has a separate reviewed EBITDA history; cash balances/movements still require source data. The verified synthetic company has no cash snapshots. Prepared cash adapters/builders do not count as a live connection.
+
+Next: publish the exact tested source and website-only release package, obtain hosted release approval, then verify real staging inputs and history latency. Separate follow-on packages cover synthetic cash and acquisition sources. Daily feed/provider/production settings are unchanged. Earlier released notices describe the current website, not this prepared batch.
+
+---
+
 ## Full figure audit — 20 November 2026
 
 The comprehensive [New pages figure and calculation audit](https://github.com/PaulLantsbury/virtual-cfo/blob/codex/new-pages-data-links-20261120/docs/full-figure-lineage-audit-2026-11-20.md) covers all three New pages, including expanded charts/tables, comparisons, scenarios and saved local records. It traces deployed source `a77e65822345087aa708fad19c98bbf3e9a73b21`. The earlier 4-of-13 gap count covered headline cards only; it was not a full-page count.

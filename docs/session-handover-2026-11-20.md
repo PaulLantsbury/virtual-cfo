@@ -1,21 +1,73 @@
-## Cash and new Marketing source package prepared — 20 November 2026
+# Day-end checkpoint — Cash and New Marketing connected and verified
 
-The [cash/acquisition batch](cash-acquisition-data-batch-2026-11-20.md) prepares48 scoped snapshots across24 closed months and connects the newly changed /new-marketing tabs, preserving the live8287d10 briefing/design and Plan. Includes cash reconciliations/history, identity-linked revenue/CAC, separately labelled simulated sessions and allocated first-order/mature-cohort costs. Six historical financial dependencies prevent stale mature results after a correction.215 tests plus the latest 16 focused merge checks and production bundles pass; desktop/mobile local preview checked. No staging data, new grants, flag activation or deployment yet.
+**20 November 2026: approved staging batch complete. Stop for the day.**
 
-Next: review the exact source/data/read-access/website activation package, then conditionally apply and verify signed-in staging. Remaining comparisons/customer drill-downs/forecast/action tracking and future recurring supplemental publication stay explicit follow-on work. Financial daily feed, providers, other stores and production unchanged.
+Website source `b7ea4913c928ac9dac57bc45b5478ca06688a016` is live and signed-in verified. [Hosted acceptance and remaining work](cash-acquisition-hosted-verification-2026-11-20.md) records the exact publication, restricted access, results and limits. [Connection register](https://github.com/PaulLantsbury/virtual-cfo/blob/b7ea4913c928ac9dac57bc45b5478ca06688a016/docs/new-marketing-v16-connection-register-2026-11-20.md).
+
+- Two years of private synthetic cash/acquisition summaries published:48 records,November2024–October2026. Membership-limited server reads enabled; no direct browser access.
+- Cash now shows reconciled bank balances/movements, three-month history and buffer arithmetic. New Marketing’s Acquisition/Conversion/Retention tabs use synthetic acquisition, simulated funnel and allocated cohort inputs; ratios are calculated in the page.
+- October bank £301,632.59,operating cash −£22,290.26; marketing CAC£2.05,conversion3.00%,948 identified first orders and686 repeat orders. These are synthetic historical activity, not real provider acceptance.
+- Preserved latest Marketing design, reviewed Profit and Plan. Unsupported figures remain yellow/unavailable.
+- Owner-approved source/data/read-access/flag/website package applied successfully. No provider transactions, daily financial-feed change, production release, new service or extra spending.
+
+## Next session — order of work
+
+1. Confirm actual scheduled financial-feed run evidence and source freshness; then prepare a closed-month refresh for the new cash/customer summaries. The existing daily financial feed does **not** refresh them automatically. Correction/version handling and future cohort windows need a reviewed workflow.
+2. Finish remaining yellow customer/funnel comparisons: unique returning customers, frequency/second-purchase timing, multi-month CAC/sessions and drilldowns. Prioritise matched source inputs and clear calculation definitions. Recheck loading, company/month changes and response time; preserve existing source safeguards.
+3. Complete Scout’s View design review using the now-connected specialist conclusions and the ten-second rule. Then agree final five-area navigation/names, run Overview→specialist→Explore the Numbers→Plan owner journey, and review Monitoring/Settings. Profit/Cash/Marketing/Plan designs are already reviewed; Plan baselines/shared actions/reminders remain separate engineering work.
+
+The design closeout from the parallel site-design branch is preserved below as product context. It predates this data release; any statement there saying cash/customer inputs are unconnected is superseded by the hosted verification above.
+
+---
+
+# Resume here — site design closeout, 20 November 2026
+
+Latest website release: 8287d1024b8c90523c807450dcef1d9d2a1490b4. This closeout is documentation only.
+
+Read the opening **End-of-day site design checkpoint** in [the roadmap](roadmap-2026-11-20.md) before older notes below.
+
+- **Reviewed/redesigned:** Profit Engine, Cash Control, Marketing (Acquisition + Conversion + Retention), Plan.
+- **Next core design review:** Scout’s View / overview, currently CFO Briefing at /dashboard, with /v11/scout as reference.
+- **Supporting reviews still pending in this latest pass:** Monitoring and Settings/connections/account mapping. Earlier work exists; do not describe them as never reviewed.
+- **Not separate unfinished core pages:** Growth Quality, Opportunity Finder, Scenario Planner, pricing/margin diagnostics. Customer work belongs in Marketing; opportunities/scenarios belong in Plan; relevant profit diagnostics belong in Profit.
+- **Temporary references:** Marketing Efficiency and the original pages. Keep them until Paul agrees final comparison/consolidation.
+- **Next design sequence:** Scout’s View → final menu/names → cross-page owner journey and consistency → Monitoring/Settings → connected/missing-data visual acceptance.
+- Design review is not data readiness. Keep sample/source boundaries, restricted readers and independent integration/feed work. Acquisition-to-future-repeat forecasting stays parked.
+
+Do not restart Cash, Profit, Marketing or Plan redesigns from the older proposals. Final minor acceptance is still possible, but their current working designs have been reviewed and implemented.
 
 ---
 
 
+---
 
-## Marketing growth duplicate — 20 November 2026
+## Cash and latest New Marketing — ready for owner approval, not applied
 
-Preserved Marketing Efficiency at /marketing-efficiency with the New prefix removed. Added temporary New Marketing at /new-marketing with Acquisition, Conversion and Retention tabs, shared context, four numbered blue sections per tab, visual diagnosis and Explore the Numbers. Existing reviewed monthly financials are reused read-only; missing customer/funnel/cohort measures stay explicitly unavailable. Fictional design requires an explicit switch. Product AOV follows the agreed original-sales definition; mature cohorts retain separate observation windows. Plan and provider/feed work are preserved. See design/v16-marketing-growth/README.md for scope, definitions and remaining data acceptance. TypeScript and eleven calculation tests passed; mobile width checked at 390px. Customer identity/funnel ingestion and acquisition-to-future-repeat forecasting remain pending, not claimed connected.
+Parallel preparation is complete and published on `codex/cash-acquisition-data-20261120`. Exact tested source: `b7ea4913c928ac9dac57bc45b5478ca06688a016`. [Bundled staging approval package](https://github.com/PaulLantsbury/virtual-cfo/blob/dbead3dc6940647a417b4634a0ca9ad3ea147315/docs/cash-acquisition-staging-approval-2026-11-20.md).
 
+The package preserves latest live design `8287d10` and Plan. It prepares 24 complete months (November 2024–October 2026), 48 private synthetic cash/acquisition summaries, cash movements/resilience, identified/guest/unknown customers, allocated CAC, simulated conversion inputs, first-order costs and mature cohort economics. The page calculates ratios from stored integer inputs. All six April–September dependencies are rechecked for mature data. Unsupported figures remain yellow/unavailable; multi-period funnel/unique-returner comparisons and customer drilldowns still need sources.
+
+215 combined checks passed plus 16 focused latest-design merge checks; frontend typecheck/build, API bundle, exact local 48-record publication/replay and single-call replay passed. Prepared desktop/mobile previews checked; hosted Supabase acceptance remains pending. Full API typecheck has the same 17 pre-existing Xero declarations errors.
+
+**No schema, data publication, grants, optional flag or website deployment has been applied in this batch.** Next action: owner approval of the linked exact package, then guarded publication/read access/deploy and signed-in checks. The initial historical supplement does not change the enabled financial daily feed; future supplemental monthly refresh needs its own reviewed workflow. No provider transactions, production change, extra service or spending.
+
+Plan hash `05e6ace2953f8857a064aa7cd58eae5c4c3ec4f87b6b3fe763c5dd62e43c0348`. Sensitive private artifacts/bindings are outside GitHub. Earlier progress notices below are historical.
+
+---
+
+## Cash and new Marketing data batch in progress — 20 November 2026
+
+The current live design baseline is146e80c1c39ae25540a2f26f7ef7e0bca75582c5, including the separate /new-marketing Acquisition, Conversion and Retention tabs. That design, prior Marketing Efficiency, Plan and existing reporting connections are being preserved.
+
+Prepared locally:24 closed months of separately reconciled synthetic cash and24 acquisition/retention/session summaries, bound to the isolated company's exact selected financial versions. Read-only staging source totals match the programme across all24months. A disposable PostgreSQL rehearsal loaded all48records and verified unchanged replay. Core cash/source/reader/RLS/browser checks pass; no staging schema, grants, data or deployment has been changed. Source privacy keeps raw fictional identity/bank proofs out of the browser and routine repository documentation.
+
+The new Marketing cells now have prepared wiring for paid-first CAC, counts, refund-linked new/repeat revenue and separately labelled simulated sessions/funnel inputs. A bounded matched-cost/cohort review is checking the remaining first-order economics/payback figures; unsupported figures stay yellow. The final exact-source/data/permission/website package will be presented for one bundled approval after that check. Daily feed/provider transactions, production and budget remain unchanged.
+
+---
 
 ## Live and signed-in verified — New page connections, 20 November 2026
 
-**950baf935c33ac7c00cbdc53f3be6e93bebab81a is live**, preserving the newer115a6117 Plan. [Hosted verification](new-pages-full-connections-hosted-verification-2026-11-20.md) records real twelve-month Profit/Cash profit-reference history, Marketing financial history/conditional scenario, October/September per-order comparisons, company switching and zero observed browser/application errors.130 local tests, TypeScript and production build passed. The earlier release hold is resolved; no repeat release approval is needed.
+**950baf935c33ac7c00cbdc53f3be6e93bebab81a is live**, preserving the newer115a6117 Plan. [Hosted verification](https://github.com/PaulLantsbury/virtual-cfo/blob/e27c041452669a96c75606b48472fc4aa9029d99/docs/new-pages-full-connections-hosted-verification-2026-11-20.md) records real twelve-month Profit/Cash profit-reference history, Marketing financial history/conditional scenario, October/September per-order comparisons, company switching and zero observed browser/application errors.130 local tests, TypeScript and production build passed. The earlier release hold is resolved; no repeat release approval is needed.
 
 Next: prepare separately reviewed synthetic cash inputs/reader, then matched acquisition/cohort evidence. Cash bank/movement/resilience and customer metrics still remain yellow/unavailable; New Plan remains explicitly sample. Daily-feed/provider/database/production settings unchanged. Genuine overnight acceptance remains a separate milestone. Twelve-month source reads completed interactively; formal latency/load benchmarking remains outstanding.
 
@@ -23,21 +75,21 @@ Next: prepare separately reviewed synthetic cash inputs/reader, then matched acq
 
 ## Release held to preserve newer live Plan — 20 November 2026
 
-The approved2ec14a6 deployment was not triggered: preflight found newer live Plan115a6117. Exact tested union **950baf935c33ac7c00cbdc53f3be6e93bebab81a** preserves all eight live Plan application/test files and all approved connections; independent file comparison,130 tests, TypeScript and production build pass. [Concrete amendment](new-pages-connections-preserve-plan-amendment-2026-11-20.md) awaits exact-source website approval. No hosted settings, database, provider or feed changes were made. Current staging remains115a6117. Next: approve amended website source, deploy and verify the signed-in pages, then separate cash/acquisition evidence work.
+The approved2ec14a6 deployment was not triggered: preflight found newer live Plan115a6117. Exact tested union **950baf935c33ac7c00cbdc53f3be6e93bebab81a** preserves all eight live Plan application/test files and all approved connections; independent file comparison,130 tests, TypeScript and production build pass. [Concrete amendment](https://github.com/PaulLantsbury/virtual-cfo/blob/10e935954ead2c81f79745534cd98539a365f832/docs/new-pages-connections-preserve-plan-amendment-2026-11-20.md) awaits exact-source website approval. No hosted settings, database, provider or feed changes were made. Current staging remains115a6117. Next: approve amended website source, deploy and verify the signed-in pages, then separate cash/acquisition evidence work.
 
 ---
 
-## Full connections implementation — 20 November 2026
+## Tested connections package awaiting website approval — 20 November 2026
 
-[Next website batch](new-pages-full-connections-batch-2026-11-20.md) is implemented and locally tested, not deployed. Profit now has reviewed monthly trends, weighted comparisons and full-breakdown/rate deltas. Marketing has reviewed financial trends, break-even/targets and explicit-baseline financial scenarios. Cash has a separate reviewed EBITDA history; cash balances/movements still require source data. The verified synthetic company has no cash snapshots. Prepared cash adapters/builders do not count as a live connection.
+Implemented and published exact source `2ec14a6d16905fd64bd18bb2fc0bab14c4bb39ab`: Profit monthly trends/full comparisons, Marketing monthly financial history/targets/conditional scenarios, and a separate Cash EBITDA history. **112 tests, TypeScript and production build pass**; local browser controls checked with labelled fixtures. [Concrete website-only release package](https://github.com/PaulLantsbury/virtual-cfo/blob/543c5ca92bccee042a701424f260b54fc2b9d4c7/docs/new-pages-full-connections-staging-release-2026-11-20.md). Not deployed; staging remains a77e658 until approval.
 
-Next: publish the exact tested source and website-only release package, obtain hosted release approval, then verify real staging inputs and history latency. Separate follow-on packages cover synthetic cash and acquisition sources. Daily feed/provider/production settings are unchanged. Earlier released notices describe the current website, not this prepared batch.
+Read-only staging confirmed zero cash snapshots for the isolated synthetic company. Cash adapter/evidence builder is prepared only; cash and acquisition source publication/permissions are separate future packages. Existing daily feed, provider jobs and production remain unchanged. Next: approve exact website deployment, verify real selected-month inputs/company switching/history latency, then prepare isolated cash/acquisition evidence. Earlier prepared/publish-next wording below is historical.
 
 ---
 
 ## Full figure audit — 20 November 2026
 
-The comprehensive [New pages figure and calculation audit](https://github.com/PaulLantsbury/virtual-cfo/blob/codex/new-pages-data-links-20261120/docs/full-figure-lineage-audit-2026-11-20.md) covers all three New pages, including expanded charts/tables, comparisons, scenarios and saved local records. It traces deployed source `a77e65822345087aa708fad19c98bbf3e9a73b21`. The earlier 4-of-13 gap count covered headline cards only; it was not a full-page count.
+The comprehensive [New pages figure and calculation audit](https://github.com/PaulLantsbury/virtual-cfo/blob/e41eebdd3ca991d09236208fec0333b74b647126/docs/full-figure-lineage-audit-2026-11-20.md) covers all three New pages, including expanded charts/tables, comparisons, scenarios and saved local records. It traces deployed source `a77e65822345087aa708fad19c98bbf3e9a73b21`. The earlier 4-of-13 gap count covered headline cards only; it was not a full-page count.
 
 A figure derived on the server or in the browser from verified database inputs is connected; it does not require its own stored database cell. User assumptions are separate labelled inputs. Sample baselines remain examples even where their arithmetic works.
 
@@ -47,36 +99,34 @@ This checkpoint publishes documentation only. Website release, database permissi
 
 ---
 
-**Released and hosted-verified — 20 November:** Approved website revision **a77e65822345087aa708fad19c98bbf3e9a73b21** is live on existing staging. October Profit/Marketing figures match reviewed history; per-order and explicit earlier-month comparison work. Unsupported cash/acquisition/forecast figures remain yellow or explicit sample. New Plan is preserved. [Hosted verification](new-pages-hosted-verification-2026-11-20.md). Daily feed unchanged; first genuine scheduled receipt still awaits 21 November.
+**New pages released and verified — 20 November:** Approved website revision **a77e65822345087aa708fad19c98bbf3e9a73b21** is live. October financial figures, per-order/earlier-month comparison, yellow unavailable/sample states and store-change clearing were signed-in verified. New Plan is preserved; TypeScript/builds and 119 tests pass. [Hosted verification](https://github.com/PaulLantsbury/virtual-cfo/blob/b47c91153fbebe262c58523ba05486aef9c0f43f/docs/new-pages-hosted-verification-2026-11-20.md). Cash reconciliation and acquisition/cohort evidence remain separate gaps. No database/provider/daily-feed change occurred. Next: genuine 21 November 02:00 London daily-feed receipt acceptance and the next evidence package; do not repeat the completed website release.
 
-# Handover — New page connections, 20 November 2026
+# Night Scout handover — 20 November 2026
 
-Read [the audit](new-pages-data-links-2026-11-20.md) and [roadmap](roadmap-2026-11-20.md). The isolated source package is released and hosted-verified. It is based on the current website ea10f8e34930e8ca13e995572a4f9a17190751bb; preserve other concurrent work and keep provider branches unchanged.
+Read the [current roadmap](roadmap-2026-11-20.md) and [approved paid package](daily-feed-2gb-release-review-2026-11-20.md). The full paid package was approved and applied. Do not ask for the same approval or repeat completed setup.
 
-Only the sidebar pages labelled New are targeted: marketing-efficiency, profit-engine and new-cash-control. Existing original comparison pages remain. Read-only connections reuse the existing authenticated history API, with explicit month/version selection and strict source validation. No API/schema/grant/financial write is needed for this release.
+## Verified applied state
 
-Default connected views preserve the page section framing and show only supported metrics; unavailable figures are yellow with text. The rich original examples remain explicitly available and yellow rather than appearing automatically after a source failure. Cash is not inferred from profit. The standalone demo remains isolated from live infrastructure.
+- Pro subscription was upgraded by the owner. Existing staging was resized to Small / **2 GB RAM**, healthy; reviewed capacity and idle-reserve gates passed. Disk allocation remains unchanged; the included 8 GB disk allowance is separate from compute memory.
+- Exact source **cc5b9363b2936aa38a2be4d77982c8638aac0ed3** changed only the inspection helper. Stored helper hash **3ac48f815453db116edc467c972f88778e2be48ec493eaa6954f6a56c1d5d645**, guarded installer **11dc291516d63f5f5c647f6ccf8e3beb03f24007a9b5ff246309125eec44c7fb**. Financial definitions and immutable inputs are unchanged.
+- Approved publication attempt three committed exactly **5–19 November**. Each of the **15 receipts** passed independent inspection through a fresh restricted connection; all **17** company relations matched source expectations. The original **14-relation** example and **22 protected global** fingerprints remained unchanged.
+- Published horizon is **19 November**, with **24 unchanged monthly seals**. All **45** reviewed daily inputs through **19 December** remain staged; 30 await their future daily windows.
+- Temporary catch-up membership was revoked and the exact reviewed bridge retirement completed. The retirement artifact was unchanged; execution used bounded session limits. Normal catalog/statistics checks returned zero findings; existing administrator read-only inheritance was unchanged.
+- Do not restage the 23 batches, repeat expiry adjustment, reinstall capability/login/helper or re-arm the retired bridge. The one further financial attempt is consumed successfully.
+- Runtime remains **fb5beb6ccb2f38df9d535ad96136747b5c0ab45e**, separate runtime branch, automatic deployment off.
 
-119 focused financial/evidence/cash tests, TypeScript, production frontend build and standalone demo boundary checks pass. Existing build warnings remain. Local desktop and 390px browser review used fixed labelled fixtures; the actual staging history reader independently returned October EBITDA £10,592.05, sales £64,800, gross profit £32,400 and contribution £23,515. New code is now hosted-verified; see the dedicated verification record.
+**Recurring feed enabled; first unattended update still awaiting verification.** Exact private settings and their separate fingerprint were verified. Hosted restricted TLS/session checks passed, then the final financial configuration read the reconciled 19 November receipt with `mutationAttempted=false`. The ordinary programme is enabled; the existing Render service is live on exact runtime **fb5beb6ccb2f38df9d535ad96136747b5c0ab45e** with recurring append mode, schedule `0 1,2 * * *` UTC and automatic deployment off. The winter 01:00 run is outside the write window; the first eligible publication is **21 November 02:00–02:15 London** for 20 November. No manual append was triggered.
 
-Keep private connection files, credentials and live account metadata out of GitHub. Local UI-review scaffolding is not part of the release. The approved website-only release and signed-in checks are complete. Next prepare the missing cash/acquisition evidence and verify the first genuine scheduled daily receipt. Do not repeat the website release or publish provider/daily-feed changes as part of this completed package.
+## Resume next
 
-[Independent daily-feed handover](https://github.com/PaulLantsbury/virtual-cfo/blob/5420b9cea960057e827422c11b479c2d5a23f1bb/docs/session-handover-2026-11-20.md): already enabled, 15 receipts through 19 November, first actual scheduled run still awaiting 21 November verification; no catch-up/reinstallation/retry.
+Verify the **genuine 21 November 02:00–02:15 London** scheduled publication for **20 November**, and reporting readback. This remains outstanding until observed. A successful historical repair, file/TLS check or manual inspection is not proof of unattended daily operation. Do not manually append the next day to manufacture that evidence.
 
+Then continue v11 page wiring and full visual/mobile acceptance, the ten-second rule and **Explore the Numbers**. Existing tables and live page designs do not prove every chart, insight and dynamic link. Cash, cohorts/attribution, planner persistence and monitoring delivery each retain their own evidence gates.
 
-## Visual Plan integration — 20 November 2026
+The fictional company remains **£750,000 annual net turnover and four employees**, UK gifting seasonality, VAT and outsourced fulfilment. Preserve original January 2025, Store D, other stores/customer data and separate Shopify/Xero provider acceptance.
 
-The visual Plan update preserves the reporting-page data-link package in a combined website-only revision. Plan uses explicitly fictional assumptions, standalone impact bars, a reconciled combined EBITDA bridge and 3/6/12 future full-calendar-month paths. AOV replaces discounts as a headline lever; conversion and existing-customer repeat orders are explicit. Historical evidence is separate from the future horizon. No live cohort forecast or source wiring is claimed for Plan. Connected reporting code and feed/provider configuration are preserved.
+## Finite limits and safe stopping
 
-Next customer design discussion: one Growth & Marketing destination with Acquisition, Conversion and Retention tabs; cohorts are progressive detail under Retention. Audit customer/order history, identity, cohort maturity and session-funnel ingestion before real metrics. Preserve current Marketing in this release. The acquisition-to-future-repeat lag stays parked. See design/v15-plan/README.md for model, checks and limitations.
+The programme ceiling remains **19 December**; restricted-login expiry is **20 December 03:00 UTC**. A missed window, drift or uncertain result requires independent inspection and a fresh bounded proposal where needed. No automatic catch-up, extension, financial retry, higher memory tier or downgrade.
 
-
-## Plan comparison chart and simpler navigation — 20 November 2026
-
-Plan now has one planning view plus My Actions. Former Find your focus / Build your plan URLs resolve to the same combined view, retaining saved sample drafts. Impact cards explicitly point to the editable inputs below; each Edit input below link selects the lever and focuses its number field. A return link leads back to the impact/chart section.
-
-The monthly chart now uses only the selected future calendar months. Each month compares the planned EBITDA, unchanged trajectory and complete same-calendar-month prior-year sample actual, with exact actual dates in tooltip/table. The disconnected historical segment and artificial Data gap bucket are removed. An unchanged plan coincides with baseline and is explained in the main view. Target is an optional chart overlay. Prior-year data does not seasonally adjust the baseline. Per-order paths retain their own original order denominators.
-
-Full 3/6-month prior-year comparisons are available in the fixture at this date. The 12-month view explicitly marks October/November 2026 prior-year actuals unavailable because the fixture ends part-way through October; it does not fill partial/missing actuals or break the two future paths. This fixes comparison alignment and presentation without changing the forecast financial model or draft version.
-
-Validation: six new chart alignment/completeness/leap-year/per-order tests and the twelve monthly model/persistence tests passed, with frontend TypeScript. Desktop and real 390px iframe review verified direct input focus, chart updates and no page overflow. Hosted staging build and live comparison are verified at publication. Scope is Plan only; connected reporting, provider services and daily-feed schedules remain unchanged.
+No website deployment, provider transactions, production changes or new service were included. Preserve spend cap, but do not call it a compute cap. Private connection files, credentials, private pins, account bindings, live fingerprints and raw catalogs stay outside GitHub. Private operator evidence records the exact execution, receipt checks and delivery checks.

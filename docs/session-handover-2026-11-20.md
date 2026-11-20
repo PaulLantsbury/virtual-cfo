@@ -1,3 +1,46 @@
+# Day-end checkpoint — Cash and New Marketing connected and verified
+
+**20 November 2026: approved staging batch complete. Stop for the day.**
+
+Website source `b7ea4913c928ac9dac57bc45b5478ca06688a016` is live and signed-in verified. [Hosted acceptance and remaining work](cash-acquisition-hosted-verification-2026-11-20.md) records the exact publication, restricted access, results and limits. [Connection register](https://github.com/PaulLantsbury/virtual-cfo/blob/b7ea4913c928ac9dac57bc45b5478ca06688a016/docs/new-marketing-v16-connection-register-2026-11-20.md).
+
+- Two years of private synthetic cash/acquisition summaries published:48 records,November2024–October2026. Membership-limited server reads enabled; no direct browser access.
+- Cash now shows reconciled bank balances/movements, three-month history and buffer arithmetic. New Marketing’s Acquisition/Conversion/Retention tabs use synthetic acquisition, simulated funnel and allocated cohort inputs; ratios are calculated in the page.
+- October bank £301,632.59,operating cash −£22,290.26; marketing CAC£2.05,conversion3.00%,948 identified first orders and686 repeat orders. These are synthetic historical activity, not real provider acceptance.
+- Preserved latest Marketing design, reviewed Profit and Plan. Unsupported figures remain yellow/unavailable.
+- Owner-approved source/data/read-access/flag/website package applied successfully. No provider transactions, daily financial-feed change, production release, new service or extra spending.
+
+## Next session — order of work
+
+1. Confirm actual scheduled financial-feed run evidence and source freshness; then prepare a closed-month refresh for the new cash/customer summaries. The existing daily financial feed does **not** refresh them automatically. Correction/version handling and future cohort windows need a reviewed workflow.
+2. Finish remaining yellow customer/funnel comparisons: unique returning customers, frequency/second-purchase timing, multi-month CAC/sessions and drilldowns. Prioritise matched source inputs and clear calculation definitions. Recheck loading, company/month changes and response time; preserve existing source safeguards.
+3. Complete Scout’s View design review using the now-connected specialist conclusions and the ten-second rule. Then agree final five-area navigation/names, run Overview→specialist→Explore the Numbers→Plan owner journey, and review Monitoring/Settings. Profit/Cash/Marketing/Plan designs are already reviewed; Plan baselines/shared actions/reminders remain separate engineering work.
+
+The design closeout from the parallel site-design branch is preserved below as product context. It predates this data release; any statement there saying cash/customer inputs are unconnected is superseded by the hosted verification above.
+
+---
+
+# Resume here — site design closeout, 20 November 2026
+
+Latest website release: 8287d1024b8c90523c807450dcef1d9d2a1490b4. This closeout is documentation only.
+
+Read the opening **End-of-day site design checkpoint** in [the roadmap](roadmap-2026-11-20.md) before older notes below.
+
+- **Reviewed/redesigned:** Profit Engine, Cash Control, Marketing (Acquisition + Conversion + Retention), Plan.
+- **Next core design review:** Scout’s View / overview, currently CFO Briefing at /dashboard, with /v11/scout as reference.
+- **Supporting reviews still pending in this latest pass:** Monitoring and Settings/connections/account mapping. Earlier work exists; do not describe them as never reviewed.
+- **Not separate unfinished core pages:** Growth Quality, Opportunity Finder, Scenario Planner, pricing/margin diagnostics. Customer work belongs in Marketing; opportunities/scenarios belong in Plan; relevant profit diagnostics belong in Profit.
+- **Temporary references:** Marketing Efficiency and the original pages. Keep them until Paul agrees final comparison/consolidation.
+- **Next design sequence:** Scout’s View → final menu/names → cross-page owner journey and consistency → Monitoring/Settings → connected/missing-data visual acceptance.
+- Design review is not data readiness. Keep sample/source boundaries, restricted readers and independent integration/feed work. Acquisition-to-future-repeat forecasting stays parked.
+
+Do not restart Cash, Profit, Marketing or Plan redesigns from the older proposals. Final minor acceptance is still possible, but their current working designs have been reviewed and implemented.
+
+---
+
+
+---
+
 ## Cash and latest New Marketing — ready for owner approval, not applied
 
 Parallel preparation is complete and published on `codex/cash-acquisition-data-20261120`. Exact tested source: `b7ea4913c928ac9dac57bc45b5478ca06688a016`. [Bundled staging approval package](https://github.com/PaulLantsbury/virtual-cfo/blob/dbead3dc6940647a417b4634a0ca9ad3ea147315/docs/cash-acquisition-staging-approval-2026-11-20.md).

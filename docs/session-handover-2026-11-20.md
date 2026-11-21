@@ -1,3 +1,13 @@
+## Completed build/test cleanup — 21 November 2026
+
+Exact cleaned overnight source: [4ab7b6fcec1a5cdb5be9bb09f48ea042e1755177](https://github.com/PaulLantsbury/virtual-cfo/commit/4ab7b6fcec1a5cdb5be9bb09f48ea042e1755177), branch codex/build-test-cleanup-20261121. [Results and next batch](roadmap-2026-11-21.md) · [Evidence](build-test-cleanup-2026-11-21.md).
+
+Full workspace build/typecheck PASS; complete Xero321/321 PASS; baseline synthetic146/146 PASS, followed by18customer/economics/Plan and5refresh guard checks PASS (overlap; not a summed total). Xero failures were internal missing types plus historical tests crossing their fixed expiry, not provider refusals. Added accurate contracts, type-only date-range correction, contained historical test clocks with exact opening/expiry checks, stricter customer and refresh validation, bounded domain test commands and repaired cloud instructions. Production SQL/expiry unchanged.
+
+No hosted release, database changes, provider transactions/retries, feed changes, production changes or spending. Overnight continuation remains prepared, Plan's baseline helper remains unwired and actual scheduled-run receipts still need read-only verification. Next: verify receipts, finish Plan/source connections and prepare a reviewed activation package; preserve reviewed page designs. Earlier cloud launch-pending notices below are historical; the cloud task completed and its output was reviewed.
+
+---
+
 ## Agreed next-session task — extend synthetic programme by three months
 
 Paul requested this roadmap addition on 20 November 2026. Prepare another **three calendar months of synthetic activity beyond the existing 19 December 2026 ceiling: 20 December 2026–19 March 2027 inclusive**.

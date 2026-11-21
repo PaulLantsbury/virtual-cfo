@@ -103,7 +103,15 @@ const shape = (
   const r = object(v);
   if (
     required.some((k) => !Object.hasOwn(r, k)) ||
-    Object.keys(r).some((k) => !required.includes(k) && !optional.includes(k))
+    Reflect.ownKeys(r).some((key) => {
+      const descriptor = Object.getOwnPropertyDescriptor(r, key);
+      return (
+        typeof key !== "string" ||
+        (!required.includes(key) && !optional.includes(key)) ||
+        !descriptor?.enumerable ||
+        !Object.hasOwn(descriptor, "value")
+      );
+    })
   )
     unavailable();
   return r;
@@ -220,10 +228,16 @@ export function validateMarketingDayFact(
       !Array.isArray(p.attribution) ||
       p.attribution.length > 20
     )
+      return unavailable();
+    // The returned snapshot must contain only the ordered, validated observations.
+    if (Reflect.ownKeys(p.attribution).length !== p.attribution.length + 1)
       unavailable();
     const keys = new Set<string>();
-    for (const value of p.attribution as unknown[]) {
-      const a = shape(value, [
+    for (let index = 0; index < p.attribution.length; index += 1) {
+      const descriptor = Object.getOwnPropertyDescriptor(p.attribution, index);
+      if (!descriptor?.enumerable || !Object.hasOwn(descriptor, "value"))
+        return unavailable();
+      const a = shape(descriptor.value, [
         "definitionKey",
         "purchaseCount",
         "purchaseValueMinor",

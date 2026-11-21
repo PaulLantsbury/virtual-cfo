@@ -1,0 +1,15 @@
+# Exact copy-corrected follow-on proposal
+
+Propose exact **25515ab436528eb5b76d523a4aca0baa1a501b2e**, branch codex/copy-fixes-20261121, repository PaulLantsbury/virtual-cfo. Source tree **e5606b85f97f0abddd5181888cb2796588af1b2b**. Deploy the pinned source SHA, not this documentation branch tip. This supersedes earlier9500535/405c3eb follow-on proposals; no deployment occurs here.
+
+Ancestry preserves accepted live3eda388 and immutable receipt21e5112, supportf2b8119, Plan/Cash recovery405c3eb and alias correction9500535. Relative to950, six source files change headings/one explanatory paragraph only. Core/sample headings match navigation; Plan unavailable/accepted headings agree; Marketing correctly describes independent reviewed baseline and conditional forecasts. Explicit sample/synthetic/conditional labels remain. Scout, selectors, auth/access, navigation/routes, financial formulas and reference pages are unchanged.
+
+Independent copy audit and full root workspace build/typecheck passed. No copy-mirroring tests or unchanged suites were rerun. Prior950 route13/build/isolatedbrowser and405 recovery18/build receipts apply to preserved code; they are not aggregated into new live acceptance. The exact recorded alias probe remains fixed under the same narrow acceptance-metadata allowlist.
+
+The separate comparison-reset investigation is in docs/copy-review/comparison-persistence-investigation-2026-11-21.md: same-identity access recheck can change revision/remount, but the observed live reset is not causally confirmed. No comparison persistence implementation or promise is added. Controlled page-subtab pass and uncertified broader cross-tab persistence remain the live receipt limits.
+
+For PM: approve this exact source for the existing staging website only, followed by read-only signed-in/mobile acceptance. Existing target srv-dar6dl3ncjis73caho6g and its branch/config/environment/private files/size/automatic-deploy policy remain unchanged. Recheck actual live/pending source and settings immediately before execution; preserve intervening changes. The current accepted baseline is3eda388 per immutable receipt21e5112; it was not redeployed or recertified by this copy batch. Data remains sole deployment/hosted-acceptance owner. No existing exact approval is reusable for25515ab.
+
+No database/schema/data/grants/sidecar activation, provider/OAuth/credential/setup, feed/job, settings/config, main/production merge, new service or spending. Xero company binding stays an integration handover only.
+
+Acceptance: retain the alias-corrected package's current/prior member-bound, invalid-version/company, Plan/Cash recovery and mobile checks; additionally inspect current core/sample headings and Marketing Plan wording. Record broader comparison persistence as unverified; do not call its investigation a fix. Rollback candidate remains exact3eda388 only after immediate live/source compatibility review; storage/draft models and external data are unchanged. Reverting restores earlier copy/alias/recovery limitations and must never overwrite a later shared release or alter provider/data state.

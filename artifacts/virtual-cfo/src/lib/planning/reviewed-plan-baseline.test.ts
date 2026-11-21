@@ -61,3 +61,33 @@ test('missing, gapped, cross-company, or mismatched acquisition evidence is unav
   const company = structuredClone(valid); (company[1].month as any).selection.storeId = 'other-company';
   assert.equal(reviewedPlanBaseline(company), null);
 });
+
+
+test('reviewed draft source bindings survive storage validation and reject changed scope or missing hashes', async () => {
+ const {validReviewedBindings}=await import('./future-plan.ts');
+ const baseline=reviewedPlanBaseline([fixture('2025-01-01',0),fixture('2025-02-01',1),fixture('2025-03-01',2)])!;
+ const bindings=JSON.parse(JSON.stringify(baseline.bindings));
+ assert.equal(validReviewedBindings(bindings,'2025-01-01','2025-03-31'),true);
+ assert.equal(validReviewedBindings(bindings,'2025-02-01','2025-03-31'),false);
+ bindings.months[1].salesRevision='';
+ assert.equal(validReviewedBindings(bindings,'2025-01-01','2025-03-31'),false);
+ assert.equal(validReviewedBindings(null,'2025-01-01','2025-03-31'),false);
+});
+
+
+test('frozen reviewed plan round-trips with provenance while legacy sample records stay readable', async()=>{
+ const {futureDefaults,projectFuture,readFutureDrafts,writeFutureDrafts,FUTURE_VERSION}=await import('./future-plan.ts');
+ const baseline=reviewedPlanBaseline([fixture('2025-01-01',0),fixture('2025-02-01',1),fixture('2025-03-01',2)])!;
+ const input=futureDefaults(baseline.baseline30),today='2026-11-21';
+ const result=projectFuture(baseline.baseline30,input,today)!;
+ const draft={version:FUTURE_VERSION,id:'reviewed-test',owner:'Owner',reviewDate:'2026-12-21',objective:'Check orders',stopRule:'Stop if losses grow',createdAt:'2026-11-21T12:00:00Z',today,sourceFrom:baseline.sourcePeriod.from,sourceTo:baseline.sourcePeriod.to,base:baseline.baseline30,reviewedBindings:baseline.bindings,input,target:null,ebitda:result.ebitda,notes:'',history:[]};
+ let raw='';const storage={setItem:(_key:string,value:string)=>{raw=value;},getItem:()=>raw};
+ writeFutureDrafts(storage,'reviewed',[draft]);
+ assert.deepEqual(readFutureDrafts(storage,'reviewed')[0].reviewedBindings,baseline.bindings);
+ const legacy={...draft,reviewedBindings:undefined};
+ writeFutureDrafts(storage,'legacy',[legacy]);assert.equal(readFutureDrafts(storage,'legacy').length,1);
+ const corrupt=structuredClone(draft);corrupt.reviewedBindings.months[0].ordersHash='bad';
+ assert.throws(()=>writeFutureDrafts(storage,'reviewed',[corrupt]));
+ const repeat=structuredClone(draft);repeat.input.repeat=10;repeat.ebitda=projectFuture(repeat.base,repeat.input,repeat.today)!.ebitda;
+ assert.throws(()=>writeFutureDrafts(storage,'reviewed',[repeat]));
+});

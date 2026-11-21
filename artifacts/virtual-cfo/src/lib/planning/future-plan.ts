@@ -6,7 +6,7 @@ export type FutureInput={months:3|6|12;startMonth:number;rampMonths:number;trend
 export const futureDefaults=(base:MarketingTotals):FutureInput=>({months:3,startMonth:1,rampMonths:1,trend:0,spend:0,cac:0,conversion:0,repeat:0,aov:0,costs:0,overheads:0,ongoing:0,setup:0,aovMargin:base.beforeAds/base.revenue*100});
 export const LEVERS:{id:Lever;title:string;assumption:string;value:number;unit:string;min:number;max:number;step:number;detail:string}[]=[
  {id:'cac',title:'Acquire customers more efficiently',assumption:'Lower acquisition cost',value:10,unit:'%',min:0,max:30,step:1,detail:'Lower CAC at the same acquisition budget, excluding any separately modelled website conversion improvement.'},
- {id:'conversion',title:'Convert more website visits',assumption:'Conversion change',value:10,unit:'% relative',min:-30,max:30,step:1,detail:'At the illustrative 2% baseline, +10% means 2.2%. Traffic and advertising stay fixed. This applies to new and existing-customer orders.'},
+ {id:'conversion',title:'Convert more website visits',assumption:'Conversion change',value:10,unit:'% relative',min:-30,max:30,step:1,detail:'A +10% relative assumption multiplies orders by 1.10; no absolute conversion rate is asserted. Traffic and advertising stay fixed. This applies to new and existing-customer orders.'},
  {id:'repeat',title:'Bring existing customers back',assumption:'Repeat-order change',value:10,unit:'%',min:-30,max:30,step:1,detail:'Extra repeat orders from the existing customer base; not a percentage-point change in retention and not future repeat orders from newly acquired customers.'},
  {id:'aov',title:'Grow the average basket',assumption:'Net AOV change',value:5,unit:'%',min:-20,max:20,step:.5,detail:'Net revenue per order including net shipping, after discounts/refunds and excluding VAT. Only the stated contribution margin on extra revenue becomes profit.'},
  {id:'costs',title:'Reduce the cost of each order',assumption:'Order cost saving',value:.5,unit:'£ / order',min:0,max:5,step:.1,detail:'Combined product, fulfilment, delivery and payment-cost saving per order. Include any setup or service costs below.'},
@@ -73,9 +73,24 @@ export function futureBridge(p:Projection,perOrder=false):BridgeRow[]{
 export function leverImpacts(base:MarketingTotals,i:FutureInput,today:string,values:Record<Lever,number>){
  return LEVERS.map(l=>{const input={...zeroLevers(i),[l.id]:values[l.id]};const result=projectFuture(base,input,today);return {...l,value:values[l.id],delta:result?.delta??null};}).sort((a,b)=>(b.delta??-Infinity)-(a.delta??-Infinity));
 }
-export type FutureDraft={version:typeof FUTURE_VERSION;id:string;owner:string;reviewDate:string;objective:string;stopRule:string;createdAt:string;today:string;sourceFrom:string;sourceTo:string;base:MarketingTotals;input:FutureInput;target:number|null;ebitda:number;notes:string;history:{at:string;note:string}[]};
+export type FutureDraft={reviewedBindings?:import('./reviewed-plan-baseline').ReviewedPlanBaseline['bindings'];version:typeof FUTURE_VERSION;id:string;owner:string;reviewDate:string;objective:string;stopRule:string;createdAt:string;today:string;sourceFrom:string;sourceTo:string;base:MarketingTotals;input:FutureInput;target:number|null;ebitda:number;notes:string;history:{at:string;note:string}[]};
 const validDay=(d:unknown):d is string=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&Number.isFinite(Date.parse(d))&&new Date(d).toISOString().slice(0,10)===d;
 const nonempty=(s:unknown,max:number):s is string=>typeof s==='string'&&s.trim().length>0&&s.length<=max;
-export function validFutureDraft(d:FutureDraft){try{const p=projectFuture(d.base,d.input,d.today);return d.version===FUTURE_VERSION&&nonempty(d.id,100)&&nonempty(d.owner,80)&&validDay(d.today)&&validDay(d.reviewDate)&&validDay(d.sourceFrom)&&validDay(d.sourceTo)&&d.sourceFrom<=d.sourceTo&&nonempty(d.objective,400)&&nonempty(d.stopRule,400)&&Number.isFinite(Date.parse(d.createdAt))&&(d.target===null||Number.isFinite(d.target)&&d.target>=0)&&typeof d.notes==='string'&&d.notes.length<=1000&&Array.isArray(d.history)&&d.history.length<=100&&d.history.every(h=>Number.isFinite(Date.parse(h.at))&&nonempty(h.note,1400))&&p!==null&&Number.isFinite(d.ebitda)&&Math.abs(p.ebitda-d.ebitda)<1e-6;}catch{return false;}}
+/** Persisted reviewed baselines retain all source identities; legacy drafts remain valid separately. */
+export function validReviewedBindings(value:unknown,from:string,to:string):boolean {
+ try {
+ const b=value as NonNullable<FutureDraft['reviewedBindings']>;
+ const nonempty=(v:unknown)=>typeof v==='string'&&v.length>0;
+ const hash=(v:unknown)=>typeof v==='string'&&/^[a-f0-9]{64}$/.test(v);
+ if(!b||!nonempty(b.company)||b.currency!=='GBP'||b.timezone!=='Europe/London'||!nonempty(b.edition)||!validDay(b.anchor)||!Array.isArray(b.months)||b.months.length!==3)return false;
+ return b.months[0].from===from&&b.months[2].to===to&&b.months.every((m,i)=>{
+ const days=(Date.parse(m.to)-Date.parse(m.from))/86400000+1;
+ return validDay(m.from)&&validDay(m.to)&&m.from.endsWith('-01')&&m.to===new Date(Date.UTC(+m.from.slice(0,4),+m.from.slice(5,7),0)).toISOString().slice(0,10)
+ &&m.days===days&&m.weight===i+1&&nonempty(m.versionId)&&[m.salesRevision,m.costRevision,m.acquisitionSourceHash,m.ordersHash,m.refundsHash,m.allocationHash,m.economicsSource?.costSourceHash,m.economicsSource?.allocationHash,m.economicsSource?.repeatMarketingHash].every(hash)
+ &&typeof m.matureCohort==='boolean'&&(i===0||new Date(Date.parse(b.months[i-1].to)+86400000).toISOString().slice(0,10)===m.from);
+ });
+ }catch{return false;}
+}
+export function validFutureDraft(d:FutureDraft){try{const p=projectFuture(d.base,d.input,d.today);return (d.reviewedBindings===undefined||(d.input.repeat===0&&validReviewedBindings(d.reviewedBindings,d.sourceFrom,d.sourceTo)))&&d.version===FUTURE_VERSION&&nonempty(d.id,100)&&nonempty(d.owner,80)&&validDay(d.today)&&validDay(d.reviewDate)&&validDay(d.sourceFrom)&&validDay(d.sourceTo)&&d.sourceFrom<=d.sourceTo&&nonempty(d.objective,400)&&nonempty(d.stopRule,400)&&Number.isFinite(Date.parse(d.createdAt))&&(d.target===null||Number.isFinite(d.target)&&d.target>=0)&&typeof d.notes==='string'&&d.notes.length<=1000&&Array.isArray(d.history)&&d.history.length<=100&&d.history.every(h=>Number.isFinite(Date.parse(h.at))&&nonempty(h.note,1400))&&p!==null&&Number.isFinite(d.ebitda)&&Math.abs(p.ebitda-d.ebitda)<1e-6;}catch{return false;}}
 export function readFutureDrafts(storage:Pick<Storage,'getItem'>,key:string):FutureDraft[]{const raw=storage.getItem(key);if(!raw)return [];const list=JSON.parse(raw);if(!Array.isArray(list)||list.length>20||!list.every(validFutureDraft)||new Set(list.map(d=>d.id)).size!==list.length)throw Error('Saved monthly plans are unreadable. They have been preserved; saving is blocked.');return list;}
 export function writeFutureDrafts(storage:Pick<Storage,'setItem'>,key:string,list:FutureDraft[]){if(list.length>20||!list.every(validFutureDraft)||new Set(list.map(d=>d.id)).size!==list.length)throw Error('Keep at most 20 valid monthly sample plans.');storage.setItem(key,JSON.stringify(list));}

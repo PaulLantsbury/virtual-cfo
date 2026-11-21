@@ -1,14 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useActiveStore, useAuth } from './auth/AuthProvider';
 import { supabase } from './supabase';
 import { HISTORY_EDITION, historyAvailableMonths, historyReadState, type HistorySelection } from './v11/history-supported';
 import { composeHistoryMonth } from './v11/history-composition';
+import {advanceReviewHandoff,cancelReviewHandoff,createReviewHandoff,type ReviewHandoffRole} from './reviewHandoff';
 
-/** Read-only, explicit month/version selection shared by the New reporting pages. */
-export function useReviewedHistory() {
+/** Read-only explicit month/version selection. Recipient opt-ins can seed a
+ * validated link once per mount; manual choices win until reload. The URL stays
+ * bookmarkable, and every new mount revalidates its company and exact version. */
+export function useReviewedHistory({handoffRole='none'}:{handoffRole?:ReviewHandoffRole}={}) {
  const storeId=useActiveStore(), {userId}=useAuth();
  const [choice,setChoice]=useState({userId:null as string|null,storeId:'',from:'',to:'',versionId:''});
+ const handoff=useRef(createReviewHandoff(typeof window==='undefined'?'':window.location.search,handoffRole));
+ const [handoffWarning,setHandoffWarning]=useState<string|null>(null);
  const current=choice.userId===userId&&choice.storeId===storeId;
  const request=async(path:string,query:Record<string,string>,signal:AbortSignal)=>{
   const {data,error}=await supabase.auth.getSession();
@@ -21,6 +26,11 @@ export function useReviewedHistory() {
  const availability=available.isSuccess&&!available.isFetching&&!available.isError?available.data:null;
  const anchor=typeof availability?.anchor==='string'?availability.anchor:'';
  const months=historyAvailableMonths(availability,{storeId,currency:'GBP',timezone:'Europe/London',edition:HISTORY_EDITION,anchor});
+ useEffect(()=>{
+  const result=advanceReviewHandoff(handoff.current,{userId,storeId,availabilityReady:!!availability,months});
+  handoff.current=result.state;setHandoffWarning(result.warning);
+  if(result.choice)setChoice({userId,storeId,...result.choice});
+ },[userId,storeId,availability]);
  const chosen=current?months.find(m=>m.from===choice.from&&m.to===choice.to):undefined;
  const versions=chosen?.versions??(chosen?.versionId?[{versionId:chosen.versionId,status:'selected' as const,kind:'base' as const}]:[]);
  const version=current?versions.find(v=>v.versionId===choice.versionId&&v.status==='selected'):undefined;
@@ -28,10 +38,11 @@ export function useReviewedHistory() {
  const report=useQuery({queryKey:['new-reviewed-report',userId,storeId,HISTORY_EDITION,selection.period.from,selection.period.to,selection.versionId],enabled:!!userId&&!!chosen&&!!version,retry:false,placeholderData:undefined,queryFn:({signal})=>request('/api/history-reporting',{storeId,currency:'GBP',edition:HISTORY_EDITION,from:selection.period.from,to:selection.period.to,versionId:selection.versionId},signal)});
  const state=historyReadState(selection,report.isSuccess?report.data:null,{loading:report.isFetching,error:report.isError?'unavailable':undefined,invalidated:!!availability&&current&&!!choice.versionId&&!version});
  const month=state==='supported'&&!available.isFetching&&!available.isError?composeHistoryMonth(report.data,selection):null;
- const error=available.isError?'Reviewed months could not be loaded.':report.isError?'The selected evidence could not be checked.':state==='invalidated'?'The selected evidence version is no longer supported.':chosen&&version&&!report.isFetching&&state==='unavailable'?'This month has no supported evidence.':null;
- return {storeId,userId,month,selection,months,versions,state,loading:report.isFetching,loadingMonths:available.isFetching,error,
-  selectMonth:(from:string)=>{const m=months.find(m=>m.from===from);setChoice({userId,storeId,from:m?.from??'',to:m?.to??'',versionId:''});},
-  selectVersion:(versionId:string)=>setChoice({userId,storeId,from:chosen?.from??'',to:chosen?.to??'',versionId}),
+ const error=available.isError?'Reviewed months could not be loaded.':report.isError?'The selected evidence could not be checked.':state==='invalidated'?'The selected evidence version is no longer supported.':chosen&&version&&!report.isFetching&&state==='unavailable'?'This month has no supported evidence.':handoffWarning;
+ const manual=()=>{handoff.current=cancelReviewHandoff(handoff.current);setHandoffWarning(null);};
+ return {storeId,userId,month,selection,months,versions,state,loading:report.isFetching,loadingMonths:available.isFetching,error,handoffWarning,
+  selectMonth:(from:string)=>{manual();const m=months.find(m=>m.from===from);setChoice({userId,storeId,from:m?.from??'',to:m?.to??'',versionId:''});},
+  selectVersion:(versionId:string)=>{manual();setChoice({userId,storeId,from:chosen?.from??'',to:chosen?.to??'',versionId});},
   retry:()=>{void available.refetch();if(chosen&&version)void report.refetch();},
  };
 }

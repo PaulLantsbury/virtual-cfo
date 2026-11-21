@@ -18,7 +18,7 @@ const missing=[
 
 /** Existing member-authorised evidence only. Profit is never substituted for cash. */
 export default function NewCashLinked({onSample}:{onSample:()=>void}){
- const h=useReviewedHistory(),m=h.month,sources=useReviewedCash(h);
+ const h=useReviewedHistory({handoffRole:'current'}),m=h.month,sources=useReviewedCash(h);
  return <AppLayout showMonitoring={false}><div className="cash-demo new-profit nc-linked">
   <header className="nc-header"><div><span className="nc-eyebrow">NIGHT SCOUT · CASH DECISIONS</span><h1>New Cash Control</h1><p>Are sales and profit turning into cash—and what needs attention?</p></div><a className="nc-badge" href="#new-cash-numbers">Explore the Numbers</a></header>
   <div className="nc-notice"><div><strong>{sources.current?'Reviewed synthetic cash records · historical month':'Cash figures need separate reviewed evidence.'}</strong><p>Yellow means not linked or unavailable. Cash appears only after separate dated bank and working-capital records reconcile to the exact financial evidence version. Historical synthetic cash is not a current bank feed.</p></div></div>

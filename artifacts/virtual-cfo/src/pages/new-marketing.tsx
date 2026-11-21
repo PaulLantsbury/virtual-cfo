@@ -55,7 +55,7 @@ function ConversionMovement({review,comparison}:{review:ReturnType<typeof buildG
 }
 export default function NewMarketing(){const storeId=useActiveStore(),auth=useAuth();return <GrowthWorkspace key={(auth.userId??'')+':'+storeId}/>;}
 export function GrowthWorkspace(){
- const history=useReviewedHistory(),priorHistory=useReviewedHistory(),[tab,setTab]=useState<GrowthTab>(()=>growthTab(window.location.search)),[sample,setSample]=useState(false),[months,setMonths]=useState<3|6|12>(3),[comparison,setComparison]=useState<Comparison>('last-year'),[perOrder,setPerOrder]=useState(false),[target,setTarget]=useState<number|null>(null),[trendMetric,setTrendMetric]=useState<'cac'|'poas'>('cac'),[conversionMetric,setConversionMetric]=useState<'conversion'|'aov'>('conversion');
+ const history=useReviewedHistory({handoffRole:'current'}),priorHistory=useReviewedHistory(),[tab,setTab]=useState<GrowthTab>(()=>growthTab(window.location.search)),[sample,setSample]=useState(false),[months,setMonths]=useState<3|6|12>(3),[comparison,setComparison]=useState<Comparison>('last-year'),[perOrder,setPerOrder]=useState(false),[target,setTarget]=useState<number|null>(null),[trendMetric,setTrendMetric]=useState<'cac'|'poas'>('cac'),[conversionMetric,setConversionMetric]=useState<'conversion'|'aov'>('conversion');
  const review=useMemo(()=>buildGrowthReview(months,comparison),[months,comparison]),m=linkedMarketingMetrics(history.month),sm=metrics(review.marketing.current),pm=review.marketing.previous?metrics(review.marketing.previous):null;
  const acquisitionSource=useReviewedSupplement(history,'acquisition');
  const acquisition=!acquisitionSource.loading&&!acquisitionSource.error?acquisitionView(acquisitionSource.payload,acquisitionFinancialContext(history.month)):null;

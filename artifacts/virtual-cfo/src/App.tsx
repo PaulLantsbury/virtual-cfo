@@ -8,6 +8,8 @@ import { AiCfoDrawer } from "@/components/AiCfoDrawer";
 import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { StoreAccessGate } from "@/components/StoreAccessGate";
 import NotFound from "@/pages/not-found";
+import Help from "@/pages/help";
+import { contextPreservingRedirect } from "@/lib/legacyNavigation";
 
 // Pages
 import Landing from "@/pages/landing";
@@ -45,6 +47,10 @@ const queryClient = new QueryClient({
 import SupportedLivePage from "./pages/v11/supported-live-page";
 import HistoryLivePage from "./pages/v11/HistoryLivePage";
 
+function ContextRedirect({ to }: { to: string }) {
+  return <Redirect to={contextPreservingRedirect(to, window.location.search, window.location.hash)} />;
+}
+
 function MerchantRouter() {
   return (
     <Switch>
@@ -52,32 +58,33 @@ function MerchantRouter() {
       <Route path="/supported-v11/scout" component={() => <SupportedLivePage section="scout" />} />
       <Route path="/supported-v11/profit" component={() => <SupportedLivePage section="profit" />} />
       <Route path="/v11/:section" component={() => <V11Preview />} />
-      <Route path="/v11"><Redirect to="/v11/scout" /></Route>
+      <Route path="/v11"><ContextRedirect to="/v11/scout" /></Route>
       {import.meta.env.DEV && <Route path="/verified-sales" component={VerifiedSalesPage} />}
       <Route path="/financial-review" component={FinancialReviewPage} />
       <Route path="/dashboard" component={ScoutsView} />
-      <Route path="/scouts-view"><Redirect to="/dashboard" /></Route>
+      <Route path="/scouts-view"><ContextRedirect to="/dashboard" /></Route>
       <Route path="/cfo-briefing-original" component={Dashboard} />
       <Route path="/dashboard/transactions" component={Dashboard} /> {/* Map to dashboard for now */}
-      <Route path="/margin-analysis"><Redirect to="/profit-engine"/></Route>
+      <Route path="/margin-analysis"><ContextRedirect to="/profit-engine"/></Route>
       <Route path="/growth-quality" component={GrowthQuality} />
       <Route path="/marketing-efficiency-original" component={OriginalMarketingEfficiency} />
       <Route path="/marketing-efficiency" component={MarketingEfficiency} />
       <Route path="/new-marketing" component={NewMarketing} />
       <Route path="/plan" component={PlanPage} />
-      <Route path="/opportunities"><Redirect to="/plan?tab=opportunities" /></Route>
-      <Route path="/profit-opportunities"><Redirect to="/plan?tab=opportunities" /></Route>
+      <Route path="/opportunities"><ContextRedirect to="/plan?tab=opportunities" /></Route>
+      <Route path="/profit-opportunities"><ContextRedirect to="/plan?tab=opportunities" /></Route>
       <Route path="/opportunity-finder-original" component={Opportunities} />
       <Route path="/profit-engine" component={()=><NewProfit/>} />
-      <Route path="/new-profit"><Redirect to="/profit-engine"/></Route>
+      <Route path="/new-profit"><ContextRedirect to="/profit-engine"/></Route>
       <Route path="/new-cash-control" component={() => <NewCashControl />} />
       <Route path="/cash-control" component={CashControl} />
-      <Route path="/pricing-optimisation"><Redirect to="/profit-engine"/></Route>
-      <Route path="/scenario-lab"><Redirect to="/plan?tab=planner&legacy=1" /></Route>
+      <Route path="/pricing-optimisation"><ContextRedirect to="/profit-engine"/></Route>
+      <Route path="/scenario-lab"><ContextRedirect to="/plan?tab=planner&legacy=1" /></Route>
       <Route path="/scenario-planner-original" component={ScenarioLab} />
       <Route path="/monitoring" component={CfoAlerts} />
       <Route path="/cfo-alerts" component={CfoAlerts} />
       <Route path="/settings" component={Settings} />
+      <Route path="/help" component={Help} />
       <Route path="/upgrade" component={Upgrade} />
       <Route component={NotFound} />
     </Switch>

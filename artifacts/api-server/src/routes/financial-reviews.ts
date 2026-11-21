@@ -2,7 +2,6 @@ import { Router, json, type IRouter, type ErrorRequestHandler } from 'express';
 export type ReviewScope = { storeId: string; from: string; to: string };
 export type RestoreRequest = {scope: ReviewScope; batchId: string; snapshotDigest: string; coverageConfirmed: true; evidenceRef: string; completenessStatement: string};
 export type ReviewService = {
- attestRuntime?(scope: ReviewScope, authorization: string): Promise<unknown>;
  prepare(scope: ReviewScope, authorization: string): Promise<unknown>;
  restore(request: RestoreRequest, authorization: string): Promise<unknown>;
 };
@@ -16,11 +15,6 @@ function scope(v: unknown): v is ReviewScope {
 const text=(v: unknown,max: number)=>typeof v==='string'&&v.trim().length>0&&v.length<=max;
 function restore(v: unknown): v is RestoreRequest {
  return object(v)&&keys(v,['scope','batchId','snapshotDigest','coverageConfirmed','evidenceRef','completenessStatement'])&&scope(v.scope)&&typeof v.batchId==='string'&&uuid.test(v.batchId)&&typeof v.snapshotDigest==='string'&&/^[a-f0-9]{64}$/.test(v.snapshotDigest)&&v.coverageConfirmed===true&&text(v.evidenceRef,2000)&&text(v.completenessStatement,10000);
-}
-const attestationBooleans=['loginMatches','serviceMatches','databaseMatches','loginRestricted','serviceRestricted','transactionReadOnly','transactionRepeatableRead','targetProjectAttested'] as const;
-function safeAttestation(value:unknown){
- if(!object(value)||value.contract!=='customer-runtime-attestation-v1'||typeof value.state!=='string'||!['observed','unavailable'].includes(value.state)||typeof value.revision!=='string'||!/^[a-f0-9]{40}$/.test(value.revision)||!attestationBooleans.every(k=>typeof value[k]==='boolean'))throw Error('Runtime attestation unavailable');
- return {contract:'customer-runtime-attestation-v1',state:value.state,revision:value.revision,...Object.fromEntries(attestationBooleans.map(k=>[k,value[k]]))};
 }
 /** Dependencies must be provided by trusted server composition, never request data.
  * Production is disabled by default; there is no environment-variable shortcut.
@@ -37,13 +31,11 @@ export function createFinancialReviewRouter(service?: ReviewService): IRouter {
  for(const action of ['prepare','restore'] as const){
   router.post(`/${action}`,async(req,res)=>{
    if(!req.is('application/json')){res.status(415).json({error:'JSON request required'});return;}
-   const attestation=action==='prepare'&&object(req.body)&&keys(req.body,['scope','runtimeAttestation'])&&req.body.runtimeAttestation===true&&scope(req.body.scope);
-   const valid=action==='prepare'?(attestation||object(req.body)&&keys(req.body,['scope'])&&scope(req.body.scope)):restore(req.body);
-   if(!valid||attestation&&Object.keys(req.query).length!==0){res.status(400).json({error:'Invalid review request'});return;}
+   const valid=action==='prepare'?object(req.body)&&keys(req.body,['scope'])&&scope(req.body.scope):restore(req.body);
+   if(!valid){res.status(400).json({error:'Invalid review request'});return;}
    try{
-    if(attestation&&!service!.attestRuntime){res.status(503).json({error:'Runtime attestation unavailable'});return;}
-    const result=attestation?await service!.attestRuntime!(req.body.scope,req.headers.authorization!):action==='prepare'?await service!.prepare(req.body.scope,req.headers.authorization!):await service!.restore(req.body,req.headers.authorization!);
-    res.status(200).json(attestation?safeAttestation(result):result);
+    const result=action==='prepare'?await service!.prepare(req.body.scope,req.headers.authorization!):await service!.restore(req.body,req.headers.authorization!);
+    res.status(200).json(result);
    }catch(error){
     // Fixed responses only: never send SQL, upstream details, tokens or stack traces.
     const e=(error??{}) as {message?: string;code?: string};

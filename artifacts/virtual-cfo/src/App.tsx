@@ -16,6 +16,7 @@ import Signup from "@/pages/signup";
 import FinancialReviewPage from "@/pages/financial-review";
 import VerifiedSalesPage from "@/pages/verified-sales";
 import Dashboard from "@/pages/dashboard";
+import ScoutsView from "@/pages/scouts-view";
 import GrowthQuality from "@/pages/growth-quality";
 import MarketingEfficiency from "@/pages/marketing-efficiency";
 import NewMarketing from "@/pages/new-marketing";
@@ -54,7 +55,9 @@ function MerchantRouter() {
       <Route path="/v11"><Redirect to="/v11/scout" /></Route>
       {import.meta.env.DEV && <Route path="/verified-sales" component={VerifiedSalesPage} />}
       <Route path="/financial-review" component={FinancialReviewPage} />
-      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/dashboard" component={ScoutsView} />
+      <Route path="/scouts-view"><Redirect to="/dashboard" /></Route>
+      <Route path="/cfo-briefing-original" component={Dashboard} />
       <Route path="/dashboard/transactions" component={Dashboard} /> {/* Map to dashboard for now */}
       <Route path="/margin-analysis"><Redirect to="/profit-engine"/></Route>
       <Route path="/growth-quality" component={GrowthQuality} />

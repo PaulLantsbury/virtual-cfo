@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/BrandLogo";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "CFO Briefing",        href: "/dashboard"              },
+  { icon: LayoutDashboard, label: "Scout’s View",        href: "/dashboard"              },
   { icon: BarChart2,       label: "Growth Quality",         href: "/growth-quality"         },
   { icon: Megaphone,       label: "Marketing Efficiency",      href: "/marketing-efficiency"   },
   { icon: Megaphone,       label: "New Marketing",             href: "/new-marketing"          },

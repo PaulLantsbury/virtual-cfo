@@ -1,0 +1,76 @@
+{
+  "contract": "runtime-attestation-source-manifest-v1",
+  "baseCommit": "3eda388d534b820728172e0edb7ab9b51d0cc3ad",
+  "implementationLocalCommit": "2914a41b18fd6d4f2466d70f65f699fd82372eba",
+  "runtimeEnabled": false,
+  "remoteApplied": false,
+  "newTestsAndRegressions": 37,
+  "newAccessOrGrants": false,
+  "files": [
+    {
+      "path": "artifacts/api-server/src/lib/review-startup.ts",
+      "bytes": 1950,
+      "sha256": "13cf56b9c7e7a42f96ebab8b80351a36c15623b4fdc153efb05ecf116a762f7b"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/runtime-attestation-release.ts",
+      "bytes": 225,
+      "sha256": "527b6a0e7dfc22b1d5e1b38c031d910d9aca9f55fb6125855edadfb05ead398b"
+    },
+    {
+      "path": "artifacts/api-server/src/routes/financial-reviews.ts",
+      "bytes": 5614,
+      "sha256": "3d9a902aacdcaa2b74eea111a9a1bd312bf1d3c69b3f56deae5303c9f5c6627a"
+    },
+    {
+      "path": "artifacts/api-server/tests/runtime-attestation-independent.test.mjs",
+      "bytes": 10937,
+      "sha256": "2acb66fd7c786697922b6b5d4417c1afd342a3c8be128eda021030bec17cc19d"
+    },
+    {
+      "path": "experiments/shopify/review-runtime.d.mts",
+      "bytes": 892,
+      "sha256": "583ab1d863b0c7134504956573cfe15357325c734fdc857c03307648b9dfa45d"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-runtime-attestation-service.d.mts",
+      "bytes": 498,
+      "sha256": "65577681a9a685606fcd589da243867b28ac8f5c9a2d1d0cbec47ab4ceade16b"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-runtime-attestation-service.mjs",
+      "bytes": 3550,
+      "sha256": "2b4b234eddf5ca7e17f35aa93655061c516b55cd490e280703c3f4deea5eb5ab"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-runtime-attestation-service.test.mjs",
+      "bytes": 4135,
+      "sha256": "e1dd32bcb95226f553ba77f6c3089bd18a38d63e331d3e7ad9bba4849f36d020"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-runtime-attestation.mjs",
+      "bytes": 2682,
+      "sha256": "7e889ce8120925abacb6e349648afbe7cf1a4ab35a8a79f22a0592ede8d89580"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-runtime-attestation.test.mjs",
+      "bytes": 3859,
+      "sha256": "65f54d738cf137e12023c90ded710552e2f896e59c72235ce9cad717d39fc951"
+    },
+    {
+      "path": "experiments/synthetic-company/history-runtime-attestation.test.mjs",
+      "bytes": 3740,
+      "sha256": "549320663c9efe4ff6b9bf2ae2436ab397c0c59bc4dbe0782214693feb4e9e71"
+    },
+    {
+      "path": "experiments/synthetic-company/history-runtime.d.mts",
+      "bytes": 933,
+      "sha256": "641f9e191a7e12dca1a04c89e55e6e990f98ed68ddb75f352ffc1bf74e559d9a"
+    },
+    {
+      "path": "experiments/synthetic-company/history-runtime.mjs",
+      "bytes": 1638,
+      "sha256": "8c1adbe0faec566dfe62e2f6532107bff9679fbff82b54156078454d21afbb70"
+    }
+  ]
+}

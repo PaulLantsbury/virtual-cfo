@@ -4,7 +4,7 @@
   "repository": "PaulLantsbury/virtual-cfo",
   "outputBranch": "codex/absence-closeout-20261121",
   "publicationAuthorized": true,
-  "cloudLaunchConfirmed": false,
+  "cloudLaunchConfirmed": true,
   "cloudTaskId": null,
   "operationalRoadmap": {
     "branch": "codex/synthetic-company-20261105",
@@ -13,9 +13,16 @@
   },
   "capsules": [
     {
+      "name": "current-live-cleanup",
+      "commit": "204226d0c796561d5bb812cde1bd9cec8da6a8d5",
+      "state": "verified-live-health-version-temporary-control-absent",
+      "receiptCommit": "5cbc35db69298a880617aded60785bff8eb9458b",
+      "required": true
+    },
+    {
       "name": "recorded-live-website",
       "commit": "3eda388d534b820728172e0edb7ab9b51d0cc3ad",
-      "state": "recorded-live-and-signed-in-checked-with-limits",
+      "state": "historical-accepted-code-baseline-now-preserved-by-cleanup",
       "required": true
     },
     {
@@ -51,10 +58,10 @@
     },
     {
       "name": "temporary-runtime-client",
-      "commit": "81a6e9bc9610f988cc266fdecbdb0b2e6384f8de",
-      "state": "local-tested-owner-approved-conditional-staging-release-dispatched-not-yet-verified",
-      "instruction": "Cloud cannot deploy or assume publication/hosted outcome. Read latest operational roadmap for final receipt; source transfer must be verified.",
-      "cleanupCommit": "ee0d665463edc1a7d3d397c49b9e9474685a0549"
+      "commit": "f34d13d0662975b78c923877a2a0efe9d999763f",
+      "state": "published-bounded-check-passed-once-and-physically-cleaned-up",
+      "instruction": "All eight read-only runtime checks passed; cleanup live17:11:07UTC. Cloud cannot redeploy/invoke/rearm; preserve current cleanup source and read immutable receipt5cbc35db69298a880617aded60785bff8eb9458b.",
+      "cleanupCommit": "204226d0c796561d5bb812cde1bd9cec8da6a8d5"
     },
     {
       "name": "cash-query-function-race-test",
@@ -87,5 +94,16 @@
   ],
   "finishCondition": "Three finite waves completed; reviewed source, test/build receipts, scoped roadmap delta and all-stream handover produced; publish only after explicit branch permission; then stop.",
   "draftPullRequestAuthorized": true,
-  "authorizationScope": "Reviewed source/tests/docs from three finite waves, single named branch, one draft PR, no merge or live operations"
+  "authorizationScope": "Reviewed source/tests/docs from three finite waves, single named branch, one draft PR, no merge or live operations",
+  "cloudTaskLinkLocation": "Private PM chat; not published in the public repository",
+  "observedCloudCheckpoint": {
+    "managedWorkspace": true,
+    "githubReachable": true,
+    "outputSeed": "56ecbac3dce05dd32481c54c4eae9c0b6cb986b8",
+    "parallelLanes": [
+      "UI",
+      "Data",
+      "Provider"
+    ]
+  }
 }

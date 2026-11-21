@@ -1,3 +1,42 @@
+## Departure checkpoint — cloud verified running, local cleanup complete
+
+The owner-approved finite cloud closeout is now confirmed running in an OpenAI-managed workspace with GitHub access and the correct seeded output branch. UI, Data and Provider parallel review lanes started. This is observed execution, not merely a launch request. The private task link is kept in the PM chat; no local Mac sign-in or filesystem is required by the cloud programme.
+
+Staging live source is **204226d0c796561d5bb812cde1bd9cec8da6a8d5**. The approved single read-only runtime check confirmed all eight checks; mandatory physical cleanup was live at **17:11:07UTC**, before the cutoff. Health/version and normal review passed; temporary UI/server code is removed. [Immutable operation/cleanup receipt](https://github.com/PaulLantsbury/virtual-cfo/blob/5cbc35db69298a880617aded60785bff8eb9458b/docs/runtime-attestation-completed-handover-2026-11-21.md). Non-document source matches accepted3eda; no schema/data/grants/feed/provider/configuration/spending changes occurred.
+
+### Finite work during absence
+
+| Lane | Source/testing objective | Stopping point |
+| --- | --- | --- |
+| Pages and evidence | Review compatible Plan/Cash recovery, genuine URL context, yellow/derived/assumption lineage and supplied actual Cash query-function regression. Preserve accepted Scout and selectors. | Reviewed source and tested next website proposal; no deployment. |
+| Synthetic data | Disposable authority/publication/replay/withdrawal/concurrency rehearsals; closed-month refresh and90daycontinuation guidance. Existing48 originals stay protected. | Exact source/data-review package with remaining live gates; no schema, grants, publication or feed activation. |
+| Provider integration | Published Meta/Google/Xero/Shopify contracts, mocked denial/error/logging tests and precise missing-source/real-acceptance register. | Tested accessible source and handover; no real provider request, OAuth activation, transaction or spending. |
+| Coordination | Three finite waves, independent cross-review, integrated build/checks, scoped roadmap delta and all-stream handover. | Reviewed branch candidate and at most one draftPR, then STOP. No merge or further milestone. |
+
+Output branch: codex/absence-closeout-20261121, seeded at56ecbac3dce05dd32481c54c4eae9c0b6cb986b8. Paul explicitly approved reviewed source/tests/docs publication there and ONE draftPR. Cloud may update its own handover and provide a roadmap delta; the shared operational roadmap must preserve concurrent edits.
+
+The cloud task must replace this departure checkpoint with its final results on its output branch when finished, clearly distinguishing tested cloud source from deployed behaviour. If it hits a new access/publication gate it saves the patch and exact blocker, continues unaffected bounded scopes, then stops; it does not wait indefinitely for the owner.
+
+### Retained limits for the next session
+
+- Authenticated non-member live denial and broad cross-tab comparison persistence remain uncertified. Supported signed-in synthetic journeys and anonymous denial were checked.
+- The old unsupported acceptance-marker query probe did not establish a defect; preserve the allowlist, not arbitrary query passthrough.
+- Plan/Cash recovery405c and later alias/copy950 source are not deployed. The targeted Cash test is published as a hash-verified patch capsule; rerun it on the final integrated cloud candidate.
+- Customer activity/second-purchase/deduplicated multimonth figures remain unavailable until separately approved additive storage/read publication. The runtime observation establishes transaction/process facts, not financial completeness or permission to activate.
+- The Meta/Google69-mock-test draft remains local/unpublished unless a verified reviewed capsule appears. Cloud must not claim it transferred or reran it. Meta logging/live daily reconciliation and future positive-spend Google acceptance remain explicit gates.
+- Existing financial feed and provider programmes were not changed. Last evidenced unattended financial receipt was the21Nov run publishing20Nov. Proposed20Dec–19Mar continuation remains preparation only.
+- Any future temporary diagnostic needs a newly reviewed source/window. Do not reuse an expired enabled ancestor or restart to rearm.
+
+### First next-session steps
+
+1. Read the cloud task's final all-stream handover, branch diff, test receipts and draftPR; reconcile with this exact live cleanup baseline.
+2. Decide one exact website-only follow-on release after source preservation/meaningful regression review.
+3. Review separate synthetic data activation and provider acceptance packages; do not combine their permissions or claim missing evidence is connected.
+
+---
+
+The following earlier draft is historical context; the departure checkpoint above supersedes its pending launch/publication/diagnostic wording.
+
 # Night Scout absence handover draft — 21 November 2026
 
 Public-safe coordinator draft. No cloud task ID or remote execution has been confirmed by this document. The companion programme is finite and does not grant publication or live-system authority.

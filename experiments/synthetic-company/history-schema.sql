@@ -1,0 +1,30 @@
+-- DISPOSABLE PROPOSAL ONLY. No live application, grants, policies, trigger replacement or reader switch.
+BEGIN;
+CREATE SCHEMA finance_history_v2;
+REVOKE ALL ON SCHEMA finance_history_v2 FROM PUBLIC;
+CREATE TABLE finance_history_v2.contracts(store_id uuid PRIMARY KEY REFERENCES public.stores(id), profile text NOT NULL CHECK(profile='uk-gifts-v2'), edition text NOT NULL CHECK(edition='synthetic-history-v2-2026-11'), date_from date NOT NULL, through_day date NOT NULL, currency text NOT NULL CHECK(currency='GBP'), timezone text NOT NULL CHECK(timezone='Europe/London'));
+CREATE TABLE finance_history_v2.events(store_id uuid NOT NULL REFERENCES public.stores(id),source_id text NOT NULL,event_date date NOT NULL,kind text NOT NULL,order_ref text,dependency_only boolean NOT NULL,body jsonb NOT NULL,row_hash text NOT NULL,PRIMARY KEY(store_id,source_id));
+CREATE INDEX history_events_day ON finance_history_v2.events(store_id,event_date);
+CREATE INDEX history_events_order ON finance_history_v2.events(store_id,order_ref);
+CREATE TABLE finance_history_v2.orders(store_id uuid NOT NULL REFERENCES public.stores(id),source_id text NOT NULL,event_date date NOT NULL,body jsonb NOT NULL,row_hash text NOT NULL,PRIMARY KEY(store_id,source_id));
+CREATE TABLE finance_history_v2.refunds(LIKE finance_history_v2.orders INCLUDING ALL);
+CREATE TABLE finance_history_v2.lines(LIKE finance_history_v2.orders INCLUDING ALL);
+CREATE TABLE finance_history_v2.returns(LIKE finance_history_v2.orders INCLUDING ALL);
+ALTER TABLE finance_history_v2.refunds ADD FOREIGN KEY(store_id) REFERENCES public.stores(id);
+ALTER TABLE finance_history_v2.lines ADD FOREIGN KEY(store_id) REFERENCES public.stores(id);
+ALTER TABLE finance_history_v2.returns ADD FOREIGN KEY(store_id) REFERENCES public.stores(id);
+CREATE TABLE finance_history_v2.coverage(coverage_id uuid PRIMARY KEY,store_id uuid NOT NULL REFERENCES public.stores(id),date_from date NOT NULL,date_to date NOT NULL CHECK(date_to>=date_from),kind text NOT NULL CHECK(kind IN('month','day')),source_manifest jsonb NOT NULL,source_hash text NOT NULL,UNIQUE(store_id,date_from,date_to,kind),UNIQUE(coverage_id,store_id));
+CREATE TABLE finance_history_v2.seals(snapshot_id uuid PRIMARY KEY,store_id uuid NOT NULL REFERENCES public.stores(id),date_from date NOT NULL,date_to date NOT NULL,coverage_id uuid NOT NULL REFERENCES finance_history_v2.coverage(coverage_id),sales_revision text NOT NULL,cost_revision text NOT NULL,source_manifest jsonb NOT NULL,UNIQUE(store_id,date_from,date_to),FOREIGN KEY(coverage_id,store_id) REFERENCES finance_history_v2.coverage(coverage_id,store_id));
+CREATE TABLE finance_history_v2.invalidations(snapshot_id uuid PRIMARY KEY REFERENCES finance_history_v2.seals(snapshot_id),reason text NOT NULL CHECK(length(trim(reason))>0));
+CREATE TABLE finance_history_v2.runs(run_id uuid PRIMARY KEY,store_id uuid NOT NULL REFERENCES public.stores(id),date_from date NOT NULL,date_to date NOT NULL,source_hash text NOT NULL,receipt jsonb NOT NULL,UNIQUE(store_id,date_from,date_to));
+CREATE FUNCTION finance_history_v2.guard_contract() RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog AS $$BEGIN IF TG_OP<>'UPDATE' THEN RAISE EXCEPTION 'History edition cannot be removed'; END IF; IF (to_jsonb(NEW)-'through_day')<>(to_jsonb(OLD)-'through_day') OR NEW.through_day<=OLD.through_day THEN RAISE EXCEPTION 'Only monotonic completed-day extension is allowed'; END IF; RETURN NEW; END$$;
+CREATE TRIGGER history_contract_update BEFORE UPDATE OR DELETE ON finance_history_v2.contracts FOR EACH ROW EXECUTE FUNCTION finance_history_v2.guard_contract();
+CREATE FUNCTION finance_history_v2.reject_change() RETURNS trigger LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog AS $$BEGIN RAISE EXCEPTION 'History v2 evidence is append-only'; END$$;
+CREATE TRIGGER history_contract_truncate BEFORE TRUNCATE ON finance_history_v2.contracts FOR EACH STATEMENT EXECUTE FUNCTION finance_history_v2.reject_change();
+DO $protect$ DECLARE n text; BEGIN FOREACH n IN ARRAY ARRAY['events','orders','refunds','lines','returns','coverage','seals','invalidations','runs'] LOOP
+ EXECUTE format('CREATE TRIGGER history_immutable BEFORE UPDATE OR DELETE OR TRUNCATE ON finance_history_v2.%I FOR EACH STATEMENT EXECUTE FUNCTION finance_history_v2.reject_change()',n);
+END LOOP; END $protect$;
+DO $rls$ DECLARE n text; BEGIN FOREACH n IN ARRAY ARRAY['contracts','events','orders','refunds','lines','returns','coverage','seals','invalidations','runs'] LOOP EXECUTE format('ALTER TABLE finance_history_v2.%I ENABLE ROW LEVEL SECURITY',n); END LOOP; END $rls$;
+REVOKE ALL ON ALL TABLES IN SCHEMA finance_history_v2 FROM PUBLIC;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA finance_history_v2 FROM PUBLIC;
+COMMIT;

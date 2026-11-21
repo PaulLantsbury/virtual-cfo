@@ -10,16 +10,16 @@ export default function Landing() {
       {/* Navigation */}
       <nav className="fixed w-full top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <BrandLogo imageClassName="h-20" />
+          <BrandLogo className="shrink-0" imageClassName="h-9 w-[117px] sm:h-16 sm:w-[208px]" />
           <div className="hidden md:flex items-center gap-8 font-medium text-sm text-muted-foreground">
             <a href="#discover" className="hover:text-foreground transition-colors">Discoveries</a>
             <a href="#process" className="hover:text-foreground transition-colors">How it works</a>
             <Link href="/upgrade" className="hover:text-foreground transition-colors">Pricing</Link>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link href="/login" className="font-semibold text-sm hover:text-primary transition-colors">Log in</Link>
             <Link href="/signup">
-              <Button className="rounded-full px-6">Find Hidden Profit</Button>
+              <Button className="rounded-full px-3 sm:px-6">Find Hidden Profit</Button>
             </Link>
           </div>
         </div>
@@ -42,10 +42,8 @@ export default function Landing() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <BrandLogo
-            variant="mascot"
-            glow
             className="mx-auto mb-12"
-            imageClassName="h-48 w-48 sm:h-60 sm:w-60 rounded-full"
+            imageClassName="h-20 w-[260px] sm:h-40 sm:w-[520px]"
           />
 
           <motion.h1 
@@ -227,7 +225,7 @@ export default function Landing() {
               },
               {
                 icon: TrendingUp,
-                title: "Margin Recovery",
+                title: "Margin Analysis",
                 desc: "Find profit leaks and the actions most likely to recover them."
               },
               {
@@ -237,7 +235,7 @@ export default function Landing() {
               },
               {
                 icon: ShieldCheck,
-                title: "Profit Growth",
+                title: "Profit Overview",
                 desc: "Understand what is driving profit and what is holding it back."
               },
               {
@@ -289,7 +287,7 @@ export default function Landing() {
       <footer className="bg-sidebar py-12 text-sidebar-foreground border-t border-sidebar-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-3">
-            <BrandLogo imageClassName="h-16" />
+            <BrandLogo imageClassName="h-16 w-[208px]" />
           </div>
           <p className="text-sidebar-foreground/60 text-sm">© 2024 Night Scout Inc. All rights reserved.</p>
         </div>

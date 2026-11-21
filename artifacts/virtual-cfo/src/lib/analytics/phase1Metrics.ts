@@ -46,6 +46,7 @@
  * See docs/data-dictionary-v1.md §A.6 for the full mismatch record.
  */
 
+import { parseRpcNumber } from "./numeric";
 import { supabase } from "../supabase";
 import { METRIC } from "../metrics";
 
@@ -181,7 +182,9 @@ async function callRpc(
     errors.push({ fn: fnName, message: error.message });
     return 0;
   }
-  return toNumber(data);
+  const value = parseRpcNumber(data);
+  if (value === null) errors.push({ fn: fnName, message: "Missing or invalid numeric result" });
+  return value ?? 0;
 }
 
 /**
@@ -204,8 +207,9 @@ async function callRpcNullable(
     return null;
   }
   if (data === null || data === undefined) return null;
-  const n = Number(data);
-  return Number.isFinite(n) ? n : null;
+  const value = parseRpcNumber(data);
+  if (value === null) errors.push({ fn: fnName, message: "Invalid numeric result" });
+  return value;
 }
 
 /**

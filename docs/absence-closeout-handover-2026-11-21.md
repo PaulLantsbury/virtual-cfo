@@ -1,3 +1,9 @@
+## Completed cloud closeout
+
+See the [all-stream handover](all-stream-handover.md) for the tested candidate, independent review, final staging receipt and remaining gates. See the [scoped roadmap delta](roadmap-delta.md) for the coordinator update. The remainder of this file is the original departure draft.
+
+---
+
 # Night Scout absence handover draft — 21 November 2026
 
 Public-safe coordinator draft. No cloud task ID or remote execution has been confirmed by this document. The companion programme is finite and does not grant publication or live-system authority.

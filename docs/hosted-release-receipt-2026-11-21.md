@@ -15,7 +15,7 @@ The release passed 46 focused unit checks, 10 isolated browser checks and the fu
 - Marketing showed supported CAC, POAS, ROAS and contribution. A controlled comparison selection survived a tab change. Missing published customer activity stayed unavailable, with no substituted figures.
 - Plan loaded the reviewed August–October baseline and labelled its next-three-month scenario conditional. Unsupported repeat-customer modelling remained disabled. No draft was saved.
 - Mobile Plan had no body overflow at 390px. Navigation opened, Escape closed it and focus returned to Open navigation. Help opened from navigation and accurately described evidence and unavailable figures.
-- Legacy /margin-analysis reached /profit-engine and retained the anchor. **Its query string was dropped: follow-up required.** Do not claim complete query-preserving legacy acceptance.
+- Legacy /margin-analysis reached /profit-engine and retained the anchor. **Its query string was dropped: follow-up required.** Exact probe: /margin-analysis?acceptance=release#evidence became /profit-engine#evidence; expected /profit-engine?acceptance=release#evidence. The design lane owns the isolated fix; the deployed source is unchanged. Do not claim complete query-preserving legacy acceptance.
 - Captured browser error logs for Cash, Marketing and the navigation tab were empty. Health returned HTTP 200; unauthenticated reporting returned HTTP 401.
 
 ## Remaining boundaries and follow-up

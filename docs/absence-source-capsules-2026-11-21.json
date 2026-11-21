@@ -1,0 +1,91 @@
+{
+  "contract": "night-scout-absence-source-capsules-v1",
+  "preparedOn": "2026-11-21",
+  "repository": "PaulLantsbury/virtual-cfo",
+  "outputBranch": "codex/absence-closeout-20261121",
+  "publicationAuthorized": true,
+  "cloudLaunchConfirmed": false,
+  "cloudTaskId": null,
+  "operationalRoadmap": {
+    "branch": "codex/synthetic-company-20261105",
+    "path": "docs/roadmap-2026-11-21.md",
+    "instruction": "Fetch latest and record exact consulted revision; do not default to main or overwrite this branch."
+  },
+  "capsules": [
+    {
+      "name": "recorded-live-website",
+      "commit": "3eda388d534b820728172e0edb7ab9b51d0cc3ad",
+      "state": "recorded-live-and-signed-in-checked-with-limits",
+      "required": true
+    },
+    {
+      "name": "accepted-scout",
+      "commit": "5dd18ef2282db09a4f389fbc68c3701fbdcfc6cc",
+      "state": "owner-accepted-source-freeze",
+      "instruction": "Preserve page/model/styles; not a standalone deployment candidate."
+    },
+    {
+      "name": "corrected-hosted-receipt",
+      "commit": "1407e47299b6b10329d92a8227a82602f9e26ee2",
+      "path": "docs/hosted-release-receipt-2026-11-21.md",
+      "state": "published-documentation"
+    },
+    {
+      "name": "plan-cash-recovery",
+      "commit": "405c3eb19124c6f6a0641326b50a7267ad2381bb",
+      "state": "published-source-not-deployed",
+      "instruction": "Verify current roadmap and ancestry; preserve live selectors/Scout and avoid unnecessary inert-marker expansion."
+    },
+    {
+      "name": "customer-protocol-review",
+      "commit": "8fdf04824e21aa44b09e04709b08f118969cef6a",
+      "state": "recorded-published-source-review-verify-on-fetch",
+      "instruction": "Disposable source/tests only; not hosted publication or canonical arithmetic proof."
+    },
+    {
+      "name": "temporary-runtime-diagnostic",
+      "commitPrefix": "f978784",
+      "fullCommit": "f978784f98a05eedcc1e75d9977eb530ce0e7491",
+      "state": "published-source-only-not-hosted-approved",
+      "instruction": "Resolve and verify full object from current roadmap. Do not deploy/invoke/extend; fixed expiry is 2026-11-21T18:00:00Z."
+    },
+    {
+      "name": "temporary-runtime-client",
+      "commit": "81a6e9bc9610f988cc266fdecbdb0b2e6384f8de",
+      "state": "local-tested-owner-approved-conditional-staging-release-dispatched-not-yet-verified",
+      "instruction": "Local exact candidate+cleanup were owner-approved conditionally and publication/deployment is in progress. Read final latest operational roadmap/receipt; cloud may inspect publishedsource but cannot deploy/invoke or assume outcome.",
+      "cleanupCommit": "ee0d665463edc1a7d3d397c49b9e9474685a0549",
+      "sourceBranch": "codex/runtime-attestation-ui-20261121"
+    },
+    {
+      "name": "cash-query-function-race-test",
+      "commit": null,
+      "state": "published-source-capsule-not-yet-applied-to-cloud-candidate",
+      "path": "artifacts/virtual-cfo/src/lib/useReviewedCash.query-race.test.mjs",
+      "sha256": "dae319f66bf863158c3bab6c53b82a0cc215b92a217124651542ca2692268e9f",
+      "bytes": 7812,
+      "patchFile": "docs/absence-ready-capsules/cash-query-race.patch",
+      "instruction": "Hash-matching test patch is included in this seed. Original test passed on9500535; integrate only after compatible Plan/Cash source review and rerun against finalcandidate; no runtime change is implied."
+    },
+    {
+      "name": "meta-google-integration-implementation",
+      "commit": null,
+      "state": "unpublished-local-work-not-confirmed-transferred",
+      "recordedMockTests": {
+        "meta": 27,
+        "google": 42,
+        "total": 69
+      },
+      "instruction": "These are reported prior local results, not cloud rerun evidence. Use accessible published contracts or record the source gap; no credentials or provider calls."
+    }
+  ],
+  "excludedMaterials": [
+    "credentials, access/refresh tokens, cookies and browser sessions",
+    "account/member/store operational bindings and private inventories",
+    "raw database bodies, private row hashes and runtime configuration",
+    "provider transaction payloads and broad logs"
+  ],
+  "finishCondition": "Three finite waves completed; reviewed source, test/build receipts, scoped roadmap delta and all-stream handover produced; publish only after explicit branch permission; then stop.",
+  "draftPullRequestAuthorized": true,
+  "authorizationScope": "Reviewed source/tests/docs from three finite waves, single named branch, one draft PR, no merge or live operations"
+}

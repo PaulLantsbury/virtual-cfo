@@ -1,0 +1,3 @@
+# Cloud seed checkpoint — 21 November2026
+
+This seed preserves exact acceptedlive3eda application source. Additions are the owner-approved bounded programme/handover/manifest and a hash-verified fictional Cash regression patch; no application runtime is changed by this seed. Publication to this single branch and one draftPR for reviewed closeout work were explicitly approved by Paul in the PMchat. No merge/liveoperation/spend is approved. Task creation is requested but not yet confirmed; this commit is not evidence of cloudexecution. Read latest operationalroadmap for final localdiagnosticcleanup outcome. Apply capsules only after source compatibility review and execute tests on the final integratedcandidate.

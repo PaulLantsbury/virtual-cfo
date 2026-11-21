@@ -2,9 +2,9 @@
 
 ## Workstream validation and publication checkpoint
 
-Source-only validation: **22 Marketing/planning tests passed**, **55 existing Profit/history/supplement tests passed**, and **full workspace build passed**. The coordinator's final recheck is running; retain its actual outcome in the release record. These receipts are local source checks, not browser or hosted acceptance, and do not certify real provider integrations.
+Source-only validation: **22 Marketing/planning tests passed**, **55 existing Profit/history/supplement tests passed**, and **full workspace build passed**. The coordinator's final full workspace build/typecheck recheck also passed. Exact tested source tree: `9131fa1026063b588fd1a7509a7262a3e3040436`. These receipts are local source checks, not browser or hosted acceptance, and do not certify real provider integrations.
 
-Planned publication branch: `codex/yellow-connections-20261121`, based on cleanup revision `4ab7b6f`. Do not overwrite the operational handover or development work on another branch. Publication is not deployment.
+Published source branch: `codex/yellow-connections-20261121`, based on cleanup revision `4ab7b6f`. Do not overwrite the operational handover or development work on another branch. Publication is not deployment.
 
 Activation requires a concrete website-only review of the final tested revision, separately from any optional-summary refresh/data-publication package. Existing immutable summaries are preserved. Optional new customer aggregates need their own reviewed source/version/data publication before existing hosted months can expose them. No new hosted change is proposed or applied by this checkpoint; no database grant/schema/data, scheduler, provider or website configuration is changed.
 

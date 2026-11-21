@@ -22,6 +22,8 @@ export function useReviewedHistorySeries(history:ReturnType<typeof useReviewedHi
  const supported=enabled&&query.isSuccess&&!query.isFetching&&!query.isError;
  const status=!history.month?'idle':!enabled?'unavailable':query.isFetching?'loading':supported?'supported':'unavailable';
  return {months:supported?query.data:[],status:status as 'idle'|'loading'|'supported'|'unavailable',loading:enabled&&query.isFetching,
+  failureKind:(enabled&&query.isError&&!query.isFetching?'read-or-reconciliation':history.month&&!enabled?'coverage':null) as 'coverage'|'read-or-reconciliation'|null,
+  retryable:enabled&&query.isError&&!query.isFetching,
   error:status==='unavailable'?'Continuous reviewed monthly history is unavailable. No example figures have been substituted.':null,
   retry:()=>{if(enabled)void query.refetch();}};
 }

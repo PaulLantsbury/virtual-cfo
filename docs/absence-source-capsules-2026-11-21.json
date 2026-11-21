@@ -1,0 +1,108 @@
+{
+  "contract": "night-scout-absence-source-capsules-v1",
+  "preparedOn": "2026-11-21",
+  "repository": "PaulLantsbury/virtual-cfo",
+  "outputBranch": "codex/absence-closeout-20261121",
+  "publicationAuthorized": true,
+  "cloudLaunchConfirmed": true,
+  "cloudTaskId": null,
+  "operationalRoadmap": {
+    "branch": "codex/synthetic-company-20261105",
+    "path": "docs/roadmap-2026-11-21.md",
+    "instruction": "Fetch latest and record exact consulted revision; do not default to main or overwrite this branch.",
+    "consultedCommit": "08a5b88898d338afcb16793bc22e3645ee0c8101"
+  },
+  "capsules": [
+    {
+      "name": "recorded-live-website",
+      "commit": "3eda388d534b820728172e0edb7ab9b51d0cc3ad",
+      "state": "accepted-website-source-and-signed-in-baseline-superseded-by-source-equivalent-cleanup",
+      "required": true
+    },
+    {
+      "name": "accepted-scout",
+      "commit": "5dd18ef2282db09a4f389fbc68c3701fbdcfc6cc",
+      "state": "owner-accepted-source-freeze",
+      "instruction": "Preserve page/model/styles; not a standalone deployment candidate."
+    },
+    {
+      "name": "corrected-hosted-receipt",
+      "commit": "1407e47299b6b10329d92a8227a82602f9e26ee2",
+      "path": "docs/hosted-release-receipt-2026-11-21.md",
+      "state": "published-documentation"
+    },
+    {
+      "name": "plan-cash-recovery",
+      "commit": "405c3eb19124c6f6a0641326b50a7267ad2381bb",
+      "state": "published-source-compatible-plan-cash-paths-integrated-as-cloud-candidate",
+      "instruction": "Verify current roadmap and ancestry; preserve live selectors/Scout and avoid unnecessary inert-marker expansion."
+    },
+    {
+      "name": "customer-protocol-review",
+      "commit": "8fdf04824e21aa44b09e04709b08f118969cef6a",
+      "state": "published-capsule-verified-selected-disposable-paths-integrated",
+      "instruction": "Disposable source/tests only; not hosted publication or canonical arithmetic proof."
+    },
+    {
+      "name": "temporary-runtime-diagnostic",
+      "commitPrefix": "f978784",
+      "fullCommit": "f978784f98a05eedcc1e75d9977eb530ce0e7491",
+      "state": "published-source-only-for-this-commit-separate-client-operation-completed-and-removed",
+      "instruction": "Resolve and verify full object from current roadmap. Do not deploy/invoke/extend; fixed expiry is 2026-11-21T18:00:00Z."
+    },
+    {
+      "name": "temporary-runtime-client",
+      "commit": "81a6e9bc9610f988cc266fdecbdb0b2e6384f8de",
+      "state": "separate-local-operation-completed-and-verified-cleanup-live",
+      "instruction": "Recorded hosted evidence concerns the separately approved operation. Cloud performed source review only. Keep diagnostic code out of the final candidate tree.",
+      "cleanupCommit": "ee0d665463edc1a7d3d397c49b9e9474685a0549",
+      "sourceBranch": "codex/runtime-attestation-ui-20261121",
+      "publishedEnabledCommit": "f34d13d0662975b78c923877a2a0efe9d999763f",
+      "publishedCleanupCommit": "204226d0c796561d5bb812cde1bd9cec8da6a8d5",
+      "cleanupReceiptCommit": "5cbc35db69298a880617aded60785bff8eb9458b"
+    },
+    {
+      "name": "cash-query-function-race-test",
+      "commit": null,
+      "state": "hash-verified-integrated-and-rerun-on-cloud-candidate",
+      "path": "artifacts/virtual-cfo/src/lib/useReviewedCash.query-race.test.mjs",
+      "sha256": "dae319f66bf863158c3bab6c53b82a0cc215b92a217124651542ca2692268e9f",
+      "bytes": 7812,
+      "patchFile": "docs/absence-ready-capsules/cash-query-race.patch",
+      "instruction": "The exact hash-matching 7812-byte fixture was reviewed for compatibility and passed in the integrated Node suite. It exercises the actual query function with controlled fictional evidence."
+    },
+    {
+      "name": "meta-google-integration-implementation",
+      "commit": null,
+      "state": "unpublished-local-capsule-unavailable-to-cloud",
+      "recordedMockTests": {
+        "meta": 27,
+        "google": 42,
+        "total": 69
+      },
+      "instruction": "These are reported prior local results, not cloud rerun evidence. Use accessible published contracts or record the source gap; no credentials or provider calls."
+    },
+    {
+      "name": "published-provider-contracts",
+      "commit": "5dc41f0445a51dde4ebbbfbf62098c4b77279cc1",
+      "state": "published-offline-fact-contract-reviewed-and-amended",
+      "instruction": "Published normalized facts, app redaction and Xero mock evidence have separate scope from the missing Meta/Google runtime implementation."
+    }
+  ],
+  "excludedMaterials": [
+    "credentials, access/refresh tokens, cookies and browser sessions",
+    "account/member/store operational bindings and private inventories",
+    "raw database bodies, private row hashes and runtime configuration",
+    "provider transaction payloads and broad logs"
+  ],
+  "finishCondition": "Three finite waves completed; reviewed source, test/build receipts, scoped roadmap delta and all-stream handover produced; publish only after explicit branch permission; then stop.",
+  "draftPullRequestAuthorized": true,
+  "authorizationScope": "Reviewed source/tests/docs from three finite waves, single named branch, one draft PR, no merge or live operations",
+  "cloudTaskIdNote": "The departure roadmap records the managed execution. The private task link is retained by PM.",
+  "verifiedSeed": "56ecbac3dce05dd32481c54c4eae9c0b6cb986b8",
+  "testedCandidate": {
+    "commit": "c8b04003d986c4a7bf32dde954a22844e9a68f57",
+    "tree": "e8fd3262b1452958a961ac3e2cc4371a7d950771",
+    "scope": "Cloud source and disposable tests. The closeout document commit preserves the tested non-document tree."
+  }
+}

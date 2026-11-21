@@ -30,7 +30,10 @@ async function fixture(options,run){
    if(!item||url.searchParams.get('storeId')!==store||url.searchParams.get('versionId')!==item.month.selection.versionId)return json({state:'unavailable'},409);
    if(url.pathname==='/api/history-reporting')return json(item.response);
    if(url.pathname==='/api/supplemental-reporting'){
-    if(options.missingSupplement===item.month.selection.period.from)return json({state:'unavailable'},503);
+    if(options.failSupplementOnce===item.month.selection.period.from){
+     options.failSupplementOnce=null;
+     return json({state:'unavailable'},503);
+    }
     const payload=structuredClone(item.acquisition);if(options.legacy)delete payload.customerActivity;
     return json({contract:'reviewed-supplement-v1',state:'supported',kind:'acquisition',sourceBasis:'synthetic-local',snapshotId:'90000000-0000-4000-8000-000000000001',financialVersionId:item.month.selection.versionId,salesRevision:item.response.salesRevision,costRevision:item.response.costRevision,scope:payload.scope,observedAt:'2026-11-20T12:00:00Z',payload});
    }
@@ -58,9 +61,21 @@ test('DISPOSABLE: Marketing exact earlier-month comparison and legacy optional a
  assert.ok(await page.getByRole('region',{name:'Reviewed customer activity comparison'}).count());
  assert.ok(await page.locator('body').evaluate(el=>el.scrollWidth<=innerWidth+1),'390px has no page overflow');
 }));
-test('DISPOSABLE: Plan needs all three supplements; never substitutes sample baseline',async()=>fixture({missingSupplement:'2025-02-01'},async page=>{
+test('DISPOSABLE: Plan discloses a failed constituent and restores the baseline after retry',async()=>fixture({failSupplementOnce:'2025-02-01'},async page=>{
  await page.goto(origin+'/plan');await page.getByLabel('Plan reviewed month',{exact:true}).selectOption('2025-03-01');await page.getByLabel('Plan evidence version',{exact:true}).selectOption('version-2');
- await page.getByRole('heading',{name:'Plan baseline unavailable'}).waitFor();assert.equal(await page.getByLabel('Bring existing customers back',{exact:false}).count(),0);
+ const failure=page.getByRole('alert').filter({hasText:'A matched acquisition source could not be read.'});
+ await failure.waitFor();
+ assert.equal(await page.getByLabel('Bring existing customers back',{exact:false}).count(),0);
+ const evidence=page.locator('#plan-evidence');
+ await evidence.getByText('Explore the Numbers · baseline sources and recovery',{exact:true}).click();
+ const sourceRow=evidence.getByRole('row').filter({hasText:'2025-02-01–2025-02-28'});
+ await sourceRow.getByText('Accepted financial month',{exact:true}).waitFor();
+ await sourceRow.getByText('The matched acquisition source could not be read.',{exact:false}).waitFor();
+ assert.ok(await page.locator('body').evaluate(el=>el.scrollWidth<=innerWidth+1),'390px has no page overflow with source evidence expanded');
+ await failure.getByRole('button',{name:'Retry acquisition sources'}).click();
+ const repeat=page.getByRole('checkbox',{name:'Bring existing customers back'});
+ await repeat.waitFor();
+ assert.equal(await repeat.isDisabled(),true);
 }));
 test('DISPOSABLE: Plan preserves paid-first population and blocks unsupported repeat lever',async()=>fixture({},async page=>{
  await page.goto(origin+'/plan');await page.getByLabel('Plan reviewed month',{exact:true}).selectOption('2025-03-01');await page.getByLabel('Plan evidence version',{exact:true}).selectOption('version-2');
@@ -122,7 +137,7 @@ test('DISPOSABLE: Marketing receives current link context only; comparison remai
 }));
 test('DISPOSABLE: Plan and explicit fictional Profit mode cannot inherit a verified URL baseline',async()=>fixture({},async page=>{
  await page.goto(origin+'/plan?'+handoff());await page.getByLabel('Plan reviewed month',{exact:true}).locator('option[value="2025-03-01"]').waitFor({state:'attached'});assert.equal(await page.getByLabel('Plan reviewed month',{exact:true}).inputValue(),'');
- await page.getByRole('heading',{name:'Plan baseline unavailable'}).waitFor();
+ await page.getByRole('heading',{name:'Choose the historical baseline ending month.'}).waitFor();
  await page.goto(origin+'/profit-engine?'+handoff());await expectValue(page,'Reporting month','2025-03-01');
  const sample=page.getByRole('button',{name:/sample/i}).first();await sample.click();await page.locator('.np-sample-unlinked').waitFor();
  assert.equal(await control(page,'Reporting month').count(),0,'Explicit sample mode has no reviewed reporting selector');await page.getByText('Sample nonnegative flows only.',{exact:false}).first().waitFor();

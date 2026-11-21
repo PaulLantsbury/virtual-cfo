@@ -2,7 +2,7 @@
 
 ## Workstream validation and publication checkpoint
 
-Source-only validation: **22 Marketing/planning tests passed**, **55 existing Profit/history/supplement tests passed**, and **full workspace build passed**. The coordinator's final full workspace build/typecheck recheck also passed. Exact tested source tree: `9131fa1026063b588fd1a7509a7262a3e3040436`. These receipts are local source checks, not browser or hosted acceptance, and do not certify real provider integrations.
+Source-only validation: **22 Marketing/planning tests passed**, **55 existing Profit/history/supplement tests passed**, and **full workspace build passed**. The coordinator's final full workspace build/typecheck recheck passed. These receipts are local source checks, not browser or hosted acceptance, and do not certify real provider integrations.
 
 Published source branch: `codex/yellow-connections-20261121`, based on cleanup revision `4ab7b6f`. Do not overwrite the operational handover or development work on another branch. Publication is not deployment.
 
@@ -67,3 +67,9 @@ Plan baseline integration must distinguish paid first customers from repeat orde
 For each changed family record exact source scope, period/version, unit/denominator, formula, rounding and missing/loading/stale/invalidated handling. Supported derived values use ordinary styling; unsupported/example figures retain yellow plus clear text. Assumptions are labelled inputs, not database defects. Source completeness and schema existence are separate checks.
 
 No database schema/data/grant, provider transaction, scheduler or deployment change is performed by this register. A proposed new field means a missing accepted contract/payload unless live schema inspection proves physical absence. Prepared customer aggregates and refreshed summaries require an exact reviewed data/version package. Do not reuse earlier exact-revision deployment approvals for a different package.
+
+## Read-only operational check — 21 November
+
+The genuine scheduled run published 20 November at 02:01 UTC on 21 November. Render application logs report committed-reconciled with replay false; an independent restricted read-only inspection at 13:57 UTC confirmed both 19 and 20 November receipts committed-reconciled and the programme horizon through 20 November. The 01:00 run correctly reported outside the London window with no mutation. No manual trigger, append, retry or catch-up was performed. This confirms scheduled publication and receipt reconciliation, not browser acceptance or refresh of optional monthly customer/cash summaries.
+
+Render read-only deployment inspection still shows the website on the previously verified b7ea4913 source, with automatic website deploys off. The published yellow-connection source is not live. The exact website proposal and separate source-activation preparation are workstream documents; PM owns cross-stream integration and the operational roadmap.

@@ -44,3 +44,22 @@ test('rejects missing, duplicate, overlapping or altered inventories and incompl
   const proposal = prepareSummaryRefreshProposal({ observedThroughLondon: '2026-12-02', existingRows: rows, verifiedMonths: [incomplete] });
   assert.equal(proposal.candidates[0].eligible, false);
 });
+
+test('rejects malformed financial-version proof and duplicate month evidence instead of accepting a first match', () => {
+ const args={observedThroughLondon:'2027-01-02',existingRows:existingRows()};
+ for(const financialVersionId of ['-'.repeat(36),'a'.repeat(36),'00000000000040008000000000000001','00000000-0000-4000-8000-00000000000g']){
+  assert.throws(()=>prepareSummaryRefreshProposal({...args,verifiedMonths:[{...receipt('2026-11'),financialVersionId}]}),/financial|evidence/i);
+ }
+ assert.throws(()=>prepareSummaryRefreshProposal({...args,verifiedMonths:[receipt('2026-11'),receipt('2026-11')]}),/Duplicate verified month/);
+ assert.throws(()=>prepareSummaryRefreshProposal({...args,verifiedMonths:[receipt('2026-11'),{...receipt('2026-11'),genuineScheduledReceipt:false}]}),/Duplicate verified month/);
+ for(const proof of [null,{...receipt('2026-11'),month:'2026-13'},{...receipt('2026-11'),completeCoverage:'true'},{...receipt('2026-11'),salesRevision:'bad'}])assert.throws(()=>prepareSummaryRefreshProposal({...args,verifiedMonths:[proof]}),/evidence|financial/i);
+});
+
+test('missing or unverified predecessor blocks later closed months; only a fully verified contiguous prefix is eligible', () => {
+ const args={observedThroughLondon:'2027-02-02',existingRows:existingRows()};
+ for(const verifiedMonths of [[receipt('2026-12'),receipt('2027-01')],[{...receipt('2026-11'),genuineScheduledReceipt:false},receipt('2026-12'),receipt('2027-01')]]){
+  const p=prepareSummaryRefreshProposal({...args,verifiedMonths});assert.deepEqual(p.candidates.map(c=>c.eligible),[false,false,false]);assert.match(p.candidates[1].reason,/preceding|contiguous/i);
+ }
+ const gap=prepareSummaryRefreshProposal({...args,verifiedMonths:[receipt('2026-11'),receipt('2027-01')]});assert.deepEqual(gap.candidates.map(c=>c.eligible),[true,false,false]);
+ const ready=prepareSummaryRefreshProposal({...args,verifiedMonths:[receipt('2026-11'),receipt('2026-12'),receipt('2027-01')]});assert.deepEqual(ready.candidates.map(c=>c.eligible),[true,true,true]);assert.equal(ready.existingRowsProtected.rows,48);assert.equal(ready.existingRowsProtected.updateAllowed,false);
+});

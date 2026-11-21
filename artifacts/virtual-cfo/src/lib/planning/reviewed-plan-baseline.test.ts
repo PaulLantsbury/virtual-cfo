@@ -24,7 +24,7 @@ function fixture(from: string, index: number) {
     financial: { snapshotId: selection.versionId, edition: HISTORY_EDITION, anchor, salesRevision: response.salesRevision, costRevision: response.costRevision, formulaVersion: response.metadata.formulaVersion },
     source: { from: '2024-01-01', through: to, sourceHash: sha(String(index + 7)), ordersHash: sha(String(index + 8)), refundsHash: sha(String(index + 9)), allocationHash: sha(String(index + 10)), synthetic: true },
     coverage: { originalOrders: response.sales.originalOrders, identifiedFirstOrders: response.sales.originalOrders - 3, identifiedRepeatOrders: 1, guestOrders: 1, unknownOrders: 1, paidFirstCustomers: 4 },
-    customerActivity: { contract: 'synthetic-customer-activity-v1', policy: 'synthetic-identity-and-spend-v1', scope: { from, to }, identifiedCustomers: 7, uniqueReturningCustomers: 1,
+    customerActivity: { contract: 'synthetic-customer-activity-v1', policy: 'synthetic-identity-and-spend-v1', scope: { from, to }, identifiedCustomers: response.sales.originalOrders - 3, uniqueReturningCustomers: 1,
       identifiedOrders: response.sales.originalOrders - 2, sourceHash: sha(String(index + 8)), basis: 'Distinct synthetic customer identifiers.' },
     spend: { advertising: 500 + index * 100, acquisition: 200, retention: 200, unallocated: 100 + index * 100 },
     revenue: { netProductSales: 9000, identifiedFirst: 5000, identifiedRepeat: 2000, guest: 1000, unknown: 1000 },

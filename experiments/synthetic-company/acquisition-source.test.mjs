@@ -57,7 +57,7 @@ test('legacy published acquisition summaries remain valid without the newer cust
  assert.ok(view);assert.equal(view.customerActivityView,null);assert.equal(validateAcquisitionPayload(legacy,financial()),true);
 });
 test('zero paid first customers means unavailable CAC, never infinity or fixture replacement',()=>{
- const p=summary();p.coverage.identifiedFirstOrders-=p.coverage.paidFirstCustomers;p.coverage.identifiedRepeatOrders+=p.coverage.paidFirstCustomers;p.coverage.paidFirstCustomers=0;
+ const p=summary();p.coverage.paidFirstCustomers=0; // Identified first orders can remain organic/email rather than paid.
  p.spend.retention+=p.spend.acquisition;p.spend.acquisition=0;p.metrics.cac=null;
  assert.equal(validateAcquisitionPayload(p,financial()),true);
  p.metrics.cac=0;assert.equal(validateAcquisitionPayload(p,financial()),false);
@@ -83,4 +83,34 @@ test('simulated analytics counts have exact session/order links, daily coverage 
  assert.equal(view.funnel.checkoutCompletion,p.analytics.totals.purchasingSessions/p.analytics.totals.checkoutSessions);
  for(const change of [p=>p.analytics.daily.pop(),p=>p.analytics.daily[0].date='2024-02-02',p=>p.analytics.daily[0].purchasingSessions=p.analytics.daily[0].orders+1,p=>p.analytics.totals.sessions++,p=>p.analytics.policy='provider-events',p=>p.analytics.coverage.complete=false]){const broken=structuredClone(p);change(broken);assert.equal(validateAcquisitionPayload(broken,financial()),false);}
  const noAnalytics=structuredClone(p);delete noAnalytics.analytics;assert.equal(validateAcquisitionPayload(noAnalytics,financial()),true);assert.equal(acquisitionView(noAnalytics,financial()).funnel,null);
+});
+
+test('customer frequency refuses impossible unique populations instead of displaying an invented rate',()=>{
+ const valid=summary(),first=valid.coverage.identifiedFirstOrders,repeat=valid.coverage.identifiedRepeatOrders;
+ assert.ok(first>1&&repeat>0);
+ for(const change of [
+  p=>{p.customerActivity.identifiedCustomers=1;p.customerActivity.uniqueReturningCustomers=0;},
+  p=>{p.customerActivity.identifiedCustomers=0;p.customerActivity.uniqueReturningCustomers=0;},
+  p=>p.customerActivity.identifiedCustomers=first-1,
+  p=>p.customerActivity.uniqueReturningCustomers=repeat+1,
+  p=>p.customerActivity.identifiedCustomers=first+p.customerActivity.uniqueReturningCustomers+1,
+  p=>p.customerActivity.uniqueReturningCustomers=0,
+ ]){const invalid=structuredClone(valid);change(invalid);assert.equal(validateAcquisitionPayload(invalid,financial()),false);assert.equal(acquisitionView(invalid,financial()),null);}
+ for(const customerActivity of [null,[],0,'missing',{}]){
+  assert.doesNotThrow(()=>validateAcquisitionPayload({...valid,customerActivity},financial()));
+  assert.equal(validateAcquisitionPayload({...valid,customerActivity},financial()),false);
+ }
+});
+test('valid overlap, first-only and repeat-only customer populations retain their distinct denominators',()=>{
+ const overlap=summary();overlap.customerActivity.identifiedCustomers=overlap.coverage.identifiedFirstOrders;
+ assert.ok(overlap.customerActivity.uniqueReturningCustomers<=overlap.customerActivity.identifiedCustomers);
+ assert.equal(validateAcquisitionPayload(overlap,financial()),true,'A first-time customer can also place a repeat order in the same month');
+ const firstOnly=summary(),orders=firstOnly.customerActivity.identifiedOrders;
+ firstOnly.coverage.identifiedFirstOrders=orders;firstOnly.coverage.identifiedRepeatOrders=0;
+ firstOnly.customerActivity.identifiedCustomers=orders;firstOnly.customerActivity.uniqueReturningCustomers=0;
+ assert.equal(validateAcquisitionPayload(firstOnly,financial()),true);assert.equal(acquisitionView(firstOnly,financial()).customerActivityView.purchaseFrequency,1);
+ const repeatOnly=summary();repeatOnly.coverage.identifiedFirstOrders=0;repeatOnly.coverage.identifiedRepeatOrders=orders;repeatOnly.coverage.paidFirstCustomers=0;
+ repeatOnly.spend.retention+=repeatOnly.spend.acquisition;repeatOnly.spend.acquisition=0;
+ repeatOnly.customerActivity.identifiedCustomers=100;repeatOnly.customerActivity.uniqueReturningCustomers=100;
+ assert.equal(validateAcquisitionPayload(repeatOnly,financial()),true);assert.equal(acquisitionView(repeatOnly,financial()).customerActivityView.purchaseFrequency,orders/100);
 });

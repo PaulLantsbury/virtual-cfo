@@ -1,6 +1,7 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+import test from 'node:test';import {createHash} from 'node:crypto';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
 import {setup,sql,U} from '../shopify/finance-fixture.mjs';
 import {checkDemoReaderForWriter} from './demo-reader-activation-check.mjs';
+const FIXTURE_AT='2026-10-30T12:00:00Z';
 const proposal=readFileSync(new URL('../../db-migrations/proposals/xero-demo-isolation-2026-10-30.sql',import.meta.url),'utf8');
 const original='56d92f8a-746e-4b4f-b408-81fc98c4aa17',demo='f59e3a44-7106-4df8-9c08-52da30c9de30',legacyConnection='30000000-0000-4000-8000-000000000001',connection='30000000-0000-4000-8000-000000000002',tenant='40000000-0000-4000-8000-000000000002';
 const accounts=['Revenue','Fees','Ads','Software','Cash','Revenue'].map((accountName,i)=>({accountId:`70000000-0000-4000-8000-00000000000${i+1}`,accountName,accountType:i===0||i===5?'REVENUE':i===4?'BANK':'EXPENSE',accountStatus:'ACTIVE'}));
@@ -10,7 +11,7 @@ const migrate=name=>sql('staging/'+name);
 // restore this disposable database's initial administrator between role exercises.
 async function admin(db){await db.exec('SET SESSION AUTHORIZATION postgres;RESET ROLE');}
 async function as(db,login,service){await admin(db);await db.exec(`SET SESSION AUTHORIZATION ${login}`);if(service)await db.exec(`SET ROLE ${service}`);}
-async function fixture({apply=true,proposalSql=proposal,fixtureClock=false}={}){
+async function fixture({apply=true,proposalSql=proposal,fixtureClock=true,advanceClock=true}={}){
  const {db}=await setup();
  await db.exec(sql('proposals/shopify-intake-2026-09-17.sql'));await db.query('INSERT INTO public.store_memberships VALUES($1,$2)',[U,original]);
  await db.exec('CREATE ROLE night_scout_import_login LOGIN NOINHERIT CONNECTION LIMIT 1 PASSWORD NULL;CREATE ROLE night_scout_test_writer LOGIN NOINHERIT;CREATE ROLE night_scout_test_writer_service NOLOGIN NOINHERIT;');
@@ -18,7 +19,27 @@ async function fixture({apply=true,proposalSql=proposal,fixtureClock=false}={}){
  await as(db,'night_scout_xero_bootstrap_login');
  const oldReceipt=(await db.query('SELECT * FROM xero_v1.bootstrap_create_initial_connection($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)',[legacyConnection,original,'legacy-real-reader-tenant',U,'2026-09-01',new Date().toISOString(),JSON.stringify(accounts),JSON.stringify(mapping),Buffer.alloc(32,1),Buffer.alloc(32,2),'legacy-key','AES-256-GCM'])).rows[0];
  await admin(db);
- if(fixtureClock)await db.exec("CREATE TABLE public.demo_fixture_time(at timestamptz);INSERT INTO public.demo_fixture_time VALUES(clock_timestamp());CREATE FUNCTION public.demo_fixture_clock() RETURNS timestamptz LANGUAGE sql AS $$SELECT at FROM public.demo_fixture_time$$;");
+ if(fixtureClock){
+  // Only this newly created disposable database sees substituted clocks. Keep the
+  // original reader SQL and the production proposal bytes unchanged. Advancing
+  // one millisecond per statement preserves audit ordering without wall time.
+  await db.exec("CREATE TABLE public.demo_fixture_time(at timestamptz);INSERT INTO public.demo_fixture_time VALUES('"+FIXTURE_AT+"');CREATE FUNCTION public.demo_fixture_clock() RETURNS timestamptz LANGUAGE sql SECURITY DEFINER SET search_path=pg_catalog AS $$SELECT at FROM public.demo_fixture_time$$;CREATE FUNCTION public.demo_fixture_tick() RETURNS void LANGUAGE sql SECURITY DEFINER SET search_path=pg_catalog AS $$UPDATE public.demo_fixture_time SET at=at+interval '1 millisecond'$$;");
+  const exec=db.exec.bind(db),query=db.query.bind(db);
+  const clocked=text=>text.replace(/\bclock_timestamp\(\)/gi,'public.demo_fixture_clock()').replace(/\bnow\(\)/gi,'public.demo_fixture_clock()').replace(/\bcurrent_date\b/gi,"(public.demo_fixture_clock() AT TIME ZONE 'Europe/London')::date");
+  let readOnly=false;
+  const run=async(method,text,args)=>{
+   const end=/^\s*(?:ROLLBACK|COMMIT)\b/i.test(text);
+   // Keep the activation check genuinely READ ONLY: advance before its BEGIN,
+   // never by writing the fixture clock inside its read-only transaction.
+   if(advanceClock&&!readOnly&&!end)await query('SELECT public.demo_fixture_tick()');
+   const result=await method(clocked(text),...args);
+   if(/^\s*BEGIN\b[\s\S]*\bREAD\s+ONLY\b/i.test(text))readOnly=true;
+   if(end)readOnly=false;
+   return result;
+  };
+  db.exec=(text,...args)=>run(exec,text,args);
+  db.query=(text,...args)=>run(query,text,args);
+ }
  if(apply)await db.exec(proposalSql);
  async function bootstrap({receiptOverride={},paramsOverride={},source=true}={}){
   const observedAt=fixtureClock?(await db.query('SELECT at FROM public.demo_fixture_time')).rows[0].at.toISOString():new Date().toISOString();
@@ -52,7 +73,7 @@ test('one-shot installs only isolated store/schema/roles; old global reader sele
 
 test('bootstrap demands fresh actual-source metadata binding, sole owner and exact demo scope; failure creates no partial connection',async()=>{
  const f=await fixture();try{
-  for(const input of [{source:false},{receiptOverride:{isDemoCompany:false}},{receiptOverride:{baseCurrency:'USD'}},{receiptOverride:{tenantId:'40000000-0000-4000-8000-000000000009'}},{receiptOverride:{observedAt:new Date(Date.now()-3600000).toISOString()}},{receiptOverride:{observedAt:new Date(Date.now()+60000).toISOString()}},{paramsOverride:{storeId:original}},{paramsOverride:{ownerId:'80000000-0000-4000-8000-000000000009'}},{paramsOverride:{mapping:mapping.slice(0,4)}},{paramsOverride:{retrievedAt:new Date(Date.now()-3600000).toISOString()}},{paramsOverride:{accounts:accounts.map((a,i)=>i===0?{...a,accountType:'EXPENSE'}:a)}},{paramsOverride:{accounts:accounts.map(a=>({...a,accountStatus:'ARCHIVED'}))}}]){
+  for(const input of [{source:false},{receiptOverride:{isDemoCompany:false}},{receiptOverride:{baseCurrency:'USD'}},{receiptOverride:{tenantId:'40000000-0000-4000-8000-000000000009'}},{receiptOverride:{observedAt:new Date(Date.parse(FIXTURE_AT)-3600000).toISOString()}},{receiptOverride:{observedAt:new Date(Date.parse(FIXTURE_AT)+60000).toISOString()}},{paramsOverride:{storeId:original}},{paramsOverride:{ownerId:'80000000-0000-4000-8000-000000000009'}},{paramsOverride:{mapping:mapping.slice(0,4)}},{paramsOverride:{retrievedAt:new Date(Date.parse(FIXTURE_AT)-3600000).toISOString()}},{paramsOverride:{accounts:accounts.map((a,i)=>i===0?{...a,accountType:'EXPENSE'}:a)}},{paramsOverride:{accounts:accounts.map(a=>({...a,accountStatus:'ARCHIVED'}))}}]){
    await assert.rejects(f.bootstrap(input));assert.equal((await f.db.query('SELECT count(*)::int n FROM xero_demo_v1.connections')).rows[0].n,0);
   }
   await f.bootstrap();await assert.rejects(f.bootstrap(),/already exists/);assert.equal((await f.db.query('SELECT count(*)::int n FROM xero_demo_v1.connections')).rows[0].n,1);
@@ -166,4 +187,22 @@ test('bounded intake refuses expired jobs/setup but preserves historical reads a
   const results=await f.db.exec(verification);const rows=results.flatMap(r=>r.rows??[]);
   assert.equal(rows.length,1);for(const [key,value] of Object.entries(rows[0]))assert.equal(value,true,key);
  }finally{await f.db.exec('ROLLBACK');await f.close();}
+});
+
+
+test('fixture time cannot weaken the shipped expiry guard; exact opening and closing trial boundaries remain enforced',async()=>{
+ assert.equal(createHash('sha256').update(proposal).digest('hex'),'8defc45f48ec15b3e7d10b4d113e34c38f7306633f921ff90f9bb26a9d74abc1','Reviewed production proposal bytes remain unchanged');
+ assert.match(proposal,/IF clock_timestamp\(\)>='2026-11-06T03:00:00Z'::timestamptz/);
+ assert.doesNotMatch(proposal,/demo_fixture_clock|demo_fixture_tick/);
+ const f=await fixture({advanceClock:false});try{
+  await f.db.exec("UPDATE public.demo_fixture_time SET at='2026-10-29T23:59:00Z'");
+  await assert.rejects(f.bootstrap(),/outside approved window/);
+  assert.equal((await f.db.query('SELECT count(*)::int n FROM xero_demo_v1.connections')).rows[0].n,0);
+  await f.db.exec("UPDATE public.demo_fixture_time SET at='2026-10-30T00:00:00Z'");
+  const receipt=await f.bootstrap();assert.equal(receipt.connection_id,connection);
+  assert.equal((await f.db.query('SELECT at FROM public.demo_fixture_time')).rows[0].at.toISOString(),'2026-10-30T00:00:00.000Z');
+  await f.db.exec("UPDATE public.demo_fixture_time SET at='2026-11-06T03:00:00Z'");
+  await assert.rejects(f.bootstrap(),/outside approved window/);
+  assert.equal((await f.db.query('SELECT at FROM public.demo_fixture_time')).rows[0].at.toISOString(),'2026-11-06T03:00:00.000Z');
+ }finally{await f.close();}
 });

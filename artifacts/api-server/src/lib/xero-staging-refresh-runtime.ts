@@ -14,7 +14,7 @@ export type XeroRefreshScope={from:string;to:string;currency:string;closedPeriod
 export type XeroRefreshJob={connection:XeroRefreshConnection;scope:XeroRefreshScope;mapping:Record<string,unknown>};
 export type XeroRefreshCredentialPort={
   /** A worker-only port. It must acquire/rotate credentials internally and must never return token material. */
-  readSnapshot(input:{connectionId:string;tenantId:string;date:string}):Promise<unknown>;
+  readSnapshot(input:{connectionId:string;tenantId:string;from:string;to:string}):Promise<unknown>;
 };
 export type XeroRefreshPersistencePort={writeSupported(input:unknown):Promise<void>;writeFailure(input:unknown):Promise<void>};
 export type XeroStagingRefreshDependencies={credentials:XeroRefreshCredentialPort;persistence:XeroRefreshPersistencePort;now?:()=>string};
@@ -40,7 +40,7 @@ export function createXeroStagingRefreshRuntime(env:NodeJS.ProcessEnv,dependenci
   return Object.freeze({
     async run(job:XeroRefreshJob){
       // Do not hand OAuth material to the orchestrator or persistence layer.
-      const readSnapshot=(input:{tenantId:string;date:string})=>dependencies.credentials.readSnapshot({connectionId:job.connection.id,...input});
+      const readSnapshot=(input:{tenantId:string;from:string;to:string})=>dependencies.credentials.readSnapshot({connectionId:job.connection.id,...input});
       return runStagingXeroRefresh({connection:job.connection,scope:job.scope,mapping:job.mapping,readSnapshot,persist:dependencies.persistence,now});
     },
   });

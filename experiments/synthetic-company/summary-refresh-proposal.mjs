@@ -1,7 +1,7 @@
 /** Offline, fail-closed eligibility plan for future Cash/Acquisition summaries. */
 const EXPECTED = Object.freeze({ from: '2024-11', through: '2026-10', months: 24, kinds: ['cash', 'acquisition'] });
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
-const validMonth = value => /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
+const validMonth = value => typeof value === 'string' && /^\d{4}-(0[1-9]|1[0-2])$/.test(value);
 const nextMonth = value => {
   const [year, month] = value.split('-').map(Number);
   return new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 7);
@@ -18,7 +18,9 @@ function expectedHistory() {
  * `existingRows` is a sanitized inventory of keys only, never source payloads.
  * A month becomes eligible only from supplied verified scheduled receipts plus
  * an exact supported monthly financial version. This planner never compiles,
- * writes, updates, invalidates, or publishes records.
+ * writes, updates, invalidates, or publishes records. Supplied month entries
+ * require complete typed proof headers; omit missing evidence rather than
+ * inserting placeholder version IDs. Later eligibility cannot cross a gap.
  */
 export function prepareSummaryRefreshProposal({
   observedThroughLondon,
@@ -39,6 +41,19 @@ export function prepareSummaryRefreshProposal({
   assert(expected.every(month => EXPECTED.kinds.every(kind => actual.has(`${month}:${kind}`))), 'Existing summary inventory differs from the immutable November 2024–October 2026 set');
   assert(actual.size === expected.length * EXPECTED.kinds.length && [...actual].every(key => expected.includes(key.split(':')[0])), 'Existing summary inventory includes an unexpected month');
   assert(Array.isArray(verifiedMonths), 'Verified month evidence must be an array');
+  const verifiedByMonth = new Map();
+  for (const evidence of verifiedMonths) {
+    assert(evidence && typeof evidence === 'object' && !Array.isArray(evidence) && validMonth(evidence.month)
+      && typeof evidence.state === 'string' && evidence.state.trim().length > 0
+      && ['genuineScheduledReceipt', 'completeCoverage', 'supportedFinancialVersion'].every(key => typeof evidence[key] === 'boolean'),
+    'Malformed verified month evidence');
+    assert(!verifiedByMonth.has(evidence.month), 'Duplicate verified month evidence');
+    assert(typeof evidence.financialVersionId === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(evidence.financialVersionId)
+      && typeof evidence.salesRevision === 'string' && /^[a-f0-9]{64}$/.test(evidence.salesRevision)
+      && typeof evidence.costRevision === 'string' && /^[a-f0-9]{64}$/.test(evidence.costRevision),
+    'Exact financial version and revisions required in verified month evidence');
+    verifiedByMonth.set(evidence.month, evidence);
+  }
 
   const nextUnpublishedMonth = nextMonth(EXPECTED.through);
   // The latest complete calendar month is always the month before the
@@ -47,16 +62,21 @@ export function prepareSummaryRefreshProposal({
   const [y, m] = observedMonth.split('-').map(Number);
   const completeThrough = new Date(Date.UTC(y, m - 2, 1)).toISOString().slice(0, 7);
   const candidates = [];
+  let predecessorsVerified = true;
   for (let month = nextUnpublishedMonth; month <= completeThrough; month = nextMonth(month)) {
-    const evidence = verifiedMonths.find(item => item?.month === month);
+    const evidence = verifiedByMonth.get(month);
     const verified = !!evidence && evidence.state === 'verified' && evidence.genuineScheduledReceipt === true
       && evidence.completeCoverage === true && evidence.supportedFinancialVersion === true
-      && /^[a-f0-9-]{36}$/i.test(evidence.financialVersionId ?? '')
+      && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(evidence.financialVersionId ?? '')
       && /^[a-f0-9]{64}$/.test(evidence.salesRevision ?? '')
       && /^[a-f0-9]{64}$/.test(evidence.costRevision ?? '');
-    candidates.push({ month, to: monthEnd(month), eligible: verified, reason: verified
+    const eligible = predecessorsVerified && verified;
+    candidates.push({ month, to: monthEnd(month), eligible, reason: !predecessorsVerified
+      ? 'Waiting for preceding unpublished months to be verified; append only a contiguous prefix.'
+      : verified
       ? 'Closed month has verified scheduled receipt and exact supported financial version.'
       : 'Waiting for a closed month, genuine scheduled receipt readback, complete coverage, and exact supported financial version.' });
+    predecessorsVerified = eligible;
   }
   return Object.freeze({
     contract: 'synthetic-summary-refresh-proposal-v1',

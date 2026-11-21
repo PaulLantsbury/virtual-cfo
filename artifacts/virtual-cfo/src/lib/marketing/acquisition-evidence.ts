@@ -67,6 +67,12 @@ export function acquisitionView(payload: unknown, financial: unknown): (Acquisit
     ||!keys(activity.scope,['from','to'])||activity.scope.from!==scope.from||activity.scope.to!==scope.to
     ||!count(activity.identifiedCustomers)||!count(activity.uniqueReturningCustomers)||activity.uniqueReturningCustomers>activity.identifiedCustomers
     ||!count(activity.identifiedOrders)||activity.identifiedOrders!==c.identifiedFirstOrders+c.identifiedRepeatOrders
+    // Distinct first-order customers and customers with a repeat order form a possibly overlapping union.
+    // Order counts are not customer counts, but every identified first order has its own first customer.
+    ||activity.identifiedCustomers<c.identifiedFirstOrders||activity.uniqueReturningCustomers>c.identifiedRepeatOrders
+    ||BigInt(activity.identifiedCustomers)>BigInt(c.identifiedFirstOrders)+BigInt(activity.uniqueReturningCustomers)
+    ||(activity.uniqueReturningCustomers===0)!==(c.identifiedRepeatOrders===0)
+    ||(activity.identifiedCustomers===0)!==(activity.identifiedOrders===0)
     ||activity.identifiedCustomers>activity.identifiedOrders||activity.sourceHash!==source.ordersHash||!sha(activity.sourceHash)
     ||typeof activity.basis!=='string'||!activity.basis.startsWith('Distinct synthetic customer identifiers')||activity.basis.length>500))return null;
   if (!['advertising','acquisition','retention','unallocated'].every(key=>count(s[key])) || !count(financial.components.advertising)

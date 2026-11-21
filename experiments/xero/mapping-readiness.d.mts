@@ -1,0 +1,2 @@
+export type XeroMappingReadiness=Readonly<{available:true;reason:null;shopifyComparison:'not_requested'}>|Readonly<{available:false;reason:'account_directory_unavailable'|'account_mapping_incomplete'|'mapped_account_missing'|'mapped_account_inactive'|'mapped_account_wrong_type';shopifyComparison:'not_requested'}>;
+export function assessXeroMappingReadiness(input?:{accounts?:unknown;mapping?:unknown}):XeroMappingReadiness;

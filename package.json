@@ -9,6 +9,8 @@
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck",
+    "test:synthetic-company": "node --experimental-strip-types --test --test-concurrency=1 --test-timeout=300000 experiments/synthetic-company/*.test.mjs",
+    "test:xero": "node --experimental-strip-types --test --test-concurrency=1 --test-timeout=300000 experiments/xero/*.test.mjs",
     "test:baseline": "node --experimental-strip-types --test artifacts/virtual-cfo/src/lib/analytics/*.test.ts",
     "test:profit-evidence": "node --test experiments/financial-v1/profit-evidence*.test.mjs",
     "test:financial": "node --test experiments/financial-v1/calculations.test.mjs",

@@ -69,8 +69,8 @@ const ATTENTION_ITEMS: AttentionItem[] = [
     freeTitle: "Pricing needs attention",
     why: "Promotion reliance is still the highest-priority pressure on contribution quality.",
     trend: "Worsening",
-    page: "Review Opportunity Finder",
-    href: "/profit-opportunities",
+    page: "Review Plan",
+    href: "/plan",
     tone: "red",
   },
   {
@@ -78,8 +78,8 @@ const ATTENTION_ITEMS: AttentionItem[] = [
     freeTitle: "Marketing efficiency needs attention",
     why: "Paid acquisition is not yet showing enough improvement against the current plan.",
     trend: "Worsening",
-    page: "Review Marketing Efficiency",
-    href: "/marketing-efficiency",
+    page: "Review Growth & Marketing",
+    href: "/new-marketing?tab=acquisition",
     tone: "amber",
   },
   {
@@ -88,7 +88,7 @@ const ATTENTION_ITEMS: AttentionItem[] = [
     why: "Working-capital pressure remains a monitoring priority while inventory and payables settle.",
     trend: "Stable risk",
     page: "Review Cash Control",
-    href: "/cash-control",
+    href: "/new-cash-control",
     tone: "amber",
   },
   {
@@ -96,8 +96,8 @@ const ATTENTION_ITEMS: AttentionItem[] = [
     freeTitle: "Inventory needs attention",
     why: "Stock is still tying up cash that could support the recovery plan.",
     trend: "Watch",
-    page: "Review Scenario Planner",
-    href: "/scenario-lab",
+    page: "Review Cash Control",
+    href: "/new-cash-control",
     tone: "amber",
   },
 ];

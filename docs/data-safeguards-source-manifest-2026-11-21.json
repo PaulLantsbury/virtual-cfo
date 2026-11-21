@@ -1,0 +1,67 @@
+{
+  "contract": "offline-data-safeguards-source-manifest-v1",
+  "state": "local-review-only",
+  "baseLocalCommit": "820bc2172f5fe5fcdcd3091e182f07fefa2ef63f",
+  "remoteApplied": false,
+  "activationAllowed": false,
+  "websiteDeploySource": "3eda388d534b820728172e0edb7ab9b51d0cc3ad",
+  "protectedInventoryRequirement": {
+    "records": 48,
+    "actualHostedFingerprint": "not-captured-by-this-package",
+    "updateAllowed": false
+  },
+  "checks": {
+    "finalFocused": 31,
+    "serialDomain": 201,
+    "countsOverlap": true,
+    "finalManifestCases": 7,
+    "fullWorkspaceBuild": "pass"
+  },
+  "files": [
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-reader.mjs",
+      "bytes": 9596,
+      "sha256": "0c9e8a88cbc76115ba44751912cc9e68f3d431ae880378ae2e203ed01e120823"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-reader.test.mjs",
+      "bytes": 9667,
+      "sha256": "adbe3dd5617acc5d8d7833c7d5527226b42f51142596c32b8d2f883e6863839d"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-integration.test.mjs",
+      "bytes": 11468,
+      "sha256": "9dbd2ce631e8ce835afa02760b49c3828c4954e03679ce45e208aad217203f21"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-recovery.sql",
+      "bytes": 2992,
+      "sha256": "e58aafb897b3ff3e91acb1ca0e80160de4b595cbf1d7d9e14df6aea3f1c491c4"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-recovery.test.mjs",
+      "bytes": 5962,
+      "sha256": "7826da3f829cfe0498b6a71b07020dcc64ddc4a1b9261b8d7865f61c7e6a888a"
+    },
+    {
+      "path": "experiments/synthetic-company/continuation-manifest.mjs",
+      "bytes": 9556,
+      "sha256": "4c68ca5890ff123c6b6c1e56ff52379ac9ea309cdfa0b7743e548651d9ebea8a"
+    },
+    {
+      "path": "experiments/synthetic-company/continuation-manifest.test.mjs",
+      "bytes": 6588,
+      "sha256": "20f9197c70363e4e6b9e26a0d8d91c4552fca0b2aca1b866a270ad6c52372c40"
+    },
+    {
+      "path": "docs/continuation-manifest-contract-2026-11-21.md",
+      "bytes": 5844,
+      "sha256": "e0a9c43f9e1c09e1bcb3e700e8745cc32f03512b772294cb97b06bb3c609984c"
+    },
+    {
+      "path": "docs/sidecar-recovery-continuation-batch-2026-11-21.md",
+      "bytes": 5357,
+      "sha256": "525671cd8c896af7b4f40b1ae48c044472c3c2f060fc4926adcd6720f61beb63"
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "contract": "customer-data-source-package-v1",
+  "implementationSource": "9a5dd35c982a81e57370700d3afffa80e98f93ba",
+  "activationAllowed": false,
+  "remoteApplied": false,
+  "executorIncluded": false,
+  "testReceipts": {
+    "currentBounded": 13,
+    "historicalFocus": 31,
+    "historicalDomain": 201,
+    "countsOverlap": true
+  },
+  "files": [
+    {
+      "path": "docs/continuation-manifest-contract-2026-11-21.md",
+      "bytes": 5844,
+      "sha256": "e0a9c43f9e1c09e1bcb3e700e8745cc32f03512b772294cb97b06bb3c609984c"
+    },
+    {
+      "path": "docs/customer-activation-review-package-2026-11-21.md",
+      "bytes": 9923,
+      "sha256": "4502b9afa75d8fecc1073d4720fb1dbe8833c6d5be91b3009a50c3ad717553f7"
+    },
+    {
+      "path": "docs/customer-continuation-closed-month-gates-2026-11-21.md",
+      "bytes": 12184,
+      "sha256": "e2a2ab6c6b016fc907e564de9f66fd58ae13d643acfae0941260e3d63db871b5"
+    },
+    {
+      "path": "docs/customer-data-package-index-2026-11-21.md",
+      "bytes": 5327,
+      "sha256": "c51fe38faf0a346caa91a5f71d0612fca1c5023a638ca43a9eb1b6a6fbbfea84"
+    },
+    {
+      "path": "docs/customer-data-source-validation-2026-11-21.md",
+      "bytes": 6257,
+      "sha256": "b65880b75c9443b0835ba991e68c910b76e344a27de757e507734d2f420e2e07"
+    },
+    {
+      "path": "docs/customer-sidecar-activation-readiness-2026-11-21.md",
+      "bytes": 8182,
+      "sha256": "4dd57c92ba6a90fb2ef3e60605668df5ba2a8d8626cab2003111f8b498ca554f"
+    },
+    {
+      "path": "docs/customer-sidecar-effective-access-gates-2026-11-21.md",
+      "bytes": 9789,
+      "sha256": "b57be434b60e87e1f6f69235886f4b05093bb9f15880b184fb191e97c4f6a0b9"
+    },
+    {
+      "path": "docs/customer-source-contract-batch-2026-11-21.md",
+      "bytes": 14763,
+      "sha256": "b3275aaacef511f552482c734e5a61bb8f5baa13eb6cc9b7ca5a025b743be8b8"
+    },
+    {
+      "path": "docs/data-safeguards-source-manifest-2026-11-21.json",
+      "bytes": 2353,
+      "sha256": "c3b06d2f18a37e076d6c5de5d3ccbbcab568ab70ff76cfd322a796b53fc3f648"
+    },
+    {
+      "path": "docs/data-security-review-2026-11-21.md",
+      "bytes": 4591,
+      "sha256": "707ecce14ff2de55824da670808c590f4371cf054f6892066957e0609c5427ff"
+    },
+    {
+      "path": "docs/sidecar-recovery-continuation-batch-2026-11-21.md",
+      "bytes": 5357,
+      "sha256": "525671cd8c896af7b4f40b1ae48c044472c3c2f060fc4926adcd6720f61beb63"
+    },
+    {
+      "path": "experiments/synthetic-company/continuation-manifest.mjs",
+      "bytes": 9556,
+      "sha256": "4c68ca5890ff123c6b6c1e56ff52379ac9ea309cdfa0b7743e548651d9ebea8a"
+    },
+    {
+      "path": "experiments/synthetic-company/continuation-manifest.test.mjs",
+      "bytes": 6588,
+      "sha256": "20f9197c70363e4e6b9e26a0d8d91c4552fca0b2aca1b866a270ad6c52372c40"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-activation-manifest.mjs",
+      "bytes": 7473,
+      "sha256": "c7f6fc540cf26913a125d21f200514e052d5f28393623ac7f941198b36482d80"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-activation-manifest.test.mjs",
+      "bytes": 6982,
+      "sha256": "8a825ac480376c86a356af6e12000061800cb7535b48af33bb5378662f116eb9"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-activation-rehearsal.test.mjs",
+      "bytes": 13445,
+      "sha256": "ac5c370aeb8ec308528e99bc5a99102281cca95991af26391c5070bbff5f2558"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-integration.test.mjs",
+      "bytes": 11468,
+      "sha256": "9dbd2ce631e8ce835afa02760b49c3828c4954e03679ce45e208aad217203f21"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-reader.mjs",
+      "bytes": 9596,
+      "sha256": "0c9e8a88cbc76115ba44751912cc9e68f3d431ae880378ae2e203ed01e120823"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-reader.test.mjs",
+      "bytes": 9667,
+      "sha256": "adbe3dd5617acc5d8d7833c7d5527226b42f51142596c32b8d2f883e6863839d"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-recovery.sql",
+      "bytes": 2992,
+      "sha256": "e58aafb897b3ff3e91acb1ca0e80160de4b595cbf1d7d9e14df6aea3f1c491c4"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-recovery.test.mjs",
+      "bytes": 5962,
+      "sha256": "7826da3f829cfe0498b6a71b07020dcc64ddc4a1b9261b8d7865f61c7e6a888a"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-security.test.mjs",
+      "bytes": 5061,
+      "sha256": "4facb5c33a92ec388aee55ec91f4c1cb3e2a48e363f559b7079c6e7de525bf37"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-storage.sql",
+      "bytes": 6129,
+      "sha256": "2f6ecbda16e2478a7533577d3e504ec1f87a335373c8c4191283d13d4241e75a"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-storage.test.mjs",
+      "bytes": 5585,
+      "sha256": "423233114d2ab1508998e4a85a2724b2bd262c71723fe8b19e37118fdc2b2038"
+    }
+  ]
+}

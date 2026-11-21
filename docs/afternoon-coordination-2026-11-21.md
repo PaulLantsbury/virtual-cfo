@@ -1,3 +1,13 @@
+## Initial checkpoint — approximately13:57London
+
+- Non-Scout data lane has published source package [codex/yellow-connections-20261121](https://github.com/PaulLantsbury/virtual-cfo/tree/codex/yellow-connections-20261121), tip `eada0f352e5634daef2815522ce676a446e22a6a`. Plan baseline/prior-year wiring and separately verified Marketing month comparisons are prepared; fullbuild and77selectedchecks reported passed. No hosted acceptance claimed.
+- [Missing-input and population register](https://github.com/PaulLantsbury/virtual-cfo/blob/eada0f352e5634daef2815522ce676a446e22a6a/docs/yellow-connection-register-2026-11-21.md) is now available. It distinguishes missing aggregates/read contracts from physically absent database columns; limited catalog visibility is not proof of absence.
+- PM redirected this lane to actual scheduled-receipt readback, exact website-only release preparation and prioritised next source/activation proposals rather than repeating finished wiring. No repeat source-branch approval requested.
+- Scout lane received the data tip and requirement to preserve it in any shared website release. Integrations lane received Paul's no-historical-Google-spend answer and is to continue portable Google preparation while prioritising Meta.
+- Design/integration detailed preflight checkpoints are still awaited; no new owner blockers have yet been established by PM. Do not convert an active chat indicator into a claim of completed code or tested service access.
+
+---
+
 # Coordinated afternoon batch — 21 November 2026
 
 Status: dispatched and in progress, not a completed release. Planning window approximately **13:50–15:50 Europe/London**. Paul is available for necessary sign-in, account configuration and concrete approvals. This chat is the project coordinator; implementation remains with the three existing workstreams.

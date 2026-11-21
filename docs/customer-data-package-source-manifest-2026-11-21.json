@@ -1,11 +1,13 @@
 {
-  "contract": "customer-data-source-package-v1",
-  "implementationSource": "9a5dd35c982a81e57370700d3afffa80e98f93ba",
+  "contract": "customer-data-source-package-v2",
+  "implementationSource": "6d7d5e9b6f2411eef54152070328daa89e2858e3",
   "activationAllowed": false,
   "remoteApplied": false,
-  "executorIncluded": false,
+  "hostedExecutorIncluded": false,
+  "disposableProtocolIncluded": true,
   "testReceipts": {
-    "currentBounded": 13,
+    "currentBounded": 34,
+    "standalonePostgres17_6": 4,
     "historicalFocus": 31,
     "historicalDomain": 201,
     "countsOverlap": true
@@ -22,19 +24,49 @@
       "sha256": "4502b9afa75d8fecc1073d4720fb1dbe8833c6d5be91b3009a50c3ad717553f7"
     },
     {
+      "path": "docs/customer-bindings-independent-review-2026-11-21.md",
+      "bytes": 11778,
+      "sha256": "c38278c51e2d66cd133968c896735ac771892b6d72055c5f9c7bc3b8779a8d8f"
+    },
+    {
+      "path": "docs/customer-concurrency-and-next-action-2026-11-21.md",
+      "bytes": 4083,
+      "sha256": "7f144b568c19af9385f03827a603bf5e82f0cbbf70b91c66930c2b2930bc9724"
+    },
+    {
       "path": "docs/customer-continuation-closed-month-gates-2026-11-21.md",
       "bytes": 12184,
       "sha256": "e2a2ab6c6b016fc907e564de9f66fd58ae13d643acfae0941260e3d63db871b5"
     },
     {
+      "path": "docs/customer-current-authority-proof-2026-11-21.md",
+      "bytes": 5054,
+      "sha256": "629f645d580e60f5caae626c7d83b4abe10d4817331c50e9be7eab46021c60e5"
+    },
+    {
       "path": "docs/customer-data-package-index-2026-11-21.md",
-      "bytes": 5327,
-      "sha256": "c51fe38faf0a346caa91a5f71d0612fca1c5023a638ca43a9eb1b6a6fbbfea84"
+      "bytes": 5749,
+      "sha256": "51e516954cad8957df14a60733fa7ca8b1b7613a870f63f82b313abd3f8e26ef"
+    },
+    {
+      "path": "docs/customer-data-readiness-batch-2026-11-21.md",
+      "bytes": 6905,
+      "sha256": "6a18589296eaf5862613d58db66e40b5f85e1feccd84d2f4a03c47f4d15f6dd2"
     },
     {
       "path": "docs/customer-data-source-validation-2026-11-21.md",
       "bytes": 6257,
       "sha256": "b65880b75c9443b0835ba991e68c910b76e344a27de757e507734d2f420e2e07"
+    },
+    {
+      "path": "docs/customer-publication-protocol-2026-11-21.md",
+      "bytes": 8012,
+      "sha256": "014d0b487f0f9c5ebd657cfc9fe5383afb289b4ff140e8c5e350d0f6686aa07e"
+    },
+    {
+      "path": "docs/customer-runtime-attestation-proposal-2026-11-21.md",
+      "bytes": 5088,
+      "sha256": "404708b7199174d73b27280b9b5b2094bfb503d192fb62d347be143908e98846"
     },
     {
       "path": "docs/customer-sidecar-activation-readiness-2026-11-21.md",
@@ -43,8 +75,8 @@
     },
     {
       "path": "docs/customer-sidecar-effective-access-gates-2026-11-21.md",
-      "bytes": 9789,
-      "sha256": "b57be434b60e87e1f6f69235886f4b05093bb9f15880b184fb191e97c4f6a0b9"
+      "bytes": 10358,
+      "sha256": "e3e7935dc00764b61225e8c0f61276fef736794598d0b0b7471f5a52fede0285"
     },
     {
       "path": "docs/customer-source-contract-batch-2026-11-21.md",
@@ -78,18 +110,53 @@
     },
     {
       "path": "experiments/synthetic-company/customer-activation-manifest.mjs",
-      "bytes": 7473,
-      "sha256": "c7f6fc540cf26913a125d21f200514e052d5f28393623ac7f941198b36482d80"
+      "bytes": 7870,
+      "sha256": "70cd03b0d25c8d7513ae3cbfbc02619361d793e0458b1992f28bd3e2dbf408d0"
     },
     {
       "path": "experiments/synthetic-company/customer-activation-manifest.test.mjs",
-      "bytes": 6982,
-      "sha256": "8a825ac480376c86a356af6e12000061800cb7535b48af33bb5378662f116eb9"
+      "bytes": 8150,
+      "sha256": "ac4cf4ec8adf90ce7ab5bcc7fb115d27473fbd424f4f10644678385beab48c09"
     },
     {
       "path": "experiments/synthetic-company/customer-activation-rehearsal.test.mjs",
       "bytes": 13445,
       "sha256": "ac5c370aeb8ec308528e99bc5a99102281cca95991af26391c5070bbff5f2558"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-bindings-independent.test.mjs",
+      "bytes": 9933,
+      "sha256": "c6387fd4416a7a8def50a1d9a40b9dd5808ba7c49cae1f2e73329b3a0a3c9c17"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-publication-fixture.mjs",
+      "bytes": 8019,
+      "sha256": "db73514c283a697f9d6fdfd47f6d6ababed13fc96523db221c996e07963e713e"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-publication-protocol.mjs",
+      "bytes": 9975,
+      "sha256": "52e2bdb3e2ce24dc097305e392432f2357c9e3f58a6b11b4761082bb978f0c7e"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-publication-protocol.test.mjs",
+      "bytes": 12433,
+      "sha256": "c053caa3552b40a8cb942d97d2fdae57f5036f704a7882f84606d3359665029e"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-runtime-attestation.mjs",
+      "bytes": 2326,
+      "sha256": "66d9a3a589c7f738760124b666ad87d911684072441d2b6416f9d5171b1fb82a"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-runtime-attestation.test.mjs",
+      "bytes": 3859,
+      "sha256": "65f54d738cf137e12023c90ded710552e2f896e59c72235ce9cad717d39fc951"
+    },
+    {
+      "path": "experiments/synthetic-company/customer-sidecar-concurrency.mjs",
+      "bytes": 10907,
+      "sha256": "43a8b9aeb4c5dd880cefd5f2fd7142f906dd6c376dfbf268ab5f3597fe53172f"
     },
     {
       "path": "experiments/synthetic-company/customer-sidecar-integration.test.mjs",

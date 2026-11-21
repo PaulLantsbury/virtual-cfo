@@ -5,6 +5,7 @@ export const LEGACY_CONTEXT_KEYS = [
   'reviewStore', 'reviewFrom', 'reviewTo', 'reviewVersion',
   'compareFrom', 'compareTo', 'compareVersion',
   'reviewHorizon', 'reviewView', 'reviewCompare', 'tab',
+  'acceptance', // Inert release-probe metadata; never reporting evidence or authority.
 ] as const;
 
 const destinations = new Set([

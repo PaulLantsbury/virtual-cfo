@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {contextPreservingRedirect} from '../src/lib/legacyNavigation.ts';
 import {CORE_NAV_ITEMS,SUPPORT_NAV_ITEMS,HELP_NAV_ITEM,isNavigationActive} from '../src/components/layout/nav-model.ts';
 const params = url => new URL(url, 'https://night-scout.invalid').searchParams;
@@ -77,4 +78,34 @@ test('active navigation uses exact page boundaries and ignores query/fragment, n
   assert.equal(isNavigationActive('/planner','/plan'), false);
   assert.equal(isNavigationActive('/profit-engine-original','/profit-engine'), false);
   assert.equal(isNavigationActive('/marketing-efficiency-original','/new-marketing'), false);
+});
+
+
+test('every current Profit alias preserves the exact hosted acceptance probe and fragment', () => {
+  const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+  const aliases = [...app.matchAll(/<Route path="([^"]+)"><ContextRedirect to="\/profit-engine"\s*\/>/g)].map(match => match[1]);
+  assert.deepEqual(aliases.sort(), ['/margin-analysis', '/new-profit', '/pricing-optimisation'].sort());
+  for (const alias of aliases) {
+    const incoming = new URL(alias + '?acceptance=release#evidence', 'https://night-scout.invalid');
+    assert.equal(contextPreservingRedirect('/profit-engine', incoming.search, incoming.hash), '/profit-engine?acceptance=release#evidence', alias);
+  }
+});
+
+test('acceptance metadata coexists with reporting context without replaying assumptions', () => {
+  const query = new URLSearchParams({acceptance:'release',reviewStore:'company-a',reviewFrom:'2026-10-01',reviewTo:'2026-10-31',reviewVersion:'requested-current',compareFrom:'2025-10-01',compareTo:'2025-10-31',compareVersion:'requested-prior'});
+  const result = contextPreservingRedirect('/profit-engine', '?' + query + '&spend=999&cac=1&unknown=drop&next=https://outside.example', '#evidence');
+  assert.deepEqual([...params(result)].sort(), [...query].sort());
+  assert.equal(new URL(result, 'https://night-scout.invalid').hash, '#evidence');
+  const plan = contextPreservingRedirect('/plan?tab=planner&legacy=1', '?acceptance=release&tab=wrong&legacy=0&spend=999', '#plan-evidence');
+  assert.equal(params(plan).get('tab'), 'planner');
+  assert.equal(params(plan).get('legacy'), '1');
+  assert.equal(params(plan).get('acceptance'), 'release');
+  assert.equal(params(plan).has('spend'), false);
+  assert.equal(new URL(plan, 'https://night-scout.invalid').hash, '#plan-evidence');
+});
+
+test('acceptance metadata retains existing duplicate and control-character rejection', () => {
+  for (const query of ['?acceptance=one&acceptance=two', '?acceptance=release%0A', '?acceptance=']) {
+    assert.equal(params(contextPreservingRedirect('/profit-engine', query)).get('acceptance'), null);
+  }
 });

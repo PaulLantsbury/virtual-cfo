@@ -3,7 +3,7 @@
   "preparedOn": "2026-11-21",
   "repository": "PaulLantsbury/virtual-cfo",
   "outputBranch": "codex/absence-closeout-20261121",
-  "publicationAuthorized": false,
+  "publicationAuthorized": true,
   "cloudLaunchConfirmed": false,
   "cloudTaskId": null,
   "operationalRoadmap": {
@@ -85,5 +85,7 @@
     "raw database bodies, private row hashes and runtime configuration",
     "provider transaction payloads and broad logs"
   ],
-  "finishCondition": "Three finite waves completed; reviewed source, test/build receipts, scoped roadmap delta and all-stream handover produced; publish only after explicit branch permission; then stop."
+  "finishCondition": "Three finite waves completed; reviewed source, test/build receipts, scoped roadmap delta and all-stream handover produced; publish only after explicit branch permission; then stop.",
+  "draftPullRequestAuthorized": true,
+  "authorizationScope": "Reviewed source/tests/docs from three finite waves, single named branch, one draft PR, no merge or live operations"
 }

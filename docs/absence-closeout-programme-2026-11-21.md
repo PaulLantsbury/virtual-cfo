@@ -1,3 +1,7 @@
+## Owner publication decision — 21 November2026
+
+Paul explicitly approved the bounded programme below, publication of its reviewed source/test/documentation results to the single branch `codex/absence-closeout-20261121`, and ONE draft pull request. No merge, deployment, live data/access/provider/feed action, credential transfer or spending is approved. Finish the three waves and handover, then stop. Cloud task launch is still pending confirmation; this document is not proof of execution.
+
 # Night Scout finite absence closeout programme — 21 November 2026
 
 Coordinator-reviewed bounded programme. This file does not create or confirm a cloud task. A launch acknowledgement with a task identifier and actual progress is required before describing this programme as running remotely.
@@ -8,7 +12,7 @@ Complete three finite parallel waves of source implementation, meaningful dispos
 
 The owner plans to leave at approximately 17:40 Europe/London on 21 November and be absent for several days. This is cloud-only work: do not depend on the Mac, its browser, local sessions, private files or credentials remaining available.
 
-Repository: `PaulLantsbury/virtual-cfo`. Planned exclusive output branch: `codex/absence-closeout-20261121`. **Publication permission is pending.** Until the coordinator supplies the owner's explicit approval for this exact branch and bounded programme, prepare local/cloud workspace changes and review artifacts only; do not push, create a pull request or publish files. An approved task launch is not publication approval. No other branch is an authorised output destination.
+Repository: `PaulLantsbury/virtual-cfo`. Planned exclusive output branch: `codex/absence-closeout-20261121`. **Publication permission is now explicitly approved for this exact branch and bounded programme, plus one draft PR.** Prepare and independently review source/tests/docs before publication. Task launch alone would not confer publication approval; the separate owner decision is recorded above. No other branch is an authorised output destination.
 
 No main merges, staging/production deployment, database connection or mutation, schema/grant/role changes, provider API/OAuth/transactions, feed or scheduler changes, credential/session inspection or transfer, configuration/private-file changes, new service, paid tool or spending. Provider data is not needed for these tests. Do not fetch broad logs or private operational captures. A genuine access or approval gate must be recorded precisely while unaffected source work continues.
 
@@ -58,7 +62,7 @@ Use focused tests appropriate to changes, followed by the required workspace typ
 2. Run final meaningful tests and required build once on the final source. A later source change invalidates the affected earlier receipt. Record actual commands, source/tree identity, results and practical limits.
 3. Produce a scoped roadmap delta for the coordinator, rather than replacing the shared operational roadmap. Mark items as verified live, published source, tested local/cloud source, proposal or blocked. Preserve all earlier work and show what the next session must decide.
 4. Produce one all-stream handover: completed changes, exact reviewed candidate, tests, remaining yellow values, provider/synthetic distinctions, absent source capsules and concrete future activation gates. Prepare reviewable release packages only; do not deploy them. Any later website/data/provider action needs its own exact approval.
-5. If and only if the coordinator supplies explicit branch publication approval, publish the reviewed non-sensitive source/test/docs candidate to `codex/absence-closeout-20261121` with a fresh head check. No PR unless that action is separately authorised. If publication remains unapproved, retain the finished patch/candidate and report that gate without pushing elsewhere.
+5. If and only if the coordinator supplies explicit branch publication approval, publish the reviewed non-sensitive source/test/docs candidate to `codex/absence-closeout-20261121` with a fresh head check. One draft PR is separately authorised by the owner; no merge is authorised. If publication remains unapproved, retain the finished patch/candidate and report that gate without pushing elsewhere.
 6. Report completion or bounded blockers, then **STOP**. Do not schedule follow-ups, start further waves, extend diagnostic dates, continue watching live services or wait indefinitely for owner input.
 
 ## Required final artifacts

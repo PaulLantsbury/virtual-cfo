@@ -4,17 +4,19 @@ import { useActiveStore, useAuth } from './auth/AuthProvider';
 import { supabase } from './supabase';
 import { HISTORY_EDITION, historyAvailableMonths, historyReadState, type HistorySelection } from './v11/history-supported';
 import { composeHistoryMonth } from './v11/history-composition';
-import {advanceReviewHandoff,cancelReviewHandoff,createReviewHandoff,type ReviewHandoffRole} from './reviewHandoff';
+import {advanceReviewHandoff,cancelReviewHandoff,createReviewHandoff,reviewNavigationOwnership,type ReviewHandoffRole} from './reviewHandoff';
 
 /** Read-only explicit month/version selection. Recipient opt-ins can seed a
  * validated link once per mount; manual choices win until reload. The URL stays
- * bookmarkable, and every new mount revalidates its company and exact version. */
+ * bookmarkable; new mounts revalidate exact evidence without replaying a URL
+ * after its user/company ownership has changed during this application lifetime. */
 export function useReviewedHistory({handoffRole='none'}:{handoffRole?:ReviewHandoffRole}={}) {
  const storeId=useActiveStore(), {userId}=useAuth();
  const [choice,setChoice]=useState({userId:null as string|null,storeId:'',from:'',to:'',versionId:''});
  const handoff=useRef(createReviewHandoff(typeof window==='undefined'?'':window.location.search,handoffRole));
+ const [navigationKey]=useState(()=>typeof window==='undefined'?'':window.location.href);
  const [handoffWarning,setHandoffWarning]=useState<string|null>(null);
- const current=choice.userId===userId&&choice.storeId===storeId;
+ const current=choice.userId===userId&&choice.storeId===storeId&&(handoff.current.phase!=='applied'||reviewNavigationOwnership.allows(navigationKey,userId,storeId));
  const request=async(path:string,query:Record<string,string>,signal:AbortSignal)=>{
   const {data,error}=await supabase.auth.getSession();
   if(error||!data.session||data.session.user.id!==userId)throw Error('Access to this business could not be verified.');
@@ -27,10 +29,17 @@ export function useReviewedHistory({handoffRole='none'}:{handoffRole?:ReviewHand
  const anchor=typeof availability?.anchor==='string'?availability.anchor:'';
  const months=historyAvailableMonths(availability,{storeId,currency:'GBP',timezone:'Europe/London',edition:HISTORY_EDITION,anchor});
  useEffect(()=>{
+  if(handoff.current.candidate&&userId&&storeId&&!reviewNavigationOwnership.register(navigationKey,userId,storeId)){
+   const warning='The linked reporting context could not be restored safely. Choose a supported month and evidence version.';
+   handoff.current={...cancelReviewHandoff(handoff.current),warning};
+   setChoice({userId,storeId,from:'',to:'',versionId:''});
+   setHandoffWarning(warning);
+   return;
+  }
   const result=advanceReviewHandoff(handoff.current,{userId,storeId,availabilityReady:!!availability,months});
   handoff.current=result.state;setHandoffWarning(result.warning);
   if(result.choice)setChoice({userId,storeId,...result.choice});
- },[userId,storeId,availability]);
+ },[userId,storeId,availability,navigationKey]);
  const chosen=current?months.find(m=>m.from===choice.from&&m.to===choice.to):undefined;
  const versions=chosen?.versions??(chosen?.versionId?[{versionId:chosen.versionId,status:'selected' as const,kind:'base' as const}]:[]);
  const version=current?versions.find(v=>v.versionId===choice.versionId&&v.status==='selected'):undefined;

@@ -13,7 +13,10 @@ const warn=(role:ReviewHandoffRole)=>role==='comparison'?'The linked earlier-mon
 export function createReviewHandoff(search:string,role:ReviewHandoffRole='none'):ReviewHandoffState{
  const empty:ReviewHandoffState={role,phase:'none',candidate:null,owner:null,warning:null};
  if(role==='none')return empty;
+ if(typeof search!=='string'||search.length>8192)return {...empty,phase:'rejected',warning:warn(role)};
+ const allKeys=['reviewStore','reviewFrom','reviewTo','reviewVersion','compareFrom','compareTo','compareVersion'];
  const params=new URLSearchParams(search),prefix=role==='comparison'?'compare':'review',names=[prefix+'From',prefix+'To',prefix+'Version'];
+ if(allKeys.some(key=>params.getAll(key).length>1))return {...empty,phase:'rejected',warning:warn(role)};
  if(!names.some(key=>params.has(key)))return empty;
  // Duplicate parameters are ambiguous even if their first value happens to match.
  const involved=['reviewStore',...names,...(role==='comparison'?['reviewFrom','reviewTo','reviewVersion']:[])];
@@ -46,3 +49,21 @@ export function advanceReviewHandoff(state:ReviewHandoffState,context:Context):{
  if(!available(candidate,context.months)||candidate.current&&!available(candidate.current,context.months))return none({...owned,phase:'rejected',warning:warn(owned.role)});
  return {state:{...owned,phase:'applied',warning:null},choice:{from:candidate.from,to:candidate.to,versionId:candidate.versionId},warning:null};
 }
+
+/** App/navigation lifetime, independent of StoreAccessGate's keyed child mounts.
+ * Registration happens in effects; render lookups never mutate these records.
+ * Capacity rejects new hints instead of evicting an old revoked ownership. */
+export function createReviewNavigationOwnership(limit=64){
+ const owners=new Map<string,{userId:string;storeId:string;revoked:boolean}>();
+ return {
+  allows(key:string,userId:string|null,storeId:string){const o=owners.get(key);return !!o&&!o.revoked&&o.userId===userId&&o.storeId===storeId;},
+  register(key:string,userId:string,storeId:string){
+   if(!key||key.length>16384||!userId||!storeId)return false;
+   const o=owners.get(key);
+   if(o){if(o.userId!==userId||o.storeId!==storeId)o.revoked=true;return !o.revoked;}
+   if(owners.size>=limit)return false;
+   owners.set(key,{userId,storeId,revoked:false});return true;
+  },
+ };
+}
+export const reviewNavigationOwnership=createReviewNavigationOwnership();

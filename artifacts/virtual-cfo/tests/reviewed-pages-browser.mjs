@@ -11,6 +11,7 @@ if(new URL(origin).hostname!=='127.0.0.1'||new URL(origin).protocol!=='http:')th
 const {chromium}=await import(process.env.NIGHT_SCOUT_PLAYWRIGHT_MODULE||'playwright');
 const months=['2025-01-01','2025-02-01','2025-03-01'].map(reviewedBrowserMonth);
 const store=months[0].month.selection.storeId;
+const otherStore='d7500000-0000-4000-8000-000000000008';
 const user={id:'60000000-0000-4000-8000-000000000001',email:'fixture@example.invalid',aud:'authenticated',role:'authenticated',app_metadata:{provider:'email'},user_metadata:{},identities:[],created_at:'2026-09-08T00:00:00Z'};
 const token=[{alg:'HS256',typ:'JWT'},{sub:user.id,role:'authenticated',exp:Math.floor(Date.now()/1000)+3600},'fictional-signature'].map(v=>Buffer.from(typeof v==='string'?v:JSON.stringify(v)).toString('base64url')).join('.');
 const session={access_token:token,refresh_token:'fictional-refresh',expires_in:3600,expires_at:Math.floor(Date.now()/1000)+3600,token_type:'bearer',user};
@@ -24,7 +25,7 @@ async function fixture(options,run){
   const request=route.request(),url=new URL(request.url()),json=(data,status=200)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify(data)});
   if(url.origin===origin&&url.pathname.startsWith('/api/')){
    assert.equal(request.method(),'GET','Fixture backend accepts reads only');
-   if(url.pathname==='/api/history-reporting/months')return json(listing);
+   if(url.pathname==='/api/history-reporting/months')return json(url.searchParams.get('storeId')===store?listing:{...listing,storeId:otherStore,months:[]});
    const item=months.find(m=>m.month.selection.period.from===url.searchParams.get('from'));
    if(!item||url.searchParams.get('storeId')!==store||url.searchParams.get('versionId')!==item.month.selection.versionId)return json({state:'unavailable'},409);
    if(url.pathname==='/api/history-reporting')return json(item.response);
@@ -39,12 +40,12 @@ async function fixture(options,run){
   if(url.hostname!=='night-scout-test.invalid')return route.abort();
   if(url.pathname==='/auth/v1/token')return json(session);
   if(url.pathname==='/auth/v1/user')return json(user);
-  if(url.pathname==='/rest/v1/store_memberships')return json([{store_id:store,stores:{id:store,name:'DISPOSABLE BROWSER FIXTURE — NOT LIVE'}}]);
+  if(url.pathname==='/rest/v1/store_memberships')return json([{store_id:store,stores:{id:store,name:'DISPOSABLE BROWSER FIXTURE — NOT LIVE'}},...(options.secondStore?[{store_id:otherStore,stores:{id:otherStore,name:'SECOND DISPOSABLE FIXTURE — NOT LIVE'}}]:[])]);
   return route.abort();
  });
  try{
   await page.addInitScript(()=>sessionStorage.setItem('userPlan','pro'));
-  await page.goto(origin+'/login');await page.getByLabel('Email address').fill(user.email);await page.getByLabel('Password',{exact:true}).fill('fictional-password');await page.getByRole('button',{name:'Sign in',exact:true}).click();await page.getByRole('combobox',{name:'Active store'}).waitFor();
+  await page.goto(origin+'/login');await page.getByLabel('Email address').fill(user.email);await page.getByLabel('Password',{exact:true}).fill('fictional-password');await page.getByRole('button',{name:'Sign in',exact:true}).click();if(options.secondStore)await page.getByRole('button',{name:'DISPOSABLE BROWSER FIXTURE — NOT LIVE',exact:true}).click();await page.getByRole('combobox',{name:'Active store'}).waitFor();
   await run(page);assert.deepEqual(errors,[]);
  }finally{await context.close();await browser.close();}
 }
@@ -67,4 +68,62 @@ test('DISPOSABLE: Plan preserves paid-first population and blocks unsupported re
  await page.getByText('Other orders include organic first, guest and unknown orders',{exact:false}).waitFor();
  assert.equal(await page.getByText('2.00% becomes',{exact:false}).count(),0,'No unsourced absolute conversion baseline');
  assert.ok(await page.locator('body').evaluate(el=>el.scrollWidth<=innerWidth+1),'390px has no page overflow');
+}));
+
+const handoff=()=>new URLSearchParams({reviewStore:store,reviewFrom:'2025-03-01',reviewTo:'2025-03-31',reviewVersion:'version-2',compareFrom:'2025-02-01',compareTo:'2025-02-28',compareVersion:'version-1'});
+const control=(page,label)=>page.getByRole('combobox',{name:new RegExp('^'+label+'(?:$|\\s)')});
+async function expectValue(page,label,value){await page.waitForFunction(({label,value})=>{const labels=[...document.querySelectorAll('label')];const l=labels.find(l=>l.textContent?.trim().startsWith(label));return l?.querySelector('select')?.value===value;},{label,value});assert.equal(await control(page,label).inputValue(),value);}
+test('DISPOSABLE: Profit handoff restores distinct exact scopes after async availability; explicit clearing stays cleared',async()=>fixture({},async page=>{
+ await page.goto(origin+'/profit-engine?'+handoff());
+ await expectValue(page,'Reporting month','2025-03-01');await expectValue(page,'Evidence version','version-2');
+ await page.locator('.np-comparison-controls summary').click();
+ await expectValue(page,'Comparison month','2025-02-01');await expectValue(page,'Comparison evidence version','version-1');
+ await page.locator('.np-period-caption').filter({hasText:'2025-03-01 – 2025-03-31'}).waitFor();
+ await control(page,'Reporting month').selectOption('');
+ await expectValue(page,'Reporting month','');await expectValue(page,'Evidence version','');
+ await page.getByRole('button',{name:'Per order',exact:true}).click();
+ await expectValue(page,'Reporting month','');await page.getByText('No supported month selected.',{exact:false}).waitFor();
+}));
+test('DISPOSABLE: foreign company and absent exact handoff version never select substitute evidence',async()=>fixture({},async page=>{
+ for(const change of [p=>p.set('reviewStore',otherStore),p=>p.set('reviewVersion','unadvertised-version')]){
+  const params=handoff();change(params);await page.goto(origin+'/profit-engine?'+params);
+  await control(page,'Reporting month').locator('option[value="2025-03-01"]').waitFor({state:'attached'});
+  await expectValue(page,'Reporting month','');await expectValue(page,'Evidence version','');
+  await page.getByText('No supported month selected.',{exact:false}).waitFor();
+ }
+}));
+test('DISPOSABLE: company switch and return cannot replay original URL handoff',async()=>fixture({secondStore:true},async page=>{
+ await page.goto(origin+'/profit-engine?'+handoff());await expectValue(page,'Reporting month','2025-03-01');await expectValue(page,'Evidence version','version-2');
+ await page.getByRole('combobox',{name:'Active store'}).selectOption(otherStore);
+ await expectValue(page,'Reporting month','');await page.getByText('No supported month selected.',{exact:false}).waitFor();
+ await page.getByRole('combobox',{name:'Active store'}).selectOption(store);
+ await control(page,'Reporting month').locator('option[value="2025-03-01"]').waitFor({state:'attached'});
+ await expectValue(page,'Reporting month','');await expectValue(page,'Evidence version','');
+}));
+
+test('DISPOSABLE: duplicate or incomplete-calendar URL contexts show warnings and select no substitute',async()=>fixture({},async page=>{
+ for(const change of [p=>p.append('reviewFrom','2025-03-01'),p=>p.set('reviewFrom','2025-03-02'),p=>p.set('reviewTo','2025-03-30'),p=>p.append('compareVersion','version-1')]){
+  const p=handoff();change(p);await page.goto(origin+'/profit-engine?'+p);
+  await control(page,'Reporting month').locator('option[value="2025-03-01"]').waitFor({state:'attached'});
+  await expectValue(page,'Reporting month','');await expectValue(page,'Evidence version','');
+  await page.getByRole('alert').filter({hasText:'linked reporting context is unavailable'}).waitFor();
+ }
+}));
+test('DISPOSABLE: unavailable comparison never prevents valid current context or picks another earlier version',async()=>fixture({},async page=>{
+ const p=handoff();p.set('compareVersion','missing-version');await page.goto(origin+'/profit-engine?'+p);
+ await expectValue(page,'Reporting month','2025-03-01');await expectValue(page,'Evidence version','version-2');await page.locator('.np-comparison-controls summary').click();
+ await expectValue(page,'Comparison month','');await expectValue(page,'Comparison evidence version','');await page.getByRole('alert').filter({hasText:'linked earlier-month comparison is unavailable'}).waitFor();
+}));
+test('DISPOSABLE: Marketing receives current link context only; comparison remains explicit page choice',async()=>fixture({},async page=>{
+ await page.goto(origin+'/new-marketing?tab=retention&'+handoff());
+ await page.waitForFunction(()=>document.querySelector('[aria-label="Growth reviewed month"]')?.value==='2025-03-01');assert.equal(await page.getByLabel('Growth reviewed month',{exact:true}).inputValue(),'2025-03-01');
+ assert.equal(await page.getByLabel('Growth evidence version',{exact:true}).inputValue(),'version-2');assert.equal(await page.getByLabel('Growth comparison month',{exact:true}).inputValue(),'');assert.equal(await page.getByLabel('Growth comparison evidence version',{exact:true}).inputValue(),'');
+ await page.getByText('No connected comparison selected',{exact:false}).first().waitFor();
+}));
+test('DISPOSABLE: Plan and explicit fictional Profit mode cannot inherit a verified URL baseline',async()=>fixture({},async page=>{
+ await page.goto(origin+'/plan?'+handoff());await page.getByLabel('Plan reviewed month',{exact:true}).locator('option[value="2025-03-01"]').waitFor({state:'attached'});assert.equal(await page.getByLabel('Plan reviewed month',{exact:true}).inputValue(),'');
+ await page.getByRole('heading',{name:'Plan baseline unavailable'}).waitFor();
+ await page.goto(origin+'/profit-engine?'+handoff());await expectValue(page,'Reporting month','2025-03-01');
+ const sample=page.getByRole('button',{name:/sample/i}).first();await sample.click();await page.locator('.np-sample-unlinked').waitFor();
+ assert.equal(await control(page,'Reporting month').count(),0,'Explicit sample mode has no reviewed reporting selector');await page.getByText('Sample nonnegative flows only.',{exact:false}).first().waitFor();
 }));

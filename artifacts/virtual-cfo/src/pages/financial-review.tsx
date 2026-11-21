@@ -1,7 +1,9 @@
 import {useEffect,useRef,useState} from 'react';
 import {useQueryClient} from '@tanstack/react-query';
 import {AppLayout} from '@/components/layout/AppLayout';
-import {useActiveStore} from '@/lib/auth/AuthProvider';
+import {RuntimeDiagnosticPanel} from '@/components/RuntimeDiagnosticPanel';
+import {RUNTIME_DIAGNOSTIC_UI_ENABLED} from '@/lib/runtimeDiagnosticRelease';
+import {useActiveStore,useAuth} from '@/lib/auth/AuthProvider';
 import {supabase} from '@/lib/supabase';
 import {Button} from '@/components/ui/button';
 type Scope={storeId:string;from:string;to:string};
@@ -19,14 +21,16 @@ const dateLabel=(v:string)=>new Intl.DateTimeFormat('en-GB',{day:'numeric',month
 type Packet={status:'blocked'|'awaiting_independent_coverage_review';batchId:string;snapshotDigest:string;scope:Scope;issues:{reason:string}[];transactionEvidence?:TransactionEvidence|null};
 const same=(a:Scope,b:Scope)=>a?.storeId===b.storeId&&a?.from===b.from&&a?.to===b.to;
 export default function FinancialReviewPage(){
- const storeId=useActiveStore(),cache=useQueryClient();
+ const storeId=useActiveStore(),auth=useAuth(),cache=useQueryClient();
  const [from,setFrom]=useState(''),[to,setTo]=useState(''),[packet,setPacket]=useState<Packet|null>(null);
  const [evidence,setEvidence]=useState(''),[statement,setStatement]=useState(''),[confirmed,setConfirmed]=useState(false);
+ const [diagnosticBusy,setDiagnosticBusy]=useState(false);
  const [busy,setBusy]=useState(false),[message,setMessage]=useState('Choose the period you want to review.');
  const pending=useRef<AbortController|null>(null),generation=useRef(0);
  useEffect(()=>()=>{generation.current++;pending.current?.abort();},[]);
  const clear=()=>{generation.current++;pending.current?.abort();setPacket(null);setEvidence('');setStatement('');setConfirmed(false);setBusy(false);setMessage('Prepare a new review for this period.');};
  const perform=async(action:'prepare'|'restore')=>{
+  if(diagnosticBusy)return;
   const current=++generation.current,controller=new AbortController();pending.current=controller;setBusy(true);
   const scope={storeId,from,to};
   const timer=setTimeout(()=>controller.abort(),40000);
@@ -76,8 +80,9 @@ export default function FinancialReviewPage(){
     <label className="space-y-2">From<input className="block rounded border p-2 bg-background" type="date" value={from} onChange={e=>{clear();setFrom(e.target.value);}}/></label>
     <label className="space-y-2">To<input className="block rounded border p-2 bg-background" type="date" value={to} onChange={e=>{clear();setTo(e.target.value);}}/></label>
    </div>
-   <Button disabled={busy||!from||!to||from>to} onClick={()=>void perform('prepare')}>{busy?'Checking…':'Prepare review'}</Button>
+   <Button disabled={busy||diagnosticBusy||!from||!to||from>to} onClick={()=>void perform('prepare')}>{busy?'Checking…':'Prepare review'}</Button>
    <p role="status" aria-live="polite" className="rounded-lg border p-4">{message}</p>
+   {RUNTIME_DIAGNOSTIC_UI_ENABLED&&<RuntimeDiagnosticPanel scope={{storeId,from,to}} userId={auth.userId} parentBusy={busy} onBusyChange={setDiagnosticBusy}/> }
    {packet?.status==='blocked'&&<p>{packet.issues.length} evidence check{packet.issues.length===1?' requires':'s require'} attention. Figures remain unverified.</p>}
    {packet&&<section className="space-y-4 rounded-lg border p-5" aria-labelledby="review-readiness-title">
     <h2 id="review-readiness-title" className="text-xl font-semibold">What still needs checking?</h2>
@@ -127,7 +132,7 @@ export default function FinancialReviewPage(){
     <label className="block">Evidence reference<input className="mt-2 block w-full rounded border p-2 bg-background" maxLength={2000} value={evidence} disabled={busy} onChange={e=>setEvidence(e.target.value)}/></label>
     <label className="block">What did you check?<textarea className="mt-2 block w-full rounded border p-2 bg-background" rows={4} maxLength={10000} value={statement} disabled={busy} onChange={e=>setStatement(e.target.value)}/></label>
     <label className="flex items-start gap-3"><input type="checkbox" className="mt-1" checked={confirmed} disabled={busy} onChange={e=>setConfirmed(e.target.checked)}/>I independently checked that the order and refund history is complete for this period.</label>
-    <Button disabled={busy||!confirmed||!evidence.trim()||!statement.trim()} onClick={()=>void perform('restore')}>Record review and restore figures</Button>
+    <Button disabled={busy||diagnosticBusy||!confirmed||!evidence.trim()||!statement.trim()} onClick={()=>void perform('restore')}>Record review and restore figures</Button>
    </section>}
   </div>
  </AppLayout>;

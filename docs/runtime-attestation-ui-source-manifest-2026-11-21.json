@@ -1,0 +1,48 @@
+{
+  "contract": "runtime-attestation-ui-source-v1",
+  "publishedParent": "f978784f98a05eedcc1e75d9977eb530ce0e7491",
+  "implementationCommit": "d12a6ab38f9d78a9317464a609cf56100ca5abc2",
+  "implementationTree": "4f46d8ca23f7ae06be0c57b6a908458cdf342de1",
+  "serverReleaseEnabled": true,
+  "uiReleaseEnabled": true,
+  "windowUnchanged": true,
+  "opensAt": "2026-11-21T16:00:00Z",
+  "expiresAt": "2026-11-21T18:00:00Z",
+  "maxProcessMs": 300000,
+  "sourceTests": 44,
+  "browserCases": 28,
+  "remoteDiagnosticInvoked": false,
+  "newAccessOrGrants": false,
+  "files": [
+    {
+      "path": "artifacts/virtual-cfo/src/components/RuntimeDiagnosticPanel.tsx",
+      "bytes": 4781,
+      "sha256": "287e469ac862afb94622c88301be8ef1c47fa7de919ed508bdf5175db2cc6c20"
+    },
+    {
+      "path": "artifacts/virtual-cfo/src/lib/runtimeDiagnostic.test.ts",
+      "bytes": 5561,
+      "sha256": "fbff505a5ccd742f4e97fd63522ca97584cfbc2f74c49b2469d161445fc6df0f"
+    },
+    {
+      "path": "artifacts/virtual-cfo/src/lib/runtimeDiagnostic.ts",
+      "bytes": 6823,
+      "sha256": "06fa296932daab31e644bb89d4d167139c2e48339ec39de93243819da2f57819"
+    },
+    {
+      "path": "artifacts/virtual-cfo/src/lib/runtimeDiagnosticRelease.ts",
+      "bytes": 145,
+      "sha256": "4c65245c8cab0757eb3c5cb1368fcf89f57c2d24064a4d92c832fbb8b3da5234"
+    },
+    {
+      "path": "artifacts/virtual-cfo/src/pages/financial-review.tsx",
+      "bytes": 14588,
+      "sha256": "4099d8f453e7191e7f6a33dd95eaeb94e04c277a10dcd38dc29d2757b27c4ecc"
+    },
+    {
+      "path": "artifacts/virtual-cfo/tests/runtime-attestation-ui-independent-browser.mjs",
+      "bytes": 13245,
+      "sha256": "2e585794ca390bb1b0328197faa38aee116738dbde306c2703bdf16c1e4735c2"
+    }
+  ]
+}

@@ -52,7 +52,7 @@ test('Google acceptance disables outside staging and rejects mismatched store or
   assert.equal(result.calls.length, 0);
 });
 
-test('Google acceptance selects the exact store account and produces a positive-spend reconciliation summary', async () => {
+test('Google acceptance selects the exact store account and produces a positive-spend coverage summary', async () => {
   const fixture = runtimeWith({
     status: 'complete', runId,
     from: baseEnv.NIGHT_SCOUT_GOOGLE_ADS_ACCEPTANCE_FROM,
@@ -77,7 +77,7 @@ test('Google acceptance selects the exact store account and produces a positive-
   assert.equal(Object.hasOwn(result, 'totalSpendMicros'), false, 'runner summary should not put spend amounts in host logs');
 });
 
-test('Google acceptance reports zero spend and missing coverage without calling it positive acceptance', async () => {
+test('Google acceptance keeps mixed observed-zero and missing coverage partial', async () => {
   const fixture = runtimeWith({
     status: 'partial', runId,
     from: baseEnv.NIGHT_SCOUT_GOOGLE_ADS_ACCEPTANCE_FROM,
@@ -89,7 +89,7 @@ test('Google acceptance reports zero spend and missing coverage without calling 
     ],
   });
   const result = await runGoogleAdsAcceptance({ env: baseEnv, createRuntime: async () => fixture.runtime, now });
-  assert.equal(result.state, 'zero_spend');
+  assert.equal(result.state, 'partial');
   assert.equal(result.positiveSpendObserved, false);
   assert.deepEqual(result.coverage, { provider_row: 1, no_row: 1 });
 });
@@ -99,4 +99,44 @@ test('Google acceptance closes the runtime even when collection fails', async ()
   fixture.runtime.collector.collect = async () => { throw new Error('private provider detail'); };
   await assert.rejects(runGoogleAdsAcceptance({ env: baseEnv, createRuntime: async () => fixture.runtime, now }), /private provider detail/);
   assert.deepEqual(fixture.calls.at(-1), ['close']);
+});
+
+
+test('Google acceptance distinguishes missing observations, complete zero, and partial positive evidence', async () => {
+  for (const [amounts, status, expectedState, positive] of [
+    [[null, null], 'partial', 'no_observations', false],
+    [['0', '0'], 'complete', 'zero_spend', false],
+    [['0', null], 'partial', 'partial', false],
+    [['123', null], 'partial', 'partial', true],
+    [['123', '0'], 'complete', 'complete', true],
+  ]) {
+    const fixture = runtimeWith({status, runId, from:'2026-11-01',to:'2026-11-02',observedAt:'2026-11-21T15:00:00.000Z',
+      coverage:amounts.map((amount,index)=>({date:`2026-11-0${index+1}`,state:amount===null?'no_row':'provider_row',spendMicros:amount}))});
+    const result=await runGoogleAdsAcceptance({env:baseEnv,createRuntime:async()=>fixture.runtime,now});
+    assert.equal(result.state,expectedState);
+    assert.equal(result.positiveSpendObserved,positive);
+    assert.deepEqual(result.coverage,{provider_row:amounts.filter(v=>v!==null).length,no_row:amounts.filter(v=>v===null).length});
+    assert.deepEqual(fixture.calls.at(-1),['close']);
+    assert.equal(Object.hasOwn(result,'totalSpendMicros'),false);
+  }
+});
+
+test('Google acceptance rejects complete/partial claims that contradict actual day coverage', async () => {
+  for(const [amounts,status] of [[[null,null],'complete'],[['0',null],'complete'],[['123',null],'complete'],[['0','0'],'partial']]){
+    const fixture=runtimeWith({status,runId,from:'2026-11-01',to:'2026-11-02',observedAt:'2026-11-21T15:00:00.000Z',
+      coverage:amounts.map((amount,index)=>({date:`2026-11-0${index+1}`,state:amount===null?'no_row':'provider_row',spendMicros:amount}))});
+    await assert.rejects(runGoogleAdsAcceptance({env:baseEnv,createRuntime:async()=>fixture.runtime,now}),/unavailable/);
+    assert.deepEqual(fixture.calls.at(-1),['close']);
+  }
+});
+
+
+test('Google acceptance rejects rolled-over observation instants and preserves valid explicit offsets', async () => {
+  const fixture = runtimeWith({status:'complete',runId,from:'2026-11-01',to:'2026-11-02',observedAt:'2026-11-21T24:00:00Z',
+    coverage:[{date:'2026-11-01',state:'provider_row',spendMicros:'1'},{date:'2026-11-02',state:'provider_row',spendMicros:'0'}]});
+  await assert.rejects(runGoogleAdsAcceptance({env:baseEnv,createRuntime:async()=>fixture.runtime,now}),/unavailable/);
+  const valid=runtimeWith({status:'complete',runId,from:'2026-11-01',to:'2026-11-02',observedAt:'2026-11-21T16:00:00.123456+01:00',
+    coverage:[{date:'2026-11-01',state:'provider_row',spendMicros:'1'},{date:'2026-11-02',state:'provider_row',spendMicros:'0'}]});
+  const result=await runGoogleAdsAcceptance({env:baseEnv,createRuntime:async()=>valid.runtime,now});
+  assert.equal(result.observedAt,'2026-11-21T16:00:00.123456+01:00');
 });

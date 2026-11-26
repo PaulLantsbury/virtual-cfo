@@ -1,3 +1,4 @@
+import {isGoogleAdsReportTimestamp} from './google-ads-report-timestamp.mjs';
 const unavailable = () => new Error('Google Ads staging acceptance unavailable');
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const customer = /^\d{10}$/;
@@ -67,7 +68,7 @@ export async function runGoogleAdsAcceptance({ env, createRuntime, now = () => n
       currency: account.currency, timeZone: account.timeZone,
     });
     if (!Array.isArray(result.coverage) || result.coverage.length !== dayDistance(from, to) + 1
-      || typeof result.observedAt !== 'string' || !Number.isFinite(Date.parse(result.observedAt))) throw unavailable();
+      || !isGoogleAdsReportTimestamp(result.observedAt)) throw unavailable();
     let totalMicros = 0n;
     const counts = { provider_row: 0, no_row: 0 };
     for (let index = 0; index < result.coverage.length; index += 1) {
@@ -84,8 +85,15 @@ export async function runGoogleAdsAcceptance({ env, createRuntime, now = () => n
       } else if (item.spendMicros !== null) throw unavailable();
       counts[item.state] += 1;
     }
+    // Missing provider rows are unknown, never a zero-spend observation.
+    // Completion describes coverage, not a successful external reconciliation.
+    const completeCoverage = counts.no_row === 0;
+    if ((result.status === 'complete') !== completeCoverage) throw unavailable();
+    const state = counts.provider_row === 0 ? 'no_observations'
+      : !completeCoverage ? 'partial'
+        : totalMicros === 0n ? 'zero_spend' : 'complete';
     return Object.freeze({
-      state: totalMicros > 0n ? result.status : 'zero_spend',
+      state,
       positiveSpendObserved: totalMicros > 0n,
       coverage: Object.freeze(counts),
       runId: result.runId,

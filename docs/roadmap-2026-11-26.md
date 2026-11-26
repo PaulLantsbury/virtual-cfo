@@ -1,3 +1,20 @@
+## Simpler delivery approach and independent baseline testing — agreed 26 November
+
+Owner approved a simpler prototype-first approach and requested the independent baseline assessment now. Every development batch must complete a user-visible capability, fix a demonstrated defect or remove a specific trial blocker. Defer infrastructure work that serves none of these. Prefer small coherent releases and targeted checks; avoid repeated unchanged suites, overlapping implementations and unnecessary branches/packages. Required financial accuracy, company separation, credential protection and honest advice remain essential.
+
+Three delivery streams for the next session:
+- Product and data: finish supported figures and concrete customer-data gaps.
+- Integrations: prove Meta/Google connections, then verify current Shopify/Xero journeys.
+- Independent testing: assess the released product separately from implementation ownership; developers still verify their own changes.
+
+Independent baseline review started now using three fresh reviewers for business usability/design, numeric sources/calculations, and CFO commentary/access claims. Initial evidence includes the current released source, actual hosted screenshots and dated acceptance receipts. The owner session was signed out after acceptance; source/screenshot review is not a fresh signed-in retest. Explicitly record what was observed, inferred or not tested. No live data writes, deployments or provider/model activity are part of this review.
+
+Checklist: ten-second business understanding; all five pages and Growth sub-tabs; Explore the Numbers; clear assumptions/missing values; representative calculation reconciliation; monthly/comparison selection; understandable bounded CFO advice; mobile usability; access clearing and unsupported capability claims. Output is a prioritised report: must fix before trial, acceptable prototype limitations, later improvements, plus concrete reproduction/evidence and smallest useful fix. No claim of exhaustive every-cell certification or timed human comprehension without actual evidence.
+
+Next session starts with the baseline report and selects a short must-fix batch before adding features. No new infrastructure programme, paid work or resource activation is implied.
+
+---
+
 ## Final product checkpoint — 26 November 2026
 
 This current product status supersedes earlier pending-release and failed-install entries below.

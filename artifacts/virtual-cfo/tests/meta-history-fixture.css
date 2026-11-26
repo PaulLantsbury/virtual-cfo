@@ -1,0 +1,2 @@
+/* Local fixture styling: no external fonts or production route dependency. */
+*{box-sizing:border-box}body{margin:0;background:#0c192c;color:#edf2fb;font:16px/1.5 system-ui,sans-serif}h1{font-size:24px}h2{font-size:20px}section{border:1px solid #344866;border-radius:12px;padding:16px}p{margin:12px 0}table{border-collapse:collapse;width:100%;text-align:left}th,td{padding:10px;border-bottom:1px solid #344866;vertical-align:top}caption{text-align:left;margin-bottom:12px}div[tabindex]:focus{outline:2px solid #8aaeff}

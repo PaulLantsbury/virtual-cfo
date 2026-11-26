@@ -1,0 +1,24 @@
+{
+  "base": "28853bb8567a503f7847f0e028f9e6277b2b384a",
+  "producer_app": "870c59fbadfc62c017ce3b988648a02bb80415de",
+  "files": {
+    "artifacts/virtual-cfo/src/components/MetaSavedHistory.tsx": "53156e21490befa4b23b46dd38b6f766c7ff577e3f73e5dfaf0c4fa29a72a616",
+    "artifacts/virtual-cfo/src/lib/metaHistoryPresentation.ts": "1f0697cf06b39cde0d01d282b259536b49b7d499f76b5d847720a474b2d19405",
+    "artifacts/virtual-cfo/src/lib/metaHistoryWire.ts": "9ad80194a991f24353dc152cc9501e466c89fc1bae57c06e2ecbec8372ef7702",
+    "artifacts/virtual-cfo/tests/meta-history-browser.mjs": "0ecb0c2519f0c64b2231c91b19078b432c7795204df5937363eb2a603b25742f",
+    "artifacts/virtual-cfo/tests/meta-history-consumer.test.ts": "41b8400f9192172b1d2837bcb076091770b326dfb437b573249c27e3cae251f6",
+    "artifacts/virtual-cfo/tests/meta-history-fixture.css": "23fa66b12040f1a1ca905701ba3e988654ca748b77ccfc3fe6d09fc4e2d4b5d1",
+    "artifacts/virtual-cfo/tests/meta-history-fixture.html": "c05370b9b396720df97a18495984b98e9600a17a3778d78e25f7b2edc6c75c90",
+    "artifacts/virtual-cfo/tests/meta-history-fixture.tsx": "fea046fd35db83657a155b2d130d34c9c3a8cdf15701787985c15313462709b8",
+    "artifacts/virtual-cfo/tests/meta-history-producer-agreement.mjs": "d37416fbb6d2bbf8d54920a36f15d3b6e12afbb9fc070db98ae92665a222d22e",
+    "artifacts/virtual-cfo/tests/meta-history-wire.fixture.ts": "f8e4ad8a2ff0e165445566224d1da877240ab3594699ad8431cae2b801371a25",
+    "artifacts/virtual-cfo/tests/meta-history-wire.test.ts": "07946c04a8ba956ed9c7f3b3ebe9f8759d58c5ad6a15e9dac8e0e4fe3a1ca88e",
+    "artifacts/virtual-cfo/tests/meta-history.fixture.ts": "f290f3c1e41edcd3111323dd42dfd372d1451aef176fb300078495101f87e59f",
+    "docs/meta-history-consumer-review-2026-11-26.md": "8314ccb1ea519381d9fd3f5b9710f054b432bfe795e1c3051c48b937ac14d4ae",
+    "docs/meta-history-ui-contract-response-2026-11-26.md": "0e95d3659b545f3fe5ad791cd9bfcb4b1d4bf2f58b0d87b6220d58de21f3f444",
+    "docs/meta-history-ui-independent-review-2026-11-26.md": "dff6a04bfc269091c2fb4383d72edd4225f5861c949ae64601e4a97a08f90d05",
+    "docs/meta-history-ui-package-2026-11-26.md": "95116e162fa7455d71bd90517b3b6ed9830c0c879da0f33822d6a964e81c6eed",
+    "docs/meta-history-ui-validation-2026-11-26.md": "ff2e90e36877a97e8e0fb7809d04217428b76ad9302795fee44c9bf4dcee18a4"
+  },
+  "note": "Unmounted consumer source; manifest excludes itself."
+}

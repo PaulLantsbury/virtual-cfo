@@ -1,0 +1,335 @@
+{
+  "contract": "night-scout-provider-recovery-v1",
+  "sourceHead": "9c4c66f2d7cae0ab874d708ca45d2d3afd16660d",
+  "baseCommit": "6cc5c542929dadedaa3a7633a6937160d4b16880",
+  "baseTree": "c78236b72faa526b4c6941de44e8e3692e5f0a87",
+  "sourceState": "explicitly selected dirty local source, not an immutable source commit",
+  "copiedOnlyOwnedPaths": true,
+  "files": [
+    {
+      "path": "artifacts/api-server/src/lib/google-ads-collector-runtime.d.mts",
+      "bytes": 467,
+      "sha256": "6b587f3d5d8cf088e9ab74809b3f21a095176b4f430435e3cca961d80d583933"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/google-ads-collector-runtime.mjs",
+      "bytes": 7369,
+      "sha256": "0c3e496edac1d6ba359b6c37c1697663da270d00f19929473f467230bcc6afde"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/google-ads-report-runtime.d.mts",
+      "bytes": 364,
+      "sha256": "e33e46ef0ea9cf93e178f7036832f745169c3e634069cecc4385b3048c0d7f10"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/google-ads-report-runtime.mjs",
+      "bytes": 6363,
+      "sha256": "d42678026dcfbe83f6511034be4aeb985896fc5adf5d9c58de0747bc5260472f"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/google-ads-runtime.d.mts",
+      "bytes": 383,
+      "sha256": "2e8b89bb0dbaef40dde8cc3d0e1156105ea10b32efbfe9f78b56c2359e681dbf"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/google-ads-runtime.mjs",
+      "bytes": 8808,
+      "sha256": "eed1463f2532879a06f49a341784725f77cdcb54748f0359bb5ddcf0d55fe11f"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/meta-ads-collector-runtime.d.mts",
+      "bytes": 578,
+      "sha256": "891c77347357f1f634be8e9e071ac95511800d802babef2b644413fa5404c4b8"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/meta-ads-collector-runtime.mjs",
+      "bytes": 5108,
+      "sha256": "5f63f0be252026a9bda397ed75569e50e2d528c088823927790004037cc1dea0"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/meta-ads-report-runtime.d.mts",
+      "bytes": 488,
+      "sha256": "82e4a683469ef3fad377612888cb3352f04ea3885183dd60bd7c5a978b7a5fb7"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/meta-ads-report-runtime.mjs",
+      "bytes": 9909,
+      "sha256": "50780196cd39db51a8f33b97885e4f54d6025cde3c1129b4805afafa9a7c5447"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/meta-ads-runtime.d.mts",
+      "bytes": 479,
+      "sha256": "2a51d7f3fa8cc80e6f7f2ceaf6dde45a60b09c6a416a3ff4dbf770759de6529e"
+    },
+    {
+      "path": "artifacts/api-server/src/lib/meta-ads-runtime.mjs",
+      "bytes": 8623,
+      "sha256": "65a918d45f870851be160ac1839984e07046d1eb5d019a9b1a06ee3d6157cb1e"
+    },
+    {
+      "path": "artifacts/api-server/src/routes/google-ads-spend-report.ts",
+      "bytes": 6710,
+      "sha256": "a935e361183f712115b80c7d8c74d850c65063e9e61c1008bcfbaaaaebd4c12a"
+    },
+    {
+      "path": "artifacts/api-server/src/routes/google-ads.ts",
+      "bytes": 14838,
+      "sha256": "87dc67288d756d75aca42863cc104d3ca9c093fa119a773da1367e3e4ed7e0ea"
+    },
+    {
+      "path": "artifacts/api-server/src/routes/meta-ads-spend-report.ts",
+      "bytes": 3004,
+      "sha256": "42a08faf6a88b4a5c257051d966c1eb4d2045eea050b0f71d6ae6a552b03d845"
+    },
+    {
+      "path": "artifacts/api-server/src/routes/meta-ads.ts",
+      "bytes": 10645,
+      "sha256": "bebc4193f9a23604b6256d774e73e4a4291b58a6d316773f313798f00e0d33f1"
+    },
+    {
+      "path": "artifacts/api-server/tests/google-ads-acceptance.test.mjs",
+      "bytes": 5028,
+      "sha256": "1cb1aa64ed572799c324491cc20592475a49cf72f9fc26c8711e4f46323c3a1a"
+    },
+    {
+      "path": "artifacts/api-server/tests/google-ads-collector-runtime.test.mjs",
+      "bytes": 3989,
+      "sha256": "755f1f41ed3067a74419ee507739c82cc3ac46023673c4d0b98ea6df863b3e0f"
+    },
+    {
+      "path": "artifacts/api-server/tests/google-ads-route.test.mjs",
+      "bytes": 12330,
+      "sha256": "d5a6b2bdaf206ed45a4d3cf5b45e480193f071b7c77cd37cc41486cf74d64208"
+    },
+    {
+      "path": "artifacts/api-server/tests/google-ads-runtime.test.mjs",
+      "bytes": 11488,
+      "sha256": "31de574e8f22c91ffc933e2710683799d22f16c1d8c67a234c1c8a94d016aed2"
+    },
+    {
+      "path": "artifacts/api-server/tests/meta-ads-acceptance-runner.test.mjs",
+      "bytes": 1896,
+      "sha256": "d9d7aa624b3008ad5868d76ab5076274e88a1dace7847279eb7586b85a9677e6"
+    },
+    {
+      "path": "artifacts/api-server/tests/meta-ads-integration.test.mjs",
+      "bytes": 19504,
+      "sha256": "e3abdcaaeeb05f97c85c5b19e3e21ee7adbf02c7f50480d2fc0c3719745c99d0"
+    },
+    {
+      "path": "artifacts/virtual-cfo/src/components/MetaDailySpendPanel.tsx",
+      "bytes": 10560,
+      "sha256": "33a452171b771b073c658c44d6a5942b33223be7e3eb52b923e7302adf2d6055"
+    },
+    {
+      "path": "artifacts/virtual-cfo/src/components/MetaSpendConnectionStatus.tsx",
+      "bytes": 9510,
+      "sha256": "f5c05cdee1e62e9161e1195238d4b6e968ac6dc9aef714a8156a2101b871ea53"
+    },
+    {
+      "path": "artifacts/virtual-cfo/src/lib/googleAdsSpendApi.ts",
+      "bytes": 6991,
+      "sha256": "253d46e8198d5eaa4155b5a67c998335f0ccad2f383b775f45cc3d78175835a6"
+    },
+    {
+      "path": "artifacts/virtual-cfo/src/lib/metaAdsApi.test.ts",
+      "bytes": 2545,
+      "sha256": "aba9e47dbe9e3840d862d83071608742cb51a67399ffc3e9e54d936f71de74a7"
+    },
+    {
+      "path": "artifacts/virtual-cfo/src/lib/metaAdsApi.ts",
+      "bytes": 8395,
+      "sha256": "95ebe3b4273fb24462e11cf8d390e3fab6672624bff086fb33d40ab6d571da40"
+    },
+    {
+      "path": "db-migrations/proposals/google-ads-spend-read-rpc-2026-11-21.sql",
+      "bytes": 11968,
+      "sha256": "df121440c1225f4754ad7410a448d6175fc8d2549ca16854fa46851c83531ef3"
+    },
+    {
+      "path": "db-migrations/proposals/google-ads-spend-rpcs-2026-11-21.sql",
+      "bytes": 54627,
+      "sha256": "7d934bc73d2b37443bd8e279ed87bd4ce9639e97a06b416410ed9ba900eb3c21"
+    },
+    {
+      "path": "db-migrations/proposals/google-ads-spend-store-2026-11-21.sql",
+      "bytes": 9189,
+      "sha256": "85732db026d4882591405d18b6cb41eddac979cb7b9840dcfedb5a3905ac8e86"
+    },
+    {
+      "path": "db-migrations/proposals/meta-ads-spend-read-rpc-2026-11-20.sql",
+      "bytes": 11346,
+      "sha256": "26930215df913d2dd5a8874c3264ac293c8c5f64d3da46ccb091f8d367d9d548"
+    },
+    {
+      "path": "db-migrations/proposals/meta-ads-spend-rpcs-2026-11-20.sql",
+      "bytes": 49964,
+      "sha256": "dc7583811c3a74e76cfa4e2da4160390595da9c1d291d223c275b64e8dd39d3a"
+    },
+    {
+      "path": "db-migrations/proposals/meta-ads-spend-store-2026-11-20.sql",
+      "bytes": 8175,
+      "sha256": "7ee141420cf19081cf348984934618efb83eda02586385e4da2a1e47b48be9b3"
+    },
+    {
+      "path": "deployments/nightly-staging/GOOGLE-ADS-STAGING-PREP.md",
+      "bytes": 11033,
+      "sha256": "9bde1482b1331e2fd9bbd26deb92e8943d18b493fafe5c3a534a2a5bd31c2bf5"
+    },
+    {
+      "path": "deployments/nightly-staging/META-ADS-DAILY-CRON.md",
+      "bytes": 2541,
+      "sha256": "8de102e38332ff0b963dcfa4c7f08555a9a2ff70a7a1ebaf7b02e6e984450eb9"
+    },
+    {
+      "path": "deployments/nightly-staging/META-ADS-STAGING-SETUP.md",
+      "bytes": 15720,
+      "sha256": "0edd37982726e013e3ff8121e871c5433fb7fffa57e1fd0f39895524df7b6572"
+    },
+    {
+      "path": "deployments/nightly-staging/run-google-ads-acceptance.mjs",
+      "bytes": 987,
+      "sha256": "300e374299b493c1cc67baa18b4abc0715bed301dd542c7d1aba2cebc9b95c90"
+    },
+    {
+      "path": "deployments/nightly-staging/run-meta-ads-acceptance.mjs",
+      "bytes": 5914,
+      "sha256": "6658ae53a42665d2f816ae1dd7d92b3267e9fe59a5f802b2a0d0921d4cbe4ec0"
+    },
+    {
+      "path": "deployments/nightly-staging/run-meta-ads-daily.mjs",
+      "bytes": 4377,
+      "sha256": "10f54b799c58a95078811cc747ac17d09c174147cfb2ffda2fa97842c4dfdd8e"
+    },
+    {
+      "path": "docs/marketing-spend-integration-status-2026-11-21.md",
+      "bytes": 9410,
+      "sha256": "23da5498323a8560e0acca9cccab4b73bcbc744e3bdf71deac42d7b076b018da"
+    },
+    {
+      "path": "docs/marketing-spend-integrations-2026-11-20.md",
+      "bytes": 19405,
+      "sha256": "30781bd2a9c8e13724812d3949ce569d4da2ea5739455836a9a616341d4e5d28"
+    },
+    {
+      "path": "experiments/marketing/google-ads-acceptance.mjs",
+      "bytes": 5719,
+      "sha256": "f3bf9849758c1cd7fc8b3222a859de55889e310341ef338aa758ad3aae53eace"
+    },
+    {
+      "path": "experiments/marketing/google-ads-account-discovery.mjs",
+      "bytes": 12078,
+      "sha256": "7a152c1a22254e79a6151e14c71f5c10a104e9efb17a0c97acea32dbbbab26a7"
+    },
+    {
+      "path": "experiments/marketing/google-ads-collector-repository.mjs",
+      "bytes": 7945,
+      "sha256": "c21a5702cf7622df05724fad6f8178adf963aa90711e609f037b2fc7624c919c"
+    },
+    {
+      "path": "experiments/marketing/google-ads-collector-repository.test.mjs",
+      "bytes": 4759,
+      "sha256": "923e20ca022b71a8eabffe2910b5e8a847005bb6086655635056719b3ec8cca6"
+    },
+    {
+      "path": "experiments/marketing/google-ads-collector.mjs",
+      "bytes": 9186,
+      "sha256": "c51a443d0d7636c654cecc9b9af9682877d195f85d0d736b543c7ef68b10dcb0"
+    },
+    {
+      "path": "experiments/marketing/google-ads-collector.test.mjs",
+      "bytes": 5983,
+      "sha256": "442039c2b732b737c710161a99423410a1ace69d7770e72a2e0ad5eaaa25c66e"
+    },
+    {
+      "path": "experiments/marketing/google-ads-integration.test.mjs",
+      "bytes": 14534,
+      "sha256": "49b0484490de0be2095a3904892f17ee305df7e886274112f2a057b867afd576"
+    },
+    {
+      "path": "experiments/marketing/google-ads-oauth-credential-envelope.mjs",
+      "bytes": 3585,
+      "sha256": "2e48665d69fa5844e387d0ee6f4e2dbbbd71fef8779dae793c2e368230b391ef"
+    },
+    {
+      "path": "experiments/marketing/google-ads-oauth-protocol.mjs",
+      "bytes": 8269,
+      "sha256": "84fd0faa6abce7a204dff2773cf2e72bfacd9ea8233c76bcc762689f684a15a8"
+    },
+    {
+      "path": "experiments/marketing/google-ads-oauth-service.mjs",
+      "bytes": 20147,
+      "sha256": "3716cb2dc9baad2448c295f980a239a90b18781f656ee8be73b801f00edc6c40"
+    },
+    {
+      "path": "experiments/marketing/google-ads-persistence.test.mjs",
+      "bytes": 5404,
+      "sha256": "7278cd7d23600f40065b97f36e964419a1d8701c1ab741926022174f2c2b06e0"
+    },
+    {
+      "path": "experiments/marketing/google-ads-report-repository.mjs",
+      "bytes": 6240,
+      "sha256": "4128631e0e771f763ded4a870ee1af4bc890d3600138667ca424f724c47fdefd"
+    },
+    {
+      "path": "experiments/marketing/google-ads-report-repository.test.mjs",
+      "bytes": 3627,
+      "sha256": "02ca93c3bcd76e42ef78699b104c4ca420fb32d4e7121e5c6d15d8a0d7e11bdd"
+    },
+    {
+      "path": "experiments/marketing/google-ads-repository.mjs",
+      "bytes": 13830,
+      "sha256": "426052ffb7171a6ee128bd3af2ee66a661aa74c9bea5109cbd6149bbf64ae58b"
+    },
+    {
+      "path": "experiments/marketing/google-ads-spend-reader.mjs",
+      "bytes": 9116,
+      "sha256": "9f57c5dbe76a7aeb7ed0771b16cd8731b45d0959bac4251ff67fba332d4f3e4b"
+    },
+    {
+      "path": "experiments/marketing/meta-ads-integration.test.mjs",
+      "bytes": 14038,
+      "sha256": "a641603ffb1f0627a3d66d79939a231e5ae5a251788b036ad4a0833efe9ad638"
+    },
+    {
+      "path": "experiments/marketing/meta-ads-repository.mjs",
+      "bytes": 20773,
+      "sha256": "5d6cd41822eb4d2849af8788f8cfde05ebb328cdd6b045f0a639e51a1c9462fb"
+    },
+    {
+      "path": "experiments/marketing/meta-ads-repository.test.mjs",
+      "bytes": 2216,
+      "sha256": "1d58ab0a44c3436cf8403b252a911f54b941191aff69e416edfb27c52909984e"
+    },
+    {
+      "path": "experiments/marketing/meta-credential-envelope.mjs",
+      "bytes": 3320,
+      "sha256": "57617d89d525c8efa0694b080848eea54490ba19ce466e1d77875fee818bd2e4"
+    },
+    {
+      "path": "experiments/marketing/meta-oauth-protocol.mjs",
+      "bytes": 7194,
+      "sha256": "dc365accbed0295cd9f82cbee857b679ad4fd7d42dd16f73c88dccdf23c3b15c"
+    },
+    {
+      "path": "experiments/marketing/meta-oauth-service.mjs",
+      "bytes": 17115,
+      "sha256": "7e9bfc4e4be9c5bce7ee8b37fbc1078b77eba365cef45c925594b1dabf0375e1"
+    },
+    {
+      "path": "experiments/marketing/meta-spend-collector.mjs",
+      "bytes": 9649,
+      "sha256": "da6041f1d5d0e285f680b88e1ff3854e80660686c1f756ff1f707773615fd9fc"
+    },
+    {
+      "path": "experiments/marketing/meta-spend-reader.mjs",
+      "bytes": 10269,
+      "sha256": "3593cb751604ad3eb0a96a60ece0d2e5f5ba10dc2f7712b05f31f66e6cdd0947"
+    },
+    {
+      "path": "experiments/marketing/meta-spend-reader.test.mjs",
+      "bytes": 6110,
+      "sha256": "c51e4c903046b42e7c58acce32488f945af05c79308720ef645702e3b6ca40bc"
+    }
+  ]
+}

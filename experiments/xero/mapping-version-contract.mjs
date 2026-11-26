@@ -1,3 +1,4 @@
+import {validXeroMappingInstant} from './mapping-instant.mjs';
 import {validateXeroAccountMapping} from './account-mapping-contract.mjs';
 
 /**
@@ -21,6 +22,6 @@ export function mappingVersionInScope({version,storeId,tenantId}={}){
 
 const identifier=value=>typeof value==='string'&&value.trim().length>0&&value.length<=256;
 const date=value=>{if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(value))return false;const parsed=new Date(`${value}T00:00:00.000Z`);return Number.isFinite(parsed.getTime())&&parsed.toISOString().slice(0,10)===value;};
-const timestamp=value=>typeof value==='string'&&Number.isFinite(Date.parse(value));
+const timestamp=validXeroMappingInstant;
 const plain=value=>value!==null&&typeof value==='object'&&Object.getPrototypeOf(value)===Object.prototype;
 const exactKeys=(value,keys)=>Object.keys(value).sort().join(',')===keys.slice().sort().join(',');

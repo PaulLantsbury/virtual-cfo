@@ -8,6 +8,8 @@ import {createXeroAccountingRuntime} from './lib/xero-accounting-runtime.ts';
 import {createXeroSavedMappingRuntime} from './lib/xero-saved-mapping-runtime.ts';
 import {reportingConfigReadiness} from '../../../deployments/render-staging/check-reporting-config.mjs';
 
+import {startMarketingProviderRuntime} from './lib/marketing-provider-startup.mjs';
+
 const rawPort = process.env["PORT"];
 
 if (!rawPort) {
@@ -60,7 +62,13 @@ try{xeroSavedMapping=createXeroSavedMappingRuntime(process.env);}catch{
   await Promise.all([runtime?.close(),xeroBootstrap?.close()]);
   process.exit(1);
 }
-const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined,webRoot,xeroReadiness,runtime?.profitService,xeroAccounting,xeroSavedMapping,runtime?.historyService,runtime?.supplementalService);
+let marketing;
+try{marketing=await startMarketingProviderRuntime(process.env);}catch{
+  logger.error("Marketing provider configuration failed; server startup stopped");
+  await Promise.allSettled([runtime?.close(),xeroBootstrap?.close()]);
+  process.exit(1);
+}
+const app=createApp(runtime?.service,xeroBootstrap?{service:xeroBootstrap.service,authenticate:xeroBootstrap.authenticate}:undefined,webRoot,xeroReadiness,runtime?.profitService,xeroAccounting,xeroSavedMapping,runtime?.historyService,runtime?.supplementalService,marketing.routes);
 const server=app.listen(port, localBind ?? "0.0.0.0", (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
@@ -71,5 +79,5 @@ const server=app.listen(port, localBind ?? "0.0.0.0", (err) => {
 });
 
 for(const signal of ["SIGTERM","SIGINT"] as const){
- process.once(signal,()=>{server.close(()=>{void Promise.all([runtime?.close(),xeroBootstrap?.close()]).finally(()=>process.exit(0));});});
+ process.once(signal,()=>{server.close(()=>{void Promise.allSettled([runtime?.close(),xeroBootstrap?.close(),marketing.close()]).finally(()=>process.exit(0));});});
 }

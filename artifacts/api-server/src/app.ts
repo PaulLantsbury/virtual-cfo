@@ -16,7 +16,19 @@ import {createSupplementalReportingRouter,type SupplementalReportingService} fro
 import {createHistoryReportingRouter,type HistoryReportingService} from './routes/history-reporting.ts';
 import {createXeroSavedMappingRouter,type SavedMappingDependencies} from './routes/xero-saved-mapping.ts';
 
-export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService,xeroAccounting?:XeroAccountingDependencies,xeroSavedMapping?:SavedMappingDependencies,historyReporting?:HistoryReportingService,supplementalReporting?:SupplementalReportingService): Express {
+import {createMetaAdsRouter, type MetaAdsRouterDependencies} from './routes/meta-ads.ts';
+import {createMetaAdsSpendReportRouter, type MetaAdsSpendReportDependencies} from './routes/meta-ads-spend-report.ts';
+import {createGoogleAdsRouter, type GoogleAdsRouterDependencies} from './routes/google-ads.ts';
+import {createGoogleAdsSpendReportRouter, type GoogleAdsSpendReportDependencies} from './routes/google-ads-spend-report.ts';
+
+export type MarketingProviderDependencies = Readonly<{
+  meta?: MetaAdsRouterDependencies;
+  metaReport?: MetaAdsSpendReportDependencies;
+  google?: GoogleAdsRouterDependencies;
+  googleReport?: GoogleAdsSpendReportDependencies;
+}>;
+
+export function createApp(reviewService?: ReviewService, xeroBootstrap?: XeroBootstrapRouterDependencies, webRoot?:string,xeroReadiness?:XeroReadinessDependencies,profitReporting?:ProfitReportingService,xeroAccounting?:XeroAccountingDependencies,xeroSavedMapping?:SavedMappingDependencies,historyReporting?:HistoryReportingService,supplementalReporting?:SupplementalReportingService,marketing:MarketingProviderDependencies={}): Express {
 const app: Express = express();
 
 app.use(
@@ -44,6 +56,11 @@ app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
 app.use('/api/profit-reporting',createProfitReportingRouter(profitReporting));
 app.use('/api/history-reporting',createHistoryReportingRouter(historyReporting));
 app.use('/api/supplemental-reporting',createSupplementalReportingRouter(supplementalReporting));
+// Each router fails closed when its separately opted-in runtime is absent.
+app.use('/api/meta-ads',createMetaAdsSpendReportRouter(marketing.metaReport));
+app.use('/api/meta-ads',createMetaAdsRouter(marketing.meta));
+app.use('/api/google-ads',createGoogleAdsSpendReportRouter(marketing.googleReport));
+app.use('/api/google-ads',createGoogleAdsRouter(marketing.google));
 // Retired operator-only endpoint must never reach the customer SPA or OAuth handlers.
 app.use('/api/xero/test-writer',(_req,res)=>{res.set('Cache-Control','no-store').status(404).json({error:'endpoint_unavailable'});});
 app.use('/api/xero/staging',createXeroStagingBootstrapRouter(xeroBootstrap));

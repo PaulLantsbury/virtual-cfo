@@ -401,3 +401,31 @@ test("future periods and Xero extracts preceding period close cannot certify com
     /contract unavailable/,
   );
 });
+
+test("provider facts reject extra attribution array fields and accessor-backed values", () => {
+  for (const namespace of ["meta_ads", "google_ads"]) {
+    const extra = fact(namespace);
+    extra.performance.attribution.rawResponse = "FICTIONAL_PRIVATE_PAYLOAD";
+    assert.throws(
+      () => validateMarketingDayFact(extra, now),
+      { message: "Marketing evidence contract unavailable" },
+    );
+
+    const accessor = fact(namespace);
+    let calls = 0;
+    Object.defineProperty(accessor.performance.attribution[0], "model", {
+      enumerable: true,
+      get() {
+        calls += 1;
+        return calls === 1
+          ? "provider_reported_example"
+          : "FICTIONAL_PRIVATE_PAYLOAD";
+      },
+    });
+    assert.throws(
+      () => validateMarketingDayFact(accessor, now),
+      { message: "Marketing evidence contract unavailable" },
+    );
+    assert.equal(calls, 0);
+  }
+});

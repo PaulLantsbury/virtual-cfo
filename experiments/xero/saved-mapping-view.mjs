@@ -1,9 +1,10 @@
+import {validXeroMappingInstant} from './mapping-instant.mjs';
 /** Shared value-free saved mapping contract. No amounts, OAuth or account writes. */
 export const XERO_SAVED_CATEGORIES=Object.freeze(['revenue','processingFee','advertising','software','includedCash']);
 const plain=v=>!!v&&typeof v==='object'&&!Array.isArray(v)&&Object.getPrototypeOf(v)===Object.prototype;
 const exact=(v,keys)=>plain(v)&&Object.keys(v).sort().join(',')===[...keys].sort().join(',');
 const day=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(`${v}T00:00:00Z`))&&new Date(`${v}T00:00:00Z`).toISOString().slice(0,10)===v;
-const stamp=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(v)&&Number.isFinite(Date.parse(v));
+const stamp=v=>validXeroMappingInstant(v)&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(v)&&Number.isFinite(Date.parse(v));
 const text=(v,max)=>typeof v==='string'&&v.trim().length>0&&v.length<=max;
 export function parseSavedXeroMapping(value,storeId){
  if(typeof storeId!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(storeId)||!exact(value,['storeId','state','mapping'])||value.storeId!==storeId)return null;

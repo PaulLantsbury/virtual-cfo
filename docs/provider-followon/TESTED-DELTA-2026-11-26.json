@@ -1,0 +1,87 @@
+{
+  "base": "8472f2182bc33aab1552a0ab49aae0ec2f505948",
+  "testedCommit": "f8dddcd186f4f57d84e3a3badf2825441b66ac79",
+  "pagesDisplayCommit": "379fbb9",
+  "files": [
+    {
+      "path": "artifacts/api-server/src/routes/google-ads-spend-report.ts",
+      "bytes": 6669,
+      "sha256": "53c8372505300cc7e41d0eb9acdc285d6fbde12b561066f71dec5f437e84e420"
+    },
+    {
+      "path": "artifacts/api-server/tests/google-ads-report-provenance.test.mjs",
+      "bytes": 3568,
+      "sha256": "4ea5e08ad3d953719dabdfb1b3cba77ad9e1d1ea2e8a242cb701264b992a2480"
+    },
+    {
+      "path": "artifacts/api-server/tests/meta-display-pipeline-pins.json",
+      "bytes": 462,
+      "sha256": "20c0640d47228d7a1942b4360a609beeee58666e8daab9f454576ecee487d454"
+    },
+    {
+      "path": "artifacts/api-server/tests/meta-display-pipeline.mjs",
+      "bytes": 11303,
+      "sha256": "034a1c1fe710c321fa6528774e8d56f531badf1a6d7238b8fe0e32d9159182c4"
+    },
+    {
+      "path": "db-migrations/proposals/google-ads-spend-read-rpc-2026-11-21.sql",
+      "bytes": 12489,
+      "sha256": "f7cb0ac6d0a4ea31075474f875938989d46a68650ddbd7285342288c21333e87"
+    },
+    {
+      "path": "experiments/marketing/google-ads-report-repository.mjs",
+      "bytes": 6317,
+      "sha256": "62abfe386f824dbec5d3dad199fef4044c44078e52d59bfa3547b03d41d2d3d5"
+    },
+    {
+      "path": "experiments/marketing/google-ads-report-timestamp.d.mts",
+      "bytes": 85,
+      "sha256": "afd85bb73e31814990b5e72f754931b1cc62c8f2ea90d4ad8fb036a6ae20d0b2"
+    },
+    {
+      "path": "experiments/marketing/google-ads-report-timestamp.mjs",
+      "bytes": 541,
+      "sha256": "d8b777f6708367694e1e3ab88b47c0046d78b71a7322130d48f7d27036da0f23"
+    },
+    {
+      "path": "experiments/marketing/google-selection-authority.test.mjs",
+      "bytes": 5412,
+      "sha256": "1db40d937a42c369a2a4350807926901696442f58dddf979fc5523c832408e10"
+    },
+    {
+      "path": "experiments/marketing/provider-setup-dryrun.test.mjs",
+      "bytes": 5185,
+      "sha256": "5dd7253ffab02e3320e9eaffc19b8af5e7d61282d9eecff59399734d4a769920"
+    },
+    {
+      "path": "experiments/xero/mapping-api-contract.mjs",
+      "bytes": 2243,
+      "sha256": "2382207664349db2dccd6a9bd05469519b44deef905b614da12a8a4a67a1a515"
+    },
+    {
+      "path": "experiments/xero/mapping-instant.d.mts",
+      "bytes": 82,
+      "sha256": "ea9eff74bcc6c8501bce26c7a4fc6639f6ae4fdce514273de9943362890fdba1"
+    },
+    {
+      "path": "experiments/xero/mapping-instant.mjs",
+      "bytes": 530,
+      "sha256": "1e4b7c8e683851dc1301093c51243ee461783394eda9a619de1f4acfe9b00c8b"
+    },
+    {
+      "path": "experiments/xero/mapping-timestamp-boundary.test.mjs",
+      "bytes": 2648,
+      "sha256": "10a4dbd9b993e6330d002c4111da1a54e884245415f73bbf6ef2a4fa1c7a3a51"
+    },
+    {
+      "path": "experiments/xero/mapping-version-contract.mjs",
+      "bytes": 1928,
+      "sha256": "b6dc427c3677cca0e67185738b86c62d04543cddbb06d04d49959f05a654a2e4"
+    },
+    {
+      "path": "experiments/xero/saved-mapping-view.mjs",
+      "bytes": 2396,
+      "sha256": "bf9df3c679bcb322cb7fffdf0912a9ec0cc33aa42785190361886380b3e99538"
+    }
+  ]
+}

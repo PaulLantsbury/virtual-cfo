@@ -1,0 +1,8 @@
+{
+  "pagesCommit": "379fbb90e6cffe6a86eaa034aa2c894d5aae72fa",
+  "files": {
+    "artifacts/virtual-cfo/src/lib/metaSpendDisplay.ts": "6fc815c477d16dd057993a70d42a01f0b965eaa1851b6cbf5a73aa7c6ec1b9a5",
+    "artifacts/virtual-cfo/src/lib/metaHistoryWire.ts": "9ad80194a991f24353dc152cc9501e466c89fc1bae57c06e2ecbec8372ef7702",
+    "artifacts/virtual-cfo/src/lib/metaHistoryPresentation.ts": "1f0697cf06b39cde0d01d282b259536b49b7d499f76b5d847720a474b2d19405"
+  }
+}

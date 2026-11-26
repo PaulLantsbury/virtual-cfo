@@ -1,0 +1,868 @@
+{
+  "integration_base": "379fbb90e6cffe6a86eaa034aa2c894d5aae72fa",
+  "live_cleanup": "204226d0c796561d5bb812cde1bd9cec8da6a8d5",
+  "frozen_website": "28853bb8567a503f7847f0e028f9e6277b2b384a",
+  "provider": "f8dddcd186f4f57d84e3a3badf2825441b66ac79",
+  "provider_docs": "0a7f881793377a8b49fd1ea991d4ea65e5bf5aac",
+  "changed_since_display": [
+    "artifacts/api-server/src/app.ts",
+    "artifacts/api-server/src/index.ts",
+    "artifacts/api-server/src/lib/google-ads-collector-runtime.d.mts",
+    "artifacts/api-server/src/lib/google-ads-collector-runtime.mjs",
+    "artifacts/api-server/src/lib/google-ads-report-runtime.d.mts",
+    "artifacts/api-server/src/lib/google-ads-report-runtime.mjs",
+    "artifacts/api-server/src/lib/google-ads-runtime.d.mts",
+    "artifacts/api-server/src/lib/google-ads-runtime.mjs",
+    "artifacts/api-server/src/lib/marketing-provider-startup.d.mts",
+    "artifacts/api-server/src/lib/marketing-provider-startup.mjs",
+    "artifacts/api-server/src/lib/meta-ads-collector-runtime.d.mts",
+    "artifacts/api-server/src/lib/meta-ads-collector-runtime.mjs",
+    "artifacts/api-server/src/lib/meta-ads-report-runtime.d.mts",
+    "artifacts/api-server/src/lib/meta-ads-report-runtime.mjs",
+    "artifacts/api-server/src/lib/meta-ads-runtime.d.mts",
+    "artifacts/api-server/src/lib/meta-ads-runtime.mjs",
+    "artifacts/api-server/src/routes/google-ads-spend-report.ts",
+    "artifacts/api-server/src/routes/google-ads.ts",
+    "artifacts/api-server/src/routes/meta-ads-spend-report.ts",
+    "artifacts/api-server/src/routes/meta-ads.ts",
+    "artifacts/api-server/tests/google-ads-acceptance.test.mjs",
+    "artifacts/api-server/tests/google-ads-collector-runtime.test.mjs",
+    "artifacts/api-server/tests/google-ads-report-provenance.test.mjs",
+    "artifacts/api-server/tests/google-ads-route.test.mjs",
+    "artifacts/api-server/tests/google-ads-runtime.test.mjs",
+    "artifacts/api-server/tests/marketing-mounted.test.mjs",
+    "artifacts/api-server/tests/marketing-provider-startup.test.mjs",
+    "artifacts/api-server/tests/meta-ads-acceptance-runner.test.mjs",
+    "artifacts/api-server/tests/meta-ads-integration.test.mjs",
+    "artifacts/api-server/tests/meta-ads-timestamp-runtime.test.mjs",
+    "artifacts/api-server/tests/meta-display-mounted.test.mjs",
+    "artifacts/api-server/tests/meta-display-pipeline-pins.json",
+    "artifacts/api-server/tests/meta-display-pipeline.mjs",
+    "artifacts/api-server/tests/meta-pages-agreement.mjs",
+    "artifacts/api-server/tests/meta-spend-client.test.mjs",
+    "artifacts/virtual-cfo/src/components/DecisionSection.tsx",
+    "artifacts/virtual-cfo/src/components/MetaDailySpendPanel.tsx",
+    "artifacts/virtual-cfo/src/components/MetaSpendConnectionStatus.tsx",
+    "artifacts/virtual-cfo/src/lib/googleAdsSpendApi.ts",
+    "artifacts/virtual-cfo/src/lib/metaAdsApi.test.ts",
+    "artifacts/virtual-cfo/src/lib/metaAdsApi.ts",
+    "artifacts/virtual-cfo/src/lib/metaAdsSpendApi.ts",
+    "artifacts/virtual-cfo/tests/five-core-browser.mjs",
+    "db-migrations/proposals/google-ads-spend-read-rpc-2026-11-21.sql",
+    "db-migrations/proposals/google-ads-spend-rpcs-2026-11-21.sql",
+    "db-migrations/proposals/google-ads-spend-store-2026-11-21.sql",
+    "db-migrations/proposals/meta-ads-spend-read-rpc-2026-11-20.sql",
+    "db-migrations/proposals/meta-ads-spend-rpcs-2026-11-20.sql",
+    "db-migrations/proposals/meta-ads-spend-store-2026-11-20.sql",
+    "deployments/nightly-staging/GOOGLE-ADS-STAGING-PREP.md",
+    "deployments/nightly-staging/META-ADS-DAILY-CRON.md",
+    "deployments/nightly-staging/META-ADS-STAGING-SETUP.md",
+    "deployments/nightly-staging/run-google-ads-acceptance.mjs",
+    "deployments/nightly-staging/run-meta-ads-acceptance.mjs",
+    "deployments/nightly-staging/run-meta-ads-daily.mjs",
+    "docs/combined-browser-validation-2026-11-26.md",
+    "docs/combined-independent-release-review-2026-11-26.md",
+    "docs/combined-release-package-2026-11-26.md",
+    "docs/integration-recovery/FINAL-RECEIPT-2026-11-26.md",
+    "docs/integration-recovery/HISTORY-CONTRACT-PROPOSAL-2026-11-26.md",
+    "docs/integration-recovery/IMPLEMENTATION-HANDOVER-2026-11-26.md",
+    "docs/integration-recovery/LOGGING-ACCEPTANCE-PROPOSAL-2026-11-26.md",
+    "docs/integration-recovery/META-SPEND-WIRE-2026-11-26.md",
+    "docs/integration-recovery/SECURITY-REVIEW-2026-11-26.md",
+    "docs/integration-recovery/STAGING-PACKAGE-2026-11-26.md",
+    "docs/integration-recovery/VALIDATION-2026-11-26.md",
+    "docs/integration-recovery/additional-recovery-manifest-2026-11-26.json",
+    "docs/integration-recovery/final-source-manifest-2026-11-26.json",
+    "docs/integration-recovery/independent-security-review-2026-11-26.md",
+    "docs/integration-recovery/source-capsule-manifest-2026-11-26.json",
+    "docs/integration-release/ACTIVATION-REVIEW-2026-11-26.md",
+    "docs/integration-release/FINAL-PACKAGE-2026-11-26.md",
+    "docs/integration-release/HOSTED-PROVIDER-PROPOSAL-2026-11-26.md",
+    "docs/integration-release/PUBLICATION-PROPOSAL-2026-11-26.md",
+    "docs/integration-release/SOURCE-REVIEW-2026-11-26.md",
+    "docs/integration-release/TESTED-SOURCE-MANIFEST-2026-11-26.json",
+    "docs/integration-release/VALIDATION-2026-11-26.md",
+    "docs/marketing-spend-integration-status-2026-11-21.md",
+    "docs/marketing-spend-integrations-2026-11-20.md",
+    "docs/provider-followon/INDEPENDENT-CONTRACT-REVIEW-2026-11-26.md",
+    "docs/provider-followon/INTEGRATION-HANDOFF-2026-11-26.md",
+    "docs/provider-followon/META-COMBINED-BOUNDARY-2026-11-26.md",
+    "docs/provider-followon/SETUP-DRYRUN-2026-11-26.md",
+    "docs/provider-followon/TESTED-DELTA-2026-11-26.json",
+    "docs/provider-next/GOOGLE-XERO-OFFLINE-AUDIT-2026-11-26.md",
+    "experiments/marketing/google-ads-acceptance.mjs",
+    "experiments/marketing/google-ads-account-discovery.mjs",
+    "experiments/marketing/google-ads-collector-repository.mjs",
+    "experiments/marketing/google-ads-collector-repository.test.mjs",
+    "experiments/marketing/google-ads-collector.mjs",
+    "experiments/marketing/google-ads-collector.test.mjs",
+    "experiments/marketing/google-ads-integration.test.mjs",
+    "experiments/marketing/google-ads-oauth-credential-envelope.mjs",
+    "experiments/marketing/google-ads-oauth-protocol.mjs",
+    "experiments/marketing/google-ads-oauth-service.mjs",
+    "experiments/marketing/google-ads-persistence.test.mjs",
+    "experiments/marketing/google-ads-report-repository.mjs",
+    "experiments/marketing/google-ads-report-repository.test.mjs",
+    "experiments/marketing/google-ads-report-timestamp.d.mts",
+    "experiments/marketing/google-ads-report-timestamp.mjs",
+    "experiments/marketing/google-ads-repository.mjs",
+    "experiments/marketing/google-ads-spend-reader.mjs",
+    "experiments/marketing/google-selection-authority.test.mjs",
+    "experiments/marketing/meta-ads-integration.test.mjs",
+    "experiments/marketing/meta-ads-repository.mjs",
+    "experiments/marketing/meta-ads-repository.test.mjs",
+    "experiments/marketing/meta-credential-envelope.mjs",
+    "experiments/marketing/meta-oauth-protocol.mjs",
+    "experiments/marketing/meta-oauth-service.mjs",
+    "experiments/marketing/meta-spend-collector.mjs",
+    "experiments/marketing/meta-spend-reader.mjs",
+    "experiments/marketing/meta-spend-reader.test.mjs",
+    "experiments/marketing/meta-spend-report-contract.d.mts",
+    "experiments/marketing/meta-spend-report-contract.mjs",
+    "experiments/marketing/meta-spend-report-contract.test.mjs",
+    "experiments/marketing/meta-wire-hardening.test.mjs",
+    "experiments/marketing/provider-facts.test.mjs",
+    "experiments/marketing/provider-facts.ts",
+    "experiments/marketing/provider-history-contract-proposal.test.mjs",
+    "experiments/marketing/provider-history-contract-proposal.ts",
+    "experiments/marketing/provider-setup-dryrun.test.mjs",
+    "experiments/marketing/provider-storage-rehearsal.test.mjs",
+    "experiments/xero/mapping-api-contract.mjs",
+    "experiments/xero/mapping-instant.d.mts",
+    "experiments/xero/mapping-instant.mjs",
+    "experiments/xero/mapping-timestamp-boundary.test.mjs",
+    "experiments/xero/mapping-version-contract.mjs",
+    "experiments/xero/saved-mapping-view.mjs"
+  ],
+  "changed_since_live": {
+    "artifacts/api-server/src/app.ts": {
+      "git_blob": "fad0d6bef5075f987389382666253917e6701d93",
+      "sha256": "11be84749e3d2fc7aa74c6467a0fadb2931cf4e8c550f281dd05a54a0e09fd05"
+    },
+    "artifacts/api-server/src/index.ts": {
+      "git_blob": "22a85bf2a951a302fc0228dd8e685d5d0e7788f7",
+      "sha256": "d68dab7c8321ce0b3c882d949ac0c167c218f289ec47b98689f5cb22d759025c"
+    },
+    "artifacts/api-server/src/lib/google-ads-collector-runtime.d.mts": {
+      "git_blob": "ae2c5495bc2ec326ce1215429644f9a70b45e79c",
+      "sha256": "6b587f3d5d8cf088e9ab74809b3f21a095176b4f430435e3cca961d80d583933"
+    },
+    "artifacts/api-server/src/lib/google-ads-collector-runtime.mjs": {
+      "git_blob": "23a5c32e1be5eb001fd204c2354e7a00af0d01ef",
+      "sha256": "0c3e496edac1d6ba359b6c37c1697663da270d00f19929473f467230bcc6afde"
+    },
+    "artifacts/api-server/src/lib/google-ads-report-runtime.d.mts": {
+      "git_blob": "ed629987f968f3d98f150a31859b8c0ef80297de",
+      "sha256": "59d251e7a9f84e09e7dba3cba003f5ef2caea6f19a0afaebc9cc52462879ac26"
+    },
+    "artifacts/api-server/src/lib/google-ads-report-runtime.mjs": {
+      "git_blob": "c4bb9c18e95febb4d880b48a89b25971f32fb59e",
+      "sha256": "d42678026dcfbe83f6511034be4aeb985896fc5adf5d9c58de0747bc5260472f"
+    },
+    "artifacts/api-server/src/lib/google-ads-runtime.d.mts": {
+      "git_blob": "04cb7bffed56686bb3339e781e4fccbe8559ed22",
+      "sha256": "346056752cffc13cae84b537d80f77fcc6ee9af5183fc9659fe8dabd023ecbc4"
+    },
+    "artifacts/api-server/src/lib/google-ads-runtime.mjs": {
+      "git_blob": "862b11fea100e7ebb0a6b524c2b7e21559e162c5",
+      "sha256": "eed1463f2532879a06f49a341784725f77cdcb54748f0359bb5ddcf0d55fe11f"
+    },
+    "artifacts/api-server/src/lib/marketing-provider-startup.d.mts": {
+      "git_blob": "3f88aae0ecb5e5166045470350284aeb554eefe4",
+      "sha256": "2e4d6b75aa7524498edaf302e809f8e0a3abde472568f8eb35c00d0c83ffa9de"
+    },
+    "artifacts/api-server/src/lib/marketing-provider-startup.mjs": {
+      "git_blob": "df3f334604a7358e1730f93c363373e797b7f92a",
+      "sha256": "a083afb6ed40f542177ef4eba23d8a3a0c48a0637eecf72196f3176eec0c0b89"
+    },
+    "artifacts/api-server/src/lib/meta-ads-collector-runtime.d.mts": {
+      "git_blob": "6b00ec1fd75836a7dfe6ea7e74cdfb8bfc1f3c51",
+      "sha256": "891c77347357f1f634be8e9e071ac95511800d802babef2b644413fa5404c4b8"
+    },
+    "artifacts/api-server/src/lib/meta-ads-collector-runtime.mjs": {
+      "git_blob": "6fefc3502fbd2f451358943cb9c1b82e02a58292",
+      "sha256": "5f63f0be252026a9bda397ed75569e50e2d528c088823927790004037cc1dea0"
+    },
+    "artifacts/api-server/src/lib/meta-ads-report-runtime.d.mts": {
+      "git_blob": "e1ce84c42eaae9d555be430e79d15ef914d04377",
+      "sha256": "82e4a683469ef3fad377612888cb3352f04ea3885183dd60bd7c5a978b7a5fb7"
+    },
+    "artifacts/api-server/src/lib/meta-ads-report-runtime.mjs": {
+      "git_blob": "faba779a9914c816b9815de9f6d581cc67144e11",
+      "sha256": "41a33ac17806138c269a71d48ad0e2bb39d4008370e35c0dc7af0d8178fbb5b8"
+    },
+    "artifacts/api-server/src/lib/meta-ads-runtime.d.mts": {
+      "git_blob": "bd6c34a161e974e1a16524b376b7eb93eced6dcf",
+      "sha256": "2a51d7f3fa8cc80e6f7f2ceaf6dde45a60b09c6a416a3ff4dbf770759de6529e"
+    },
+    "artifacts/api-server/src/lib/meta-ads-runtime.mjs": {
+      "git_blob": "9cfc7834df5322ed35b78245cf1680f20275cdaa",
+      "sha256": "232d4eec0637614e7d29fea4a2595ff274aa77495ba452339980bbe1b065d4fd"
+    },
+    "artifacts/api-server/src/routes/google-ads-spend-report.ts": {
+      "git_blob": "a66d4f43bc0aa3b945383743334cb13b996e0e0c",
+      "sha256": "53c8372505300cc7e41d0eb9acdc285d6fbde12b561066f71dec5f437e84e420"
+    },
+    "artifacts/api-server/src/routes/google-ads.ts": {
+      "git_blob": "81d89ed4da2c7b97a7bca4fe36ad16bf4d7fde41",
+      "sha256": "87dc67288d756d75aca42863cc104d3ca9c093fa119a773da1367e3e4ed7e0ea"
+    },
+    "artifacts/api-server/src/routes/meta-ads-spend-report.ts": {
+      "git_blob": "b7af35979f098839e18622004f8c0b8529676925",
+      "sha256": "92ff0a63230ee8a289ac8a549e1c5916e77818679b462e5e3e6c5ca3799da934"
+    },
+    "artifacts/api-server/src/routes/meta-ads.ts": {
+      "git_blob": "d38ff2428a0da930d8a5c63c5b454d6d185e229e",
+      "sha256": "bebc4193f9a23604b6256d774e73e4a4291b58a6d316773f313798f00e0d33f1"
+    },
+    "artifacts/api-server/tests/google-ads-acceptance.test.mjs": {
+      "git_blob": "c40575983648b044793b04396c7a20e71b015eaa",
+      "sha256": "1cb1aa64ed572799c324491cc20592475a49cf72f9fc26c8711e4f46323c3a1a"
+    },
+    "artifacts/api-server/tests/google-ads-collector-runtime.test.mjs": {
+      "git_blob": "0c2b0c19173003079d7fb835bb1a6279eb4adc59",
+      "sha256": "755f1f41ed3067a74419ee507739c82cc3ac46023673c4d0b98ea6df863b3e0f"
+    },
+    "artifacts/api-server/tests/google-ads-report-provenance.test.mjs": {
+      "git_blob": "e5bcc9d4819a81a4352f84eb62ad5ca86e75e747",
+      "sha256": "4ea5e08ad3d953719dabdfb1b3cba77ad9e1d1ea2e8a242cb701264b992a2480"
+    },
+    "artifacts/api-server/tests/google-ads-route.test.mjs": {
+      "git_blob": "d9927a19a8c7b0a42d07e8dcd72beb923fa07f59",
+      "sha256": "d5a6b2bdaf206ed45a4d3cf5b45e480193f071b7c77cd37cc41486cf74d64208"
+    },
+    "artifacts/api-server/tests/google-ads-runtime.test.mjs": {
+      "git_blob": "d1f79e01416f7f36cbd3f39825485bada1b2cb34",
+      "sha256": "31de574e8f22c91ffc933e2710683799d22f16c1d8c67a234c1c8a94d016aed2"
+    },
+    "artifacts/api-server/tests/marketing-mounted.test.mjs": {
+      "git_blob": "62fa815f11f6956dfade04beb6cc10bbddced38d",
+      "sha256": "adaaff3e8c0905eccb206684d29f66bbf0fa4a790e4c66fb69320d9da1890266"
+    },
+    "artifacts/api-server/tests/marketing-provider-startup.test.mjs": {
+      "git_blob": "de0acd4868dd3392ad4bca2d4e77cf4b89842d04",
+      "sha256": "4a1c413f27d685a5d0baa625bcff9406078970f5611c48b43cdf1e75f5b3966c"
+    },
+    "artifacts/api-server/tests/meta-ads-acceptance-runner.test.mjs": {
+      "git_blob": "aeacc2f6c5319d1faf617600fa21c747f3c12d73",
+      "sha256": "d9d7aa624b3008ad5868d76ab5076274e88a1dace7847279eb7586b85a9677e6"
+    },
+    "artifacts/api-server/tests/meta-ads-integration.test.mjs": {
+      "git_blob": "763d929ed66deb00ce207c446291a6107c916106",
+      "sha256": "d5fc2158e8922d319c0c52a4de18da43eb65a46928de49b81c4fd5d82a803672"
+    },
+    "artifacts/api-server/tests/meta-ads-timestamp-runtime.test.mjs": {
+      "git_blob": "1a3a0e78e009e50bbb408bd69da36d286ff4b585",
+      "sha256": "f319b96e25f062c4c5a9576ba3e8bcc605e792c6a52798752180b05029efede0"
+    },
+    "artifacts/api-server/tests/meta-display-mounted.test.mjs": {
+      "git_blob": "e83980a837fb123d9f0dc9ae1d0b50180b1d1f66",
+      "sha256": "771d64f236323987da4844392e646f2535fc7da3337f42501e63519f97518a61"
+    },
+    "artifacts/api-server/tests/meta-display-pipeline-pins.json": {
+      "git_blob": "ceb8c93cbf0bd826e8b5e133e23bbf6e074c5c92",
+      "sha256": "20c0640d47228d7a1942b4360a609beeee58666e8daab9f454576ecee487d454"
+    },
+    "artifacts/api-server/tests/meta-display-pipeline.mjs": {
+      "git_blob": "7eb0a0f3a58ef15655ae3177c688d4b77ec911b0",
+      "sha256": "034a1c1fe710c321fa6528774e8d56f531badf1a6d7238b8fe0e32d9159182c4"
+    },
+    "artifacts/api-server/tests/meta-pages-agreement.mjs": {
+      "git_blob": "43239c9e633bae420b8e9248aeb37cee9fce4341",
+      "sha256": "999b04011e0d5ee0a522ecfc8c477e27d3eaf9dee337a4544d3419596a1ee4de"
+    },
+    "artifacts/api-server/tests/meta-spend-client.test.mjs": {
+      "git_blob": "814e530de5104c69bf7e823e4322eab552740a93",
+      "sha256": "28398470805228555f9183e71d6bd462e8f2ea62aba3e19f40eb2bf9c0492194"
+    },
+    "artifacts/virtual-cfo/src/components/CashSourceFigures.tsx": {
+      "git_blob": "5c6838124b4a2ed723c92b3a3fed12ca63b4ab27",
+      "sha256": "d5f23d78893d9a3e8747061637894acd1b42c7811b477dfe948976736f422375"
+    },
+    "artifacts/virtual-cfo/src/components/DecisionSection.tsx": {
+      "git_blob": "42def2c04d53834aface1bb5e5d8acbecab3f946",
+      "sha256": "b1dfda7640e7bf3b06fdbb28bd71d6e82d1d7cdf5521fe37ff1a83372db26a9e"
+    },
+    "artifacts/virtual-cfo/src/components/MetaDailySpendPanel.tsx": {
+      "git_blob": "c8a6f35aa0a5a322761fee578bdd73fe7365670b",
+      "sha256": "33a452171b771b073c658c44d6a5942b33223be7e3eb52b923e7302adf2d6055"
+    },
+    "artifacts/virtual-cfo/src/components/MetaReadOnlySpendPanel.tsx": {
+      "git_blob": "cde3fd0ca0c5c064f8cc2d73a162853190eed49e",
+      "sha256": "826b93a31f06b7b1ab6ae5e388831dcef803f47f81f3e4b38799dd47e9e5779d"
+    },
+    "artifacts/virtual-cfo/src/components/MetaSavedHistory.tsx": {
+      "git_blob": "8fa8a06710f4554cb7ef98508f3babf4a78840fb",
+      "sha256": "61800f856cdf9bcc162cfea5efb3ace383482c2c0c3ac10d3ffca742a1d4c21a"
+    },
+    "artifacts/virtual-cfo/src/components/MetaSpendConnectionStatus.tsx": {
+      "git_blob": "bd9d536d0d08ab9d48232b1eeff28e338bcb6c58",
+      "sha256": "f5c05cdee1e62e9161e1195238d4b6e968ac6dc9aef714a8156a2101b871ea53"
+    },
+    "artifacts/virtual-cfo/src/components/NewProfitLive.tsx": {
+      "git_blob": "30c302b04fc51c636df6704e826006929dc85e88",
+      "sha256": "fce7dbc848b087081e8adedfc6d7da45230fca7afb269f0a1e0f9304a225f2f8"
+    },
+    "artifacts/virtual-cfo/src/components/PlanBaselineEvidence.tsx": {
+      "git_blob": "1e15a38ecb68c12e930de8c843bf933483d11640",
+      "sha256": "d1be4005c919a7f76397bf3b1e62d408740e7c957af06ee4f09f28bde94cd5d2"
+    },
+    "artifacts/virtual-cfo/src/lib/googleAdsSpendApi.ts": {
+      "git_blob": "92ec8c5e3833bbb9f2805f335e31275abb9de558",
+      "sha256": "253d46e8198d5eaa4155b5a67c998335f0ccad2f383b775f45cc3d78175835a6"
+    },
+    "artifacts/virtual-cfo/src/lib/metaAdsApi.test.ts": {
+      "git_blob": "8b321b1b573059ab16453ad406f4c11f273e0971",
+      "sha256": "aba9e47dbe9e3840d862d83071608742cb51a67399ffc3e9e54d936f71de74a7"
+    },
+    "artifacts/virtual-cfo/src/lib/metaAdsApi.ts": {
+      "git_blob": "2a0425a79e62781a1a899c3fac6eeb0515528827",
+      "sha256": "95ebe3b4273fb24462e11cf8d390e3fab6672624bff086fb33d40ab6d571da40"
+    },
+    "artifacts/virtual-cfo/src/lib/metaAdsSpendApi.ts": {
+      "git_blob": "f9ba0e286da7a883843f1f0e390a80278b059707",
+      "sha256": "c5407376c5c5083bcb5b8d129d26ab269e8d311874a5f33950ba5fe93ff8dae3"
+    },
+    "artifacts/virtual-cfo/src/lib/metaHistoryPresentation.ts": {
+      "git_blob": "a5eae502be87a22534b8dba1649fbe64267a28d7",
+      "sha256": "1f0697cf06b39cde0d01d282b259536b49b7d499f76b5d847720a474b2d19405"
+    },
+    "artifacts/virtual-cfo/src/lib/metaHistoryWire.ts": {
+      "git_blob": "3a1d3c15715bbe85135cb9666e6c1de5ce6f5f00",
+      "sha256": "9ad80194a991f24353dc152cc9501e466c89fc1bae57c06e2ecbec8372ef7702"
+    },
+    "artifacts/virtual-cfo/src/lib/metaSpendDisplay.ts": {
+      "git_blob": "37efb983b1f7da1935b8f080d714da804963eb7f",
+      "sha256": "6fc815c477d16dd057993a70d42a01f0b965eaa1851b6cbf5a73aa7c6ec1b9a5"
+    },
+    "artifacts/virtual-cfo/src/lib/planning/plan-baseline-evidence.test.ts": {
+      "git_blob": "27320f21c269a0c6f301171661a61289dd129708",
+      "sha256": "6c58cb05e290aa5c8daa6953a4707a9ab68cb17c00d5314761726a7e92fa472c"
+    },
+    "artifacts/virtual-cfo/src/lib/planning/plan-baseline-evidence.ts": {
+      "git_blob": "b20db73b248afc075324273ffafeafb16ac0502f",
+      "sha256": "8386a6468fd1ab72520c4df8c2243fadf9f4c6c560c75887345184bb3464b53a"
+    },
+    "artifacts/virtual-cfo/src/lib/planning/useReviewedPlanBaseline.test.mjs": {
+      "git_blob": "b018d9afb94105461c82663327720b9177b7358c",
+      "sha256": "9e7b5e27d2f43d6f507487671e2c05398dacb1ff8f88149296ef2f3b3784f4db"
+    },
+    "artifacts/virtual-cfo/src/lib/planning/useReviewedPlanBaseline.ts": {
+      "git_blob": "982aa97055962549db0f29dbb2f41862454ee87b",
+      "sha256": "8f4381b73b60feb6c2ba0b66989378f5abd8be28d874219c4fed105243850121"
+    },
+    "artifacts/virtual-cfo/src/lib/reviewedCashWindow.test.ts": {
+      "git_blob": "94e1fa434dcb8f3080ffde57d2b18367db099a7b",
+      "sha256": "cd4a6572b46858c966823f323e47e238122e7b6f05c932e414dc239e254dd036"
+    },
+    "artifacts/virtual-cfo/src/lib/reviewedCashWindow.ts": {
+      "git_blob": "7d888fd9cf374eda19ef2dd746ae20e2cd4f3e8c",
+      "sha256": "be1de2b6730f5af90c9d3235d41cc64b51799a69f6aba2c110024a775d4e3a66"
+    },
+    "artifacts/virtual-cfo/src/lib/useMetaSavedSpend.ts": {
+      "git_blob": "ab34c552da09e41833c5895a7b95f9f5c87180be",
+      "sha256": "aac8f44d9b9943b8c657300258aa5d0b62b24e908855bf39cf0108da8838dd9e"
+    },
+    "artifacts/virtual-cfo/src/lib/useReviewedCash.query-race.test.mjs": {
+      "git_blob": "b491c8b8e41bda7d3011e71586bee258a54709ae",
+      "sha256": "dae319f66bf863158c3bab6c53b82a0cc215b92a217124651542ca2692268e9f"
+    },
+    "artifacts/virtual-cfo/src/lib/useReviewedCash.test.mjs": {
+      "git_blob": "7b783c239251fa6ded5f8d5b5ef6a29ba59e4ba3",
+      "sha256": "165ddf2dfa99c57d70cf4e1e947cf6b311381d3330a00070bfaedc8e7c6f7368"
+    },
+    "artifacts/virtual-cfo/src/lib/useReviewedCash.ts": {
+      "git_blob": "9039ec80425e93266fbd6fe72001cbacf96d8ac8",
+      "sha256": "ff8271924fe1c3b0cc11a04e2322a150ec0d745e7492da2242cc17aee818fe67"
+    },
+    "artifacts/virtual-cfo/src/lib/useReviewedHistorySeries.ts": {
+      "git_blob": "2bc8262fd35955d02e0c50f3dea15c1feea81b24",
+      "sha256": "69b531782f88e918294216a0bdf6f7f7e4fe8cfb652d40ba80fe8e5e3a2b00bb"
+    },
+    "artifacts/virtual-cfo/src/pages/cash-demo.tsx": {
+      "git_blob": "2829fe780db710f3b3c5ff58f220e84f34728cf4",
+      "sha256": "cae5910c5d5907f9e23ada50412f4ec4abc471d525755a396bbc96c39f822289"
+    },
+    "artifacts/virtual-cfo/src/pages/new-cash-linked.tsx": {
+      "git_blob": "79e1d3ebb18ac8bead80a32dfddff1a496d07d3c",
+      "sha256": "e5be7c074b09f8980719c8002fd7f1af771208520d41e9e6de275c189b1dd63f"
+    },
+    "artifacts/virtual-cfo/src/pages/new-marketing.tsx": {
+      "git_blob": "916dcd129c5b260b35a482b739a7af0004ae9769",
+      "sha256": "c8a0392050fbeecf63ca0b6af2aee57d07fb76e54fc831f6892580976a0a8cc6"
+    },
+    "artifacts/virtual-cfo/src/pages/new-profit.tsx": {
+      "git_blob": "9469bb657b1e31078629c891378dddce50a291b1",
+      "sha256": "e74eff79767bd02c8ccad3f60b7e390e3c94bb884ecffd5d04916dce4683c959"
+    },
+    "artifacts/virtual-cfo/src/pages/plan-visual.css": {
+      "git_blob": "ca2b705e55a2083fc56f9ec127f754a1af6de805",
+      "sha256": "e10a7824a8d932063158272d62ef42b212626d21480746972dec3fc6d57fe4f7"
+    },
+    "artifacts/virtual-cfo/src/pages/plan-visual.tsx": {
+      "git_blob": "30a692ada6c51638b73b467d69d551b44afeded5",
+      "sha256": "9d3a2f9c576a8f2ec34ce90fcd1c91a935b22c111fb9edaa8364e8733758dba2"
+    },
+    "artifacts/virtual-cfo/tests/five-core-browser.mjs": {
+      "git_blob": "6f8cd2570a81864b5134557fd3b56f76837563d9",
+      "sha256": "abe6b6921923e3e43196a71676a4af36d7718c0e87fa9b7ede46e2493ed95bb5"
+    },
+    "artifacts/virtual-cfo/tests/meta-display-browser-fixture.mjs": {
+      "git_blob": "eb7cbf491db00bd1929471da12e7e9f610449f0c",
+      "sha256": "83abe73940fc3f8b50a360a47fe1ead684bd050100baa18bee91adc61eb30aa2"
+    },
+    "artifacts/virtual-cfo/tests/meta-display-browser.mjs": {
+      "git_blob": "c3d23c4195eeb7fbc5db31309063bdebc0d7e391",
+      "sha256": "e3a0bd830778719c52adf4088c30538e482ec55adf0aa1afa973e7935e46aeb3"
+    },
+    "artifacts/virtual-cfo/tests/meta-display-report.fixture.ts": {
+      "git_blob": "817b4b89b89c17d5b223e1c9283ff81576c44da2",
+      "sha256": "88f6cec93d8afcadf0313e2ced8d3248a25c8823ead5071e77a42644af195405"
+    },
+    "artifacts/virtual-cfo/tests/meta-display.test.mjs": {
+      "git_blob": "483a67ea587c01204f875528f5f8505efc72aa32",
+      "sha256": "6d3981210a02ae0daf0a66c5b616bcf502d5dbcf51d081fe994462b2968786fd"
+    },
+    "artifacts/virtual-cfo/tests/meta-history-browser.mjs": {
+      "git_blob": "0923281652715b0305c1848ee36748a62d1900cb",
+      "sha256": "0ecb0c2519f0c64b2231c91b19078b432c7795204df5937363eb2a603b25742f"
+    },
+    "artifacts/virtual-cfo/tests/meta-history-consumer.test.ts": {
+      "git_blob": "00fee1fc65eb3651a1945c955af4e6563dde5ff7",
+      "sha256": "41b8400f9192172b1d2837bcb076091770b326dfb437b573249c27e3cae251f6"
+    },
+    "artifacts/virtual-cfo/tests/meta-history-fixture.css": {
+      "git_blob": "4bed7b8a2205a932dd4fe1a258d8d765cad93585",
+      "sha256": "23fa66b12040f1a1ca905701ba3e988654ca748b77ccfc3fe6d09fc4e2d4b5d1"
+    },
+    "artifacts/virtual-cfo/tests/meta-history-fixture.html": {
+      "git_blob": "4be668da3d3693a6ffc16e79a111709454fd383d",
+      "sha256": "c05370b9b396720df97a18495984b98e9600a17a3778d78e25f7b2edc6c75c90"
+    },
+    "artifacts/virtual-cfo/tests/meta-history-fixture.tsx": {
+      "git_blob": "15aea22574ffc7300f8d21b1245bf24740aa3597",
+      "sha256": "fea046fd35db83657a155b2d130d34c9c3a8cdf15701787985c15313462709b8"
+    },
+    "artifacts/virtual-cfo/tests/meta-history-producer-agreement.mjs": {
+      "git_blob": "c4537851ab7b5f45f2ad3adf6e9765027bffcc21",
+      "sha256": "88a6c0380c53133f96da0ea2b6d7e62e0acd943df04dff36b22ce9ae6dd123eb"
+    },
+    "artifacts/virtual-cfo/tests/meta-history-wire.fixture.ts": {
+      "git_blob": "0b84ef631ff4bbd6dc372cb88f407dc73ccbd953",
+      "sha256": "f8e4ad8a2ff0e165445566224d1da877240ab3594699ad8431cae2b801371a25"
+    },
+    "artifacts/virtual-cfo/tests/meta-history-wire.test.ts": {
+      "git_blob": "04c53a5d663700cad438bb67cd763db01d2d3134",
+      "sha256": "07946c04a8ba956ed9c7f3b3ebe9f8759d58c5ad6a15e9dac8e0e4fe3a1ca88e"
+    },
+    "artifacts/virtual-cfo/tests/meta-history.fixture.ts": {
+      "git_blob": "4b67de8c0f25893223db9e005bae1a0ce6339d10",
+      "sha256": "f290f3c1e41edcd3111323dd42dfd372d1451aef176fb300078495101f87e59f"
+    },
+    "artifacts/virtual-cfo/tests/reviewed-pages-browser.mjs": {
+      "git_blob": "7e71fb675fc9b97ea39f22af5c2c00393d2b295f",
+      "sha256": "22c0f93c142df5b999407b8a7516dc6bad531653906a150bf39b7b16a1f7d526"
+    },
+    "db-migrations/proposals/google-ads-spend-read-rpc-2026-11-21.sql": {
+      "git_blob": "13b8d437248305c436d039adf0507073419c3f40",
+      "sha256": "f7cb0ac6d0a4ea31075474f875938989d46a68650ddbd7285342288c21333e87"
+    },
+    "db-migrations/proposals/google-ads-spend-rpcs-2026-11-21.sql": {
+      "git_blob": "3fa6b526c0661d9f24966933ed6fd87f09e71e21",
+      "sha256": "d9ec68696a64d09d3ba3c799167826172692d68620a320e98d327fd069ddc3d4"
+    },
+    "db-migrations/proposals/google-ads-spend-store-2026-11-21.sql": {
+      "git_blob": "8571732ef01fa9aad6664c5e2d2fcdcdd99ff59e",
+      "sha256": "85732db026d4882591405d18b6cb41eddac979cb7b9840dcfedb5a3905ac8e86"
+    },
+    "db-migrations/proposals/meta-ads-spend-read-rpc-2026-11-20.sql": {
+      "git_blob": "987e7b0385e2fdd065f27a837403403466b62781",
+      "sha256": "3d2367000859ff33f5644bd4aedf73b25137edde0d52ad0a66810f323be0ad80"
+    },
+    "db-migrations/proposals/meta-ads-spend-rpcs-2026-11-20.sql": {
+      "git_blob": "c32a5dd03885341fe600d56565e9159ffcac6da3",
+      "sha256": "a6df957d7ed26249e937143e07d46da119c9943756367110064a23a1e9cddb2c"
+    },
+    "db-migrations/proposals/meta-ads-spend-store-2026-11-20.sql": {
+      "git_blob": "14b4119dab31033793cba94a173bf871fa25c0e8",
+      "sha256": "7ee141420cf19081cf348984934618efb83eda02586385e4da2a1e47b48be9b3"
+    },
+    "deployments/nightly-staging/GOOGLE-ADS-STAGING-PREP.md": {
+      "git_blob": "9b8d7f8263551f5f1f055faff7245ce23d072818",
+      "sha256": "511c379ebf4ad2c2934d222e431d2c8085cae68f3eb90d601c345b53849d24f8"
+    },
+    "deployments/nightly-staging/META-ADS-DAILY-CRON.md": {
+      "git_blob": "0e79cc5d9c820cb46b99103daabb2ad4ed27c45a",
+      "sha256": "8de102e38332ff0b963dcfa4c7f08555a9a2ff70a7a1ebaf7b02e6e984450eb9"
+    },
+    "deployments/nightly-staging/META-ADS-STAGING-SETUP.md": {
+      "git_blob": "fb1fc1a7afe9064bf61ae9ad116bd9b9a8e7db1e",
+      "sha256": "f76c1cef027bad0dc14ef750a5a2de299d9eb8e54be9360206d4f3fcb62e7770"
+    },
+    "deployments/nightly-staging/run-google-ads-acceptance.mjs": {
+      "git_blob": "c8392d74d4a6ac617e4f8f85d3f43c1177d09dc8",
+      "sha256": "300e374299b493c1cc67baa18b4abc0715bed301dd542c7d1aba2cebc9b95c90"
+    },
+    "deployments/nightly-staging/run-meta-ads-acceptance.mjs": {
+      "git_blob": "d24c634055ceada22f157b8fa759f7dd476d6923",
+      "sha256": "6658ae53a42665d2f816ae1dd7d92b3267e9fe59a5f802b2a0d0921d4cbe4ec0"
+    },
+    "deployments/nightly-staging/run-meta-ads-daily.mjs": {
+      "git_blob": "cdd9865ccbf452f5adf50efc48be7eb64b2e3fc5",
+      "sha256": "10f54b799c58a95078811cc747ac17d09c174147cfb2ffda2fa97842c4dfdd8e"
+    },
+    "docs/combined-browser-validation-2026-11-26.md": {
+      "git_blob": "b72e8a658cd038e3bc822d6fe4c71129ab2e3a5b",
+      "sha256": "e66d472b4f5a1899828b2462dff0a43dcdb06b42b85f9c00016291612326533c"
+    },
+    "docs/combined-independent-release-review-2026-11-26.md": {
+      "git_blob": "eb5eb2ba798cd80300f261b4bbbb0e4d0251fc76",
+      "sha256": "5a4de61e197cd616fe659b41300515f85e9458dbe84ac26f1b14c196412dc457"
+    },
+    "docs/combined-release-package-2026-11-26.md": {
+      "git_blob": "2c48aab063656f7501aec4c2f659955688633af5",
+      "sha256": "643509b6a7d73bfe01b41c2861afb6ae4764a690be8c6f0ec8b7a06995678ed5"
+    },
+    "docs/integration-recovery/FINAL-RECEIPT-2026-11-26.md": {
+      "git_blob": "a0b83a9050aa30d7a66977079b1647f7f8e2cb28",
+      "sha256": "23ae26a9bb22f27408a26dcfbeb704cc1614829114fc7747f45052f79fefe41c"
+    },
+    "docs/integration-recovery/HISTORY-CONTRACT-PROPOSAL-2026-11-26.md": {
+      "git_blob": "b7d9fe9717714441ed8ed9eea40d8a543b61e0c4",
+      "sha256": "951d6966f15c47ea283c89135ed553d6880b6c74e1cc03917d3c9da7ea367eb7"
+    },
+    "docs/integration-recovery/IMPLEMENTATION-HANDOVER-2026-11-26.md": {
+      "git_blob": "a819926da84dee8ee45c3f0b7d42546950ebfb8d",
+      "sha256": "55953fcdf7f001d0ccf912f549929ee795cbc152b4793b11c9356f0d0a5c2ac4"
+    },
+    "docs/integration-recovery/LOGGING-ACCEPTANCE-PROPOSAL-2026-11-26.md": {
+      "git_blob": "a29db6a19e5451ba38dfe756a8cbf0914dfff7bf",
+      "sha256": "9c2fee3f0bca905b77a9b2878b9bc36cf90db90a3dd9f5303134b4ad81b08aca"
+    },
+    "docs/integration-recovery/META-SPEND-WIRE-2026-11-26.md": {
+      "git_blob": "ad04899a6f57faeb9563e51836aaeb0cdbd8b12e",
+      "sha256": "da3651ffd7a8eb26a90597a73b5129f6b4c4d7722b681b5e921393d337325f06"
+    },
+    "docs/integration-recovery/SECURITY-REVIEW-2026-11-26.md": {
+      "git_blob": "db941704830dffe562872a0de8a588cd61f3be8e",
+      "sha256": "11713a69e08f400ca5dce5e7772da4a13670ddd13e2d34663085f9c0c37a1191"
+    },
+    "docs/integration-recovery/STAGING-PACKAGE-2026-11-26.md": {
+      "git_blob": "b8334ef262a0dd658af2e4a380b6bf367ef0f9ec",
+      "sha256": "0733545a8ae80fd2991bf5c28ce7aa91c19271f437167cd9efeb21a6d2ce1664"
+    },
+    "docs/integration-recovery/VALIDATION-2026-11-26.md": {
+      "git_blob": "8b18646cac7cfb31a2f56f4288d68604b05f9261",
+      "sha256": "12b6d449524d5d095759d0d470e86efc6c9a588ffd790764c3b97ce1dfab2a02"
+    },
+    "docs/integration-recovery/additional-recovery-manifest-2026-11-26.json": {
+      "git_blob": "a4ea3675fb162299c3fc5a1d4487974d24eb5fa1",
+      "sha256": "8542e0f49752e69909118290d0ec0908b06450d58f7cb14150173fdc394d9fea"
+    },
+    "docs/integration-recovery/final-source-manifest-2026-11-26.json": {
+      "git_blob": "6d0aaeba2feb98cf2a57d39fab151f39a6c2d876",
+      "sha256": "8f353dd415069dc3322e7f655be831c8e17bd5d358cd8c0750ded19dede76990"
+    },
+    "docs/integration-recovery/independent-security-review-2026-11-26.md": {
+      "git_blob": "67f73f94f90e49fc08b5ec5d17ccb07f3448a023",
+      "sha256": "c03404cc77ca8a8ef8e2273007b64ac141c89f56673e9c40c2e5ff29064faf59"
+    },
+    "docs/integration-recovery/source-capsule-manifest-2026-11-26.json": {
+      "git_blob": "d1f33072ce07a7320de47f0a9291d1066f1116b8",
+      "sha256": "adcc3a6eefdaeb0444dc3683bca5228990501a9a14346ecf7fa1ab6c1aefb241"
+    },
+    "docs/integration-release/ACTIVATION-REVIEW-2026-11-26.md": {
+      "git_blob": "7fe7a62763852c3ebdeb03e33c5cfc2ef6aef5da",
+      "sha256": "c33eccac2dfecf9258990f0c3ee6aeb21df86b51e56be22dc53bb84ce3609e84"
+    },
+    "docs/integration-release/FINAL-PACKAGE-2026-11-26.md": {
+      "git_blob": "2031a2ddcbd47f26c5ccc351936a9c28e20e1c3e",
+      "sha256": "87baaf2079d0844ec61ebe6e54f3e0cf0a987b6a83d807ad501140cd3f32d4cb"
+    },
+    "docs/integration-release/HOSTED-PROVIDER-PROPOSAL-2026-11-26.md": {
+      "git_blob": "d7705a509ebd687cb821c683d1e23777d18907be",
+      "sha256": "c7a361048efe5493c0071b6c47c5ba0a89047baba984402306b0f936bf0021d4"
+    },
+    "docs/integration-release/PUBLICATION-PROPOSAL-2026-11-26.md": {
+      "git_blob": "9b936ae2b0ddb80a6940ede022292aded0b68ee2",
+      "sha256": "eec7881f42fdb4fd54acf0a00fe445efefd58fb2252c900c88e470ef194f4c0b"
+    },
+    "docs/integration-release/SOURCE-REVIEW-2026-11-26.md": {
+      "git_blob": "fd0688bebfca782fec64b512cea1a2b4fc6313e3",
+      "sha256": "36963eae2629bbbafdae07858a3d2970095163b8b576492cefd72fdc4bd0e650"
+    },
+    "docs/integration-release/TESTED-SOURCE-MANIFEST-2026-11-26.json": {
+      "git_blob": "1c6504a167b337ddd283ac81a72c0dc807c1c291",
+      "sha256": "a54cabab851177c714d831a3969ee917eeca691be8ef355ab5cb8acbe3c6350b"
+    },
+    "docs/integration-release/VALIDATION-2026-11-26.md": {
+      "git_blob": "5a70d3e345d37be4033173bfc4aba71bb9af2785",
+      "sha256": "ae606abeebfecc8115ad49441363b698006201677a9604c2e505e394ba0d7c5d"
+    },
+    "docs/marketing-spend-integration-status-2026-11-21.md": {
+      "git_blob": "12eb3664f93bb62393ca6ca7b79f496b43a38bf3",
+      "sha256": "23da5498323a8560e0acca9cccab4b73bcbc744e3bdf71deac42d7b076b018da"
+    },
+    "docs/marketing-spend-integrations-2026-11-20.md": {
+      "git_blob": "71a3615ee2d490ec536d41e8c5e09757bfb14b9e",
+      "sha256": "30781bd2a9c8e13724812d3949ce569d4da2ea5739455836a9a616341d4e5d28"
+    },
+    "docs/meta-display-independent-review-2026-11-26.md": {
+      "git_blob": "b52cd7551a19cf630d64d9f503cda7a6db6848b0",
+      "sha256": "420c290098f5de49ba15c269fccb346b7a4747bffb34f664a70cde3707d61bc9"
+    },
+    "docs/meta-display-manifest-2026-11-26.json": {
+      "git_blob": "4c9e6b2f7ec7e9723ddcdb8414d9217fa5c528de",
+      "sha256": "8eb07e372bb6f5f0fa961bba571ed636eb3cbec9110a0901c7bf20f35f00b6b1"
+    },
+    "docs/meta-display-package-2026-11-26.md": {
+      "git_blob": "5fbd4e1c68aab4e28962597387266346c47dee19",
+      "sha256": "647489fd711872675f736b76d6a6108400e117e033d1a69330ebc78fa523f5b3"
+    },
+    "docs/meta-display-validation-2026-11-26.md": {
+      "git_blob": "7abd2173d9f700510c3b9bc6b005d531b06c3fea",
+      "sha256": "67f2b231cef18549638b87bb130c909f4334730f379db8febc833882fdab468c"
+    },
+    "docs/meta-history-consumer-review-2026-11-26.md": {
+      "git_blob": "154ce678e5f0a91a7f667c587b88efbf9d60bb8d",
+      "sha256": "8314ccb1ea519381d9fd3f5b9710f054b432bfe795e1c3051c48b937ac14d4ae"
+    },
+    "docs/meta-history-ui-contract-response-2026-11-26.md": {
+      "git_blob": "7a83819857c791c0ca8e5ca44b518a20824d0b9a",
+      "sha256": "0e95d3659b545f3fe5ad791cd9bfcb4b1d4bf2f58b0d87b6220d58de21f3f444"
+    },
+    "docs/meta-history-ui-independent-review-2026-11-26.md": {
+      "git_blob": "800e094289f939c6d0cac46b4fd14af3d585adbd",
+      "sha256": "dff6a04bfc269091c2fb4383d72edd4225f5861c949ae64601e4a97a08f90d05"
+    },
+    "docs/meta-history-ui-manifest-2026-11-26.json": {
+      "git_blob": "bb1bd83b1b124606db588d37d4d66853efac40cd",
+      "sha256": "43cd5de462c7eb1531a7447df37284acbc4825e23ecc9f20314a7c72fc27119e"
+    },
+    "docs/meta-history-ui-package-2026-11-26.md": {
+      "git_blob": "6f882de1c1edb6d04cdf673c23b5e700a28a6ecf",
+      "sha256": "95116e162fa7455d71bd90517b3b6ed9830c0c879da0f33822d6a964e81c6eed"
+    },
+    "docs/meta-history-ui-validation-2026-11-26.md": {
+      "git_blob": "ed21acf6aeef2d2709ee6e0a87d18f3fd1d55ff9",
+      "sha256": "ff2e90e36877a97e8e0fb7809d04217428b76ad9302795fee44c9bf4dcee18a4"
+    },
+    "docs/provider-followon/INDEPENDENT-CONTRACT-REVIEW-2026-11-26.md": {
+      "git_blob": "ed504b54f5e25ee794bde7e4d4eade0279807e0f",
+      "sha256": "70911eef746fb8b673f32cea84b138392df0528abaa4625a5b18550d0cf9e4df"
+    },
+    "docs/provider-followon/INTEGRATION-HANDOFF-2026-11-26.md": {
+      "git_blob": "6a6f0b99ef00813c70618abba36e823a000e99c4",
+      "sha256": "3109b09f47e881aab50eb35d947f61b6b070fd536331623278dfdf96c7b65419"
+    },
+    "docs/provider-followon/META-COMBINED-BOUNDARY-2026-11-26.md": {
+      "git_blob": "8b3df8d776b84f0d176e5dc6eaa2040f1f0f89d1",
+      "sha256": "aaa536e4e75c801818b3d71439c0038b7467bcd94cfc4878eafa72dd06121c00"
+    },
+    "docs/provider-followon/SETUP-DRYRUN-2026-11-26.md": {
+      "git_blob": "380c3d403cdd650fd9d97fbced19b9c3f3e29c7d",
+      "sha256": "d79cbb391a6b3be4d6a1fae2b9d137228be197df762b36d0d6ec4300241509e3"
+    },
+    "docs/provider-followon/TESTED-DELTA-2026-11-26.json": {
+      "git_blob": "49769acdc97f03ad5921a9536db7a5d65a60b8b6",
+      "sha256": "a2f34e020dcdef66bfe250ebc8f2db3512d1d67a2dcbddfec6905f8dd2feb58e"
+    },
+    "docs/provider-next/GOOGLE-XERO-OFFLINE-AUDIT-2026-11-26.md": {
+      "git_blob": "fd0e5edc0a6eb5e446e855f29b3600c085f7bf30",
+      "sha256": "7cf61331a17b79f4c3ee2e52e82fec882e53ab0536a2269717c1e3f6e3adde8d"
+    },
+    "docs/website-browser-validation-2026-11-26.md": {
+      "git_blob": "62acfebf65ccfdb48010c29e5c88c3a4d41c7b9c",
+      "sha256": "fc3f2ab740802b93b1f590e23904a92b3a50ead20865bcad872a5640deb5dc9e"
+    },
+    "docs/website-changed-files-2026-11-26.json": {
+      "git_blob": "6f7f75c03bfea25dc8de8563493145c8a459d496",
+      "sha256": "99016584377eed3b2eff5d31a46b8ad685552bbc7be9559c8ccca6fcd596583b"
+    },
+    "docs/website-independent-review-2026-11-26.md": {
+      "git_blob": "5f48177962ca927f256a6ddae48a512dd56e6ce2",
+      "sha256": "4fd62951844738d0c4482e3cafd92116e41c5f697cdf22596b359befe4861a07"
+    },
+    "docs/website-preservation-review-2026-11-26.md": {
+      "git_blob": "0cc4c8e608af2b0cb2836bc6718e82e646fc7b1e",
+      "sha256": "44823fe01c55e174b7291c40c482ea1dc1cc0777238498f8daf0629cc21f8460"
+    },
+    "docs/website-release-package-2026-11-26.md": {
+      "git_blob": "a442b76877b261407e101a4da73f9664b6f0554d",
+      "sha256": "ba736785916948f0a8c4cbf4ce72c4e2120e2daecc7c7609d667f9b8c0de8128"
+    },
+    "experiments/marketing/google-ads-acceptance.mjs": {
+      "git_blob": "336e564c7725880ceb37df18fdb1670a46d70493",
+      "sha256": "f3bf9849758c1cd7fc8b3222a859de55889e310341ef338aa758ad3aae53eace"
+    },
+    "experiments/marketing/google-ads-account-discovery.mjs": {
+      "git_blob": "fd86cfa4654f2dea449186d62d0993628027b133",
+      "sha256": "7a152c1a22254e79a6151e14c71f5c10a104e9efb17a0c97acea32dbbbab26a7"
+    },
+    "experiments/marketing/google-ads-collector-repository.mjs": {
+      "git_blob": "121f76670579a6a8168dd634c0d7c8046b1fa5a8",
+      "sha256": "c21a5702cf7622df05724fad6f8178adf963aa90711e609f037b2fc7624c919c"
+    },
+    "experiments/marketing/google-ads-collector-repository.test.mjs": {
+      "git_blob": "596c3030122a46b36e900c7d39367cea1ce5d49b",
+      "sha256": "923e20ca022b71a8eabffe2910b5e8a847005bb6086655635056719b3ec8cca6"
+    },
+    "experiments/marketing/google-ads-collector.mjs": {
+      "git_blob": "df107f09a62669d8373ee5b79bb9a1cf80561ffa",
+      "sha256": "c51a443d0d7636c654cecc9b9af9682877d195f85d0d736b543c7ef68b10dcb0"
+    },
+    "experiments/marketing/google-ads-collector.test.mjs": {
+      "git_blob": "5fe1099bb0d914e6494139d6049ed7927381195a",
+      "sha256": "442039c2b732b737c710161a99423410a1ace69d7770e72a2e0ad5eaaa25c66e"
+    },
+    "experiments/marketing/google-ads-integration.test.mjs": {
+      "git_blob": "1cf6846aafc7351ac4a7d5c6513075ae39d9cce8",
+      "sha256": "49b0484490de0be2095a3904892f17ee305df7e886274112f2a057b867afd576"
+    },
+    "experiments/marketing/google-ads-oauth-credential-envelope.mjs": {
+      "git_blob": "03c9206de01d03da587fac3ecfa580d70cfdc7be",
+      "sha256": "2e48665d69fa5844e387d0ee6f4e2dbbbd71fef8779dae793c2e368230b391ef"
+    },
+    "experiments/marketing/google-ads-oauth-protocol.mjs": {
+      "git_blob": "b85287daa161081134e73ba65a6a2cd6ee6ce11c",
+      "sha256": "84fd0faa6abce7a204dff2773cf2e72bfacd9ea8233c76bcc762689f684a15a8"
+    },
+    "experiments/marketing/google-ads-oauth-service.mjs": {
+      "git_blob": "fe49803c9be31b10ec6f9ab5781edc1b88b74407",
+      "sha256": "3716cb2dc9baad2448c295f980a239a90b18781f656ee8be73b801f00edc6c40"
+    },
+    "experiments/marketing/google-ads-persistence.test.mjs": {
+      "git_blob": "35312b6cbb4a981297c3924db247dacb7e417da6",
+      "sha256": "7278cd7d23600f40065b97f36e964419a1d8701c1ab741926022174f2c2b06e0"
+    },
+    "experiments/marketing/google-ads-report-repository.mjs": {
+      "git_blob": "795b42f1a36f95c72f934df4840d118d5da46ac7",
+      "sha256": "62abfe386f824dbec5d3dad199fef4044c44078e52d59bfa3547b03d41d2d3d5"
+    },
+    "experiments/marketing/google-ads-report-repository.test.mjs": {
+      "git_blob": "df312f20c1ab53487b0e7c30d7fba2972342fe47",
+      "sha256": "02ca93c3bcd76e42ef78699b104c4ca420fb32d4e7121e5c6d15d8a0d7e11bdd"
+    },
+    "experiments/marketing/google-ads-report-timestamp.d.mts": {
+      "git_blob": "4cc6a45315b90e637bb26273957d20b4a486bb78",
+      "sha256": "afd85bb73e31814990b5e72f754931b1cc62c8f2ea90d4ad8fb036a6ae20d0b2"
+    },
+    "experiments/marketing/google-ads-report-timestamp.mjs": {
+      "git_blob": "d84bd9e37d0c9b788148cf5bfece6e969ea9c83f",
+      "sha256": "d8b777f6708367694e1e3ab88b47c0046d78b71a7322130d48f7d27036da0f23"
+    },
+    "experiments/marketing/google-ads-repository.mjs": {
+      "git_blob": "4ded5f8eaafa927d13482efcf8b0ad738bd1c9e7",
+      "sha256": "426052ffb7171a6ee128bd3af2ee66a661aa74c9bea5109cbd6149bbf64ae58b"
+    },
+    "experiments/marketing/google-ads-spend-reader.mjs": {
+      "git_blob": "9872dd81d0499b83130054e710e97151f2b70d0c",
+      "sha256": "9f57c5dbe76a7aeb7ed0771b16cd8731b45d0959bac4251ff67fba332d4f3e4b"
+    },
+    "experiments/marketing/google-selection-authority.test.mjs": {
+      "git_blob": "fc435306b130b8d481eb4b8305b74d9c3f32a824",
+      "sha256": "1db40d937a42c369a2a4350807926901696442f58dddf979fc5523c832408e10"
+    },
+    "experiments/marketing/meta-ads-integration.test.mjs": {
+      "git_blob": "6e411d879cb68496a301cec29c8b542dcdc4e193",
+      "sha256": "90eddfa9ac742b376465e1adc791785aeb90e2636957a8462a1fe6d23f2d534d"
+    },
+    "experiments/marketing/meta-ads-repository.mjs": {
+      "git_blob": "bba7648bbc089038e33ee7530aa7c422249223b6",
+      "sha256": "5d6cd41822eb4d2849af8788f8cfde05ebb328cdd6b045f0a639e51a1c9462fb"
+    },
+    "experiments/marketing/meta-ads-repository.test.mjs": {
+      "git_blob": "69c2e93ae24bbdba1596cea5e0f042734fe6c6bb",
+      "sha256": "1d58ab0a44c3436cf8403b252a911f54b941191aff69e416edfb27c52909984e"
+    },
+    "experiments/marketing/meta-credential-envelope.mjs": {
+      "git_blob": "79119be2c10e9fa875b91a4ca3fd0c84eed7366b",
+      "sha256": "57617d89d525c8efa0694b080848eea54490ba19ce466e1d77875fee818bd2e4"
+    },
+    "experiments/marketing/meta-oauth-protocol.mjs": {
+      "git_blob": "c7ec8556f2dacef0d65512e2bc26f2def91defba",
+      "sha256": "dc365accbed0295cd9f82cbee857b679ad4fd7d42dd16f73c88dccdf23c3b15c"
+    },
+    "experiments/marketing/meta-oauth-service.mjs": {
+      "git_blob": "c57b9e83256c7a374e20420df1b19e01889eb7df",
+      "sha256": "7e9bfc4e4be9c5bce7ee8b37fbc1078b77eba365cef45c925594b1dabf0375e1"
+    },
+    "experiments/marketing/meta-spend-collector.mjs": {
+      "git_blob": "19fbbe9b6f40c11964f5debd974d7c60a78bac1c",
+      "sha256": "da6041f1d5d0e285f680b88e1ff3854e80660686c1f756ff1f707773615fd9fc"
+    },
+    "experiments/marketing/meta-spend-reader.mjs": {
+      "git_blob": "806f4c9ea8ffee4ace0f96b8df5205c4265df2e1",
+      "sha256": "3593cb751604ad3eb0a96a60ece0d2e5f5ba10dc2f7712b05f31f66e6cdd0947"
+    },
+    "experiments/marketing/meta-spend-reader.test.mjs": {
+      "git_blob": "10febf48eb4d2980bdcf33187d6178726ecfbc64",
+      "sha256": "c51e4c903046b42e7c58acce32488f945af05c79308720ef645702e3b6ca40bc"
+    },
+    "experiments/marketing/meta-spend-report-contract.d.mts": {
+      "git_blob": "7a502c7c8dfe26e929a1571d250ca421545260c0",
+      "sha256": "e4b0b1d3bd46a27ede3195c753bda9bada2eaa92804eec2482691995bd18c08e"
+    },
+    "experiments/marketing/meta-spend-report-contract.mjs": {
+      "git_blob": "ea707ffc5f93fe41cb44d07ba135e4c02eefcb17",
+      "sha256": "d4105763bb861616e4c6836fc25bc61662e851572d7c6800f17af4905fcdee86"
+    },
+    "experiments/marketing/meta-spend-report-contract.test.mjs": {
+      "git_blob": "0068ee3baa89b98268f56c83763e70a443d3f744",
+      "sha256": "f8b3c8a81cdefe7ff6a1eca19b7e766719cfc881c64b7c51a9477e0c677b8ae8"
+    },
+    "experiments/marketing/meta-wire-hardening.test.mjs": {
+      "git_blob": "469d2b90aff8b833a76d4ca41e39ebd74cc93d24",
+      "sha256": "b8d98fafc81bc6ed70de1b0efd5d88b5f5f621115fffeecc44127159c8f784c6"
+    },
+    "experiments/marketing/provider-facts.test.mjs": {
+      "git_blob": "2b7a889f83c5f027f7979c460e50a20531bc3649",
+      "sha256": "a5fb6a4111df42522a4260ea09b890200217343aad6d0034cd94849d5108fb0b"
+    },
+    "experiments/marketing/provider-facts.ts": {
+      "git_blob": "4f72fcf1ef27ce86aa929fc163560c624fa6c752",
+      "sha256": "865ccbb481d31e4daabb2e9647c8e0e2f0c21157ef211536dd524ef33d3561f3"
+    },
+    "experiments/marketing/provider-history-contract-proposal.test.mjs": {
+      "git_blob": "2c3bc5a336127118ddec276bdbdafaa9d70e29a2",
+      "sha256": "0c5e9e09fcd24bdcc3e37526723808235c8dfe1ecd8ed2e532c4df0574bc4210"
+    },
+    "experiments/marketing/provider-history-contract-proposal.ts": {
+      "git_blob": "231e0d319f33c410aa46f0ddb3d12d43bbc686e9",
+      "sha256": "43427425b25705d7bcad87fb8c3b595c3f9fe1d35437150715592171904b2a09"
+    },
+    "experiments/marketing/provider-setup-dryrun.test.mjs": {
+      "git_blob": "0136513c941c57de60c3d87a92a7f1f64278d36c",
+      "sha256": "5dd7253ffab02e3320e9eaffc19b8af5e7d61282d9eecff59399734d4a769920"
+    },
+    "experiments/marketing/provider-storage-rehearsal.test.mjs": {
+      "git_blob": "d5e2cfa626ded2596ab46d06bad75ac453a301fe",
+      "sha256": "187a5ba60e969380dfa68aa6d29840ef3ad1b1a4af2f9b1db1c032e2cfd4e04f"
+    },
+    "experiments/xero/mapping-api-contract.mjs": {
+      "git_blob": "0bad35dec92213f021ac4fdce86a3a210c9f90cb",
+      "sha256": "2382207664349db2dccd6a9bd05469519b44deef905b614da12a8a4a67a1a515"
+    },
+    "experiments/xero/mapping-instant.d.mts": {
+      "git_blob": "ac42d2554719920750491f66443e6dcc5224d8e1",
+      "sha256": "ea9eff74bcc6c8501bce26c7a4fc6639f6ae4fdce514273de9943362890fdba1"
+    },
+    "experiments/xero/mapping-instant.mjs": {
+      "git_blob": "3dd962febca6ac8067247f233b006e5be7d0e359",
+      "sha256": "1e4b7c8e683851dc1301093c51243ee461783394eda9a619de1f4acfe9b00c8b"
+    },
+    "experiments/xero/mapping-timestamp-boundary.test.mjs": {
+      "git_blob": "8df57ae64ee99bf006ddbfabebdda6142835b015",
+      "sha256": "10a4dbd9b993e6330d002c4111da1a54e884245415f73bbf6ef2a4fa1c7a3a51"
+    },
+    "experiments/xero/mapping-version-contract.mjs": {
+      "git_blob": "5fe1d077f87dacbdc27fef4166a98a63296582ef",
+      "sha256": "b6dc427c3677cca0e67185738b86c62d04543cddbb06d04d49959f05a654a2e4"
+    },
+    "experiments/xero/saved-mapping-view.mjs": {
+      "git_blob": "ead1916ad8db890d9feb93a1fd2927f99af44658",
+      "sha256": "bf9df3c679bcb322cb7fffdf0912a9ec0cc33aa42785190361886380b3e99538"
+    }
+  },
+  "note": "No deletions. Manifest excludes itself. Proposals are not installed; runtimes/display remain default-off."
+}

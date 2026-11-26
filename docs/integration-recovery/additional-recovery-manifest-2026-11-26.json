@@ -1,0 +1,10 @@
+{
+  "reason": "Original byte-for-byte recovery of provider-only helper imported by unmounted MetaDailySpendPanel. Original hashes below precede the valid-UUID repair; final candidate manifest records corrected bytes. No shared page wiring.",
+  "files": [
+    {
+      "path": "artifacts/virtual-cfo/src/lib/metaAdsSpendApi.ts",
+      "sha256": "0b6ff2e549bbbea31fc383cb8b4d758b6b99910d16abebbe576ea37fbec19772",
+      "bytes": 7333
+    }
+  ]
+}

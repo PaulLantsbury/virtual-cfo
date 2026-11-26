@@ -42,6 +42,8 @@ async function fixture(options,run){
    return json({error:'Unexpected fixture API'},404);
   }
   if(url.origin===origin){if(!['GET','HEAD'].includes(request.method()))return route.abort();return route.continue();}
+  // Existing theme font requests are blocked locally, distinct from provider/model calls.
+  if(['fonts.googleapis.com','fonts.gstatic.com'].includes(url.hostname))return route.abort();
   if(url.hostname!=='night-scout-test.invalid'){options.forbiddenRequests?.push(url.toString());return route.abort();}
   if(url.pathname==='/auth/v1/token')return json(session);
   if(url.pathname==='/auth/v1/user')return options.revoked?json({message:'Unauthorized'},401):json(user);

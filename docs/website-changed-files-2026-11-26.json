@@ -1,0 +1,30 @@
+{
+  "baseline": "204226d0c796561d5bb812cde1bd9cec8da6a8d5",
+  "files": {
+    "artifacts/virtual-cfo/src/components/CashSourceFigures.tsx": "d5f23d78893d9a3e8747061637894acd1b42c7811b477dfe948976736f422375",
+    "artifacts/virtual-cfo/src/components/NewProfitLive.tsx": "fce7dbc848b087081e8adedfc6d7da45230fca7afb269f0a1e0f9304a225f2f8",
+    "artifacts/virtual-cfo/src/components/PlanBaselineEvidence.tsx": "d1be4005c919a7f76397bf3b1e62d408740e7c957af06ee4f09f28bde94cd5d2",
+    "artifacts/virtual-cfo/src/lib/planning/plan-baseline-evidence.test.ts": "6c58cb05e290aa5c8daa6953a4707a9ab68cb17c00d5314761726a7e92fa472c",
+    "artifacts/virtual-cfo/src/lib/planning/plan-baseline-evidence.ts": "8386a6468fd1ab72520c4df8c2243fadf9f4c6c560c75887345184bb3464b53a",
+    "artifacts/virtual-cfo/src/lib/planning/useReviewedPlanBaseline.test.mjs": "9e7b5e27d2f43d6f507487671e2c05398dacb1ff8f88149296ef2f3b3784f4db",
+    "artifacts/virtual-cfo/src/lib/planning/useReviewedPlanBaseline.ts": "8f4381b73b60feb6c2ba0b66989378f5abd8be28d874219c4fed105243850121",
+    "artifacts/virtual-cfo/src/lib/reviewedCashWindow.test.ts": "cd4a6572b46858c966823f323e47e238122e7b6f05c932e414dc239e254dd036",
+    "artifacts/virtual-cfo/src/lib/reviewedCashWindow.ts": "be1de2b6730f5af90c9d3235d41cc64b51799a69f6aba2c110024a775d4e3a66",
+    "artifacts/virtual-cfo/src/lib/useReviewedCash.query-race.test.mjs": "dae319f66bf863158c3bab6c53b82a0cc215b92a217124651542ca2692268e9f",
+    "artifacts/virtual-cfo/src/lib/useReviewedCash.test.mjs": "165ddf2dfa99c57d70cf4e1e947cf6b311381d3330a00070bfaedc8e7c6f7368",
+    "artifacts/virtual-cfo/src/lib/useReviewedCash.ts": "ff8271924fe1c3b0cc11a04e2322a150ec0d745e7492da2242cc17aee818fe67",
+    "artifacts/virtual-cfo/src/lib/useReviewedHistorySeries.ts": "69b531782f88e918294216a0bdf6f7f7e4fe8cfb652d40ba80fe8e5e3a2b00bb",
+    "artifacts/virtual-cfo/src/pages/cash-demo.tsx": "cae5910c5d5907f9e23ada50412f4ec4abc471d525755a396bbc96c39f822289",
+    "artifacts/virtual-cfo/src/pages/new-cash-linked.tsx": "e5be7c074b09f8980719c8002fd7f1af771208520d41e9e6de275c189b1dd63f",
+    "artifacts/virtual-cfo/src/pages/new-marketing.tsx": "c0450ce2e8345cd592427498406287f5fb7e8c24836499a250a8318b0218eb3f",
+    "artifacts/virtual-cfo/src/pages/new-profit.tsx": "e74eff79767bd02c8ccad3f60b7e390e3c94bb884ecffd5d04916dce4683c959",
+    "artifacts/virtual-cfo/src/pages/plan-visual.css": "e10a7824a8d932063158272d62ef42b212626d21480746972dec3fc6d57fe4f7",
+    "artifacts/virtual-cfo/src/pages/plan-visual.tsx": "9d3a2f9c576a8f2ec34ce90fcd1c91a935b22c111fb9edaa8364e8733758dba2",
+    "artifacts/virtual-cfo/tests/reviewed-pages-browser.mjs": "22c0f93c142df5b999407b8a7516dc6bad531653906a150bf39b7b16a1f7d526",
+    "docs/website-browser-validation-2026-11-26.md": "fc3f2ab740802b93b1f590e23904a92b3a50ead20865bcad872a5640deb5dc9e",
+    "docs/website-independent-review-2026-11-26.md": "4fd62951844738d0c4482e3cafd92116e41c5f697cdf22596b359befe4861a07",
+    "docs/website-preservation-review-2026-11-26.md": "44823fe01c55e174b7291c40c482ea1dc1cc0777238498f8daf0629cc21f8460",
+    "docs/website-release-package-2026-11-26.md": "ba736785916948f0a8c4cbf4ce72c4e2120e2daecc7c7609d667f9b8c0de8128"
+  },
+  "manifest_note": "This inventory excludes its own file to avoid self-reference."
+}

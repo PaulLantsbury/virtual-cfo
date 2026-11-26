@@ -20,7 +20,7 @@ test('the candidate never switches the active business or uses another companyâ€
 });
 test('withdrawn, missing and replacement versions never become implicit latest evidence',()=>{
  for(const invalidMonths of [[],months.map(m=>({...m,versions:m.versions.map(v=>({...v,status:'invalidated'}))})),months.map(m=>m.from==='2026-10-01'?{...m,versions:[{versionId:'oct-correction',status:'selected',kind:'expense-correction'}]}:m)]){
-  const r=advanceReviewHandoff(createReviewHandoff(search,'current'),{...context,months:invalidMonths});assert.equal(r.choice,null);assert.equal(r.state.phase,'rejected');assert.match(r.warning,/supported month and evidence version/);
+  const r=advanceReviewHandoff(createReviewHandoff(search,'current'),{...context,months:invalidMonths});assert.equal(r.choice,null);assert.equal(r.state.phase,'rejected');assert.match(r.warning,/Choose a month and check the report again/);
  }
  const rejected=advanceReviewHandoff(createReviewHandoff(search,'current'),{...context,months:[]});assert.equal(advanceReviewHandoff(rejected.state,context).choice,null);
 });

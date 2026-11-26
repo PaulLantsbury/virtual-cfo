@@ -9,7 +9,7 @@ export function CashReviewedProfitHistory({history,cashMonths=[]}:{history:Retur
  const points=series.status==='supported'?cashProfitHistory(series.months,history.storeId):null;
  return <section className="nc-section" aria-labelledby="cash-profit-history-title"><div className="nc-section-title"><span>02A</span><div><p>REVIEWED MONTHLY PROFIT · REFERENCE ONLY</p><h2 id="cash-profit-history-title">How has profit changed?</h2></div></div>
   <p>Each bar is EBITDA for a complete reviewed month. Cash is shown only for separately checked, matching cash records. No weekly or daily cash timing is estimated.</p>
-  {series.status==='idle'&&<p>Choose a reviewed month and evidence version above to view the monthly profit history ending there.</p>}
+  {series.status==='idle'&&<p>Choose a month above to view the monthly profit history ending there.</p>}
   {series.loading&&<p role="status">Checking complete monthly profit evidence…</p>}
   {series.error&&<p role="alert">{series.error} <button onClick={series.retry}>Retry history check</button></p>}
   {series.status==='unavailable'&&!series.error&&<p className="nc-not-linked">Monthly profit history unavailable. Every month must have complete, supported evidence; missing months are not zero.</p>}

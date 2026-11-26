@@ -1,3 +1,4 @@
+import {resolveHistoryMonthVersion} from './reportingMonth.ts';
 import {composeHistoryMonth, composeHistorySeries} from './v11/history-composition.ts';
 import type {HistoryAvailability, HistorySelection} from './v11/history-supported.ts';
 
@@ -14,10 +15,10 @@ export function reviewedSeriesSelections(months: HistoryAvailability['months'], 
  for(const m of chosen){
   const versions=m.versions??(m.versionId?[{versionId:m.versionId,status:'selected' as const,kind:'base' as const}]:[]);
   const valid=versions.filter(v=>v.status==='selected');
-  const version=m.from===selected.period.from?valid.find(v=>v.versionId===selected.versionId):valid.length===1?valid[0]:undefined;
-  if(!version) return [];
+  const versionId=m.from===selected.period.from?valid.find(v=>v.versionId===selected.versionId)?.versionId:resolveHistoryMonthVersion(m).versionId;
+  if(!versionId) return [];
   if(result.length){const next=new Date(`${result.at(-1)!.period.to}T12:00:00Z`);next.setUTCDate(next.getUTCDate()+1);if(next.toISOString().slice(0,10)!==m.from)return [];}
-  result.push({...selected,period:{from:m.from,to:m.to},versionId:version.versionId});
+  result.push({...selected,period:{from:m.from,to:m.to},versionId});
  }
  return result;
 }

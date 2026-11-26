@@ -9,7 +9,7 @@ type Context={userId:string|null;storeId:string;availabilityReady:boolean;months
 const text=(value:string|null)=>typeof value==='string'&&value.length>0&&value.length<=256&&!/[\u0000-\u001f\u007f]/.test(value);
 const day=(value:string)=>/^\d{4}-\d{2}-\d{2}$/.test(value)&&Number.isFinite(Date.parse(value+'T12:00:00Z'))&&new Date(value+'T12:00:00Z').toISOString().slice(0,10)===value;
 const month=(value:ReviewHandoffChoice)=>day(value.from)&&day(value.to)&&value.from.endsWith('-01')&&value.to===new Date(Date.UTC(+value.from.slice(0,4),+value.from.slice(5,7),0)).toISOString().slice(0,10)&&text(value.versionId);
-const warn=(role:ReviewHandoffRole)=>role==='comparison'?'The linked earlier-month comparison is unavailable. Choose a supported comparison month and evidence version.':'The linked reporting context is unavailable. Choose a supported month and evidence version.';
+const warn=(role:ReviewHandoffRole)=>role==='comparison'?'The linked earlier-month comparison is unavailable. Choose a comparison month and check the report again.':'The linked reporting context is unavailable. Choose a month and check the report again.';
 export function createReviewHandoff(search:string,role:ReviewHandoffRole='none'):ReviewHandoffState{
  const empty:ReviewHandoffState={role,phase:'none',candidate:null,owner:null,warning:null};
  if(role==='none')return empty;

@@ -1,3 +1,4 @@
+import {resolveHistoryMonthVersion} from './reportingMonth';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useActiveStore, useAuth } from './auth/AuthProvider';
@@ -30,7 +31,7 @@ export function useReviewedHistory({handoffRole='none'}:{handoffRole?:ReviewHand
  const months=historyAvailableMonths(availability,{storeId,currency:'GBP',timezone:'Europe/London',edition:HISTORY_EDITION,anchor});
  useEffect(()=>{
   if(handoff.current.candidate&&userId&&storeId&&!reviewNavigationOwnership.register(navigationKey,userId,storeId)){
-   const warning='The linked reporting context could not be restored safely. Choose a supported month and evidence version.';
+   const warning='The linked reporting context could not be restored safely. Choose a month and check the report again.';
    handoff.current={...cancelReviewHandoff(handoff.current),warning};
    setChoice({userId,storeId,from:'',to:'',versionId:''});
    setHandoffWarning(warning);
@@ -47,10 +48,10 @@ export function useReviewedHistory({handoffRole='none'}:{handoffRole?:ReviewHand
  const report=useQuery({queryKey:['new-reviewed-report',userId,storeId,HISTORY_EDITION,selection.period.from,selection.period.to,selection.versionId],enabled:!!userId&&!!chosen&&!!version,retry:false,placeholderData:undefined,queryFn:({signal})=>request('/api/history-reporting',{storeId,currency:'GBP',edition:HISTORY_EDITION,from:selection.period.from,to:selection.period.to,versionId:selection.versionId},signal)});
  const state=historyReadState(selection,report.isSuccess?report.data:null,{loading:report.isFetching,error:report.isError?'unavailable':undefined,invalidated:!!availability&&current&&!!choice.versionId&&!version});
  const month=state==='supported'&&!available.isFetching&&!available.isError?composeHistoryMonth(report.data,selection):null;
- const error=available.isError?'Reviewed months could not be loaded.':report.isError?'The selected evidence could not be checked.':state==='invalidated'?'The selected evidence version is no longer supported.':chosen&&version&&!report.isFetching&&state==='unavailable'?'This month has no supported evidence.':handoffWarning;
+ const error=available.isError?'Reviewed months could not be loaded.':report.isError?'The selected evidence could not be checked.':state==='invalidated'?'The report for this month has changed. Choose the month again to check the current report.':chosen&&version&&!report.isFetching&&state==='unavailable'?'This month has no supported evidence.':chosen&&!choice.versionId?resolveHistoryMonthVersion(chosen).reason:handoffWarning;
  const manual=()=>{handoff.current=cancelReviewHandoff(handoff.current);setHandoffWarning(null);};
  return {storeId,userId,month,selection,months,versions,state,loading:report.isFetching,loadingMonths:available.isFetching,error,handoffWarning,
-  selectMonth:(from:string)=>{manual();const m=months.find(m=>m.from===from);setChoice({userId,storeId,from:m?.from??'',to:m?.to??'',versionId:''});},
+  selectMonth:(from:string)=>{manual();const m=months.find(m=>m.from===from);setChoice({userId,storeId,from:m?.from??'',to:m?.to??'',versionId:resolveHistoryMonthVersion(m).versionId});},
   selectVersion:(versionId:string)=>{manual();setChoice({userId,storeId,from:chosen?.from??'',to:chosen?.to??'',versionId});},
   retry:()=>{void available.refetch();if(chosen&&version)void report.refetch();},
  };

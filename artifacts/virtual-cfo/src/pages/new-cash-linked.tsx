@@ -1,3 +1,4 @@
+import {reportingMonthLabel} from '@/lib/reportingMonth';
 import {AppLayout} from '@/components/layout/AppLayout';
 import {useReviewedCash} from '@/lib/useReviewedCash';
 import {CashSourceFigures,CashSourceResilience} from '@/components/CashSourceFigures';
@@ -22,7 +23,7 @@ export default function NewCashLinked({onSample}:{onSample:()=>void}){
  return <AppLayout showMonitoring={false}><div className="cash-demo new-profit nc-linked">
   <header className="nc-header"><div><span className="nc-eyebrow">NIGHT SCOUT · CASH DECISIONS</span><h1>Cash Control</h1><p>Are sales and profit turning into cash—and what needs attention?</p></div><a className="nc-badge" href="#new-cash-numbers">Explore the Numbers</a></header>
   <div className="nc-notice"><div><strong>{sources.current?'Reviewed synthetic cash records · historical month':'Cash figures need separate reviewed evidence.'}</strong><p>Yellow means not linked or unavailable. Cash appears only after separate dated bank and working-capital records reconcile to the exact financial evidence version. Historical synthetic cash is not a current bank feed.</p></div></div>
-  <div className="nc-controls"><label>Reviewed month <select aria-label="Cash reference month" value={h.selection.period.from} onChange={e=>h.selectMonth(e.target.value)}><option value="">Choose a month</option>{h.months.map(v=><option key={v.from} value={v.from}>{v.from.slice(0,7)}</option>)}</select></label><label>Evidence version <select aria-label="Cash reference evidence version" value={h.selection.versionId} disabled={!h.selection.period.from} onChange={e=>h.selectVersion(e.target.value)}><option value="">Choose evidence</option>{h.versions.map((v,i)=><option key={v.versionId} value={v.versionId} disabled={v.status!=='selected'}>{v.kind==='base'?'Original reviewed evidence':'Reviewed correction'}{h.versions.length>1?` · ${i+1}`:''}</option>)}</select></label></div>
+  <div className="nc-controls"><label>Month <select aria-label="Cash reference month" value={h.selection.period.from} onChange={e=>h.selectMonth(e.target.value)}><option value="">Choose a month</option>{h.months.map(v=><option key={v.from} value={v.from}>{reportingMonthLabel(v.from)}</option>)}</select></label></div>
   {(h.loadingMonths||h.loading)&&<p role="status">Checking the selected business’s evidence…</p>}
   {h.error&&<p role="alert">{h.error} <button onClick={h.retry}>Retry evidence check</button></p>}
   <CashSourceFigures sources={sources} history={h}/>

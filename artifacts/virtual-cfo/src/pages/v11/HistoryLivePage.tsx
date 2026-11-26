@@ -1,3 +1,4 @@
+import {resolveHistoryMonthVersion} from '@/lib/reportingMonth';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -30,13 +31,14 @@ export default function HistoryLivePage(){
  return <AppLayout showMonitoring={false}>
  <h1>Sales and profit history</h1><p>Choose the synthetic history and a reviewed reporting month. Existing reporting preferences stay unchanged.</p>
  <label>History<select value={enabled?HISTORY_EDITION:''} onChange={e=>setChoice({userId:auth.userId,storeId,edition:e.target.value,from:'',to:'',versionId:''})}><option value="">Choose history</option><option value={HISTORY_EDITION}>Synthetic company · complete history</option></select></label>
- {!availability&&<details><summary>Explore the Numbers</summary><p>Business: {storeId} · GBP · Europe/London. Choose a history, month and evidence version to inspect supported amounts. No source freshness or financial readiness is inferred from the list of choices.</p></details>}
- {enabled&&<><p>Choose a reviewed month and evidence version. Figures are checked against source records after selection.</p>
+ {!availability&&<details><summary>Explore the Numbers</summary><p>Business: {storeId} · GBP · Europe/London. Choose a history and month to inspect supported amounts. No source freshness or financial readiness is inferred from the list of choices.</p></details>}
+ {enabled&&<><p>Choose a month. Figures are checked against source records after selection.</p>
 
  {available.isFetching&&<p role="status">Loading reviewed reporting months…</p>}
  {available.isError&&<p role="alert">{available.error instanceof HistoryRequestError&&available.error.denied?'Access to this history is not authorised. Check your business membership.':'Checking reviewed months failed. Retry the check.'}</p>}
  {available.isError&&<button type="button" onClick={()=>void available.refetch()}>Retry month check</button>}
- {availability&&<HistorySupportedPanel invalidated={historyChoiceWithdrawn(choice.versionId,versions)} onRetry={()=>void result.refetch()} loading={result.isFetching} error={result.isError?(result.error instanceof HistoryRequestError&&result.error.denied?'denied':'unavailable'):undefined} versionControl={<label>Evidence version<select value={selectedVersion?.versionId??''} disabled={!month} onChange={e=>setChoice({...choice,versionId:e.target.value})}><option value="">Choose evidence version</option>{versions.map((v,index)=><option key={v.versionId} value={v.versionId} disabled={v.status!=='selected'}>{v.kind==='base'?'Original reviewed evidence':'Reviewed correction'}{v.status==='invalidated'?' · unavailable':''}{versions.length>1?` · ${index+1}`:''}</option>)}</select></label>} selection={selection} availability={availability} response={result.isSuccess&&selectedVersion?result.data:null} onMonthChange={range=>setChoice({...choice,...range,versionId:''})}/>}
+ {month&&!choice.versionId&&<p role="alert">{resolveHistoryMonthVersion(month).reason}</p>}
+ {availability&&<HistorySupportedPanel invalidated={historyChoiceWithdrawn(choice.versionId,versions)} onRetry={()=>void result.refetch()} loading={result.isFetching} error={result.isError?(result.error instanceof HistoryRequestError&&result.error.denied?'denied':'unavailable'):undefined} selection={selection} availability={availability} response={result.isSuccess&&selectedVersion?result.data:null} onMonthChange={range=>setChoice({...choice,...range,versionId:resolveHistoryMonthVersion(months.find(m=>m.from===range.from&&m.to===range.to)).versionId})}/>}
  <details id="history-selection-context"><summary>Selected evidence context</summary><p>Edition: {HISTORY_EDITION} · version: {selection.versionId||'Not selected'} · opening basis: {anchor||'Unavailable'}.</p></details>
  </>}
  </AppLayout>;

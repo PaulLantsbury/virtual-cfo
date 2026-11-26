@@ -28,3 +28,10 @@ test('cancellation prevents subsequent database reads',async()=>{
  const controller=new AbortController();let reads=0;
  await assert.rejects(readReviewedSeries([dec,selection],async s=>{reads++;controller.abort();return source(s);},controller.signal));assert.equal(reads,1);
 });
+
+test('earlier months use declared authoritative head without changing the explicit ending selection',()=>{
+ const corrected={...inventory[0],snapshotId:'correction',versionId:'correction',versions:[...inventory[0].versions,{versionId:'correction',status:'selected' as const,kind:'expense-correction' as const}]};
+ assert.deepEqual(reviewedSeriesSelections([corrected,inventory[1]],selection).map(s=>s.versionId),['correction',selection.versionId]);
+ assert.deepEqual(reviewedSeriesSelections([{...corrected,versions:[inventory[0].versions[0],{...corrected.versions[1],status:'invalidated' as const}]},inventory[1]],selection),[]);
+ assert.deepEqual(reviewedSeriesSelections([corrected,inventory[1]],{...selection,versionId:'withdrawn'}),[]);
+});

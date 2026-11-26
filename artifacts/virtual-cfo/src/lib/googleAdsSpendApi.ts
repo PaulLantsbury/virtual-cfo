@@ -32,11 +32,13 @@ const uuid = (value: unknown): value is string => typeof value === 'string'
 const day = (value: unknown): value is string => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
   && Number.isFinite(Date.parse(`${value}T00:00:00.000Z`))
   && new Date(`${value}T00:00:00.000Z`).toISOString().slice(0, 10) === value;
-const timestamp = (value: unknown): value is string => typeof value === 'string'
-  && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
-  && Number.isFinite(Date.parse(value));
+export const googleTimestamp = (value: unknown): value is string => typeof value === 'string'
+  && /^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,6})?(?:Z|[+-](?:(?:0\d|1[0-3]):[0-5]\d|14:00))$/.test(value)
+  && day(value.slice(0,10)) && Number.isFinite(Date.parse(value));
+const timestamp=googleTimestamp;
 const plain = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object'
-  && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype;
+  && !Array.isArray(value) && Object.getPrototypeOf(value) === Object.prototype
+  && Reflect.ownKeys(value).length===Object.keys(value).length && Object.values(Object.getOwnPropertyDescriptors(value)).every(d=>'value' in d);
 const coverages = new Set<GoogleAdsSpendCoverage>(['provider_row', 'no_row', 'partial', 'failed', 'not_collected']);
 const statuses = new Set(['complete', 'partial']);
 const maxInt64 = 9_223_372_036_854_775_807n;
@@ -85,7 +87,7 @@ function parseDay(value: unknown, expectedDate: string): GoogleAdsSpendDay | nul
   });
 }
 
-function parseReport(value: unknown, storeId: string, from: string, to: string): GoogleAdsSpendResult {
+export function parseGoogleAdsSpendReport(value: unknown, storeId: string, from: string, to: string): GoogleAdsSpendResult {
   if (!plain(value) || Object.keys(value).sort().join(',') !== 'account,days,from,status,storeId,to'
     || value.storeId !== storeId || value.from !== from || value.to !== to || !Array.isArray(value.days)) throw fail();
   const first = Date.parse(`${from}T00:00:00.000Z`);
@@ -97,12 +99,12 @@ function parseReport(value: unknown, storeId: string, from: string, to: string):
     return Object.freeze({ status: 'not_connected', storeId, from, to, account: null, days: Object.freeze([]) as readonly [] });
   }
   if (value.status !== 'available' || !validAccount(value.account) || value.days.length !== count) throw fail();
-  const days = value.days.map((record, index) => {
+  const days = Array.from(value.days, (record, index) => {
     const expectedDate = new Date(first + index * 86_400_000).toISOString().slice(0, 10);
     return parseDay(record, expectedDate);
   });
   if (days.some((record) => record === null)) throw fail();
-  return Object.freeze({ status: 'available', storeId, from, to, account: value.account, days: Object.freeze(days as GoogleAdsSpendDay[]) });
+  return Object.freeze({ status: 'available', storeId, from, to, account: Object.freeze({...value.account}), days: Object.freeze(days as GoogleAdsSpendDay[]) });
 }
 
 export async function fetchGoogleAdsSpendRange(
@@ -116,15 +118,17 @@ export async function fetchGoogleAdsSpendRange(
     || (Date.parse(`${to}T00:00:00.000Z`) - Date.parse(`${from}T00:00:00.000Z`)) / 86_400_000 > 92) throw fail();
   const token = await (dependencies.accessToken ?? currentAccessToken)();
   if (typeof token !== 'string' || token.length < 1 || token.length > 8192 || /\s/.test(token)) throw fail();
+  if(signal?.aborted)throw fail();
   const query = new URLSearchParams({ storeId, from, to });
   const response = await (dependencies.fetcher ?? fetch)(`/api/google-ads/spend?${query}`, {
     credentials: 'include',
     cache: 'no-store',
+    redirect: 'error',
     signal,
     headers: { accept: 'application/json', authorization: `Bearer ${token}` },
   });
-  if (!response.ok) throw fail();
+  if (!response.ok || signal?.aborted) throw fail();
   let body: unknown;
   try { body = await response.json(); } catch { throw fail(); }
-  return parseReport(body, storeId, from, to);
+  return parseGoogleAdsSpendReport(body, storeId, from, to);
 }

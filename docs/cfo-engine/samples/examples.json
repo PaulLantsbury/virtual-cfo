@@ -1,0 +1,3828 @@
+{
+  "policy": {
+    "version": "cfo-guardrails-core-v1",
+    "document": "docs/cfo-guardrails-core-v1-2026-11-26.md",
+    "commit": "b675ede2e6028e5891ef7e179ee391447f5133d0",
+    "blob": "b3affd81ca7b353e112e9d70272494942af81c72",
+    "sha256": "683b348dff7e03ae7befac60dbccb0fdfca9d3edcbeeff345a76c6255dfce768"
+  },
+  "examples": [
+    {
+      "name": "normal",
+      "title": "Profit increased in the fictional example",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were £14,000.00, excluding VAT and shipping.",
+        "Gross profit was £8,000.00.",
+        "Contribution after advertising was £6,000.00.",
+        "Operating profit was £3,500.00, after the supported operating costs.",
+        "Operating profit increased by £800.00 compared with September. This is an arithmetic comparison; it does not establish the business cause.",
+        "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 1400000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 1400000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: 800000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": 800000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Contribution for 2026-10-01 to 2026-10-31: 600000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-contribution"
+                ],
+                "value": 600000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Operating profit for 2026-10-01 to 2026-10-31: 350000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit"
+                ],
+                "value": 350000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 100000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 100000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "arithmetic",
+            "text": [
+              "Fictional example. Operating profit changed by 80000 pence from the previous calendar month. This arithmetic does not establish a cause."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit",
+                  "prior-operatingProfit"
+                ],
+                "value": 80000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current",
+                  "fictional-ledger-prior"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "calculation",
+              "comparison",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "supported",
+            "level": "investigation",
+            "text": [
+              "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "calculation",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "requires-human-review",
+            "level": "conditional-test",
+            "text": [
+              "Fictional example. No commercial action is approved. A human must review the underlying economics, assumptions, downside, measurement, stop rule, owner and review date before a test or decision."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "ladder",
+              "commercial-review"
+            ],
+            "reason": "Substantive plan evidence and approval are not validated by this offline engine.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing-costs",
+      "title": "Product costs are missing",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were £14,000.00, excluding VAT and shipping.",
+        "Operating profit is unavailable because some of its required evidence is missing or incompatible.",
+        "The profit comparison is withheld; the two periods are not both eligible for this comparison.",
+        "Next check: complete the historical product-cost evidence before drawing a margin conclusion.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 1400000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 1400000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 100000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 100000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "arithmetic",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Comparable current and prior measures are required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "investigation",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Current validated measures are required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "conditional-test",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Current validated measures are required.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing-advertising",
+      "title": "Advertising evidence is incomplete",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were £14,000.00, excluding VAT and shipping.",
+        "Gross profit was £8,000.00.",
+        "Operating profit is unavailable because some of its required evidence is missing or incompatible.",
+        "The profit comparison is withheld; the two periods are not both eligible for this comparison.",
+        "Next check: complete advertising evidence. Missing spend has not been replaced with zero.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 1400000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 1400000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: 800000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": 800000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "arithmetic",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Comparable current and prior measures are required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "investigation",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Current validated measures are required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "conditional-test",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Current validated measures are required.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing-overheads",
+      "title": "Supported trading figures remain visible",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were £14,000.00, excluding VAT and shipping.",
+        "Gross profit was £8,000.00.",
+        "Contribution after advertising was £6,000.00.",
+        "Operating profit is unavailable because some of its required evidence is missing or incompatible.",
+        "The profit comparison is withheld; the two periods are not both eligible for this comparison.",
+        "Next check: complete overhead evidence before relying on a business-profit conclusion.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 1400000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 1400000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: 800000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": 800000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Contribution for 2026-10-01 to 2026-10-31: 600000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-contribution"
+                ],
+                "value": 600000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 100000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 100000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "arithmetic",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Comparable current and prior measures are required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "investigation",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Current validated measures are required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "requires-human-review",
+            "level": "conditional-test",
+            "text": [
+              "Fictional example. No commercial action is approved. A human must review the underlying economics, assumptions, downside, measurement, stop rule, owner and review date before a test or decision."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "ladder",
+              "commercial-review"
+            ],
+            "reason": "Substantive plan evidence and approval are not validated by this offline engine.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing-cash",
+      "title": "Profit does not establish cash available",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were £14,000.00, excluding VAT and shipping.",
+        "Gross profit was £8,000.00.",
+        "Contribution after advertising was £6,000.00.",
+        "Operating profit was £3,500.00, after the supported operating costs.",
+        "Operating profit increased by £800.00 compared with September. This is an arithmetic comparison; it does not establish the business cause.",
+        "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 1400000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 1400000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: 800000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": 800000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Contribution for 2026-10-01 to 2026-10-31: 600000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-contribution"
+                ],
+                "value": 600000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Operating profit for 2026-10-01 to 2026-10-31: 350000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit"
+                ],
+                "value": 350000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 100000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 100000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "arithmetic",
+            "text": [
+              "Fictional example. Operating profit changed by 80000 pence from the previous calendar month. This arithmetic does not establish a cause."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit",
+                  "prior-operatingProfit"
+                ],
+                "value": 80000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current",
+                  "fictional-ledger-prior"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "calculation",
+              "comparison",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "supported",
+            "level": "investigation",
+            "text": [
+              "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "calculation",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "requires-human-review",
+            "level": "conditional-test",
+            "text": [
+              "Fictional example. No commercial action is approved. A human must review the underlying economics, assumptions, downside, measurement, stop rule, owner and review date before a test or decision."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "ladder",
+              "commercial-review"
+            ],
+            "reason": "Substantive plan evidence and approval are not validated by this offline engine.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "missing-customer",
+      "title": "Order totals cannot answer customer questions",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were £14,000.00, excluding VAT and shipping.",
+        "Gross profit was £8,000.00.",
+        "Contribution after advertising was £6,000.00.",
+        "Operating profit was £3,500.00, after the supported operating costs.",
+        "Operating profit increased by £800.00 compared with September. This is an arithmetic comparison; it does not establish the business cause.",
+        "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "Repeat customers and customer acquisition economics are unavailable. These sales and cost figures contain no validated customer population or matched acquisition evidence.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 1400000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 1400000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: 800000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": 800000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Contribution for 2026-10-01 to 2026-10-31: 600000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-contribution"
+                ],
+                "value": 600000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Operating profit for 2026-10-01 to 2026-10-31: 350000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit"
+                ],
+                "value": 350000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 100000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 100000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "arithmetic",
+            "text": [
+              "Fictional example. Operating profit changed by 80000 pence from the previous calendar month. This arithmetic does not establish a cause."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit",
+                  "prior-operatingProfit"
+                ],
+                "value": 80000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current",
+                  "fictional-ledger-prior"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "calculation",
+              "comparison",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "supported",
+            "level": "investigation",
+            "text": [
+              "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "calculation",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "requires-human-review",
+            "level": "conditional-test",
+            "text": [
+              "Fictional example. No commercial action is approved. A human must review the underlying economics, assumptions, downside, measurement, stop rule, owner and review date before a test or decision."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "ladder",
+              "commercial-review"
+            ],
+            "reason": "Substantive plan evidence and approval are not validated by this offline engine.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "stale",
+      "title": "Saved figures need a freshness check",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "stale",
+      "statements": [
+        "These are the saved October figures, marked stale. They are not a newly verified result.",
+        "October net product sales were £14,000.00, excluding VAT and shipping.",
+        "Gross profit was £8,000.00.",
+        "Contribution after advertising was £6,000.00.",
+        "Operating profit was £3,500.00, after the supported operating costs.",
+        "The profit comparison is withheld; the two periods are not both eligible for this comparison.",
+        "Next check: refresh and review the same reporting scope before relying on a new trend or action.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 1400000 pence. Historical evidence is stale; refresh before making decisions."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 1400000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: 800000 pence. Historical evidence is stale; refresh before making decisions."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": 800000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Contribution for 2026-10-01 to 2026-10-31: 600000 pence. Historical evidence is stale; refresh before making decisions."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-contribution"
+                ],
+                "value": 600000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Operating profit for 2026-10-01 to 2026-10-31: 350000 pence. Historical evidence is stale; refresh before making decisions."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit"
+                ],
+                "value": 350000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 100000 pence. Historical evidence is stale; refresh before making decisions."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 100000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "arithmetic",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Refresh stale evidence before comparisons or advice.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "investigation",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Refresh stale evidence before comparisons or advice.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "conditional-test",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Refresh stale evidence before comparisons or advice.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "invalidated",
+      "title": "Withdrawn evidence is not reused",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "withheld",
+      "statements": [
+        "This request has no eligible evidence. No figures or advice from a previous company or withdrawn result are shown.",
+        "Next check: confirm access, the selected company and the current approved evidence before asking again."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "arithmetic",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "investigation",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "conditional-test",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "denied",
+      "title": "Access is required before showing figures",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "withheld",
+      "statements": [
+        "This request has no eligible evidence. No figures or advice from a previous company or withdrawn result are shown.",
+        "Next check: confirm access, the selected company and the current approved evidence before asking again."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "arithmetic",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "investigation",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "conditional-test",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "scope-mismatch",
+      "title": "Another company’s figures are withheld",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "withheld",
+      "statements": [
+        "This request has no eligible evidence. No figures or advice from a previous company or withdrawn result are shown.",
+        "Next check: confirm access, the selected company and the current approved evidence before asking again."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "arithmetic",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "investigation",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "withheld",
+            "level": "conditional-test",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "A valid authorized evidence context is required.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "comparison-mismatch",
+      "title": "Current figures survive a missing comparison",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were £14,000.00, excluding VAT and shipping.",
+        "Gross profit was £8,000.00.",
+        "Contribution after advertising was £6,000.00.",
+        "Operating profit was £3,500.00, after the supported operating costs.",
+        "The profit comparison is withheld; the two periods are not both eligible for this comparison.",
+        "Next check: use a September comparison with matching financial definitions and valid evidence.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 1400000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 1400000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: 800000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": 800000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Contribution for 2026-10-01 to 2026-10-31: 600000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-contribution"
+                ],
+                "value": 600000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Operating profit for 2026-10-01 to 2026-10-31: 350000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit"
+                ],
+                "value": 350000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 100000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 100000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "arithmetic",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "Comparable current and prior measures are required.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "supported",
+            "level": "investigation",
+            "text": [
+              "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "calculation",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "requires-human-review",
+            "level": "conditional-test",
+            "text": [
+              "Fictional example. No commercial action is approved. A human must review the underlying economics, assumptions, downside, measurement, stop rule, owner and review date before a test or decision."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "ladder",
+              "commercial-review"
+            ],
+            "reason": "Substantive plan evidence and approval are not validated by this offline engine.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "zero",
+      "title": "A supported zero stays distinct from missing data",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were £0.00, excluding VAT and shipping.",
+        "Gross profit was £0.00.",
+        "Contribution after advertising was £0.00.",
+        "Operating profit was £0.00, after the supported operating costs.",
+        "Operating profit decreased by £2,700.00 compared with September. This is an arithmetic comparison; it does not establish the business cause.",
+        "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 0 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 0,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: 0 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": 0,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Contribution for 2026-10-01 to 2026-10-31: 0 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-contribution"
+                ],
+                "value": 0,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Operating profit for 2026-10-01 to 2026-10-31: 0 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit"
+                ],
+                "value": 0,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 0 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 0,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "arithmetic",
+            "text": [
+              "Fictional example. Operating profit changed by -270000 pence from the previous calendar month. This arithmetic does not establish a cause."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit",
+                  "prior-operatingProfit"
+                ],
+                "value": -270000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current",
+                  "fictional-ledger-prior"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "calculation",
+              "comparison",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "supported",
+            "level": "investigation",
+            "text": [
+              "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "calculation",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "requires-human-review",
+            "level": "conditional-test",
+            "text": [
+              "Fictional example. No commercial action is approved. A human must review the underlying economics, assumptions, downside, measurement, stop rule, owner and review date before a test or decision."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "ladder",
+              "commercial-review"
+            ],
+            "reason": "Substantive plan evidence and approval are not validated by this offline engine.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "negative",
+      "title": "A refund-only period can be negative",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were -£70.00, excluding VAT and shipping.",
+        "Gross profit was -£70.00.",
+        "Contribution after advertising was -£75.00.",
+        "Operating profit was -£75.00, after the supported operating costs.",
+        "Operating profit decreased by £2,775.00 compared with September. This is an arithmetic comparison; it does not establish the business cause.",
+        "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: -7000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": -7000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: -7000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": -7000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Contribution for 2026-10-01 to 2026-10-31: -7500 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-contribution"
+                ],
+                "value": -7500,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Operating profit for 2026-10-01 to 2026-10-31: -7500 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit"
+                ],
+                "value": -7500,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 0 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 0,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "arithmetic",
+            "text": [
+              "Fictional example. Operating profit changed by -277500 pence from the previous calendar month. This arithmetic does not establish a cause."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit",
+                  "prior-operatingProfit"
+                ],
+                "value": -277500,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current",
+                  "fictional-ledger-prior"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "calculation",
+              "comparison",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "supported",
+            "level": "investigation",
+            "text": [
+              "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "calculation",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "requires-human-review",
+            "level": "conditional-test",
+            "text": [
+              "Fictional example. No commercial action is approved. A human must review the underlying economics, assumptions, downside, measurement, stop rule, owner and review date before a test or decision."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "ladder",
+              "commercial-review"
+            ],
+            "reason": "Substantive plan evidence and approval are not validated by this offline engine.",
+            "canExecute": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "prompt-injection",
+      "title": "Source notes cannot change the advice rules",
+      "company": "Fictional Northbridge Home Ltd",
+      "notice": "Fictional acceptance examples. These figures are not the published Night Scout synthetic company, real provider data, or ChatGPT responses.",
+      "reportingPeriod": "October 2026",
+      "comparisonPeriod": "September 2026",
+      "currency": "GBP",
+      "timeZone": "Europe/London",
+      "sourceObservedAt": "2026-11-01T12:00:00Z",
+      "dataThrough": "2026-10-31",
+      "reviewDate": "2026-11-26",
+      "status": "ready",
+      "statements": [
+        "October net product sales were £14,000.00, excluding VAT and shipping.",
+        "Gross profit was £8,000.00.",
+        "Contribution after advertising was £6,000.00.",
+        "Operating profit was £3,500.00, after the supported operating costs.",
+        "Operating profit increased by £800.00 compared with September. This is an arithmetic comparison; it does not establish the business cause.",
+        "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results.",
+        "Cash available is unknown: dated eligible cash balances are not supplied. Profit does not show what is safe to spend.",
+        "A marketing-spend test is not proposed: the required assumptions, downside checks and measurement plan are absent."
+      ],
+      "decisions": [
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-netProductSales"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Net product sales for 2026-10-01 to 2026-10-31: 1400000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-netProductSales"
+                ],
+                "value": 1400000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-grossProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Gross profit for 2026-10-01 to 2026-10-31: 800000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-grossProfit"
+                ],
+                "value": 800000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-contribution"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Contribution for 2026-10-01 to 2026-10-31: 600000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-contribution"
+                ],
+                "value": 600000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Operating profit for 2026-10-01 to 2026-10-31: 350000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit"
+                ],
+                "value": 350000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-advertising"
+          },
+          "result": {
+            "status": "supported",
+            "level": "fact",
+            "text": [
+              "Fictional example. Advertising for 2026-10-01 to 2026-10-31: 100000 pence."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-advertising"
+                ],
+                "value": 100000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "context",
+              "calculation",
+              "freshness"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "arithmetic",
+            "currentId": "current-operatingProfit",
+            "priorId": "prior-operatingProfit"
+          },
+          "result": {
+            "status": "supported",
+            "level": "arithmetic",
+            "text": [
+              "Fictional example. Operating profit changed by 80000 pence from the previous calendar month. This arithmetic does not establish a cause."
+            ],
+            "claims": [
+              {
+                "metricIds": [
+                  "current-operatingProfit",
+                  "prior-operatingProfit"
+                ],
+                "value": 80000,
+                "unit": "pence",
+                "evidenceRefs": [
+                  "fictional-ledger-current",
+                  "fictional-ledger-prior"
+                ]
+              }
+            ],
+            "ruleIds": [
+              "calculation",
+              "comparison",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-availableCash"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "fact",
+            "metricId": "current-repeatCustomers"
+          },
+          "result": {
+            "status": "withheld",
+            "level": "fact",
+            "text": [],
+            "claims": [],
+            "ruleIds": [
+              "context",
+              "ladder"
+            ],
+            "reason": "This measure lacks validated calculation evidence.",
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "investigation",
+            "topic": "profit-change",
+            "metricIds": [
+              "current-grossProfit",
+              "current-contribution",
+              "current-operatingProfit",
+              "current-ebitda"
+            ]
+          },
+          "result": {
+            "status": "supported",
+            "level": "investigation",
+            "text": [
+              "Fictional example. Check the underlying sales and classified costs before attributing a cause. These figures alone do not establish which action will improve results."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "calculation",
+              "ladder"
+            ],
+            "reason": null,
+            "canExecute": false
+          }
+        },
+        {
+          "intent": {
+            "kind": "conditional-test",
+            "topic": "marketing-economics",
+            "metricIds": [
+              "current-advertising",
+              "current-contribution"
+            ]
+          },
+          "result": {
+            "status": "requires-human-review",
+            "level": "conditional-test",
+            "text": [
+              "Fictional example. No commercial action is approved. A human must review the underlying economics, assumptions, downside, measurement, stop rule, owner and review date before a test or decision."
+            ],
+            "claims": [],
+            "ruleIds": [
+              "ladder",
+              "commercial-review"
+            ],
+            "reason": "Substantive plan evidence and approval are not validated by this offline engine.",
+            "canExecute": false
+          }
+        }
+      ]
+    }
+  ]
+}

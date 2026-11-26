@@ -1,0 +1,20 @@
+export type MetricKey = 'netProductSales'|'netShipping'|'revenue'|'cogs'|'variableCosts'|'advertising'|'overheads'|'da'|'grossProfit'|'contributionBeforeMarketing'|'contribution'|'operatingProfit'|'ebitda'|'orders'|'availableCash'|'unsettledCash'|'operatingCash'|'grossMargin'|'contributionMargin'|'operatingMargin'|'ebitdaMargin'|'discountRate'|'refundRate'|'overheadRatio'|'retainedSalesRate'|'grossProductSales'|'discounts'|'refunds'|'cashOverheads';
+export interface Scope { readonly companyId:string;readonly storeId:string;readonly currency:string;readonly timeZone:string;readonly from:string;readonly to:string;readonly selectionVersion:string; }
+export interface EvidenceRequest extends Scope { readonly asOf:string;readonly access:'allowed'|'denied';readonly formulaVersion:string; }
+export interface SourceRecord {readonly scope:Scope;readonly profitInput?:unknown;readonly id:string;readonly ref:string;readonly from:string;readonly to:string;readonly reportVersion:string;readonly sourceVersion:string;readonly formulaVersion:string;readonly observedAt:string;readonly dataThrough:string;}
+export interface MetricEvidence {readonly id:string;readonly key:MetricKey;readonly unit:'pence'|'count'|'ratio'|'pence-per-order';readonly period:'current'|'prior';readonly value:number|null;readonly sourceId:string;readonly numeratorId?:string;readonly denominatorId?:string;}
+export interface TestPlan {readonly baselineIds:readonly string[];readonly assumptionRefs:readonly string[];readonly downsideRef:string;readonly measurementRef:string;readonly stopRuleRef:string;readonly ownerId:string;readonly reviewDate:string;readonly economicsRef?:string;readonly cashCommitmentsRef?:string;readonly capacityRef?:string;readonly mechanismRef?:string;readonly alternativesRef?:string;}
+export interface EvidenceInput {readonly schemaVersion:'cfo-evidence-v1';readonly scope:Scope;readonly mode:'fictional'|'reviewed';readonly freshness:'current'|'stale'|'invalidated';readonly sources:readonly SourceRecord[];readonly metrics:readonly MetricEvidence[];readonly testPlan:TestPlan|null;}
+declare const brand:unique symbol;
+export interface EvidenceContext {readonly [brand]:true;readonly status:'ready'|'stale'|'withheld';readonly reason:string|null;readonly scope:Scope|null;readonly mode:'fictional'|'reviewed'|null;readonly sources:readonly SourceRecord[];readonly metrics:readonly MetricEvidence[];readonly testPlan:TestPlan|null;}
+export type Topic = 'profit-change'|'marketing-economics'|'cash-position';
+export type ClaimIntent = {readonly kind:'fact';readonly metricId:string}|{readonly kind:'arithmetic';readonly currentId:string;readonly priorId:string}|{readonly kind:'investigation'|'conditional-test'|'human-review';readonly topic:Topic;readonly metricIds:readonly string[]};
+export interface NumericClaim {readonly metricIds:readonly string[];readonly value:number;readonly unit:'pence'|'count'|'ratio'|'percentage-points'|'pence-per-order';readonly evidenceRefs:readonly string[];}
+export interface ClaimResult {readonly status:'supported'|'withheld'|'requires-human-review';readonly level:ClaimIntent['kind'];readonly text:readonly string[];readonly claims:readonly NumericClaim[];readonly ruleIds:readonly string[];readonly reason:string|null;readonly canExecute:false;}
+export interface Rule {readonly id:string;readonly title:string;readonly section:string;readonly coverage:'automated-gate'|'adapter-required'|'unsupported';readonly limitation:string;}
+export const POLICY_VERSION:Readonly<{version:string;document:string;commit:string;blob:string;sha256:string}>;
+export const RULES:readonly Rule[];
+export const COVERAGE:Readonly<{policyVersion:string;rules:readonly Rule[];families:readonly {readonly family:string;readonly coverage:string;readonly ruleIds:readonly string[]}[]}>;
+export function createEvidenceContext(input:unknown,expected:EvidenceRequest):EvidenceContext;
+export function evaluateClaim(context:EvidenceContext,intent:unknown):ClaimResult;
+export function validateClaimResult(context:EvidenceContext,intent:unknown,result:unknown):boolean;

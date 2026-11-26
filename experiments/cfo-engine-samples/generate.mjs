@@ -1,0 +1,20 @@
+import { mkdir, writeFile } from 'node:fs/promises';
+import { buildBriefing, validateBriefing } from './briefings.mjs';
+import { SAMPLE_CASES, SAMPLE_NOTICE } from './fixtures.mjs';
+import { POLICY_VERSION } from '../../lib/cfo-engine/index.mjs';
+const target = new URL('../../docs/cfo-engine/samples/', import.meta.url);
+const examples = SAMPLE_CASES.map(buildBriefing);
+if (!examples.every(example => validateBriefing(example.name, example))) throw new Error('Sample validation failed');
+await mkdir(target, { recursive: true });
+await writeFile(new URL('examples.json', target), JSON.stringify({ policy: POLICY_VERSION, examples }, null, 2) + '\n');
+const output = ['# Fictional CFO briefing examples', '', `**${SAMPLE_NOTICE}**`, '', 'All examples concern October 2026 in GBP and Europe/London, compared with September where compatible. Source observations are dated 1 November 2026; review date is 26 November. “Current” in these fixtures is an explicit fictional evidence state, not a live freshness claim. No action is executed.', '', '[Inspect the policy decisions and evidence references](evidence.md).', ''];
+for (const example of examples) output.push(`## ${example.title}`, '', ...example.statements.map(text => text + '\n'));
+await writeFile(new URL('briefings.md', target), output.join('\n').trimEnd() + '\n');
+const detail = ['# Sample policy and evidence decisions', '', 'All inputs are fictional acceptance fixtures from the earlier tested offline prototype. Each monetary claim is rederived by the shared financial calculator and admitted through the new CFO engine. This sample adapter is not a database adapter and proves no merchant access, source completeness or provider reconciliation.', '', '[Machine-readable decisions](examples.json) · [Readable briefings](briefings.md)', ''];
+examples.forEach((example, index) => {
+  detail.push(`## ${example.name}`, '', `Result: ${example.status}. JSON location: examples.json#/examples/${index}.`, '');
+  for (const decision of example.decisions) detail.push(`- ${JSON.stringify(decision.intent)} → ${decision.result.status}; rules: ${decision.result.ruleIds.join(', ')}; reason: ${decision.result.reason ?? 'none'}.`);
+  detail.push('');
+});
+await writeFile(new URL('evidence.md', target), detail.join('\n').trimEnd() + '\n');
+console.log(`Generated ${examples.length} fictional CFO engine examples.`);

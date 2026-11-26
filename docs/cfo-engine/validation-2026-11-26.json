@@ -1,0 +1,24 @@
+{
+  "baseCommit": "16df211a5d82dbaff74471de4b7feee4f553c624",
+  "runtimeSha256": "18ed11b1571a397acf0edd6921284553c6cf7ab2ca9d475ce2d0f95e1dd4b9fd",
+  "validation": {
+    "combinedFinancialEngineSamples": "63/63 passed; subsequent inherited-kind regression adds one engine test",
+    "finalEngineSamples": "27/27 passed",
+    "declaration": "strict NodeNext compile passed after final source",
+    "workspaceBuild": "passed, once after final runtime source; pre-existing large bundle warning"
+  },
+  "logs": [
+    {
+      "path": "/tmp/cfo-engine-finish-tests.log",
+      "sha256": "f73d2d8ba7566485be23a172bd526612b9dd5b3ec44446a46da0c7925e732689"
+    },
+    {
+      "path": "/tmp/cfo-engine-final-tests.log",
+      "sha256": "186c37d35e64ee1f5d095b09908cf2858b2affb784f1feb1dee56a40e0386011"
+    },
+    {
+      "path": "/tmp/cfo-engine-finish-build.log",
+      "sha256": "74f2d99b6c169dbb2e32c224060fec112eee6326715a5895bee5ba6c08777612"
+    }
+  ]
+}

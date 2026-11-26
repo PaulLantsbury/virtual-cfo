@@ -3,38 +3,16 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { user } from "@/lib/plan";
 
-const FREE_FEATURES = [
-  "Dashboard",
-  "Growth Quality",
-  "Margin Analysis",
-  "Cash Control",
-  "Profit Overview",
-  "Ask Night Scout",
-];
-
-const PRO_FEATURES = [
-  "Everything in Free",
-  "Recovery Plans",
-  "Opportunity Values",
-  "Growth Simulators",
-  "Weekly Night Scout Briefings",
-  "Scout Recommendations",
-  "Cash Forecasting",
-  "Growth Modelling",
-];
-
-const TRUST_POINTS = [
-  "Cancel any time — no long-term commitment",
-  "Data stays private — no third-party sharing",
-  "Built for Shopify + Xero founders",
-];
+const FREE_FEATURES = ["Scout’s View", "Profit Engine", "Growth & Marketing", "Cash Control", "Explore the Numbers"];
+const PRO_FEATURES = ["Conditional profit modelling", "Editable scenario assumptions", "Browser-only plan drafts", "Owner and review notes", "Source and assumption review"];
+const TRUST_POINTS = ["Source limitations stay visible", "No automatic business changes", "Billing is not connected here"];
 
 export default function Upgrade() {
   const isAlreadyPro = user.plan === "pro";
 
   const handleUpgrade = () => {
     // @billing-integration Replace this with Stripe/RevenueCat checkout session
-    alert("Billing integration coming soon. In dev: set sessionStorage.setItem(\"userPlan\", \"pro\") and refresh.");
+    alert("Billing is not available here yet. No subscription or payment has been created.");
   };
 
   return (
@@ -53,7 +31,7 @@ export default function Upgrade() {
             Pricing
           </h1>
           <p className="text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Start by finding the problems, then upgrade when you want Night Scout to tell you exactly what to do next.
+            Review supported evidence and explore conditional plans. The plan preview below does not activate billing, personalised AI, scheduled briefings or cash forecasting.
           </p>
         </div>
 
@@ -65,7 +43,7 @@ export default function Upgrade() {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  Find The Problems
+                  Review the evidence
                 </p>
                 {!isAlreadyPro && (
                   <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border/60">
@@ -76,7 +54,7 @@ export default function Upgrade() {
               <p className="text-4xl font-display font-bold text-foreground leading-none mb-1">
                 £0
               </p>
-              <p className="text-sm text-muted-foreground">See where opportunity exists.</p>
+              <p className="text-sm text-muted-foreground">Check supported figures and their limitations.</p>
             </div>
 
             <ul className="space-y-3 mb-8 flex-1">
@@ -101,16 +79,16 @@ export default function Upgrade() {
             "border-indigo-500 dark:border-indigo-400",
             "bg-gradient-to-b from-indigo-50/80 to-white dark:from-indigo-950/30 dark:to-card"
           )}>
-            {/* Most popular badge */}
+            {/* Plan preview badge */}
             <div className="absolute top-0 right-0">
               <div className="bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-wider px-4 py-1 rounded-bl-xl">
-                Most popular
+                Plan preview
               </div>
             </div>
 
             <div className="mb-6">
               <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-3">
-                Know Exactly What To Do
+                Test your assumptions
               </p>
               <p className="text-4xl font-display font-bold text-foreground leading-none mb-1">
                 £49
@@ -139,7 +117,7 @@ export default function Upgrade() {
                   onClick={handleUpgrade}
                   className="w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-lg shadow-indigo-600/25 transition-colors"
                 >
-                  Wake Up To Profitable Growth
+                  Billing not yet available
                 </button>
               )}
             </div>
@@ -159,32 +137,32 @@ export default function Upgrade() {
 
         {/* ── What you unlock ── */}
         <div className="bg-card rounded-2xl border border-border/50 shadow-sm p-7 mb-8">
-          <h2 className="text-lg font-bold text-foreground mb-6">What Night Scout unlocks</h2>
+          <h2 className="text-lg font-bold text-foreground mb-6">What these capabilities mean</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {[
               {
-                title: "Recovery plans",
-                body: "Turn hidden profit leaks into practical actions your team can take this week.",
+                title: "Conditional plans",
+                body: "Explore a change under stated assumptions; no realised saving is implied.",
               },
               {
-                title: "Opportunity values",
-                body: "See the pound value attached to every recovery opportunity Night Scout identifies.",
+                title: "Modelled impact",
+                body: "Compare hypothetical profit changes, not guaranteed opportunities or success probabilities.",
               },
               {
-                title: "Weekly Night Scout briefings",
-                body: "Wake up to the most important insight in your business and the action to focus on next.",
+                title: "Scheduled briefings · unavailable",
+                body: "Scheduled analysis and delivery are not activated by a plan selection.",
               },
               {
-                title: "Cash forecasting",
-                body: "Spot future cash pressure before it limits your choices.",
+                title: "Cash forecasting · unavailable",
+                body: "A forecast requires dated balances, commitments and receipts; profit modelling is not a cash forecast.",
               },
               {
                 title: "Growth modelling",
-                body: "Test how margin, pricing, marketing and cash decisions affect profitable growth.",
+                body: "Test profit assumptions against supported starting economics; check cash and capacity separately.",
               },
               {
-                title: "Scout recommendations",
-                body: "Get clear recommended actions, not just another place to inspect numbers.",
+                title: "Evidence-led investigations",
+                body: "Use supported observations to choose what to check. Consequential changes need evidence and owner review.",
               },
             ].map((item) => (
               <div key={item.title} className="flex items-start gap-3">
@@ -208,9 +186,9 @@ export default function Upgrade() {
               className="inline-flex items-center gap-2 py-3 px-8 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-lg shadow-indigo-600/25 transition-colors"
             >
               <Zap className="w-4 h-4" />
-              Wake Up To Profitable Growth
+              Billing not yet available
             </button>
-            <p className="text-xs text-muted-foreground mt-3">No long-term commitment. Cancel any time.</p>
+            <p className="text-xs text-muted-foreground mt-3">No payment, subscription or automatic action is created here.</p>
           </div>
         )}
 

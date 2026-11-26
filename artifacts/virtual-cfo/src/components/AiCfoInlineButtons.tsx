@@ -18,17 +18,17 @@ export function AiCfoInlineButtons({
 
   const buttons = [
     {
-      label: "Explain this",
+      label: "About Ask",
       icon: Sparkles,
       question: undefined,
     },
     {
-      label: "What should I do?",
+      label: "Advice availability",
       icon: HelpCircle,
       question: "What should I do about this?",
     },
     {
-      label: "Model impact",
+      label: "Impact analysis unavailable",
       icon: BarChart2,
       question: "Model the financial impact of fixing this.",
     },

@@ -1,3 +1,4 @@
+import {createHistoryCfoBriefing} from './history-cfo-evidence.mjs';
 /** Proposed v2 SQL reader. Reuses canonical monetary engines, NOT installed finance_v1 SQL/seals. */
 import {resolveHistorySelection} from './history-versions.mjs';
 import {HISTORY_EDITION,HISTORY_FORMULA,historySourceAsOf,historyToday} from './history-context.mjs';
@@ -78,7 +79,8 @@ export async function readHistoryInTransaction(tx,scope,options={}){
  const {contract,c,version,seal,m}=context;
  const report=await calculateHistorySources(tx,scope,c,{overlays:version.overlays});
  if(report.salesRevision!==seal.sales_revision||report.costRevision!==seal.cost_revision||m.salesRevision!==report.salesRevision||m.costRevision!==report.costRevision)return {state:'unavailable',reason:'History evidence changed',contract:'history-v2-proposal'};
- return {state:'supported',contract:'history-v2-proposal',versionId:version.versionId,snapshotId:version.versionId,metadata:{edition:HISTORY_EDITION,versionId:version.versionId,anchor:contract.anchor,sourceAsOf:m.sourceAsOf,observedAt:m.observedAt,formulaVersion:HISTORY_FORMULA,sourceBasis:'synthetic-local',verification:'canonical-source-revision-only'},scope,sales:report.sales,components:report.components,profit:report.profit,report:{sales:report.sales,profit:report.profit,components:report.components},salesRevision:report.salesRevision,costRevision:report.costRevision};
+ const cfoBriefing=createHistoryCfoBriefing({report,scope,financialVersionId:version.versionId,observedAt:m.observedAt,now:(options.now||(()=>new Date()))()});
+ return {cfoBriefing,state:'supported',contract:'history-v2-proposal',versionId:version.versionId,snapshotId:version.versionId,metadata:{edition:HISTORY_EDITION,versionId:version.versionId,anchor:contract.anchor,sourceAsOf:m.sourceAsOf,observedAt:m.observedAt,formulaVersion:HISTORY_FORMULA,sourceBasis:'synthetic-local',verification:'canonical-source-revision-only'},scope,sales:report.sales,components:report.components,profit:report.profit,report:{sales:report.sales,profit:report.profit,components:report.components},salesRevision:report.salesRevision,costRevision:report.costRevision};
 }
 
 const member=async(tx,scope,user)=>{await tx.query("SELECT set_config('night_scout.profit_user_id',$1,true)",[user.id]);if((await tx.query('SELECT store_id FROM public.store_memberships WHERE store_id=$1 AND user_id=$2',[scope.storeId,user.id])).rows.length!==1)throw Error('History store membership required');};

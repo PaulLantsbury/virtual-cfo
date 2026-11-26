@@ -108,9 +108,7 @@ test('actual app replaces native owner routers with bounded proxy while reports 
 
 test('actual backend two-step probe passes through website canary then closes on expiry',async()=>{
  const {createCanaryProxy}=await import('../../../experiments/provider-proxy/canary.mjs');
- const {existsSync}=await import('node:fs');
- const local=join(root,'../../deployments/provider-activation/logging-canary.mjs');
- const backend=existsSync(local)?local:join(root,'../../../night-scout-provider-activation-20261126/deployments/provider-activation/logging-canary.mjs');
+ const backend=join(root,'../../deployments/provider-activation/logging-canary.mjs');
  const {startLoggingCanary,probeLoggingCanary}=await import(pathToFileURL(backend));
  const expiresAt=new Date(Date.now()+60000).toISOString();let clock=Date.now(),calls=0;
  const upstream=await startLoggingCanary({enabled:true,expiresAt});

@@ -1,7 +1,8 @@
 import {createCanaryProxy} from '../../../../experiments/provider-proxy/canary.mjs';
 import {createProviderProxyAdapter} from '../../../../experiments/provider-proxy/adapter.mjs';
-// No environment-supplied target. A reviewed source change must pin the host.
-export const WEBSITE_PRIVATE_PROVIDER_ORIGIN = undefined;
+import {PINNED_PRIVATE_PROVIDER_ORIGIN} from '../../../../experiments/provider-proxy/boundary.mjs';
+// Integration owner verified service srv-dc46b5l9el5s73abpnc0. No environment-supplied target.
+export const WEBSITE_PRIVATE_PROVIDER_ORIGIN = PINNED_PRIVATE_PROVIDER_ORIGIN;
 const fail=()=>{throw new Error('Marketing provider configuration unavailable');};
 export function validateWebsiteReportEnvironment(env){
  const allowed=new Set(['STAGING_PROJECT_REF','STAGING_OWNER_ID','STAGING_STORE_ID','REPORT_DATABASE_URL','REPORT_RUNTIME_ENABLED']);

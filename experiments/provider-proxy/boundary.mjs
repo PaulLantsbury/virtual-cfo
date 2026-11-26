@@ -1,8 +1,9 @@
 /** Pure, unregistered proxy boundary. No environment, URL target, socket or fetch.
- * Activation is intentionally closed until a reviewed private service is pinned. */
+ * The fixed private service is pinned; runtime enablement remains explicit and default-off. */
 export const WEBSITE_ORIGIN='https://night-scout-xero-staging.onrender.com';
-export const APPROVED_PRIVATE_ORIGINS=Object.freeze([]);
-export const providerProxyActivation=()=>Object.freeze({enabled:false,reason:'private_host_unpinned'});
+export const PINNED_PRIVATE_PROVIDER_ORIGIN='http://night-scout-provider-api-staging:10000';
+export const APPROVED_PRIVATE_ORIGINS=Object.freeze([PINNED_PRIVATE_PROVIDER_ORIGIN]);
+export const providerProxyActivation=()=>Object.freeze({enabled:false,reason:'explicit_runtime_enablement_required'});
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const opaque=/^[A-Za-z0-9_-]{43}$/;
 const fail=()=>{throw Error('Provider proxy unavailable');};

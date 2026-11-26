@@ -49,10 +49,36 @@ test('report-only mode never constructs API runtimes and refuses misplaced capab
   assert.deepEqual(called,[]);
  }
 });
-test('website proxy explicit flag cannot activate without fixed approved target',async()=>{
+test('website proxy requires explicit true despite fixed verified target',async()=>{
  const {createWebsiteOwnerProxy}=await import('../src/lib/provider-proxy-startup.mjs');
  assert.equal(createWebsiteOwnerProxy({}),undefined);
  assert.equal(createWebsiteOwnerProxy({NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'false'}),undefined);
- assert.throws(()=>createWebsiteOwnerProxy({NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'true'}));
+ assert.equal(typeof createWebsiteOwnerProxy({NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'true'}),'function');
  assert.throws(()=>createWebsiteOwnerProxy({NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'yes'}));
+});
+
+test('owner forwarding stays fixed despite environment target overrides, without real network',async()=>{
+ const {Readable}=await import('node:stream');const {EventEmitter}=await import('node:events');
+ const {createWebsiteOwnerProxy,WEBSITE_PRIVATE_PROVIDER_ORIGIN}=await import('../src/lib/provider-proxy-startup.mjs');
+ const original=globalThis.fetch;const calls=[];
+ globalThis.fetch=async(url,init)=>{calls.push({url,init});return new Response('{"status":"available","connections":[]}',{headers:{'content-type':'application/json'}});};
+ try{
+  const proxy=createWebsiteOwnerProxy({NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'true',NIGHT_SCOUT_PROVIDER_PRIVATE_ORIGIN:'https://evil.invalid',WEBSITE_PRIVATE_PROVIDER_ORIGIN:'https://evil.invalid'});
+  assert.equal(calls.length,0,'constructing the explicitly enabled adapter does not call the host');
+  const path='/api/meta-ads/status?storeId=11111111-1111-4111-8111-111111111111';
+  const req=Readable.from([]);Object.assign(req,{method:'GET',originalUrl:path,headers:{authorization:'Bearer fictional'},rawHeaders:[]});
+  const res=new EventEmitter();Object.assign(res,{destroyed:false,writableEnded:false,writeHead(status,headers){this.status=status;this.headers=headers;},end(body){this.body=body;this.writableEnded=true;}});
+  await proxy(req,res);assert.equal(res.status,200);assert.equal(calls.length,1);assert.equal(calls[0].url,WEBSITE_PRIVATE_PROVIDER_ORIGIN+path);assert.equal(calls[0].init.redirect,'manual');
+ }finally{globalThis.fetch=original;}
+});
+
+test('verified host does not bypass finite canary mode or provider-secret separation',async()=>{
+ const {createWebsiteCanaryProxy,createWebsiteOwnerProxy}=await import('../src/lib/provider-proxy-startup.mjs');
+ assert.equal(createWebsiteCanaryProxy({}),undefined);
+ const enabled={NIGHT_SCOUT_FICTIONAL_CANARY_PROXY_ENABLED:'true',NIGHT_SCOUT_FICTIONAL_CANARY_EXPIRES_AT:new Date(Date.now()+60000).toISOString()};
+ assert.equal(typeof createWebsiteCanaryProxy(enabled),'function');
+ assert.throws(()=>createWebsiteCanaryProxy({...enabled,NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'true'}));
+ assert.throws(()=>createWebsiteCanaryProxy({...enabled,NIGHT_SCOUT_FICTIONAL_CANARY_EXPIRES_AT:new Date(Date.now()-1000).toISOString()}));
+ assert.throws(()=>createWebsiteCanaryProxy({...enabled,NIGHT_SCOUT_GOOGLE_ADS_CLIENT_SECRET:'fictional'}));
+ assert.throws(()=>createWebsiteOwnerProxy({NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'true',NIGHT_SCOUT_META_ADS_API_DATABASE_URL:'fictional'}));
 });

@@ -1,0 +1,10 @@
+{
+ "compilerOptions": {
+  "target":"ES2022", "module":"ESNext", "moduleResolution":"Bundler",
+  "strict":true, "skipLibCheck":false, "noEmit":true,
+  "allowImportingTsExtensions":true, "esModuleInterop":true,
+  "types":["node"], "typeRoots":["../../artifacts/api-server/node_modules/@types"],
+  "baseUrl":"../..", "paths":{"express":["artifacts/api-server/node_modules/@types/express"]}
+ },
+ "files":["host-app.ts","host-entry.ts","host-boundary.d.mts"]
+}

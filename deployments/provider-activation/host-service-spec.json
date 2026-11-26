@@ -1,0 +1,27 @@
+{
+  "status": "proposal-only-not-a-provisioning-request",
+  "requiredBeforeProvisioning": ["owner approval", "published tested source and verified remote commit SHA", "verify same workspace and Frankfurt private-network reachability"],
+  "name": "night-scout-provider-api-staging",
+  "type": "pserv",
+  "runtime": "node",
+  "region": "frankfurt",
+  "computePlan": "0.5c-512mb",
+  "legacyPlanAlias": "starter",
+  "baseComputeUsdPerMonth": 7,
+  "numInstances": 1,
+  "autoDeployTrigger": "off",
+  "buildCommand": "pnpm install --frozen-lockfile && node deployments/provider-activation/host-build.mjs",
+  "startCommand": "node deployments/provider-activation/dist/host-entry.mjs",
+  "healthCheck": "TCP; do not configure healthCheckPath",
+  "environment": {
+    "PORT": "10000",
+    "NIGHT_SCOUT_PROVIDER_API_HOST_ENABLED": "false",
+    "NIGHT_SCOUT_META_ADS_API_RUNTIME_ENABLED": "false",
+    "NIGHT_SCOUT_GOOGLE_ADS_API_RUNTIME_ENABLED": "false"
+  },
+  "secretEnvironmentGroups": [],
+  "disks": [],
+  "schedules": [],
+  "sourceBinding": null,
+  "verifiedPrivateUpstream": null
+}

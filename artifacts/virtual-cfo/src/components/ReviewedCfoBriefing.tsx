@@ -4,7 +4,7 @@ const money=(value:number)=>new Intl.NumberFormat('en-GB',{style:'currency',curr
 export function ReviewedCfoBriefing({month}:{month:ReturnType<typeof composeHistoryMonth>}){
  const briefing=reviewedCfoBriefing(month);
  return <section className="sv-checked-briefing" aria-label="Checked financial briefing"><h5>Checked financial briefing</h5>{briefing?<>
-  <p>Net product sales were {money(briefing.facts.find(f=>f.key==='netProductSales')!.value)}. Contribution after advertising was {money(briefing.facts.find(f=>f.key==='contribution')!.value)}, before overheads. EBITDA was {money(briefing.facts.find(f=>f.key==='ebitda')!.value)}, after overheads excluding depreciation and amortisation.</p>
+  <p>For the selected month, net product sales were {money(briefing.facts.find(f=>f.key==='netProductSales')!.value)}. Contribution after advertising was {money(briefing.facts.find(f=>f.key==='contribution')!.value)}, before overheads. EBITDA was {money(briefing.facts.find(f=>f.key==='ebitda')!.value)}, after overheads excluding depreciation and amortisation.</p>
   {briefing.investigation&&<p>{briefing.investigation}</p>}
   <p>This check covers the selected historical month. It does not assess cash available to spend, customer economics or future results.</p>
   <details className="sv-details"><summary>Explore the checked briefing</summary><div><p>Reviewed synthetic records · {month!.selection.period.from}–{month!.selection.period.to} · GBP excluding VAT · Europe/London. These are monthly totals, including when the flow above is displayed per order.</p>

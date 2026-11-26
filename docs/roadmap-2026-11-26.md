@@ -1,3 +1,13 @@
+## Independent baseline completed — next-session starting point
+
+[Independent baseline assessment](independent-baseline-2026-11-26.md) consolidates three fresh read-only reviews of the released website source, actual screenshots and dated acceptance evidence. It is not a fresh independent signed-in retest or exhaustive cell audit.
+
+Guided owner testing can proceed. Next small batch: clarify Growth relative-change chart, remove Pricing's false active-monitoring claim, replace ambiguous Not linked labels with actual reasons, and simplify CFO wording. No arithmetic blocker was found in the independently checked figures. Before multi-user testing, complete authorised signed-in non-member refusal; no leak was identified. Keep honest synthetic/provider/customer/model limitations disclosed. Improve Scout evidence layout and measure loading friction without speculative infrastructure redesign.
+
+Start nextsession from the baseline's prioritised task list and acceptance criteria. Independent testing remains separate from implementation; developers still verify their changes. No fixes, deployments or data changes were made during this assessment.
+
+---
+
 ## Simpler delivery approach and independent baseline testing — agreed 26 November
 
 Owner approved a simpler prototype-first approach and requested the independent baseline assessment now. Every development batch must complete a user-visible capability, fix a demonstrated defect or remove a specific trial blocker. Defer infrastructure work that serves none of these. Prefer small coherent releases and targeted checks; avoid repeated unchanged suites, overlapping implementations and unnecessary branches/packages. Required financial accuracy, company separation, credential protection and honest advice remain essential.

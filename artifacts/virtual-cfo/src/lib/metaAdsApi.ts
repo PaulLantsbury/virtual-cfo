@@ -2,7 +2,7 @@ export type MetaAdAccount = Readonly<{accountId:string;currency:string;timeZone:
 export type MetaRun = Readonly<{status:'running'|'complete'|'partial'|'failed';from:string;to:string;startedAt:string;finishedAt:string|null;safeFailure:string|null;pagesRead:number}>;
 export type MetaConnection = Readonly<{connectionId:string;status:'pending'|'connected'|'reauthorization_required'|'disconnected'|'revoked';connectedAt:string|null;disconnectedAt:string|null;tokenExpiresAt:string|null;accountId:string|null;currency:string|null;timeZone:string|null;latestRun:MetaRun|null}>;
 export type MetaStatus = Readonly<{connections:readonly MetaConnection[]}>;
-type Dependencies=Readonly<{fetcher?:typeof fetch;accessToken?:()=>Promise<string>}>
+type Dependencies=Readonly<{fetcher?:typeof fetch;accessToken?:()=>Promise<string>;expectedUserId?:string;signal?:AbortSignal}>
 const uuid=(v:unknown):v is string=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 const day=(v:unknown):v is string=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(`${v}T00:00:00Z`));
 const date=(v:unknown):v is string=>typeof v==='string'&&Number.isFinite(Date.parse(v));
@@ -12,19 +12,21 @@ const connectionStates=new Set(['pending','connected','reauthorization_required'
 const runStates=new Set(['running','complete','partial','failed']);
 const unavailable=()=>new Error('Meta Ads connection unavailable');
 
-async function currentAccessToken(){
+async function currentAccessToken(expectedUserId?:string){
  const {supabase}=await import('./supabase.ts');
  const {data,error}=await supabase.auth.getSession();const session=data.session;
- if(error||!session?.access_token||!session.expires_at||session.expires_at*1000<=Date.now())throw unavailable();
+ if(error||(expectedUserId!==undefined&&session?.user.id!==expectedUserId)||!session?.access_token||!session.expires_at||session.expires_at*1000<=Date.now())throw unavailable();
  return session.access_token;
 }
 async function request(path:string,storeId:string,method:'GET'|'POST',body?:Record<string,string>,signal?:AbortSignal,deps:Dependencies={}){
- if(!uuid(storeId))throw unavailable();
- const token=await(deps.accessToken??currentAccessToken)();
+ signal=signal??deps.signal;
+ if(!uuid(storeId)||signal?.aborted)throw unavailable();
+ const token=await(deps.accessToken??(()=>currentAccessToken(deps.expectedUserId)))();
+ if(signal?.aborted)throw unavailable();
  if(typeof token!=='string'||token.length<1||token.length>8192||/\s/.test(token))throw unavailable();
  const url=method==='GET'?`${path}?${new URLSearchParams({storeId,...(body??{})})}`:path;
- const response=await(deps.fetcher??fetch)(url,{method,credentials:'include',cache:'no-store',signal,headers:{accept:'application/json',authorization:`Bearer ${token}`,...(method==='POST'?{'content-type':'application/json'}:{})},...(method==='POST'?{body:JSON.stringify({storeId,...body})}:{})});
- if(!response.ok)throw unavailable();
+ const response=await(deps.fetcher??fetch)(url,{method,credentials:'include',cache:'no-store',redirect:'error',signal,headers:{accept:'application/json',authorization:`Bearer ${token}`,...(method==='POST'?{'content-type':'application/json'}:{})},...(method==='POST'?{body:JSON.stringify({storeId,...body})}:{})});
+ if(!response.ok||signal?.aborted)throw unavailable();
  return response.json() as Promise<unknown>;
 }
 function parseAccount(v:unknown):MetaAdAccount|null{

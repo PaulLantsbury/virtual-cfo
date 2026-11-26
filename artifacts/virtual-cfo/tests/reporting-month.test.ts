@@ -34,3 +34,6 @@ test('withdrawn URL version does not fall forward to declared replacement or acr
  assert.equal(advanceReviewHandoff(state,{userId:'user',storeId:'store',availabilityReady:true,months}).choice,null);
  assert.equal(advanceReviewHandoff(state,{userId:'user',storeId:'other',availabilityReady:true,months}).choice,null);
 });
+
+import {historyAvailableMonths,HISTORY_EDITION} from '../src/lib/v11/history-supported.ts';
+test('malformed availability version collections withhold without throwing',()=>{const scope={storeId:'store',currency:'GBP' as const,timezone:'Europe/London' as const,edition:HISTORY_EDITION,anchor:'2024-11-01'};for(const malformed of [{},null,[null],[false],true,'bad']){const raw={...scope,contract:'history-availability-v2',verification:'sealed-candidates-only',requiresReadValidation:true,months:[{...base,versions:malformed}]};assert.deepEqual(historyAvailableMonths(raw,scope),[]);}});

@@ -47,7 +47,7 @@ export function historyAvailableMonths(raw:unknown, scope:Omit<HistorySelection,
  if(r.verification!=='sealed-candidates-only'||r.requiresReadValidation!==true||r.contract!=='history-availability-v2'||r.storeId!==scope.storeId||r.edition!==scope.edition||r.anchor!==scope.anchor||r.currency!==scope.currency||r.timezone!==scope.timezone||!Array.isArray(r.months))return [];
  const seen=new Set<string>();
  for(const range of r.months){if(!range||!month(range)||range.from<scope.anchor||typeof range.snapshotId!=='string'||!range.snapshotId||seen.has(range.from))return [];seen.add(range.from);
- if(range.versions){const ids=new Set<string>();for(const version of range.versions){if(typeof version.versionId!=='string'||!version.versionId||ids.has(version.versionId)||!['selected','invalidated'].includes(version.status)||!['base','expense-correction'].includes(version.kind))return [];ids.add(version.versionId);}}
+ if(range.versions!==undefined){if(!Array.isArray(range.versions))return [];const ids=new Set<string>();for(const version of range.versions){if(!version||typeof version!=='object'||typeof version.versionId!=='string'||!version.versionId||ids.has(version.versionId)||!['selected','invalidated'].includes(version.status)||!['base','expense-correction'].includes(version.kind))return [];ids.add(version.versionId);}}
  }
  return [...r.months].sort((a,b)=>a.from.localeCompare(b.from));
 }

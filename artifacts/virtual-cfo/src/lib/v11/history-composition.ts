@@ -28,7 +28,7 @@ export function composeHistoryMonth(raw: unknown, selection: HistorySelection) {
     netProductSales: metrics.netProductSales, netShipping: metrics.netShipping, turnover: metrics.revenue,
     grossProfit: metrics.grossProfit, contribution: metrics.cm3, operatingProfit, ebitda: metrics.ebitda,
   };
-  return immutable({ input, view, selection, amounts, originalOrders: input.sales!.originalOrders,
+  return immutable({ input, view, selection, amounts, cfoBriefing: (raw as Record<string, unknown>).cfoBriefing ?? null, originalOrders: input.sales!.originalOrders,
     originalProductSales: input.sales!.grossProductSales - input.sales!.discounts,
     context: view.primary.context,
     evidence: { financialProfile: 'uk-gifts-v2' as const, edition: selection.edition, anchor: selection.anchor, versionId: selection.versionId,

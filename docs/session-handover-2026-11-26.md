@@ -1,3 +1,13 @@
+## Latest resumed-hour result — supersedes preceding checkpoint
+
+Owner approved exact combined website4b83819400ba6264731a4eb7cf176705df4f5800 publication/deployment/acceptance/conditionalrollback. Exact source is published and independently remote-verified on codex/cfo-ui-integrated-20261126. All177history checks passed, plus focused CFO/build/declaration/browser and independent review receipts. No website deployment yet: fresh baseline remains0e7f99fa/dep-dc41v2 with automaticdeploymentoff/noactive deploy. Automaticapprovalreview rejected generic dashboard reveal controls despite named boolean scope; direct narrow confirmation to inspect seven nonsecret switches is pending in integrations chat. No secret values are required. Preserve this gate rather than bypassing review.
+
+Owner directly approved ONE cb781894 corrected local passwordless installation attempt. Fresh preflight passed; it failed again and independent17:21:33read-only reconciliation foundzero provider schemas/roles. No further retry. Native reproduction identifies tables_safe=false from pre-existing PUBLIC SELECT on extensions.pg_stat_statements and pg_stat_statements_info. Other attestor checks passed. These platform telemetry surfaces are not ordinary provider tables; exact exposure, role scope and options need review. No blanket extension exemption, shared-platform revoke or broader telemetry consent has been implemented/approved. Prepare a minimal tested decision package; do not silently loosen safety or rerun.
+
+Google disabled registration, privatehost and Metacallback setup remain completed as recorded. Providercredentials/OAuth/collection/reportactivation/modelcalls/customerpopulation/feedchanges remain outside scope. Data package is frozen/unexecuted; Pages has no further code/testwork pending. Integrations continues bounded diagnosis and approved website acceptance only if its narrow gate clears. Finalstopby18:00London, including cleanup and actual-result receipt; no new wide batch. Nextsession starts with exact unresolved flags/telemetry gates if still open, not prior password search or duplicate setup.
+
+---
+
 ## Resumed hour checkpoint — 26 November, approximately 17:20 London
 
 This section supersedes the earlier paused/first-stage-pending status below. Owner resumed a bounded hour, aiming to stop by18:00, and directly approved remaining disabled setup, Google terms/policy and a narrow passwordless-install capture exception in integrations chat.

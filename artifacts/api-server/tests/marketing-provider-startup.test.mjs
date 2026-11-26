@@ -37,3 +37,22 @@ test('composition exposes only route ports and closes each runtime once', async 
   await runtime.close();
   assert.equal(closed.length,4);
 });
+
+test('report-only mode never constructs API runtimes and refuses misplaced capability secrets',async()=>{
+ const called=[];
+ const factories=Object.fromEntries(['meta','google','metaReport','googleReport'].map(name=>[name,async()=>{called.push(name);return undefined;}]));
+ await startMarketingProviderRuntime({},factories,{reportOnly:true});
+ assert.deepEqual(called,['metaReport','googleReport']);
+ for(const suffix of ['API_DATABASE_URL','API_RUNTIME_ENABLED','COLLECTOR_DATABASE_URL','APP_SECRET','CLIENT_SECRET','PKCE_KEY','ENVELOPE_MASTER_KEY']){
+  called.length=0;
+  await assert.rejects(startMarketingProviderRuntime({['NIGHT_SCOUT_META_ADS_'+suffix]:suffix.endsWith('ENABLED')?'true':'fictional'},factories,{reportOnly:true}));
+  assert.deepEqual(called,[]);
+ }
+});
+test('website proxy explicit flag cannot activate without fixed approved target',async()=>{
+ const {createWebsiteOwnerProxy}=await import('../src/lib/provider-proxy-startup.mjs');
+ assert.equal(createWebsiteOwnerProxy({}),undefined);
+ assert.equal(createWebsiteOwnerProxy({NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'false'}),undefined);
+ assert.throws(()=>createWebsiteOwnerProxy({NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'true'}));
+ assert.throws(()=>createWebsiteOwnerProxy({NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'yes'}));
+});

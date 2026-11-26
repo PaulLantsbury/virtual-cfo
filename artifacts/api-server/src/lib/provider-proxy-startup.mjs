@@ -1,0 +1,23 @@
+import {createProviderProxyAdapter} from '../../../../experiments/provider-proxy/adapter.mjs';
+// No environment-supplied target. A reviewed source change must pin the host.
+export const WEBSITE_PRIVATE_PROVIDER_ORIGIN = undefined;
+const fail=()=>{throw new Error('Marketing provider configuration unavailable');};
+export function validateWebsiteReportEnvironment(env){
+ const allowed=new Set(['STAGING_PROJECT_REF','STAGING_OWNER_ID','STAGING_STORE_ID','REPORT_DATABASE_URL','REPORT_RUNTIME_ENABLED']);
+ for(const [name,d] of Object.entries(Object.getOwnPropertyDescriptors(env))){
+  if(!/^NIGHT_SCOUT_(META|GOOGLE)_ADS_/.test(name))continue;
+  if(!('value' in d))fail();const value=d.value;
+  if(value===undefined||value===null||value==='')continue;
+  if(typeof value!=='string')fail();
+  const suffix=name.replace(/^NIGHT_SCOUT_(META|GOOGLE)_ADS_/,'');
+  if(suffix.endsWith('_ENABLED')&&!['true','false'].includes(value))fail();
+  if(!allowed.has(suffix)&&!(suffix.endsWith('_ENABLED')&&value==='false'))fail();
+ }
+}
+export function createWebsiteOwnerProxy(env){
+ const enabled=env.NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED;
+ if(enabled===undefined||enabled===''||enabled==='false')return undefined;
+ if(enabled!=='true')fail();
+ validateWebsiteReportEnvironment(env);
+ return createProviderProxyAdapter({enabled:true,upstreamOrigin:WEBSITE_PRIVATE_PROVIDER_ORIGIN});
+}

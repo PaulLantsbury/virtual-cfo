@@ -90,3 +90,18 @@ test('mounted Meta report preserves expired saved facts and unknown days but rej
  });
 });
 test.after(async()=>rm(scratch,{recursive:true,force:true}));
+
+test('actual app replaces native owner routers with bounded proxy while reports remain local',async()=>{
+ const {createProviderProxyAdapter}=await import('../../../experiments/provider-proxy/adapter.mjs');
+ const calls=[];let localReads=0;
+ const ownerProxy=createProviderProxyAdapter({enabled:true,upstreamOrigin:'http://provider.invalid',approvedOrigins:['http://provider.invalid'],transport:async(url,init)=>{calls.push({url,init});return new Response(JSON.stringify({error:'unavailable'}),{status:503});}});
+ const googleReport={authenticate:async()=>({userId}),service:{readSpend:async(_identity,input)=>{localReads++;return {status:'not_connected',...input,account:null,days:[]};}}};
+ await serve({ownerProxy,googleReport,google:{authenticate:()=>assert.fail('native owner router must not execute')}},async base=>{
+  const owner=await fetch(`${base}/api/google-ads/status?storeId=${storeId}`,{headers:{authorization:'Bearer fictional'}});
+  assert.equal(owner.status,503);assert.equal(calls.length,1);assert.equal(calls[0].url,`http://provider.invalid/api/google-ads/status?storeId=${storeId}`);
+  assert.equal(calls[0].init.redirect,'manual');
+  const report=await fetch(`${base}/api/google-ads/spend?storeId=${storeId}&from=2026-10-01&to=2026-10-14`,{headers:{authorization:'Bearer fictional'}});
+  assert.equal(report.status,200);assert.equal(localReads,1);assert.equal(calls.length,1);
+  assert.equal((await fetch(`${base}/api/meta-ads/spend`)).status,503);assert.equal(calls.length,1);
+ });
+});

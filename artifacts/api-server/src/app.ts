@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Express, type RequestHandler } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
@@ -22,6 +22,7 @@ import {createGoogleAdsRouter, type GoogleAdsRouterDependencies} from './routes/
 import {createGoogleAdsSpendReportRouter, type GoogleAdsSpendReportDependencies} from './routes/google-ads-spend-report.ts';
 
 export type MarketingProviderDependencies = Readonly<{
+  ownerProxy?: RequestHandler;
   meta?: MetaAdsRouterDependencies;
   metaReport?: MetaAdsSpendReportDependencies;
   google?: GoogleAdsRouterDependencies;
@@ -58,9 +59,9 @@ app.use('/api/history-reporting',createHistoryReportingRouter(historyReporting))
 app.use('/api/supplemental-reporting',createSupplementalReportingRouter(supplementalReporting));
 // Each router fails closed when its separately opted-in runtime is absent.
 app.use('/api/meta-ads',createMetaAdsSpendReportRouter(marketing.metaReport));
-app.use('/api/meta-ads',createMetaAdsRouter(marketing.meta));
+app.use('/api/meta-ads',marketing.ownerProxy ?? createMetaAdsRouter(marketing.meta));
 app.use('/api/google-ads',createGoogleAdsSpendReportRouter(marketing.googleReport));
-app.use('/api/google-ads',createGoogleAdsRouter(marketing.google));
+app.use('/api/google-ads',marketing.ownerProxy ?? createGoogleAdsRouter(marketing.google));
 // Retired operator-only endpoint must never reach the customer SPA or OAuth handlers.
 app.use('/api/xero/test-writer',(_req,res)=>{res.set('Cache-Control','no-store').status(404).json({error:'endpoint_unavailable'});});
 app.use('/api/xero/staging',createXeroStagingBootstrapRouter(xeroBootstrap));

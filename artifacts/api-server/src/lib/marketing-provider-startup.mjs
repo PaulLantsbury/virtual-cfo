@@ -1,3 +1,4 @@
+import {validateWebsiteReportEnvironment} from './provider-proxy-startup.mjs';
 import {createMetaAdsRuntime} from './meta-ads-runtime.mjs';
 import {createMetaAdsReportRuntime} from './meta-ads-report-runtime.mjs';
 import {createGoogleAdsRuntime} from './google-ads-runtime.mjs';
@@ -10,7 +11,8 @@ export async function startMarketingProviderRuntime(env, factories = {
   metaReport: createMetaAdsReportRuntime,
   google: createGoogleAdsRuntime,
   googleReport: createGoogleAdsReportRuntime,
-}) {
+}, {reportOnly=false} = {}) {
+  if(reportOnly) validateWebsiteReportEnvironment(env);
   const opened = [];
   const close = async () => {
     const pending = opened.splice(0);
@@ -18,7 +20,7 @@ export async function startMarketingProviderRuntime(env, factories = {
   };
   try {
     const routes = {};
-    for (const name of ['meta', 'metaReport', 'google', 'googleReport']) {
+    for (const name of (reportOnly ? ['metaReport','googleReport'] : ['meta', 'metaReport', 'google', 'googleReport'])) {
       const runtime = await factories[name](env);
       if (runtime) {
         opened.push(runtime);

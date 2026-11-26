@@ -21,3 +21,5 @@
 .sv-checked-briefing h5 { font-size: .9rem; margin: 1rem 0 .5rem; }
 .sv-checked-briefing .sv-details { margin-top: .75rem; }
 .sv-checked-briefing .sv-details table { width: 100%; }
+
+.sv-checked-briefing > p + p { margin-top: .65rem; }

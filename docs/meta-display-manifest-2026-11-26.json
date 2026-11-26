@@ -1,0 +1,22 @@
+{
+  "base": "2a557ea9c0917820151878a373bcf7196fd2a816",
+  "frozen_website": "28853bb8567a503f7847f0e028f9e6277b2b384a",
+  "producer": "74ce7893eb60dac8549043355ef6f287d31b2c10",
+  "default_enabled": false,
+  "files": {
+    "artifacts/virtual-cfo/src/components/MetaReadOnlySpendPanel.tsx": "826b93a31f06b7b1ab6ae5e388831dcef803f47f81f3e4b38799dd47e9e5779d",
+    "artifacts/virtual-cfo/src/components/MetaSavedHistory.tsx": "61800f856cdf9bcc162cfea5efb3ace383482c2c0c3ac10d3ffca742a1d4c21a",
+    "artifacts/virtual-cfo/src/lib/metaSpendDisplay.ts": "6fc815c477d16dd057993a70d42a01f0b965eaa1851b6cbf5a73aa7c6ec1b9a5",
+    "artifacts/virtual-cfo/src/lib/useMetaSavedSpend.ts": "aac8f44d9b9943b8c657300258aa5d0b62b24e908855bf39cf0108da8838dd9e",
+    "artifacts/virtual-cfo/src/pages/new-marketing.tsx": "c8a0392050fbeecf63ca0b6af2aee57d07fb76e54fc831f6892580976a0a8cc6",
+    "artifacts/virtual-cfo/tests/meta-display-browser-fixture.mjs": "83abe73940fc3f8b50a360a47fe1ead684bd050100baa18bee91adc61eb30aa2",
+    "artifacts/virtual-cfo/tests/meta-display-browser.mjs": "e3a0bd830778719c52adf4088c30538e482ec55adf0aa1afa973e7935e46aeb3",
+    "artifacts/virtual-cfo/tests/meta-display-report.fixture.ts": "88f6cec93d8afcadf0313e2ced8d3248a25c8823ead5071e77a42644af195405",
+    "artifacts/virtual-cfo/tests/meta-display.test.mjs": "6d3981210a02ae0daf0a66c5b616bcf502d5dbcf51d081fe994462b2968786fd",
+    "artifacts/virtual-cfo/tests/meta-history-producer-agreement.mjs": "88a6c0380c53133f96da0ea2b6d7e62e0acd943df04dff36b22ce9ae6dd123eb",
+    "docs/meta-display-independent-review-2026-11-26.md": "420c290098f5de49ba15c269fccb346b7a4747bffb34f664a70cde3707d61bc9",
+    "docs/meta-display-package-2026-11-26.md": "647489fd711872675f736b76d6a6108400e117e033d1a69330ebc78fa523f5b3",
+    "docs/meta-display-validation-2026-11-26.md": "67f2b231cef18549638b87bb130c909f4334730f379db8febc833882fdab468c"
+  },
+  "note": "Manifest excludes itself. Source-only candidate, no hosted activation."
+}

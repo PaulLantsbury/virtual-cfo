@@ -4,15 +4,15 @@ import {buildMetaHistoryFromWire,type MetaHistoryWirePresentation} from '../lib/
 /** Unmounted review component. No fetch, storage, provider action or production route integration. */
 export function MetaSavedHistory(props:{result:unknown;requested:unknown;displayContext:unknown;membershipAuthorized:boolean}){
  const view=buildMetaHistoryPresentation(props.result,props.requested,props.displayContext,props.membershipAuthorized);
- return <SavedHistoryView view={view}/>;
+ return <MetaSavedHistoryView view={view}/>;
 }
 
 /** Unmounted wire review entry point; the caller supplies authenticated read-only results. */
 export function MetaSavedHistoryFromWire(props:{wire:unknown;requested:unknown;membershipAuthorized:boolean}){
- return <SavedHistoryView view={buildMetaHistoryFromWire(props.wire,props.requested,props.membershipAuthorized)}/>;
+ return <MetaSavedHistoryView view={buildMetaHistoryFromWire(props.wire,props.requested,props.membershipAuthorized)}/>;
 }
 const coverageLabels={provider_row:'Reported by Meta',no_row:'No provider row',partial:'Partial coverage',failed:'Collection failed',not_collected:'Not collected'} as const;
-function SavedHistoryView({view}:{view:MetaHistoryWirePresentation}){
+export function MetaSavedHistoryView({view}:{view:MetaHistoryWirePresentation}){
  if(view.state==='withheld')return <section aria-label="Saved Meta spend"><h2>Saved Meta spend</h2><p role="status">Saved spend is withheld because access or the exact account and period could not be confirmed.</p></section>;
  return <section aria-label="Saved Meta spend" className="space-y-4 rounded-xl border p-4" style={{minWidth:0,overflowWrap:'anywhere'}}>
   <h2>Saved Meta spend</h2><p role="status">{view.connectionLabel}. {view.evidenceLabel}.</p>

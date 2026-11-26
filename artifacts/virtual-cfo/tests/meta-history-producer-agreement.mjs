@@ -17,3 +17,10 @@ for(const scenario of ['wire-current','wire-expired','wire-disconnected','wire-a
  if(scenario==='wire-disconnected'){assert.equal(result.state,'withheld');assert.deepEqual(result.days,[]);}
  else {assert.equal(result.state,scenario==='wire-all-unknown'?'unavailable':'available');assert.deepEqual(result.sourceDays,parsed.days);assert.equal(result.subtotalMinor,scenario==='wire-all-unknown'?null:'1200');}
 });
+test('producer/consumer agreement: malformed enum never invokes coercion',()=>{
+ const p=wireFixture('wire-current');let called=0;p.wire.connectionState={toString(){called++;return 'current';}};
+ assert.throws(()=>parseMetaSpendReport(p.wire,p.wire.storeId,p.wire.from,p.wire.to));assert.equal(buildMetaHistoryFromWire(p.wire,p.requested,true).state,'withheld');assert.equal(called,0);
+});
+test('producer/consumer agreement: malformed observation timestamp is rejected',()=>{
+ for(const observedAt of ['2026-10-03T24:00:00Z','2026-10-03T09:60:00Z','2026-10-03T09:00:00+14:01']){const p=wireFixture('wire-current');p.wire.days[0].observedAt=observedAt;assert.throws(()=>parseMetaSpendReport(p.wire,p.wire.storeId,p.wire.from,p.wire.to));assert.equal(buildMetaHistoryFromWire(p.wire,p.requested,true).state,'withheld');}
+});

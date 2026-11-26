@@ -23,6 +23,7 @@ import {createGoogleAdsSpendReportRouter, type GoogleAdsSpendReportDependencies}
 
 export type MarketingProviderDependencies = Readonly<{
   ownerProxy?: RequestHandler;
+  canaryProxy?: RequestHandler;
   meta?: MetaAdsRouterDependencies;
   metaReport?: MetaAdsSpendReportDependencies;
   google?: GoogleAdsRouterDependencies;
@@ -52,6 +53,9 @@ app.use(
   }),
 );
 app.use(cors());
+// Exact temporary diagnostics fail closed outside the separately approved finite mode.
+for(const path of ['/__night_scout_fictional_logging_canary__/capture','/__night_scout_fictional_logging_canary__/failure'])
+ app.all(path,marketing.canaryProxy??((_req,res)=>{res.set('Cache-Control','no-store').status(503).json({unavailable:true});}));
 // Mount before general body parsing so review limits and safe errors apply.
 app.use("/api/financial-reviews", createFinancialReviewRouter(reviewService));
 app.use('/api/profit-reporting',createProfitReportingRouter(profitReporting));

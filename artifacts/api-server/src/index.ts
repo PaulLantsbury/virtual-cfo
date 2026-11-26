@@ -1,4 +1,4 @@
-import {createWebsiteOwnerProxy} from './lib/provider-proxy-startup.mjs';
+import {createWebsiteOwnerProxy,createWebsiteCanaryProxy} from './lib/provider-proxy-startup.mjs';
 import {createApp} from "./app";
 import {startReviewRuntime} from "./lib/review-startup";
 import { logger } from "./lib/logger";
@@ -64,9 +64,9 @@ try{xeroSavedMapping=createXeroSavedMappingRuntime(process.env);}catch{
   process.exit(1);
 }
 let marketing;
-try{const ownerProxy=createWebsiteOwnerProxy(process.env);
- const providerRuntime=await startMarketingProviderRuntime(process.env,undefined,{reportOnly:!!ownerProxy});
- marketing={...providerRuntime,routes:{...providerRuntime.routes,...(ownerProxy?{ownerProxy}:{})}};}catch{
+try{const canaryProxy=createWebsiteCanaryProxy(process.env);const ownerProxy=createWebsiteOwnerProxy(process.env);
+ const providerRuntime=await startMarketingProviderRuntime(process.env,undefined,{reportOnly:!!ownerProxy||!!canaryProxy});
+ marketing={...providerRuntime,routes:{...providerRuntime.routes,...(ownerProxy?{ownerProxy}:{}),...(canaryProxy?{canaryProxy}:{})}};}catch{
   logger.error("Marketing provider configuration failed; server startup stopped");
   await Promise.allSettled([runtime?.close(),xeroBootstrap?.close()]);
   process.exit(1);

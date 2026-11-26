@@ -1,3 +1,4 @@
+import {createCanaryProxy} from '../../../../experiments/provider-proxy/canary.mjs';
 import {createProviderProxyAdapter} from '../../../../experiments/provider-proxy/adapter.mjs';
 // No environment-supplied target. A reviewed source change must pin the host.
 export const WEBSITE_PRIVATE_PROVIDER_ORIGIN = undefined;
@@ -20,4 +21,12 @@ export function createWebsiteOwnerProxy(env){
  if(enabled!=='true')fail();
  validateWebsiteReportEnvironment(env);
  return createProviderProxyAdapter({enabled:true,upstreamOrigin:WEBSITE_PRIVATE_PROVIDER_ORIGIN});
+}
+
+export function createWebsiteCanaryProxy(env){
+ const flag=env.NIGHT_SCOUT_FICTIONAL_CANARY_PROXY_ENABLED;
+ if(flag===undefined||flag===''||flag==='false')return undefined;
+ if(flag!=='true'||env.NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED==='true')fail();
+ validateWebsiteReportEnvironment(env);
+ return createCanaryProxy({enabled:true,expiresAt:env.NIGHT_SCOUT_FICTIONAL_CANARY_EXPIRES_AT,upstreamOrigin:WEBSITE_PRIVATE_PROVIDER_ORIGIN});
 }

@@ -105,3 +105,35 @@ test('actual app replaces native owner routers with bounded proxy while reports 
   assert.equal((await fetch(`${base}/api/meta-ads/spend`)).status,503);assert.equal(calls.length,1);
  });
 });
+
+test('actual backend two-step probe passes through website canary then closes on expiry',async()=>{
+ const {createCanaryProxy}=await import('../../../experiments/provider-proxy/canary.mjs');
+ const {existsSync}=await import('node:fs');
+ const local=join(root,'../../deployments/provider-activation/logging-canary.mjs');
+ const backend=existsSync(local)?local:join(root,'../../../night-scout-provider-activation-20261126/deployments/provider-activation/logging-canary.mjs');
+ const {startLoggingCanary,probeLoggingCanary}=await import(pathToFileURL(backend));
+ const expiresAt=new Date(Date.now()+60000).toISOString();let clock=Date.now(),calls=0;
+ const upstream=await startLoggingCanary({enabled:true,expiresAt});
+ const canaryProxy=createCanaryProxy({enabled:true,expiresAt,now:()=>clock,upstreamOrigin:upstream.targetOrigin,approvedOrigins:[upstream.targetOrigin],transport:(...args)=>{calls++;return fetch(...args);}});
+ try{await serve({canaryProxy},async base=>{
+  const receipt=await probeLoggingCanary({enabled:true,expiresAt,targetOrigin:base});
+  assert.deepEqual(receipt,{sink:'transport',fieldCount:5,pass:true});assert.equal(calls,2);
+  clock=Date.parse(expiresAt);
+  assert.equal((await fetch(base+'/__night_scout_fictional_logging_canary__/capture',{method:'POST'})).status,503);assert.equal(calls,2);
+ });}finally{await upstream.close();}
+});
+test('canary off and nonfictional input never forward or reach SPA',async()=>{
+ const {createCanaryProxy}=await import('../../../experiments/provider-proxy/canary.mjs');
+ const {createWebsiteCanaryProxy}=await import('../src/lib/provider-proxy-startup.mjs');
+ assert.throws(()=>createWebsiteCanaryProxy({NIGHT_SCOUT_FICTIONAL_CANARY_PROXY_ENABLED:'true',NIGHT_SCOUT_PROVIDER_OWNER_PROXY_ENABLED:'true'}));
+ assert.throws(()=>createWebsiteCanaryProxy({NIGHT_SCOUT_FICTIONAL_CANARY_PROXY_ENABLED:'true'}));
+ assert.throws(()=>createCanaryProxy({enabled:true,upstreamOrigin:'http://unapproved.invalid',expiresAt:new Date(Date.now()+60000).toISOString()}));
+ assert.throws(()=>createCanaryProxy({enabled:true,upstreamOrigin:'http://fixture.invalid',approvedOrigins:['http://fixture.invalid'],expiresAt:new Date(Date.now()+9000010).toISOString()}));
+ const canaryProxy=createCanaryProxy({enabled:true,upstreamOrigin:'http://fixture.invalid',approvedOrigins:['http://fixture.invalid'],expiresAt:new Date(Date.now()+60000).toISOString(),transport:()=>assert.fail('nonfictional request forwarded')});
+ for(const marketing of [{},{canaryProxy}])await serve(marketing,async base=>{
+  for(const step of ['capture','failure']){
+   const r=await fetch(base+'/__night_scout_fictional_logging_canary__/'+step+'?code=actual-secret',{method:'POST',headers:{authorization:'Bearer actual-secret','content-type':'application/json'},body:'{"client_secret":"actual-secret"}'});
+   assert.equal(r.status,503);assert.deepEqual(await r.json(),{unavailable:true});
+  }
+ });
+});

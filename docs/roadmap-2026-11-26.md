@@ -1,3 +1,15 @@
+## 27 November — range release failed hosted acceptance; previous website restored
+
+The owner-approved exact source `d2cb5a9ab173bcae0c194c9843a4ab9fd210dd63` was published on `codex/reporting-ranges-20261127` and deployed to staging. Public health passed. Signed-in multi-month Scout/Profit reporting for 1 August–31 October 2026 succeeded: product sales £172,800, operating profit £22,764.15, EBITDA £23,364.15; the separate operating-cash figure was about £23,920. The selected monthly chart appeared after source reads.
+
+However, exact Custom 28 September–4 October 2026 in Weekly view returned “The selected date range could not be checked.” This is a failed live acceptance, despite the passing local tests. The remaining five-page range checks were aborted. No blanket range-release success is claimed.
+
+The authorized rollback completed: previous compact-controls revision `016beeea1e30d63cc87eda5512666533f63918d3` is live again. Public health and signed-in October sales £64,800, operating profit £10,392.05 and operating cash about −£22,290 were checked. Restored Last month/Monthly/Total/None and retained the synthetic company. Existing linked branch, automatic-deploy-off setting, commands and health path remain unchanged. No database, grants, provider, daily-feed, AI or spending changes occurred.
+
+Root cause remains unconfirmed. Independent offline reviews found no demonstrated date-key or financial-validation defect. The partial-range path performs additional source reads, unlike whole-month aggregation; reducing repeated reads from already validated monthly witnesses is a concrete candidate improvement, not a proven diagnosis. Existing completed range logs showed successful multi-month responses; no completed log for the failed weekly request was found in the bounded check. A request/authentication/transport failure cannot yet be distinguished from hosted timing/lifecycle behavior.
+
+Next priority: reproduce the exact late-history cross-month week at realistic dataset size and capture safe request-stage/status evidence without tokens or payloads. Fix only the demonstrated failure, independently retest full and partial paths and stale/loading behavior, then prepare a new exact staging approval package. Do not retry or leave the failed candidate live under the consumed approval. Preserve passing source work and its local tests; keep live monthly reporting stable. New weekly/multi-month/Custom calculations are therefore prepared/published, not accepted as live.
+
 ## 27 November — range calculations implemented and independently checked; exact staging approval next
 
 Focused parallel calculation, page-integration and independent-testing lanes completed the prepared package `d2cb5a9ab173bcae0c194c9843a4ab9fd210dd63` on local branch `codex/reporting-ranges-20261127`. Existing compact-controls staging remains live. See [the exact release package](reporting-ranges-staging-release-2026-11-27.md) and [the data/calculation contract](reporting-range-calculations-2026-11-27.md).

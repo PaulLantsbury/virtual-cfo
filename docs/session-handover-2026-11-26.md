@@ -1,3 +1,15 @@
+## 27 November — first real AI connection probe completed
+
+Owner supplied the final Terminal result from the approved finite local test: all three requests returned valid selections from the allowed financial facts, then the process ended. First selection emphasised sales, contribution and operating profit; the next two emphasised sales, product costs and variable costs. Recorded response times were about1.3–4.0seconds. Token usage and actual billed cost were not observed. No further requests or restart are authorised under that completed pilot.
+
+This proves the account/model connection and constrained fact selection for the fixed generated example, not finished model-written CFO explanation, commercial advice, website activation or real-company analysis. The next small batch prepares guarded plain-English wording of a checked month-to-month change and the existing bounded investigation, with independent semantic review and deterministic fallback. It needs a new exact approval before additional model requests.
+
+Independent testing has accepted the corrected offline comparison engine. The combined website fixes and comparison remain in focused retest after two Growth presentation corrections; no new hosted release is claimed by this checkpoint. The Xero reader's missing-expense and comparison-value fallback corrections are being reviewed on its actual current source. A private Supabase support request about the remaining advertising-connection setup dependency was submitted; no activation is implied.
+
+Continue the beta-critical plan: finish independent website acceptance and release package, verify the narrow customer-data step, prepare actual provider-to-report acceptance, and evaluate the next CFO wording slice. No broad new feature or architecture programme. Keep private operational and credential details outside repository guidance.
+
+---
+
 ## 27 November — beta-critical delivery resumed
 
 [Today's prototype plan](prototype-plan-2026-11-27.md) is the current priority. Owner reconfirmed working pages/Supabase data, accepted Google/Meta/Shopify/Xero read feeds, and useful AI CFO analysis as the beta goal. Optional long-term work is deferred explicitly.

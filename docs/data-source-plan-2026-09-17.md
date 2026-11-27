@@ -106,3 +106,8 @@ One proposed coding-package approval covers these internal milestones, not repea
 - P2.4: Run focused integration and browser tests, check combined local staging, document limitations and publish the package. Live connector verification is a distinct completion gate requiring a configured development account, not something mocked tests can satisfy.
 
 Ownership: application worker P2.1; reporting worker P2.2; connector worker P2.3; coordinator integrates and assigns independent review across completed portions. Shared hook/API changes remain coordinator-owned to avoid conflicting edits. No new SQL application or access grants are authorised by this backlog. If external access is absent, complete and stage the independent deliverables and report live verification as outstanding; never mark the full Shopify journey complete.
+
+
+## 27 November 2026 — reporting date ranges
+
+See [shared reporting range calculations](reporting-range-calculations-2026-11-27.md) for the implemented source contract and agreed Xero-style cost timing. Range reads revalidate every complete monthly source in the authenticated company scope, retain daily financial inputs and use a distinct range contract. Recurring monthly payroll is calendar-day allocated; reliably dated costs remain dated. Cash supplements keep original monthly authority and reconcile actual partial-date offsets with an explicit profit-timing adjustment. Complete daily sessions support partial funnels; monthly customer attribution, distinct identities and mature cohorts are not invented for partial ranges. November remains open; no complete-month cost source is assumed. No provider feed or live database change is included.

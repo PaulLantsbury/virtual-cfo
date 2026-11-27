@@ -1,4 +1,5 @@
 import {createHistoryCfoAnalysis} from './history-cfo-analysis.mjs';
+import {readHistoryRangeInTransaction,validHistoryRangeScope,validatedHistoryDaily} from './history-range-reader.mjs';
 import {createHistoryCfoBriefing} from './history-cfo-evidence.mjs';
 /** Proposed v2 SQL reader. Reuses canonical monetary engines, NOT installed finance_v1 SQL/seals. */
 import {resolveHistorySelection} from './history-versions.mjs';
@@ -80,6 +81,9 @@ export async function readHistoryInTransaction(tx,scope,options={}){
  const {contract,c,version,seal,m}=context;
  const report=await calculateHistorySources(tx,scope,c,{overlays:version.overlays});
  if(report.salesRevision!==seal.sales_revision||report.costRevision!==seal.cost_revision||m.salesRevision!==report.salesRevision||m.costRevision!==report.costRevision)return {state:'unavailable',reason:'History evidence changed',contract:'history-v2-proposal'};
+ // Private request-local reuse only: never included in an HTTP response and
+ // never accepted from a browser. Range slicing follows this exact validation.
+ if(typeof options.captureValidatedSources==='function')options.captureValidatedSources({context,report});
  const cfoBriefing=createHistoryCfoBriefing({report,scope,financialVersionId:version.versionId,observedAt:m.observedAt,now:(options.now||(()=>new Date()))()});
  return {cfoBriefing,state:'supported',contract:'history-v2-proposal',versionId:version.versionId,snapshotId:version.versionId,metadata:{edition:HISTORY_EDITION,versionId:version.versionId,anchor:contract.anchor,sourceAsOf:m.sourceAsOf,observedAt:m.observedAt,formulaVersion:HISTORY_FORMULA,sourceBasis:'synthetic-local',verification:'canonical-source-revision-only'},scope,sales:report.sales,components:report.components,profit:report.profit,report:{sales:report.sales,profit:report.profit,components:report.components},salesRevision:report.salesRevision,costRevision:report.costRevision};
 }
@@ -111,6 +115,24 @@ export async function readHistoryAnalysisInTransaction(tx,scope,{selection,now=(
 
 const member=async(tx,scope,user)=>{await tx.query("SELECT set_config('night_scout.profit_user_id',$1,true)",[user.id]);if((await tx.query('SELECT store_id FROM public.store_memberships WHERE store_id=$1 AND user_id=$2',[scope.storeId,user.id])).rows.length!==1)throw Error('History store membership required');};
 export function createHistoryService(db,supabase,{now=()=>new Date()}={}){return {
+ async range(scope,authorization,selection){
+  if(!validHistoryRangeScope(scope))throw Error('Valid historical range required');
+  const user=await reviewerAuthenticator(supabase,authorization)();
+  return db.transaction(async tx=>{
+   await tx.exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');await member(tx,scope,user);
+   const witnesses=new Map(),daily=new Map(),key=(s,v)=>`${s.from}:${s.to}:${v}`;
+   return readHistoryRangeInTransaction(tx,scope,{now,selection,
+    readMonth:(connection,full,options)=>readHistoryInTransaction(connection,full,{...options,captureValidatedSources:witness=>{daily.set(key(full,options.selection.versionId),validatedHistoryDaily(witness.report,full,options.selection.versionId));if(full.from<scope.from||full.to>scope.to)witnesses.set(key(full,options.selection.versionId),witness);}}),
+    readDaily:(full,selected)=>daily.get(key(full,selected.versionId))??[],
+    readSlice:async(connection,full,selected,part)=>{
+     const witness=witnesses.get(key(full,selected.versionId));
+     ensure(witness&&part.storeId===full.storeId&&part.currency===full.currency&&part.from>=full.from&&part.to<=full.to&&part.from<=part.to,'Validated constituent month required before slicing');
+     if(part.from===full.from&&part.to===full.to)return witness.report;
+     const overlays=new Map([...witness.context.version.overlays].filter(([,overlay])=>overlay.body.date>=part.from&&overlay.body.date<=part.to));
+     return calculateHistorySources(connection,part,witness.context.c,{overlays});
+    }});
+  });
+ },
  async read(scope,authorization,selection){
   if(!validProfitScope(scope))throw Error('Complete history month required');
   const user=await reviewerAuthenticator(supabase,authorization)();

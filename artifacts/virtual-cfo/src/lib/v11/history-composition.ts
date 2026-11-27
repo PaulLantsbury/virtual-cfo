@@ -33,7 +33,7 @@ export function composeHistoryMonth(raw: unknown, selection: HistorySelection) {
     context: view.primary.context,
     evidence: { financialProfile: 'uk-gifts-v2' as const, edition: selection.edition, anchor: selection.anchor, versionId: selection.versionId,
       salesRevision: (raw as any).salesRevision as string, costRevision: (raw as any).costRevision as string,
-      observedAt: (raw as any).metadata.observedAt as string, verification: 'canonical-source-revision-only' as const,
+      observedAt: (raw as any).metadata.observedAt as string, verification: 'canonical-source-revision-only' as 'canonical-source-revision-only'|'constituent-source-revisions',
       coverage: input.sales!.provenance.coverageEvidence, costCoverage: input.profit?.state ?? 'unavailable' },
   });
 }

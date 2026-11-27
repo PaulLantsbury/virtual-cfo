@@ -10,7 +10,7 @@ type State={key:string;status:'loading'|'unavailable'|'ready';view:CheckedAnalys
  * re-reads the immediately preceding canonical month before accepting analysis. */
 export function useReviewedCfoAnalysis(history:ReturnType<typeof useReviewedHistory>){
  const auth=useAuth(),month=history.month;
- const eligible=auth.status==='ready'&&auth.userId===history.userId&&auth.storeId===history.storeId&&!!month&&!history.loading&&!history.loadingMonths&&!history.error;
+ const eligible=!history.rangeMode&&auth.status==='ready'&&auth.userId===history.userId&&auth.storeId===history.storeId&&!!month&&!history.loading&&!history.loadingMonths&&!history.error;
  const prior=eligible?immediatelyPriorSelection(month!,history.months):null;
  const [attempt,setAttempt]=useState(0),[state,setState]=useState<State>({key:'',status:'unavailable',view:null});
  const key=JSON.stringify([auth.status,auth.userId,auth.storeId,auth.revision,eligible&&month?[month.selection,month.evidence]:null,prior,attempt]);

@@ -7,10 +7,19 @@ import {reviewedPlanBaseline} from './reviewed-plan-baseline';
 import {acquisitionFinancialContext,acquisitionView} from '../marketing/acquisition-evidence';
 import {linkedMarketingMetrics} from '../marketing/linked-model';
 import {classifyPlanBaseline,type PlanBaselineMonthResult,type PlanBaselineReadResult} from './plan-baseline-evidence';
+import {useActiveStore,useAuth} from '../auth/AuthProvider';
+import {useReportingSelection} from '../useReportingSelection';
+import {requestedReportingRange} from '../reportingRange';
+import {planBaselineMonthForRange} from './plan-range-anchor';
+
+const connectedDefaults={period:'last-month',view:'monthly',comparison:'none'} as const;
 
 /** Three contiguous, explicitly selected reviewed months; no fixture or partial baseline. */
 export function useReviewedPlanBaseline(){
- const history=useReviewedHistory({monthAnchorOnly:true}),series=useReviewedHistorySeries(history,3);
+ const storeId=useActiveStore(),{userId}=useAuth();
+ const reporting=useReportingSelection(userId,storeId,connectedDefaults);
+ const sourceMonthOverride=planBaselineMonthForRange(requestedReportingRange(reporting.selection));
+ const history=useReviewedHistory({monthAnchorOnly:true,sourceMonthOverride}),series=useReviewedHistorySeries(history,3);
  const actuals=useReviewedHistorySeries(history,12);
  const financialIncomplete=series.months.filter(month=>{const metrics=linkedMarketingMetrics(month);return month.input.profit?.state!=='complete'||!metrics||[metrics.revenue,metrics.beforeAds,metrics.advertising,metrics.overheads].some(v=>v===null);}).map(m=>m.selection.period.from+'–'+m.selection.period.to);
  const enabled=!!history.userId&&series.status==='supported'&&series.months.length===3&&!financialIncomplete.length;

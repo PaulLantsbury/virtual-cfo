@@ -1,6 +1,7 @@
 export type HistoryScope={storeId:string;currency:string;from:string;to:string};
 export type HistoryVersionSelection={edition:string;versionId:string};
 export interface HistoryReadService {
+ range(scope:HistoryScope,authorization:string,selection:{edition:string;versions:{from:string;to:string;versionId:string}[]}):Promise<any>;
  read(scope:HistoryScope,authorization:string,selection?:HistoryVersionSelection):Promise<any>;
  analyze(scope:HistoryScope,authorization:string,selection:HistoryVersionSelection):Promise<any>;
  available(scope:{storeId:string;currency:string},authorization:string):Promise<any>;

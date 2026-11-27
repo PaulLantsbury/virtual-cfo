@@ -18,7 +18,7 @@ export function NewMarketingLive({ onShowSample }: { onShowSample: () => void })
   const [perOrder, setPerOrder] = useState(false);
   const month = history.month, m = linkedMarketingMetrics(month);
   const acquisitionSource = useReviewedSupplement(history, 'acquisition');
-  const acquisition = !acquisitionSource.loading && !acquisitionSource.error ? acquisitionView(acquisitionSource.payload, acquisitionFinancialContext(month)) : null;
+  const acquisition = !acquisitionSource.loading && !acquisitionSource.error ? acquisitionSource.rangeAcquisition ?? acquisitionView(acquisitionSource.payload, acquisitionFinancialContext(month)) : null;
   const display = (pence: number | null) => money(pence === null ? null : perOrder ? m && m.orders > 0 ? pence / m.orders : null : pence, perOrder);
   const amountUnavailable = (pence: number | null) => pence === null || perOrder && (!m || m.orders <= 0);
   const unit = perOrder ? ' / original order' : '';
@@ -57,7 +57,7 @@ export function NewMarketingLive({ onShowSample }: { onShowSample: () => void })
       <NewMarketingConnections history={history} perOrder={perOrder} />
     </DecisionSection>
     <DecisionSection id="marketing-linked-gaps" number="03" eyebrow="FROM INSIGHT TO ACTION" title="What still needs connecting?">
-      <AcquisitionEvidence payload={acquisitionSource.payload} financial={month} loading={acquisitionSource.loading} error={acquisitionSource.error} />
+      <AcquisitionEvidence rangeEvidence={acquisitionSource.rangeAcquisition} payload={acquisitionSource.payload} financial={month} loading={acquisitionSource.loading} error={acquisitionSource.error} />
       {acquisitionSource.error && month && <button className="mr-text-link" onClick={acquisitionSource.retry}>Retry acquisition evidence check</button>}
       <div className="mr-card mr-not-linked"><h2>Customer profitability and forecasts still need evidence</h2><p><strong>{acquisition?.economicsView?'Allocated first-order economics are shown in the matched source panel; measured channel response remains unavailable.':'First-order contribution, mature-cohort payback and measured channel response: Unavailable.'}</strong> {acquisition ? acquisition.economicsView?'The optional cost source provides finite first-order observation and, when available, a separate mature cohort; these are allocated synthetic economics, not merchant cash payback.':'Paid first-customer CAC and identity coverage now have a matching synthetic sidecar; this does not supply a matched cost/cohort model.' : 'CAC and identity counts also remain unavailable until a reviewed acquisition sidecar matches this month/version.'}</p><p><strong>Acquisition spend-response curves, 30-day trajectories and CAC thresholds: sample or unavailable.</strong> The connected financial what-if above uses verified monthly financial inputs plus your explicit assumptions. It does not supply measured customer response or a future forecast.</p><button className="mr-button mr-secondary" onClick={onShowSample}>Inspect the yellow-labelled sample planner</button><p>Next step: review matched first-order costs, mature cohorts and cash guardrails before choosing a bounded spending test. No advertising changes, saved actions or reminders are created here.</p></div>
     </DecisionSection>

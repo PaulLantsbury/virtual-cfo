@@ -61,3 +61,13 @@ test('negative or zero prior denominators never manufacture a percentage growth 
 
 test('a supported negative EBITDA is visible even when the cost explanation is incomplete',()=>{const r=overview(snapshot({financial:{sales:10000000,contribution:null,ebitda:-1000000,overheads:null,advertising:null,orders:1000}}),null);assert.equal(r.outcomes[2].value,-1000000);assert.equal(r.insights[0].id,'reported-loss');assert.equal(r.verdict.tone,'warning');assert.match(r.insights[0].evidence,/split is incomplete/);});
 test('fractional or nonfinite stored money never becomes a precise supported headline',()=>{const r=overview(snapshot({financial:{...snapshot().financial,sales:100.5,contribution:NaN,ebitda:Infinity}}),null);assert.equal(r.outcomes[0].value,null);assert.equal(r.outcomes[1].value,null);assert.equal(r.outcomes[2].value,null);});
+
+test('allocated cost timing reconciles profit to dated cash without changing bank balances',()=>{
+ const cash={operatingCash:700000,openingBank:4000000,closingBank:4700000,bankMovement:700000,stock:-100000,debtors:0,settlements:0,supplierCredit:0,otherWorkingCapital:0,allocatedToDatedEbitdaAdjustment:-200000};
+ const r=overview(snapshot({cash}),null);
+ assert.equal(r.outcomes.find(o=>o.id==='operatingCash').value,700000);
+ assert.equal(r.outcomes.find(o=>o.id==='bank').value,4700000);
+ assert.match(r.insights.find(i=>i.id==='cash-conversion').evidence,/Monthly cost allocation/);
+ assert.equal(overview(snapshot({cash:{...cash,allocatedToDatedEbitdaAdjustment:0}}),null).coverage.cash,false);
+ assert.equal(overview(snapshot({cash:{...cash,allocatedToDatedEbitdaAdjustment:null}}),null).coverage.cash,false);
+});

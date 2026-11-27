@@ -1,3 +1,4 @@
+import { RangeFinancialTrend } from './RangeFinancialTrend';
 import { useState } from 'react';
 import { Bar, CartesianGrid, Cell, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { useReviewedHistory } from '../lib/useReviewedHistory';
@@ -8,6 +9,10 @@ const percent=(value:number|null)=>value===null?'—':`${value.toFixed(1)}%`;
 const primary='hsl(var(--primary))',muted='hsl(var(--muted-foreground))',border='hsl(var(--border))';
 /** Visible historical chart. Dates and values still come only from checked monthly evidence. */
 export function NewProfitMonthlyTrend({history,perOrder}:{history:ReturnType<typeof useReviewedHistory>;perOrder:boolean}){
+ if(history.rangeMode)return <RangeFinancialTrend history={history} perOrder={perOrder}/>;
+ return <MonthlyFinancialContext history={history} perOrder={perOrder}/>;
+}
+function MonthlyFinancialContext({history,perOrder}:{history:ReturnType<typeof useReviewedHistory>;perOrder:boolean}){
  const series=useReviewedHistorySeries(history,12),[count,setCount]=useState<3|6|12>(12),[comparison,setComparison]=useState<ProfitTrendComparison>('none'),[profitOnly,setProfitOnly]=useState(false);
  const trend=series.status==='supported'?buildNewProfitMonthlyTrend(series.months,history.month,count,perOrder,comparison):null;
  const loading=history.loading||history.loadingMonths||series.loading;

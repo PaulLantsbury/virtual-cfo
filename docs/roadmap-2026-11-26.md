@@ -1,3 +1,15 @@
+## Next-session priority — faster metric loading
+
+Owner reports that metrics load very slowly. Investigate this alongside the remaining Cash reporting blocker before expanding prototype scope.
+
+Measure the initial report load, changing dates and moving between all five pages. Explore loading independent page data together rather than sequentially, sharing/reusing data for the same company and date selection, and preloading other pages where that measurably improves navigation. Avoid duplicate reads and excessive simultaneous database connections; compare approaches before choosing a solution.
+
+Keep clear loading feedback while data arrives. Never show stale figures from a previous company or period, weaken access checks, or substitute sample values. Independent testers should verify correctness and measured speed before/after, including rapid date changes and page navigation. Record practical performance targets from the baseline review.
+
+This is a recorded investigation for next session, not a change to the live website tonight. The existing Cash fix and five-page acceptance remain required.
+
+---
+
 ## 27 November closeout — connection fix applied; website restored after Cash check
 
 The owner-approved connection-capacity correction is applied and retained. Replacement website version `43a2606f6e2665ab71334487b3ab8b225314c391` published successfully, started successfully and passed its health check. The previously failing 28 September–4 October 2026 weekly Profit report passed on signed-in staging: net product sales £14,058.02, revenue including shipping £14,643.98, EBITDA £2,115.62, operating profit £2,069.80 and 389 original orders. The weekly chart and Profit-to-Cash selection transfer passed.

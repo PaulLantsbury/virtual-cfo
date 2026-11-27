@@ -1,3 +1,11 @@
+## 27 November — independent live website checks passed
+
+The released comparison, loading messages, Growth chart, retention, Cash, Plan and Pricing passed the documented signed-in checks. Mobile layouts were checked at 390px; the starting selection was restored. This does not certify every metric or provider feed.
+
+Next beta-only work: independent tests of the default-off October customer interface and owner approval for a private synthetic-data AI wording trial. The wording launcher passed independent zero-request review; no wording calls or hosted AI activation have occurred. The earlier fact-selection allowance is consumed.
+
+October customer counts remain unpublished pending a supported credential route, fresh authenticated checks and exact signed publication approval. The superseded connector credential proposal must not execute. Meta/Google remain disabled pending the shared credential route. Xero's reader release is complete, but new provider acceptance remains separate. Keep other additions deferred.
+
 ## 27 November — approved releases deployed; next focused batches active
 
 The reviewed website priority fixes and checked month-to-month financial comparison are deployed on staging. Fresh independent hosted acceptance is in progress; observed October/September operating-profit change reconciles to £2,804. The corrected Xero scheduled reader is also deployed. Its existing schedule remains unchanged, automatic code deployment is off, and no manual provider run was triggered. Deployment does not establish a successful new Xero report collection or resolve the pending account classifications.

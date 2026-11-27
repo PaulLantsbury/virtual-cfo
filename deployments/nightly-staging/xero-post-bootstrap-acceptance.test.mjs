@@ -11,6 +11,7 @@ const row=(id,value)=>({RowType:'Row',Cells:[{Value:id,Attributes:[{Id:'account'
 const report=(id,name,rows)=>({Reports:[{ReportID:id,ReportName:name,ReportDate:'2026-09-24',Rows:rows}]});
 const responses={
  Organisation:{Organisations:[{BaseCurrency:'GBP'}]},
+ Accounts:{Accounts:[{AccountID:'bank',Type:'BANK',Status:'ACTIVE',CurrencyCode:'GBP'}]},
  ProfitAndLoss:report('ProfitAndLoss','Profit and Loss',[row('sales','80.00'),row('fees','-3.00'),row('ads','-20.00'),row('software','-50.00')]),
  BalanceSheet:report('BalanceSheet','Balance Sheet',[row('bank','103.20')]),
  TrialBalance:report('TrialBalance','Trial Balance',[]),
@@ -36,16 +37,16 @@ test('post-bootstrap worker refreshes, rotates and persists bounded supported ev
   const value=String(url);
   if(value==='https://identity.xero.com/connect/token'){refreshes+=1;return new Response(JSON.stringify({access_token:'access-token-long-enough',refresh_token:'rotated-refresh-token-long-enough',scope:scopes}),{status:200});}
   if(value==='https://api.xero.com/connections')return new Response(JSON.stringify([{tenantId}]),{status:200});
-  const name=Object.keys(responses).find(key=>value.includes(key));assert.ok(name,`unexpected Xero URL ${value}`);reportReads+=1;return new Response(JSON.stringify(responses[name]),{status:200});
+  const name=Object.keys(responses).find(key=>value.includes(key));assert.ok(name,`unexpected Xero URL ${value}`);assert.equal(db.lease,lease,'the durable fence must remain held for every accounting read');reportReads+=1;return new Response(JSON.stringify(responses[name]),{status:200});
  };
  const result=await createStagingXeroRefreshJob({env,query,fetchImpl,now:()=> '2026-09-25T02:00:00.000Z'})();
  assert.deepEqual(result,{state:'supported',projectRef:'bioalckltvkhlczusdvl',scope:{from:'2026-09-01',to:'2026-09-24',currency:'GBP'}});
- assert.equal(refreshes,1);assert.equal(reportReads,5);assert.equal(db.version,2);assert.equal(db.lease,null);assert.deepEqual(db.audits,['credential_rotated']);
+ assert.equal(refreshes,1);assert.equal(reportReads,6);assert.equal(db.version,2);assert.equal(db.lease,null);assert.deepEqual(db.audits,['credential_rotated']);
  assert.equal(decryptStagingEnvelope(master,{connectionId,tenantId,keyVersion,ciphertext:db.ciphertext,encryptedDek:db.encryptedDek}).toString(),'rotated-refresh-token-long-enough');
  assert.equal(db.evidence.length,1);const saved=db.evidence[0];
  assert.deepEqual(saved.slice(0,11),[connectionId,mappingVersionId,'2026-09-01','2026-09-24','GBP',false,'supported',null,'2026-09-24','2026-09-25T02:00:00.000Z',saved[10]]);assert.match(saved[10],/^[a-f0-9]{64}$/);
  assert.deepEqual(saved.slice(11),[8000,-300,-2000,-5000,10320]);
  assert.doesNotMatch(JSON.stringify(db.evidence),/access-token|refresh-token|Reports|ProfitAndLoss/);
  await assert.rejects(createStagingXeroRefreshJob({env,query,fetchImpl})(),/invalid/);
- assert.equal(refreshes,1);assert.equal(reportReads,5);assert.equal(db.version,2);assert.equal(db.evidence.length,1);
+ assert.equal(refreshes,1);assert.equal(reportReads,6);assert.equal(db.version,2);assert.equal(db.evidence.length,1);
 });

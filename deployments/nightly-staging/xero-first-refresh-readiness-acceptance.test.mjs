@@ -32,6 +32,7 @@ const row=(id,value)=>({RowType:'Row',Cells:[{Value:id,Attributes:[{Id:'account'
 const report=(id,name,rows)=>({Reports:[{ReportID:id,ReportName:name,ReportDate:'2026-09-25',Rows:rows}]});
 const reports={
  Organisation:{Organisations:[{BaseCurrency:'GBP'}]},
+ Accounts:{Accounts:[{AccountID:'bank',Type:'BANK',Status:'ACTIVE',CurrencyCode:'GBP'}]},
  ProfitAndLoss:report('ProfitAndLoss','Profit and Loss',[row('sales','80.00'),row('fees','-3.00'),row('ads','-20.00'),row('software','-5.00')]),
  BalanceSheet:report('BalanceSheet','Balance Sheet',[row('bank','103.20')]),
  TrialBalance:report('TrialBalance','Trial Balance',[]),BankSummary:report('BankSummary','Bank Summary',[])
@@ -56,7 +57,7 @@ test('bootstrap-persisted connection becomes ready only after the first bounded 
  const fetchImpl=async url=>{const value=String(url);if(value==='https://identity.xero.com/connect/token'){events.push('provider_token_refresh');return new Response(JSON.stringify({access_token:'access-token-long-enough',refresh_token:'rotated-refresh-token-long-enough',scope:scopes}),{status:200});}if(value==='https://api.xero.com/connections'){events.push('provider_connection_preflight');return new Response(JSON.stringify([{tenantId}]),{status:200});}const name=Object.keys(reports).find(key=>value.includes(key));assert.ok(name,`unexpected Xero URL ${value}`);assert.equal(db.lease,lease,'the durable fence must remain held for every report read');events.push(`provider_report_${name}`);return new Response(JSON.stringify(reports[name]),{status:200});};
  const outcome=await createStagingXeroRefreshJob({env:workerEnv,query,fetchImpl,now:()=> '2026-09-25T16:00:00.000Z'})();
  assert.equal(outcome.state,'supported');assert.equal(db.version,2);assert.equal(db.lease,null);assert.equal(db.evidence.length,1);
- assert.equal(events[0],'lease_acquired');assert.equal(events[1],'provider_token_refresh');assert.equal(events[2],'credential_rotated_fence_retained');assert.equal(events[3],'provider_connection_preflight');assert.equal(events.at(-1),'evidence_persisted_fence_cleared');assert.equal(events.filter(event=>event.startsWith('provider_report_')).length,5);
+ assert.equal(events[0],'lease_acquired');assert.equal(events[1],'provider_token_refresh');assert.equal(events[2],'credential_rotated_fence_retained');assert.equal(events[3],'provider_connection_preflight');assert.equal(events.at(-1),'evidence_persisted_fence_cleared');assert.equal(events.filter(event=>event.startsWith('provider_report_')).length,6);
  const saved=db.evidence[0];assert.deepEqual(saved.slice(11),[8000,-300,-2000,-500,10320]);
  const after=await read('valid');assert.equal(after.connection.status,'active');assert.equal(after.connection.mappingReviewRequired,false);assert.equal(after.evidenceState,'ready');assert.equal(after.evidenceRetrievedAt,'2026-09-25T16:00:00.000Z');
  assert.doesNotMatch(JSON.stringify(after),/tenant|mappingVersion|credential|token|booked|revenue|cash/i);

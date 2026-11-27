@@ -1,3 +1,11 @@
+## 27 November — Google setup checked; Xero execution remains gated
+
+Google read-only account checks found no visible manager-link conflict for the existing work identity. One separate genuine test manager and test client can be proposed for explicit setup approval, using UK/GBP/Europe-London; verify the test label before submission. No account has been created. Test accounts cannot demonstrate real advertising spend; credentials, consent and collection remain separately gated.
+
+The minimal Xero mapping-successor prototype passed 17 disposable local PostgreSQL checks. This is not a hosted execution package. Testing deliberately demonstrated that a worker which already selected the old mapping can still acquire its lease after a new mapping commits. Before any save, establish an effective execution fence or bounded quiescence, a fresh provider account directory, and a verified dedicated execution connection with exact authority and schema checks. Do not infer safety from the absence of an active lease alone. Existing saved account directory is stale; no fresh provider call is implicitly authorized.
+
+A future mapping is selected using database current date rather than the report interval, so later separately authorized historical reads may use it. Existing evidence remains immutable; unavailable November amounts must not become assumed zero. Do not offer mapping-save approval until these prerequisites are met. Google setup is the sole currently reviewable external action; other provider/customer gates remain unchanged.
+
 ## 27 November — AI evaluation closed; current briefing retained
 
 Owner confirmed keeping the existing rule-based briefing as default. The separately approved corrected wording trial produced three private drafts, all requiring human review and none publishable automatically. Independent semantic review accepted all three for this private evaluation, but found no demonstrated clarity or usefulness improvement over the existing briefing. Do not make further model calls or add prompt features without a concrete new need and approval. Preserve both consumed trials and private receipts. No AI wording has been enabled on the website.

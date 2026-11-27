@@ -1,0 +1,19 @@
+import type {useReviewedHistory} from '@/lib/useReviewedHistory';
+import {useReviewedCfoAnalysis} from '@/lib/useReviewedCfoAnalysis';
+import {ReviewedCfoBriefing} from './ReviewedCfoBriefing';
+const money=(n:number)=>new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',minimumFractionDigits:2,maximumFractionDigits:2}).format(n/100);
+const monthName=(s:string)=>new Intl.DateTimeFormat('en-GB',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(s+'T12:00:00Z'));
+export function ReviewedCfoAnalysis({history}:{history:ReturnType<typeof useReviewedHistory>}){
+ const checked=useReviewedCfoAnalysis(history),view=checked.view;
+ if(!history.month)return null;
+ if(!view)return <><ReviewedCfoBriefing month={history.month}/><p role="status">{checked.status==='loading'?'Checking the immediately preceding month for a profit comparison…':'The immediately preceding month comparison is unavailable. The checked current-month briefing remains separate.'}</p>{checked.status!=='loading'&&<button onClick={checked.retry}>Retry checked comparison</button>}</>;
+ const result=view.facts.find(f=>f.key==='operatingProfit')!,focus=view.bridge.find(f=>f.key===view.focus);
+ return <section className="sv-checked-briefing" aria-label="Checked financial comparison"><h5>Checked financial comparison</h5>
+ <p>After costs and overheads, operating profit {result.changePence===0?'was unchanged at '+money(result.currentPence):(result.changePence>0?'increased':'decreased')+' by '+money(Math.abs(result.changePence))+' to '+money(result.currentPence)} in {monthName(view.current.selection.period.from)}.</p>
+ {focus&&<p><strong>Next check:</strong> Check the records behind {focus.label.toLowerCase()}, which changed by {money(focus.changePence)}. This is the largest absolute component movement in this comparison. Confirm the period and classification before deciding whether any commercial change is warranted.</p>}
+ <p>Compared automatically with {monthName(view.prior.selection.period.from)}, the immediately preceding month. The manual comparison elsewhere on Scout is separate.</p>
+ <p>This explains recorded arithmetic, not its business cause. It does not establish savings, future performance or cash available to spend. Synthetic records; no model-generated advice.</p>
+ <details className="sv-details"><summary>Explore the checked comparison</summary><div style={{overflowWrap:'anywhere'}}><p>{view.prior.selection.period.from}–{view.prior.selection.period.to} → {view.current.selection.period.from}–{view.current.selection.period.to}. GBP excluding VAT · Europe/London · monthly totals, even when the flow is per order.</p><div style={{overflowX:'auto'}}><table><caption>Six recorded components reconcile to operating profit change.</caption><thead><tr><th>Component</th><th>Prior</th><th>Current</th><th>Effect on profit</th></tr></thead><tbody>{view.bridge.map(f=><tr key={f.key}><th>{f.label}</th><td>{money(f.priorPence)}</td><td>{money(f.currentPence)}</td><td>{money(f.profitEffectPence)}</td></tr>)}<tr><th>Operating profit change</th><td>{money(result.priorPence)}</td><td>{money(result.currentPence)}</td><td>{money(result.changePence)}</td></tr></tbody></table></div>
+ <details><summary>Checked facts and source versions</summary><table><thead><tr><th>Fact</th><th>Prior</th><th>Current</th></tr></thead><tbody>{view.facts.map(f=><tr key={f.key}><th>{f.label}</th><td>{money(f.priorPence)}</td><td>{money(f.currentPence)}</td></tr>)}</tbody></table>{[view.prior,view.current].map(m=><p key={m.selection.versionId}>{m.selection.period.from}–{m.selection.period.to}; version {m.selection.versionId}; sales revision {m.evidence.salesRevision}; cost revision {m.evidence.costRevision}; observed {m.evidence.observedAt}.</p>)}<p>Calculation profit-evidence-v1 · policy cfo-guardrails-core-v1. Each month was read and checked independently before displaying this comparison.</p></details></div></details>
+ </section>;
+}

@@ -1,3 +1,11 @@
+## 27 November — afternoon prototype-only scenario batch active
+
+Parallel Pages, Data, rule-based CFO and independent testing batches are assessing existing profitable/lower-profit periods and missing-evidence behavior. Canonical data contains no loss-making month across the 24-month export; use January 2026 as a lower-profit case, not a loss. October 2026 is the stronger-profit comparison. Negative operating cash flow despite positive profit provides a real profit-versus-cash scenario. Any fictional zero/loss boundary tests must remain clearly labelled offline fixtures, not new observed data.
+
+Xero fictional handoff source publication succeeded, but no hosted build or shell test has occurred. Current Render API documentation explicitly excludes cron jobs from commitId selection. A separately independently reviewed amendment proposes a temporary linked-branch change, one build and restoration of the original branch BEFORE the unchanged bounded fictional shell test. Original approval excluded this setting change; amendment approval is pending. Do not retry a build, bypass source selection or claim the handoff proven.
+
+Keep current website and rule-based briefing live. Fix only reproduced prototype blockers; no drag-and-drop mapping tool, new redesign, extra history or further AI calls in this batch. Google and Supabase support remain pending, with no new replies at the latest bounded inbox check.
+
 ## 27 November — bounded Xero handoff proof ready for approval
 
 The next executable proposal is deliberately limited to fictional data: publish/build the two-file transport self-test on the existing Xero service and verify its output through one bounded temporary shell. Existing reader source, schedule, command and linked branch remain unchanged. Independent source, receiver and local command checks passed; actual hosted transport is not yet proven. No provider, secret or database access is part of this test. Normal build/runtime usage applies; no new service is proposed.

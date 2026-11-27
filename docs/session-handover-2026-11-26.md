@@ -1,3 +1,13 @@
+## 27 November — Xero prerequisite preparation progressed
+
+Parallel implementation and independent reviews progressed the bounded directory-refresh core, dedicated mapping execution checks and operational pause plan. These are offline artifacts, not a completed hosted release. Fresh catalog evidence confirms the existing mapping remains unchanged and the saved account directory remains stale.
+
+Refreshing the account directory necessarily uses the existing refresh lease and renews/persists the encrypted provider token; future approval must disclose these writes alongside the snapshot, rather than call the operation read-only. No accounting transaction creation or report replay is included. Quiescence must cover jobs that selected the old mapping before acquiring a lease, and the database transaction must be known terminal before normal scheduling resumes. Never resume solely on a timeout.
+
+The remaining immediate implementation task is the minimal one-use command and exact code/command delivery on the existing worker, using its existing private credentials, plus sanitized snapshot handoff. Reuse the reviewed cores; no new service, generic framework, credentials or broad worker redesign. Independently review the complete source/delivery package before seeking the bounded refresh approval. A final mapping save must bind the actual fresh directory and separate exact authority.
+
+Google account creation remains paused pending its submitted support question; Supabase's further assurance remains outstanding. Keep the accepted website and rule-based briefing unchanged. No live provider or database mutation occurred in this preparation batch.
+
 ## 27 November — Google setup paused pending support; coverage reconciliation complete
 
 Google test-account creation remains unsubmitted because the required pre-submit test label is missing. Owner completed verification and reported no installed content blocker. The official signup route retained its test flag, but that alone does not satisfy the required test confirmation. A separately approved private support request was submitted once and acknowledged; await guidance before continuing. No Google manager or client is confirmed created; no campaigns, billing, credentials or provider collection changed.

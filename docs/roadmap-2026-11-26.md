@@ -1,3 +1,15 @@
+## 27 November — weekly correction reviewed; end-of-day stop
+
+Focused backend, frontend and independent-testing lanes completed local candidate `9131d38356caee652e9b7a68df3a0f97fde6aafe` on `codex/weekly-reporting-fix-20261127`. It retains the previous range implementation and adds seven narrowly scoped source/test/guidance changes. Not published or deployed. See [the revised staging package](weekly-reporting-staging-amendment-2026-11-27.md) and [the closeout/handover](weekly-reporting-fix-2026-11-27.md).
+
+The partial reader now reuses validated monthly witnesses instead of issuing twelve duplicate database queries (40 down to28 for the exact failed week). A misleading source-validation warning during loading is fixed; cancelled selections stop before late requests; settled failures distinguish sign-in, connection, HTTP status and unreadable responses without exposing private content. No financial definitions, cost allocation, permissions or automatic retry policy changed.
+
+Independent testing used the full two-year disposable dataset for28September–4October2026: old/revised complete responses are identical. Local measured request time was1,059ms before/916ms after; this is not a hosted performance guarantee.98 focused/regression checks and12 browser scenarios pass, including service-error/manual-retry recovery. Workspace typechecks and all constituent builds pass. The original hosted failure is NOT conclusively reproduced or diagnosed; live acceptance remains a release gate rather than an assumed success.
+
+Current live website remains the restored, signed-in-verified compact-controls revision `016beeea1e30d63cc87eda5512666533f63918d3`; confirmed unchanged at closeout. No database, provider, feed, AI, access, plan or spending change occurred. All agents and local previews are stopped. No new unattended batch is scheduled.
+
+Next session: (1) approve the exact revised package and verify the failed week first, restoring the prior site if it fails; (2) complete all five-page/date/cash acceptance, then owner design review; (3) resume the agreed guarded ChatGPT wording milestone; (4) resume separately bounded Meta/Google, Xero mapping/read and Shopify source acceptance from their recorded blockers. Open-month completion, additional customer proofs and feed extension remain separately scoped. Defer nonessential enhancements until the prototype is testable. No owner action is needed to preserve the current stopping point.
+
 ## 27 November — range release failed hosted acceptance; previous website restored
 
 The owner-approved exact source `d2cb5a9ab173bcae0c194c9843a4ab9fd210dd63` was published on `codex/reporting-ranges-20261127` and deployed to staging. Public health passed. Signed-in multi-month Scout/Profit reporting for 1 August–31 October 2026 succeeded: product sales £172,800, operating profit £22,764.15, EBITDA £23,364.15; the separate operating-cash figure was about £23,920. The selected monthly chart appeared after source reads.

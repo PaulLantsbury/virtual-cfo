@@ -15,7 +15,7 @@ async function custom(p,from,to,view='Monthly'){
  await button(p,'Custom').click();await p.getByLabel('Custom start date',{exact:true}).fill(from);await p.getByLabel('Custom end date',{exact:true}).fill(to);await p.getByRole('button',{name:'Apply dates',exact:true}).click();await button(p,view).click();
 }
 async function scenario(options,run){
- const forbiddenRequests=[],requests=[];
+ const forbiddenRequests=[],requests=[];let failedRange=false;
  await fixture({viewport:{width:1440,height:1000},forbiddenRequests},async(page,context)=>{
   await page.clock.setFixedTime(new Date('2026-11-27T12:00:00Z'));
   const listed=rangeMonths.filter(m=>m.month.selection.period.from!==options.missing);
@@ -25,6 +25,8 @@ async function scenario(options,run){
    const json=(body,status=200)=>route.fulfill({status,contentType:'application/json',body:JSON.stringify(body)});
    if(url.pathname==='/api/history-reporting/months')return json(listing);
    if(url.pathname==='/api/history-reporting/range'){
+    if(options.failOnceFrom===from&&!failedRange){failedRange=true;return json({private:'fictional internal body must not be shown'},503);}
+    if(options.failOnceFrom===from&&failedRange)await new Promise(resolve=>setTimeout(resolve,350));
     if(options.delayFrom===from)await new Promise(resolve=>setTimeout(resolve,350));
     const raw=browserRangeResponse(from,to);return json(options.supplements&&raw.state==='supported'?attachPartialCash(raw):raw);
    }
@@ -79,4 +81,17 @@ test('partial cash uses dated movements with an explicit timing bridge; conversi
  await page.locator('[data-cash-component=cost-timing]').waitFor({state:'attached'});assert.equal(await page.locator('[data-cash-component=cost-timing]').getAttribute('data-amount-pence'),'-2832');
  assert.notEqual(await page.locator('.nc-kpi').filter({hasText:'Bank cash at selected period end'}).locator('strong').innerText(),'—');
  await navigate(page,'/new-marketing');await page.getByRole('button',{name:/^Conversion/}).click();await page.waitForLoadState('networkidle');await page.waitForFunction(()=>/1.0+%|1%/.test(document.querySelector('main')?.textContent??''));assert.match(await page.locator('main').innerText(),/1.0+%|1%/);await page.locator('[data-growth-range-chart] table tbody tr').first().waitFor({state:'attached'});assert.ok(await page.locator('[data-growth-range-chart] table tbody tr').count()>0);
+}));
+
+test('a reporting 503 is distinguished from invalid evidence and one manual retry shows loading before recovery',()=>scenario({failOnceFrom:'2025-01-27'},async(page,requests)=>{
+ await custom(page,'2025-01-27','2025-02-02','Weekly');
+ await page.getByRole('button',{name:'Retry evidence check',exact:true}).waitFor();
+ assert.match(await page.locator('main').innerText(),/status 503/);
+ assert.doesNotMatch(await page.locator('main').innerText(),/fictional internal body|range source evidence did not pass/);
+ assert.equal(requests.filter(r=>r.path==='/api/history-reporting/range'&&r.from==='2025-01-27').length,1,'No automatic retry');
+ await page.getByRole('button',{name:'Retry evidence check',exact:true}).click();
+ await page.getByText('Loading selected financial figures…',{exact:true}).waitFor();
+ assert.doesNotMatch(await page.locator('main').innerText(),/range source evidence did not pass/);
+ await page.waitForFunction(()=>document.querySelector('.sv-outcome strong')?.textContent==='£70');
+ assert.equal(requests.filter(r=>r.path==='/api/history-reporting/range'&&r.from==='2025-01-27').length,2);
 }));

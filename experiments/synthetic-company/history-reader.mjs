@@ -50,15 +50,23 @@ export async function historySources(tx,scope,{overlays=new Map()}={}){
 }
 export async function calculateHistorySources(tx,scope,coverage,options={}){
  const s=await historySources(tx,scope,options);
+ return calculateValidatedHistoryWitness(scope,coverage,s);
+}
+/** Private only: caller must have validated the entire constituent monthly seal
+ * and exact source revisions in this same member-scoped read-only transaction.
+ * Source dependency arrays remain intact; only dated outputs are selected. */
+function calculateValidatedHistoryWitness(scope,coverage,s){
+ const within=row=>row.event_date>=scope.from&&row.event_date<=scope.to;
+ const selectedReturns=s.selectedReturns.filter(within),costEvents=s.costEvents.filter(within);
  const mapped=s.originalOrders.map(({body:o,event_date})=>({id:o.id,store_id:scope.storeId,currency:o.currency,day:event_date,mapping_state:'verified',original_eligible:true,tax_basis:'exclusive',gross:o.gross_sales,discount:o.discounts,gross_vat:o.gross_product_vat,discount_vat:o.discount_vat,shipping:o.shipping,shipping_vat:o.shipping_vat}));
  const refunds=s.priorRefunds.map(({body:r,event_date})=>({...r,currency:scope.currency,day:event_date,mapping_state:'verified'}));
  const sales=calculateMappedSales({orders:mapped,refunds,coverage:[{store_id:scope.storeId,currency:scope.currency,date_from:scope.from,date_to:scope.to,sales_and_refunds_complete:true,evidence_ref:`history-v2:${coverage.coverage_id}`}]},scope);
  let cogs=s.selectedLines.filter(l=>l.event_date>=scope.from&&l.event_date<=scope.to).reduce((sum,l)=>sum+l.body.quantity*l.body.historic_unit_cost_pence,0);
  const selectedLinesById=new Map(s.selectedLines.map(l=>[l.source_id,l]));
- for(const ret of s.selectedReturns){const line=selectedLinesById.get(ret.body.line_id);ensure(line,'Unsupported stock return');cogs-=ret.body.quantity*line.body.historic_unit_cost_pence;}
+ for(const ret of selectedReturns){const line=selectedLinesById.get(ret.body.line_id);ensure(line,'Unsupported stock return');cogs-=ret.body.quantity*line.body.historic_unit_cost_pence;}
  const costs={variableCosts:0,advertising:0,overheadIncludingDA:0,depreciationAmortisation:0};
- for(const e of s.costEvents)for(const p of e.body.postings){if(!p.account.startsWith('expense:'))continue;const category=p.account.slice(8);if(variable.has(category))costs.variableCosts+=p.amount;else if(category==='marketing')costs.advertising+=p.amount;else{costs.overheadIncludingDA+=p.amount;if(category==='depreciation')costs.depreciationAmortisation+=p.amount;}}
- return {...s,sales,components:{cogs,...costs},profit:profitBridge({...sales,cogs,...costs})};
+ for(const e of costEvents)for(const p of e.body.postings){if(!p.account.startsWith('expense:'))continue;const category=p.account.slice(8);if(variable.has(category))costs.variableCosts+=p.amount;else if(category==='marketing')costs.advertising+=p.amount;else{costs.overheadIncludingDA+=p.amount;if(category==='depreciation')costs.depreciationAmortisation+=p.amount;}}
+ return {...s,selectedOrders:s.originalOrders.filter(within),selectedRefunds:s.priorRefunds.filter(within),selectedReturns,costEvents,sales,components:{cogs,...costs},profit:profitBridge({...sales,cogs,...costs})};
 }
 async function historyReadContext(tx,scope,{now=()=>new Date(),selection,requestContext}={}) {
   const contract=requestContext?requestContext.contract:(await tx.query('SELECT *,date_from::text anchor,through_day::text through FROM finance_history_v2.contracts WHERE store_id=$1',[scope.storeId])).rows[0];
@@ -128,8 +136,9 @@ export function createHistoryService(db,supabase,{now=()=>new Date()}={}){return
      const witness=witnesses.get(key(full,selected.versionId));
      ensure(witness&&part.storeId===full.storeId&&part.currency===full.currency&&part.from>=full.from&&part.to<=full.to&&part.from<=part.to,'Validated constituent month required before slicing');
      if(part.from===full.from&&part.to===full.to)return witness.report;
-     const overlays=new Map([...witness.context.version.overlays].filter(([,overlay])=>overlay.body.date>=part.from&&overlay.body.date<=part.to));
-     return calculateHistorySources(connection,part,witness.context.c,{overlays});
+     // The full witness already includes the selected immutable correction
+     // overlays and prior sale/refund/return dependencies. Never requery edges.
+     return calculateValidatedHistoryWitness(part,witness.context.c,witness.report);
     }});
   });
  },

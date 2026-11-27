@@ -72,7 +72,7 @@ test('verified staging session pooler retains dedicated project login, TLS and c
 
 test('startup diagnostic exposes allowlisted stage/code without provider secrets',async()=>{
  const secret='private-password-host-query';
- for(const [code,expected] of [['SELF_SIGNED_CERT_IN_CHAIN','SELF_SIGNED_CERT_IN_CHAIN'],['28P01','28P01'],[secret,'CHECK_FAILED']]){
+ for(const [code,expected] of [['SELF_SIGNED_CERT_IN_CHAIN','SELF_SIGNED_CERT_IN_CHAIN'],['28P01','28P01'],['53300','53300'],[secret,'CHECK_FAILED']]){
   const cause=Object.assign(new Error(secret),{code,detail:secret});
   await assert.rejects(initialiseReviewRuntime(config,{createPool:()=>({connect:async()=>{throw cause;},end:async()=>{}}),createAuthClient:()=>assert.fail()}),e=>{assert.deepEqual(e.safeDiagnostic,{phase:'database_connect',code:expected});assert.equal(JSON.stringify(e).includes(secret),false);assert.equal(e.message.includes(secret),false);return true;});
  }

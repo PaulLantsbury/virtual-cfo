@@ -94,7 +94,7 @@ export async function initialiseReviewRuntime(config,{createPool,createAuthClien
   return {service:createReviewerService(database,supabase),profitService:createProfitReportingService(database,supabase),close:()=>pool.end()};
  }catch(cause){
   try{await pool?.end();}catch{}
-  const codes=new Set(['ENETUNREACH','EHOSTUNREACH','ENOTFOUND','ECONNREFUSED','ETIMEDOUT','28P01','28000','42501','42P01','42883','SELF_SIGNED_CERT_IN_CHAIN','DEPTH_ZERO_SELF_SIGNED_CERT','UNABLE_TO_VERIFY_LEAF_SIGNATURE','UNABLE_TO_GET_ISSUER_CERT_LOCALLY','CERT_HAS_EXPIRED']);
+  const codes=new Set(['ENETUNREACH','EHOSTUNREACH','ENOTFOUND','ECONNREFUSED','ETIMEDOUT','28P01','28000','53300','42501','42P01','42883','SELF_SIGNED_CERT_IN_CHAIN','DEPTH_ZERO_SELF_SIGNED_CERT','UNABLE_TO_VERIFY_LEAF_SIGNATURE','UNABLE_TO_GET_ISSUER_CERT_LOCALLY','CERT_HAS_EXPIRED']);
   const error=new Error('Review server could not be initialised');
   error.safeDiagnostic=Object.freeze({phase,code:codes.has(cause?.code)?cause.code:'CHECK_FAILED'});
   throw error;

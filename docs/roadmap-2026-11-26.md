@@ -1,3 +1,8 @@
+## 27 November — owner-friendly paragraphs now; ChatGPT wording NEXT, deferred
+Current authorized priority: restore shared prototype controls, implement calendar-day monthly-cost allocation, and replace each primary page's opening technical sentence with one short, plain-English owner briefing. The paragraph must explain two or three supported observations, why they matter and one bounded next focus. See [the approved page-briefing requirement](owner-friendly-page-briefings-2026-11-27.md).
+
+Paul has prioritized the ChatGPT wording layer as the NEXT phase after that current work. Explicitly defer it for now: no AI investigation, new calls, prompt iterations, credentials or deployment. Keep the rule-based briefing as the website default. Reuse its approved facts/guardrails as the later AI foundation, with independent acceptance and fallback. Existing private trial approvals remain consumed.
+
 ## 27 November — URGENT: shared period controls and Xero calendar-day cost allocation
 Paul approved restoring the prototype Amounts/Period/View/Compare controls with shared selections across pages, and applying recurring monthly Xero costs by calendar day to weekly reports. This is the current urgent prototype/design priority, ahead of unrelated integration work.
 

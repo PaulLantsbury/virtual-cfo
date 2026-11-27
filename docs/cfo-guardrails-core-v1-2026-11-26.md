@@ -1,3 +1,5 @@
+> **27 November 2026 — approved presentation supplement:** All primary opening boxes must use a short, everyday-English owner paragraph, explaining supported results, significance and one bounded focus. See [Owner-friendly opening briefings](owner-friendly-page-briefings-2026-11-27.md). Existing numerical/advice safeguards remain in force. The ChatGPT wording phase is next on the roadmap but explicitly deferred; no model activation is included.
+
 # Night Scout: approved CFO interpretation and advice rulebook — version 1
 
 **Approved by Paul — 26 November 2026. Version 1: interpretation and advice policy.**

@@ -41,3 +41,14 @@ for(const [id,category] of [['fees','processingFee'],['ads','advertising'],['sof
  }
  assert.equal(extractSelectedAccountTotals(baseline())[id],0);
 });
+
+for(const [id,category,reportId] of [['sales','revenue','ProfitAndLoss'],['fees','processingFee','ProfitAndLoss'],['ads','advertising','ProfitAndLoss'],['software','software','ProfitAndLoss'],['bank1','includedCash','BalanceSheet']])test(`${category} current value never borrows a later comparison`,()=>{
+ const baseline=()=>({mapping,profitAndLoss:report('ProfitAndLoss',[row('sales','100.00'),row('shipping','6.00'),row('fees','0.00'),row('ads','0.00'),row('software','0.00')]),balanceSheet:report('BalanceSheet',[row('bank1','0.00'),row('bank2','2.00')])});
+ const selected=x=>(reportId==='ProfitAndLoss'?x.profitAndLoss:x.balanceSheet).Reports[0].Rows.find(r=>r.Cells[0].Value===id);
+ for(const [current,reason] of [['','amount_missing'],['   ','amount_missing'],[undefined,'amount_missing'],[null,'amount_missing'],[0,'amount_missing'],['not-money','amount_format_invalid']]){
+  const x=baseline(),r=selected(x);r.Cells[1]={Value:current};r.Cells.push({Value:'0.00'});
+  assert.throws(()=>extractSelectedAccountTotals(x),e=>e.safeReason===reason&&e.safeCategory===category&&e.safeReport===reportId);
+ }
+ const sparse=baseline(),r=selected(sparse);delete r.Cells[1];r.Cells[2]={Value:'0.00'};assert.throws(()=>extractSelectedAccountTotals(sparse),e=>e.safeReason==='amount_missing');
+ const zero=baseline(),z=selected(zero);z.Cells[1].Value='0.00';z.Cells.push({Value:'999.99'});assert.equal(extractSelectedAccountTotals(zero)[id],0);
+});

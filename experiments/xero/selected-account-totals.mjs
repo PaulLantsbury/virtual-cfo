@@ -35,7 +35,9 @@ function totalsFromReport(payload,reportId,ids){
 
 function flatten(rows,out=[]){for(const row of rows){if(!row||typeof row!=='object')fail('report_row_invalid');if(Array.isArray(row.Rows))flatten(row.Rows,out);if(row.RowType==='Row'&&Array.isArray(row.Cells))out.push(row);}return out;}
 function accountId(cells){const values=cells.flatMap(cell=>Array.isArray(cell?.Attributes)?cell.Attributes:[]).filter(attribute=>attribute?.Id==='account'&&typeof attribute.Value==='string');if(values.length===0)return null;if(values.some(value=>value.Value!==values[0].Value))fail('account_attribute_ambiguous');return values[0].Value;}
-function money(cells){const values=cells.slice(1).map(cell=>cell?.Value).filter(value=>typeof value==='string'&&value.trim()!=='');if(values.length<1)fail('amount_missing');const raw=values[0].replace(/,/g,'');if(!/^-?\d+(?:\.\d{1,2})?$/.test(raw))fail('amount_format_invalid');const cents=Math.round(Number(raw)*100);if(!Number.isSafeInteger(cents))fail('amount_out_of_range');return cents;}
+// Standard report layout uses the first value column; never borrow a comparison.
+// BankSummary passes its separately validated closing column in this same slot.
+function money(cells){const current=cells[1]?.Value;if(typeof current!=='string'||current.trim()==='')fail('amount_missing');const raw=current.replace(/,/g,'');if(!/^-?\d+(?:\.\d{1,2})?$/.test(raw))fail('amount_format_invalid');const cents=Math.round(Number(raw)*100);if(!Number.isSafeInteger(cents))fail('amount_out_of_range');return cents;}
 function fail(reason){throw Object.assign(Error('Xero selected account totals are unavailable'),{safeReason:reason});}
 
 /** BankSummary fallback remains gated on caller-proven base-currency semantics. */

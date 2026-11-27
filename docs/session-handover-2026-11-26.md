@@ -1,3 +1,11 @@
+## 27 November — owner-directed stop after current tasks; design review next
+
+Owner instructed every stream to finish only its current bounded task and then stop. Do not launch follow-on batches, publish/deploy candidates, request further release approvals or perform new provider/data operations. Freeze prepared work and preserve receipts. Existing scheduled services are not to be altered by this workflow pause.
+
+The next priority is an owner-led, page-by-page design review: the owner reports several pages have changed and are not working as intended. Review and agree the desired designs and behavior before resuming integration/data work or implementing more changes. Do not assume the previously accepted technical checks mean the owner accepts current designs.
+
+Stopping baseline: current website and rule-based briefing remain live; AI trials closed; Xero fictional hosted handoff passed with original linked branch/settings restored. Any real-directory refresh/mapping package remains preparation only and must be held. Google test-account creation and Supabase credential work remain blocked pending support. Customer interface fixes stay undeployed until explicitly resumed. Each stream must provide its exact result/candidate, remaining blockers and stop confirmation for the handover.
+
 ## 27 November — approved Xero fictional hosted handoff passed
 
 The approved temporary-branch amendment completed successfully: exactly one build of the additive fictional-test version, original linked branch restored before one bounded temporary shell, actual output captured and verified locally. The shell exit was observed within 78 seconds; physical infrastructure teardown was not separately observable. Schedule, daily/build commands and automatic deployment remain unchanged. No Xero, database, secret or environment reads occurred and no real snapshot was written. The additive two-file test artifact remains built over the unchanged reader.

@@ -22,12 +22,22 @@ test('withholds totals for missing, duplicate, ambiguous or non-money account ro
  const valid={profitAndLoss:report('ProfitAndLoss',[row('sales','100.00'),row('shipping','6.00'),row('fees','3.00'),row('ads','20.00'),row('software','50.00')]),balanceSheet:report('BalanceSheet',[row('bank1','1.00'),row('bank2','2.00')])};
  for(const mutate of [x=>x.profitAndLoss.Reports[0].Rows.shift(),x=>x.balanceSheet.Reports[0].Rows.push(row('bank1','2.00')),x=>x.profitAndLoss.Reports[0].Rows[0].Cells.splice(1,1),x=>x.balanceSheet.Reports[0].Rows[0].Cells[1].Value='not-money']){const input=structuredClone(valid);mutate(input);assert.throws(()=>extractSelectedAccountTotals({mapping,...input}),/unavailable/);}
 });
-test('defaults absent optional profit accounts to zero for live two-cell profit and three-cell cash rows',()=>{
+test('preserves explicit zero expense rows with two-cell profit and three-cell cash rows',()=>{
  const threeCell=(id,current,comparison)=>({RowType:'Row',Cells:[{Value:id,Attributes:[{Id:'account',Value:id}]},{Value:current,Attributes:[{Id:'account',Value:id}]},{Value:comparison,Attributes:[{Id:'account',Value:id}]}]});
- const result=extractSelectedAccountTotals({mapping,profitAndLoss:report('ProfitAndLoss',[row('sales','100.00'),row('shipping','6.00')]),balanceSheet:report('BalanceSheet',[threeCell('bank1','1,000.00','900.00'),threeCell('bank2','0.00','0.00')])});
+ const result=extractSelectedAccountTotals({mapping,profitAndLoss:report('ProfitAndLoss',[row('sales','100.00'),row('shipping','6.00'),row('fees','0.00'),row('ads','0.00'),row('software','0.00')]),balanceSheet:report('BalanceSheet',[threeCell('bank1','1,000.00','900.00'),threeCell('bank2','0.00','0.00')])});
  assert.deepEqual(result,{sales:10000,shipping:600,fees:0,ads:0,software:0,bank1:100000,bank2:0});
 });
-test('still rejects absent required accounts and invalid present optional rows',()=>{
- const valid={profitAndLoss:report('ProfitAndLoss',[row('sales','100.00'),row('shipping','6.00')]),balanceSheet:report('BalanceSheet',[row('bank1','1.00'),row('bank2','2.00')])};
+test('rejects absent selected accounts and invalid present expense rows',()=>{
+ const valid={profitAndLoss:report('ProfitAndLoss',[row('sales','100.00'),row('shipping','6.00'),row('fees','0.00'),row('ads','0.00'),row('software','0.00')]),balanceSheet:report('BalanceSheet',[row('bank1','1.00'),row('bank2','2.00')])};
  for(const mutate of [x=>x.profitAndLoss.Reports[0].Rows.pop(),x=>x.balanceSheet.Reports[0].Rows.pop(),x=>x.profitAndLoss.Reports[0].Rows.push(row('fees','not-money')),x=>x.profitAndLoss.Reports[0].Rows.push(row('fees','1.00'),row('fees','2.00'))]){const input=structuredClone(valid);mutate(input);assert.throws(()=>extractSelectedAccountTotals({mapping,...input}),/unavailable/);}
+});
+
+for(const [id,category] of [['fees','processingFee'],['ads','advertising'],['software','software']])test(`requires explicit ${category} row and rejects malformed/duplicate values`,()=>{
+ const baseline=()=>({mapping,profitAndLoss:report('ProfitAndLoss',[row('sales','100.00'),row('shipping','6.00'),row('fees','0.00'),row('ads','0.00'),row('software','0.00')]),balanceSheet:report('BalanceSheet',[row('bank1','1.00'),row('bank2','2.00')])});
+ for(const [kind,reason] of [['missing','required_account_missing'],['duplicate','duplicate_selected_account'],['malformed','amount_format_invalid']]){
+  const input=baseline(),rows=input.profitAndLoss.Reports[0].Rows,index=rows.findIndex(r=>r.Cells[0].Value===id);
+  if(kind==='missing')rows.splice(index,1);else if(kind==='duplicate')rows.push(row(id,'0.00'));else rows[index].Cells[1].Value='not-money';
+  assert.throws(()=>extractSelectedAccountTotals(input),e=>e.safeReason===reason&&e.safeReport==='ProfitAndLoss'&&e.safeCategory===category);
+ }
+ assert.equal(extractSelectedAccountTotals(baseline())[id],0);
 });

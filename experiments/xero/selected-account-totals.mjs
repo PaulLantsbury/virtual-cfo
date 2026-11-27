@@ -9,16 +9,16 @@ export function extractSelectedAccountTotals({profitAndLoss,balanceSheet,bankSum
  if(!selected)fail('mapping_invalid');
  return Object.freeze({
   ...categoryTotals(profitAndLoss,'ProfitAndLoss','revenue',selected.revenue),
-  ...categoryTotals(profitAndLoss,'ProfitAndLoss','processingFee',selected.processingFee,{missingValue:0}),
-  ...categoryTotals(profitAndLoss,'ProfitAndLoss','advertising',selected.advertising,{missingValue:0}),
-  ...categoryTotals(profitAndLoss,'ProfitAndLoss','software',selected.software,{missingValue:0}),
+  ...categoryTotals(profitAndLoss,'ProfitAndLoss','processingFee',selected.processingFee),
+  ...categoryTotals(profitAndLoss,'ProfitAndLoss','advertising',selected.advertising),
+  ...categoryTotals(profitAndLoss,'ProfitAndLoss','software',selected.software),
   ...cashTotals(balanceSheet,bankSummary,selected.includedCash,bankSummaryContext)
  });
 }
 
-function categoryTotals(payload,reportId,category,ids,options){try{return totalsFromReport(payload,reportId,ids,options);}catch(error){if(error?.safeReason)Object.assign(error,{safeReport:reportId,safeCategory:category});throw error;}}
+function categoryTotals(payload,reportId,category,ids){try{return totalsFromReport(payload,reportId,ids);}catch(error){if(error?.safeReason)Object.assign(error,{safeReport:reportId,safeCategory:category});throw error;}}
 
-function totalsFromReport(payload,reportId,ids,{missingValue}={}){
+function totalsFromReport(payload,reportId,ids){
  const report=payload?.Reports?.[0];
  if(!report||report.ReportID!==reportId||!Array.isArray(report.Rows))fail('report_shape_invalid');
  const found=new Map();
@@ -28,8 +28,7 @@ function totalsFromReport(payload,reportId,ids,{missingValue}={}){
   found.set(id,money(row.Cells));
  }
  if(found.size!==ids.length){
-  if(missingValue===undefined){const error=Object.assign(Error('Xero selected account totals are unavailable'),{safeReason:'required_account_missing',safeFoundCount:found.size});throw error;}
-  for(const id of ids)if(!found.has(id))found.set(id,missingValue);
+  const error=Object.assign(Error('Xero selected account totals are unavailable'),{safeReason:'required_account_missing',safeFoundCount:found.size});throw error;
  }
  return Object.freeze(Object.fromEntries(found));
 }

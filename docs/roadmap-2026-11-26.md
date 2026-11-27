@@ -1,3 +1,11 @@
+## 27 November — approved Xero fictional hosted handoff passed
+
+The approved temporary-branch amendment completed successfully: exactly one build of the additive fictional-test version, original linked branch restored before one bounded temporary shell, actual output captured and verified locally. The shell exit was observed within 78 seconds; physical infrastructure teardown was not separately observable. Schedule, daily/build commands and automatic deployment remain unchanged. No Xero, database, secret or environment reads occurred and no real snapshot was written. The additive two-file test artifact remains built over the unchanged reader.
+
+This establishes the fictional hosted output handoff only. Prepare the separate real-directory refresh/sanitized snapshot publication package using the tested route, with explicit authority for token renewal, lease/encrypted-envelope/audit writes, real account-directory disclosure and exact snapshot storage. No real provider request or mapping save is authorized by the completed test. Final mapping save still needs actual fresh directory and worker-quiescence evidence.
+
+The rule-based CFO scenario review of the existing release found no blocking numerical/advice-rule defect. January/December and October/September comparisons reconcile in offline service/client checks; missing prior/current evidence does not become assumed zero. These are source/offline checks, not a new full hosted acceptance. Pages and independent testers retain the final browser scenario verdict. Keep the current briefing default and AI trial lane closed.
+
 ## 27 November — afternoon prototype-only scenario batch active
 
 Parallel Pages, Data, rule-based CFO and independent testing batches are assessing existing profitable/lower-profit periods and missing-evidence behavior. Canonical data contains no loss-making month across the 24-month export; use January 2026 as a lower-profit case, not a loss. October 2026 is the stronger-profit comparison. Negative operating cash flow despite positive profit provides a real profit-versus-cash scenario. Any fictional zero/loss boundary tests must remain clearly labelled offline fixtures, not new observed data.

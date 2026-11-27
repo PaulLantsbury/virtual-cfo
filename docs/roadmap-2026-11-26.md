@@ -1,3 +1,15 @@
+## 27 November — compact shared date controls implemented and independently checked; release pending
+
+Owner approved the compact selector mockup for all five primary pages. Exact local source `016beeea1e30d63cc87eda5512666533f63918d3` is based on the live five-page restoration `fa887b86a18079ff7698b305e85fb3f7cd67f349`. It is committed locally, not published or deployed. Proposed source branch: `codex/compact-date-controls-20261127`.
+
+Implemented: one quiet Night Scout-styled panel, smaller controls, Period first and Amounts/View/Compare second. Add Custom exact From/To dates with Apply; remove the Ending month dropdown. Last week/month automatically resolve the latest complete Europe/London week/month and show the exact dates. Three/six/twelve-month presets resolve complete calendar months, or 13/26/52 complete weeks in weekly view. Choices remain shared across all five pages, reverse navigation, reload and user/company scope. Historical saved month choices migrate to Custom; new presets stay clock-relative on reload. Invalid, reversed and future ranges are rejected. No evidence versions, data or authorisation are stored in preferences.
+
+Preserve source honesty: only exact complete calendar-month Custom ranges in monthly view can reuse existing monthly readers. Partial/weekly/multi-month ranges remain dashes where not connected; no stale whole-month totals are relabelled. Plan's separate three-month baseline cannot look beyond a partial selected end date. This batch does not complete weekly cost/source aggregation or arbitrary-date financial reporting.
+
+Verification: 35 focused unit checks pass; five new browser cases and all twelve adapted earlier regression cases pass across full/targeted runs. Independent cross-review found no blocker. Desktop1440/mobile390 layouts and all five routes checked with disposable fictional fixtures and external requests blocked. Full constituent workspace typechecks and all builds pass; pre-existing build warnings remain. The known root package-wrapper linked-dependency restriction was avoided using its constituent commands, not by reinstalling dependencies. No database, provider, daily-feed, model, hosted or spending changes occurred.
+
+Next: exact source publication + staging website release approval, then signed-in checks. Keep the existing restoration live until approved. Weekly/multi-month calculation/source integration remains urgent next work; ChatGPT wording remains deferred.
+
 ## 27 November — five-page restoration RELEASED and signed-in checked
 
 The owner-approved exact website source `fa887b86a18079ff7698b305e85fb3f7cd67f349` is published on `codex/five-page-restoration-20261127` and live on staging. The previous live source was confirmed before deployment; no newer website work was overwritten. Build/deploy and public website health passed.

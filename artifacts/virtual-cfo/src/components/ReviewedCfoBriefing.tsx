@@ -4,7 +4,7 @@ const money=(value:number)=>new Intl.NumberFormat('en-GB',{style:'currency',curr
 export function ReviewedCfoBriefing({month}:{month:ReturnType<typeof composeHistoryMonth>}){
  const briefing=reviewedCfoBriefing(month);
  return <section className="sv-checked-briefing" aria-label="Checked financial briefing"><h5>Checked financial briefing</h5>{briefing?<>
-  <p>Sales after discounts and refunds were {money(briefing.facts.find(f=>f.key==='netProductSales')!.value)}. After costs and overheads, the month’s operating result was {money(briefing.facts.find(f=>f.key==='operatingProfit')!.value)}.</p>
+  <p>Product sales after discounts and refunds were {money(briefing.facts.find(f=>f.key==='netProductSales')!.value)}. After costs and overheads, the month’s operating result was {money(briefing.facts.find(f=>f.key==='operatingProfit')!.value)}.</p>
   {briefing.investigation&&<p><strong>Next check:</strong> Review the sales and cost records before deciding what to change.</p>}
   <p>Selected month only · synthetic records · not a cash or spending forecast.</p>
   <details className="sv-details"><summary>Explore the checked briefing</summary><div><p>Reviewed synthetic records · {month!.selection.period.from}–{month!.selection.period.to} · GBP excluding VAT · Europe/London. These are monthly totals, including when the flow above is displayed per order.</p>

@@ -10,8 +10,8 @@ const unavailable='Checked financial commentary is unavailable for this report. 
 const normal=(route,url,item,json)=>json({...item.response,cfoBriefing:envelope(item)});
 for(const width of [390,1440])test(`Checked briefing current facts, month change and fictional exclusion at ${width}px`,async()=>{
  const forbiddenRequests=[];await fixture({viewport:{width,height:900},forbiddenRequests,history:normal},async page=>{
- await page.goto(origin+'/dashboard');assert.equal(await briefing(page).count(),0);await select(page,'2025-03-01');const region=briefing(page);await region.waitFor();await region.getByText(/£90\.00/).first().waitFor();await region.getByText(/£33\.00/).first().waitFor();await region.getByText(/£14\.00/).first().waitFor();await region.getByText('Explore the checked briefing',{exact:true}).click();await region.getByText(/version-2/).first().waitFor();assert.ok(await region.evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Briefing contents fit its box');assert.ok(await page.locator('body').evaluate(el=>el.scrollWidth<=innerWidth+1),'Page is contained');if(process.env.NIGHT_SCOUT_SCREENSHOT_DIR){await page.setViewportSize({width,height:2000});await region.screenshot({path:process.env.NIGHT_SCOUT_SCREENSHOT_DIR+`/checked-briefing-${width}.png`});await page.setViewportSize({width,height:900});}
- await select(page,'2025-02-01');await briefing(page).getByText(/£15\.00/).first().waitFor();assert.doesNotMatch(await briefing(page).innerText(),/version-2/);
+ await page.goto(origin+'/dashboard');assert.equal(await briefing(page).count(),0);await select(page,'2025-03-01');const region=briefing(page);await region.waitFor();await region.getByText(/£90\.00/).first().waitFor();await region.getByText(/£13\.00/).first().waitFor();await region.getByText('Next check:',{exact:true}).waitFor();await region.getByText('Explore the checked briefing',{exact:true}).click();await region.getByText('Source and calculation versions',{exact:true}).click();await region.getByText(/version-2/).first().waitFor();assert.ok(await region.evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Briefing contents fit its box');assert.ok(await page.locator('body').evaluate(el=>el.scrollWidth<=innerWidth+1),'Page is contained');if(process.env.NIGHT_SCOUT_SCREENSHOT_DIR){await page.setViewportSize({width,height:2000});await region.screenshot({path:process.env.NIGHT_SCOUT_SCREENSHOT_DIR+`/checked-briefing-${width}.png`});await page.setViewportSize({width,height:900});}
+ await select(page,'2025-02-01');await briefing(page).getByText(/£14\.00/).first().waitFor();assert.doesNotMatch(await briefing(page).innerText(),/version-2/);
  await page.getByRole('button',{name:'View fictional design',exact:true}).click();assert.equal(await briefing(page).count(),0);assert.deepEqual(forbiddenRequests,[]);
  });
 });
@@ -27,10 +27,14 @@ test('Failed/denied report and pending company or same-window auth change discar
  for(const mode of ['failed','denied','company','auth']){
  let arrive,release;const arrived=new Promise(r=>arrive=r),pending=new Promise(r=>release=r);let hold=false;
  await fixture({secondStore:mode==='company',history:async(route,url,item,json)=>{if(!hold)return normal(route,url,item,json);arrive();await pending;try{return json(mode==='failed'||mode==='denied'?{error:'unavailable'}:{...item.response,cfoBriefing:envelope(item)},mode==='failed'?503:mode==='denied'?403:200);}catch{}}},async(page,context)=>{
- await context.route('https://night-scout-test.invalid/auth/v1/logout*',route=>route.fulfill({status:204}));await page.goto(origin+'/dashboard');await select(page,'2025-03-01');await briefing(page).getByText(/£14\.00/).first().waitFor();hold=true;await select(page,'2025-02-01');await arrived;assert.equal(await briefing(page).count(),0,'Old briefing removed while new report pending');
+ await context.route('https://night-scout-test.invalid/auth/v1/logout*',route=>route.fulfill({status:204}));await page.goto(origin+'/dashboard');await select(page,'2025-03-01');await briefing(page).getByText(/£13\.00/).first().waitFor();hold=true;await select(page,'2025-02-01');await arrived;assert.equal(await briefing(page).count(),0,'Old briefing removed while new report pending');
  if(mode==='company')await page.getByRole('combobox',{name:'Active store'}).selectOption(otherStore);
  if(mode==='auth')await page.evaluate(async()=>{const {supabase}=await import('/src/lib/supabase.ts');await supabase.auth.signOut({scope:'local'});});
  release();if(mode==='auth')await page.getByRole('heading',{name:'Sign in to Night Scout',exact:true}).waitFor();else await page.waitForLoadState('networkidle');assert.equal(await briefing(page).count(),0);
  });
  }
 });
+
+test('Pricing never advertises active monitoring in Free or Pro',async()=>fixture({},async page=>{
+ for(const plan of ['free','pro']){await page.evaluate(p=>sessionStorage.setItem('userPlan',p),plan);await page.goto(origin+'/upgrade');await page.getByRole('combobox',{name:'Active store'}).waitFor();const text=await page.locator('body').innerText();assert.doesNotMatch(text,/Monitoring active|3 areas need attention|Upgrade to Pro to activate updates|monitoring margin, cash/i);}
+}));

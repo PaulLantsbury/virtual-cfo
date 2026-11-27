@@ -48,7 +48,14 @@ export function prepareHistoryCfoAnalysis({current,prior=null,now=new Date(),acc
   if(access!=='allowed'||!['current','stale'].includes(freshness))return {input:null,expected};
   const selected=snapshot(current,'current',selection,now),sources=[selected.source],metrics=[...selected.metrics];
   // A bad prior month cannot suppress separately valid current-month facts.
-  if(prior){try{const previous=snapshot(prior,'prior',selection,now);sources.push(previous.source);metrics.push(...previous.metrics);}catch{/* Comparison remains withheld. */}}
+  if(prior){try{
+   const start=new Date(`${selection.from}T00:00:00Z`);
+   const priorFrom=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth()-1,1)).toISOString().slice(0,10);
+   const priorTo=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth(),0)).toISOString().slice(0,10);
+   // Reject a wrong-period comparator before it can invalidate the selected snapshot.
+   ensure(prior.scope?.from===priorFrom&&prior.scope?.to===priorTo);
+   const previous=snapshot(prior,'prior',selection,now);sources.push(previous.source);metrics.push(...previous.metrics);
+  }catch{/* Comparison remains withheld. */}}
   return {input:{schemaVersion:'cfo-evidence-v1',scope:selection,mode:'reviewed',freshness,sources,metrics,testPlan:null},expected};
  }catch{return {input:null,expected};}
 }

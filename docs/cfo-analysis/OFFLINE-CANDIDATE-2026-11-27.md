@@ -2,6 +2,12 @@
 
 Offline source prepared on released baseline `4b83819400ba6264731a4eb7cf176705df4f5800`. No publication, deployment, model request, new credentials, database change or provider action occurred. The canonical approved rulebook and existing financial calculations are unchanged.
 
+## Independent-review corrections
+
+Independent testing of initial candidate `384c2a98050128b82dda0f168c84966891614b1f` found two defects: additional nested scope fields survived generic presentation output, and supplying the selected month as its own prior period cleared otherwise valid current facts. The corrected candidate explicitly projects the seven declared scope fields and checks prior calendar-month eligibility before appending its source. Shared engine strictness, formulas, declarations and raw/model payload boundaries are unchanged.
+
+Correction validation: 42/42 focused test entries passed, including the tester’s two unchanged reproduction files and new regressions for ready/stale/partial scope projection, model success/fallback output, and duplicate-month current-fact preservation. The count includes the nested test container; it is not 42 independent scenarios. Strict declaration compilation and whitespace checks passed. The earlier full build receipt belongs to the initial candidate; it was not relabelled or redundantly rerun for this isolated correction. Separate tester retest of the corrected frozen revision remains pending.
+
 ## Delivered behaviour
 
 `lib/cfo-analysis/index.mjs` explains a selected completed month versus its immediately preceding complete calendar month. It reuses the existing evidence engine to recompute and validate every fact. Six component changes reconcile exactly to operating-profit change: net product sales, net shipping, cost of goods, variable costs, advertising and overheads including depreciation/amortisation. D&A is not deducted twice. Negative amounts and zero remain numbers; missing is never zero.

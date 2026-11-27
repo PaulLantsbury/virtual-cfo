@@ -86,3 +86,10 @@ test('stale data permits dated facts only; denied or invalidated clears all fact
   const result=analyze(changes);assert.equal(result.status,'withheld');assert.deepEqual(result.facts,[]);assert.equal(result.scope,null);
  }
 });
+test('duplicate selected month as comparator preserves current facts and withholds comparison',()=>{
+ const result=analyze({prior:structuredClone(current)});
+ assert.equal(result.status,'withheld');assert.equal(result.investigation,null);assert.deepEqual(result.bridge,[]);
+ assert.equal(result.facts.find(f=>f.key==='operatingProfit').currentPence,current.report.profit.operatingProfit);
+ assert.ok(result.facts.every(f=>f.priorPence===null&&f.changePence===null));
+ assert.equal(result.sources.length,1);assert.equal(result.sources[0].reportVersion,current.financialVersionId);
+});

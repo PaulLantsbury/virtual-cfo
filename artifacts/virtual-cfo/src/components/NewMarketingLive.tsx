@@ -28,7 +28,7 @@ export function NewMarketingLive({ onShowSample }: { onShowSample: () => void })
   ] as const : [];
   const max = Math.max(1, ...values.map(([, n]) => Math.abs(n ?? 0)));
   return <div className="new-profit marketing-review mr-linked-review">
-    <header className="np-header"><div><span className="mr-eyebrow">GROWTH & MARKETING</span><h1>Marketing Efficiency</h1><p>Know what marketing is earning — and what still needs evidence.</p></div><a className="mr-button mr-secondary" href="#marketing-linked-numbers">Explore the Numbers</a></header>
+    <header className="np-header"><div><span className="mr-eyebrow">GROWTH & MARKETING</span><h1>Marketing Efficiency</h1><p>Know what marketing is earning — and what still needs evidence.</p></div></header>
     <div className="mr-review-label"><p><strong>{month ? 'Connected reporting · synthetic company.' : 'Database reporting · choose verified evidence.'}</strong> {month ? 'The selected monthly financial figures passed their source check through the restricted Supabase reporting service.' : 'No verified month is selected. Figures appear only after the selected company, month and evidence version pass their source check.'} These records describe synthetic company activity, not Shopify, Xero or advertising-platform results.</p><button className="mr-text-link" onClick={onShowSample}>Open sample planner · not linked</button></div>
     <p className="mr-link-key"><span className="mr-link-ready">Connected / calculated from verified evidence</span> <span className="mr-not-linked">Yellow = sample, unavailable or unsupported input</span></p>
     <div className="np-controls" aria-label="Connected marketing reporting controls">

@@ -3,9 +3,9 @@ import {CartesianGrid,ComposedChart,Line,ResponsiveContainer,Tooltip,XAxis,YAxis
 import type {useReviewedHistory} from '@/lib/useReviewedHistory';
 import {useReviewedAcquisitionSeries} from '@/lib/useReviewedAcquisitionSeries';
 const monthLabel=(from:string)=>new Intl.DateTimeFormat('en-GB',{month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(from+'T12:00:00Z'));
-const count=(v:number|null)=>v===null?'Unavailable':v.toLocaleString('en-GB');
-const rate=(v:number|null)=>v===null?'Unavailable':(v*100).toFixed(2)+'%';
-const money=(v:number|null)=>v===null?'Unavailable':'£'+(v/100).toFixed(2);
+const count=(v:number|null)=>v===null?'—':v.toLocaleString('en-GB');
+const rate=(v:number|null)=>v===null?'—':(v*100).toFixed(2)+'%';
+const money=(v:number|null)=>v===null?'—':'£'+(v/100).toFixed(2);
 export function ConnectedAcquisitionTrend({history,metric}:{history:ReturnType<typeof useReviewedHistory>;metric:'sessions'|'cac'}){
  const [months,setMonths]=useState(3),series=useReviewedAcquisitionSeries(history,months),rows=series.rows.map(r=>({...r,label:monthLabel(r.from)}));
  const title=metric==='sessions'?'Visits and purchase conversion':'Paid first-customer CAC';

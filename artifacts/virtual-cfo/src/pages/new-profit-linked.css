@@ -1,10 +1,11 @@
-/* Yellow is a provenance marker, accompanied by explicit status text. */
-.new-profit .np-unlinked{color:#facc15;background:#713f122b;border-radius:4px;padding:2px 5px;box-decoration-break:clone}
+/* Source status is textual. Missing figures remain neutral rather than yellow. */
+.new-profit .np-unlinked{color:var(--np-muted);background:transparent;border-radius:0;padding:0;box-decoration-break:initial}
 .new-profit .np-control-group select{background:hsl(var(--card));color:hsl(var(--foreground));border:1px solid hsl(var(--border));border-radius:7px;padding:7px;max-width:100%}
-.new-profit.np-sample-unlinked .np-stat>strong,.new-profit.np-sample-unlinked .np-stat-secondary,.new-profit.np-sample-unlinked .np-op-reconcile,.new-profit.np-sample-unlinked .np-py,.new-profit.np-sample-unlinked .np-stat>p,.new-profit.np-sample-unlinked .np-diagnosis-margin,.new-profit.np-sample-unlinked td,.new-profit.np-sample-unlinked .np-plan-impact,.new-profit.np-sample-unlinked .np-plan-overview strong,.new-profit.np-sample-unlinked .np-unit-focus-grid strong,.new-profit.np-sample-unlinked .np-unit-focus-grid small,.new-profit.np-sample-unlinked .np-combined-values strong{color:#facc15;background:#713f122b}
-.new-profit.np-sample-unlinked svg text{fill:#facc15}
-.new-profit.np-sample-unlinked .np-plan-card small{color:#facc15}
-@media(prefers-color-scheme:light){.new-profit .np-unlinked{color:#854d0e;background:#fef08a}}
-.new-profit.np-sample-unlinked .np-verdict h2,.new-profit.np-sample-unlinked .np-graph-analysis li,.new-profit.np-sample-unlinked .np-rate-observation,.new-profit.np-sample-unlinked .np-plan-card-intro p,.new-profit.np-sample-unlinked .np-plan-facts strong,.new-profit.np-sample-unlinked .np-profit-margin{color:#facc15;background:#713f122b}
-
-.new-profit .np-text-link{color:#93c5fd;text-decoration:underline;text-underline-offset:3px}.new-profit .np-text-link:focus-visible{outline:2px solid #facc15;outline-offset:3px}
+.new-profit .np-text-link{color:#93c5fd;text-decoration:underline;text-underline-offset:3px}.new-profit .np-text-link:focus-visible{outline:2px solid #93c5fd;outline-offset:3px}
+.np-connected .np-chart-placeholder{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px dashed var(--np-border);border-radius:12px;margin:16px 0;padding:24px;text-align:center;color:var(--np-muted);background:color-mix(in srgb,var(--np-card) 75%,transparent)}
+.np-connected .np-chart-placeholder>strong{font-size:38px;font-weight:650;line-height:1.2;color:var(--np-text)}
+.np-connected .np-chart-placeholder>p{max-width:45ch;margin:0}.np-connected .np-flow-placeholder{min-height:260px}.np-connected .np-linked-trend{margin-bottom:20px}
+.np-connected .np-trend-controls{margin:14px 0;gap:18px}.np-connected .np-landscape-plan{margin-top:20px}.np-connected .np-plan-card-intro small{overflow-wrap:anywhere}
+.np-connected details.np-card>summary{display:flex;align-items:center;justify-content:space-between;gap:14px}.np-connected details.np-card>summary>svg{flex-shrink:0}
+.np-connected .np-rate-chart{height:230px}.np-connected .np-rate-charts{padding:12px 0}
+@media(max-width:700px){.np-connected .np-chart-placeholder{min-height:240px;padding:20px 12px}.np-connected .np-flow-placeholder{min-height:210px}.np-connected .np-trend-controls{align-items:stretch}.np-connected .np-trend-controls .np-control-group{max-width:100%}.np-connected .np-trend-controls select{max-width:100%}}

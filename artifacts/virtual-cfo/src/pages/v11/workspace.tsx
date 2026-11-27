@@ -179,13 +179,7 @@ export default function V11Workspace({
           <h1>{titles[section][0]}</h1>
           <p>{titles[section][1]}</p>
         </div>
-        <button
-          ref={exploreButton}
-          className="v11-explore"
-          onClick={openEvidence}
-        >
-          Explore the Numbers <ArrowUpRight size={18} aria-hidden="true" />
-        </button>
+
       </header>
       {historical ? (
         <div className="v11-context">

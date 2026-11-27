@@ -10,7 +10,7 @@ import {classifyPlanBaseline,type PlanBaselineMonthResult,type PlanBaselineReadR
 
 /** Three contiguous, explicitly selected reviewed months; no fixture or partial baseline. */
 export function useReviewedPlanBaseline(){
- const history=useReviewedHistory(),series=useReviewedHistorySeries(history,3);
+ const history=useReviewedHistory({monthAnchorOnly:true}),series=useReviewedHistorySeries(history,3);
  const actuals=useReviewedHistorySeries(history,12);
  const financialIncomplete=series.months.filter(month=>{const metrics=linkedMarketingMetrics(month);return month.input.profit?.state!=='complete'||!metrics||[metrics.revenue,metrics.beforeAds,metrics.advertising,metrics.overheads].some(v=>v===null);}).map(m=>m.selection.period.from+'–'+m.selection.period.to);
  const enabled=!!history.userId&&series.status==='supported'&&series.months.length===3&&!financialIncomplete.length;

@@ -1,3 +1,4 @@
+import {createHistoryCfoAnalysis} from './history-cfo-analysis.mjs';
 import {createHistoryCfoBriefing} from './history-cfo-evidence.mjs';
 /** Proposed v2 SQL reader. Reuses canonical monetary engines, NOT installed finance_v1 SQL/seals. */
 import {resolveHistorySelection} from './history-versions.mjs';
@@ -83,12 +84,42 @@ export async function readHistoryInTransaction(tx,scope,options={}){
  return {cfoBriefing,state:'supported',contract:'history-v2-proposal',versionId:version.versionId,snapshotId:version.versionId,metadata:{edition:HISTORY_EDITION,versionId:version.versionId,anchor:contract.anchor,sourceAsOf:m.sourceAsOf,observedAt:m.observedAt,formulaVersion:HISTORY_FORMULA,sourceBasis:'synthetic-local',verification:'canonical-source-revision-only'},scope,sales:report.sales,components:report.components,profit:report.profit,report:{sales:report.sales,profit:report.profit,components:report.components},salesRevision:report.salesRevision,costRevision:report.costRevision};
 }
 
+/** Optional deterministic comparison read; normal history requests do no extra work. */
+export async function readHistoryAnalysisInTransaction(tx,scope,{selection,now=()=>new Date()}={}){
+ const clock=now(),fixedNow=()=>clock;
+ const load=async(period,chosen)=>{
+  const context=await historyReadContext(tx,period,{selection:chosen,now:fixedNow});
+  if(context.state!=='resolved')return null;
+  const {c,version,seal,m}=context;
+  const report=await calculateHistorySources(tx,period,c,{overlays:version.overlays});
+  if(report.salesRevision!==seal.sales_revision||report.costRevision!==seal.cost_revision||m.salesRevision!==report.salesRevision||m.costRevision!==report.costRevision)return null;
+  return {scope:period,report,financialVersionId:version.versionId,observedAt:m.observedAt};
+ };
+ const binding=r=>r?{financialVersionId:r.financialVersionId,salesRevision:r.report.salesRevision,costRevision:r.report.costRevision,observedAt:r.observedAt,from:r.scope.from,to:r.scope.to}:null;
+ let current=null,prior=null;
+ try{current=await load(scope,selection);}catch{/* No valid current evidence may escape. */}
+ if(current){
+  const first=new Date(scope.from+'T00:00:00Z');
+  const previous={...scope,from:new Date(Date.UTC(first.getUTCFullYear(),first.getUTCMonth()-1,1)).toISOString().slice(0,10),to:new Date(Date.UTC(first.getUTCFullYear(),first.getUTCMonth(),0)).toISOString().slice(0,10)};
+  try{
+   const rows=(await tx.query('SELECT s.snapshot_id,h.version_id FROM finance_history_v2.seals s LEFT JOIN finance_history_v2.version_heads h USING(store_id,date_from,date_to) WHERE s.store_id=$1 AND s.date_from=$2 AND s.date_to=$3',[scope.storeId,previous.from,previous.to])).rows;
+   if(rows.length===1)prior=await load(previous,{edition:HISTORY_EDITION,versionId:rows[0].version_id||rows[0].snapshot_id});
+  }catch{/* Independently valid current facts survive unavailable prior evidence. */}
+ }
+ return {contract:'history-cfo-analysis-response-v1',scope:{...scope,timezone:'Europe/London'},sourceBasis:'synthetic-local',current:binding(current),prior:binding(prior),analysis:createHistoryCfoAnalysis({current,prior,now:clock,access:current?'allowed':'denied',freshness:current?'current':'invalidated'})};
+}
+
 const member=async(tx,scope,user)=>{await tx.query("SELECT set_config('night_scout.profit_user_id',$1,true)",[user.id]);if((await tx.query('SELECT store_id FROM public.store_memberships WHERE store_id=$1 AND user_id=$2',[scope.storeId,user.id])).rows.length!==1)throw Error('History store membership required');};
 export function createHistoryService(db,supabase,{now=()=>new Date()}={}){return {
  async read(scope,authorization,selection){
   if(!validProfitScope(scope))throw Error('Complete history month required');
   const user=await reviewerAuthenticator(supabase,authorization)();
   return db.transaction(async tx=>{await tx.exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');await member(tx,scope,user);return readHistoryInTransaction(tx,scope,{now,selection});});
+ },
+ async analyze(scope,authorization,selection){
+  if(!validProfitScope(scope)||!selection)throw Error('Complete selected history month required');
+  const user=await reviewerAuthenticator(supabase,authorization)();
+  return db.transaction(async tx=>{await tx.exec('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY');await member(tx,scope,user);return readHistoryAnalysisInTransaction(tx,scope,{now,selection});});
  },
  async available(scope,authorization){
   if(!scope||Object.keys(scope).sort().join(',')!=='currency,storeId'||scope.currency!=='GBP'||typeof scope.storeId!=='string')throw Error('Invalid history availability scope');

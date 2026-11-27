@@ -1,3 +1,13 @@
+## 27 November — compact date controls RELEASED and signed-in verified
+
+Approved exact website source `016beeea1e30d63cc87eda5512666533f63918d3` is published on `codex/compact-date-controls-20261127` and live on staging. The previous live five-page restoration was confirmed before release; no newer work was overwritten. Build/deployment and public health passed. The existing linked branch, automatic-deploy setting, build/start command and health path were preserved.
+
+Targeted signed-in acceptance used the isolated synthetic company. Last month automatically resolved 1–31 October 2026, with no date-entry fields or Ending month dropdown; Last week resolved 16–22 November 2026. Normal keyboard entry applied an exact Custom 1–31 October 2025 period, which remained selected across Scout, Profit, Growth, Cash and Plan alongside Per order. A partial 1–17 October 2025 change in Plan remained disabled for modelling/saving and carried back to Scout. Returning to Last month/Total hid Custom fields and survived reload. October source figures reconciled: product sales £64,800, operating profit £10,392.05 and operating cash −£22,290.26. No browser errors were observed. No plan or data was saved.
+
+Narrow-screen controls fitted without page-wide overflow at the actual hosted browser minimum 433px; normal size restored. Earlier independent local checks additionally cover 390/1440px, date validation, source gates and company/account separation. Hosted acceptance is targeted, not exhaustive cell-by-cell or pixel certification.
+
+The compact Night Scout-styled panel and automatic presets/Custom interaction are complete for this release. A supported whole calendar-month Custom period can use existing monthly readers. Weekly, multi-month and partial-date financial calculations are still not connected; unsupported figures stay as dashes and never reuse whole-month totals. Completing trusted range/source aggregation, including calendar-day recurring Xero cost allocation, remains the next calculation priority. Existing read latency remains noticeable; loading feedback is retained. ChatGPT wording remains deferred. No database, access, provider, daily-feed, model, service-setting, production or spending changes occurred. No rollback was required.
+
 ## 27 November — compact shared date controls implemented and independently checked; release pending
 
 Owner approved the compact selector mockup for all five primary pages. Exact local source `016beeea1e30d63cc87eda5512666533f63918d3` is based on the live five-page restoration `fa887b86a18079ff7698b305e85fb3f7cd67f349`. It is committed locally, not published or deployed. Proposed source branch: `codex/compact-date-controls-20261127`.

@@ -1,0 +1,12 @@
+# Compact reporting controls — hosted verification
+
+Approved exact website source `016beeea1e30d63cc87eda5512666533f63918d3` is published on `codex/compact-date-controls-20261127` and live on staging. The previous live five-page restoration was confirmed before release; no newer work was overwritten. Build/deployment and public health passed. The existing linked branch, automatic-deploy setting, build/start command and health path were preserved.
+
+Targeted signed-in acceptance used the isolated synthetic company. Last month automatically resolved 1–31 October 2026, with no date-entry fields or Ending month dropdown; Last week resolved 16–22 November 2026. Normal keyboard entry applied an exact Custom 1–31 October 2025 period, which remained selected across Scout, Profit, Growth, Cash and Plan alongside Per order. A partial 1–17 October 2025 change in Plan remained disabled for modelling/saving and carried back to Scout. Returning to Last month/Total hid Custom fields and survived reload. October source figures reconciled: product sales £64,800, operating profit £10,392.05 and operating cash −£22,290.26. No browser errors were observed. No plan or data was saved.
+
+Narrow-screen controls fitted without page-wide overflow at the actual hosted browser minimum 433px; normal size restored. Earlier independent local checks additionally cover 390/1440px, date validation, source gates and company/account separation. Hosted acceptance is targeted, not exhaustive cell-by-cell or pixel certification.
+
+The compact Night Scout-styled panel and automatic presets/Custom interaction are complete for this release. A supported whole calendar-month Custom period can use existing monthly readers. Weekly, multi-month and partial-date financial calculations are still not connected; unsupported figures stay as dashes and never reuse whole-month totals. Completing trusted range/source aggregation, including calendar-day recurring Xero cost allocation, remains the next calculation priority. Existing read latency remains noticeable; loading feedback is retained. ChatGPT wording remains deferred. No database, access, provider, daily-feed, model, service-setting, production or spending changes occurred. No rollback was required.
+
+
+The source/publication/staging approval is completed. Private deployment receipts and screenshots remain outside routine repository guidance. Existing source and data safeguards are unchanged.

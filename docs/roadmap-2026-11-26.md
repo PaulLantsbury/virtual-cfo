@@ -1,3 +1,17 @@
+## 27 November closeout — connection fix applied; website restored after Cash check
+
+The owner-approved connection-capacity correction is applied and retained. Replacement website version `43a2606f6e2665ab71334487b3ab8b225314c391` published successfully, started successfully and passed its health check. The previously failing 28 September–4 October 2026 weekly Profit report passed on signed-in staging: net product sales £14,058.02, revenue including shipping £14,643.98, EBITDA £2,115.62, operating profit £2,069.80 and 389 original orders. The weekly chart and Profit-to-Cash selection transfer passed.
+
+Cash for that same partial-month week settled with “Matching additional source records are not available for this selected period.” Dependent cash amounts remained dashes; no zero or sample substitution occurred. The reason for this source rejection is not yet established. Remaining five-page hosted acceptance was aborted as required by the approved stop-on-failure boundary.
+
+The approved rollback completed at 17:52 London: working website `016beeea1e30d63cc87eda5512666533f63918d3` is live again. Signed-in monthly Profit was verified after restoration, including £64,800 sales and £10,392.05 operating profit. The approved six-connection allowance remains for future deployment overlap; passwords and data permissions remain unchanged.
+
+**Next session:** investigate and reproduce the partial-week Cash source-validation failure against the actual synthetic records; obtain independent verification and prepare a narrow fix package. Then finish five-page weekly/multi-month/Custom acceptance and the owner's design review. Do not mark range reporting fully released. The startup connection failure is resolved and is distinct from the remaining Cash acceptance failure.
+
+All agents and local previews are stopped; no unattended batch was started. No financial data writes, grants, credential changes, provider/feed/model activation, production change or additional spending occurred. No owner action is needed to stop tonight. Earlier “ready for approval” notes below are historical; this result supersedes them.
+
+---
+
 ## 27 November — startup cause confirmed; bounded correction ready for approval
 
 Read-only database/pooler logs at the exact failed-start times now establish the cause: the reporting login hit its connection ceiling while the existing and replacement website instances overlapped. This is confirmed capacity refusal, not evidence that weekly calculation code failed at startup. Startup/build/connection files were unchanged between the working and failed source. The previously masked application error concealed the useful connection-limit code.

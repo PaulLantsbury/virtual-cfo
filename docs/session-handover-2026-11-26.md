@@ -1,3 +1,17 @@
+## 27 November — owner decisions and Xero mapping tool requirement
+
+Owner confirmed the integration planning paths: use the intended existing Meta account; prepare a genuine Google test-account setup proposal; retain Shopify's honest development-store test-order demonstration alongside separately labelled synthetic financial pages. These answers do not authorize creation, collection or activation.
+
+For the test-company Xero mapping proposal, owner selected Sales plus Shipping revenue, IT Software and Consumables for software, and Bank Fees for payment-processing fees. Prepare the exact reviewed mapping change before saving it; this fixture-specific classification must not become an automatic rule for other companies.
+
+### Product requirement: guided Xero account mapping
+
+Add a tool allowing users to drag existing Xero chart-of-account entries into the agreed Night Scout profit-and-loss categories. Provide equivalent keyboard/select controls, show mapped/unmapped accounts and prevent double counting. Let users preview totals and reconcile the complete statement before explicitly saving a versioned mapping. Keep unmapped or unsupported values visibly unavailable rather than assuming zero. Map Night Scout reporting only: do not change Xero accounts or transactions. Category definitions and VAT/sign treatment must follow the agreed financial contract; do not infer payment-processing fees from an account name alone.
+
+Sequence: retain the minimal reviewed mapping needed for beta; schedule the self-service tool as a separate scoped onboarding improvement after core beta acceptance, unless a demonstrated beta blocker requires a smaller version. The current request adds the requirement; it does not authorize a redesign of the active website.
+
+Owner also approved one separate corrected private AI wording trial. Execution awaits owner masked-key launch; no results or hosted adoption are claimed. Earlier trial allowances remain consumed.
+
 ## 27 November — focused checks and owner decisions
 
 The first private AI wording evaluation stopped after one invalid draft; no wording was accepted or published. The rejected text was not retained, so its precise cause is unknown. Offline review found instruction/validator mismatches; a minimal correction passed independent source checks with financial safeguards unchanged. A separate bounded trial requires fresh approval. Preserve the consumed run and do not retry it.

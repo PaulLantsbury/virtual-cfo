@@ -1,3 +1,21 @@
+## 27 November — revised release published; startup failed; safe end-of-day stop
+
+Owner-approved revised source `9131d38356caee652e9b7a68df3a0f97fde6aafe` is published on `codex/weekly-reporting-fix-20261127`. Its hosted build passed, but the replacement instance failed its reporting database connection check during startup. It did not become live, so the exact weekly check and five-page acceptance were not reached. No claim of a successful hosted weekly fix is made.
+
+Render retained the prior compact-controls revision `016beeea1e30d63cc87eda5512666533f63918d3` live. Its public health and signed-in October Profit page were verified: product sales £64,800, operating profit £10,392.05, EBITDA £10,592.05 and1,790 original orders. This was an unsuccessful new rollout, not an outage of the existing site. No manual deployment retry or settings change was made. No database, access, provider, feed, model, plan or spending changes occurred. Detailed startup/deployment receipts remain private.
+
+The revised source and its98 focused/regression checks,12 browser scenarios and full two-year disposable comparison remain preserved. It removes duplicate range reads and improves loading/error handling. Those local results do not resolve either the new startup blocker or the earlier hosted weekly failure. Keep the current website stable.
+
+STOPPED FOR THE DAY: all agents and local previews are stopped; no unattended follow-on batch is scheduled. Nothing further is needed from the owner now. The Mac may be switched off.
+
+Next session, in order:
+1. Diagnose why a newly started staging instance fails its reporting connection check while the existing website continues reading successfully. Prepare a concrete scoped remedy; do not rotate credentials, widen access, restart the database, change plans or retry deployment without the necessary reviewed authority.
+2. Once startup is resolved, run the bounded exact28September–4October2026 weekly acceptance first, then the remaining five-page/cash/multi-month/Custom checks. Stop and restore the confirmed prior site on any failure.
+3. Finish owner review of the five accepted page designs with supported figures. Keep open November and unsupported customer measures honest.
+4. Resume guarded ChatGPT wording after calculation/design acceptance, then the separately bounded provider-integration work from its existing handovers. No unrelated enhancements before the testable prototype.
+
+The source-publication action is complete; this exact hosted attempt is consumed and failed. The previous “ready for staging approval” sections below are historical.
+
 ## 27 November — weekly correction reviewed; end-of-day stop
 
 Focused backend, frontend and independent-testing lanes completed local candidate `9131d38356caee652e9b7a68df3a0f97fde6aafe` on `codex/weekly-reporting-fix-20261127`. It retains the previous range implementation and adds seven narrowly scoped source/test/guidance changes. Not published or deployed. See [the revised staging package](weekly-reporting-staging-amendment-2026-11-27.md) and [the closeout/handover](weekly-reporting-fix-2026-11-27.md).

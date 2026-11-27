@@ -1,3 +1,13 @@
+## 27 November — focused checks and owner decisions
+
+The first private AI wording evaluation stopped after one invalid draft; no wording was accepted or published. The rejected text was not retained, so its precise cause is unknown. Offline review found instruction/validator mismatches; a minimal correction passed independent source checks with financial safeguards unchanged. A separate bounded trial requires fresh approval. Preserve the consumed run and do not retry it.
+
+The customer interface remains default-off. Its small sign-in/access-denied message correction is prepared for independent recheck. Recommendation: keep the accepted website live and combine the customer release with verified October publication rather than deploy unavailable fields early. October counts remain unpublished pending supported credential setup and exact fresh publication authority.
+
+Shopify review established that the inspected saved batch contains two correctly excluded test orders and no eligible financial events. Intake flags alone cannot establish financial coverage. This demonstrates exclusion handling, not merchant revenue or complete zero revenue. End-to-end financial acceptance needs an eligible, authorized dataset and completeness evidence; do not reclassify test orders or create transactions to claim success.
+
+Outstanding owner planning inputs concern Google test-account availability, intended Meta account, Xero account classification and whether a suitable existing Shopify merchant dataset is available. These choices do not activate providers. Secure credential assurance remains a shared external dependency. Keep non-beta enhancements deferred.
+
 ## 27 November — independent live website checks passed
 
 The released comparison, loading messages, Growth chart, retention, Cash, Plan and Pricing passed the documented signed-in checks. Mobile layouts were checked at 390px; the starting selection was restored. This does not certify every metric or provider feed.

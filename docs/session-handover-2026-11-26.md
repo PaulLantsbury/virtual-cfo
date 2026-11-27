@@ -1,3 +1,10 @@
+## 27 November — URGENT: shared period controls and Xero calendar-day cost allocation
+Paul approved restoring the prototype Amounts/Period/View/Compare controls with shared selections across pages, and applying recurring monthly Xero costs by calendar day to weekly reports. This is the current urgent prototype/design priority, ahead of unrelated integration work.
+
+See [the approved data/calculation specification](xero-weekly-cost-allocation-spec-2026-11-27.md). Preserve monthly actuals, use one shared server calculation, label weekly costs and dependent profit as allocated estimates, and keep cash balances, dated/order-linked costs and one-offs under their own treatment. Complete-month source coverage, explicit classification and exact penny reconciliation are required. No monthly-only or unsupported page may masquerade as the selected weekly range.
+
+Local shared-selector preparation exists but is not fully page-integrated or deployed. The pure allocation engine is now being implemented and independently reviewed; server source binding and all-page integration follow. Do not claim Xero weekly reporting is live. Unrelated provider/data releases remain held. Update this checkpoint with source, integration and independent page-acceptance evidence before staging approval.
+
 ## 27 November — owner-directed stop after current tasks; design review next
 
 Owner instructed every stream to finish only its current bounded task and then stop. Do not launch follow-on batches, publish/deploy candidates, request further release approvals or perform new provider/data operations. Freeze prepared work and preserve receipts. Existing scheduled services are not to be altered by this workflow pause.

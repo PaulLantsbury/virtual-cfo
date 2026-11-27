@@ -1,3 +1,8 @@
+## 27 November 2026 — approved source granularity and weekly-cost extension
+Source granularity, collection cadence and page aggregation must be distinguished. Daily synthetic activity and dated Shopify events do not imply the current monthly page readers already support weekly reports. Xero is not inherently monthly-only; for stable recurring cost interpretation, derive weekly estimates from checked complete monthly accrual totals rather than bill-entry dates. Store original monthly source records unchanged and calculate shared, versioned daily/weekly allocations in the reporting server.
+
+The authoritative implementation contract is [Monthly Xero costs to weekly reporting](xero-weekly-cost-allocation-spec-2026-11-27.md). It defines classification, cross-month allocation, exact reconciliation, actual versus estimated presentation and all-page reuse. No open-month projection, cash-balance allocation or transaction creation is implied. Implementation is in progress, not a live-coverage claim.
+
 # Data source and integration plan — 17 September 2026
 
 Status: Package 1 specification and implementation backlog. This document inspects repository code and recorded staging evidence; it does not certify today's database contents or external connections. No live queries, credentials, migrations, application changes or new financial policies accompany it. Product sequencing follows Paul's approval of the 17 September roadmap. Detailed contracts below remain implementation proposals where marked.

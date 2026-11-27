@@ -1,3 +1,8 @@
+## Approved clarification — 27 November 2026: weekly Xero recurring costs
+The existing calendar-day weekly-overhead rule is now an urgent cross-platform implementation requirement. Use checked complete monthly accrual costs, explicitly classified as recurring, to derive daily allocations and then selected weekly totals. Preserve original monthly actuals. Partial/cross-month weeks use each source month's calendar-day rate; deterministic cumulative nearest-penny rounding preserves the source total exactly. Costs and dependent weekly profit must be labelled allocated estimates. Cash balances, actual matched order costs and one-offs are not automatically spread. No new authority to blend Shopify and Xero or double-count costs is implied.
+
+The detailed contract, penny convention, missing-data treatment and per-page acceptance gates are in [Monthly Xero costs to weekly reporting](xero-weekly-cost-allocation-spec-2026-11-27.md). This extends the weekly display basis without weakening the actual-only complete-month evidence slice. Source implementation is authorized; live provider/database/deployment changes remain separately gated.
+
 # Agreed financial definitions
 
 ## Decision record

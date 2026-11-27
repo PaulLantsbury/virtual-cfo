@@ -1,3 +1,17 @@
+## 27 November — startup cause confirmed; bounded correction ready for approval
+
+Read-only database/pooler logs at the exact failed-start times now establish the cause: the reporting login hit its connection ceiling while the existing and replacement website instances overlapped. This is confirmed capacity refusal, not evidence that weekly calculation code failed at startup. Startup/build/connection files were unchanged between the working and failed source. The previously masked application error concealed the useful connection-limit code.
+
+A focused implementation and independent-review batch prepared local source `43a2606f6e2665ab71334487b3ab8b225314c391` on `codex/reporting-startup-capacity-20261127`, based on the reviewed weekly amendment. The source change only recognizes the specific safe connection-limit error; unknown messages remain masked. A separately reviewed private transaction proposes a modest connection allowance for one old and one replacement web pool, with strict expected-state/role-property checks. No credential, grant, TLS, timeout, global setting or plan changes. Exact operational identities/settings/SQL stay in the private approval package.
+
+Eleven startup/runtime checks and four disposable database guard cases pass. Full workspace typechecks and all constituent builds pass. Independent review supports the bounded deployment-capacity remedy; it has NOT been applied. See [the product-level explanation](reporting-startup-capacity-2026-11-27.md). The earlier weekly failure remains a separate live-acceptance gate; do not claim weekly success before it is tested.
+
+The working compact-controls source `016beeea1e30d63cc87eda5512666533f63918d3` remains live and unchanged. No deployment retry, database change, provider/feed/model action or spending occurred in this investigation.
+
+Next decision: approve the exact capacity adjustment and exact new source publication/deployment together, then require startup/health and the previously failing week before the remaining five-page acceptance. Stop and retain/restore the confirmed website on failure. Keep the reviewed modest overlap allowance for future deployments as explicitly approved; do not silently restore the old ceiling and recreate the blocker.
+
+All investigation/review agents are stopped. No follow-on or unattended batch is scheduled. Once the bounded release result is recorded, stop for the day. Next priorities remain successful weekly/five-page acceptance, owner design review, then guarded ChatGPT wording and separately scoped provider acceptance. No passwords or tokens are needed from the owner for the proposed route.
+
 ## 27 November — revised release published; startup failed; safe end-of-day stop
 
 Owner-approved revised source `9131d38356caee652e9b7a68df3a0f97fde6aafe` is published on `codex/weekly-reporting-fix-20261127`. Its hosted build passed, but the replacement instance failed its reporting database connection check during startup. It did not become live, so the exact weekly check and five-page acceptance were not reached. No claim of a successful hosted weekly fix is made.

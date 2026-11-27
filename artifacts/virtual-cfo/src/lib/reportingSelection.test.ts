@@ -10,7 +10,8 @@ const memoryStorage = () => {
 
 test('prototype defaults and two page consumers share changes in both directions', () => {
   const store = createReportingSelectionStore();
-  assert.deepEqual(store.read(owner), DEFAULT_REPORTING_SELECTION);
+  assert.equal(store.read(owner).period, DEFAULT_REPORTING_SELECTION.period);
+  assert.equal(store.read(owner).view, DEFAULT_REPORTING_SELECTION.view);
   let firstPageNotifications = 0, secondPageNotifications = 0;
   const unmountFirst = store.subscribe(owner, () => firstPageNotifications++);
   const unmountSecond = store.subscribe(owner, () => secondPageNotifications++);
@@ -49,7 +50,8 @@ test('user and company scopes never inherit another scope selection', () => {
   const otherCompany = { ...owner, storeId: 'company-b' };
   store.subscribe(otherCompany, () => otherNotifications++);
   store.update(owner, { month: '2026-10-01', comparisonMonth: '2026-09-01', perOrder: true });
-  assert.equal(store.read(otherCompany).month, '');
+  assert.equal(store.read(otherCompany).period, DEFAULT_REPORTING_SELECTION.period);
+  assert.notEqual(store.read(otherCompany).period, 'custom');
   assert.equal(store.read({ userId: 'different-user', storeId: owner.storeId }).perOrder, false);
   assert.equal(otherNotifications, 0);
   assert.equal(store.read(owner).comparisonMonth, '2026-09-01');
@@ -65,7 +67,8 @@ test('session restore projects only valid preferences and never restores evidenc
   assert.deepEqual(second.read(owner), first.read(owner));
   assert.equal(second.read(owner, { period: 'last-month', view: 'monthly' }).period, 6);
   const restored = restoreReportingSelection(JSON.stringify({ ...DEFAULT_REPORTING_SELECTION, versionId: 'injected', storeId: 'other-company', facts: { profit: 100 } }));
-  assert.deepEqual(restored, DEFAULT_REPORTING_SELECTION);
+  assert.equal(restored!.period, DEFAULT_REPORTING_SELECTION.period);
+  assert.equal(restored!.customFrom, '');
   assert.equal('versionId' in restored!, false);
 });
 
@@ -94,7 +97,7 @@ test('invalid patches cannot corrupt state and future comparison anchors are cle
   assert.equal(store.read(owner).comparisonMonth, '');
   store.update(owner, { month: 'bad', period: -1, perOrder: 'true' } as never);
   assert.equal(store.read(owner).month, '2026-08-01');
-  assert.equal(store.read(owner).period, 3);
+  assert.equal(store.read(owner).period, 'custom');
   assert.equal(store.read(owner).perOrder, false);
 });
 
@@ -131,4 +134,37 @@ test('last-year and custom comparisons preserve their explicit meanings', () => 
   assert.equal(store.read(owner).comparisonMonth, '2025-08-01');
   store.update(owner, { comparison: 'none' });
   assert.equal(store.read(owner).comparisonMonth, '');
+});
+
+
+test('custom exact dates persist independently and explicit presets defeat stale month hints', () => {
+ const storage=memoryStorage(), store=createReportingSelectionStore(()=>storage);
+ store.update(owner,{period:'custom',view:'monthly',customFrom:'2026-09-03',customTo:'2026-09-17'});
+ assert.equal(store.read(owner).period,'custom');
+ assert.equal(store.read(owner).customFrom,'2026-09-03');
+ assert.equal(store.read(owner).month,'2026-09-01');
+ assert.equal(store.metadata(owner).monthTouched,true);
+ const reloaded=createReportingSelectionStore(()=>storage);
+ assert.equal(reloaded.read(owner).customTo,'2026-09-17');
+ reloaded.update(owner,{period:'last-month'});
+ assert.equal(reloaded.read(owner).period,'last-month');
+ assert.equal(reloaded.metadata(owner).monthTouched,true);
+ const encoded=[...storage.values.values()][0];
+ assert.equal(JSON.parse(encoded).schemaVersion,2);
+});
+test('legacy saved historical month migrates to Custom but v2 presets remain automatic', () => {
+ const legacy={period:'last-month',view:'monthly',perOrder:false,comparison:'none',month:'2026-09-01',comparisonMonth:''};
+ const old=restoreReportingSelection(JSON.stringify(legacy))!;
+ assert.equal(old.period,'custom');assert.equal(old.customFrom,'2026-09-01');assert.equal(old.customTo,'2026-09-30');
+ const modern=restoreReportingSelection(JSON.stringify({...legacy,schemaVersion:2,customFrom:'',customTo:''}))!;
+ assert.equal(modern.period,'last-month');assert.equal(modern.customFrom,'');
+});
+test('each legacy explicit month choice becomes a full Custom month, including leap years', () => {
+ const selected=updateReportingSelection(DEFAULT_REPORTING_SELECTION,{month:'2024-02-01',view:'monthly'});
+ assert.equal(selected.period,'custom');assert.equal(selected.customFrom,'2024-02-01');assert.equal(selected.customTo,'2024-02-29');
+ const clear=updateReportingSelection(selected,{month:''});assert.equal(clear.period,'custom');assert.equal(clear.customFrom,'');assert.equal(clear.customTo,'');assert.equal(clear.month,'');
+});
+test('invalid modern custom fields cannot inject invalid calendar dates', () => {
+ const stored={...DEFAULT_REPORTING_SELECTION,schemaVersion:2,period:'custom',customFrom:'2026-02-30',customTo:'2026-03-01'};
+ assert.equal(restoreReportingSelection(JSON.stringify(stored)),null);
 });

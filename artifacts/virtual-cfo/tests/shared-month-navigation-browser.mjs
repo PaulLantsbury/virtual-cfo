@@ -12,35 +12,34 @@ const fixtureMonths=Array.from({length:12},(_,index)=>{
 });
 const listing={contract:'history-availability-v2',verification:'sealed-candidates-only',requiresReadValidation:true,storeId:store,currency:'GBP',timezone:'Europe/London',edition:HISTORY_EDITION,anchor:'2024-11-01',months:fixtureMonths.map(({month:m})=>({from:m.selection.period.from,to:m.selection.period.to,snapshotId:m.selection.versionId,versionId:m.selection.versionId,versions:[{versionId:m.selection.versionId,status:'selected',kind:'base'}]}))};
 const routes=['/dashboard','/profit-engine','/new-marketing','/new-cash-control','/plan'];
-const selectors={
- '/dashboard':'select[aria-label="Scout reviewed month"]',
- '/profit-engine':'select[aria-label="Profit reporting month"]',
- '/new-marketing':'select[aria-label="Growth reviewed month"]',
- '/new-cash-control':'select[aria-label="Cash reference month"]',
- '/plan':'select[aria-label="Plan reviewed month"]',
-};
 const priorSelectors={'/dashboard':'select[aria-label="Scout comparison month"]','/profit-engine':'select[aria-label="Profit comparison month"]','/new-marketing':'select[aria-label="Growth comparison month"]'};
+const monthTo=from=>new Date(Date.UTC(Number(from.slice(0,4)),Number(from.slice(5,7)),0)).toISOString().slice(0,10);
 async function choose(page,path,value,prior=false){
- const selector=prior?priorSelectors[path]:selectors[path];
- const control=page.locator(selector).first();await control.waitFor({state:'attached'});
- // Open genuine disclosure controls instead of bypassing them with DOM changes.
- if(path==='/dashboard'){
-  const picker=page.locator('.sv-period-picker');
-  if(await picker.count()&&await picker.getAttribute('open')===null)await picker.locator('summary').first().click();
-  if(prior){const detail=control.locator('xpath=ancestor::details[1]');if(await detail.count()&&await detail.getAttribute('open')===null)await detail.locator('summary').first().click();}
- }else if(prior&&path==='/profit-engine'){
-  const detail=page.locator('.np-comparison-controls');if(await detail.getAttribute('open')===null)await detail.locator('summary').first().click();
- }else if(prior&&path==='/new-marketing'){
+ if(prior){
+  const control=page.locator(priorSelectors[path]).first();await control.waitFor({state:'attached'});
   const detail=control.locator('xpath=ancestor::details[1]');if(await detail.count()&&await detail.getAttribute('open')===null)await detail.locator('summary').first().click();
+  await control.selectOption(value);
+ }else{
+  const controls=page.locator('section[aria-label="Reporting controls"]');
+  await controls.getByRole('button',{name:'Custom',exact:true}).click();
+  await page.getByLabel('Custom start date',{exact:true}).fill(value);
+  await page.getByLabel('Custom end date',{exact:true}).fill(monthTo(value));
+  await page.getByRole('button',{name:'Apply dates',exact:true}).click();
  }
- await control.selectOption(value);
  await hasMonth(page,path,value,prior);
 }
 async function hasMonth(page,path,value,prior=false){
- const selector=prior?priorSelectors[path]:selectors[path];
- await page.waitForFunction(({selector,value})=>document.querySelector(selector)?.value===value,{selector,value});
+ if(prior){
+  const selector=priorSelectors[path];await page.waitForFunction(({selector,value})=>document.querySelector(selector)?.value===value,{selector,value});
+ }else if(value){
+  await page.waitForFunction(value=>document.querySelector('input[aria-label="Custom start date"]')?.value===value,value);
+ }else{
+  await page.waitForFunction(()=>[...document.querySelectorAll('section[aria-label="Reporting controls"] button')].some(b=>b.textContent==='Last month'&&b.getAttribute('aria-pressed')==='true'));
+ }
  await page.waitForLoadState('networkidle');
- assert.equal(await page.locator(selector).first().inputValue(),value,'Choice survives completion of the page loading phase');
+ if(prior)assert.equal(await page.locator(priorSelectors[path]).first().inputValue(),value);
+ else if(value)assert.equal(await page.getByLabel('Custom start date',{exact:true}).inputValue(),value,'Custom choice survives completion of page loading');
+ else assert.equal(await page.locator('section[aria-label="Reporting controls"]').getByRole('button',{name:'Last month',exact:true}).getAttribute('aria-pressed'),'true','New company/account gets its own automatic preset');
 }
 async function navigate(page,path){
  const mobileMenu=page.getByRole('button',{name:'Open navigation',exact:true});
@@ -77,28 +76,28 @@ test('shared reporting month survives all five page links, reverse updates and r
  for(const path of ['/new-cash-control','/plan','/dashboard','/profit-engine']){await navigate(page,path);await hasMonth(page,path,'2026-01-01');}
  await page.reload();await hasMonth(page,'/profit-engine','2026-01-01');
 }));
-test('comparison stays distinct and explicit clear defeats an old deep link',async()=>scenario({},async page=>{
+test('comparison stays distinct and newer custom dates defeat an old deep link',async()=>scenario({},async page=>{
  await page.goto(origin+'/dashboard');await choose(page,'/dashboard','2026-10-01');await choose(page,'/dashboard','2026-01-01',true);
  await navigate(page,'/profit-engine');await hasMonth(page,'/profit-engine','2026-10-01');await hasMonth(page,'/profit-engine','2026-01-01',true);
  await navigate(page,'/new-marketing');await hasMonth(page,'/new-marketing','2026-10-01');await hasMonth(page,'/new-marketing','2026-01-01',true);await choose(page,'/new-marketing','2025-12-01',true);
  await navigate(page,'/dashboard');await hasMonth(page,'/dashboard','2026-10-01');await hasMonth(page,'/dashboard','2025-12-01',true);
- await choose(page,'/dashboard','');
+ await choose(page,'/dashboard','2026-01-01');
  const old=fixtureMonths.at(-1).month.selection;
  await page.goto(origin+'/profit-engine?'+new URLSearchParams({reviewStore:store,reviewFrom:old.period.from,reviewTo:old.period.to,reviewVersion:old.versionId}));
- await hasMonth(page,'/profit-engine','');await page.waitForLoadState('networkidle');await hasMonth(page,'/profit-engine','');
- await page.reload();await hasMonth(page,'/profit-engine','');
+ await hasMonth(page,'/profit-engine','2026-01-01');await page.waitForLoadState('networkidle');await hasMonth(page,'/profit-engine','2026-01-01');
+ await page.reload();await hasMonth(page,'/profit-engine','2026-01-01');
 }));
 test('company and account changes do not inherit another identity reporting month',async()=>scenario({secondStore:true},async(page,context)=>{
- await page.goto(origin+'/dashboard');await choose(page,'/dashboard','2026-10-01');
+ await page.goto(origin+'/dashboard');await choose(page,'/dashboard','2026-01-01');
  await page.getByRole('combobox',{name:'Active store'}).selectOption(otherStore);await hasMonth(page,'/dashboard','');
- await page.getByRole('combobox',{name:'Active store'}).selectOption(store);await hasMonth(page,'/dashboard','2026-10-01');
+ await page.getByRole('combobox',{name:'Active store'}).selectOption(store);await hasMonth(page,'/dashboard','2026-01-01');
  const second={...user,id:'60000000-0000-4000-8000-000000000002',email:'second-fixture@example.invalid'};
  const tokenFor=u=>[{alg:'HS256',typ:'JWT'},{sub:u.id,role:'authenticated',exp:Math.floor(Date.now()/1000)+3600},'fictional-signature'].map(v=>Buffer.from(typeof v==='string'?v:JSON.stringify(v)).toString('base64url')).join('.');
  let current=second;
  await context.route('https://night-scout-test.invalid/auth/v1/user',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(current)}));
  const replaceSession=async u=>page.evaluate(async token=>{const {supabase}=await import('/src/lib/supabase.ts');const {error}=await supabase.auth.setSession({access_token:token,refresh_token:'fictional-refresh'});if(error)throw error;},tokenFor(u));
  await replaceSession(second);await page.getByRole('button',{name:'DISPOSABLE BROWSER FIXTURE — NOT LIVE',exact:true}).click();await hasMonth(page,'/dashboard','');
- current=user;await replaceSession(user);await hasMonth(page,'/dashboard','2026-10-01');
+ current=user;await replaceSession(user);await hasMonth(page,'/dashboard','2026-01-01');
 }));
 
 test('period, view, amounts and comparison remain one shared choice across all five pages',async()=>scenario({},async page=>{
@@ -125,7 +124,7 @@ test('period, view, amounts and comparison remain one shared choice across all f
 }));
 
 test('Plan keeps the full workspace visible while baseline inputs are missing',async()=>scenario({},async page=>{
- await page.goto(origin+'/plan');
+ await page.goto(origin+'/plan');await choose(page,'/plan','2024-11-01');
  await page.getByRole('heading',{name:'Compare the levers. Choose what to test.',exact:true}).waitFor();
  await page.getByRole('heading',{name:'Build a plan you can actually test',exact:true}).waitFor();
  assert.equal(await page.getByRole('button',{name:'Save plan',exact:true}).isEnabled(),false);
@@ -140,11 +139,11 @@ async function readyRestoredPage(page,path,from){
  // Plan can replace its pending frame when the source check finishes, while
  // auth revalidation can briefly replace the entire route. Wait for THIS page's
  // heading and settled shared control rather than any transient h1.
- await page.waitForFunction(({path,selector,name,from})=>location.pathname===path
+ await page.waitForFunction(({path,name,from})=>location.pathname===path
   &&document.querySelector('main h1')?.textContent?.trim()===name
-  &&document.querySelector(selector)?.value===from
+  &&document.querySelector('input[aria-label="Custom start date"]')?.value===from
   &&document.querySelector('.connected-reporting-context')?.getAttribute('aria-busy')==='false',
-  {path,selector:selectors[path],name,from});
+  {path,name,from});
  const heading=page.getByRole('heading',{level:1,name,exact:true});
  await heading.waitFor({state:'visible'});
  // A trial action performs Playwright's retrying actionability/scroll checks
@@ -152,7 +151,7 @@ async function readyRestoredPage(page,path,from){
  // heading with the same exact route identity instead of skipping the check.
  await heading.click({trial:true});
  assert.equal(await heading.textContent(),name,`${path}: settled route heading`);
- assert.equal(await page.locator(selectors[path]).first().inputValue(),from,`${path}: settled shared month`);
+ assert.equal(await page.getByLabel('Custom start date',{exact:true}).inputValue(),from,`${path}: settled shared custom date`);
 }
 
 test('restored primary pages remain usable at desktop and mobile widths without header jump buttons',async()=>{

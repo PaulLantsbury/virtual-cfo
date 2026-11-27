@@ -26,3 +26,6 @@
 
 .scouts-view .sv-controls:has(.connected-reporting-context){display:block;border:0;padding:0;background:transparent}
 .scouts-view .sv-controls:has(.shared-reporting-controls)>div{min-width:0}
+
+/* One compact shared panel supplies its own quiet surface. */
+.scouts-view .sv-period-picker:has(.connected-reporting-context){border:0;background:transparent;margin:12px 0}

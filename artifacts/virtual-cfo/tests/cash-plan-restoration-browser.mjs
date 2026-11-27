@@ -29,6 +29,13 @@ async function scenario(options,run){
   await run(page,context);assert.deepEqual(forbiddenRequests,[]);
  });
 }
+async function chooseMonth(page,from){
+ await page.locator('section[aria-label="Reporting controls"]').getByRole('button',{name:'Custom',exact:true}).click();
+ await page.getByLabel('Custom start date',{exact:true}).fill(from);
+ const to=new Date(Date.UTC(Number(from.slice(0,4)),Number(from.slice(5,7)),0)).toISOString().slice(0,10);
+ await page.getByLabel('Custom end date',{exact:true}).fill(to);
+ await page.getByRole('button',{name:'Apply dates',exact:true}).click();
+}
 const noPageOverflow=async page=>assert.ok(await page.locator('body').evaluate(el=>el.scrollWidth<=innerWidth+1),'No page-wide horizontal overflow');
 const savedShot=async(page,name)=>{if(process.env.NIGHT_SCOUT_SCREENSHOT_DIR){const path=process.env.NIGHT_SCOUT_SCREENSHOT_DIR+'/'+name;await page.screenshot({path:path+'.png',fullPage:true});const panel=page.locator(name.startsWith('cash')?'.nc-main-bridge':'.pv-preview').first();if(await panel.count())await panel.screenshot({path:path+'-panel.png'});}};
 for(const width of [1440,390])test(`Plan missing baseline retains the complete workspace with disabled inputs ${width}px`,async()=>scenario({viewport:{width,height:1000}},async page=>{
@@ -43,7 +50,7 @@ for(const width of [1440,390])test(`Plan missing baseline retains the complete w
 test('Plan loading retains its workspace, then the supported baseline restores the original editable model',async()=>{
  let release;const wait=new Promise(resolve=>release=resolve);
  await scenario({pending:{kind:'acquisition',from:'2025-02-01',wait}},async page=>{
-  await page.goto(origin+'/plan');await page.getByRole('combobox',{name:'Plan reviewed month',exact:true}).selectOption('2025-03-01');
+  await page.goto(origin+'/plan');await chooseMonth(page,'2025-03-01');
   const frame=page.locator('.pv-baseline-pending');await frame.locator('.pv-placeholder-value').first().getByText('Loading…',{exact:true}).waitFor();assert.equal(await frame.getByRole('button',{name:'Save plan',exact:true}).isDisabled(),true);
   release();await page.waitForFunction(()=>!document.querySelector('.pv-baseline-pending'));
   await page.getByRole('heading',{name:'Build a plan you can actually test',exact:true}).waitFor();assert.equal(await page.getByRole('combobox',{name:'Plan ahead',exact:true}).isEnabled(),true);
@@ -52,7 +59,7 @@ test('Plan loading retains its workspace, then the supported baseline restores t
  });
 });
 for(const width of [1440,390])test(`Cash restores a signed, reconciled bridge and matched trend without dividing bank cash ${width}px`,async()=>scenario({viewport:{width,height:1000}},async page=>{
- await page.goto(origin+'/new-cash-control');await page.getByRole('combobox',{name:'Cash reference month',exact:true}).selectOption('2025-03-01');
+ await page.goto(origin+'/new-cash-control');await chooseMonth(page,'2025-03-01');
  const bridge=page.getByRole('img',{name:'Profit (EBITDA) to operating cash reconciliation. Exact signed amounts follow.',exact:true});await bridge.waitFor();
  const values=await bridge.locator('g[data-cash-component]').evaluateAll(rows=>rows.map(row=>({id:row.dataset.cashComponent,amount:Number(row.dataset.amountPence)})));
  assert.equal(values.length,7);assert.equal(values[0].amount,1400);assert.equal(values.at(-1).amount,-3570);assert.equal(values.slice(0,-1).reduce((s,v)=>s+v.amount,0),values.at(-1).amount);
@@ -65,7 +72,7 @@ for(const width of [1440,390])test(`Cash restores a signed, reconciled bridge an
 test('Cash distinguishes pending data from missing numeric data while preserving the graphical layout',async()=>{
  let release;const wait=new Promise(resolve=>release=resolve);
  await scenario({missingCash:true,pending:{kind:'cash',from:'2025-03-01',wait}},async page=>{
-  await page.goto(origin+'/new-cash-control');await page.getByRole('combobox',{name:'Cash reference month',exact:true}).selectOption('2025-03-01');
+  await page.goto(origin+'/new-cash-control');await chooseMonth(page,'2025-03-01');
   const bank=page.locator('.nc-kpi').filter({hasText:'Bank cash at selected month end'}).locator('strong');await bank.getByText('Loading…',{exact:true}).waitFor();assert.equal(await page.locator('.nc-chart-placeholder').count(),2);
   release();await page.waitForFunction(()=>[...document.querySelectorAll('.nc-kpi')].filter(card=>!card.textContent.includes('Profit (EBITDA)')).every(card=>card.querySelector('strong')?.textContent==='—'));assert.equal(await page.locator('.nc-kpi').filter({hasText:'Profit (EBITDA)'}).locator('strong').textContent(),'£14.00','Supported profit survives missing cash');
   assert.equal(await page.getByRole('img',{name:'Profit (EBITDA) to operating cash reconciliation. Exact signed amounts follow.',exact:true}).count(),0);

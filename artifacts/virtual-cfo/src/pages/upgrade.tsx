@@ -16,7 +16,7 @@ export default function Upgrade() {
   };
 
   return (
-    <AppLayout>
+    <AppLayout showMonitoring={false}>
       <div className="max-w-4xl mx-auto">
 
         {/* ── Page header ── */}

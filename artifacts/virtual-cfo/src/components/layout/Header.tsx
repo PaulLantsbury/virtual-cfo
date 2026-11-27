@@ -7,7 +7,7 @@ import {BrandLogo} from '@/components/BrandLogo';
 import {Sheet,SheetTrigger,SheetContent,SheetHeader,SheetTitle,SheetDescription} from '@/components/ui/sheet';
 import {MainNavigation} from './MainNavigation';
 
-export function Header({showMonitoring=true}:{showMonitoring?:boolean}){
+export function Header({showMonitoring=false}:{showMonitoring?:boolean}){
  const [menuOpen,setMenuOpen]=useState(false),[location]=useLocation();
  useEffect(()=>{setMenuOpen(false);},[location]);
  useEffect(()=>{const desktop=window.matchMedia('(min-width: 768px)');const closeOnDesktop=()=>{if(desktop.matches)setMenuOpen(false);};desktop.addEventListener('change',closeOnDesktop);return()=>desktop.removeEventListener('change',closeOnDesktop);},[]);

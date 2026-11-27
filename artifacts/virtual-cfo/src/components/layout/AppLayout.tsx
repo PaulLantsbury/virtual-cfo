@@ -2,7 +2,7 @@ import React from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 
-export function AppLayout({ children, showMonitoring = true }: { children: React.ReactNode; showMonitoring?: boolean }) {
+export function AppLayout({ children, showMonitoring = false }: { children: React.ReactNode; showMonitoring?: boolean }) {
   return (
     <div
       className="flex h-full"

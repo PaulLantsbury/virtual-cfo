@@ -1,3 +1,11 @@
+## 27 November — AI evaluation closed; current briefing retained
+
+Owner confirmed keeping the existing rule-based briefing as default. The separately approved corrected wording trial produced three private drafts, all requiring human review and none publishable automatically. Independent semantic review accepted all three for this private evaluation, but found no demonstrated clarity or usefulness improvement over the existing briefing. Do not make further model calls or add prompt features without a concrete new need and approval. Preserve both consumed trials and private receipts. No AI wording has been enabled on the website.
+
+Keep the accepted website live. Customer interface and safe sign-in/access-denied messages are prepared; consolidate the later customer release with verified October data rather than deploy optional unavailable fields early. October publication still requires supported credential setup, fresh authenticated evidence and exact signed authority.
+
+Continue only beta-critical integration preparation: the small reviewed Xero mapping-successor operation, Google test-account setup scope, and the shared supported credential route. Mapping source/selector/directory freshness and executable authority must be verified before any hosted write. Owner account choices are already resolved; do not repeatedly ask them. The drag-and-drop mapping tool remains recorded separately on the roadmap. Shopify remains an honest test-order exclusion demonstration, not merchant-finance acceptance.
+
 ## 27 November — owner decisions and Xero mapping tool requirement
 
 Owner confirmed the integration planning paths: use the intended existing Meta account; prepare a genuine Google test-account setup proposal; retain Shopify's honest development-store test-order demonstration alongside separately labelled synthetic financial pages. These answers do not authorize creation, collection or activation.

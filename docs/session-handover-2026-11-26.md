@@ -1,3 +1,13 @@
+## 27 November — beta-critical delivery resumed
+
+[Today's prototype plan](prototype-plan-2026-11-27.md) is the current priority. Owner reconfirmed working pages/Supabase data, accepted Google/Meta/Shopify/Xero read feeds, and useful AI CFO analysis as the beta goal. Optional long-term work is deferred explicitly.
+
+Pages, product data and integration chats have resumed focused parallel batches. Separate CFO analysis and independent testing chats are created and active. Start with last night's four priority fixes, then independent retest; advance provider/data/model packages in parallel. No new activation or spending is authorised by this planning instruction. Owner sign-in and any authorised non-member test identity are requested early; work not dependent on them continues.
+
+Current results must be reported as live, prepared or blocked. PM owns shared documentation and release coordination; no competing shared-file edits. See the plan for batch scope, acceptance, ownership and deferred work.
+
+---
+
 ## Independent baseline completed — next-session starting point
 
 [Independent baseline assessment](independent-baseline-2026-11-26.md) consolidates three fresh read-only reviews of the released website source, actual screenshots and dated acceptance evidence. It is not a fresh independent signed-in retest or exhaustive cell audit.

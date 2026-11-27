@@ -1,3 +1,19 @@
+## 27 November — approved releases deployed; next focused batches active
+
+The reviewed website priority fixes and checked month-to-month financial comparison are deployed on staging. Fresh independent hosted acceptance is in progress; observed October/September operating-profit change reconciles to £2,804. The corrected Xero scheduled reader is also deployed. Its existing schedule remains unchanged, automatic code deployment is off, and no manual provider run was triggered. Deployment does not establish a successful new Xero report collection or resolve the pending account classifications.
+
+The first approved real AI fact-selection probe completed all three requests and exited. A separate review-only wording candidate and private launcher are ready for independent assessment; any additional calls need a new exact approval. Draft wording cannot automatically replace accepted analysis or become advice.
+
+Next batches:
+- Independent testers complete current hosted-page checks and review the next small wording pilot.
+- Pages prepares an isolated, default-off connection for the three October customer measures using the data owner's fixed read contract. Counts remain unpublished until approved population and member-read verification.
+- Data completes the narrow October plan and source reconciliation; credential/custody setup remains separately gated and must use a consistent reviewed credential-handling policy.
+- Integrations preserves the deployed reader and pending mapping decisions while reviewing the supported restricted-credential route. Supabase Support has replied and escalated the unanswered capture questions; do not invent clearance or repeat approval requests for tests that cannot resolve the blocker.
+
+No new forecasts, monitoring service, broad redesign or generic infrastructure work is part of these batches. Operational deployment receipts, account settings, secrets and exact credential procedures remain private.
+ 
+---
+
 ## 27 November — first real AI connection probe completed
 
 Owner supplied the final Terminal result from the approved finite local test: all three requests returned valid selections from the allowed financial facts, then the process ended. First selection emphasised sales, contribution and operating profit; the next two emphasised sales, product costs and variable costs. Recorded response times were about1.3–4.0seconds. Token usage and actual billed cost were not observed. No further requests or restart are authorised under that completed pilot.

@@ -1,3 +1,8 @@
+## 27 November — five-page design/history audit completed; restoration review first
+See [the read-only design audit](five-page-design-audit-2026-11-27.md). Material differences are confirmed: narrower connected Profit/Cash layouts alongside retained rich prototypes, some Growth chart presentations still sample-only, and Plan's entire visual workspace hidden by a baseline gate compounded by reset date selection. Scout largely retains v17 but later technical comparison content creates clutter and potentially differing comparison contexts.
+
+The owner wants the agreed presentation checked before more changes. Freeze undeployed preparation and review the restoration plan, preserving accurate data guards without substituting fictional values. Technical tests did not establish complete visual parity or blanket owner design approval. New requirements include persistent shared selectors, owner-friendly opening paragraphs and removing top-level Explore the Numbers buttons across pages; retain supporting figures. Unrelated provider releases remain held and AI wording remains deferred.
+
 ## 27 November — owner-friendly paragraphs now; ChatGPT wording NEXT, deferred
 Current authorized priority: restore shared prototype controls, implement calendar-day monthly-cost allocation, and replace each primary page's opening technical sentence with one short, plain-English owner briefing. The paragraph must explain two or three supported observations, why they matter and one bounded next focus. See [the approved page-briefing requirement](owner-friendly-page-briefings-2026-11-27.md).
 

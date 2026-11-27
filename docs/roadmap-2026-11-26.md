@@ -1,3 +1,11 @@
+## 27 November — bounded Xero handoff proof ready for approval
+
+The next executable proposal is deliberately limited to fictional data: publish/build the two-file transport self-test on the existing Xero service and verify its output through one bounded temporary shell. Existing reader source, schedule, command and linked branch remain unchanged. Independent source, receiver and local command checks passed; actual hosted transport is not yet proven. No provider, secret or database access is part of this test. Normal build/runtime usage applies; no new service is proposed.
+
+This is a prerequisite to a later real account-directory refresh, not permission to perform it. The existing worker cannot persist directories with its current authority; no grants have been added. Later real account names/IDs in private terminal output, token renewal, lease/envelope/audit writes and directory persistence require explicit reviewed scope. Keep file-only output as default until an exact transport is approved.
+
+The final mapping save remains separately gated by fresh directory, complete trusted adapter, worker quiescence and exact owner authority. Preserve known historical-read selection semantics and unknown-commit protections. Google and Supabase support responses remain outstanding; keep the accepted website and current briefing unchanged.
+
 ## 27 November — Xero prerequisite preparation progressed
 
 Parallel implementation and independent reviews progressed the bounded directory-refresh core, dedicated mapping execution checks and operational pause plan. These are offline artifacts, not a completed hosted release. Fresh catalog evidence confirms the existing mapping remains unchanged and the saved account directory remains stale.
